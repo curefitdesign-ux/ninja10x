@@ -5,10 +5,11 @@ const BackgroundGrid = () => {
 
   return (
     <div 
-      className="absolute inset-0 grid opacity-30 pointer-events-none"
+      className="absolute inset-x-0 bottom-0 grid opacity-30 pointer-events-none"
       style={{
         gridTemplateColumns: `repeat(${columns}, 1fr)`,
         gridTemplateRows: `repeat(${rows}, 1fr)`,
+        top: '50px',
       }}
     >
       {Array.from({ length: totalCells }).map((_, index) => (
