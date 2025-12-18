@@ -1,48 +1,67 @@
 import { useState, useRef } from 'react';
-import { Camera, Image as ImageIcon, User } from 'lucide-react';
+import { User, Camera, Image as ImageIcon } from 'lucide-react';
 
 interface Photo {
   id: string;
   url: string;
+  activity?: string;
 }
 
 interface StackedPhotoCardsProps {
   photos: Photo[];
-  onAddPhoto: (file: File) => void;
+  onAddPhoto: (file: File, activity: string) => void;
   maxPhotos?: number;
 }
 
+const activities = [
+  'Running', 'Cycling', 'Treking',
+  'Swimming', 'Yoga', 'GYM',
+  'Cricket', 'Badminton', 'Tennis',
+  'Meditation', 'Boxing', 'Dance'
+];
+
 const StackedPhotoCards = ({ photos, onAddPhoto, maxPhotos = 3 }: StackedPhotoCardsProps) => {
-  const [showOptions, setShowOptions] = useState(false);
+  const [showActivitySheet, setShowActivitySheet] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
+  const [showUploadSheet, setShowUploadSheet] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const handleCardClick = () => {
     if (photos.length < maxPhotos) {
-      setShowOptions(true);
+      setShowActivitySheet(true);
     }
   };
 
+  const handleActivitySelect = (activity: string) => {
+    setSelectedActivity(activity);
+    setShowActivitySheet(false);
+    setShowUploadSheet(true);
+  };
+
   const handleCameraClick = () => {
-    setShowOptions(false);
+    setShowUploadSheet(false);
     cameraInputRef.current?.click();
   };
 
   const handleGalleryClick = () => {
-    setShowOptions(false);
+    setShowUploadSheet(false);
     fileInputRef.current?.click();
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      onAddPhoto(file);
+    if (file && selectedActivity) {
+      onAddPhoto(file, selectedActivity);
+      setSelectedActivity(null);
     }
     e.target.value = '';
   };
 
   const handleOverlayClick = () => {
-    setShowOptions(false);
+    setShowActivitySheet(false);
+    setShowUploadSheet(false);
+    setSelectedActivity(null);
   };
 
   // Calculate positions for stacked cards - center focus with smaller cards behind
@@ -149,8 +168,8 @@ const StackedPhotoCards = ({ photos, onAddPhoto, maxPhotos = 3 }: StackedPhotoCa
         })}
       </div>
 
-      {/* Bottom Sheet Upload Options */}
-      {showOptions && (
+      {/* Activity Selection Bottom Sheet */}
+      {showActivitySheet && (
         <>
           <div 
             className="fixed inset-0 bg-black/50 z-40"
@@ -159,7 +178,36 @@ const StackedPhotoCards = ({ photos, onAddPhoto, maxPhotos = 3 }: StackedPhotoCa
           <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
             <div className="bg-background/95 backdrop-blur-xl rounded-t-3xl p-6 pb-10 border-t border-foreground/10">
               <div className="w-12 h-1 bg-foreground/20 rounded-full mx-auto mb-6" />
-              <h3 className="text-lg font-semibold text-foreground text-center mb-6">Upload Photo</h3>
+              <h3 className="text-xl font-semibold text-foreground text-center mb-8">Choose your activity</h3>
+              <div className="grid grid-cols-3 gap-4 px-2">
+                {activities.map((activity) => (
+                  <button
+                    key={activity}
+                    onClick={() => handleActivitySelect(activity)}
+                    className="flex flex-col items-center gap-3 p-3 rounded-2xl hover:bg-foreground/5 transition-colors"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-foreground/10 backdrop-blur-sm" />
+                    <span className="text-sm font-semibold text-foreground italic">{activity}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Upload Method Bottom Sheet */}
+      {showUploadSheet && (
+        <>
+          <div 
+            className="fixed inset-0 bg-black/50 z-40"
+            onClick={handleOverlayClick}
+          />
+          <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
+            <div className="bg-background/95 backdrop-blur-xl rounded-t-3xl p-6 pb-10 border-t border-foreground/10">
+              <div className="w-12 h-1 bg-foreground/20 rounded-full mx-auto mb-6" />
+              <h3 className="text-lg font-semibold text-foreground text-center mb-2">Upload {selectedActivity} Photo</h3>
+              <p className="text-sm text-foreground/60 text-center mb-6">Choose how to add your photo</p>
               <div className="flex gap-4 justify-center">
                 <button
                   onClick={handleCameraClick}
