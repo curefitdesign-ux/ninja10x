@@ -1,22 +1,37 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const Preview = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { imageUrl, activity } = location.state || {};
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [activity, setActivity] = useState<string | null>(null);
+
+  // Store state on mount
+  useEffect(() => {
+    const state = location.state as { imageUrl?: string; activity?: string } | null;
+    if (state?.imageUrl) {
+      setImageUrl(state.imageUrl);
+      setActivity(state.activity || null);
+    } else {
+      // Only redirect if no image data
+      navigate('/');
+    }
+  }, []);
 
   const handleSave = () => {
-    // Navigate back with the save action
-    navigate('/', { state: { savePhoto: true, imageUrl, activity } });
+    if (imageUrl && activity) {
+      navigate('/', { state: { savePhoto: true, imageUrl, activity } });
+    }
   };
 
   const handleBack = () => {
     navigate('/');
   };
 
+  // Show nothing while checking state
   if (!imageUrl) {
-    navigate('/');
     return null;
   }
 
@@ -26,7 +41,7 @@ const Preview = () => {
       <div 
         className="absolute inset-0 scale-150"
         style={{
-          backgroundImage: `url(${imageUrl})`,
+          backgroundImage: `url("${imageUrl}")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           filter: 'blur(50px)',
@@ -52,6 +67,7 @@ const Preview = () => {
               src={imageUrl} 
               alt="Preview" 
               className="w-full h-full object-cover"
+              onError={(e) => console.log('Image load error:', e)}
             />
           </div>
         </div>
