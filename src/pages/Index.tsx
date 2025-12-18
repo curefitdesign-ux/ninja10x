@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import AuroraBackground from '@/components/AuroraBackground';
 import PhotoUploadCard from '@/components/PhotoUploadCard';
+import CameraUI from '@/components/CameraUI';
 
 interface Photo {
   id: string;
@@ -19,7 +20,11 @@ const Index = () => {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showCamera, setShowCamera] = useState(false);
+
+  // Calculate week and day based on photos
+  const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
+  const currentDay = (photos.length % 3) + 1;
 
   const handleCardClick = () => {
     if (photos.length < 12) {
@@ -30,12 +35,11 @@ const Index = () => {
   const handleActivitySelect = (activity: string) => {
     setSelectedActivity(activity);
     setShowActivitySheet(false);
-    fileInputRef.current?.click();
+    setShowCamera(true);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && selectedActivity) {
+  const handleCapture = (file: File) => {
+    if (selectedActivity) {
       const url = URL.createObjectURL(file);
       const newPhoto: Photo = {
         id: `photo-${Date.now()}`,
@@ -43,9 +47,14 @@ const Index = () => {
         activity: selectedActivity,
       };
       setPhotos((prev) => [...prev, newPhoto]);
-      setSelectedActivity(null);
     }
-    e.target.value = '';
+    setShowCamera(false);
+    setSelectedActivity(null);
+  };
+
+  const handleCameraClose = () => {
+    setShowCamera(false);
+    setSelectedActivity(null);
   };
 
   const handleOverlayClick = () => {
@@ -55,15 +64,6 @@ const Index = () => {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileChange}
-      />
-
       {/* Aurora Background */}
       <AuroraBackground />
       
@@ -110,6 +110,17 @@ const Index = () => {
             </div>
           </div>
         </>
+      )}
+
+      {/* Camera UI */}
+      {showCamera && selectedActivity && (
+        <CameraUI
+          activity={selectedActivity}
+          week={currentWeek}
+          day={currentDay}
+          onCapture={handleCapture}
+          onClose={handleCameraClose}
+        />
       )}
     </div>
   );
