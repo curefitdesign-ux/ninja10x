@@ -89,7 +89,7 @@ const Index = () => {
         <div className="py-2" />
         
         {/* Main Content */}
-        <main className="flex-1 flex flex-col justify-center py-6">
+        <main className="flex-1 flex flex-col justify-center py-6 -mt-[100px]">
           <PhotoUploadCard photos={photos} onCardClick={handleCardClick} />
         </main>
         
