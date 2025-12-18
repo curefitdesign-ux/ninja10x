@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import PhotoGrid from './PhotoGrid';
+import StackedPhotoCards from './StackedPhotoCards';
+import BackgroundGrid from './BackgroundGrid';
 import WeekProgress from './WeekProgress';
 
 interface Photo {
@@ -21,7 +22,13 @@ const PhotoUploadCard = () => {
     Math.min(Math.max(photos.length - 9, 0), 3),
   ];
 
+  // Get photos for current week only (max 3)
+  const currentWeekStartIndex = (currentWeek - 1) * 3;
+  const currentWeekPhotos = photos.slice(currentWeekStartIndex, currentWeekStartIndex + 3);
+
   const handleAddPhoto = (file: File) => {
+    if (photos.length >= 12) return; // Max 12 photos (4 weeks x 3)
+    
     const url = URL.createObjectURL(file);
     const newPhoto: Photo = {
       id: `photo-${Date.now()}`,
@@ -31,14 +38,28 @@ const PhotoUploadCard = () => {
   };
 
   return (
-    <div className="glass-card p-5 mx-4">
-      {/* Photo Grid */}
-      <div className="mb-5">
-        <PhotoGrid photos={photos} onAddPhoto={handleAddPhoto} />
+    <div className="glass-card p-5 mx-4 relative overflow-hidden">
+      {/* Background Grid */}
+      <BackgroundGrid />
+      
+      {/* Title */}
+      <h2 className="text-xl font-bold text-foreground text-center mb-6 relative z-10">
+        CONQUER WILL POWER
+      </h2>
+      
+      {/* Stacked Photo Cards */}
+      <div className="relative z-10 mb-6">
+        <StackedPhotoCards 
+          photos={currentWeekPhotos} 
+          onAddPhoto={handleAddPhoto}
+          maxPhotos={3}
+        />
       </div>
       
       {/* Week Progress */}
-      <WeekProgress currentWeek={currentWeek} photosPerWeek={photosPerWeek} />
+      <div className="relative z-10">
+        <WeekProgress currentWeek={currentWeek} photosPerWeek={photosPerWeek} />
+      </div>
     </div>
   );
 };
