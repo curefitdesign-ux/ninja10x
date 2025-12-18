@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import StackedPhotoCards from './StackedPhotoCards';
-import BackgroundGrid from './BackgroundGrid';
 import WeekProgress from './WeekProgress';
+import cardBackground from '@/assets/card-background.png';
 
 interface Photo {
   id: string;
@@ -38,10 +38,10 @@ const PhotoUploadCard = () => {
   };
 
   return (
-    <div className="glass-card p-5 mx-4 relative overflow-hidden">
-      {/* Background Grid */}
-      <BackgroundGrid />
-      
+    <div 
+      className="glass-card p-5 mx-4 relative overflow-hidden"
+      style={{ backgroundImage: `url(${cardBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+    >
       {/* Title */}
       <h2 className="text-xl font-bold text-foreground text-center mb-6 relative z-10">
         CONQUER WILL POWER
