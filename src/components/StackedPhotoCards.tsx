@@ -45,27 +45,34 @@ const StackedPhotoCards = ({ photos, onAddPhoto, maxPhotos = 3 }: StackedPhotoCa
     setShowOptions(false);
   };
 
-  // Calculate positions for stacked cards
+  // Calculate positions for stacked cards - center focus with smaller cards behind
   const getCardStyle = (index: number, totalFilled: number) => {
-    const baseOffset = 12;
-    const isFilledCard = index < totalFilled;
+    const currentCardIndex = totalFilled; // The next empty card to fill
     
-    if (isFilledCard) {
-      // Filled cards stack to the left
+    if (index < totalFilled) {
+      // Filled cards - stack to back left, smaller
+      const offset = totalFilled - index;
       return {
-        transform: `translateX(${-index * 20}px) rotate(${-index * 2}deg)`,
-        zIndex: totalFilled - index,
+        transform: `translateX(${-offset * 25}px) scale(${0.85 - offset * 0.05})`,
+        zIndex: index,
+        opacity: 0.6 - offset * 0.15,
+      };
+    } else if (index === currentCardIndex) {
+      // Current card - front and center, full size
+      return {
+        transform: 'translateX(0) scale(1)',
+        zIndex: maxPhotos + 1,
         opacity: 1,
       };
+    } else {
+      // Future cards - stack to back right, smaller
+      const offset = index - currentCardIndex;
+      return {
+        transform: `translateX(${offset * 25}px) scale(${0.85 - offset * 0.05})`,
+        zIndex: maxPhotos - index,
+        opacity: 0.6 - offset * 0.15,
+      };
     }
-    
-    // Empty cards stack to the right
-    const emptyIndex = index - totalFilled;
-    return {
-      transform: `translateX(${emptyIndex * baseOffset}px) rotate(${emptyIndex * 3}deg)`,
-      zIndex: maxPhotos - index,
-      opacity: 1 - emptyIndex * 0.1,
-    };
   };
 
   return (
