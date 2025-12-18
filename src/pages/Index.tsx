@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AuroraBackground from '@/components/AuroraBackground';
 import PhotoUploadCard from '@/components/PhotoUploadCard';
 import CameraUI from '@/components/CameraUI';
-import PhotoPreview from '@/components/PhotoPreview';
 
 interface Photo {
   id: string;
@@ -18,12 +18,26 @@ const activities = [
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const [capturedImageUrl, setCapturedImageUrl] = useState<string | null>(null);
+
+  // Handle save from preview page
+  useEffect(() => {
+    if (location.state?.savePhoto && location.state?.imageUrl && location.state?.activity) {
+      const newPhoto: Photo = {
+        id: `photo-${Date.now()}`,
+        url: location.state.imageUrl,
+        activity: location.state.activity,
+      };
+      setPhotos((prev) => [...prev, newPhoto]);
+      // Clear the state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Calculate week and day based on photos
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
@@ -43,28 +57,11 @@ const Index = () => {
 
   const handleCapture = (file: File) => {
     const url = URL.createObjectURL(file);
-    setCapturedImageUrl(url);
     setShowCamera(false);
-    setShowPreview(true);
-  };
-
-  const handlePreviewSave = () => {
-    if (selectedActivity && capturedImageUrl) {
-      const newPhoto: Photo = {
-        id: `photo-${Date.now()}`,
-        url: capturedImageUrl,
-        activity: selectedActivity,
-      };
-      setPhotos((prev) => [...prev, newPhoto]);
-    }
-    setShowPreview(false);
-    setCapturedImageUrl(null);
-    setSelectedActivity(null);
-  };
-
-  const handlePreviewClose = () => {
-    setShowPreview(false);
-    setCapturedImageUrl(null);
+    // Navigate to preview page
+    navigate('/preview', { 
+      state: { imageUrl: url, activity: selectedActivity } 
+    });
     setSelectedActivity(null);
   };
 
@@ -136,18 +133,6 @@ const Index = () => {
           day={currentDay}
           onCapture={handleCapture}
           onClose={handleCameraClose}
-        />
-      )}
-
-      {/* Photo Preview */}
-      {showPreview && capturedImageUrl && selectedActivity && (
-        <PhotoPreview
-          imageUrl={capturedImageUrl}
-          activity={selectedActivity}
-          week={currentWeek}
-          day={currentDay}
-          onSave={handlePreviewSave}
-          onClose={handlePreviewClose}
         />
       )}
     </div>
