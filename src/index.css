@@ -126,6 +126,15 @@
     }
   }
 
+  @keyframes slide-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
   .animate-aurora-float {
     animation: aurora-float 8s ease-in-out infinite;
   }
@@ -147,6 +156,10 @@
       transparent 100%
     );
     background-size: 200% 100%;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out forwards;
   }
 
   /* Glassmorphism card */
