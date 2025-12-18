@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import StackedPhotoCards from './StackedPhotoCards';
-import BackgroundGrid from './BackgroundGrid';
 import WeekProgress from './WeekProgress';
 
 interface Photo {
@@ -39,9 +38,6 @@ const PhotoUploadCard = () => {
 
   return (
     <div className="glass-card p-5 mx-4 relative overflow-hidden">
-      {/* Background Grid */}
-      <BackgroundGrid />
-      
       {/* Title */}
       <h2 className="text-xl font-bold text-foreground text-center mb-6 relative z-10">
         CONQUER WILL POWER
