@@ -50,27 +50,30 @@ const StackedPhotoCards = ({ photos, onAddPhoto, maxPhotos = 3 }: StackedPhotoCa
     const currentCardIndex = totalFilled; // The next empty card to fill
     
     if (index < totalFilled) {
-      // Filled cards - stack to back left, smaller
+      // Filled cards - stack to back left, smaller, tilted -5deg
       const offset = totalFilled - index;
       return {
-        transform: `translateX(${-offset * 25}px) scale(${0.85 - offset * 0.05})`,
+        transform: `translateX(${-offset * 25}px) scale(${0.85 - offset * 0.05}) rotate(-5deg)`,
         zIndex: index,
         opacity: 0.6 - offset * 0.15,
+        filter: 'blur(2px)',
       };
     } else if (index === currentCardIndex) {
       // Current card - front and center, full size
       return {
-        transform: 'translateX(0) scale(1)',
+        transform: 'translateX(0) scale(1) rotate(0deg)',
         zIndex: maxPhotos + 1,
         opacity: 1,
+        filter: 'none',
       };
     } else {
-      // Future cards - stack to back right, smaller
+      // Future cards - stack to back right, smaller, tilted 5deg, moved 20px more right
       const offset = index - currentCardIndex;
       return {
-        transform: `translateX(${offset * 25}px) scale(${0.85 - offset * 0.05})`,
+        transform: `translateX(${offset * 25 + 20}px) scale(${0.85 - offset * 0.05}) rotate(5deg)`,
         zIndex: maxPhotos - index,
         opacity: 0.6 - offset * 0.15,
+        filter: 'blur(2px)',
       };
     }
   };
