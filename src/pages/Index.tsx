@@ -92,7 +92,7 @@ const Index = () => {
             onClick={handleOverlayClick}
           />
           <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up" style={{ height: '90vh' }}>
-            <div className="bg-background/80 backdrop-blur-xl rounded-t-3xl p-6 pb-10 border-t border-foreground/10 h-full">
+            <div className="bg-white/10 backdrop-blur-xl rounded-t-3xl p-6 pb-10 border-t border-foreground/10 h-full">
               <div className="w-12 h-1 bg-foreground/20 rounded-full mx-auto mb-6" />
               <h3 className="text-xl font-semibold text-foreground text-center mb-8">Choose your activity</h3>
               <div className="grid grid-cols-3 gap-4 px-2">
