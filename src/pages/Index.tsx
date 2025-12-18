@@ -12,12 +12,8 @@ const Index = () => {
         {/* Status Bar Space */}
         <div className="h-12" />
         
-        {/* Header Badge */}
-        <header className="flex justify-center py-4">
-          <div className="px-4 py-2 rounded-full border border-foreground/30 bg-background/30 backdrop-blur-sm">
-            <span className="text-sm font-semibold text-foreground tracking-wider">CULT NINJA</span>
-          </div>
-        </header>
+        {/* Spacer */}
+        <div className="py-2" />
         
         {/* Main Content */}
         <main className="flex-1 flex flex-col justify-center py-6">
