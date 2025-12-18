@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import StackedPhotoCards from './StackedPhotoCards';
 import WeekProgress from './WeekProgress';
 import cardBackground from '@/assets/card-background.png';
@@ -9,9 +8,12 @@ interface Photo {
   activity?: string;
 }
 
-const PhotoUploadCard = () => {
-  const [photos, setPhotos] = useState<Photo[]>([]);
-  
+interface PhotoUploadCardProps {
+  photos: Photo[];
+  onCardClick: () => void;
+}
+
+const PhotoUploadCard = ({ photos, onCardClick }: PhotoUploadCardProps) => {
   // Determine current week based on photos (3 photos per week = 12 total for 4 weeks)
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
 
@@ -26,18 +28,6 @@ const PhotoUploadCard = () => {
   // Get photos for current week only (max 3)
   const currentWeekStartIndex = (currentWeek - 1) * 3;
   const currentWeekPhotos = photos.slice(currentWeekStartIndex, currentWeekStartIndex + 3);
-
-  const handleAddPhoto = (file: File, activity: string) => {
-    if (photos.length >= 12) return; // Max 12 photos (4 weeks x 3)
-    
-    const url = URL.createObjectURL(file);
-    const newPhoto: Photo = {
-      id: `photo-${Date.now()}`,
-      url,
-      activity,
-    };
-    setPhotos((prev) => [...prev, newPhoto]);
-  };
 
   return (
     <div className="px-5">
@@ -58,19 +48,19 @@ const PhotoUploadCard = () => {
           CONQUER WILL POWER
         </h2>
       
-      {/* Stacked Photo Cards */}
-      <div className="relative z-10 mb-6">
-        <StackedPhotoCards 
-          photos={currentWeekPhotos} 
-          onAddPhoto={handleAddPhoto}
-          maxPhotos={3}
-        />
-      </div>
+        {/* Stacked Photo Cards */}
+        <div className="relative z-10 mb-6">
+          <StackedPhotoCards 
+            photos={currentWeekPhotos} 
+            onCardClick={onCardClick}
+            maxPhotos={3}
+          />
+        </div>
       
-      {/* Week Progress */}
-      <div className="relative z-10">
-        <WeekProgress currentWeek={currentWeek} photosPerWeek={photosPerWeek} />
-      </div>
+        {/* Week Progress */}
+        <div className="relative z-10">
+          <WeekProgress currentWeek={currentWeek} photosPerWeek={photosPerWeek} />
+        </div>
       </div>
     </div>
   );
