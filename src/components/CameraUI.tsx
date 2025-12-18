@@ -5,22 +5,22 @@ interface CameraUIProps {
   activity: string;
   week: number;
   day: number;
-  onCapture: (file: File) => void;
+  onCapture: (imageDataUrl: string) => void;
   onClose: () => void;
 }
 
 const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const [isRecording, setIsRecording] = useState(false);
   const [recordingProgress, setRecordingProgress] = useState(0);
+  const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const recordingStartRef = useRef<number>(0);
-  const chunksRef = useRef<Blob[]>([]);
+  const isLongPressRef = useRef(false);
 
   const startCamera = useCallback(async () => {
     try {
@@ -30,7 +30,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
       
       const newStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode },
-        audio: true
+        audio: false
       });
       
       setStream(newStream);
@@ -56,7 +56,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
   };
 
-  const handleTakePhoto = () => {
+  const takePhoto = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -65,44 +65,19 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.drawImage(video, 0, 0);
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const file = new File([blob], `${activity}-photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
-            onCapture(file);
-          }
-        }, 'image/jpeg', 0.9);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        onCapture(dataUrl);
       }
     }
   };
 
   const startRecording = () => {
-    if (!stream) return;
-    
     setIsRecording(true);
     recordingStartRef.current = Date.now();
-    chunksRef.current = [];
     
-    const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-    mediaRecorderRef.current = mediaRecorder;
-    
-    mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) {
-        chunksRef.current.push(e.data);
-      }
-    };
-    
-    mediaRecorder.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: 'video/webm' });
-      const file = new File([blob], `${activity}-video-${Date.now()}.webm`, { type: 'video/webm' });
-      onCapture(file);
-    };
-    
-    mediaRecorder.start();
-    
-    // Update progress every 100ms
     recordingTimerRef.current = setInterval(() => {
       const elapsed = Date.now() - recordingStartRef.current;
-      const progress = Math.min(elapsed / 4000, 1); // 4 seconds max
+      const progress = Math.min(elapsed / 4000, 1);
       setRecordingProgress(progress);
       
       if (progress >= 1) {
@@ -115,24 +90,35 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     if (recordingTimerRef.current) {
       clearInterval(recordingTimerRef.current);
     }
-    
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop();
-    }
-    
     setIsRecording(false);
     setRecordingProgress(0);
+    // For now, take a photo at end of recording
+    takePhoto();
   };
 
   const handleShutterPress = () => {
-    startRecording();
+    isLongPressRef.current = false;
+    
+    // Start timer to detect long press
+    pressTimerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+      startRecording();
+    }, 300); // 300ms to trigger long press
   };
 
   const handleShutterRelease = () => {
+    // Clear the long press timer
+    if (pressTimerRef.current) {
+      clearTimeout(pressTimerRef.current);
+      pressTimerRef.current = null;
+    }
+    
     if (isRecording) {
+      // Was recording, stop it
       stopRecording();
-    } else {
-      handleTakePhoto();
+    } else if (!isLongPressRef.current) {
+      // Quick tap, take photo
+      takePhoto();
     }
   };
 
@@ -143,7 +129,12 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      onCapture(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        onCapture(dataUrl);
+      };
+      reader.readAsDataURL(file);
     }
     e.target.value = '';
   };
@@ -155,7 +146,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*,video/*"
+        accept="image/*"
         className="hidden"
         onChange={handleFileChange}
       />
@@ -215,7 +206,10 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
           <button
             onMouseDown={handleShutterPress}
             onMouseUp={handleShutterRelease}
-            onMouseLeave={() => isRecording && stopRecording()}
+            onMouseLeave={() => {
+              if (pressTimerRef.current) clearTimeout(pressTimerRef.current);
+              if (isRecording) stopRecording();
+            }}
             onTouchStart={handleShutterPress}
             onTouchEnd={handleShutterRelease}
             className="relative w-20 h-20 rounded-full flex items-center justify-center"
