@@ -6,6 +6,7 @@ import cardBackground from '@/assets/card-background.png';
 interface Photo {
   id: string;
   url: string;
+  activity?: string;
 }
 
 const PhotoUploadCard = () => {
@@ -26,13 +27,14 @@ const PhotoUploadCard = () => {
   const currentWeekStartIndex = (currentWeek - 1) * 3;
   const currentWeekPhotos = photos.slice(currentWeekStartIndex, currentWeekStartIndex + 3);
 
-  const handleAddPhoto = (file: File) => {
+  const handleAddPhoto = (file: File, activity: string) => {
     if (photos.length >= 12) return; // Max 12 photos (4 weeks x 3)
     
     const url = URL.createObjectURL(file);
     const newPhoto: Photo = {
       id: `photo-${Date.now()}`,
       url,
+      activity,
     };
     setPhotos((prev) => [...prev, newPhoto]);
   };
