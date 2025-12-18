@@ -56,7 +56,7 @@ const StackedPhotoCards = ({ photos, onAddPhoto, maxPhotos = 3 }: StackedPhotoCa
         transform: `translateX(${-offset * 25}px) scale(${0.85 - offset * 0.05}) rotate(-5deg)`,
         zIndex: index,
         opacity: 0.6 - offset * 0.15,
-        filter: 'blur(2px)',
+        backdropFilter: 'blur(8px)',
       };
     } else if (index === currentCardIndex) {
       // Current card - front and center, full size
@@ -73,7 +73,7 @@ const StackedPhotoCards = ({ photos, onAddPhoto, maxPhotos = 3 }: StackedPhotoCa
         transform: `translateX(${offset * 25 + 20}px) scale(${0.85 - offset * 0.05}) rotate(5deg)`,
         zIndex: maxPhotos - index,
         opacity: 0.6 - offset * 0.15,
-        filter: 'blur(2px)',
+        backdropFilter: 'blur(8px)',
       };
     }
   };
