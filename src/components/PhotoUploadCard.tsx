@@ -38,21 +38,23 @@ const PhotoUploadCard = () => {
   };
 
   return (
-    <div className="flex flex-col items-center">
-      {/* Cult Ninja Tag */}
-      <div className="px-4 py-2 mb-4 rounded-full border border-foreground/30 bg-background/30 backdrop-blur-sm">
-        <span className="text-sm font-semibold text-foreground tracking-wider">CULT NINJA</span>
-      </div>
-      
+    <div className="px-5">
       {/* Ninja Widget */}
       <div 
-        className="glass-card p-5 mx-4 relative overflow-hidden w-full"
+        className="glass-card p-5 relative overflow-hidden w-full"
         style={{ backgroundImage: `url(${cardBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
       >
-      {/* Title */}
-      <h2 className="text-xl font-bold text-foreground text-center mb-6 relative z-10">
-        CONQUER WILL POWER
-      </h2>
+        {/* Cult Ninja Tag */}
+        <div className="flex justify-center mb-4">
+          <div className="px-4 py-2 rounded-full border border-foreground/30 bg-background/30 backdrop-blur-sm">
+            <span className="text-sm font-semibold text-foreground tracking-wider">CULT NINJA</span>
+          </div>
+        </div>
+        
+        {/* Title */}
+        <h2 className="text-xl font-bold text-foreground text-center mb-6 relative z-10">
+          CONQUER WILL POWER
+        </h2>
       
       {/* Stacked Photo Cards */}
       <div className="relative z-10 mb-6">

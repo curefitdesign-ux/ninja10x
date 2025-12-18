@@ -149,29 +149,33 @@ const StackedPhotoCards = ({ photos, onAddPhoto, maxPhotos = 3 }: StackedPhotoCa
         })}
       </div>
 
-      {/* Upload Options Modal */}
+      {/* Bottom Sheet Upload Options */}
       {showOptions && (
         <>
           <div 
             className="fixed inset-0 bg-black/50 z-40"
             onClick={handleOverlayClick}
           />
-          <div className="absolute z-50 bottom-0 left-0 right-0 mx-4 mb-4 p-4 rounded-2xl glass-card">
-            <div className="flex gap-4 justify-center">
-              <button
-                onClick={handleCameraClick}
-                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-foreground/10 hover:bg-foreground/20 transition-colors"
-              >
-                <Camera className="w-8 h-8 text-foreground" />
-                <span className="text-sm text-foreground">Camera</span>
-              </button>
-              <button
-                onClick={handleGalleryClick}
-                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-foreground/10 hover:bg-foreground/20 transition-colors"
-              >
-                <ImageIcon className="w-8 h-8 text-foreground" />
-                <span className="text-sm text-foreground">Gallery</span>
-              </button>
+          <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
+            <div className="bg-background/95 backdrop-blur-xl rounded-t-3xl p-6 pb-10 border-t border-foreground/10">
+              <div className="w-12 h-1 bg-foreground/20 rounded-full mx-auto mb-6" />
+              <h3 className="text-lg font-semibold text-foreground text-center mb-6">Upload Photo</h3>
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={handleCameraClick}
+                  className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-foreground/5 hover:bg-foreground/10 transition-colors flex-1 max-w-[140px]"
+                >
+                  <Camera className="w-10 h-10 text-foreground" />
+                  <span className="text-sm font-medium text-foreground">Camera</span>
+                </button>
+                <button
+                  onClick={handleGalleryClick}
+                  className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-foreground/5 hover:bg-foreground/10 transition-colors flex-1 max-w-[140px]"
+                >
+                  <ImageIcon className="w-10 h-10 text-foreground" />
+                  <span className="text-sm font-medium text-foreground">Gallery</span>
+                </button>
+              </div>
             </div>
           </div>
         </>
