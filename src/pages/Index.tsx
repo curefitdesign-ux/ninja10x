@@ -55,19 +55,13 @@ const Index = () => {
     setShowCamera(true);
   };
 
-  const handleCapture = (file: File) => {
-    // Convert to base64 for persistence across navigation
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64Url = reader.result as string;
-      setShowCamera(false);
-      // Navigate to preview page
-      navigate('/preview', { 
-        state: { imageUrl: base64Url, activity: selectedActivity } 
-      });
-      setSelectedActivity(null);
-    };
-    reader.readAsDataURL(file);
+  const handleCapture = (imageDataUrl: string) => {
+    setShowCamera(false);
+    // Navigate to preview page with the image data URL
+    navigate('/preview', { 
+      state: { imageUrl: imageDataUrl, activity: selectedActivity } 
+    });
+    setSelectedActivity(null);
   };
 
   const handleCameraClose = () => {
