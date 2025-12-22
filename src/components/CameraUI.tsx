@@ -234,13 +234,13 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
           loop
           playsInline
           muted
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain bg-black"
         />
       ) : capturedImage ? (
         <img
           src={capturedImage}
           alt="Captured"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain bg-black"
         />
       ) : (
         <video
@@ -248,7 +248,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
           autoPlay
           playsInline
           muted
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain bg-black"
         />
       )}
 

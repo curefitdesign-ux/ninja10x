@@ -12,15 +12,17 @@ interface VogueFrameProps {
 const VogueFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale }: VogueFrameProps) => {
   return (
     <div className="w-full aspect-[3/4] rounded-[32px] overflow-hidden bg-white shadow-2xl relative">
-      {/* Background image with object-cover fill */}
-      <img 
-        src={imageUrl}
-        alt="Activity"
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{
-          transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-        }}
-      />
+      {/* Background image with aspect ratio maintained */}
+      <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+        <img 
+          src={imageUrl}
+          alt="Activity"
+          className="max-w-full max-h-full object-contain"
+          style={{
+            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+          }}
+        />
+      </div>
       
       {/* Top text - Magazine masthead style with massive title */}
       <div className="absolute top-6 left-5 right-5">
