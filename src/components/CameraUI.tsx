@@ -180,19 +180,9 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         </button>
       </div>
 
-      {/* Camera Frame - matches 3:4 aspect ratio of preview frames */}
+      {/* Camera Frame */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        {/* Dark overlay outside crop area */}
-        <div className="absolute inset-0 bg-black/60" />
-        {/* Clear crop area with 3:4 aspect ratio */}
-        <div 
-          className="relative rounded-[32px] overflow-hidden"
-          style={{ 
-            width: 'calc(100% - 48px)', 
-            aspectRatio: '3/4',
-            boxShadow: '0 0 0 9999px rgba(0,0,0,0.6)',
-          }}
-        >
+        <div className="relative w-[280px] h-[420px]">
           {/* Corner brackets */}
           <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-white/80 rounded-tl-2xl" />
           <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-white/80 rounded-tr-2xl" />
