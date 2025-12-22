@@ -18,10 +18,8 @@ interface StackedPhotoCardsProps {
   maxPhotos?: number;
 }
 
-const StackedPhotoCards = ({ photos, onCardClick, maxPhotos = 100 }: StackedPhotoCardsProps) => {
-  // Show up to 5 cards visually (photos + 1 empty for next capture)
-  const visibleCount = Math.min(photos.length + 1, 5);
-  const displayPhotos = photos.slice(-4); // Show last 4 photos max
+const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
+  // Show all photos - no capping
   
   // Calculate positions for stacked cards - next empty card front, filled cards stack left
   const getCardStyle = (index: number, isEmptyCard: boolean, totalVisible: number) => {
@@ -72,9 +70,9 @@ const StackedPhotoCards = ({ photos, onCardClick, maxPhotos = 100 }: StackedPhot
     <div className="relative w-full flex justify-center items-center" style={{ height: '320px' }}>
       {/* Stacked Cards */}
       <div className="relative" style={{ width: '220px', height: '280px' }}>
-        {/* Render filled photo cards */}
-        {displayPhotos.map((photo, index) => {
-          const style = getCardStyle(index, false, displayPhotos.length);
+        {/* Render all photo cards */}
+        {photos.map((photo, index) => {
+          const style = getCardStyle(index, false, photos.length);
           
           return (
             <div
@@ -91,7 +89,7 @@ const StackedPhotoCards = ({ photos, onCardClick, maxPhotos = 100 }: StackedPhot
         <div
           className="absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-500 ease-out cursor-pointer glass-card"
           style={{
-            ...getCardStyle(displayPhotos.length, true, displayPhotos.length),
+            ...getCardStyle(photos.length, true, photos.length),
             background: 'linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
             border: '1px solid rgba(255,255,255,0.2)',
             backdropFilter: 'blur(10px)',
