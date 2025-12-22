@@ -13,30 +13,51 @@ interface StackedPhotoCardsProps {
 }
 
 const StackedPhotoCards = ({ photos, onCardClick, maxPhotos = 3 }: StackedPhotoCardsProps) => {
-  // Calculate positions for stacked cards - center focus with smaller cards behind
+  // Calculate positions for stacked cards - last capture front and center
   const getCardStyle = (index: number, totalFilled: number) => {
-    const currentCardIndex = totalFilled; // The next empty card to fill
+    const lastFilledIndex = totalFilled - 1;
     
-    if (index < totalFilled) {
-      // Filled cards - stack to back left, smaller, tilted -5deg
-      const offset = totalFilled - index;
-      return {
-        transform: `translateX(${-offset * 25}px) scale(${0.85 - offset * 0.05}) rotate(-5deg)`,
-        zIndex: index,
-        opacity: 0.6 - offset * 0.15,
-        backdropFilter: 'blur(16px)',
-      };
-    } else if (index === currentCardIndex) {
-      // Current card - front and center, full size
+    if (totalFilled === 0) {
+      // No photos yet - first empty card is front and center
+      if (index === 0) {
+        return {
+          transform: 'translateX(0) scale(1) rotate(0deg)',
+          zIndex: maxPhotos + 1,
+          opacity: 1,
+          filter: 'none',
+        };
+      } else {
+        // Future empty cards stack to right
+        const offset = index;
+        return {
+          transform: `translateX(${offset * 25 + 20}px) scale(${0.85 - offset * 0.05}) rotate(5deg)`,
+          zIndex: maxPhotos - index,
+          opacity: 0.6 - offset * 0.15,
+          backdropFilter: 'blur(16px)',
+        };
+      }
+    }
+    
+    if (index === lastFilledIndex) {
+      // Last captured photo - front and center
       return {
         transform: 'translateX(0) scale(1) rotate(0deg)',
         zIndex: maxPhotos + 1,
         opacity: 1,
         filter: 'none',
       };
+    } else if (index < lastFilledIndex) {
+      // Earlier filled cards - stack to back left
+      const offset = lastFilledIndex - index;
+      return {
+        transform: `translateX(${-offset * 25}px) scale(${0.85 - offset * 0.05}) rotate(-5deg)`,
+        zIndex: index,
+        opacity: 0.6 - offset * 0.15,
+        backdropFilter: 'blur(16px)',
+      };
     } else {
-      // Future cards - stack to back right, smaller, tilted 5deg, moved 20px more right
-      const offset = index - currentCardIndex;
+      // Future empty cards - stack to back right
+      const offset = index - lastFilledIndex;
       return {
         transform: `translateX(${offset * 25 + 20}px) scale(${0.85 - offset * 0.05}) rotate(5deg)`,
         zIndex: maxPhotos - index,

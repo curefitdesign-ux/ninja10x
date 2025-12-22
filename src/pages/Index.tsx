@@ -44,9 +44,7 @@ const Index = () => {
   const currentDay = (photos.length % 3) + 1;
 
   const handleCardClick = () => {
-    if (photos.length < 12) {
-      setShowActivitySheet(true);
-    }
+    setShowActivitySheet(true);
   };
 
   const handleActivitySelect = (activity: string) => {
