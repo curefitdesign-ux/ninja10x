@@ -5,11 +5,13 @@ interface CameraUIProps {
   activity: string;
   week: number;
   day: number;
+  isUpcoming?: boolean;
   onCapture: (imageDataUrl: string) => void;
   onClose: () => void;
 }
 
-const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) => {
+const CameraUI = ({ activity, week, day, isUpcoming = false, onCapture, onClose }: CameraUIProps) => {
+  const frameRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const playbackVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -71,19 +73,48 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   };
 
   const takePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
+    if (videoRef.current && canvasRef.current && frameRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      const frame = frameRef.current;
+      
+      // Get the frame's position relative to the viewport
+      const frameRect = frame.getBoundingClientRect();
+      const videoRect = video.getBoundingClientRect();
+      
+      // Calculate crop area in video coordinates
+      const scaleX = video.videoWidth / videoRect.width;
+      const scaleY = video.videoHeight / videoRect.height;
+      
+      // Frame position relative to video + 50px extra height
+      const cropX = (frameRect.left - videoRect.left) * scaleX;
+      const cropY = (frameRect.top - videoRect.top) * scaleY;
+      const cropWidth = frameRect.width * scaleX;
+      const cropHeight = (frameRect.height + 50) * scaleY;
+      
+      // Set canvas to cropped dimensions
+      canvas.width = cropWidth;
+      canvas.height = cropHeight;
+      
       const ctx = canvas.getContext('2d');
       if (ctx) {
         // Flip horizontally if using front camera to avoid mirror image
         if (facingMode === 'user') {
           ctx.translate(canvas.width, 0);
           ctx.scale(-1, 1);
+          // Adjust crop position for flipped image
+          ctx.drawImage(
+            video, 
+            video.videoWidth - cropX - cropWidth, cropY, cropWidth, cropHeight,
+            0, 0, cropWidth, cropHeight
+          );
+        } else {
+          ctx.drawImage(
+            video, 
+            cropX, cropY, cropWidth, cropHeight,
+            0, 0, cropWidth, cropHeight
+          );
         }
-        ctx.drawImage(video, 0, 0);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
         setCapturedImage(dataUrl);
       }
@@ -298,6 +329,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         {/* Clear crop area with 3:4 aspect ratio and matching rounded corners */}
         <div 
+          ref={frameRef}
           className="relative rounded-[32px] border-2 border-white/20 overflow-hidden"
           style={{ 
             width: 'calc(100% - 48px)', 
@@ -420,14 +452,17 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
             </button>
           )}
 
-          {/* Gallery */}
-          <button
-            onClick={handleGalleryClick}
-            className="p-4"
-            disabled={!!hasCapturedMedia}
-          >
-            <ImageIcon className={`w-8 h-8 ${hasCapturedMedia ? 'text-white/30' : 'text-white/80'}`} />
-          </button>
+          {/* Gallery - hidden after capture */}
+          {!hasCapturedMedia ? (
+            <button
+              onClick={handleGalleryClick}
+              className="p-4"
+            >
+              <ImageIcon className="w-8 h-8 text-white/80" />
+            </button>
+          ) : (
+            <div className="p-4 w-16" /> // Spacer to maintain layout
+          )}
         </div>
       </div>
     </div>
