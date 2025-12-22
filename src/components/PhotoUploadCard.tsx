@@ -72,9 +72,6 @@ const PhotoUploadCard = ({
             <p className="text-sm text-foreground/60">
               Next upload in <span className="font-semibold text-foreground/80">{hoursUntilNextUpload}h</span>
             </p>
-            <p className="text-xs text-foreground/40 mt-1">
-              Tap photo to edit
-            </p>
           </div>
         )}
       
