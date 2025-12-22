@@ -6,6 +6,9 @@ interface Photo {
   id: string;
   url: string;
   activity?: string;
+  frame?: 'shaky' | 'journal' | 'vogue';
+  duration?: string;
+  pr?: string;
 }
 
 interface PhotoUploadCardProps {
@@ -48,12 +51,11 @@ const PhotoUploadCard = ({ photos, onCardClick }: PhotoUploadCardProps) => {
           CONQUER WILL POWER
         </h2>
       
-        {/* Stacked Photo Cards */}
+        {/* Stacked Photo Cards - pass all photos, component handles display */}
         <div className="relative z-10 mb-6">
           <StackedPhotoCards 
-            photos={currentWeekPhotos} 
+            photos={photos} 
             onCardClick={onCardClick}
-            maxPhotos={3}
           />
         </div>
       
