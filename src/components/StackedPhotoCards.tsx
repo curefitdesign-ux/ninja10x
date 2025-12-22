@@ -1,4 +1,4 @@
-import { User, Pencil } from 'lucide-react';
+import { User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Photo {
@@ -77,8 +77,8 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
     return sortedPhotos.map((photo, index) => {
       const isTodaysPhoto = photo.uploadDate === currentDate;
       
-      // Calculate position - when canUploadToday, all photos shift back by 1 position
-      // so the empty card can take the center
+      // All photos stack to the left - position based on index
+      // When canUploadToday, all photos shift back by 1 to make room for empty card
       const stackPosition = canUploadToday ? index + 1 : (isTodaysPhoto ? 0 : index + 1);
       
       const translateX = stackPosition * 25;
@@ -96,19 +96,13 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
             zIndex,
             opacity,
           }}
-          onClick={() => isTodaysPhoto ? onCardClick() : handlePhotoTap(photo)}
+          onClick={() => handlePhotoTap(photo)}
         >
           <img
             src={photo.url}
             alt={photo.activity || 'Photo'}
             className="w-full h-full object-cover"
           />
-          {/* Edit indicator on today's photo */}
-          {isTodaysPhoto && (
-            <div className="absolute bottom-3 right-3 bg-foreground/20 backdrop-blur-sm rounded-full p-2">
-              <Pencil className="w-4 h-4 text-foreground/80" />
-            </div>
-          )}
         </div>
       );
     });
