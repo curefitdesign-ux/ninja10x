@@ -192,34 +192,22 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         />
       )}
 
-      {/* Blur mask overlay outside crop area */}
+      {/* Gradient masked blur overlay */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Top blur section */}
+        {/* Full-screen blur layer with radial gradient mask */}
         <div 
-          className="absolute top-0 left-0 right-0 backdrop-blur-xl bg-black/30"
-          style={{ height: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)' }}
-        />
-        {/* Bottom blur section */}
-        <div 
-          className="absolute bottom-0 left-0 right-0 backdrop-blur-xl bg-black/30"
-          style={{ height: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)' }}
-        />
-        {/* Left blur section */}
-        <div 
-          className="absolute left-0 backdrop-blur-xl bg-black/30"
-          style={{ 
-            top: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)',
-            height: 'calc((100vw - 48px) * 4 / 3)',
-            width: '24px'
+          className="absolute inset-0 backdrop-blur-2xl"
+          style={{
+            maskImage: 'radial-gradient(ellipse 45% 40% at 50% 50%, transparent 0%, transparent 60%, black 100%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 45% 40% at 50% 50%, transparent 0%, transparent 60%, black 100%)',
           }}
         />
-        {/* Right blur section */}
+        {/* Subtle dark tint for edges */}
         <div 
-          className="absolute right-0 backdrop-blur-xl bg-black/30"
-          style={{ 
-            top: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)',
-            height: 'calc((100vw - 48px) * 4 / 3)',
-            width: '24px'
+          className="absolute inset-0 bg-black/40"
+          style={{
+            maskImage: 'radial-gradient(ellipse 50% 45% at 50% 50%, transparent 0%, transparent 50%, black 100%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 50% 45% at 50% 50%, transparent 0%, transparent 50%, black 100%)',
           }}
         />
       </div>
