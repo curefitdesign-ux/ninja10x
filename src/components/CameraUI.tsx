@@ -212,22 +212,22 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
             WebkitMaskImage: 'linear-gradient(to top, black 60%, transparent 100%)',
           }}
         />
-        {/* Left blur section - full height */}
+        {/* Left blur section - full height, smooth & translucent */}
         <div 
-          className="absolute left-0 top-0 bottom-0 backdrop-blur-2xl bg-black/30"
+          className="absolute left-0 top-0 bottom-0 backdrop-blur-xl bg-black/15"
           style={{ 
-            width: '24px',
-            maskImage: 'linear-gradient(to right, black 40%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to right, black 40%, transparent 100%)',
+            width: '48px',
+            maskImage: 'linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
           }}
         />
-        {/* Right blur section - full height */}
+        {/* Right blur section - full height, smooth & translucent */}
         <div 
-          className="absolute right-0 top-0 bottom-0 backdrop-blur-2xl bg-black/30"
+          className="absolute right-0 top-0 bottom-0 backdrop-blur-xl bg-black/15"
           style={{ 
-            width: '24px',
-            maskImage: 'linear-gradient(to left, black 40%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to left, black 40%, transparent 100%)',
+            width: '48px',
+            maskImage: 'linear-gradient(to left, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
           }}
         />
       </div>
