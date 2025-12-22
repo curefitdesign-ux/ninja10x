@@ -113,10 +113,8 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     setCapturedImage(null);
     setCapturedVideo(null);
     recordedChunksRef.current = [];
-    // Camera stream should still be active, but restart just in case
-    if (!stream || stream.getTracks().some(t => t.readyState === 'ended')) {
-      startCamera();
-    }
+    // Restart camera with same facing mode
+    startCamera();
   };
 
   const startRecording = () => {
@@ -420,14 +418,17 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
             </button>
           )}
 
-          {/* Gallery */}
-          <button
-            onClick={handleGalleryClick}
-            className="p-4"
-            disabled={!!hasCapturedMedia}
-          >
-            <ImageIcon className={`w-8 h-8 ${hasCapturedMedia ? 'text-white/30' : 'text-white/80'}`} />
-          </button>
+          {/* Gallery - hidden when captured */}
+          {hasCapturedMedia ? (
+            <div className="p-4 w-16" />
+          ) : (
+            <button
+              onClick={handleGalleryClick}
+              className="p-4"
+            >
+              <ImageIcon className="w-8 h-8 text-white/80" />
+            </button>
+          )}
         </div>
       </div>
     </div>
