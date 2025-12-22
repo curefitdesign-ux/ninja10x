@@ -22,26 +22,26 @@ const ShakyFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition
         }}
       />
       
-      
       {/* Content */}
-      <div className="absolute inset-0 p-6 flex flex-col">
-        {/* Week/Day badge */}
+      <div className="absolute inset-0 p-5 flex flex-col">
+        {/* Week/Day badge - top left */}
         <div 
-          className="inline-flex self-start rounded-full px-4 py-2"
+          className="inline-flex self-start rounded-full px-3 py-1.5"
           style={{
-            background: 'rgba(255,255,255,0.25)',
+            background: 'rgba(255,255,255,0.2)',
             backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.3)',
+            border: '1px solid rgba(255,255,255,0.25)',
           }}
         >
-          <span className="text-white font-bold text-xs tracking-wide">WEEK {week} | DAY {day}</span>
+          <span className="text-white font-semibold text-[11px] tracking-wider">WEEK {week} | DAY {day}</span>
         </div>
         
-        {/* Activity name */}
+        {/* Activity name - large italic bold */}
         <h2 
-          className="text-white text-[42px] font-black italic mt-4 leading-none"
+          className="text-white font-black italic mt-3 leading-[0.95]"
           style={{
-            textShadow: '2px 4px 8px rgba(0,0,0,0.2)',
+            fontSize: 'clamp(36px, 12vw, 52px)',
+            textShadow: '2px 4px 12px rgba(0,0,0,0.15)',
           }}
         >
           {activity}
@@ -50,42 +50,48 @@ const ShakyFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition
         {/* Spacer */}
         <div className="flex-1" />
         
-        {/* Stats at bottom */}
-        <div className="flex gap-12">
+        {/* Stats at bottom - side by side */}
+        <div className="flex gap-8">
           {/* Time section */}
-          <div>
-            <p className="text-white/70 text-sm font-medium mb-1">Time</p>
+          <div className="flex-1">
+            <p className="text-white/60 text-xs font-medium mb-0.5 tracking-wide">Time</p>
             <p 
-              className="text-white text-[32px] font-bold tracking-tight"
-              style={{ fontVariantNumeric: 'tabular-nums' }}
+              className="text-white font-bold leading-none"
+              style={{ 
+                fontSize: 'clamp(28px, 8vw, 36px)',
+                fontVariantNumeric: 'tabular-nums',
+              }}
             >
               {duration || "02:00:50"}
             </p>
             {/* Mini bar chart */}
-            <div className="flex items-end gap-1.5 mt-3 h-12">
-              <div className="w-5 h-5 bg-white/25 rounded-sm" />
-              <div className="w-5 h-10 bg-white/25 rounded-sm" />
-              <div className="w-5 h-12 bg-white/25 rounded-sm" />
-              <div className="w-5 h-7 bg-white/25 rounded-sm" />
+            <div className="flex items-end gap-1 mt-3 h-10">
+              <div className="w-4 h-4 bg-white/20 rounded-sm" />
+              <div className="w-4 h-8 bg-white/20 rounded-sm" />
+              <div className="w-4 h-10 bg-white/20 rounded-sm" />
+              <div className="w-4 h-6 bg-white/20 rounded-sm" />
             </div>
           </div>
           
           {/* PR section */}
-          <div>
-            <p className="text-white/70 text-sm font-medium mb-1">Punches Per Round</p>
+          <div className="flex-1">
+            <p className="text-white/60 text-xs font-medium mb-0.5 tracking-wide">Punches Per Round</p>
             <p 
-              className="text-white text-[32px] font-bold tracking-tight"
-              style={{ fontVariantNumeric: 'tabular-nums' }}
+              className="text-white font-bold leading-none"
+              style={{ 
+                fontSize: 'clamp(28px, 8vw, 36px)',
+                fontVariantNumeric: 'tabular-nums',
+              }}
             >
               {pr || "100"}
             </p>
             {/* Mini line chart */}
-            <svg className="w-28 h-12 mt-3" viewBox="0 0 112 48" fill="none">
+            <svg className="w-24 h-10 mt-3" viewBox="0 0 96 40" fill="none">
               <path 
-                d="M0 36 L16 28 L32 32 L48 18 L64 24 L80 12 L96 16 L112 8" 
+                d="M0 30 L14 22 L28 26 L42 14 L56 20 L70 10 L84 14 L96 6" 
                 fill="none" 
-                stroke="rgba(255,255,255,0.25)" 
-                strokeWidth="3"
+                stroke="rgba(255,255,255,0.2)" 
+                strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
