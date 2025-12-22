@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
+import html2canvas from 'html2canvas';
 import ShakyFrame from '@/components/frames/ShakyFrame';
 import JournalFrame from '@/components/frames/JournalFrame';
 import VogueFrame from '@/components/frames/VogueFrame';
@@ -24,7 +25,9 @@ const Preview = () => {
   // Bottom sheet keyboard state
   const [editingField, setEditingField] = useState<EditingField>(null);
   const [tempValue, setTempValue] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
   
   // Swipe handling
   const touchStartX = useRef(0);
@@ -47,8 +50,34 @@ const Preview = () => {
     }
   }, [editingField]);
 
-  const handleSave = () => {
-    if (imageUrl && activity) {
+  const handleSave = async () => {
+    if (!imageUrl || !activity || !frameRef.current) return;
+    
+    setIsSaving(true);
+    
+    try {
+      // Capture the frame as an image
+      const canvas = await html2canvas(frameRef.current, {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+      });
+      
+      const framedImageUrl = canvas.toDataURL('image/png', 1.0);
+      
+      navigate('/', { 
+        state: { 
+          savePhoto: true, 
+          imageUrl: framedImageUrl,
+          activity, 
+          frame: currentFrame,
+          duration,
+          pr,
+        } 
+      });
+    } catch (error) {
+      console.error('Error capturing frame:', error);
       navigate('/', { 
         state: { 
           savePhoto: true, 
@@ -59,6 +88,8 @@ const Preview = () => {
           pr,
         } 
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -203,7 +234,9 @@ const Preview = () => {
               onTouchEnd={handleTouchEnd}
               className="transition-transform duration-300"
             >
-              {renderFrame()}
+              <div ref={frameRef}>
+                {renderFrame()}
+              </div>
             </div>
 
             {/* Frame indicator dots */}
@@ -255,9 +288,12 @@ const Preview = () => {
           {/* Save button */}
           <button 
             onClick={handleSave}
-            className="w-full bg-[#FF4D4D] py-4 rounded-2xl"
+            disabled={isSaving}
+            className="w-full bg-[#FF4D4D] py-4 rounded-2xl disabled:opacity-50"
           >
-            <span className="text-white font-bold text-lg">Save Activity</span>
+            <span className="text-white font-bold text-lg">
+              {isSaving ? 'Saving...' : 'Save Activity'}
+            </span>
           </button>
         </div>
 
