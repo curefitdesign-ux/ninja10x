@@ -22,21 +22,6 @@ const ShakyFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition
         }}
       />
       
-      {/* Gradient overlay - silver/gray with radial light */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: 'linear-gradient(180deg, rgba(180,180,180,0.85) 0%, rgba(160,160,160,0.9) 30%, rgba(140,140,140,0.92) 60%, rgba(100,100,100,0.95) 100%)',
-        }}
-      />
-      
-      {/* Radial light highlight at top center */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: 'radial-gradient(ellipse 80% 40% at 50% 20%, rgba(255,255,255,0.5) 0%, transparent 60%)',
-        }}
-      />
       
       {/* Content */}
       <div className="absolute inset-0 p-6 flex flex-col">
