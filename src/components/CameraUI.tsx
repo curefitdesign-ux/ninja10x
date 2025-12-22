@@ -194,22 +194,22 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
 
       {/* Gradient masked blur overlay - uniform rectangular */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Top blur section */}
+        {/* Top blur section - smooth & translucent */}
         <div 
-          className="absolute top-0 left-0 right-0 backdrop-blur-2xl bg-black/30"
+          className="absolute top-0 left-0 right-0 backdrop-blur-xl bg-black/15"
           style={{ 
-            height: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)',
-            maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+            height: 'calc((100% - (100vw - 48px) * 4 / 3) / 2 + 24px)',
+            maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.2) 80%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.2) 80%, transparent 100%)',
           }}
         />
-        {/* Bottom blur section */}
+        {/* Bottom blur section - smooth & translucent */}
         <div 
-          className="absolute bottom-0 left-0 right-0 backdrop-blur-2xl bg-black/30"
+          className="absolute bottom-0 left-0 right-0 backdrop-blur-xl bg-black/15"
           style={{ 
-            height: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)',
-            maskImage: 'linear-gradient(to top, black 60%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to top, black 60%, transparent 100%)',
+            height: 'calc((100% - (100vw - 48px) * 4 / 3) / 2 + 24px)',
+            maskImage: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.2) 80%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.2) 80%, transparent 100%)',
           }}
         />
         {/* Left blur section - full height, smooth & translucent */}
