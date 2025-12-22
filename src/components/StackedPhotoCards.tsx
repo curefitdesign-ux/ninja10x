@@ -37,49 +37,72 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
     });
   };
 
-  const renderEmptyCard = () => {
+  // Default empty upload card - the first upload state
+  const DefaultUploadCard = ({ zIndex = 100, isClickable = true }: { zIndex?: number; isClickable?: boolean }) => (
+    <div
+      className={`absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isClickable ? 'cursor-pointer' : ''}`}
+      style={{
+        transform: 'translateX(0) scale(1) rotate(0deg)',
+        zIndex,
+        opacity: 1,
+        background: 'linear-gradient(145deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
+        border: '1px solid rgba(255,255,255,0.3)',
+        backdropFilter: 'blur(10px)',
+      }}
+      onClick={isClickable ? onCardClick : undefined}
+    >
+      <div className="w-full h-full flex flex-col items-center justify-center">
+        {/* Camera frame with user icon */}
+        <div className="relative w-24 h-24">
+          {/* Corner brackets - curved like camera viewfinder */}
+          <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-foreground/30 rounded-tl-xl" />
+          <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-foreground/30 rounded-tr-xl" />
+          <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-foreground/30 rounded-bl-xl" />
+          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-foreground/30 rounded-br-xl" />
+          {/* User icon */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <User className="w-12 h-12 text-foreground/30" strokeWidth={1.5} />
+          </div>
+        </div>
+        <p className="text-base text-foreground/40 mt-4 font-medium">Today's capture</p>
+      </div>
+    </div>
+  );
+
+  // Upcoming placeholder card (faded cards to the right/back)
+  const UpcomingCard = ({ position }: { position: number }) => {
+    const translateX = position * 20;
+    const scale = Math.max(0.85, 1 - position * 0.05);
+    const rotate = position * 4;
+    const opacity = Math.max(0.2, 0.5 - position * 0.15);
+    const zIndex = 50 - position;
+
     return (
       <div
-        className="absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer glass-card"
+        className="absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
         style={{
-          transform: 'translateX(0) scale(1) rotate(0deg)',
-          zIndex: 100,
-          opacity: 1,
-          background: 'linear-gradient(145deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
-          border: '1px solid rgba(255,255,255,0.3)',
-          backdropFilter: 'blur(10px)',
+          transform: `translateX(${translateX}px) scale(${scale}) rotate(${rotate}deg)`,
+          zIndex,
+          opacity,
+          background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
+          border: '1px solid rgba(255,255,255,0.15)',
+          backdropFilter: 'blur(5px)',
         }}
-        onClick={onCardClick}
-      >
-        <div className="w-full h-full flex flex-col items-center justify-center">
-          <div className="relative w-20 h-20">
-            <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-foreground/40 rounded-tl-md" />
-            <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-foreground/40 rounded-tr-md" />
-            <div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-foreground/40 rounded-bl-md" />
-            <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-foreground/40 rounded-br-md" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <User className="w-10 h-10 text-foreground/40" />
-            </div>
-          </div>
-          <p className="text-xs text-foreground/50 mt-3">Today's capture</p>
-        </div>
-      </div>
+      />
     );
   };
 
-  // Render all stacked photos - all previous photos go to the back
-  const renderStackedPhotos = () => {
+  // Render previous photos stacked to the left
+  const renderPreviousPhotos = () => {
     // Sort photos by date, newest first
     const sortedPhotos = [...photos].sort((a, b) => 
       new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime()
     );
 
     return sortedPhotos.map((photo, index) => {
-      const isTodaysPhoto = photo.uploadDate === currentDate;
-      
-      // All photos stack to the left - position based on index
+      // All photos stack to the left
       // When canUploadToday, all photos shift back by 1 to make room for empty card
-      const stackPosition = canUploadToday ? index + 1 : (isTodaysPhoto ? 0 : index + 1);
+      const stackPosition = canUploadToday ? index + 1 : index;
       
       const translateX = stackPosition * 25;
       const scale = Math.max(0.75, 1 - stackPosition * 0.06);
@@ -113,14 +136,15 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
   return (
     <div className="relative w-full flex justify-center items-center" style={{ height: '320px' }}>
       <div className="relative" style={{ width: '220px', height: '280px' }}>
-        {/* No photos - show empty card */}
-        {photos.length === 0 && renderEmptyCard()}
+        {/* Upcoming placeholder cards (behind, to the right) */}
+        <UpcomingCard position={2} />
+        <UpcomingCard position={1} />
         
-        {/* Render all stacked photos */}
-        {photos.length > 0 && renderStackedPhotos()}
+        {/* Previous photos stacked to the left */}
+        {photos.length > 0 && renderPreviousPhotos()}
         
-        {/* Fresh day capture card - show in center when new day starts */}
-        {photos.length > 0 && canUploadToday && renderEmptyCard()}
+        {/* Default upload card - always show in center when can upload today */}
+        {canUploadToday && <DefaultUploadCard zIndex={100} isClickable={true} />}
       </div>
     </div>
   );
