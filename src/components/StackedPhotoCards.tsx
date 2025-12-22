@@ -32,13 +32,13 @@ const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
         filter: 'none',
       };
     } else {
-      // Filled cards - stack to left
+      // Filled cards - stack to left with smooth animation
       const offset = totalVisible - index;
+      const clampedOffset = Math.min(offset, 4); // Limit visual stacking
       return {
-        transform: `translateX(${-offset * 25}px) scale(${0.85 - (offset - 1) * 0.05}) rotate(-5deg)`,
+        transform: `translateX(${-clampedOffset * 28}px) scale(${Math.max(0.7, 0.92 - (clampedOffset - 1) * 0.06)}) rotate(-${Math.min(clampedOffset * 2, 8)}deg)`,
         zIndex: index,
-        opacity: Math.max(0.4, 0.8 - (offset - 1) * 0.15),
-        backdropFilter: 'blur(16px)',
+        opacity: Math.max(0.3, 1 - (clampedOffset - 1) * 0.2),
       };
     }
   };
@@ -77,7 +77,7 @@ const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
           return (
             <div
               key={photo.id}
-              className="absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-500 ease-out"
+              className="absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
               style={style}
             >
               {renderFrameContent(photo)}
@@ -87,7 +87,7 @@ const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
         
         {/* Empty card for next capture - always on top */}
         <div
-          className="absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-500 ease-out cursor-pointer glass-card"
+          className="absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer glass-card"
           style={{
             ...getCardStyle(photos.length, true, photos.length),
             background: 'linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
