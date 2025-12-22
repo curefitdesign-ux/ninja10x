@@ -8,6 +8,9 @@ interface Photo {
   id: string;
   url: string;
   activity?: string;
+  frame?: 'shaky' | 'journal' | 'vogue';
+  duration?: string;
+  pr?: string;
 }
 
 const activities = [
@@ -32,6 +35,9 @@ const Index = () => {
         id: `photo-${Date.now()}`,
         url: location.state.imageUrl,
         activity: location.state.activity,
+        frame: location.state.frame || 'shaky',
+        duration: location.state.duration,
+        pr: location.state.pr,
       };
       setPhotos((prev) => [...prev, newPhoto]);
       // Clear the state

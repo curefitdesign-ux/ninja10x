@@ -49,7 +49,16 @@ const Preview = () => {
 
   const handleSave = () => {
     if (imageUrl && activity) {
-      navigate('/', { state: { savePhoto: true, imageUrl, activity } });
+      navigate('/', { 
+        state: { 
+          savePhoto: true, 
+          imageUrl, 
+          activity, 
+          frame: currentFrame,
+          duration,
+          pr,
+        } 
+      });
     }
   };
 
