@@ -60,7 +60,7 @@ const StackedPhotoCards = ({ photos, onCardClick, maxPhotos = 3 }: StackedPhotoC
               key={index}
               className={`
                 absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden
-                cursor-pointer
+                transition-all duration-500 ease-out cursor-pointer
                 ${photo ? '' : 'glass-card'}
               `}
               style={{
