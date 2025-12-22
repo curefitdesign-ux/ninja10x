@@ -1,6 +1,5 @@
 import { User, Pencil } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 
 interface Photo {
   id: string;
@@ -20,12 +19,6 @@ interface StackedPhotoCardsProps {
 
 const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCardsProps) => {
   const navigate = useNavigate();
-  const [animationKey, setAnimationKey] = useState(0);
-  
-  // Trigger animation when date changes (new day)
-  useEffect(() => {
-    setAnimationKey(prev => prev + 1);
-  }, [currentDate]);
   
   // Check if today has a photo
   const todaysPhoto = photos.find(p => p.uploadDate === currentDate);
@@ -96,7 +89,7 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
       
       return (
         <div
-          key={`${photo.id}-${animationKey}`}
+          key={photo.id}
           className="absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer"
           style={{
             transform: `translateX(-${translateX}px) scale(${scale}) rotate(-${rotate}deg)`,
