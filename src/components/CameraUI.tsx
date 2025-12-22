@@ -192,22 +192,27 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         />
       )}
 
-      {/* Gradient masked blur overlay */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Full-screen blur layer with radial gradient mask */}
+      {/* Gradient masked blur overlay - rectangular with equal margins */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Calculate clear area: 24px from sides, centered vertically with 3:4 aspect ratio */}
+        {/* Blur layer */}
         <div 
-          className="absolute inset-0 backdrop-blur-2xl"
+          className="absolute inset-0 backdrop-blur-2xl bg-black/30"
           style={{
-            maskImage: 'radial-gradient(ellipse 45% 40% at 50% 50%, transparent 0%, transparent 60%, black 100%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 45% 40% at 50% 50%, transparent 0%, transparent 60%, black 100%)',
-          }}
-        />
-        {/* Subtle dark tint for edges */}
-        <div 
-          className="absolute inset-0 bg-black/40"
-          style={{
-            maskImage: 'radial-gradient(ellipse 50% 45% at 50% 50%, transparent 0%, transparent 50%, black 100%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 50% 45% at 50% 50%, transparent 0%, transparent 50%, black 100%)',
+            maskImage: `
+              radial-gradient(
+                calc(50% - 24px) calc((50vw - 24px) * 4 / 3 / 2) at 50% 50%,
+                transparent 85%,
+                black 100%
+              )
+            `,
+            WebkitMaskImage: `
+              radial-gradient(
+                calc(50% - 24px) calc((50vw - 24px) * 4 / 3 / 2) at 50% 50%,
+                transparent 85%,
+                black 100%
+              )
+            `,
           }}
         />
       </div>
