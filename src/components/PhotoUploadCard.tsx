@@ -9,14 +9,24 @@ interface Photo {
   frame?: 'shaky' | 'journal' | 'vogue';
   duration?: string;
   pr?: string;
+  uploadDate: string;
 }
 
 interface PhotoUploadCardProps {
   photos: Photo[];
   onCardClick: () => void;
+  hasUploadedToday: boolean;
+  hoursUntilNextUpload: number;
+  currentDate: string;
 }
 
-const PhotoUploadCard = ({ photos, onCardClick }: PhotoUploadCardProps) => {
+const PhotoUploadCard = ({ 
+  photos, 
+  onCardClick, 
+  hasUploadedToday,
+  hoursUntilNextUpload,
+  currentDate
+}: PhotoUploadCardProps) => {
   // Determine current week based on photos (3 photos per week = 12 total for 4 weeks)
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
 
@@ -27,10 +37,6 @@ const PhotoUploadCard = ({ photos, onCardClick }: PhotoUploadCardProps) => {
     Math.min(Math.max(photos.length - 6, 0), 3),
     Math.min(Math.max(photos.length - 9, 0), 3),
   ];
-
-  // Get photos for current week only (max 3)
-  const currentWeekStartIndex = (currentWeek - 1) * 3;
-  const currentWeekPhotos = photos.slice(currentWeekStartIndex, currentWeekStartIndex + 3);
 
   return (
     <div className="px-5">
@@ -51,13 +57,26 @@ const PhotoUploadCard = ({ photos, onCardClick }: PhotoUploadCardProps) => {
           CONQUER WILL POWER
         </h2>
       
-        {/* Stacked Photo Cards - pass all photos, component handles display */}
-        <div className="relative z-10 mb-6">
+        {/* Stacked Photo Cards */}
+        <div className="relative z-10 mb-4">
           <StackedPhotoCards 
             photos={photos} 
             onCardClick={onCardClick}
+            currentDate={currentDate}
           />
         </div>
+        
+        {/* Upload Status Message */}
+        {hasUploadedToday && (
+          <div className="text-center mb-4 relative z-10">
+            <p className="text-sm text-foreground/60">
+              Next upload in <span className="font-semibold text-foreground/80">{hoursUntilNextUpload}h</span>
+            </p>
+            <p className="text-xs text-foreground/40 mt-1">
+              Tap photo to edit
+            </p>
+          </div>
+        )}
       
         {/* Week Progress */}
         <div className="relative z-10">
