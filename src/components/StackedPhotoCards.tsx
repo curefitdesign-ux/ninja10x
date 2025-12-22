@@ -121,13 +121,11 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
           }}
           onClick={() => handlePhotoTap(photo)}
         >
-          <div className="w-full h-full bg-black/20 flex items-center justify-center">
-            <img
-              src={photo.url}
-              alt={photo.activity || 'Photo'}
-              className="max-w-full max-h-full object-contain"
-            />
-          </div>
+          <img
+            src={photo.url}
+            alt={photo.activity || 'Photo'}
+            className="w-full h-full object-cover"
+          />
         </div>
       );
     });
