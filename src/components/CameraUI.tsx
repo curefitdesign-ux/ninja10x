@@ -192,27 +192,46 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         />
       )}
 
-      {/* Gradient masked blur overlay - rectangular with equal margins */}
+      {/* Gradient masked blur overlay - uniform rectangular */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Calculate clear area: 24px from sides, centered vertically with 3:4 aspect ratio */}
-        {/* Blur layer */}
+        {/* Top blur section */}
         <div 
-          className="absolute inset-0 backdrop-blur-2xl bg-black/30"
-          style={{
-            maskImage: `
-              radial-gradient(
-                calc(50% - 24px) calc((50vw - 24px) * 4 / 3 / 2) at 50% 50%,
-                transparent 85%,
-                black 100%
-              )
-            `,
-            WebkitMaskImage: `
-              radial-gradient(
-                calc(50% - 24px) calc((50vw - 24px) * 4 / 3 / 2) at 50% 50%,
-                transparent 85%,
-                black 100%
-              )
-            `,
+          className="absolute top-0 left-0 right-0 backdrop-blur-2xl bg-black/30"
+          style={{ 
+            height: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)',
+            maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+          }}
+        />
+        {/* Bottom blur section */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 backdrop-blur-2xl bg-black/30"
+          style={{ 
+            height: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)',
+            maskImage: 'linear-gradient(to top, black 60%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to top, black 60%, transparent 100%)',
+          }}
+        />
+        {/* Left blur section */}
+        <div 
+          className="absolute left-0 backdrop-blur-2xl bg-black/30"
+          style={{ 
+            top: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)',
+            height: 'calc((100vw - 48px) * 4 / 3)',
+            width: '24px',
+            maskImage: 'linear-gradient(to right, black 40%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, black 40%, transparent 100%)',
+          }}
+        />
+        {/* Right blur section */}
+        <div 
+          className="absolute right-0 backdrop-blur-2xl bg-black/30"
+          style={{ 
+            top: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)',
+            height: 'calc((100vw - 48px) * 4 / 3)',
+            width: '24px',
+            maskImage: 'linear-gradient(to left, black 40%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to left, black 40%, transparent 100%)',
           }}
         />
       </div>
