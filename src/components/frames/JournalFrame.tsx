@@ -32,14 +32,14 @@ const JournalFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
         </svg>
       </div>
       
-      {/* Photo area */}
+      {/* Photo area with object-cover fill */}
       <div className="absolute top-12 left-5 right-5 bottom-[180px] rounded-2xl overflow-hidden bg-gray-100">
-        <div 
-          className="w-full h-full"
+        <img 
+          src={imageUrl}
+          alt="Activity"
+          className="w-full h-full object-cover"
           style={{
-            backgroundImage: `url("${imageUrl}")`,
-            backgroundSize: `${imageScale * 100}%`,
-            backgroundPosition: `${50 + imagePosition.x}% ${50 + imagePosition.y}%`,
+            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
           }}
         />
       </div>
