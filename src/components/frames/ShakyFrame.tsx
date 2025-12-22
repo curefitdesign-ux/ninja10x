@@ -11,16 +11,18 @@ interface ShakyFrameProps {
 
 const ShakyFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale }: ShakyFrameProps) => {
   return (
-    <div className="w-full aspect-[3/4] rounded-[32px] overflow-hidden shadow-2xl relative">
-      {/* Background image with object-cover fill */}
-      <img 
-        src={imageUrl}
-        alt="Activity"
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{
-          transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-        }}
-      />
+    <div className="w-full aspect-[3/4] rounded-[32px] overflow-hidden shadow-2xl relative bg-black/20">
+      {/* Background image with aspect ratio maintained */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <img 
+          src={imageUrl}
+          alt="Activity"
+          className="max-w-full max-h-full object-contain"
+          style={{
+            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+          }}
+        />
+      </div>
       
       {/* Content */}
       <div className="absolute inset-0 p-5 flex flex-col">
