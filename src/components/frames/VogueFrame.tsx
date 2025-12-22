@@ -22,8 +22,6 @@ const VogueFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition
         }}
       />
       
-      {/* Very light white overlay for washed out effect */}
-      <div className="absolute inset-0 bg-white/75" />
       
       {/* Top text - Magazine masthead style */}
       <div className="absolute top-8 left-6 right-6">
