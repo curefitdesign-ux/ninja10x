@@ -12,39 +12,78 @@ interface Photo {
 interface StackedPhotoCardsProps {
   photos: Photo[];
   onCardClick: () => void;
-  maxPhotos?: number;
 }
 
 const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
-  // Calculate positions for stacked cards - next empty card front, filled cards stack left
-  const getCardStyle = (index: number, isEmptyCard: boolean, totalVisible: number) => {
-    if (isEmptyCard) {
-      // Empty card (next capture) - front and center
+  const MIN_CARDS = 3;
+  const totalCards = Math.max(MIN_CARDS, photos.length + 1);
+  
+  // Calculate positions - filled cards stack left, empty cards in center/right
+  const getCardStyle = (cardIndex: number, isFilled: boolean, filledCount: number) => {
+    if (isFilled) {
+      // Filled cards animate from center to left
+      const distanceFromTop = filledCount - 1 - cardIndex; // 0 for most recent, increases for older
       return {
-        transform: 'translateX(0) scale(1) rotate(0deg)',
-        zIndex: totalVisible + 1,
-        opacity: 1,
-        filter: 'none',
+        transform: `translateX(${-distanceFromTop * 30}px) scale(${Math.max(0.75, 1 - distanceFromTop * 0.08)}) rotate(-${Math.min(distanceFromTop * 3, 10)}deg)`,
+        zIndex: cardIndex + 1,
+        opacity: Math.max(0.4, 1 - distanceFromTop * 0.2),
       };
     } else {
-      // Filled cards - stack to left with smooth animation
-      const offset = totalVisible - index;
-      const clampedOffset = Math.min(offset, 4);
-      return {
-        transform: `translateX(${-clampedOffset * 28}px) scale(${Math.max(0.7, 0.92 - (clampedOffset - 1) * 0.06)}) rotate(-${Math.min(clampedOffset * 2, 8)}deg)`,
-        zIndex: index,
-        opacity: Math.max(0.3, 1 - (clampedOffset - 1) * 0.2),
-      };
+      // Empty cards - first empty is front center, rest stack behind
+      const emptyIndex = cardIndex - filledCount;
+      if (emptyIndex === 0) {
+        // Next capture card - front and center
+        return {
+          transform: 'translateX(0) scale(1) rotate(0deg)',
+          zIndex: totalCards + 1,
+          opacity: 1,
+        };
+      } else {
+        // Background empty cards - stack slightly behind
+        return {
+          transform: `translateX(${emptyIndex * 15}px) scale(${0.95 - emptyIndex * 0.05}) rotate(${emptyIndex * 2}deg)`,
+          zIndex: totalCards - emptyIndex,
+          opacity: 0.3 - emptyIndex * 0.1,
+        };
+      }
     }
   };
 
+  const renderEmptyCard = (index: number, isClickable: boolean) => (
+    <div
+      key={`empty-${index}`}
+      className={`absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isClickable ? 'cursor-pointer' : ''} glass-card`}
+      style={{
+        ...getCardStyle(index, false, photos.length),
+        background: 'linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        backdropFilter: 'blur(10px)',
+      }}
+      onClick={isClickable ? onCardClick : undefined}
+    >
+      <div className="w-full h-full flex flex-col items-center justify-center">
+        <div className="relative w-20 h-20">
+          <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-foreground/40 rounded-tl-md" />
+          <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-foreground/40 rounded-tr-md" />
+          <div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-foreground/40 rounded-bl-md" />
+          <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-foreground/40 rounded-br-md" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <User className="w-10 h-10 text-foreground/40" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Calculate how many empty cards to show
+  const emptyCardsCount = Math.max(1, MIN_CARDS - photos.length);
+
   return (
     <div className="relative w-full flex justify-center items-center" style={{ height: '320px' }}>
-      {/* Stacked Cards */}
       <div className="relative" style={{ width: '220px', height: '280px' }}>
-        {/* Render all photo cards */}
+        {/* Render filled photo cards - they animate left when new ones are added */}
         {photos.map((photo, index) => {
-          const style = getCardStyle(index, false, photos.length);
+          const style = getCardStyle(index, true, photos.length);
           
           return (
             <div
@@ -52,7 +91,6 @@ const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
               className="absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
               style={style}
             >
-              {/* Display the saved framed image directly */}
               <img
                 src={photo.url}
                 alt={photo.activity || 'Photo'}
@@ -62,32 +100,12 @@ const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
           );
         })}
         
-        {/* Empty card for next capture - always on top */}
-        <div
-          className="absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer glass-card"
-          style={{
-            ...getCardStyle(photos.length, true, photos.length),
-            background: 'linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            backdropFilter: 'blur(10px)',
-          }}
-          onClick={onCardClick}
-        >
-          <div className="w-full h-full flex flex-col items-center justify-center">
-            {/* Scan frame icon */}
-            <div className="relative w-20 h-20">
-              {/* Corner brackets */}
-              <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-foreground/40 rounded-tl-md" />
-              <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-foreground/40 rounded-tr-md" />
-              <div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-foreground/40 rounded-bl-md" />
-              <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-foreground/40 rounded-br-md" />
-              {/* User icon in center */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <User className="w-10 h-10 text-foreground/40" />
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Render empty cards - background ones first, then the clickable one on top */}
+        {Array.from({ length: emptyCardsCount }).map((_, i) => {
+          const cardIndex = photos.length + (emptyCardsCount - 1 - i);
+          const isClickable = i === emptyCardsCount - 1;
+          return renderEmptyCard(cardIndex, isClickable);
+        })}
       </div>
     </div>
   );
