@@ -371,8 +371,8 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
               {/* Outer ring */}
               <div className="absolute w-20 h-20 rounded-full border-4 border-white/30" />
               {/* Inner button with check */}
-              <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center">
-                <Check className="w-8 h-8 text-white" strokeWidth={3} />
+              <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center">
+                <Check className="w-8 h-8 text-black" strokeWidth={3} />
               </div>
             </button>
           ) : (
