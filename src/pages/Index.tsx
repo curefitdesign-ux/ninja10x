@@ -11,6 +11,7 @@ interface Photo {
   frame?: 'shaky' | 'journal' | 'vogue';
   duration?: string;
   pr?: string;
+  uploadDate: string; // YYYY-MM-DD format
 }
 
 const activities = [
@@ -27,10 +28,41 @@ const Index = () => {
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
+  const [simulatedDate, setSimulatedDate] = useState<string | null>(null); // For testing
+
+  // Get current date (or simulated date for testing)
+  const getCurrentDate = () => {
+    if (simulatedDate) return simulatedDate;
+    return new Date().toISOString().split('T')[0];
+  };
+
+  // Check if user has already uploaded today
+  const hasUploadedToday = () => {
+    const today = getCurrentDate();
+    return photos.some(photo => photo.uploadDate === today);
+  };
+
+  // Get today's photo if exists
+  const getTodaysPhoto = () => {
+    const today = getCurrentDate();
+    return photos.find(photo => photo.uploadDate === today);
+  };
+
+  // Calculate hours left until midnight
+  const getHoursUntilMidnight = () => {
+    const now = new Date();
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0);
+    const diff = midnight.getTime() - now.getTime();
+    return Math.ceil(diff / (1000 * 60 * 60));
+  };
 
   // Handle save from preview page
   useEffect(() => {
     if (location.state?.savePhoto && location.state?.imageUrl && location.state?.activity) {
+      const today = getCurrentDate();
+      const existingTodayPhotoIndex = photos.findIndex(p => p.uploadDate === today);
+      
       const newPhoto: Photo = {
         id: `photo-${Date.now()}`,
         url: location.state.imageUrl,
@@ -38,19 +70,47 @@ const Index = () => {
         frame: location.state.frame || 'shaky',
         duration: location.state.duration,
         pr: location.state.pr,
+        uploadDate: today,
       };
-      setPhotos((prev) => [...prev, newPhoto]);
+
+      if (existingTodayPhotoIndex >= 0) {
+        // Replace existing photo for today (edit mode)
+        setPhotos((prev) => {
+          const updated = [...prev];
+          updated[existingTodayPhotoIndex] = newPhoto;
+          return updated;
+        });
+      } else {
+        // Add new photo
+        setPhotos((prev) => [...prev, newPhoto]);
+      }
       // Clear the state
       window.history.replaceState({}, document.title);
     }
-  }, [location.state]);
+  }, [location.state, simulatedDate]);
 
   // Calculate week and day based on photos
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
   const currentDay = (photos.length % 3) + 1;
 
   const handleCardClick = () => {
-    setShowActivitySheet(true);
+    const todaysPhoto = getTodaysPhoto();
+    if (todaysPhoto) {
+      // Edit existing photo
+      navigate('/preview', { 
+        state: { 
+          imageUrl: todaysPhoto.url, 
+          activity: todaysPhoto.activity,
+          frame: todaysPhoto.frame,
+          duration: todaysPhoto.duration,
+          pr: todaysPhoto.pr,
+          isReview: true
+        } 
+      });
+    } else {
+      // New upload
+      setShowActivitySheet(true);
+    }
   };
 
   const handleActivitySelect = (activity: string) => {
@@ -78,6 +138,17 @@ const Index = () => {
     setSelectedActivity(null);
   };
 
+  // Simulate next day for testing
+  const simulateNextDay = () => {
+    const current = simulatedDate ? new Date(simulatedDate) : new Date();
+    current.setDate(current.getDate() + 1);
+    setSimulatedDate(current.toISOString().split('T')[0]);
+  };
+
+  const resetSimulation = () => {
+    setSimulatedDate(null);
+  };
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       {/* Aurora Background */}
@@ -88,12 +159,41 @@ const Index = () => {
         {/* Status Bar Space */}
         <div className="h-12" />
         
+        {/* Test Controls */}
+        <div className="absolute top-14 right-4 z-20 flex flex-col gap-2">
+          <button
+            onClick={simulateNextDay}
+            className="px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors"
+          >
+            Test: Next Day
+          </button>
+          {simulatedDate && (
+            <>
+              <span className="text-[10px] text-foreground/50 text-center">
+                {simulatedDate}
+              </span>
+              <button
+                onClick={resetSimulation}
+                className="px-3 py-1 text-[10px] text-foreground/50 hover:text-foreground/70 transition-colors"
+              >
+                Reset
+              </button>
+            </>
+          )}
+        </div>
+        
         {/* Spacer */}
         <div className="py-2" />
         
         {/* Main Content */}
         <main className="flex-1 flex flex-col justify-center py-6 -mt-[100px]">
-          <PhotoUploadCard photos={photos} onCardClick={handleCardClick} />
+          <PhotoUploadCard 
+            photos={photos} 
+            onCardClick={handleCardClick}
+            hasUploadedToday={hasUploadedToday()}
+            hoursUntilNextUpload={getHoursUntilMidnight()}
+            currentDate={getCurrentDate()}
+          />
         </main>
         
         {/* Bottom Safe Area */}
