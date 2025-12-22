@@ -78,6 +78,11 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
       if (ctx) {
+        // Flip horizontally if using front camera to avoid mirror image
+        if (facingMode === 'user') {
+          ctx.translate(canvas.width, 0);
+          ctx.scale(-1, 1);
+        }
         ctx.drawImage(video, 0, 0);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
         setCapturedImage(dataUrl);
