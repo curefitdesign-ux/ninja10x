@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import ShakyFrame from '@/components/frames/ShakyFrame';
 import JournalFrame from '@/components/frames/JournalFrame';
@@ -7,6 +7,8 @@ import VogueFrame from '@/components/frames/VogueFrame';
 
 const FRAMES = ['shaky', 'journal', 'vogue'] as const;
 type FrameType = typeof FRAMES[number];
+
+type EditingField = 'duration' | 'pr' | null;
 
 const Preview = () => {
   const location = useLocation();
@@ -18,6 +20,11 @@ const Preview = () => {
   const [currentFrame, setCurrentFrame] = useState<FrameType>('shaky');
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [imageScale, setImageScale] = useState(1.2);
+  
+  // Bottom sheet keyboard state
+  const [editingField, setEditingField] = useState<EditingField>(null);
+  const [tempValue, setTempValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
   
   // Swipe handling
   const touchStartX = useRef(0);
@@ -32,6 +39,13 @@ const Preview = () => {
       navigate('/');
     }
   }, []);
+
+  // Focus input when bottom sheet opens
+  useEffect(() => {
+    if (editingField && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [editingField]);
 
   const handleSave = () => {
     if (imageUrl && activity) {
@@ -70,6 +84,33 @@ const Preview = () => {
     } else if (direction === 'prev' && currentIndex > 0) {
       setCurrentFrame(FRAMES[currentIndex - 1]);
     }
+  };
+
+  const openEditSheet = (field: EditingField) => {
+    if (field === 'duration') {
+      setTempValue(duration);
+    } else if (field === 'pr') {
+      setTempValue(pr);
+    }
+    setEditingField(field);
+  };
+
+  const handleInputChange = (value: string) => {
+    setTempValue(value);
+    // Live update the preview
+    if (editingField === 'duration') {
+      setDuration(value);
+    } else if (editingField === 'pr') {
+      setPr(value);
+    }
+  };
+
+  const confirmEdit = () => {
+    setEditingField(null);
+  };
+
+  const closeSheet = () => {
+    setEditingField(null);
   };
 
   if (!imageUrl) {
@@ -173,28 +214,22 @@ const Preview = () => {
 
         {/* Bottom section */}
         <div className="space-y-4 pb-6">
-          {/* Editable data points */}
+          {/* Editable data points - now tappable */}
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4">
-            <div className="flex justify-between items-center py-2 border-b border-white/10">
+            <button 
+              onClick={() => openEditSheet('duration')}
+              className="w-full flex justify-between items-center py-2 border-b border-white/10"
+            >
               <span className="text-white/80">Duration</span>
-              <input
-                type="text"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                placeholder="e.g. 2hrs"
-                className="bg-transparent text-white font-semibold text-lg text-right outline-none w-24 placeholder:text-white/40"
-              />
-            </div>
-            <div className="flex justify-between items-center py-2">
+              <span className="text-white font-semibold text-lg">{duration || 'e.g. 2hrs'}</span>
+            </button>
+            <button 
+              onClick={() => openEditSheet('pr')}
+              className="w-full flex justify-between items-center py-2"
+            >
               <span className="text-white/80">PR <span className="text-white/40">(Optional)</span></span>
-              <input
-                type="text"
-                value={pr}
-                onChange={(e) => setPr(e.target.value)}
-                placeholder="-"
-                className="bg-transparent text-white font-semibold text-lg text-right outline-none w-24 placeholder:text-white/40"
-              />
-            </div>
+              <span className="text-white font-semibold text-lg">{pr || '-'}</span>
+            </button>
           </div>
 
           {/* Health sync widget */}
@@ -219,6 +254,53 @@ const Preview = () => {
 
         <div className="h-6" />
       </div>
+
+      {/* Bottom Sheet Keyboard Overlay */}
+      {editingField && (
+        <>
+          {/* Backdrop with blur */}
+          <div 
+            className="fixed inset-0 z-40 backdrop-blur-md bg-black/40"
+            onClick={closeSheet}
+          />
+          
+          {/* Bottom Sheet */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom duration-300">
+            <div className="bg-white/10 backdrop-blur-2xl border-t border-white/20 rounded-t-3xl p-6 pb-10">
+              {/* Handle bar */}
+              <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-6" />
+              
+              {/* Label */}
+              <p className="text-white/60 text-sm mb-2">
+                {editingField === 'duration' ? 'Duration' : 'Personal Record (PR)'}
+              </p>
+              
+              {/* Input with confirm button */}
+              <div className="flex items-center gap-3">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={tempValue}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  placeholder={editingField === 'duration' ? 'e.g. 2hrs 30min' : 'e.g. 100kg bench press'}
+                  className="flex-1 bg-white/10 backdrop-blur-sm text-white text-xl font-semibold px-4 py-4 rounded-2xl outline-none border border-white/20 focus:border-white/40 placeholder:text-white/30"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      confirmEdit();
+                    }
+                  }}
+                />
+                <button
+                  onClick={confirmEdit}
+                  className="w-14 h-14 flex items-center justify-center rounded-2xl bg-green-500"
+                >
+                  <Check className="w-6 h-6 text-white" strokeWidth={3} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
