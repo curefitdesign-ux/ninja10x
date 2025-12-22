@@ -11,13 +11,17 @@ interface CameraUIProps {
 
 const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const playbackVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const [isRecording, setIsRecording] = useState(false);
   const [recordingProgress, setRecordingProgress] = useState(0);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [capturedVideo, setCapturedVideo] = useState<string | null>(null);
   const [showHoldTip, setShowHoldTip] = useState(true);
   const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -84,16 +88,56 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const handleConfirm = () => {
     if (capturedImage) {
       onCapture(capturedImage);
+    } else if (capturedVideo && playbackVideoRef.current && canvasRef.current) {
+      // For video, capture current frame as thumbnail
+      const video = playbackVideoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(video, 0, 0);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        onCapture(dataUrl);
+      }
     }
   };
 
   const handleRetake = () => {
+    // Clear captured media
     setCapturedImage(null);
+    setCapturedVideo(null);
+    recordedChunksRef.current = [];
+    // Camera stream should still be active, but restart just in case
+    if (!stream || stream.getTracks().some(t => t.readyState === 'ended')) {
+      startCamera();
+    }
   };
 
   const startRecording = () => {
+    if (!stream) return;
+    
     setIsRecording(true);
     recordingStartRef.current = Date.now();
+    recordedChunksRef.current = [];
+    
+    // Setup MediaRecorder
+    const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+    mediaRecorderRef.current = mediaRecorder;
+    
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        recordedChunksRef.current.push(event.data);
+      }
+    };
+    
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+      const videoUrl = URL.createObjectURL(blob);
+      setCapturedVideo(videoUrl);
+    };
+    
+    mediaRecorder.start(100);
     
     recordingTimerRef.current = setInterval(() => {
       const elapsed = Date.now() - recordingStartRef.current;
@@ -110,14 +154,15 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     if (recordingTimerRef.current) {
       clearInterval(recordingTimerRef.current);
     }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
     setIsRecording(false);
     setRecordingProgress(0);
-    // For now, take a photo at end of recording
-    takePhoto();
   };
 
   const handleShutterPress = () => {
-    if (capturedImage) return; // Don't allow if already captured
+    if (capturedImage || capturedVideo) return; // Don't allow if already captured
     
     isLongPressRef.current = false;
     
@@ -129,7 +174,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   };
 
   const handleShutterRelease = () => {
-    if (capturedImage) return; // Don't allow if already captured
+    if (capturedImage || capturedVideo) return; // Don't allow if already captured
     
     // Clear the long press timer
     if (pressTimerRef.current) {
@@ -163,6 +208,8 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     e.target.value = '';
   };
 
+  const hasCapturedMedia = capturedImage || capturedVideo;
+
   return (
     <div className="fixed inset-0 z-50 bg-black">
       {/* Hidden elements */}
@@ -175,8 +222,18 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         onChange={handleFileChange}
       />
 
-      {/* Camera Feed or Captured Image */}
-      {capturedImage ? (
+      {/* Camera Feed, Captured Image, or Captured Video */}
+      {capturedVideo ? (
+        <video
+          ref={playbackVideoRef}
+          src={capturedVideo}
+          autoPlay
+          loop
+          playsInline
+          muted
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      ) : capturedImage ? (
         <img
           src={capturedImage}
           alt="Captured"
@@ -276,7 +333,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         {/* Hold for video tip */}
         <div 
           className={`flex justify-center mb-4 transition-all duration-500 ${
-            showHoldTip && !capturedImage ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
+            showHoldTip && !hasCapturedMedia ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
           }`}
         >
           <div className="px-4 py-2 rounded-full backdrop-blur-md bg-white/20 border border-white/10">
@@ -286,7 +343,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
 
         <div className="flex items-center justify-between">
           {/* Left Button - Retake (when captured) or Flip Camera */}
-          {capturedImage ? (
+          {hasCapturedMedia ? (
             <button
               onClick={handleRetake}
               className="p-4"
@@ -303,7 +360,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
           )}
 
           {/* Shutter Button / Confirm Button */}
-          {capturedImage ? (
+          {hasCapturedMedia ? (
             <button
               onClick={handleConfirm}
               className="relative w-20 h-20 rounded-full flex items-center justify-center"
@@ -362,9 +419,9 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
           <button
             onClick={handleGalleryClick}
             className="p-4"
-            disabled={!!capturedImage}
+            disabled={!!hasCapturedMedia}
           >
-            <ImageIcon className={`w-8 h-8 ${capturedImage ? 'text-white/30' : 'text-white/80'}`} />
+            <ImageIcon className={`w-8 h-8 ${hasCapturedMedia ? 'text-white/30' : 'text-white/80'}`} />
           </button>
         </div>
       </div>
