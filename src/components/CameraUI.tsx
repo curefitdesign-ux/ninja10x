@@ -221,12 +221,19 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         {/* Clear crop area with 3:4 aspect ratio and matching rounded corners */}
         <div 
-          className="relative rounded-[32px] border-2 border-white/20"
+          className="relative rounded-[32px] border-2 border-white/20 overflow-hidden"
           style={{ 
             width: 'calc(100% - 48px)', 
             aspectRatio: '3/4',
           }}
         >
+          {/* Subtle vignette effect inside capture area */}
+          <div 
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 50%, rgba(0,0,0,0.15) 100%)',
+            }}
+          />
           {/* Corner brackets - matching the outer rounded corners */}
           <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-white/80 rounded-tl-[32px]" />
           <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-white/80 rounded-tr-[32px]" />
