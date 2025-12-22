@@ -1,7 +1,4 @@
 import { User } from 'lucide-react';
-import ShakyFrame from './frames/ShakyFrame';
-import JournalFrame from './frames/JournalFrame';
-import VogueFrame from './frames/VogueFrame';
 
 interface Photo {
   id: string;
@@ -19,8 +16,6 @@ interface StackedPhotoCardsProps {
 }
 
 const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
-  // Show all photos - no capping
-  
   // Calculate positions for stacked cards - next empty card front, filled cards stack left
   const getCardStyle = (index: number, isEmptyCard: boolean, totalVisible: number) => {
     if (isEmptyCard) {
@@ -34,35 +29,12 @@ const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
     } else {
       // Filled cards - stack to left with smooth animation
       const offset = totalVisible - index;
-      const clampedOffset = Math.min(offset, 4); // Limit visual stacking
+      const clampedOffset = Math.min(offset, 4);
       return {
         transform: `translateX(${-clampedOffset * 28}px) scale(${Math.max(0.7, 0.92 - (clampedOffset - 1) * 0.06)}) rotate(-${Math.min(clampedOffset * 2, 8)}deg)`,
         zIndex: index,
         opacity: Math.max(0.3, 1 - (clampedOffset - 1) * 0.2),
       };
-    }
-  };
-
-  const renderFrameContent = (photo: Photo) => {
-    const frameProps = {
-      imageUrl: photo.url,
-      activity: photo.activity || '',
-      week: 1,
-      day: 1,
-      duration: photo.duration || '',
-      pr: photo.pr || '',
-      imagePosition: { x: 0, y: 0 },
-      imageScale: 1.2,
-    };
-
-    switch (photo.frame) {
-      case 'journal':
-        return <JournalFrame {...frameProps} />;
-      case 'vogue':
-        return <VogueFrame {...frameProps} />;
-      case 'shaky':
-      default:
-        return <ShakyFrame {...frameProps} />;
     }
   };
 
@@ -80,7 +52,12 @@ const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
               className="absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
               style={style}
             >
-              {renderFrameContent(photo)}
+              {/* Display the saved framed image directly */}
+              <img
+                src={photo.url}
+                alt={photo.activity || 'Photo'}
+                className="w-full h-full object-cover"
+              />
             </div>
           );
         })}
