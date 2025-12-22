@@ -1,4 +1,5 @@
 import { User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Photo {
   id: string;
@@ -15,8 +16,22 @@ interface StackedPhotoCardsProps {
 }
 
 const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
-  // Always show 3 cards: left (previous), center (current/last), right (next empty)
+  const navigate = useNavigate();
   
+  const handlePhotoTap = (photo: Photo) => {
+    // Reopen preview with the photo data
+    navigate('/preview', { 
+      state: { 
+        imageUrl: photo.url, 
+        activity: photo.activity,
+        frame: photo.frame,
+        duration: photo.duration,
+        pr: photo.pr,
+        isReview: true // Flag to indicate this is a review, not new capture
+      } 
+    });
+  };
+
   const renderEmptyCard = (position: 'left' | 'center' | 'right', isClickable: boolean) => {
     let style = {};
     
@@ -66,66 +81,62 @@ const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
     );
   };
 
-  const renderPhotoCard = (photo: Photo, position: 'left' | 'center') => {
-    let style = {};
-    
-    if (position === 'left') {
-      style = {
-        transform: 'translateX(-35px) scale(0.85) rotate(-5deg)',
-        zIndex: 2,
-        opacity: 0.7,
-      };
-    } else {
-      style = {
-        transform: 'translateX(0) scale(1) rotate(0deg)',
-        zIndex: 3,
-        opacity: 1,
-      };
-    }
-    
-    return (
-      <div
-        key={photo.id}
-        className="absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-        style={style}
-      >
-        <img
-          src={photo.url}
-          alt={photo.activity || 'Photo'}
-          className="w-full h-full object-cover"
-        />
-      </div>
-    );
+  // Render all stacked photo cards
+  const renderStackedPhotos = () => {
+    return photos.map((photo, index) => {
+      const distanceFromTop = photos.length - 1 - index;
+      const maxOffset = 8; // Maximum number of visible stacked cards
+      
+      // Calculate transform based on position in stack
+      const translateX = Math.min(distanceFromTop * 12, maxOffset * 12);
+      const scale = Math.max(0.7, 1 - distanceFromTop * 0.05);
+      const rotate = Math.min(distanceFromTop * 2, 10);
+      const opacity = Math.max(0.3, 1 - distanceFromTop * 0.15);
+      const zIndex = photos.length - distanceFromTop;
+      
+      return (
+        <div
+          key={photo.id}
+          className="absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer"
+          style={{
+            transform: `translateX(-${translateX}px) scale(${scale}) rotate(-${rotate}deg)`,
+            zIndex,
+            opacity,
+          }}
+          onClick={() => handlePhotoTap(photo)}
+        >
+          <img
+            src={photo.url}
+            alt={photo.activity || 'Photo'}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      );
+    });
   };
-
-  // Get last 2 photos for display
-  const lastPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
-  const previousPhoto = photos.length > 1 ? photos[photos.length - 2] : null;
 
   return (
     <div className="relative w-full flex justify-center items-center" style={{ height: '320px' }}>
       <div className="relative" style={{ width: '220px', height: '280px' }}>
-        {/* Left position: previous photo or empty */}
-        {previousPhoto ? (
-          renderPhotoCard(previousPhoto, 'left')
-        ) : (
-          renderEmptyCard('left', false)
+        {/* Empty cards for unfilled slots when no photos */}
+        {photos.length === 0 && (
+          <>
+            {renderEmptyCard('left', false)}
+            {renderEmptyCard('center', true)}
+            {renderEmptyCard('right', false)}
+          </>
         )}
         
-        {/* Center position: last photo or empty (clickable if no photos) */}
-        {lastPhoto ? (
-          renderPhotoCard(lastPhoto, 'center')
-        ) : (
-          renderEmptyCard('center', true)
-        )}
+        {/* Render all stacked photos */}
+        {photos.length > 0 && renderStackedPhotos()}
         
-        {/* Right position: always empty card for next capture (clickable if we have photos) */}
-        {photos.length > 0 ? (
+        {/* Next capture card (always on top right when photos exist) */}
+        {photos.length > 0 && (
           <div
             className="absolute top-0 left-0 w-full h-full rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer glass-card"
             style={{
               transform: 'translateX(35px) scale(0.85) rotate(5deg)',
-              zIndex: 4,
+              zIndex: photos.length + 1,
               opacity: 0.9,
               background: 'linear-gradient(145deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
               border: '1px solid rgba(255,255,255,0.3)',
@@ -145,8 +156,6 @@ const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
               </div>
             </div>
           </div>
-        ) : (
-          renderEmptyCard('right', false)
         )}
       </div>
     </div>
