@@ -12,13 +12,13 @@ interface ShakyFrameProps {
 const ShakyFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale }: ShakyFrameProps) => {
   return (
     <div className="w-full aspect-[3/4] rounded-[32px] overflow-hidden shadow-2xl relative">
-      {/* Background image */}
-      <div 
-        className="absolute inset-0"
+      {/* Background image with object-cover fill */}
+      <img 
+        src={imageUrl}
+        alt="Activity"
+        className="absolute inset-0 w-full h-full object-cover"
         style={{
-          backgroundImage: `url("${imageUrl}")`,
-          backgroundSize: `${imageScale * 100}%`,
-          backgroundPosition: `${50 + imagePosition.x}% ${50 + imagePosition.y}%`,
+          transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
         }}
       />
       
