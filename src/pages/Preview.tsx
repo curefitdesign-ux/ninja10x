@@ -207,10 +207,10 @@ const Preview = () => {
         </button>
 
         {/* Frame carousel - horizontal scroll */}
-        <div className="flex-1 flex items-center py-2 -mx-5">
+        <div className="flex-1 flex items-center py-2 overflow-hidden">
           <div 
             ref={containerRef}
-            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-5"
+            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center px-4"
             style={{ 
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
@@ -220,8 +220,8 @@ const Preview = () => {
             {FRAMES.map((frame, index) => (
               <div 
                 key={frame}
-                className="flex-shrink-0 snap-center"
-                style={{ width: 'calc(90% - 16px)' }}
+                className="flex-shrink-0 snap-center h-fit"
+                style={{ width: 'calc(100vw - 64px)' }}
                 onClick={() => setCurrentFrame(frame)}
               >
                 <div ref={index === currentIndex ? frameRef : undefined}>
