@@ -206,53 +206,31 @@ const Preview = () => {
           <ArrowLeft className="w-5 h-5 text-white" />
         </button>
 
-        {/* Frame carousel */}
-        <div className="flex-1 flex items-center justify-center py-2">
-          <div className="relative w-full max-w-[240px]">
-            {/* Next template peek - 5% visible */}
-            {currentIndex < FRAMES.length - 1 && (
+        {/* Frame carousel - horizontal scroll */}
+        <div className="flex-1 flex items-center py-2 -mx-5">
+          <div 
+            ref={containerRef}
+            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-5"
+            style={{ 
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
+            {FRAMES.map((frame, index) => (
               <div 
-                className="absolute top-0 bottom-0 -right-[5%] w-[15%] opacity-40 pointer-events-none"
-                style={{ transform: 'scale(0.95)' }}
+                key={frame}
+                className="flex-shrink-0 snap-center"
+                style={{ width: 'calc(90% - 16px)' }}
+                onClick={() => setCurrentFrame(frame)}
               >
-                <div className="w-full h-full rounded-[24px] overflow-hidden bg-white/20 backdrop-blur-sm" />
+                <div ref={index === currentIndex ? frameRef : undefined}>
+                  {frame === 'shaky' && <ShakyFrame {...frameProps} />}
+                  {frame === 'journal' && <JournalFrame {...frameProps} />}
+                  {frame === 'vogue' && <VogueFrame {...frameProps} />}
+                </div>
               </div>
-            )}
-            
-            {/* Previous template peek */}
-            {currentIndex > 0 && (
-              <div 
-                className="absolute top-0 bottom-0 -left-[5%] w-[15%] opacity-40 pointer-events-none"
-                style={{ transform: 'scale(0.95)' }}
-              >
-                <div className="w-full h-full rounded-[24px] overflow-hidden bg-white/20 backdrop-blur-sm" />
-              </div>
-            )}
-
-            {/* Swipeable frame container */}
-            <div 
-              ref={containerRef}
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-              className="transition-transform duration-300"
-            >
-              <div ref={frameRef}>
-                {renderFrame()}
-              </div>
-            </div>
-
-            {/* Frame indicator dots */}
-            <div className="flex justify-center gap-2 mt-3">
-              {FRAMES.map((frame, index) => (
-                <button
-                  key={frame}
-                  onClick={() => setCurrentFrame(frame)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    index === currentIndex ? 'bg-white w-6' : 'bg-white/40'
-                  }`}
-                />
-              ))}
-            </div>
+            ))}
           </div>
         </div>
 
