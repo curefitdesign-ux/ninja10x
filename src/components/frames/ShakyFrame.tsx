@@ -11,38 +11,36 @@ interface ShakyFrameProps {
 
 const ShakyFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale }: ShakyFrameProps) => {
   return (
-    <div className="w-full aspect-[3/4] rounded-[32px] overflow-hidden shadow-2xl relative bg-black/20">
-      {/* Background image with aspect ratio maintained */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <img 
-          src={imageUrl}
-          alt="Activity"
-          className="max-w-full max-h-full object-contain"
-          style={{
-            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-          }}
-        />
-      </div>
+    <div className="w-full aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative">
+      {/* Background image filling the frame */}
+      <img 
+        src={imageUrl}
+        alt="Activity"
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{
+          transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+        }}
+      />
       
       {/* Content */}
-      <div className="absolute inset-0 p-5 flex flex-col">
+      <div className="absolute inset-0 p-4 flex flex-col">
         {/* Week/Day badge - top left */}
         <div 
-          className="inline-flex self-start rounded-full px-3 py-1.5"
+          className="inline-flex self-start rounded-full px-2.5 py-1"
           style={{
             background: 'rgba(255,255,255,0.2)',
             backdropFilter: 'blur(10px)',
             border: '1px solid rgba(255,255,255,0.25)',
           }}
         >
-          <span className="text-white font-semibold text-[11px] tracking-wider">WEEK {week} | DAY {day}</span>
+          <span className="text-white font-semibold text-[10px] tracking-wider">WEEK {week} | DAY {day}</span>
         </div>
         
-        {/* Activity name - large italic bold */}
+        {/* Activity name */}
         <h2 
-          className="text-white font-black italic mt-3 leading-[0.95]"
+          className="text-white font-black italic mt-2 leading-[0.95]"
           style={{
-            fontSize: 'clamp(36px, 12vw, 52px)',
+            fontSize: 'clamp(28px, 10vw, 40px)',
             textShadow: '2px 4px 12px rgba(0,0,0,0.15)',
           }}
         >
@@ -52,43 +50,33 @@ const ShakyFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition
         {/* Spacer */}
         <div className="flex-1" />
         
-        {/* Stats at bottom - side by side */}
-        <div className="flex gap-8">
-          {/* Time section */}
+        {/* Stats at bottom */}
+        <div className="flex gap-6">
           <div className="flex-1">
-            <p className="text-white/60 text-xs font-medium mb-0.5 tracking-wide">Time</p>
+            <p className="text-white/60 text-[10px] font-medium mb-0.5 tracking-wide">Time</p>
             <p 
-              className="text-white font-bold leading-none"
-              style={{ 
-                fontSize: 'clamp(28px, 8vw, 36px)',
-                fontVariantNumeric: 'tabular-nums',
-              }}
+              className="text-white font-bold leading-none text-xl"
+              style={{ fontVariantNumeric: 'tabular-nums' }}
             >
               {duration || "02:00:50"}
             </p>
-            {/* Mini bar chart */}
-            <div className="flex items-end gap-1 mt-3 h-10">
-              <div className="w-4 h-4 bg-white/20 rounded-sm" />
-              <div className="w-4 h-8 bg-white/20 rounded-sm" />
-              <div className="w-4 h-10 bg-white/20 rounded-sm" />
-              <div className="w-4 h-6 bg-white/20 rounded-sm" />
+            <div className="flex items-end gap-0.5 mt-2 h-6">
+              <div className="w-2.5 h-2.5 bg-white/20 rounded-sm" />
+              <div className="w-2.5 h-5 bg-white/20 rounded-sm" />
+              <div className="w-2.5 h-6 bg-white/20 rounded-sm" />
+              <div className="w-2.5 h-4 bg-white/20 rounded-sm" />
             </div>
           </div>
           
-          {/* PR section */}
           <div className="flex-1">
-            <p className="text-white/60 text-xs font-medium mb-0.5 tracking-wide">Punches Per Round</p>
+            <p className="text-white/60 text-[10px] font-medium mb-0.5 tracking-wide">Punches Per Round</p>
             <p 
-              className="text-white font-bold leading-none"
-              style={{ 
-                fontSize: 'clamp(28px, 8vw, 36px)',
-                fontVariantNumeric: 'tabular-nums',
-              }}
+              className="text-white font-bold leading-none text-xl"
+              style={{ fontVariantNumeric: 'tabular-nums' }}
             >
               {pr || "100"}
             </p>
-            {/* Mini line chart */}
-            <svg className="w-24 h-10 mt-3" viewBox="0 0 96 40" fill="none">
+            <svg className="w-16 h-6 mt-2" viewBox="0 0 96 40" fill="none">
               <path 
                 d="M0 30 L14 22 L28 26 L42 14 L56 20 L70 10 L84 14 L96 6" 
                 fill="none" 

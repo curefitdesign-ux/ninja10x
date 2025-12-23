@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import ShakyFrame from '@/components/frames/ShakyFrame';
@@ -207,24 +207,26 @@ const Preview = () => {
         </button>
 
         {/* Frame carousel */}
-        <div className="flex-1 flex items-center justify-center py-4">
-          <div className="relative w-full max-w-[335px]">
-            {/* Navigation arrows */}
-            {currentIndex > 0 && (
-              <button 
-                onClick={() => goToFrame('prev')}
-                className="absolute -left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-sm"
-              >
-                <ChevronLeft className="w-5 h-5 text-white" />
-              </button>
-            )}
+        <div className="flex-1 flex items-center justify-center py-2">
+          <div className="relative w-full max-w-[240px]">
+            {/* Next template peek - 5% visible */}
             {currentIndex < FRAMES.length - 1 && (
-              <button 
-                onClick={() => goToFrame('next')}
-                className="absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-sm"
+              <div 
+                className="absolute top-0 bottom-0 -right-[5%] w-[15%] opacity-40 pointer-events-none"
+                style={{ transform: 'scale(0.95)' }}
               >
-                <ChevronRight className="w-5 h-5 text-white" />
-              </button>
+                <div className="w-full h-full rounded-[24px] overflow-hidden bg-white/20 backdrop-blur-sm" />
+              </div>
+            )}
+            
+            {/* Previous template peek */}
+            {currentIndex > 0 && (
+              <div 
+                className="absolute top-0 bottom-0 -left-[5%] w-[15%] opacity-40 pointer-events-none"
+                style={{ transform: 'scale(0.95)' }}
+              >
+                <div className="w-full h-full rounded-[24px] overflow-hidden bg-white/20 backdrop-blur-sm" />
+              </div>
             )}
 
             {/* Swipeable frame container */}
@@ -240,7 +242,7 @@ const Preview = () => {
             </div>
 
             {/* Frame indicator dots */}
-            <div className="flex justify-center gap-2 mt-4">
+            <div className="flex justify-center gap-2 mt-3">
               {FRAMES.map((frame, index) => (
                 <button
                   key={frame}
