@@ -128,7 +128,8 @@ const Preview = () => {
 
   const openEditSheet = (field: EditingField) => {
     if (field === 'duration') {
-      setTempValue(duration);
+      // Extract just the number from duration (remove 'hrs')
+      setTempValue(duration.replace(/[^0-9]/g, ''));
     } else if (field === 'pr') {
       setTempValue(pr);
     }
@@ -136,11 +137,13 @@ const Preview = () => {
   };
 
   const handleInputChange = (value: string) => {
-    setTempValue(value);
-    // Live update the preview
     if (editingField === 'duration') {
-      setDuration(value);
+      // Only allow digits for duration
+      const digitsOnly = value.replace(/[^0-9]/g, '');
+      setTempValue(digitsOnly);
+      setDuration(digitsOnly ? `${digitsOnly}hrs` : '');
     } else if (editingField === 'pr') {
+      setTempValue(value);
       setPr(value);
     }
   };
@@ -207,10 +210,10 @@ const Preview = () => {
         </button>
 
         {/* Frame carousel - horizontal scroll */}
-        <div className="flex-1 flex items-center py-2 overflow-hidden">
+        <div className="flex-1 flex items-center overflow-hidden -mx-5">
           <div 
             ref={containerRef}
-            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center px-4"
+            className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center px-3"
             style={{ 
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
@@ -220,11 +223,11 @@ const Preview = () => {
             {FRAMES.map((frame, index) => (
               <div 
                 key={frame}
-                className="flex-shrink-0 snap-center h-fit"
-                style={{ width: 'calc(100vw - 64px)' }}
+                className="flex-shrink-0 snap-center h-fit flex items-center justify-center"
+                style={{ width: 'calc(85vw)', transform: 'scale(0.95)' }}
                 onClick={() => setCurrentFrame(frame)}
               >
-                <div ref={index === currentIndex ? frameRef : undefined}>
+                <div ref={index === currentIndex ? frameRef : undefined} className="w-full">
                   {frame === 'shaky' && <ShakyFrame {...frameProps} />}
                   {frame === 'journal' && <JournalFrame {...frameProps} />}
                   {frame === 'vogue' && <VogueFrame {...frameProps} />}
@@ -302,19 +305,25 @@ const Preview = () => {
               
               {/* Input with confirm button */}
               <div className="flex items-center gap-3">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={tempValue}
-                  onChange={(e) => handleInputChange(e.target.value)}
-                  placeholder={editingField === 'duration' ? 'e.g. 2hrs 30min' : 'e.g. 100kg bench press'}
-                  className="flex-1 bg-white/10 backdrop-blur-sm text-white text-xl font-semibold px-4 py-4 rounded-2xl outline-none border border-white/20 focus:border-white/40 placeholder:text-white/30"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      confirmEdit();
-                    }
-                  }}
-                />
+                <div className="flex-1 flex items-center bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 focus-within:border-white/40">
+                  <input
+                    ref={inputRef}
+                    type={editingField === 'duration' ? 'number' : 'text'}
+                    inputMode={editingField === 'duration' ? 'numeric' : 'text'}
+                    value={tempValue}
+                    onChange={(e) => handleInputChange(e.target.value)}
+                    placeholder={editingField === 'duration' ? '2' : 'e.g. 100kg bench press'}
+                    className="flex-1 bg-transparent text-white text-xl font-semibold px-4 py-4 outline-none placeholder:text-white/30"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        confirmEdit();
+                      }
+                    }}
+                  />
+                  {editingField === 'duration' && (
+                    <span className="text-white/60 text-xl font-semibold pr-4">hrs</span>
+                  )}
+                </div>
                 <button
                   onClick={confirmEdit}
                   className="w-14 h-14 flex items-center justify-center rounded-2xl bg-green-500"
