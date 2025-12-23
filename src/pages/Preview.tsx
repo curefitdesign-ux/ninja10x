@@ -5,11 +5,15 @@ import html2canvas from 'html2canvas';
 import ShakyFrame from '@/components/frames/ShakyFrame';
 import JournalFrame from '@/components/frames/JournalFrame';
 import VogueFrame from '@/components/frames/VogueFrame';
+import WheelPicker from '@/components/WheelPicker';
 
 const FRAMES = ['shaky', 'journal', 'vogue'] as const;
 type FrameType = typeof FRAMES[number];
 
 type EditingField = 'duration' | 'pr' | null;
+
+// Generate hour options from 0 to 24
+const HOUR_OPTIONS = Array.from({ length: 25 }, (_, i) => i);
 
 const Preview = () => {
   const location = useLocation();
@@ -129,23 +133,23 @@ const Preview = () => {
   const openEditSheet = (field: EditingField) => {
     if (field === 'duration') {
       // Extract just the number from duration (remove 'hrs')
-      setTempValue(duration.replace(/[^0-9]/g, ''));
+      const numValue = parseInt(duration.replace(/[^0-9]/g, '')) || 0;
+      setTempValue(String(numValue));
     } else if (field === 'pr') {
       setTempValue(pr);
     }
     setEditingField(field);
   };
 
+  const handleWheelChange = (value: string | number) => {
+    const numValue = Number(value);
+    setTempValue(String(numValue));
+    setDuration(numValue > 0 ? `${numValue}hrs` : '');
+  };
+
   const handleInputChange = (value: string) => {
-    if (editingField === 'duration') {
-      // Only allow digits for duration
-      const digitsOnly = value.replace(/[^0-9]/g, '');
-      setTempValue(digitsOnly);
-      setDuration(digitsOnly ? `${digitsOnly}hrs` : '');
-    } else if (editingField === 'pr') {
-      setTempValue(value);
-      setPr(value);
-    }
+    setTempValue(value);
+    setPr(value);
   };
 
   const confirmEdit = () => {
@@ -299,38 +303,53 @@ const Preview = () => {
               <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-6" />
               
               {/* Label */}
-              <p className="text-white/60 text-sm mb-2">
-                {editingField === 'duration' ? 'Duration' : 'Personal Record (PR)'}
+              <p className="text-white text-lg font-semibold text-center mb-4">
+                {editingField === 'duration' ? 'Select Duration' : 'Personal Record (PR)'}
               </p>
               
-              {/* Input with confirm button */}
-              <div className="flex items-center gap-3">
-                <div className="flex-1 flex items-center bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 focus-within:border-white/40">
-                  <input
-                    ref={inputRef}
-                    type={editingField === 'duration' ? 'number' : 'text'}
-                    inputMode={editingField === 'duration' ? 'numeric' : 'text'}
-                    value={tempValue}
-                    onChange={(e) => handleInputChange(e.target.value)}
-                    placeholder={editingField === 'duration' ? '2' : 'e.g. 100kg bench press'}
-                    className="flex-1 bg-transparent text-white text-xl font-semibold px-4 py-4 outline-none placeholder:text-white/30"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        confirmEdit();
-                      }
-                    }}
-                  />
-                  {editingField === 'duration' && (
-                    <span className="text-white/60 text-xl font-semibold pr-4">hrs</span>
-                  )}
+              {editingField === 'duration' ? (
+                /* Wheel Picker for Duration */
+                <div className="flex items-center justify-center gap-4 mb-4">
+                  <div className="flex-1 max-w-[200px]">
+                    <WheelPicker
+                      items={HOUR_OPTIONS}
+                      value={parseInt(tempValue) || 0}
+                      onChange={handleWheelChange}
+                      itemHeight={50}
+                      visibleItems={5}
+                    />
+                  </div>
+                  <span className="text-white text-2xl font-semibold">hrs</span>
                 </div>
-                <button
-                  onClick={confirmEdit}
-                  className="w-14 h-14 flex items-center justify-center rounded-2xl bg-green-500"
-                >
-                  <Check className="w-6 h-6 text-white" strokeWidth={3} />
-                </button>
-              </div>
+              ) : (
+                /* Text Input for PR */
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-1 flex items-center bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 focus-within:border-white/40">
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={tempValue}
+                      onChange={(e) => handleInputChange(e.target.value)}
+                      placeholder="e.g. 100kg bench press"
+                      className="flex-1 bg-transparent text-white text-xl font-semibold px-4 py-4 outline-none placeholder:text-white/30"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          confirmEdit();
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {/* Confirm button */}
+              <button
+                onClick={confirmEdit}
+                className="w-full py-4 flex items-center justify-center rounded-2xl bg-green-500"
+              >
+                <Check className="w-6 h-6 text-white mr-2" strokeWidth={3} />
+                <span className="text-white font-semibold">Confirm</span>
+              </button>
             </div>
           </div>
         </>
