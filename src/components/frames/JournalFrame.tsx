@@ -59,7 +59,7 @@ const JournalFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
       </div>
       
       {/* Activity icon - Shuttlecock - positioned above the tilted image */}
-      <div className="absolute left-6 top-[45px] z-20">
+      <div className="absolute left-[34px] top-[35px] z-20">
         <img 
           src={shuttlecockIcon}
           alt="Shuttlecock"
@@ -89,7 +89,7 @@ const JournalFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
         <h2 className="text-black text-[28px] font-black italic leading-none mb-2">{activity}</h2>
         
         {/* Stats row */}
-        <div className="flex gap-6">
+        <div className="flex gap-6 -ml-[10px]">
           <div>
             <p className="text-gray-500 text-[10px] font-medium">Duration</p>
             <p className="text-black text-xl font-bold">{duration || "02hrs"}</p>
