@@ -4,10 +4,11 @@ import { useEffect, useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import ShakyFrame from '@/components/frames/ShakyFrame';
 import JournalFrame from '@/components/frames/JournalFrame';
+import Journal2Frame from '@/components/frames/Journal2Frame';
 import VogueFrame from '@/components/frames/VogueFrame';
 import WheelPicker from '@/components/WheelPicker';
 
-const FRAMES = ['shaky', 'journal', 'vogue'] as const;
+const FRAMES = ['shaky', 'journal', 'journal2', 'vogue'] as const;
 type FrameType = typeof FRAMES[number];
 
 type EditingField = 'duration' | 'pr' | null;
@@ -234,6 +235,7 @@ const Preview = () => {
                 <div ref={index === currentIndex ? frameRef : undefined} className="w-full">
                   {frame === 'shaky' && <ShakyFrame {...frameProps} />}
                   {frame === 'journal' && <JournalFrame {...frameProps} />}
+                  {frame === 'journal2' && <Journal2Frame {...frameProps} />}
                   {frame === 'vogue' && <VogueFrame {...frameProps} />}
                 </div>
               </div>
