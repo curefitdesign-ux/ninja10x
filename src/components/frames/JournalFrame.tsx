@@ -45,8 +45,7 @@ const JournalFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
       <div 
         className="absolute top-10 left-4 right-4 bottom-[140px] rounded-xl overflow-hidden bg-gray-100"
         style={{
-          transform: 'rotate(-10deg) scale(0.9)',
-          transformOrigin: 'center center',
+          transform: 'scale(0.9)',
         }}
       >
         <img 
