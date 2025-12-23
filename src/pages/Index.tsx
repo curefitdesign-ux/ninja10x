@@ -4,6 +4,17 @@ import AuroraBackground from '@/components/AuroraBackground';
 import PhotoUploadCard from '@/components/PhotoUploadCard';
 import CameraUI from '@/components/CameraUI';
 
+// Activity icons
+import footballIcon from '@/assets/activities/football.png';
+import cricketIcon from '@/assets/activities/cricket.png';
+import racquetIcon from '@/assets/activities/racquet.png';
+import basketballIcon from '@/assets/activities/basketball.png';
+import cyclingIcon from '@/assets/activities/cycling.png';
+import runningIcon from '@/assets/activities/running.png';
+import trekkingIcon from '@/assets/activities/trekking.png';
+import boxingIcon from '@/assets/activities/boxing.png';
+import yogaIcon from '@/assets/activities/yoga.png';
+
 interface Photo {
   id: string;
   url: string;
@@ -15,10 +26,15 @@ interface Photo {
 }
 
 const activities = [
-  'Running', 'Cycling', 'Treking',
-  'Swimming', 'Yoga', 'GYM',
-  'Cricket', 'Badminton', 'Tennis',
-  'Meditation', 'Boxing', 'Dance'
+  { name: 'Running', icon: runningIcon },
+  { name: 'Cycling', icon: cyclingIcon },
+  { name: 'Trekking', icon: trekkingIcon },
+  { name: 'Basketball', icon: basketballIcon },
+  { name: 'Yoga', icon: yogaIcon },
+  { name: 'Football', icon: footballIcon },
+  { name: 'Cricket', icon: cricketIcon },
+  { name: 'Badminton', icon: racquetIcon },
+  { name: 'Boxing', icon: boxingIcon },
 ];
 
 const Index = () => {
@@ -208,18 +224,24 @@ const Index = () => {
             onClick={handleOverlayClick}
           />
           <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up" style={{ height: '90vh' }}>
-            <div className="bg-white/10 backdrop-blur-xl rounded-t-3xl p-6 pb-10 border-t border-foreground/10 h-full">
-              <div className="w-12 h-1 bg-foreground/20 rounded-full mx-auto mb-6" />
-              <h3 className="text-xl font-semibold text-foreground text-center mb-8">Choose your activity</h3>
+            <div className="bg-black rounded-t-3xl p-6 pb-10 border-t border-white/10 h-full">
+              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
+              <h3 className="text-xl font-semibold text-white text-center mb-8">Choose your activity</h3>
               <div className="grid grid-cols-3 gap-4 px-2">
                 {activities.map((activity) => (
                   <button
-                    key={activity}
-                    onClick={() => handleActivitySelect(activity)}
-                    className="flex flex-col items-center gap-3 p-3 rounded-2xl hover:bg-foreground/5 transition-colors"
+                    key={activity.name}
+                    onClick={() => handleActivitySelect(activity.name)}
+                    className="flex flex-col items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors"
                   >
-                    <div className="w-16 h-16 rounded-full bg-foreground/10 backdrop-blur-sm" />
-                    <span className="text-sm font-semibold text-foreground italic">{activity}</span>
+                    <div className="w-20 h-20 rounded-full overflow-hidden">
+                      <img 
+                        src={activity.icon} 
+                        alt={activity.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <span className="text-sm font-semibold text-white">{activity.name}</span>
                   </button>
                 ))}
               </div>
