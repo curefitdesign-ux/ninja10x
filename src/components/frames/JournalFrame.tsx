@@ -1,3 +1,5 @@
+import shuttlecockIcon from '@/assets/frames/shuttlecock.png';
+
 interface JournalFrameProps {
   imageUrl: string;
   activity: string;
@@ -32,8 +34,14 @@ const JournalFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
         </svg>
       </div>
       
-      {/* Photo area filling the frame */}
-      <div className="absolute top-10 left-4 right-4 bottom-[140px] rounded-xl overflow-hidden bg-gray-100">
+      {/* Photo area filling the frame - tilted 10deg, 90% size */}
+      <div 
+        className="absolute top-10 left-4 right-4 bottom-[140px] rounded-xl overflow-hidden bg-gray-100"
+        style={{
+          transform: 'rotate(-10deg) scale(0.9)',
+          transformOrigin: 'center center',
+        }}
+      >
         <img 
           src={imageUrl}
           alt="Activity"
@@ -46,20 +54,11 @@ const JournalFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
       
       {/* Activity icon - Shuttlecock */}
       <div className="absolute left-4 bottom-[105px]">
-        <svg width="40" height="40" viewBox="0 0 56 56" fill="none">
-          <ellipse cx="28" cy="20" rx="16" ry="20" fill="url(#featherGradient)" />
-          <ellipse cx="22" cy="18" rx="4" ry="10" fill="rgba(200,230,240,0.6)" />
-          <ellipse cx="28" cy="16" rx="4" ry="12" fill="rgba(220,240,250,0.6)" />
-          <ellipse cx="34" cy="18" rx="4" ry="10" fill="rgba(200,230,240,0.6)" />
-          <ellipse cx="28" cy="42" rx="8" ry="6" fill="#E8C4C4" />
-          <ellipse cx="28" cy="40" rx="6" ry="4" fill="#F0D4D4" />
-          <defs>
-            <linearGradient id="featherGradient" x1="28" y1="0" x2="28" y2="40" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#E8F4F8" />
-              <stop offset="1" stopColor="#C8E0E8" />
-            </linearGradient>
-          </defs>
-        </svg>
+        <img 
+          src={shuttlecockIcon}
+          alt="Shuttlecock"
+          className="w-12 h-12 object-contain"
+        />
       </div>
       
       {/* Bottom content */}
