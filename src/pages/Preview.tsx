@@ -344,13 +344,12 @@ const Preview = () => {
                 </div>
               )}
               
-              {/* Confirm button */}
+              {/* Confirm button - small white pill */}
               <button
                 onClick={confirmEdit}
-                className="w-full py-4 flex items-center justify-center rounded-2xl bg-green-500"
+                className="mx-auto px-8 py-2 flex items-center justify-center rounded-full bg-white"
               >
-                <Check className="w-6 h-6 text-white mr-2" strokeWidth={3} />
-                <span className="text-white font-semibold">Confirm</span>
+                <span className="text-black font-semibold text-sm">Confirm</span>
               </button>
             </div>
           </div>

@@ -140,9 +140,7 @@ const WheelPicker = ({
         }}
       />
       
-      {/* Gradient overlays for fade effect */}
-      <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/80 to-transparent pointer-events-none z-10" />
-      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/80 to-transparent pointer-events-none z-10" />
+      {/* Removed gradient overlays */}
       
       {/* Items container */}
       <div
