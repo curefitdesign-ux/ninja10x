@@ -59,12 +59,12 @@ const JournalFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
         />
       </div>
       
-      {/* Activity icon - Shuttlecock */}
-      <div className="absolute left-4 bottom-[125px]">
+      {/* Activity icon - Shuttlecock - positioned above the tilted image */}
+      <div className="absolute left-6 top-[45px] z-20">
         <img 
           src={shuttlecockIcon}
           alt="Shuttlecock"
-          className="w-12 h-12 object-contain"
+          className="w-20 h-20 object-contain"
         />
       </div>
       
