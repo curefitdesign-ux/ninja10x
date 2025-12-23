@@ -1,4 +1,5 @@
 import shuttlecockIcon from '@/assets/frames/shuttlecock.png';
+import journalBg from '@/assets/frames/journal-bg.png';
 
 interface JournalFrameProps {
   imageUrl: string;
@@ -13,7 +14,13 @@ interface JournalFrameProps {
 
 const JournalFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale }: JournalFrameProps) => {
   return (
-    <div className="w-full aspect-[9/16] rounded-[24px] overflow-hidden bg-white shadow-2xl relative">
+    <div className="w-full aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative">
+      {/* Background image */}
+      <img 
+        src={journalBg}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover"
+      />
       {/* Paperclip */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
         <svg width="40" height="80" viewBox="0 0 48 100" fill="none">
@@ -53,7 +60,7 @@ const JournalFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
       </div>
       
       {/* Activity icon - Shuttlecock */}
-      <div className="absolute left-4 bottom-[105px]">
+      <div className="absolute left-4 bottom-[125px]">
         <img 
           src={shuttlecockIcon}
           alt="Shuttlecock"
@@ -91,10 +98,6 @@ const JournalFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
           <div>
             <p className="text-gray-500 text-[10px] font-medium">Rounds</p>
             <p className="text-black text-xl font-bold">{pr || "10"}</p>
-          </div>
-          <div>
-            <p className="text-gray-500 text-[10px] font-medium">Calories</p>
-            <p className="text-black text-xl font-bold">400</p>
           </div>
         </div>
       </div>
