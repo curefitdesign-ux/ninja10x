@@ -40,20 +40,26 @@ const WheelPicker = ({
   const updateTransform = () => {
     if (containerRef.current) {
       const children = containerRef.current.children;
+      const selectedIndex = Math.round(scrollY.current / itemHeight);
+      
       for (let i = 0; i < children.length; i++) {
         const child = children[i] as HTMLElement;
-        const itemCenter = i * itemHeight + itemHeight / 2;
-        const viewCenter = scrollY.current + containerHeight / 2;
-        const distance = Math.abs(itemCenter - viewCenter);
-        const maxDistance = containerHeight / 2;
+        const isSelected = i === selectedIndex;
         
-        // Calculate opacity and scale based on distance from center
-        const normalizedDistance = Math.min(distance / maxDistance, 1);
-        const opacity = 1 - normalizedDistance * 0.7;
-        const scale = 1 - normalizedDistance * 0.15;
-        
-        child.style.opacity = String(opacity);
-        child.style.transform = `scale(${scale})`;
+        // Selected item is big and white, others are smaller and dimmed
+        if (isSelected) {
+          child.style.opacity = '1';
+          child.style.transform = 'scale(1.3)';
+          child.style.color = 'white';
+          child.style.fontWeight = '700';
+        } else {
+          const distance = Math.abs(i - selectedIndex);
+          const opacity = Math.max(0.3, 1 - distance * 0.25);
+          child.style.opacity = String(opacity);
+          child.style.transform = 'scale(1)';
+          child.style.color = 'rgba(255,255,255,0.5)';
+          child.style.fontWeight = '500';
+        }
       }
     }
   };
