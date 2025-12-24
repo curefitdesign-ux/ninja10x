@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, SwitchCamera, Image as ImageIcon, Check, RotateCcw } from 'lucide-react';
-import cameraOverlay from '@/assets/camera-overlay.png';
 
 interface CameraUIProps {
   activity: string;
@@ -303,14 +302,6 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
             aspectRatio: '3/4',
           }}
         >
-          {/* Silhouette overlay guide */}
-          {!capturedImage && !capturedVideo && (
-            <img 
-              src={cameraOverlay} 
-              alt="" 
-              className="absolute inset-0 w-full h-full object-contain opacity-30 pointer-events-none"
-            />
-          )}
           {/* Subtle vignette effect inside capture area */}
           <div 
             className="absolute inset-0 pointer-events-none"
