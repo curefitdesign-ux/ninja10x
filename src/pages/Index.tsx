@@ -226,7 +226,7 @@ const Index = () => {
           <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up" style={{ height: '90vh' }}>
             <div className="bg-black rounded-t-3xl p-6 pb-10 border-t border-white/10 h-full">
               <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
-              <h3 className="text-xl font-semibold text-white text-center mb-8">Choose your activity</h3>
+              <h3 className="text-xl font-bold italic text-white text-center mb-8">Choose your activity</h3>
               <div className="grid grid-cols-3 gap-4 px-2">
                 {activities.map((activity) => (
                   <button
