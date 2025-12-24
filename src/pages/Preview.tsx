@@ -217,27 +217,34 @@ const Preview = () => {
         <div className="flex-1 flex items-center overflow-hidden -mx-5">
           <div 
             ref={containerRef}
-            className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center px-3"
+            className="flex gap-1 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center px-1"
             style={{ 
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
               WebkitOverflowScrolling: 'touch',
             }}
           >
-            {FRAMES.map((frame, index) => (
-              <div 
-                key={frame}
-                className="flex-shrink-0 snap-center h-fit flex items-center justify-center"
-                style={{ width: 'calc(85vw)', transform: 'scale(0.95)' }}
-                onClick={() => setCurrentFrame(frame)}
-              >
-                <div ref={index === currentIndex ? frameRef : undefined} className="w-full">
-                  {frame === 'shaky' && <ShakyFrame {...frameProps} />}
-                  {frame === 'journal' && <JournalFrame {...frameProps} />}
-                  {frame === 'vogue' && <VogueFrame {...frameProps} />}
+            {FRAMES.map((frame, index) => {
+              const isCenter = index === currentIndex;
+              return (
+                <div 
+                  key={frame}
+                  className="flex-shrink-0 snap-center h-fit flex items-center justify-center transition-all duration-300 ease-out"
+                  style={{ 
+                    width: 'calc(85vw)',
+                    transform: isCenter ? 'scale(1)' : 'scale(0.9)',
+                    opacity: isCenter ? 1 : 0.7,
+                  }}
+                  onClick={() => setCurrentFrame(frame)}
+                >
+                  <div ref={index === currentIndex ? frameRef : undefined} className="w-full">
+                    {frame === 'shaky' && <ShakyFrame {...frameProps} />}
+                    {frame === 'journal' && <JournalFrame {...frameProps} />}
+                    {frame === 'vogue' && <VogueFrame {...frameProps} />}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
