@@ -97,11 +97,11 @@ const FitnessFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
       <div 
         className="absolute z-10"
         style={{
-          top: '18%',
+          top: '22%',
           left: '50%',
-          width: '68%',
+          width: '58%',
           aspectRatio: '3/4',
-          transform: 'translateX(-40%) rotate(-8deg)',
+          transform: 'translateX(-50%) rotate(-8deg)',
         }}
       >
         {/* Card shadow */}
