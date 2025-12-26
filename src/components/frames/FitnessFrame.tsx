@@ -11,88 +11,184 @@ interface FitnessFrameProps {
 
 const FitnessFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale }: FitnessFrameProps) => {
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative" style={{ background: '#7A7A32' }}>
+    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[20px] overflow-hidden shadow-2xl relative" style={{ background: '#6B6B2A' }}>
       {/* Grid background */}
       <div className="absolute inset-0">
-        {/* Outer border */}
-        <div className="absolute inset-3 border border-[#A5A560]/40 rounded-lg" />
+        {/* Outer border frame */}
+        <div 
+          className="absolute inset-[10px] rounded-[12px]" 
+          style={{ border: '1px solid rgba(165, 165, 96, 0.35)' }}
+        />
         
         {/* Grid pattern */}
-        <svg className="absolute inset-0 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg">
+        <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="fitnessGrid" width="24" height="24" patternUnits="userSpaceOnUse">
-              <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#A5A560" strokeWidth="0.5"/>
+            <pattern id="fitnessGrid" width="22" height="22" patternUnits="userSpaceOnUse">
+              <path d="M 22 0 L 0 0 0 22" fill="none" stroke="rgba(165, 165, 96, 0.25)" strokeWidth="0.5"/>
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#fitnessGrid)" />
         </svg>
         
-        {/* Curved decorative line */}
-        <svg className="absolute inset-0 w-full h-full animate-subtle-wave" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <path 
-            d="M 30 45 Q 50 35, 70 50 Q 85 60, 95 55" 
+        {/* Curved decorative lines */}
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+          {/* Upper curve around photo */}
+          <ellipse 
+            cx="60" cy="50" rx="35" ry="25"
             fill="none" 
-            stroke="rgba(255,255,255,0.15)" 
-            strokeWidth="0.3"
+            stroke="rgba(200, 200, 180, 0.12)" 
+            strokeWidth="0.15"
+            transform="rotate(-15 60 50)"
           />
-          <path 
-            d="M 25 75 Q 45 65, 65 80 Q 85 90, 100 85" 
+          {/* Lower curve */}
+          <ellipse 
+            cx="55" cy="75" rx="40" ry="20"
             fill="none" 
-            stroke="rgba(255,255,255,0.15)" 
-            strokeWidth="0.3"
+            stroke="rgba(200, 200, 180, 0.1)" 
+            strokeWidth="0.15"
+            transform="rotate(-10 55 75)"
           />
         </svg>
       </div>
       
       {/* CONQUER WILL POWER tag */}
-      <div className="absolute top-6 right-4 z-20 animate-subtle-pulse">
-        <div className="bg-[#FF5A4D] px-3 py-1.5 rounded-sm">
-          <span className="text-white font-bold text-[10px] tracking-wider">CONQUER WILL POWER</span>
+      <div className="absolute top-5 right-3 z-20 animate-subtle-pulse">
+        <div 
+          className="px-2.5 py-1"
+          style={{ 
+            background: '#F45B4A',
+            borderRadius: '2px'
+          }}
+        >
+          <span 
+            className="text-white font-bold text-[9px] tracking-[0.08em]"
+            style={{ fontFamily: 'system-ui, sans-serif' }}
+          >
+            CONQUER WILL POWER
+          </span>
         </div>
       </div>
       
       {/* CULT NINJA title */}
-      <div className="absolute top-16 left-4 z-20">
-        <h1 className="text-[#F4E04D] text-[40px] font-black italic leading-none tracking-tight" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
+      <div className="absolute top-12 left-4 z-20">
+        <h1 
+          className="text-[36px] font-black italic leading-[0.9] tracking-tight"
+          style={{ 
+            color: '#F4E14D',
+            fontFamily: 'system-ui, sans-serif',
+            textShadow: '2px 3px 4px rgba(0,0,0,0.35)'
+          }}
+        >
           CULT
         </h1>
-        <h2 className="text-white text-[48px] font-black leading-none tracking-tight" style={{ textShadow: '3px 3px 6px rgba(0,0,0,0.4)' }}>
+        <h2 
+          className="text-[44px] font-black leading-[0.95] tracking-tight -mt-1"
+          style={{ 
+            color: '#FFFFFF',
+            fontFamily: 'system-ui, sans-serif',
+            textShadow: '3px 4px 8px rgba(0,0,0,0.5)'
+          }}
+        >
           NINJA
         </h2>
       </div>
       
-      {/* Photo container - tilted */}
+      {/* Photo container - tilted with shadow */}
       <div 
-        className="absolute top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/4 w-[65%] aspect-[3/4] rounded-2xl overflow-hidden bg-white shadow-xl"
+        className="absolute z-10"
         style={{
-          transform: 'translateX(-50%) translateY(-25%) rotate(8deg)',
+          top: '22%',
+          left: '50%',
+          width: '58%',
+          aspectRatio: '3/4',
+          transform: 'translateX(-35%) rotate(8deg)',
         }}
       >
-        <img 
-          src={imageUrl}
-          alt="Activity"
-          className="w-full h-full object-cover"
+        {/* Card shadow */}
+        <div 
+          className="absolute inset-0 rounded-[16px]"
           style={{
-            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+            background: 'rgba(0,0,0,0.3)',
+            filter: 'blur(12px)',
+            transform: 'translate(6px, 8px)',
           }}
         />
+        {/* Photo card */}
+        <div 
+          className="relative w-full h-full rounded-[16px] overflow-hidden bg-white"
+          style={{
+            boxShadow: '0 8px 32px rgba(0,0,0,0.25)'
+          }}
+        >
+          <img 
+            src={imageUrl}
+            alt="Activity"
+            className="w-full h-full object-cover"
+            style={{
+              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+            }}
+          />
+        </div>
       </div>
       
-      {/* Left side stats */}
-      <div className="absolute left-4 bottom-[30%] z-20 space-y-2">
-        <div className="bg-[#FF5A4D] px-3 py-1 rounded-sm animate-subtle-float" style={{ animationDelay: '0.2s' }}>
-          <span className="text-white font-bold text-sm">Laps : {pr || '20'}</span>
+      {/* Left side stats pills */}
+      <div className="absolute left-3 z-20 space-y-1.5" style={{ bottom: '26%' }}>
+        <div 
+          className="px-2.5 py-1 animate-subtle-float"
+          style={{ 
+            background: '#F45B4A',
+            borderRadius: '2px',
+            animationDelay: '0.2s'
+          }}
+        >
+          <span 
+            className="text-white font-bold text-[11px]"
+            style={{ fontFamily: 'system-ui, sans-serif' }}
+          >
+            Laps : {pr || '20'}
+          </span>
         </div>
-        <div className="bg-[#FF5A4D] px-3 py-1 rounded-sm animate-subtle-float" style={{ animationDelay: '0.4s' }}>
-          <span className="text-white font-bold text-sm">Duration : {duration || '02:00:50'}</span>
+        <div 
+          className="px-2.5 py-1 animate-subtle-float"
+          style={{ 
+            background: '#F45B4A',
+            borderRadius: '2px',
+            animationDelay: '0.4s'
+          }}
+        >
+          <span 
+            className="text-white font-bold text-[11px]"
+            style={{ fontFamily: 'system-ui, sans-serif' }}
+          >
+            Duration : {duration || '02:00:50'}
+          </span>
         </div>
       </div>
       
       {/* Bottom right content */}
-      <div className="absolute bottom-6 right-4 text-right z-20">
-        <p className="text-white/60 text-sm font-medium">Week</p>
-        <p className="text-[#F4E04D] text-[56px] font-black leading-none animate-subtle-pulse">{week}/{day + 2}</p>
-        <p className="text-[#F4E04D] text-lg font-medium">Activity</p>
+      <div className="absolute right-4 z-20 text-right" style={{ bottom: '6%' }}>
+        <p 
+          className="text-[13px] font-medium mb-0"
+          style={{ color: 'rgba(255,255,255,0.5)' }}
+        >
+          Week
+        </p>
+        <p 
+          className="text-[52px] font-black leading-none animate-subtle-pulse"
+          style={{ 
+            color: '#F4E14D',
+            fontFamily: 'system-ui, sans-serif',
+            letterSpacing: '-0.02em'
+          }}
+        >
+          {week}/{day + 2}
+        </p>
+        <p 
+          className="text-[15px] font-medium -mt-1"
+          style={{ color: '#F4E14D' }}
+        >
+          Activity
+        </p>
       </div>
     </div>
   );
