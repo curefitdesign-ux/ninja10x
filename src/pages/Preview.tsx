@@ -160,7 +160,6 @@ const Preview = () => {
     
     return { scale, opacity };
   };
-  };
 
   const openEditSheet = (field: EditingField) => {
     if (field === 'duration') {
@@ -398,5 +397,4 @@ const Preview = () => {
   );
 };
 
-export default Preview;
 export default Preview;
