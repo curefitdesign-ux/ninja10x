@@ -26,11 +26,11 @@ const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositio
       <div className="absolute inset-0 pointer-events-none">
         {/* Top section - cream background with title */}
         <div 
-          className="absolute top-0 left-0 right-0 h-[15%] flex items-center justify-center"
-          style={{ background: '#F5F3ED' }}
+          className="absolute top-0 left-0 right-0 flex items-center justify-center"
+          style={{ background: '#F5F3ED', height: '14%' }}
         >
           <h1 
-            className="text-[#2D2D2D] text-[42px] font-black uppercase tracking-tight leading-none animate-subtle-pulse"
+            className="text-[#2D2D2D] text-[48px] font-black uppercase tracking-tight leading-none"
             style={{ fontFamily: 'Impact, sans-serif' }}
           >
             {activity || 'TENNIS'}
@@ -39,69 +39,143 @@ const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositio
         
         {/* Left frame border */}
         <div 
-          className="absolute top-[15%] left-0 w-4 bottom-[35%]"
-          style={{ background: '#F5F3ED' }}
+          className="absolute left-0"
+          style={{ background: '#F5F3ED', top: '14%', bottom: '30%', width: '16px' }}
         />
         
         {/* Right frame border */}
         <div 
-          className="absolute top-[15%] right-0 w-4 bottom-[35%]"
-          style={{ background: '#F5F3ED' }}
+          className="absolute right-0"
+          style={{ background: '#F5F3ED', top: '14%', bottom: '30%', width: '16px' }}
         />
+        
+        {/* Photo frame with white border */}
+        <div 
+          className="absolute left-4 right-4 bg-white"
+          style={{ 
+            top: '14%', 
+            bottom: '30%',
+            boxShadow: 'inset 0 0 0 8px white'
+          }}
+        >
+          {/* Inner white border effect */}
+          <div 
+            className="absolute inset-2 overflow-hidden"
+            style={{ border: '6px solid white' }}
+          >
+            <img 
+              src={imageUrl}
+              alt="Activity"
+              className="w-full h-full object-cover"
+              style={{
+                transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+              }}
+            />
+          </div>
+        </div>
         
         {/* Bottom section - cream background with stats */}
         <div 
-          className="absolute bottom-0 left-0 right-0 h-[35%]"
-          style={{ background: '#F5F3ED' }}
+          className="absolute bottom-0 left-0 right-0"
+          style={{ background: '#F5F3ED', height: '30%' }}
         >
-          {/* Ribbon badge */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-            <div className="relative">
+          {/* Ribbon badge - positioned at top edge */}
+          <div className="absolute left-1/2 -translate-x-1/2 z-20" style={{ top: '-12px' }}>
+            <div className="relative flex items-center">
               {/* Ribbon wings - left */}
-              <svg className="absolute -left-5 top-1/2 -translate-y-1/2 w-6 h-5 animate-subtle-wave" viewBox="0 0 24 20">
-                <polygon points="24,3 0,6 0,14 24,17" fill="#C5C3BC" />
-              </svg>
-              {/* Ribbon wings - right */}
-              <svg className="absolute -right-5 top-1/2 -translate-y-1/2 w-6 h-5 animate-subtle-wave" style={{ animationDelay: '0.5s' }} viewBox="0 0 24 20">
-                <polygon points="0,3 24,6 24,14 0,17" fill="#C5C3BC" />
+              <svg className="w-8 h-6" viewBox="0 0 32 24" style={{ marginRight: '-2px' }}>
+                <polygon points="32,4 0,8 0,16 32,20" fill="#B8B6AF" />
               </svg>
               
               {/* Ribbon center */}
-              <div className="bg-[#D0CEC7] px-5 py-1.5 relative shadow-sm">
+              <div 
+                className="bg-[#C5C3BC] px-4 py-1.5 relative"
+                style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}
+              >
                 <span 
-                  className="text-[#3D3D3D] font-black text-base tracking-wide"
+                  className="text-[#4A4A4A] font-black text-sm tracking-wide whitespace-nowrap"
                   style={{ fontFamily: 'Impact, sans-serif' }}
                 >
                   WEEK {week} | DAY {day}
                 </span>
               </div>
+              
+              {/* Ribbon wings - right */}
+              <svg className="w-8 h-6" viewBox="0 0 32 24" style={{ marginLeft: '-2px' }}>
+                <polygon points="0,4 32,8 32,16 0,20" fill="#B8B6AF" />
+              </svg>
             </div>
-          </div>
-          
-          {/* Dashed divider line */}
-          <div className="absolute top-[22%] left-0 right-0 px-4">
-            <div className="border-t-2 border-dashed border-[#C5C3BC]" />
           </div>
           
           {/* Side notches - left */}
           <div 
-            className="absolute left-0 top-[22%] -translate-y-1/2 w-4 h-8 rounded-r-full"
-            style={{ background: 'rgba(0,0,0,0.15)' }}
-          />
+            className="absolute left-0 w-5 h-10 rounded-r-full"
+            style={{ 
+              background: 'transparent',
+              top: '35%',
+              transform: 'translateY(-50%)',
+              boxShadow: '-20px 0 0 0 rgba(0,0,0,0.2), inset 0 0 0 0 transparent'
+            }}
+          >
+            <div 
+              className="absolute inset-0 rounded-r-full"
+              style={{ 
+                background: 'linear-gradient(to right, rgba(0,0,0,0.15), transparent)'
+              }}
+            />
+          </div>
+          
           {/* Side notches - right */}
           <div 
-            className="absolute right-0 top-[22%] -translate-y-1/2 w-4 h-8 rounded-l-full"
-            style={{ background: 'rgba(0,0,0,0.15)' }}
+            className="absolute right-0 w-5 h-10 rounded-l-full"
+            style={{ 
+              background: 'transparent',
+              top: '35%',
+              transform: 'translateY(-50%)',
+            }}
+          >
+            <div 
+              className="absolute inset-0 rounded-l-full"
+              style={{ 
+                background: 'linear-gradient(to left, rgba(0,0,0,0.15), transparent)'
+              }}
+            />
+          </div>
+          
+          {/* Cutout notches */}
+          <div 
+            className="absolute left-0 w-4 h-8 rounded-r-full"
+            style={{ 
+              top: '35%',
+              transform: 'translateX(-50%) translateY(-50%)',
+              background: 'rgba(0,0,0,0.2)'
+            }}
+          />
+          <div 
+            className="absolute right-0 w-4 h-8 rounded-l-full"
+            style={{ 
+              top: '35%',
+              transform: 'translateX(50%) translateY(-50%)',
+              background: 'rgba(0,0,0,0.2)'
+            }}
           />
           
+          {/* Dashed divider line */}
+          <div className="absolute left-6 right-6" style={{ top: '35%' }}>
+            <div 
+              className="border-t-2 border-dashed"
+              style={{ borderColor: '#C5C3BC' }}
+            />
+          </div>
+          
           {/* Stats section */}
-          <div className="absolute bottom-4 left-0 right-0 px-6">
-            <div className="flex justify-center items-end gap-6">
+          <div className="absolute left-0 right-0 px-8" style={{ bottom: '15%' }}>
+            <div className="flex justify-center items-end">
               {/* Laps */}
               <div className="text-center flex-1">
-                <p className="text-[#6B6B6B] text-sm font-medium mb-0.5">Laps</p>
+                <p className="text-[#7A7A7A] text-base font-medium mb-1">Laps</p>
                 <p 
-                  className="text-[#2D2D2D] text-[44px] font-black leading-none animate-subtle-float"
+                  className="text-[#2D2D2D] text-[52px] font-black leading-none"
                   style={{ fontFamily: 'Impact, sans-serif' }}
                 >
                   {pr || '20'}
@@ -109,14 +183,14 @@ const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositio
               </div>
               
               {/* Divider */}
-              <div className="h-16 w-[3px] bg-[#2D2D2D] rounded-full" />
+              <div className="h-20 w-[3px] bg-[#2D2D2D] rounded-full mx-4" />
               
               {/* Duration */}
               <div className="text-center flex-1">
-                <p className="text-[#6B6B6B] text-sm font-medium mb-0.5">Duration</p>
+                <p className="text-[#7A7A7A] text-base font-medium mb-1">Duration</p>
                 <p 
-                  className="text-[#2D2D2D] text-[44px] font-black leading-none animate-subtle-float"
-                  style={{ fontFamily: 'Impact, sans-serif', animationDelay: '0.3s' }}
+                  className="text-[#2D2D2D] text-[52px] font-black leading-none uppercase"
+                  style={{ fontFamily: 'Impact, sans-serif' }}
                 >
                   {duration || '2HRS'}
                 </p>
@@ -124,14 +198,6 @@ const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositio
             </div>
           </div>
         </div>
-        
-        {/* Inner photo frame border - subtle shadow inset */}
-        <div 
-          className="absolute top-[15%] left-4 right-4 bottom-[35%] rounded-sm pointer-events-none"
-          style={{ 
-            boxShadow: 'inset 0 0 0 3px #F5F3ED, inset 0 0 10px rgba(0,0,0,0.1)'
-          }}
-        />
       </div>
     </div>
   );
