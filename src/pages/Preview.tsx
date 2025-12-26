@@ -332,13 +332,13 @@ const Preview = () => {
         <>
           {/* Backdrop with blur */}
           <div 
-            className="fixed inset-0 z-40 backdrop-blur-md bg-black/40"
+            className="fixed inset-0 z-40 backdrop-blur-md bg-black/70"
             onClick={closeSheet}
           />
           
           {/* Bottom Sheet */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom duration-300">
-            <div className="bg-white/10 backdrop-blur-2xl border-t border-white/20 rounded-t-3xl p-6 pb-10">
+          <div className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom duration-300 focus:outline-none focus-visible:outline-none" tabIndex={-1}>
+            <div className="bg-white/10 backdrop-blur-2xl border-t border-white/20 rounded-t-3xl p-6 pb-10 focus:outline-none focus-visible:outline-none" tabIndex={-1}>
               {/* Handle bar */}
               <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-6" />
               

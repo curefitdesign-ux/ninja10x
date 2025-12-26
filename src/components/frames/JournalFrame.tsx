@@ -70,33 +70,37 @@ const JournalFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 p-4 pt-0">
         {/* Badges row */}
-        <div className="flex justify-between mb-2">
+        <div className="flex gap-2 mb-3">
           <div 
             className="rounded-full px-3 py-1.5"
             style={{ background: '#2DD4A8' }}
           >
-            <span className="text-white font-bold text-[10px] tracking-wide">WEEK {week} | DAY {day}</span>
+            <span className="text-black font-bold text-[10px] tracking-wide">WEEK {week} | DAY {day}</span>
           </div>
           <div 
             className="rounded-full px-3 py-1.5"
             style={{ background: '#2DD4A8' }}
           >
-            <span className="text-white font-bold text-[10px] tracking-wide">Bellandur, Bangalore</span>
+            <span className="text-black font-bold text-[10px] tracking-wide">Bellandur, Bangalore</span>
           </div>
         </div>
         
         {/* Activity name */}
-        <h2 className="text-black text-[28px] font-black italic leading-none mb-2">{activity}</h2>
+        <h2 className="text-black text-[32px] font-black leading-none mb-3">{activity}</h2>
         
         {/* Stats row */}
-        <div className="flex gap-6 -ml-[10px]">
+        <div className="flex gap-8">
           <div>
-            <p className="text-gray-500 text-[10px] font-medium">Duration</p>
-            <p className="text-black text-xl font-bold">{duration || "02hrs"}</p>
+            <p className="text-gray-500 text-xs font-medium">Duration</p>
+            <p className="text-black text-2xl font-black">{duration || "02hrs"}</p>
           </div>
           <div>
-            <p className="text-gray-500 text-[10px] font-medium">Rounds</p>
-            <p className="text-black text-xl font-bold">{pr || "10"}</p>
+            <p className="text-gray-500 text-xs font-medium">Rounds</p>
+            <p className="text-black text-2xl font-black">{pr || "10"}</p>
+          </div>
+          <div>
+            <p className="text-gray-500 text-xs font-medium">Calories</p>
+            <p className="text-black text-2xl font-black">400</p>
           </div>
         </div>
       </div>
