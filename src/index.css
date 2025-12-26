@@ -135,6 +135,60 @@
     }
   }
 
+  @keyframes frame-entrance {
+    0% {
+      opacity: 0;
+      transform: scale(0.8) translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes subtle-float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  @keyframes subtle-pulse {
+    0%, 100% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes subtle-wave {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(3px);
+    }
+  }
+
+  .animate-frame-entrance {
+    animation: frame-entrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .animate-subtle-float {
+    animation: subtle-float 3s ease-in-out infinite;
+  }
+
+  .animate-subtle-pulse {
+    animation: subtle-pulse 2s ease-in-out infinite;
+  }
+
+  .animate-subtle-wave {
+    animation: subtle-wave 2.5s ease-in-out infinite;
+  }
+
   .animate-aurora-float {
     animation: aurora-float 8s ease-in-out infinite;
   }

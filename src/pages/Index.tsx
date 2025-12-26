@@ -112,7 +112,7 @@ const Index = () => {
   const handleCardClick = () => {
     const todaysPhoto = getTodaysPhoto();
     if (todaysPhoto) {
-      // Edit existing photo
+      // Edit existing photo - go directly to preview, skip camera
       navigate('/preview', { 
         state: { 
           imageUrl: todaysPhoto.url, 
@@ -124,7 +124,7 @@ const Index = () => {
         } 
       });
     } else {
-      // New upload
+      // New upload - show activity sheet first
       setShowActivitySheet(true);
     }
   };
