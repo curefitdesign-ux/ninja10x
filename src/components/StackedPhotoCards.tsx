@@ -1,6 +1,7 @@
 import { User, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { format, subDays, addDays, isToday, isBefore, isAfter, startOfDay } from 'date-fns';
+import { format, subDays, addDays, startOfDay } from 'date-fns';
+import shuttlecockIcon from '@/assets/frames/shuttlecock.png';
 
 interface Photo {
   id: string;
@@ -47,7 +48,7 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
     {
       date: today,
       dateString: format(today, 'yyyy-MM-dd'),
-      displayDate: 'TODAY',
+      displayDate: format(today, 'd MMM').toUpperCase(),
       photo: todaysPhoto,
       state: 'active',
       isLocked: false,
@@ -81,41 +82,44 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
     const isLeft = position === 0;
     const isRight = position === 2;
     
-    // Calculate transforms based on position
+    // Calculate transforms based on position - side cards overlap center
     const getTransform = () => {
       if (isCenter) {
-        return { translateX: 0, scale: 1, rotate: 0 };
+        return { translateX: 0, scale: 1, rotate: 0, zIndex: 30 };
       } else if (isLeft) {
-        return { translateX: -85, scale: 0.85, rotate: -8 };
+        return { translateX: -70, scale: 0.9, rotate: -6, zIndex: 20 };
       } else {
-        return { translateX: 85, scale: 0.85, rotate: 8 };
+        return { translateX: 70, scale: 0.9, rotate: 6, zIndex: 20 };
       }
     };
     
-    const { translateX, scale, rotate } = getTransform();
-    const zIndex = isCenter ? 100 : 50;
-    const opacity = isCenter ? 1 : 0.85;
+    const { translateX, scale, rotate, zIndex } = getTransform();
+    const opacity = isCenter ? 1 : 0.9;
+    
+    // Card base styles
+    const cardWidth = isCenter ? 160 : 140;
+    const cardHeight = isCenter ? 200 : 180;
 
     // Render locked upcoming card
     if (day.isLocked) {
       return (
         <div
-          className="absolute top-1/2 left-1/2 rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+          className="absolute top-1/2 left-1/2 rounded-2xl overflow-hidden transition-all duration-500 ease-out"
           style={{
-            width: '200px',
-            height: '260px',
+            width: `${cardWidth}px`,
+            height: `${cardHeight}px`,
             transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale}) rotate(${rotate}deg)`,
             zIndex,
-            opacity: 0.6,
-            background: 'linear-gradient(145deg, rgba(40,40,40,0.95) 0%, rgba(20,20,20,0.98) 100%)',
+            opacity: 0.7,
+            background: 'rgba(70, 70, 90, 0.8)',
             border: '1px solid rgba(255,255,255,0.1)',
           }}
         >
           <div className="w-full h-full flex flex-col items-center justify-center">
-            <div className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center mb-3">
-              <Lock className="w-6 h-6 text-white/50" />
+            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-2">
+              <Lock className="w-5 h-5 text-white/40" />
             </div>
-            <p className="text-xs text-white/40 font-medium tracking-wider">{day.displayDate}</p>
+            <p className="text-[10px] text-white/40 font-medium tracking-wider">{day.displayDate}</p>
           </div>
         </div>
       );
@@ -125,32 +129,31 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
     if (day.state === 'active' && !day.photo) {
       return (
         <div
-          className="absolute top-1/2 left-1/2 rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer"
+          className="absolute top-1/2 left-1/2 rounded-2xl overflow-hidden transition-all duration-500 ease-out cursor-pointer"
           style={{
-            width: '200px',
-            height: '260px',
+            width: `${cardWidth}px`,
+            height: `${cardHeight}px`,
             transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale}) rotate(${rotate}deg)`,
             zIndex,
             opacity,
-            background: 'linear-gradient(145deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
-            border: '2px solid rgba(255,255,255,0.4)',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+            background: 'rgba(70, 70, 90, 0.9)',
+            border: '2px solid rgba(255,255,255,0.25)',
+            boxShadow: '0 15px 40px rgba(0,0,0,0.3)',
           }}
           onClick={onCardClick}
         >
           <div className="w-full h-full flex flex-col items-center justify-center">
             {/* Camera frame with user icon */}
-            <div className="relative w-20 h-20">
-              <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-foreground/40 rounded-tl-xl" />
-              <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-foreground/40 rounded-tr-xl" />
-              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-foreground/40 rounded-bl-xl" />
-              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-foreground/40 rounded-br-xl" />
+            <div className="relative w-16 h-16">
+              <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-white/30 rounded-tl-lg" />
+              <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-white/30 rounded-tr-lg" />
+              <div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-white/30 rounded-bl-lg" />
+              <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-white/30 rounded-br-lg" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <User className="w-10 h-10 text-foreground/40" strokeWidth={1.5} />
+                <User className="w-8 h-8 text-white/30" strokeWidth={1.5} />
               </div>
             </div>
-            <p className="text-sm text-foreground/50 mt-4 font-medium">Today's capture</p>
+            <p className="text-xs text-white/50 mt-3 font-medium">Today's capture</p>
           </div>
         </div>
       );
@@ -160,14 +163,15 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
     if (day.photo) {
       return (
         <div
-          className="absolute top-1/2 left-1/2 rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer"
+          className="absolute top-1/2 left-1/2 rounded-2xl overflow-hidden transition-all duration-500 ease-out cursor-pointer"
           style={{
-            width: '200px',
-            height: '260px',
+            width: `${cardWidth}px`,
+            height: `${cardHeight}px`,
             transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale}) rotate(${rotate}deg)`,
             zIndex,
             opacity,
-            boxShadow: isCenter ? '0 20px 50px rgba(0,0,0,0.4)' : '0 10px 30px rgba(0,0,0,0.2)',
+            boxShadow: isCenter ? '0 15px 40px rgba(0,0,0,0.4)' : '0 8px 25px rgba(0,0,0,0.2)',
+            border: '2px solid rgba(0,0,0,0.3)',
           }}
           onClick={() => handlePhotoTap(day.photo!)}
         >
@@ -176,9 +180,30 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
             alt={day.photo.activity || 'Photo'}
             className="w-full h-full object-cover"
           />
+          
+          {/* Small thumbnail photo in corner */}
+          <div 
+            className="absolute top-2 right-2 w-10 h-12 rounded-lg overflow-hidden border-2 border-black/50 shadow-lg"
+            style={{ transform: 'rotate(8deg)' }}
+          >
+            <img
+              src={day.photo.url}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          </div>
+          
+          {/* Activity icon */}
+          <div className="absolute top-1 right-0 w-8 h-8">
+            <img src={shuttlecockIcon} alt="" className="w-full h-full object-contain" />
+          </div>
+          
           {/* Date overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
-            <p className="text-white text-sm font-bold tracking-wide text-center">
+          <div className="absolute bottom-2 left-2 right-2">
+            <p 
+              className="text-white text-sm font-bold tracking-wide italic"
+              style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.8)' }}
+            >
               {day.displayDate}
             </p>
           </div>
@@ -186,31 +211,31 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
       );
     }
 
-    // Render empty past card (missed day)
+    // Render empty past card (missed day) or empty upcoming card
     return (
       <div
-        className="absolute top-1/2 left-1/2 rounded-3xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+        className="absolute top-1/2 left-1/2 rounded-2xl overflow-hidden transition-all duration-500 ease-out"
         style={{
-          width: '200px',
-          height: '260px',
+          width: `${cardWidth}px`,
+          height: `${cardHeight}px`,
           transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale}) rotate(${rotate}deg)`,
           zIndex,
-          opacity: 0.5,
-          background: 'linear-gradient(145deg, rgba(60,60,60,0.6) 0%, rgba(30,30,30,0.8) 100%)',
+          opacity: 0.7,
+          background: 'rgba(70, 70, 90, 0.8)',
           border: '1px solid rgba(255,255,255,0.1)',
         }}
       >
         <div className="w-full h-full flex flex-col items-center justify-center">
-          <p className="text-xs text-white/30 font-medium tracking-wider">{day.displayDate}</p>
-          <p className="text-xs text-white/20 mt-1">Missed</p>
+          <p className="text-[10px] text-white/30 font-medium tracking-wider">{day.displayDate}</p>
+          {day.state === 'past' && <p className="text-[10px] text-white/20 mt-1">Missed</p>}
         </div>
       </div>
     );
   };
 
   return (
-    <div className="relative w-full flex justify-center items-center" style={{ height: '340px' }}>
-      <div className="relative w-full" style={{ height: '280px' }}>
+    <div className="relative w-full flex justify-center items-center" style={{ height: '260px' }}>
+      <div className="relative w-full" style={{ height: '220px' }}>
         {days.map((day, index) => (
           <DayCardComponent key={day.dateString} day={day} position={index} />
         ))}
