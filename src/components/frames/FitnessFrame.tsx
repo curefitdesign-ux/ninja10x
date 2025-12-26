@@ -11,7 +11,7 @@ interface FitnessFrameProps {
 
 const FitnessFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale }: FitnessFrameProps) => {
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[20px] overflow-hidden shadow-2xl relative" style={{ background: '#6B6B2A' }}>
+    <div className="w-full mx-auto aspect-[4/5] rounded-[20px] overflow-hidden shadow-2xl relative" style={{ background: '#6B6B2A' }}>
       {/* Grid background */}
       <div className="absolute inset-0">
         {/* Outer border frame */}
