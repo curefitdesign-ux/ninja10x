@@ -276,6 +276,8 @@ const Preview = () => {
                     {frame === 'shaky' && <ShakyFrame {...frameProps} />}
                     {frame === 'journal' && <JournalFrame {...frameProps} />}
                     {frame === 'vogue' && <VogueFrame {...frameProps} />}
+                    {frame === 'fitness' && <FitnessFrame {...frameProps} />}
+                    {frame === 'ticket' && <TicketFrame {...frameProps} />}
                   </div>
                 </div>
               );
