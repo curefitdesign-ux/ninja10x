@@ -55,28 +55,28 @@ const ShakyFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition
           <div className="flex-1">
             <p className="text-white/60 text-[10px] font-medium mb-0.5 tracking-wide">Time</p>
             <p 
-              className="text-white font-bold leading-none text-xl"
+              className="text-white font-bold leading-none text-xl animate-subtle-pulse"
               style={{ fontVariantNumeric: 'tabular-nums' }}
             >
               {duration || "02:00:50"}
             </p>
             <div className="flex items-end gap-0.5 mt-2 h-6">
-              <div className="w-2.5 h-2.5 bg-white/20 rounded-sm" />
-              <div className="w-2.5 h-5 bg-white/20 rounded-sm" />
-              <div className="w-2.5 h-6 bg-white/20 rounded-sm" />
-              <div className="w-2.5 h-4 bg-white/20 rounded-sm" />
+              <div className="w-2.5 h-2.5 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0s' }} />
+              <div className="w-2.5 h-5 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0.2s' }} />
+              <div className="w-2.5 h-6 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0.4s' }} />
+              <div className="w-2.5 h-4 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0.6s' }} />
             </div>
           </div>
           
           <div className="flex-1">
             <p className="text-white/60 text-[10px] font-medium mb-0.5 tracking-wide">Punches Per Round</p>
             <p 
-              className="text-white font-bold leading-none text-xl"
-              style={{ fontVariantNumeric: 'tabular-nums' }}
+              className="text-white font-bold leading-none text-xl animate-subtle-pulse"
+              style={{ fontVariantNumeric: 'tabular-nums', animationDelay: '0.5s' }}
             >
               {pr || "100"}
             </p>
-            <svg className="w-16 h-6 mt-2" viewBox="0 0 96 40" fill="none">
+            <svg className="w-16 h-6 mt-2 animate-subtle-wave" viewBox="0 0 96 40" fill="none">
               <path 
                 d="M0 30 L14 22 L28 26 L42 14 L56 20 L70 10 L84 14 L96 6" 
                 fill="none" 

@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Check } from 'lucide-react';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import ShakyFrame from '@/components/frames/ShakyFrame';
 import JournalFrame from '@/components/frames/JournalFrame';
@@ -33,15 +33,21 @@ const Preview = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   
-  // Swipe handling
-  const touchStartX = useRef(0);
+  // Carousel state
   const containerRef = useRef<HTMLDivElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Create extended frames for infinite loop effect (duplicate frames at start and end)
+  const extendedFrames = [...FRAMES, ...FRAMES, ...FRAMES];
 
   useEffect(() => {
     const state = location.state as { imageUrl?: string; activity?: string } | null;
     if (state?.imageUrl) {
       setImageUrl(state.imageUrl);
       setActivity(state.activity || null);
+      // Trigger entrance animation after a brief delay
+      setTimeout(() => setIsLoaded(true), 100);
     } else {
       navigate('/');
     }
@@ -101,33 +107,59 @@ const Preview = () => {
     navigate('/');
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const touchEndX = e.changedTouches[0].clientX;
-    const diff = touchStartX.current - touchEndX;
+  // Handle scroll to update current frame and calculate scale
+  const handleScroll = useCallback(() => {
+    if (!containerRef.current) return;
     
-    if (Math.abs(diff) > 50) {
-      const currentIndex = FRAMES.indexOf(currentFrame);
-      if (diff > 0 && currentIndex < FRAMES.length - 1) {
-        // Swipe left - next frame
-        setCurrentFrame(FRAMES[currentIndex + 1]);
-      } else if (diff < 0 && currentIndex > 0) {
-        // Swipe right - previous frame
-        setCurrentFrame(FRAMES[currentIndex - 1]);
-      }
+    const container = containerRef.current;
+    const scrollLeft = container.scrollLeft;
+    const itemWidth = container.offsetWidth * 0.75;
+    const centerOffset = (container.offsetWidth - itemWidth) / 2;
+    
+    // Calculate which frame is in center
+    const centerPosition = scrollLeft + container.offsetWidth / 2;
+    const frameIndex = Math.round((centerPosition - centerOffset) / itemWidth);
+    
+    // Handle infinite loop - map extended index back to original frame
+    const normalizedIndex = ((frameIndex % FRAMES.length) + FRAMES.length) % FRAMES.length;
+    const newFrame = FRAMES[normalizedIndex];
+    
+    if (newFrame !== currentFrame) {
+      setCurrentFrame(newFrame);
     }
-  };
+    
+    setScrollProgress(scrollLeft);
+  }, [currentFrame]);
 
-  const goToFrame = (direction: 'prev' | 'next') => {
-    const currentIndex = FRAMES.indexOf(currentFrame);
-    if (direction === 'next' && currentIndex < FRAMES.length - 1) {
-      setCurrentFrame(FRAMES[currentIndex + 1]);
-    } else if (direction === 'prev' && currentIndex > 0) {
-      setCurrentFrame(FRAMES[currentIndex - 1]);
+  // Scroll to center on mount
+  useEffect(() => {
+    if (containerRef.current && isLoaded) {
+      const container = containerRef.current;
+      const itemWidth = container.offsetWidth * 0.75;
+      // Start at the middle set of frames
+      const startIndex = FRAMES.length;
+      const targetScroll = startIndex * itemWidth - (container.offsetWidth - itemWidth) / 2;
+      container.scrollLeft = targetScroll;
     }
+  }, [isLoaded]);
+
+  // Calculate scale for each frame based on distance from center
+  const getFrameScale = (index: number): { scale: number; opacity: number } => {
+    if (!containerRef.current) return { scale: index === FRAMES.length ? 1 : 0.85, opacity: index === FRAMES.length ? 1 : 0.6 };
+    
+    const container = containerRef.current;
+    const itemWidth = container.offsetWidth * 0.75;
+    const centerOffset = (container.offsetWidth - itemWidth) / 2;
+    const frameCenter = index * itemWidth + itemWidth / 2 - centerOffset;
+    const viewCenter = scrollProgress + container.offsetWidth / 2;
+    
+    const distance = Math.abs(frameCenter - viewCenter);
+    const maxDistance = itemWidth;
+    const scale = Math.max(0.85, 1 - (distance / maxDistance) * 0.15);
+    const opacity = Math.max(0.6, 1 - (distance / maxDistance) * 0.4);
+    
+    return { scale, opacity };
+  };
   };
 
   const openEditSheet = (field: EditingField) => {
@@ -213,31 +245,33 @@ const Preview = () => {
           <ArrowLeft className="w-5 h-5 text-white" />
         </button>
 
-        {/* Frame carousel - horizontal scroll */}
-        <div className="flex-1 flex items-center overflow-hidden -mx-5">
+        {/* Frame carousel - horizontal scroll with infinite loop effect */}
+        <div className={`flex-1 flex items-center overflow-hidden -mx-5 ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'}`}>
           <div 
             ref={containerRef}
-            className="flex gap-1 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center px-1"
+            onScroll={handleScroll}
+            className="flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center"
             style={{ 
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
               WebkitOverflowScrolling: 'touch',
             }}
           >
-            {FRAMES.map((frame, index) => {
-              const isCenter = index === currentIndex;
+            {extendedFrames.map((frame, index) => {
+              const { scale, opacity } = getFrameScale(index);
+              const isCurrentFrame = frame === currentFrame && Math.abs(scale - 1) < 0.05;
+              
               return (
                 <div 
-                  key={frame}
-                  className="flex-shrink-0 snap-center h-fit flex items-center justify-center transition-all duration-300 ease-out"
+                  key={`${frame}-${index}`}
+                  className="flex-shrink-0 snap-center h-fit flex items-center justify-center transition-all duration-150 ease-out"
                   style={{ 
-                    width: 'calc(85vw)',
-                    transform: isCenter ? 'scale(1)' : 'scale(0.9)',
-                    opacity: isCenter ? 1 : 0.7,
+                    width: 'calc(75vw)',
+                    transform: `scale(${scale})`,
+                    opacity,
                   }}
-                  onClick={() => setCurrentFrame(frame)}
                 >
-                  <div ref={index === currentIndex ? frameRef : undefined} className="w-full">
+                  <div ref={isCurrentFrame ? frameRef : undefined} className="w-full">
                     {frame === 'shaky' && <ShakyFrame {...frameProps} />}
                     {frame === 'journal' && <JournalFrame {...frameProps} />}
                     {frame === 'vogue' && <VogueFrame {...frameProps} />}
@@ -364,4 +398,5 @@ const Preview = () => {
   );
 };
 
+export default Preview;
 export default Preview;

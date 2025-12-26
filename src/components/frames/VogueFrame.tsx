@@ -22,10 +22,10 @@ const VogueFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition
         }}
       />
       
-      {/* Top text - Magazine masthead style */}
+      {/* Top text - Magazine masthead style with subtle animation */}
       <div className="absolute top-4 left-4 right-4">
         <h1 
-          className="font-black italic leading-[0.85] tracking-tighter"
+          className="font-black italic leading-[0.85] tracking-tighter animate-subtle-pulse"
           style={{
             fontSize: 'clamp(48px, 18vw, 72px)',
             color: 'rgba(255,255,255,0.95)',
@@ -40,7 +40,7 @@ const VogueFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition
           Player
         </h1>
         <p 
-          className="text-[10px] font-medium mt-0.5 tracking-wide"
+          className="text-[10px] font-medium mt-0.5 tracking-wide animate-subtle-wave"
           style={{
             color: 'rgba(180,180,180,0.7)',
           }}
