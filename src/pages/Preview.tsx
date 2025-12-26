@@ -216,6 +216,10 @@ const Preview = () => {
         return <JournalFrame {...frameProps} />;
       case 'vogue':
         return <VogueFrame {...frameProps} />;
+      case 'fitness':
+        return <FitnessFrame {...frameProps} />;
+      case 'ticket':
+        return <TicketFrame {...frameProps} />;
     }
   };
 
