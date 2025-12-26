@@ -24,7 +24,7 @@ const FitnessFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
         <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <pattern id="fitnessGrid" width="22" height="22" patternUnits="userSpaceOnUse">
-              <path d="M 22 0 L 0 0 0 22" fill="none" stroke="rgba(165, 165, 96, 0.25)" strokeWidth="0.5"/>
+              <path d="M 22 0 L 0 0 0 22" fill="none" stroke="rgba(165, 165, 96, 0.45)" strokeWidth="0.5"/>
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#fitnessGrid)" />
@@ -97,11 +97,11 @@ const FitnessFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
       <div 
         className="absolute z-10"
         style={{
-          top: '22%',
+          top: '18%',
           left: '50%',
-          width: '58%',
+          width: '68%',
           aspectRatio: '3/4',
-          transform: 'translateX(-35%) rotate(8deg)',
+          transform: 'translateX(-40%) rotate(-8deg)',
         }}
       >
         {/* Card shadow */}
