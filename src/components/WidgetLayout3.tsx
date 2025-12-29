@@ -184,30 +184,32 @@ const WidgetLayout3 = ({
         {/* Film Strip Section - 12 blocks in one row */}
         <div className="relative z-10">
           {/* Film strip background image */}
-          <div 
-            className="relative w-full"
-            style={{
-              backgroundImage: `url(${filmstripBg})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              height: '60px',
-              borderRadius: '4px'
-            }}
-          >
+          <div className="relative w-full">
+            <img 
+              src={filmstripBg} 
+              alt="" 
+              className="w-full h-auto"
+              style={{ display: 'block' }}
+            />
             {/* 12 photo blocks overlaid on film strip */}
             <div 
-              className="absolute inset-0 flex items-center justify-end gap-[3px] pr-2"
-              style={{ paddingTop: '8px', paddingBottom: '8px' }}
+              className="absolute inset-0 flex items-center gap-[2px]"
+              style={{ 
+                paddingLeft: '38px',
+                paddingRight: '4px',
+                paddingTop: '10px', 
+                paddingBottom: '10px' 
+              }}
             >
               {[...Array(12)].map((_, index) => {
                 const photo = photos[index];
                 return (
                   <div 
                     key={index}
-                    className="h-full aspect-[3/4] overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all flex-shrink-0"
+                    className="h-full flex-1 overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all"
                     style={{ 
                       background: '#0a0a0a',
-                      borderRadius: '6px'
+                      borderRadius: '4px'
                     }}
                     onClick={() => photo && handlePhotoTap(photo)}
                   >
@@ -216,7 +218,7 @@ const WidgetLayout3 = ({
                         src={photo.url}
                         alt=""
                         className="w-full h-full object-cover"
-                        style={{ borderRadius: '6px' }}
+                        style={{ borderRadius: '4px' }}
                       />
                     ) : null}
                   </div>
