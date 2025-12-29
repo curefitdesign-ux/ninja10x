@@ -112,9 +112,14 @@ const WidgetLayout3 = ({
         <div className="relative z-10 mb-6 flex justify-center" style={{ minHeight: latestPhoto ? '280px' : '160px' }}>
           {latestPhoto ? (
             <div 
-              className="relative cursor-pointer w-[55%]"
+              className="relative cursor-pointer"
               onClick={() => handlePhotoTap(latestPhoto)}
-              style={{ transform: 'rotate(2deg)' }}
+              style={{ 
+                transform: 'rotate(2deg) scale(0.55)',
+                transformOrigin: 'center center',
+                width: '100%',
+                maxWidth: '280px'
+              }}
             >
               {renderFrame()}
             </div>
@@ -166,7 +171,7 @@ const WidgetLayout3 = ({
                     return (
                       <div 
                         key={index}
-                        className={`overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all ${photo ? 'animate-scale-in' : ''}`}
+                        className={`overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all ${photo ? 'animate-scale-in animate-film-shimmer' : ''}`}
                         style={{ 
                           background: '#0a0a0a',
                           borderRadius: '2px',

@@ -297,27 +297,27 @@ const Preview = () => {
       </div>
       {/* Dynamic gradient overlay based on current frame */}
       <div 
-        className="absolute inset-0 transition-all duration-500"
+        className="absolute inset-0 transition-all duration-500 animate-color-pulse"
         style={{ 
           backgroundColor: FRAME_COLORS[currentFrame].bg,
           backgroundImage: FRAME_COLORS[currentFrame].gradient 
         }}
       />
-      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute inset-0 bg-black/20 animate-subtle-pulse" />
 
       {/* Content */}
       <div className="relative z-10 flex flex-col min-h-screen px-5">
-        {/* Header */}
+        {/* Header with title aligned with arrow */}
         <div className="h-12" />
-        <button 
-          onClick={handleBack}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm mb-4"
-        >
-          <ArrowLeft className="w-5 h-5 text-white" />
-        </button>
-
-        {/* Select your frame title */}
-        <h2 className="text-white/80 text-lg font-semibold text-center mb-4">Select your frame</h2>
+        <div className="flex items-center gap-3 mb-4">
+          <button 
+            onClick={handleBack}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm"
+          >
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </button>
+          <h2 className="text-white/80 text-lg font-semibold">Select your frame</h2>
+        </div>
         
         {/* Frame carousel - horizontal scroll with infinite loop effect */}
         <div className={`flex-1 flex items-center overflow-hidden -mx-5 ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'}`}>
@@ -389,13 +389,13 @@ const Preview = () => {
             </button>
           </div>
 
-          {/* Save button */}
+          {/* Save button - White CTA with black text */}
           <button 
             onClick={handleSave}
             disabled={isSaving}
-            className="w-full bg-[#FF4D4D] py-4 rounded-2xl disabled:opacity-50"
+            className="w-full bg-white py-4 rounded-2xl disabled:opacity-50"
           >
-            <span className="text-white font-bold text-lg">
+            <span className="text-black font-bold text-lg">
               {isSaving ? 'Saving...' : 'Save Activity'}
             </span>
           </button>
