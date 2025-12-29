@@ -68,7 +68,7 @@ const WidgetLayout3 = ({
         </h2>
       
         {/* Single Center Photo Card */}
-        <div className="relative z-10 mb-6 flex justify-center" style={{ minHeight: '220px' }}>
+        <div className="relative z-10 mb-6 flex justify-center" style={{ minHeight: latestPhoto ? '220px' : '160px' }}>
           {latestPhoto ? (
             <div 
               className="relative cursor-pointer"
@@ -167,7 +167,24 @@ const WidgetLayout3 = ({
                 </div>
               </div>
             </div>
-          ) : null}
+          ) : (
+            /* Empty State */
+            <div 
+              className="flex flex-col items-center justify-center cursor-pointer"
+              onClick={onAddPhoto}
+            >
+              <div 
+                className="w-20 h-20 rounded-full flex items-center justify-center mb-3"
+                style={{ 
+                  background: 'rgba(255,255,255,0.1)',
+                  border: '2px dashed rgba(255,255,255,0.3)'
+                }}
+              >
+                <User className="w-8 h-8 text-white/50" strokeWidth={1.5} />
+              </div>
+              <p className="text-sm text-white/60 font-medium">Upload your first image</p>
+            </div>
+          )}
         </div>
       
         {/* Film Strip Section - 12 blocks in one row */}
@@ -180,9 +197,9 @@ const WidgetLayout3 = ({
               className="w-full h-auto"
               style={{ display: 'block' }}
             />
-            {/* 12 photo blocks overlaid on film strip */}
+            {/* 12 photo blocks overlaid on film strip - 4 groups of 3 with spacing */}
             <div 
-              className="absolute inset-0 flex items-center justify-center gap-[2px]"
+              className="absolute inset-0 flex items-center justify-center gap-[5px]"
               style={{ 
                 paddingLeft: '16px',
                 paddingRight: '3px',
@@ -190,43 +207,48 @@ const WidgetLayout3 = ({
                 paddingBottom: '6px' 
               }}
             >
-              {[...Array(12)].map((_, index) => {
-                const photo = photos[index];
-                return (
-                  <div 
-                    key={index}
-                    className={`flex-1 overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all ${photo ? 'animate-scale-in' : ''}`}
-                    style={{ 
-                      background: '#0a0a0a',
-                      borderRadius: '3px',
-                      aspectRatio: '9/16',
-                      maxHeight: '100%',
-                      animationDelay: photo ? `${index * 50}ms` : '0ms',
-                      animationFillMode: 'both'
-                    }}
-                    onClick={() => photo && handlePhotoTap(photo)}
-                  >
-                    {photo ? (
-                      photo.isVideo || isVideoUrl(photo.url) ? (
-                        <video
-                          src={photo.url}
-                          className="w-full h-full object-cover"
-                          style={{ borderRadius: '3px' }}
-                          muted
-                          playsInline
-                        />
-                      ) : (
-                        <img
-                          src={photo.url}
-                          alt=""
-                          className="w-full h-full object-cover"
-                          style={{ borderRadius: '3px' }}
-                        />
-                      )
-                    ) : null}
-                  </div>
-                );
-              })}
+              {[0, 1, 2, 3].map((groupIndex) => (
+                <div key={groupIndex} className="flex gap-[1px]">
+                  {[0, 1, 2].map((boxIndex) => {
+                    const index = groupIndex * 3 + boxIndex;
+                    const photo = photos[index];
+                    return (
+                      <div 
+                        key={index}
+                        className={`overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all ${photo ? 'animate-scale-in' : ''}`}
+                        style={{ 
+                          background: '#0a0a0a',
+                          borderRadius: '2px',
+                          width: '18px',
+                          aspectRatio: '9/16',
+                          animationDelay: photo ? `${index * 50}ms` : '0ms',
+                          animationFillMode: 'both'
+                        }}
+                        onClick={() => photo && handlePhotoTap(photo)}
+                      >
+                        {photo ? (
+                          photo.isVideo || isVideoUrl(photo.url) ? (
+                            <video
+                              src={photo.url}
+                              className="w-full h-full object-cover"
+                              style={{ borderRadius: '2px' }}
+                              muted
+                              playsInline
+                            />
+                          ) : (
+                            <img
+                              src={photo.url}
+                              alt=""
+                              className="w-full h-full object-cover"
+                              style={{ borderRadius: '2px' }}
+                            />
+                          )
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           </div>
         </div>
