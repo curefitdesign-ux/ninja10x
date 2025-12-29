@@ -2,12 +2,6 @@ import { User, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import cardBackground from '@/assets/card-background.png';
 import filmstripBg from '@/assets/frames/filmstrip-bg.png';
-import ShakyFrame from '@/components/frames/ShakyFrame';
-import JournalFrame from '@/components/frames/JournalFrame';
-import VogueFrame from '@/components/frames/VogueFrame';
-import FitnessFrame from '@/components/frames/FitnessFrame';
-import TicketFrame from '@/components/frames/TicketFrame';
-import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
 
 interface Photo {
   id: string;
@@ -39,9 +33,6 @@ const WidgetLayout3 = ({
   
   // Get the latest photo for center display
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
-  
-  // Get activity data points for labels
-  const { label1, label2 } = useActivityDataPoints(latestPhoto?.activity || '');
 
   const handlePhotoTap = (photo: Photo) => {
     navigate('/preview', { 
@@ -54,39 +45,6 @@ const WidgetLayout3 = ({
         isReview: true
       } 
     });
-  };
-
-  // Render the appropriate frame based on selected frame type
-  const renderFrame = () => {
-    if (!latestPhoto) return null;
-    
-    const frameProps = {
-      imageUrl: latestPhoto.url,
-      isVideo: latestPhoto.isVideo || isVideoUrl(latestPhoto.url),
-      activity: latestPhoto.activity || '',
-      week: 1,
-      day: photos.length,
-      duration: latestPhoto.duration || '',
-      pr: latestPhoto.pr || '',
-      imagePosition: { x: 0, y: 0 },
-      imageScale: 1.2,
-      label1,
-      label2,
-    };
-
-    switch (latestPhoto.frame) {
-      case 'journal':
-        return <JournalFrame {...frameProps} />;
-      case 'vogue':
-        return <VogueFrame {...frameProps} />;
-      case 'fitness':
-        return <FitnessFrame {...frameProps} />;
-      case 'ticket':
-        return <TicketFrame {...frameProps} />;
-      case 'shaky':
-      default:
-        return <ShakyFrame {...frameProps} />;
-    }
   };
 
   return (
@@ -108,20 +66,36 @@ const WidgetLayout3 = ({
           CONQUER WILL POWER
         </h2>
       
-        {/* Single Center Photo Card - Shows selected frame template */}
-        <div className="relative z-10 mb-6 flex justify-center" style={{ minHeight: latestPhoto ? '280px' : '160px' }}>
+        {/* Single Center Photo Card - Shows the captured framed image */}
+        <div className="relative z-10 mb-6 flex justify-center" style={{ minHeight: latestPhoto ? '220px' : '160px' }}>
           {latestPhoto ? (
             <div 
-              className="relative cursor-pointer"
+              className="relative cursor-pointer overflow-hidden rounded-xl"
               onClick={() => handlePhotoTap(latestPhoto)}
               style={{ 
-                transform: 'rotate(2deg) scale(0.55)',
-                transformOrigin: 'center center',
-                width: '100%',
-                maxWidth: '280px'
+                transform: 'rotate(2deg)',
+                width: '180px',
+                aspectRatio: '9/16',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
               }}
             >
-              {renderFrame()}
+              {/* Show the saved framed image directly - no template re-rendering */}
+              {latestPhoto.isVideo || isVideoUrl(latestPhoto.url) ? (
+                <video
+                  src={latestPhoto.url}
+                  className="w-full h-full object-cover"
+                  muted
+                  playsInline
+                  loop
+                  autoPlay
+                />
+              ) : (
+                <img
+                  src={latestPhoto.url}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+              )}
             </div>
           ) : (
             /* Empty State */
