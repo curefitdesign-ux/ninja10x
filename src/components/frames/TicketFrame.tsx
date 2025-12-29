@@ -20,7 +20,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
   const durationLabel = label2 || 'Duration';
   
   return (
-    <div className="w-full mx-auto aspect-[9/16] overflow-hidden relative rounded-3xl">
+    <div className="w-[90%] mx-auto aspect-[9/16] overflow-hidden relative rounded-3xl">
       {/* Layer 1: Background Image or Video (full-bleed) */}
       {isVideo ? (
         <video 
@@ -55,10 +55,10 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
         className="absolute z-10 pointer-events-none"
         style={{ 
           objectFit: 'fill',
-          top: '6%',
-          left: '8%',
-          width: '84%',
-          height: '88%'
+          top: '4%',
+          left: '6%',
+          width: '88%',
+          height: '92%'
         }}
       />
       
@@ -66,16 +66,16 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
       <div 
         className="absolute z-20 left-0 right-0 flex items-center justify-center"
         style={{ 
-          top: 'calc(6% + 30px)',
-          height: '7%'
+          top: 'calc(4% + 20px)',
+          height: '6%'
         }}
       >
         <h1 
           className="text-[#2A2A2A] uppercase tracking-wide leading-none text-center"
           style={{ 
             fontFamily: 'Impact, "Arial Black", sans-serif',
-            fontSize: 'clamp(32px, 10vw, 48px)',
-            letterSpacing: '3px'
+            fontSize: 'clamp(24px, 8vw, 36px)',
+            letterSpacing: '2px'
           }}
         >
           {activity || 'TENNIS'}
@@ -86,9 +86,9 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
       <div 
         className="absolute z-30 left-1/2 -translate-x-1/2 flex items-center justify-center"
         style={{ 
-          top: '54%',
-          width: '55%',
-          height: '5%'
+          top: '52%',
+          width: '50%',
+          height: '4%'
         }}
       >
         {/* Ribbon image */}
@@ -106,8 +106,8 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
           className="relative z-10 text-[#5A5A5A] font-bold tracking-wider whitespace-nowrap"
           style={{ 
             fontFamily: 'Impact, "Arial Black", sans-serif',
-            fontSize: 'clamp(12px, 3.5vw, 16px)',
-            letterSpacing: '2px',
+            fontSize: 'clamp(10px, 3vw, 13px)',
+            letterSpacing: '1.5px',
             transform: 'rotate(-4deg)'
           }}
         >
@@ -117,8 +117,8 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
       
       {/* Layer 5: Dashed Divider Line */}
       <div 
-        className="absolute z-20 left-[12%] right-[12%]"
-        style={{ top: '62%' }}
+        className="absolute z-20 left-[10%] right-[10%]"
+        style={{ top: '60%' }}
       >
         <div 
           className="w-full"
@@ -130,10 +130,10 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
       
       {/* Layer 6-9: Stats Section */}
       <div 
-        className="absolute z-20 left-0 right-0 px-[12%] flex items-center justify-center"
+        className="absolute z-20 left-0 right-0 px-[10%] flex items-center justify-center"
         style={{ 
-          top: '66%',
-          height: '26%'
+          top: '64%',
+          height: '24%'
         }}
       >
         <div className="flex items-center justify-center w-full">
@@ -143,7 +143,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
               className="text-[#888888] font-normal mb-1"
               style={{ 
                 fontFamily: 'system-ui, -apple-system, sans-serif',
-                fontSize: 'clamp(11px, 3vw, 14px)',
+                fontSize: 'clamp(9px, 2.5vw, 12px)',
                 letterSpacing: '0.5px'
               }}
             >
@@ -153,7 +153,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
               className="text-[#2A2A2A] leading-none"
               style={{ 
                 fontFamily: 'Impact, "Arial Black", sans-serif',
-                fontSize: 'clamp(40px, 12vw, 64px)',
+                fontSize: 'clamp(32px, 10vw, 48px)',
                 fontWeight: 900
               }}
             >
@@ -162,14 +162,14 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
           </div>
           
           {/* Vertical divider */}
-          <div 
-            className="mx-4 rounded-full"
-            style={{ 
-              width: '2px',
-              height: 'clamp(50px, 15vw, 80px)',
-              background: '#2A2A2A'
-            }}
-          />
+            <div 
+              className="mx-3 rounded-full"
+              style={{ 
+                width: '2px',
+                height: 'clamp(40px, 12vw, 60px)',
+                background: '#2A2A2A'
+              }}
+            />
           
           {/* Right stat - Duration Label + Value */}
           <div className="text-center flex-1">
@@ -177,7 +177,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
               className="text-[#888888] font-normal mb-1"
               style={{ 
                 fontFamily: 'system-ui, -apple-system, sans-serif',
-                fontSize: 'clamp(11px, 3vw, 14px)',
+                fontSize: 'clamp(9px, 2.5vw, 12px)',
                 letterSpacing: '0.5px'
               }}
             >
@@ -187,7 +187,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
               className="text-[#2A2A2A] leading-none uppercase"
               style={{ 
                 fontFamily: 'Impact, "Arial Black", sans-serif',
-                fontSize: 'clamp(40px, 12vw, 64px)',
+                fontSize: 'clamp(32px, 10vw, 48px)',
                 fontWeight: 900
               }}
             >
