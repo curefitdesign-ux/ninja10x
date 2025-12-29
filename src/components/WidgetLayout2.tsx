@@ -5,12 +5,18 @@ import shuttlecockIcon from '@/assets/frames/shuttlecock.png';
 interface Photo {
   id: string;
   url: string;
+  isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue';
   duration?: string;
   pr?: string;
   uploadDate: string;
 }
+
+// Helper to detect if URL is a video
+const isVideoUrl = (url: string) => {
+  return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
+};
 
 interface WidgetLayout2Props {
   photos: Photo[];
@@ -152,13 +158,24 @@ const WidgetLayout2 = ({
                   ))}
                 </div>
 
-                {/* Photo */}
+                {/* Photo/Video */}
                 <div className="relative pt-8 px-2">
-                  <img
-                    src={displayPhoto.url}
-                    alt={displayPhoto.activity || 'Photo'}
-                    className="w-full aspect-[4/3] object-cover rounded-lg"
-                  />
+                  {displayPhoto.isVideo || isVideoUrl(displayPhoto.url) ? (
+                    <video
+                      src={displayPhoto.url}
+                      className="w-full aspect-[4/3] object-cover rounded-lg"
+                      muted
+                      loop
+                      autoPlay
+                      playsInline
+                    />
+                  ) : (
+                    <img
+                      src={displayPhoto.url}
+                      alt={displayPhoto.activity || 'Photo'}
+                      className="w-full aspect-[4/3] object-cover rounded-lg"
+                    />
+                  )}
                   
                   {/* Shuttlecock icon */}
                   <div className="absolute bottom-2 left-3 w-8 h-8">
@@ -317,11 +334,20 @@ const WidgetLayout2 = ({
                           style={{ background: '#0a0a0a' }}
                         >
                           {photo && (
-                            <img
-                              src={photo.url}
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
+                            photo.isVideo || isVideoUrl(photo.url) ? (
+                              <video
+                                src={photo.url}
+                                className="w-full h-full object-cover"
+                                muted
+                                playsInline
+                              />
+                            ) : (
+                              <img
+                                src={photo.url}
+                                alt=""
+                                className="w-full h-full object-cover"
+                              />
+                            )
                           )}
                         </div>
                       );

@@ -5,6 +5,7 @@ import cardBackground from '@/assets/card-background.png';
 interface Photo {
   id: string;
   url: string;
+  isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue';
   duration?: string;
