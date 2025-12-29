@@ -162,9 +162,8 @@ const Preview = () => {
   }, [isLoaded]);
 
   // Calculate scale for each frame based on distance from center
-  // Width scales down for non-focused, but height stays the same
-  const getFrameStyle = (index: number): { scaleX: number; opacity: number } => {
-    if (!containerRef.current) return { scaleX: index === FRAMES.length ? 1 : 0.7, opacity: index === FRAMES.length ? 1 : 0.6 };
+  const getFrameScale = (index: number): { scale: number; opacity: number } => {
+    if (!containerRef.current) return { scale: index === FRAMES.length ? 1 : 0.85, opacity: index === FRAMES.length ? 1 : 0.6 };
     
     const container = containerRef.current;
     const itemWidth = container.offsetWidth * 0.75;
@@ -174,11 +173,10 @@ const Preview = () => {
     
     const distance = Math.abs(frameCenter - viewCenter);
     const maxDistance = itemWidth;
-    // Only scale width, not height
-    const scaleX = Math.max(0.7, 1 - (distance / maxDistance) * 0.3);
+    const scale = Math.max(0.85, 1 - (distance / maxDistance) * 0.15);
     const opacity = Math.max(0.6, 1 - (distance / maxDistance) * 0.4);
     
-    return { scaleX, opacity };
+    return { scale, opacity };
   };
 
   const openEditSheet = (field: EditingField) => {
@@ -289,15 +287,16 @@ const Preview = () => {
             }}
           >
             {extendedFrames.map((frame, index) => {
-              const { scaleX, opacity } = getFrameStyle(index);
-              const isCurrentFrame = frame === currentFrame && Math.abs(scaleX - 1) < 0.05;
+              const { scale, opacity } = getFrameScale(index);
+              const isCurrentFrame = frame === currentFrame && Math.abs(scale - 1) < 0.05;
               
               return (
                 <div 
                   key={`${frame}-${index}`}
-                  className="flex-shrink-0 snap-center h-fit flex items-center justify-center transition-all duration-150 ease-out origin-center"
+                  className="flex-shrink-0 snap-center h-fit flex items-center justify-center transition-all duration-150 ease-out"
                   style={{ 
-                    width: `calc(75vw * ${scaleX})`,
+                    width: 'calc(75vw)',
+                    transform: `scale(${scale})`,
                     opacity,
                   }}
                 >
