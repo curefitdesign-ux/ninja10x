@@ -70,6 +70,13 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
   };
 
+  const stopCamera = useCallback(() => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+  }, [stream]);
+
   const takePhoto = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
@@ -85,8 +92,9 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         }
         ctx.drawImage(video, 0, 0);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-        // Immediately capture and close camera
-        onCapture(dataUrl);
+        setCapturedImage(dataUrl);
+        // Stop camera to avoid green dot
+        stopCamera();
       }
     }
   };
@@ -130,6 +138,11 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
       const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
       const videoUrl = URL.createObjectURL(blob);
       setCapturedVideo(videoUrl);
+      // Stop camera to avoid green dot
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        setStream(null);
+      }
     };
     
     mediaRecorder.start(100);

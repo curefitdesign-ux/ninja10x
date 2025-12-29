@@ -20,7 +20,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
   const durationLabel = label2 || 'Duration';
   
   return (
-    <div className="w-full mx-auto aspect-[9/16] overflow-hidden relative">
+    <div className="w-full mx-auto aspect-[9/16] overflow-hidden relative rounded-3xl">
       {/* Layer 1: Background Image or Video (full-bleed) */}
       {isVideo ? (
         <video 
