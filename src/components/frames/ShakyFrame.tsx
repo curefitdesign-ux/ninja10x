@@ -7,9 +7,13 @@ interface ShakyFrameProps {
   pr: string;
   imagePosition: { x: number; y: number };
   imageScale: number;
+  label1?: string;
+  label2?: string;
 }
 
-const ShakyFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale }: ShakyFrameProps) => {
+const ShakyFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: ShakyFrameProps) => {
+  const metricLabel = label1 || 'Metric';
+  const durationLabel = label2 || 'Duration';
   return (
     <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative">
       {/* Background image filling the frame */}
@@ -53,7 +57,7 @@ const ShakyFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition
         {/* Stats at bottom */}
         <div className="flex gap-6">
           <div className="flex-1">
-            <p className="text-white/60 text-[10px] font-medium mb-0.5 tracking-wide">Time</p>
+            <p className="text-white/60 text-[10px] font-medium mb-0.5 tracking-wide">{durationLabel}</p>
             <p 
               className="text-white font-bold leading-none text-xl animate-subtle-pulse"
               style={{ fontVariantNumeric: 'tabular-nums' }}
@@ -69,12 +73,12 @@ const ShakyFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition
           </div>
           
           <div className="flex-1">
-            <p className="text-white/60 text-[10px] font-medium mb-0.5 tracking-wide">Punches Per Round</p>
+            <p className="text-white/60 text-[10px] font-medium mb-0.5 tracking-wide">{metricLabel}</p>
             <p 
               className="text-white font-bold leading-none text-xl animate-subtle-pulse"
               style={{ fontVariantNumeric: 'tabular-nums', animationDelay: '0.5s' }}
             >
-              {pr || "100"}
+              {pr || "10"}
             </p>
             <svg className="w-16 h-6 mt-2 animate-subtle-wave" viewBox="0 0 96 40" fill="none">
               <path 

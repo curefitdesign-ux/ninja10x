@@ -10,9 +10,13 @@ interface Journal2FrameProps {
   pr: string;
   imagePosition: { x: number; y: number };
   imageScale: number;
+  label1?: string;
+  label2?: string;
 }
 
-const Journal2Frame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale }: Journal2FrameProps) => {
+const Journal2Frame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: Journal2FrameProps) => {
+  const metricLabel = label1 || 'Metric';
+  const durationLabel = label2 || 'Duration';
   return (
     <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden bg-white shadow-2xl relative">
       {/* Paperclip - positioned at top center, overlapping the image */}
@@ -79,16 +83,12 @@ const Journal2Frame = ({ imageUrl, activity, week, day, duration, pr, imagePosit
         {/* Stats row */}
         <div className="flex gap-6">
           <div>
-            <p className="text-gray-500 text-[10px] font-medium">Duration</p>
+            <p className="text-gray-500 text-[10px] font-medium">{durationLabel}</p>
             <p className="text-black text-xl font-bold">{duration || "02hrs"}</p>
           </div>
           <div>
-            <p className="text-gray-500 text-[10px] font-medium">Rounds</p>
+            <p className="text-gray-500 text-[10px] font-medium">{metricLabel}</p>
             <p className="text-black text-xl font-bold">{pr || "10"}</p>
-          </div>
-          <div>
-            <p className="text-gray-500 text-[10px] font-medium">Calories</p>
-            <p className="text-black text-xl font-bold">400</p>
           </div>
         </div>
       </div>

@@ -8,6 +8,7 @@ import VogueFrame from '@/components/frames/VogueFrame';
 import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
 import WheelPicker from '@/components/WheelPicker';
+import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
 
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
@@ -27,6 +28,8 @@ const Preview = () => {
   const [currentFrame, setCurrentFrame] = useState<FrameType>('shaky');
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [imageScale, setImageScale] = useState(1.2);
+
+  const { label1, label2 } = useActivityDataPoints(activity || '');
   
   // Bottom sheet keyboard state
   const [editingField, setEditingField] = useState<EditingField>(null);
@@ -206,6 +209,8 @@ const Preview = () => {
     pr,
     imagePosition,
     imageScale,
+    label1,
+    label2,
   };
 
   const renderFrame = () => {
@@ -297,14 +302,14 @@ const Preview = () => {
               onClick={() => openEditSheet('duration')}
               className="w-full flex justify-between items-center py-2 border-b border-white/10"
             >
-              <span className="text-white/80">Duration</span>
-              <span className="text-white font-semibold text-lg">{duration || 'e.g. 2hrs'}</span>
+              <span className="text-white/80">{label2}</span>
+              <span className="text-white font-semibold text-lg">{duration || `e.g. ${label2.toLowerCase()}`}</span>
             </button>
             <button 
               onClick={() => openEditSheet('pr')}
               className="w-full flex justify-between items-center py-2"
             >
-              <span className="text-white/80">PR <span className="text-white/40">(Optional)</span></span>
+              <span className="text-white/80">{label1} <span className="text-white/40">(Optional)</span></span>
               <span className="text-white font-semibold text-lg">{pr || '-'}</span>
             </button>
           </div>
@@ -352,7 +357,7 @@ const Preview = () => {
               
               {/* Label */}
               <p className="text-white text-lg font-semibold text-center mb-4">
-                {editingField === 'duration' ? 'Select Duration' : 'Personal Record (PR)'}
+                {editingField === 'duration' ? `Select ${label2}` : `Enter ${label1}`}
               </p>
               
               {editingField === 'duration' ? (
@@ -378,7 +383,7 @@ const Preview = () => {
                       type="text"
                       value={tempValue}
                       onChange={(e) => handleInputChange(e.target.value)}
-                      placeholder="e.g. 100kg bench press"
+                      placeholder={`e.g. ${label1}`}
                       className="flex-1 bg-transparent text-white text-xl font-semibold px-4 py-4 outline-none placeholder:text-white/30"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {

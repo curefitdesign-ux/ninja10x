@@ -7,9 +7,13 @@ interface TicketFrameProps {
   pr: string;
   imagePosition: { x: number; y: number };
   imageScale: number;
+  label1?: string;
+  label2?: string;
 }
 
-const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale }: TicketFrameProps) => {
+const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: TicketFrameProps) => {
+  const metricLabel = label1 || 'Metric';
+  const durationLabel = label2 || 'Duration';
   return (
     <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative">
       {/* Full bleed background image */}
@@ -171,9 +175,9 @@ const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositio
           {/* Stats section */}
           <div className="absolute left-0 right-0 px-8" style={{ bottom: '15%' }}>
             <div className="flex justify-center items-end">
-              {/* Laps */}
+              {/* Metric */}
               <div className="text-center flex-1">
-                <p className="text-[#7A7A7A] text-base font-medium mb-1">Laps</p>
+                <p className="text-[#7A7A7A] text-base font-medium mb-1">{metricLabel}</p>
                 <p 
                   className="text-[#2D2D2D] text-[52px] font-black leading-none"
                   style={{ fontFamily: 'Impact, sans-serif' }}
@@ -187,7 +191,7 @@ const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositio
               
               {/* Duration */}
               <div className="text-center flex-1">
-                <p className="text-[#7A7A7A] text-base font-medium mb-1">Duration</p>
+                <p className="text-[#7A7A7A] text-base font-medium mb-1">{durationLabel}</p>
                 <p 
                   className="text-[#2D2D2D] text-[52px] font-black leading-none uppercase"
                   style={{ fontFamily: 'Impact, sans-serif' }}
