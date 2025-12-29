@@ -56,7 +56,7 @@ const Index = () => {
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
   const [simulatedDate, setSimulatedDate] = useState<string | null>(null);
-  const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout1');
+  const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout2');
 
   // Get current date (or simulated date for testing)
   const getCurrentDate = () => {
