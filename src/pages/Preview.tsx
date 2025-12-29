@@ -13,13 +13,28 @@ import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
 
-// Background colors matched from each template's actual color scheme
-const FRAME_COLORS: Record<FrameType, string> = {
-  shaky: 'rgba(40, 40, 50, 0.4)',         // Dark neutral - lets image show through
-  journal: 'rgba(45, 212, 168, 0.25)',    // #2DD4A8 teal/mint from badge
-  vogue: 'rgba(255, 255, 255, 0.15)',     // White/elegant minimal
-  fitness: 'rgba(107, 107, 42, 0.5)',     // #6B6B2A olive green from background
-  ticket: 'rgba(200, 197, 188, 0.35)',    // #C8C5BC cream/vintage from dashed line
+// Background colors matched from each template - dark gradient shades
+const FRAME_COLORS: Record<FrameType, { bg: string; gradient: string }> = {
+  shaky: { 
+    bg: 'rgba(20, 20, 30, 0.85)', 
+    gradient: 'linear-gradient(180deg, rgba(30, 30, 40, 0.9) 0%, rgba(10, 10, 15, 0.95) 100%)'
+  },
+  journal: { 
+    bg: 'rgba(15, 60, 50, 0.85)', 
+    gradient: 'linear-gradient(180deg, rgba(25, 80, 65, 0.9) 0%, rgba(10, 40, 35, 0.95) 100%)'
+  },
+  vogue: { 
+    bg: 'rgba(40, 40, 45, 0.85)', 
+    gradient: 'linear-gradient(180deg, rgba(50, 50, 55, 0.9) 0%, rgba(20, 20, 25, 0.95) 100%)'
+  },
+  fitness: { 
+    bg: 'rgba(50, 50, 20, 0.85)', 
+    gradient: 'linear-gradient(180deg, rgba(60, 60, 25, 0.9) 0%, rgba(35, 35, 15, 0.95) 100%)'
+  },
+  ticket: { 
+    bg: 'rgba(55, 50, 45, 0.85)', 
+    gradient: 'linear-gradient(180deg, rgba(65, 60, 55, 0.9) 0%, rgba(40, 35, 30, 0.95) 100%)'
+  },
 };
 
 type EditingField = 'duration' | 'pr' | null;
@@ -53,8 +68,7 @@ const Preview = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Create extended frames for infinite loop effect (duplicate frames at start and end)
-  const extendedFrames = [...FRAMES, ...FRAMES, ...FRAMES];
+  // Single set of frames - no duplicates
 
   useEffect(() => {
     const state = location.state as { imageUrl?: string; isVideo?: boolean; activity?: string } | null;
@@ -138,9 +152,9 @@ const Preview = () => {
     const centerPosition = scrollLeft + container.offsetWidth / 2;
     const frameIndex = Math.round((centerPosition - centerOffset) / itemWidth);
     
-    // Handle infinite loop - map extended index back to original frame
-    const normalizedIndex = ((frameIndex % FRAMES.length) + FRAMES.length) % FRAMES.length;
-    const newFrame = FRAMES[normalizedIndex];
+    // Map index to original frame
+    const clampedIndex = Math.max(0, Math.min(frameIndex, FRAMES.length - 1));
+    const newFrame = FRAMES[clampedIndex];
     
     if (newFrame !== currentFrame) {
       setCurrentFrame(newFrame);
@@ -149,21 +163,19 @@ const Preview = () => {
     setScrollProgress(scrollLeft);
   }, [currentFrame]);
 
-  // Scroll to center on mount
+  // Scroll to first frame on mount
   useEffect(() => {
     if (containerRef.current && isLoaded) {
       const container = containerRef.current;
       const itemWidth = container.offsetWidth * 0.75;
-      // Start at the middle set of frames
-      const startIndex = FRAMES.length;
-      const targetScroll = startIndex * itemWidth - (container.offsetWidth - itemWidth) / 2;
-      container.scrollLeft = targetScroll;
+      const targetScroll = (container.offsetWidth - itemWidth) / 2;
+      container.scrollLeft = 0;
     }
   }, [isLoaded]);
 
   // Calculate scale for each frame based on distance from center
   const getFrameScale = (index: number): { scale: number; opacity: number } => {
-    if (!containerRef.current) return { scale: index === FRAMES.length ? 1 : 0.85, opacity: index === FRAMES.length ? 1 : 0.6 };
+    if (!containerRef.current) return { scale: index === 0 ? 1 : 0.85, opacity: index === 0 ? 1 : 0.6 };
     
     const container = containerRef.current;
     const itemWidth = container.offsetWidth * 0.75;
@@ -256,10 +268,13 @@ const Preview = () => {
           filter: 'blur(80px) brightness(0.7)',
         }}
       />
-      {/* Dynamic color overlay based on current frame */}
+      {/* Dynamic gradient overlay based on current frame */}
       <div 
-        className="absolute inset-0 transition-colors duration-500"
-        style={{ backgroundColor: FRAME_COLORS[currentFrame] }}
+        className="absolute inset-0 transition-all duration-500"
+        style={{ 
+          backgroundColor: FRAME_COLORS[currentFrame].bg,
+          backgroundImage: FRAME_COLORS[currentFrame].gradient 
+        }}
       />
       <div className="absolute inset-0 bg-black/20" />
 
@@ -286,7 +301,7 @@ const Preview = () => {
               WebkitOverflowScrolling: 'touch',
             }}
           >
-            {extendedFrames.map((frame, index) => {
+            {FRAMES.map((frame, index) => {
               const { scale, opacity } = getFrameScale(index);
               const isCurrentFrame = frame === currentFrame && Math.abs(scale - 1) < 0.05;
               
