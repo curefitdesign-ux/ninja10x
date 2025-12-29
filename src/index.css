@@ -249,6 +249,36 @@
     animation: subtle-wave 2.5s ease-in-out infinite;
   }
 
+  /* Film strip shimmer animation */
+  @keyframes film-shimmer {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.85;
+      transform: scale(1.02);
+    }
+  }
+
+  .animate-film-shimmer {
+    animation: film-shimmer 3s ease-in-out infinite;
+  }
+
+  /* Color pulse animation for background */
+  @keyframes color-pulse {
+    0%, 100% {
+      filter: brightness(1) saturate(1);
+    }
+    50% {
+      filter: brightness(1.05) saturate(1.1);
+    }
+  }
+
+  .animate-color-pulse {
+    animation: color-pulse 4s ease-in-out infinite;
+  }
+
   .animate-aurora-float {
     animation: aurora-float 8s ease-in-out infinite;
   }
