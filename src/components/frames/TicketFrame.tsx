@@ -1,3 +1,6 @@
+import ticketFrameAsset from '@/assets/frames/ticket-frame.png';
+import ribbonAsset from '@/assets/frames/ticket-ribbon.png';
+
 interface TicketFrameProps {
   imageUrl: string;
   activity: string;
@@ -12,190 +15,162 @@ interface TicketFrameProps {
 }
 
 const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: TicketFrameProps) => {
-  const metricLabel = label1 || 'Metric';
+  const metricLabel = label1 || 'Laps';
   const durationLabel = label2 || 'Duration';
   
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] overflow-hidden relative bg-[#F5F0E8]">
-      {/* Main ticket container */}
-      <div className="absolute inset-0 flex flex-col">
-        
-        {/* Top cream header with activity name */}
-        <div 
-          className="flex items-center justify-center py-6 px-4"
+    <div className="w-full mx-auto aspect-[9/16] overflow-hidden relative">
+      {/* Layer 1: Background Image (full-bleed) */}
+      <div 
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: `url("${imageUrl}")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+          transformOrigin: 'center center'
+        }}
+      />
+      
+      {/* Layer 2: Ticket Frame Asset (with transparent window) */}
+      <img 
+        src={ticketFrameAsset}
+        alt=""
+        className="absolute inset-0 w-full h-full z-10 pointer-events-none"
+        style={{ objectFit: 'fill' }}
+      />
+      
+      {/* Layer 3: Title Text (dynamic) - positioned in top cream area */}
+      <div 
+        className="absolute z-20 left-0 right-0 flex items-center justify-center"
+        style={{ 
+          top: '4%',
+          height: '8%'
+        }}
+      >
+        <h1 
+          className="text-[#2A2A2A] uppercase tracking-wide leading-none text-center"
           style={{ 
-            background: '#F5F0E8',
-            height: '10%',
-            minHeight: '60px'
+            fontFamily: 'Impact, "Arial Black", sans-serif',
+            fontSize: 'clamp(32px, 10vw, 48px)',
+            letterSpacing: '3px'
           }}
         >
-          <h1 
-            className="text-[#2A2A2A] text-[42px] font-black uppercase tracking-wide leading-none text-center"
-            style={{ 
-              fontFamily: 'Impact, "Arial Black", sans-serif',
-              letterSpacing: '2px'
-            }}
-          >
-            {activity || 'TENNIS'}
-          </h1>
-        </div>
-        
-        {/* Photo section with white border */}
-        <div 
-          className="relative mx-4 bg-white"
+          {activity || 'TENNIS'}
+        </h1>
+      </div>
+      
+      {/* Layer 4: Ribbon Asset + Text (positioned at bottom of photo area) */}
+      <div 
+        className="absolute z-30 left-1/2 -translate-x-1/2 flex items-center justify-center"
+        style={{ 
+          top: '57%',
+          width: '70%',
+          height: '6%'
+        }}
+      >
+        {/* Ribbon image */}
+        <img 
+          src={ribbonAsset}
+          alt=""
+          className="absolute w-full h-auto"
           style={{ 
-            flex: '1 1 auto',
-            minHeight: '45%'
+            transform: 'rotate(-4deg)',
+            filter: 'brightness(0.92)'
+          }}
+        />
+        {/* Ribbon text */}
+        <span 
+          className="relative z-10 text-[#5A5A5A] font-bold tracking-wider whitespace-nowrap"
+          style={{ 
+            fontFamily: 'Impact, "Arial Black", sans-serif',
+            fontSize: 'clamp(12px, 3.5vw, 16px)',
+            letterSpacing: '2px',
+            transform: 'rotate(-4deg)'
           }}
         >
-          {/* White border frame */}
-          <div className="absolute inset-0 p-2">
-            <div className="w-full h-full overflow-hidden relative">
-              <img 
-                src={imageUrl}
-                alt="Activity"
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{
-                  transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-                  transformOrigin: 'center center'
-                }}
-              />
-            </div>
-          </div>
-        </div>
-        
-        {/* Bottom stats section */}
+          WEEK {week} | DAY {day}
+        </span>
+      </div>
+      
+      {/* Layer 5: Dashed Divider Line */}
+      <div 
+        className="absolute z-20 left-[8%] right-[8%]"
+        style={{ top: '66%' }}
+      >
         <div 
-          className="relative"
+          className="w-full"
           style={{ 
-            background: '#F5F0E8',
-            height: '35%',
-            minHeight: '180px'
+            borderTop: '2px dashed #C8C5BC'
           }}
-        >
-          {/* Ribbon badge centered at top */}
-          <div className="absolute left-1/2 -translate-x-1/2 z-20" style={{ top: '-14px' }}>
-            <div className="relative flex items-center">
-              {/* Left ribbon wing */}
-              <svg width="28" height="28" viewBox="0 0 28 28" style={{ marginRight: '-1px' }}>
-                <polygon points="28,6 0,10 0,18 28,22" fill="#C8C5BC" />
-              </svg>
-              
-              {/* Center ribbon */}
-              <div 
-                className="px-5 py-2 relative"
-                style={{ 
-                  background: '#D4D1C8',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                }}
-              >
-                <span 
-                  className="text-[#5A5A5A] font-bold text-sm tracking-wider whitespace-nowrap"
-                  style={{ 
-                    fontFamily: 'Impact, "Arial Black", sans-serif',
-                    letterSpacing: '1px'
-                  }}
-                >
-                  WEEK {week} | DAY {day}
-                </span>
-              </div>
-              
-              {/* Right ribbon wing */}
-              <svg width="28" height="28" viewBox="0 0 28 28" style={{ marginLeft: '-1px' }}>
-                <polygon points="0,6 28,10 28,18 0,22" fill="#C8C5BC" />
-              </svg>
-            </div>
+        />
+      </div>
+      
+      {/* Layer 6-9: Stats Section */}
+      <div 
+        className="absolute z-20 left-0 right-0 px-[10%] flex items-center justify-center"
+        style={{ 
+          top: '71%',
+          height: '24%'
+        }}
+      >
+        <div className="flex items-center justify-center w-full">
+          {/* Left stat - Metric Label + Value */}
+          <div className="text-center flex-1">
+            <p 
+              className="text-[#888888] font-normal mb-1"
+              style={{ 
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+                fontSize: 'clamp(11px, 3vw, 14px)',
+                letterSpacing: '0.5px'
+              }}
+            >
+              {metricLabel}
+            </p>
+            <p 
+              className="text-[#2A2A2A] leading-none"
+              style={{ 
+                fontFamily: 'Impact, "Arial Black", sans-serif',
+                fontSize: 'clamp(40px, 12vw, 64px)',
+                fontWeight: 900
+              }}
+            >
+              {pr || '20'}
+            </p>
           </div>
           
-          {/* Left semicircle cutout */}
+          {/* Vertical divider */}
           <div 
-            className="absolute left-0 w-5 h-10 rounded-r-full"
+            className="mx-4 rounded-full"
             style={{ 
-              top: '28%',
-              transform: 'translateX(-50%)',
-              background: 'linear-gradient(to right, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.08) 50%, transparent 100%)',
-              boxShadow: 'inset -3px 0 6px rgba(0,0,0,0.1)'
+              width: '2px',
+              height: 'clamp(50px, 15vw, 80px)',
+              background: '#2A2A2A'
             }}
           />
           
-          {/* Right semicircle cutout */}
-          <div 
-            className="absolute right-0 w-5 h-10 rounded-l-full"
-            style={{ 
-              top: '28%',
-              transform: 'translateX(50%)',
-              background: 'linear-gradient(to left, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.08) 50%, transparent 100%)',
-              boxShadow: 'inset 3px 0 6px rgba(0,0,0,0.1)'
-            }}
-          />
-          
-          {/* Dashed perforation line */}
-          <div 
-            className="absolute left-6 right-6"
-            style={{ top: '33%' }}
-          >
-            <div 
-              className="border-t-2 border-dashed"
-              style={{ borderColor: '#C8C5BC' }}
-            />
-          </div>
-          
-          {/* Stats display */}
-          <div 
-            className="absolute left-0 right-0 px-8 flex items-end justify-center"
-            style={{ bottom: '18%' }}
-          >
-            <div className="flex items-end justify-center w-full max-w-[320px]">
-              {/* Left stat - Metric */}
-              <div className="text-center flex-1">
-                <p 
-                  className="text-[#8A8A8A] text-base font-medium mb-2 uppercase tracking-wide"
-                  style={{ fontSize: '14px' }}
-                >
-                  {metricLabel}
-                </p>
-                <p 
-                  className="text-[#2A2A2A] leading-none"
-                  style={{ 
-                    fontFamily: 'Impact, "Arial Black", sans-serif',
-                    fontSize: '56px',
-                    fontWeight: 900
-                  }}
-                >
-                  {pr || '20'}
-                </p>
-              </div>
-              
-              {/* Vertical divider */}
-              <div 
-                className="mx-6 rounded-full"
-                style={{ 
-                  width: '3px',
-                  height: '80px',
-                  background: '#2A2A2A'
-                }}
-              />
-              
-              {/* Right stat - Duration */}
-              <div className="text-center flex-1">
-                <p 
-                  className="text-[#8A8A8A] text-base font-medium mb-2 uppercase tracking-wide"
-                  style={{ fontSize: '14px' }}
-                >
-                  {durationLabel}
-                </p>
-                <p 
-                  className="text-[#2A2A2A] leading-none uppercase"
-                  style={{ 
-                    fontFamily: 'Impact, "Arial Black", sans-serif',
-                    fontSize: '56px',
-                    fontWeight: 900
-                  }}
-                >
-                  {duration || '2HRS'}
-                </p>
-              </div>
-            </div>
+          {/* Right stat - Duration Label + Value */}
+          <div className="text-center flex-1">
+            <p 
+              className="text-[#888888] font-normal mb-1"
+              style={{ 
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+                fontSize: 'clamp(11px, 3vw, 14px)',
+                letterSpacing: '0.5px'
+              }}
+            >
+              {durationLabel}
+            </p>
+            <p 
+              className="text-[#2A2A2A] leading-none uppercase"
+              style={{ 
+                fontFamily: 'Impact, "Arial Black", sans-serif',
+                fontSize: 'clamp(40px, 12vw, 64px)',
+                fontWeight: 900
+              }}
+            >
+              {duration || '2HRS'}
+            </p>
           </div>
         </div>
       </div>
