@@ -86,7 +86,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
       <div 
         className="absolute z-30 left-1/2 -translate-x-1/2 flex items-center justify-center"
         style={{ 
-          top: '52%',
+          top: '59%',
           width: '50%',
           height: '4%'
         }}
@@ -118,7 +118,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
       {/* Layer 5: Dashed Divider Line */}
       <div 
         className="absolute z-20 left-[10%] right-[10%]"
-        style={{ top: '60%' }}
+        style={{ top: '67%' }}
       >
         <div 
           className="w-full"
@@ -132,7 +132,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
       <div 
         className="absolute z-20 left-0 right-0 px-[10%] flex items-center justify-center"
         style={{ 
-          top: '64%',
+          top: '71%',
           height: '24%'
         }}
       >
