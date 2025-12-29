@@ -20,6 +20,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const [isRecording, setIsRecording] = useState(false);
   const [recordingProgress, setRecordingProgress] = useState(0);
+  const [recordingSeconds, setRecordingSeconds] = useState(3);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedVideo, setCapturedVideo] = useState<string | null>(null);
   const [showHoldTip, setShowHoldTip] = useState(true);
@@ -150,7 +151,9 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     recordingTimerRef.current = setInterval(() => {
       const elapsed = Date.now() - recordingStartRef.current;
       const progress = Math.min(elapsed / 3000, 1); // 3 sec max
+      const remaining = Math.ceil((3000 - elapsed) / 1000);
       setRecordingProgress(progress);
+      setRecordingSeconds(Math.max(remaining, 0));
       
       if (progress >= 1) {
         stopRecording();
@@ -167,6 +170,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     }
     setIsRecording(false);
     setRecordingProgress(0);
+    setRecordingSeconds(3);
   };
 
   const handleShutterPress = () => {
@@ -233,6 +237,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
       {/* Camera Feed, Captured Image, or Captured Video */}
       {capturedVideo ? (
         <video
+          key={capturedVideo}
           ref={playbackVideoRef}
           src={capturedVideo}
           autoPlay
@@ -240,6 +245,10 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
           playsInline
           muted
           className="absolute inset-0 w-full h-full object-cover"
+          onLoadedData={(e) => {
+            const video = e.target as HTMLVideoElement;
+            video.play().catch(() => {});
+          }}
         />
       ) : capturedImage ? (
         <img
@@ -416,10 +425,14 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
                   />
                 )}
               </svg>
-              {/* Inner button */}
-              <div className={`w-16 h-16 rounded-full transition-all duration-150 ${
+              {/* Inner button with countdown */}
+              <div className={`w-16 h-16 rounded-full transition-all duration-150 flex items-center justify-center ${
                 isRecording ? 'bg-red-500 scale-75' : 'bg-white/90'
-              }`} />
+              }`}>
+                {isRecording && (
+                  <span className="text-white font-bold text-xl">{recordingSeconds}</span>
+                )}
+              </div>
             </button>
           )}
 
