@@ -85,7 +85,8 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         }
         ctx.drawImage(video, 0, 0);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-        setCapturedImage(dataUrl);
+        // Immediately capture and close camera
+        onCapture(dataUrl);
       }
     }
   };
