@@ -6,12 +6,18 @@ import shuttlecockIcon from '@/assets/frames/shuttlecock.png';
 interface Photo {
   id: string;
   url: string;
+  isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue';
   duration?: string;
   pr?: string;
   uploadDate: string;
 }
+
+// Helper to detect if URL is a video
+const isVideoUrl = (url: string) => {
+  return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
+};
 
 interface StackedPhotoCardsProps {
   photos: Photo[];
@@ -175,22 +181,42 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
           }}
           onClick={() => handlePhotoTap(day.photo!)}
         >
-          <img
-            src={day.photo.url}
-            alt={day.photo.activity || 'Photo'}
-            className="w-full h-full object-cover"
-          />
+          {day.photo.isVideo || isVideoUrl(day.photo.url) ? (
+            <video
+              src={day.photo.url}
+              className="w-full h-full object-cover"
+              muted
+              loop
+              autoPlay
+              playsInline
+            />
+          ) : (
+            <img
+              src={day.photo.url}
+              alt={day.photo.activity || 'Photo'}
+              className="w-full h-full object-cover"
+            />
+          )}
           
           {/* Small thumbnail photo in corner */}
           <div 
             className="absolute top-2 right-2 w-10 h-12 rounded-lg overflow-hidden border-2 border-black/50 shadow-lg"
             style={{ transform: 'rotate(8deg)' }}
           >
-            <img
-              src={day.photo.url}
-              alt=""
-              className="w-full h-full object-cover"
-            />
+            {day.photo.isVideo || isVideoUrl(day.photo.url) ? (
+              <video
+                src={day.photo.url}
+                className="w-full h-full object-cover"
+                muted
+                playsInline
+              />
+            ) : (
+              <img
+                src={day.photo.url}
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            )}
           </div>
           
           {/* Activity icon */}
