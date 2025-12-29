@@ -7,9 +7,13 @@ interface FitnessFrameProps {
   pr: string;
   imagePosition: { x: number; y: number };
   imageScale: number;
+  label1?: string;
+  label2?: string;
 }
 
-const FitnessFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale }: FitnessFrameProps) => {
+const FitnessFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: FitnessFrameProps) => {
+  const metricLabel = label1 || 'Metric';
+  const durationLabel = label2 || 'Duration';
   return (
     <div className="w-[90%] mx-auto aspect-[9/16] rounded-[20px] overflow-hidden shadow-2xl relative" style={{ background: '#6B6B2A' }}>
       {/* Grid background */}
@@ -145,7 +149,7 @@ const FitnessFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
             className="text-white font-bold text-[11px]"
             style={{ fontFamily: 'system-ui, sans-serif' }}
           >
-            Laps : {pr || '20'}
+            {metricLabel} : {pr || '20'}
           </span>
         </div>
         <div 
@@ -160,7 +164,7 @@ const FitnessFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
             className="text-white font-bold text-[11px]"
             style={{ fontFamily: 'system-ui, sans-serif' }}
           >
-            Duration : {duration || '02:00:50'}
+            {durationLabel} : {duration || '02:00:50'}
           </span>
         </div>
       </div>
