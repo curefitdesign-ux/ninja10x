@@ -12,7 +12,55 @@ interface JournalFrameProps {
   imageScale: number;
 }
 
+const getActivityDataPoints = (activity: string): { label1: string; label2: string } => {
+  const activityLower = activity.toLowerCase();
+  
+  if (activityLower.includes('running') || activityLower.includes('jogging')) {
+    return { label1: 'Distance', label2: 'Duration' };
+  } else if (activityLower.includes('walking')) {
+    return { label1: 'Steps', label2: 'Duration' };
+  } else if (activityLower.includes('cycling')) {
+    return { label1: 'Distance', label2: 'Duration' };
+  } else if (activityLower.includes('trekking') || activityLower.includes('hiking')) {
+    return { label1: 'Difficulty', label2: 'Duration' };
+  } else if (activityLower.includes('swimming')) {
+    return { label1: 'Laps', label2: 'Duration' };
+  } else if (activityLower.includes('strength') || activityLower.includes('gym')) {
+    return { label1: 'Session', label2: 'Duration' };
+  } else if (activityLower.includes('cardio') || activityLower.includes('treadmill') || activityLower.includes('elliptical') || activityLower.includes('rowing')) {
+    return { label1: 'Calories', label2: 'Duration' };
+  } else if (activityLower.includes('yoga') || activityLower.includes('pilates')) {
+    return { label1: 'Style', label2: 'Duration' };
+  } else if (activityLower.includes('meditation') || activityLower.includes('breathing')) {
+    return { label1: 'Type', label2: 'Duration' };
+  } else if (activityLower.includes('dance') || activityLower.includes('zumba')) {
+    return { label1: 'Intensity', label2: 'Duration' };
+  } else if (activityLower.includes('boxing') || activityLower.includes('martial')) {
+    return { label1: 'Type', label2: 'Duration' };
+  } else if (activityLower.includes('cricket')) {
+    return { label1: 'Activity', label2: 'Duration' };
+  } else if (activityLower.includes('football') || activityLower.includes('futsal')) {
+    return { label1: 'Position', label2: 'Duration' };
+  } else if (activityLower.includes('badminton')) {
+    return { label1: 'Sets', label2: 'Duration' };
+  } else if (activityLower.includes('basketball')) {
+    return { label1: 'Type', label2: 'Duration' };
+  } else if (activityLower.includes('tennis')) {
+    return { label1: 'Sets', label2: 'Duration' };
+  } else if (activityLower.includes('hiit') || activityLower.includes('home workout')) {
+    return { label1: 'Workout', label2: 'Duration' };
+  } else if (activityLower.includes('stair') || activityLower.includes('climbing')) {
+    return { label1: 'Floors', label2: 'Duration' };
+  } else if (activityLower.includes('skipping') || activityLower.includes('rope')) {
+    return { label1: 'Count', label2: 'Duration' };
+  }
+  
+  return { label1: 'Rounds', label2: 'Duration' };
+};
+
 const JournalFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale }: JournalFrameProps) => {
+  const { label1, label2 } = getActivityDataPoints(activity);
+  
   return (
     <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative">
       {/* Background image */}
@@ -85,16 +133,12 @@ const JournalFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
         {/* Stats row */}
         <div className="flex gap-8">
           <div>
-            <p className="text-gray-500 text-xs font-medium">Duration</p>
-            <p className="text-black text-2xl font-black">{duration || "02hrs"}</p>
-          </div>
-          <div>
-            <p className="text-gray-500 text-xs font-medium">Rounds</p>
+            <p className="text-gray-500 text-xs font-medium">{label1}</p>
             <p className="text-black text-2xl font-black">{pr || "10"}</p>
           </div>
           <div>
-            <p className="text-gray-500 text-xs font-medium">Calories</p>
-            <p className="text-black text-2xl font-black">400</p>
+            <p className="text-gray-500 text-xs font-medium">{label2}</p>
+            <p className="text-black text-2xl font-black">{duration || "02hrs"}</p>
           </div>
         </div>
       </div>
