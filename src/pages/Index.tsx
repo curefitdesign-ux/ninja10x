@@ -4,6 +4,7 @@ import { ChevronDown } from 'lucide-react';
 import AuroraBackground from '@/components/AuroraBackground';
 import PhotoUploadCard from '@/components/PhotoUploadCard';
 import WidgetLayout2 from '@/components/WidgetLayout2';
+import WidgetLayout3 from '@/components/WidgetLayout3';
 import CameraUI from '@/components/CameraUI';
 import {
   DropdownMenu,
@@ -46,7 +47,7 @@ const activities = [
   { name: 'Boxing', icon: boxingIcon },
 ];
 
-type LayoutType = 'layout1' | 'layout2';
+type LayoutType = 'layout1' | 'layout2' | 'layout3';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ const Index = () => {
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
   const [simulatedDate, setSimulatedDate] = useState<string | null>(null);
-  const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout2');
+  const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout3');
 
   // Get current date (or simulated date for testing)
   const getCurrentDate = () => {
@@ -89,7 +90,6 @@ const Index = () => {
   useEffect(() => {
     if (location.state?.savePhoto && location.state?.imageUrl && location.state?.activity) {
       const today = getCurrentDate();
-      const existingTodayPhotoIndex = photos.findIndex(p => p.uploadDate === today);
       
       const newPhoto: Photo = {
         id: `photo-${Date.now()}`,
@@ -102,21 +102,26 @@ const Index = () => {
         uploadDate: today,
       };
 
-      if (existingTodayPhotoIndex >= 0) {
-        // Replace existing photo for today (edit mode)
-        setPhotos((prev) => {
-          const updated = [...prev];
-          updated[existingTodayPhotoIndex] = newPhoto;
-          return updated;
-        });
-      } else {
-        // Add new photo
+      // For Layout 3, always add new photo (no day capping)
+      // For Layout 1 & 2, check for existing today's photo
+      if (selectedLayout === 'layout3') {
         setPhotos((prev) => [...prev, newPhoto]);
+      } else {
+        const existingTodayPhotoIndex = photos.findIndex(p => p.uploadDate === today);
+        if (existingTodayPhotoIndex >= 0) {
+          setPhotos((prev) => {
+            const updated = [...prev];
+            updated[existingTodayPhotoIndex] = newPhoto;
+            return updated;
+          });
+        } else {
+          setPhotos((prev) => [...prev, newPhoto]);
+        }
       }
       // Clear the state
       window.history.replaceState({}, document.title);
     }
-  }, [location.state, simulatedDate]);
+  }, [location.state, simulatedDate, selectedLayout]);
 
   // Calculate week and day based on photos
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
@@ -124,7 +129,10 @@ const Index = () => {
 
   const handleCardClick = () => {
     const todaysPhoto = getTodaysPhoto();
-    if (todaysPhoto) {
+    // For layout3, always open activity sheet to add new photo
+    if (selectedLayout === 'layout3') {
+      setShowActivitySheet(true);
+    } else if (todaysPhoto) {
       // Edit existing photo - go directly to preview, skip camera
       navigate('/preview', { 
         state: { 
@@ -141,6 +149,11 @@ const Index = () => {
       // New upload - show activity sheet first
       setShowActivitySheet(true);
     }
+  };
+
+  // Handler specifically for Layout 3's add photo button
+  const handleAddPhoto = () => {
+    setShowActivitySheet(true);
   };
 
   const handleActivitySelect = (activity: string) => {
@@ -195,7 +208,7 @@ const Index = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors">
-                {selectedLayout === 'layout1' ? 'Layout 1' : 'Layout 2'}
+                {selectedLayout === 'layout1' ? 'Layout 1' : selectedLayout === 'layout2' ? 'Layout 2' : 'Layout 3'}
                 <ChevronDown className="w-3 h-3" />
               </button>
             </DropdownMenuTrigger>
@@ -214,6 +227,12 @@ const Index = () => {
                 className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout2' ? 'bg-white/10' : ''}`}
               >
                 Layout 2
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => setSelectedLayout('layout3')}
+                className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout3' ? 'bg-white/10' : ''}`}
+              >
+                Layout 3
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -255,12 +274,18 @@ const Index = () => {
               hoursUntilNextUpload={getHoursUntilMidnight()}
               currentDate={getCurrentDate()}
             />
-          ) : (
+          ) : selectedLayout === 'layout2' ? (
             <WidgetLayout2 
               photos={photos} 
               onCardClick={handleCardClick}
               hasUploadedToday={hasUploadedToday()}
               hoursUntilNextUpload={getHoursUntilMidnight()}
+              currentDate={getCurrentDate()}
+            />
+          ) : (
+            <WidgetLayout3 
+              photos={photos} 
+              onAddPhoto={handleAddPhoto}
               currentDate={getCurrentDate()}
             />
           )}
