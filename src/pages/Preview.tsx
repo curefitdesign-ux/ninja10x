@@ -321,7 +321,7 @@ const Preview = () => {
           <div 
             ref={containerRef}
             onScroll={handleScroll}
-            className="flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center px-[12.5vw]"
+            className="flex gap-0 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center px-[12.5vw]"
             style={{ 
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
