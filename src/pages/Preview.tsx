@@ -330,7 +330,7 @@ const Preview = () => {
           >
             {FRAMES.map((frame, index) => {
               const { scale, opacity } = getFrameScale(index);
-              const isCurrentFrame = frame === currentFrame && Math.abs(scale - 1) < 0.05;
+              const isActiveFrame = frame === currentFrame;
               
               return (
                 <div 
@@ -342,7 +342,7 @@ const Preview = () => {
                     opacity,
                   }}
                 >
-                  <div ref={isCurrentFrame ? frameRef : undefined} className="w-full">
+                  <div ref={isActiveFrame ? frameRef : undefined} className="w-full">
                     {frame === 'shaky' && <ShakyFrame {...frameProps} />}
                     {frame === 'journal' && <JournalFrame {...frameProps} />}
                     {frame === 'vogue' && <VogueFrame {...frameProps} />}
