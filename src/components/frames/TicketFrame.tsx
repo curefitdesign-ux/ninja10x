@@ -14,187 +14,183 @@ interface TicketFrameProps {
 const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: TicketFrameProps) => {
   const metricLabel = label1 || 'Metric';
   const durationLabel = label2 || 'Duration';
+  
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative">
-      {/* Full bleed background image */}
-      <img 
-        src={imageUrl}
-        alt="Activity"
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{
-          transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-        }}
-      />
-      
-      {/* Ticket frame overlay */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Top section - cream background with title */}
+    <div className="w-[90%] mx-auto aspect-[9/16] overflow-hidden relative bg-[#F5F0E8]">
+      {/* Main ticket container */}
+      <div className="absolute inset-0 flex flex-col">
+        
+        {/* Top cream header with activity name */}
         <div 
-          className="absolute top-0 left-0 right-0 flex items-center justify-center"
-          style={{ background: '#F5F3ED', height: '14%' }}
+          className="flex items-center justify-center py-6 px-4"
+          style={{ 
+            background: '#F5F0E8',
+            height: '10%',
+            minHeight: '60px'
+          }}
         >
           <h1 
-            className="text-[#2D2D2D] text-[48px] font-black uppercase tracking-tight leading-none"
-            style={{ fontFamily: 'Impact, sans-serif' }}
+            className="text-[#2A2A2A] text-[42px] font-black uppercase tracking-wide leading-none text-center"
+            style={{ 
+              fontFamily: 'Impact, "Arial Black", sans-serif',
+              letterSpacing: '2px'
+            }}
           >
             {activity || 'TENNIS'}
           </h1>
         </div>
         
-        {/* Left frame border */}
+        {/* Photo section with white border */}
         <div 
-          className="absolute left-0"
-          style={{ background: '#F5F3ED', top: '14%', bottom: '30%', width: '16px' }}
-        />
-        
-        {/* Right frame border */}
-        <div 
-          className="absolute right-0"
-          style={{ background: '#F5F3ED', top: '14%', bottom: '30%', width: '16px' }}
-        />
-        
-        {/* Photo frame with white border */}
-        <div 
-          className="absolute left-4 right-4 bg-white"
+          className="relative mx-4 bg-white"
           style={{ 
-            top: '14%', 
-            bottom: '30%',
-            boxShadow: 'inset 0 0 0 8px white'
+            flex: '1 1 auto',
+            minHeight: '45%'
           }}
         >
-          {/* Inner white border effect */}
-          <div 
-            className="absolute inset-2 overflow-hidden"
-            style={{ border: '6px solid white' }}
-          >
-            <img 
-              src={imageUrl}
-              alt="Activity"
-              className="w-full h-full object-cover"
-              style={{
-                transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-              }}
-            />
+          {/* White border frame */}
+          <div className="absolute inset-0 p-2">
+            <div className="w-full h-full overflow-hidden relative">
+              <img 
+                src={imageUrl}
+                alt="Activity"
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{
+                  transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+                  transformOrigin: 'center center'
+                }}
+              />
+            </div>
           </div>
         </div>
         
-        {/* Bottom section - cream background with stats */}
+        {/* Bottom stats section */}
         <div 
-          className="absolute bottom-0 left-0 right-0"
-          style={{ background: '#F5F3ED', height: '30%' }}
+          className="relative"
+          style={{ 
+            background: '#F5F0E8',
+            height: '35%',
+            minHeight: '180px'
+          }}
         >
-          {/* Ribbon badge - positioned at top edge */}
-          <div className="absolute left-1/2 -translate-x-1/2 z-20" style={{ top: '-12px' }}>
+          {/* Ribbon badge centered at top */}
+          <div className="absolute left-1/2 -translate-x-1/2 z-20" style={{ top: '-14px' }}>
             <div className="relative flex items-center">
-              {/* Ribbon wings - left */}
-              <svg className="w-8 h-6" viewBox="0 0 32 24" style={{ marginRight: '-2px' }}>
-                <polygon points="32,4 0,8 0,16 32,20" fill="#B8B6AF" />
+              {/* Left ribbon wing */}
+              <svg width="28" height="28" viewBox="0 0 28 28" style={{ marginRight: '-1px' }}>
+                <polygon points="28,6 0,10 0,18 28,22" fill="#C8C5BC" />
               </svg>
               
-              {/* Ribbon center */}
+              {/* Center ribbon */}
               <div 
-                className="bg-[#C5C3BC] px-4 py-1.5 relative"
-                style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}
+                className="px-5 py-2 relative"
+                style={{ 
+                  background: '#D4D1C8',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}
               >
                 <span 
-                  className="text-[#4A4A4A] font-black text-sm tracking-wide whitespace-nowrap"
-                  style={{ fontFamily: 'Impact, sans-serif' }}
+                  className="text-[#5A5A5A] font-bold text-sm tracking-wider whitespace-nowrap"
+                  style={{ 
+                    fontFamily: 'Impact, "Arial Black", sans-serif',
+                    letterSpacing: '1px'
+                  }}
                 >
                   WEEK {week} | DAY {day}
                 </span>
               </div>
               
-              {/* Ribbon wings - right */}
-              <svg className="w-8 h-6" viewBox="0 0 32 24" style={{ marginLeft: '-2px' }}>
-                <polygon points="0,4 32,8 32,16 0,20" fill="#B8B6AF" />
+              {/* Right ribbon wing */}
+              <svg width="28" height="28" viewBox="0 0 28 28" style={{ marginLeft: '-1px' }}>
+                <polygon points="0,6 28,10 28,18 0,22" fill="#C8C5BC" />
               </svg>
             </div>
           </div>
           
-          {/* Side notches - left */}
+          {/* Left semicircle cutout */}
           <div 
             className="absolute left-0 w-5 h-10 rounded-r-full"
             style={{ 
-              background: 'transparent',
-              top: '35%',
-              transform: 'translateY(-50%)',
-              boxShadow: '-20px 0 0 0 rgba(0,0,0,0.2), inset 0 0 0 0 transparent'
+              top: '28%',
+              transform: 'translateX(-50%)',
+              background: 'linear-gradient(to right, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.08) 50%, transparent 100%)',
+              boxShadow: 'inset -3px 0 6px rgba(0,0,0,0.1)'
             }}
-          >
-            <div 
-              className="absolute inset-0 rounded-r-full"
-              style={{ 
-                background: 'linear-gradient(to right, rgba(0,0,0,0.15), transparent)'
-              }}
-            />
-          </div>
+          />
           
-          {/* Side notches - right */}
+          {/* Right semicircle cutout */}
           <div 
             className="absolute right-0 w-5 h-10 rounded-l-full"
             style={{ 
-              background: 'transparent',
-              top: '35%',
-              transform: 'translateY(-50%)',
+              top: '28%',
+              transform: 'translateX(50%)',
+              background: 'linear-gradient(to left, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.08) 50%, transparent 100%)',
+              boxShadow: 'inset 3px 0 6px rgba(0,0,0,0.1)'
             }}
+          />
+          
+          {/* Dashed perforation line */}
+          <div 
+            className="absolute left-6 right-6"
+            style={{ top: '33%' }}
           >
             <div 
-              className="absolute inset-0 rounded-l-full"
-              style={{ 
-                background: 'linear-gradient(to left, rgba(0,0,0,0.15), transparent)'
-              }}
-            />
-          </div>
-          
-          {/* Cutout notches */}
-          <div 
-            className="absolute left-0 w-4 h-8 rounded-r-full"
-            style={{ 
-              top: '35%',
-              transform: 'translateX(-50%) translateY(-50%)',
-              background: 'rgba(0,0,0,0.2)'
-            }}
-          />
-          <div 
-            className="absolute right-0 w-4 h-8 rounded-l-full"
-            style={{ 
-              top: '35%',
-              transform: 'translateX(50%) translateY(-50%)',
-              background: 'rgba(0,0,0,0.2)'
-            }}
-          />
-          
-          {/* Dashed divider line */}
-          <div className="absolute left-6 right-6" style={{ top: '35%' }}>
-            <div 
               className="border-t-2 border-dashed"
-              style={{ borderColor: '#C5C3BC' }}
+              style={{ borderColor: '#C8C5BC' }}
             />
           </div>
           
-          {/* Stats section */}
-          <div className="absolute left-0 right-0 px-8" style={{ bottom: '15%' }}>
-            <div className="flex justify-center items-end">
-              {/* Metric */}
+          {/* Stats display */}
+          <div 
+            className="absolute left-0 right-0 px-8 flex items-end justify-center"
+            style={{ bottom: '18%' }}
+          >
+            <div className="flex items-end justify-center w-full max-w-[320px]">
+              {/* Left stat - Metric */}
               <div className="text-center flex-1">
-                <p className="text-[#7A7A7A] text-base font-medium mb-1">{metricLabel}</p>
                 <p 
-                  className="text-[#2D2D2D] text-[52px] font-black leading-none"
-                  style={{ fontFamily: 'Impact, sans-serif' }}
+                  className="text-[#8A8A8A] text-base font-medium mb-2 uppercase tracking-wide"
+                  style={{ fontSize: '14px' }}
+                >
+                  {metricLabel}
+                </p>
+                <p 
+                  className="text-[#2A2A2A] leading-none"
+                  style={{ 
+                    fontFamily: 'Impact, "Arial Black", sans-serif',
+                    fontSize: '56px',
+                    fontWeight: 900
+                  }}
                 >
                   {pr || '20'}
                 </p>
               </div>
               
-              {/* Divider */}
-              <div className="h-20 w-[3px] bg-[#2D2D2D] rounded-full mx-4" />
+              {/* Vertical divider */}
+              <div 
+                className="mx-6 rounded-full"
+                style={{ 
+                  width: '3px',
+                  height: '80px',
+                  background: '#2A2A2A'
+                }}
+              />
               
-              {/* Duration */}
+              {/* Right stat - Duration */}
               <div className="text-center flex-1">
-                <p className="text-[#7A7A7A] text-base font-medium mb-1">{durationLabel}</p>
                 <p 
-                  className="text-[#2D2D2D] text-[52px] font-black leading-none uppercase"
-                  style={{ fontFamily: 'Impact, sans-serif' }}
+                  className="text-[#8A8A8A] text-base font-medium mb-2 uppercase tracking-wide"
+                  style={{ fontSize: '14px' }}
+                >
+                  {durationLabel}
+                </p>
+                <p 
+                  className="text-[#2A2A2A] leading-none uppercase"
+                  style={{ 
+                    fontFamily: 'Impact, "Arial Black", sans-serif',
+                    fontSize: '56px',
+                    fontWeight: 900
+                  }}
                 >
                   {duration || '2HRS'}
                 </p>
