@@ -2,6 +2,7 @@ import { User, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import cardBackground from '@/assets/card-background.png';
 import shuttlecockIcon from '@/assets/frames/shuttlecock.png';
+import filmstripBg from '@/assets/frames/filmstrip-bg.png';
 
 interface Photo {
   id: string;
@@ -180,32 +181,48 @@ const WidgetLayout3 = ({
           )}
         </div>
       
-        {/* Film Strip Section - 12 blocks */}
+        {/* Film Strip Section - 12 blocks in one row */}
         <div className="relative z-10">
-          <div className="grid grid-cols-6 gap-1.5">
-            {[...Array(12)].map((_, index) => {
-              const photo = photos[index];
-              return (
-                <div 
-                  key={index}
-                  className="aspect-[3/4] overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all"
-                  style={{ 
-                    background: '#1a1a1a',
-                    borderRadius: '10px'
-                  }}
-                  onClick={() => photo && handlePhotoTap(photo)}
-                >
-                  {photo ? (
-                    <img
-                      src={photo.url}
-                      alt=""
-                      className="w-full h-full object-cover"
-                      style={{ borderRadius: '10px' }}
-                    />
-                  ) : null}
-                </div>
-              );
-            })}
+          {/* Film strip background image */}
+          <div 
+            className="relative w-full"
+            style={{
+              backgroundImage: `url(${filmstripBg})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              height: '60px',
+              borderRadius: '4px'
+            }}
+          >
+            {/* 12 photo blocks overlaid on film strip */}
+            <div 
+              className="absolute inset-0 flex items-center justify-end gap-[3px] pr-2"
+              style={{ paddingTop: '8px', paddingBottom: '8px' }}
+            >
+              {[...Array(12)].map((_, index) => {
+                const photo = photos[index];
+                return (
+                  <div 
+                    key={index}
+                    className="h-full aspect-[3/4] overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all flex-shrink-0"
+                    style={{ 
+                      background: '#0a0a0a',
+                      borderRadius: '6px'
+                    }}
+                    onClick={() => photo && handlePhotoTap(photo)}
+                  >
+                    {photo ? (
+                      <img
+                        src={photo.url}
+                        alt=""
+                        className="w-full h-full object-cover"
+                        style={{ borderRadius: '6px' }}
+                      />
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
