@@ -260,7 +260,7 @@ const Preview = () => {
     <div className="relative min-h-screen w-full overflow-hidden">
       {/* Blurred background image with dynamic color overlay */}
       <div 
-        className="absolute inset-0 scale-150 transition-all duration-500"
+        className="absolute inset-0 scale-150 transition-all duration-500 animate-bg-drift"
         style={{
           backgroundImage: `url("${imageUrl}")`,
           backgroundSize: 'cover',
@@ -268,6 +268,33 @@ const Preview = () => {
           filter: 'blur(80px) brightness(0.7)',
         }}
       />
+      {/* Subtle floating orbs for motion */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div 
+          className="absolute w-64 h-64 rounded-full animate-orb-float-1"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
+            top: '10%',
+            left: '-10%',
+          }}
+        />
+        <div 
+          className="absolute w-48 h-48 rounded-full animate-orb-float-2"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)',
+            top: '60%',
+            right: '-5%',
+          }}
+        />
+        <div 
+          className="absolute w-32 h-32 rounded-full animate-orb-float-3"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)',
+            bottom: '20%',
+            left: '20%',
+          }}
+        />
+      </div>
       {/* Dynamic gradient overlay based on current frame */}
       <div 
         className="absolute inset-0 transition-all duration-500"
@@ -294,7 +321,7 @@ const Preview = () => {
           <div 
             ref={containerRef}
             onScroll={handleScroll}
-            className="flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center"
+            className="flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center px-[12.5vw]"
             style={{ 
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
