@@ -167,44 +167,7 @@ const WidgetLayout3 = ({
                 </div>
               </div>
             </div>
-          ) : (
-            /* Empty State Card with blur background */
-            <div 
-              className="relative cursor-pointer"
-              onClick={onAddPhoto}
-            >
-              {/* Blur background layer */}
-              <div 
-                className="absolute inset-0 rounded-2xl overflow-hidden"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(100, 100, 140, 0.6) 0%, rgba(60, 60, 100, 0.8) 100%)',
-                  backdropFilter: 'blur(20px)',
-                  WebkitBackdropFilter: 'blur(20px)',
-                }}
-              />
-              <div 
-                className="relative flex flex-col items-center justify-center rounded-2xl"
-                style={{ 
-                  width: '160px',
-                  height: '200px',
-                  background: 'rgba(70, 70, 90, 0.5)',
-                  border: '2px solid rgba(255,255,255,0.25)',
-                  boxShadow: '0 15px 40px rgba(0,0,0,0.3), inset 0 0 30px rgba(255,255,255,0.05)',
-                }}
-              >
-                <div className="relative w-16 h-16">
-                  <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-white/30 rounded-tl-lg" />
-                  <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-white/30 rounded-tr-lg" />
-                  <div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-white/30 rounded-bl-lg" />
-                  <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-white/30 rounded-br-lg" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <User className="w-8 h-8 text-white/40" strokeWidth={1.5} />
-                  </div>
-                </div>
-                <p className="text-xs text-white/60 mt-3 font-medium">Add your first photo</p>
-              </div>
-            </div>
-          )}
+          ) : null}
         </div>
       
         {/* Film Strip Section - 12 blocks in one row */}
