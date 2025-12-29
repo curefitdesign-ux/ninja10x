@@ -316,6 +316,9 @@ const Preview = () => {
           <ArrowLeft className="w-5 h-5 text-white" />
         </button>
 
+        {/* Select your frame title */}
+        <h2 className="text-white/80 text-lg font-semibold text-center mb-4">Select your frame</h2>
+        
         {/* Frame carousel - horizontal scroll with infinite loop effect */}
         <div className={`flex-1 flex items-center overflow-hidden -mx-5 ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'}`}>
           <div 
