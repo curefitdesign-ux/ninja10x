@@ -66,7 +66,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
       <div 
         className="absolute z-20 left-0 right-0 flex items-center justify-center"
         style={{ 
-          top: 'calc(6% + 70px)',
+          top: 'calc(6% + 30px)',
           height: '7%'
         }}
       >
