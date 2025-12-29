@@ -1,8 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { ChevronDown } from 'lucide-react';
 import AuroraBackground from '@/components/AuroraBackground';
 import PhotoUploadCard from '@/components/PhotoUploadCard';
+import WidgetLayout2 from '@/components/WidgetLayout2';
 import CameraUI from '@/components/CameraUI';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Activity icons
 import footballIcon from '@/assets/activities/football.png';
@@ -38,6 +46,8 @@ const activities = [
   { name: 'Boxing', icon: boxingIcon },
 ];
 
+type LayoutType = 'layout1' | 'layout2';
+
 const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,7 +55,8 @@ const Index = () => {
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
-  const [simulatedDate, setSimulatedDate] = useState<string | null>(null); // For testing
+  const [simulatedDate, setSimulatedDate] = useState<string | null>(null);
+  const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout1');
 
   // Get current date (or simulated date for testing)
   const getCurrentDate = () => {
@@ -178,27 +189,57 @@ const Index = () => {
         {/* Status Bar Space */}
         <div className="h-12" />
         
-        {/* Test Controls */}
-        <div className="absolute top-14 right-4 z-20 flex flex-col gap-2">
-          <button
-            onClick={simulateNextDay}
-            className="px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors"
-          >
-            Test: Next Day
-          </button>
-          {simulatedDate && (
-            <>
-              <span className="text-[10px] text-foreground/50 text-center">
-                {simulatedDate}
-              </span>
-              <button
-                onClick={resetSimulation}
-                className="px-3 py-1 text-[10px] text-foreground/50 hover:text-foreground/70 transition-colors"
-              >
-                Reset
+        {/* Top Controls Row */}
+        <div className="flex justify-between items-start px-4">
+          {/* Layout Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors">
+                {selectedLayout === 'layout1' ? 'Layout 1' : 'Layout 2'}
+                <ChevronDown className="w-3 h-3" />
               </button>
-            </>
-          )}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              className="bg-black/90 backdrop-blur-xl border border-white/20 rounded-xl z-50"
+              align="start"
+            >
+              <DropdownMenuItem 
+                onClick={() => setSelectedLayout('layout1')}
+                className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout1' ? 'bg-white/10' : ''}`}
+              >
+                Layout 1
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => setSelectedLayout('layout2')}
+                className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout2' ? 'bg-white/10' : ''}`}
+              >
+                Layout 2
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Test Controls */}
+          <div className="flex flex-col gap-2 items-end">
+            <button
+              onClick={simulateNextDay}
+              className="px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors"
+            >
+              Test: Next Day
+            </button>
+            {simulatedDate && (
+              <>
+                <span className="text-[10px] text-foreground/50 text-center">
+                  {simulatedDate}
+                </span>
+                <button
+                  onClick={resetSimulation}
+                  className="px-3 py-1 text-[10px] text-foreground/50 hover:text-foreground/70 transition-colors"
+                >
+                  Reset
+                </button>
+              </>
+            )}
+          </div>
         </div>
         
         {/* Spacer */}
@@ -206,13 +247,23 @@ const Index = () => {
         
         {/* Main Content */}
         <main className="flex-1 flex flex-col justify-center py-6 -mt-[100px]">
-          <PhotoUploadCard 
-            photos={photos} 
-            onCardClick={handleCardClick}
-            hasUploadedToday={hasUploadedToday()}
-            hoursUntilNextUpload={getHoursUntilMidnight()}
-            currentDate={getCurrentDate()}
-          />
+          {selectedLayout === 'layout1' ? (
+            <PhotoUploadCard 
+              photos={photos} 
+              onCardClick={handleCardClick}
+              hasUploadedToday={hasUploadedToday()}
+              hoursUntilNextUpload={getHoursUntilMidnight()}
+              currentDate={getCurrentDate()}
+            />
+          ) : (
+            <WidgetLayout2 
+              photos={photos} 
+              onCardClick={handleCardClick}
+              hasUploadedToday={hasUploadedToday()}
+              hoursUntilNextUpload={getHoursUntilMidnight()}
+              currentDate={getCurrentDate()}
+            />
+          )}
         </main>
         
         {/* Bottom Safe Area */}
