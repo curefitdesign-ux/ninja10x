@@ -7,7 +7,7 @@ interface Photo {
   url: string;
   isVideo?: boolean;
   activity?: string;
-  frame?: 'shaky' | 'journal' | 'vogue';
+  frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
   duration?: string;
   pr?: string;
   uploadDate: string;
