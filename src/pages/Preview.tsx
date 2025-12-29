@@ -306,10 +306,10 @@ const Preview = () => {
       <div className="absolute inset-0 bg-black/20 animate-subtle-pulse" />
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col min-h-screen px-5">
+      <div className="relative z-10 flex flex-col min-h-screen">
         {/* Header with title aligned with arrow */}
         <div className="h-12" />
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-4 px-5">
           <button 
             onClick={handleBack}
             className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm"
@@ -320,7 +320,7 @@ const Preview = () => {
         </div>
         
         {/* Frame carousel - horizontal scroll with infinite loop effect */}
-        <div className={`flex-1 flex items-center overflow-hidden -mx-5 ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'}`}>
+        <div className={`flex-1 flex items-center overflow-hidden ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'}`}>
           <div 
             ref={containerRef}
             onScroll={handleScroll}
@@ -358,8 +358,8 @@ const Preview = () => {
           </div>
         </div>
 
-        {/* Bottom section */}
-        <div className="space-y-4 pb-6">
+        {/* Bottom section - Sticky */}
+        <div className="sticky bottom-0 left-0 right-0 space-y-4 pb-6 pt-4 px-5 bg-gradient-to-t from-black/60 via-black/30 to-transparent">
           {/* Editable data points - now tappable */}
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4">
             <button 
@@ -400,8 +400,6 @@ const Preview = () => {
             </span>
           </button>
         </div>
-
-        <div className="h-6" />
       </div>
 
       {/* Bottom Sheet Keyboard Overlay */}
