@@ -18,6 +18,7 @@ import yogaIcon from '@/assets/activities/yoga.png';
 interface Photo {
   id: string;
   url: string;
+  isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue';
   duration?: string;
@@ -82,6 +83,7 @@ const Index = () => {
       const newPhoto: Photo = {
         id: `photo-${Date.now()}`,
         url: location.state.imageUrl,
+        isVideo: location.state.isVideo || false,
         activity: location.state.activity,
         frame: location.state.frame || 'shaky',
         duration: location.state.duration,
@@ -116,6 +118,7 @@ const Index = () => {
       navigate('/preview', { 
         state: { 
           imageUrl: todaysPhoto.url, 
+          isVideo: todaysPhoto.isVideo,
           activity: todaysPhoto.activity,
           frame: todaysPhoto.frame,
           duration: todaysPhoto.duration,
@@ -135,11 +138,11 @@ const Index = () => {
     setShowCamera(true);
   };
 
-  const handleCapture = (imageDataUrl: string) => {
+  const handleCapture = (mediaDataUrl: string, isVideo?: boolean) => {
     setShowCamera(false);
-    // Navigate to preview page with the image data URL
+    // Navigate to preview page with the media data URL
     navigate('/preview', { 
-      state: { imageUrl: imageDataUrl, activity: selectedActivity } 
+      state: { imageUrl: mediaDataUrl, isVideo, activity: selectedActivity } 
     });
     setSelectedActivity(null);
   };

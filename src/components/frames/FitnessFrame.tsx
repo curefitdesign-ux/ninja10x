@@ -1,5 +1,6 @@
 interface FitnessFrameProps {
   imageUrl: string;
+  isVideo?: boolean;
   activity: string;
   week: number;
   day: number;
@@ -11,7 +12,7 @@ interface FitnessFrameProps {
   label2?: string;
 }
 
-const FitnessFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: FitnessFrameProps) => {
+const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: FitnessFrameProps) => {
   const metricLabel = label1 || 'Metric';
   const durationLabel = label2 || 'Duration';
   return (
@@ -124,14 +125,28 @@ const FitnessFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
             boxShadow: '0 8px 32px rgba(0,0,0,0.25)'
           }}
         >
-          <img 
-            src={imageUrl}
-            alt="Activity"
-            className="w-full h-full object-cover"
-            style={{
-              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-            }}
-          />
+          {isVideo ? (
+            <video 
+              src={imageUrl}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+              style={{
+                transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+              }}
+            />
+          ) : (
+            <img 
+              src={imageUrl}
+              alt="Activity"
+              className="w-full h-full object-cover"
+              style={{
+                transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+              }}
+            />
+          )}
         </div>
       </div>
       

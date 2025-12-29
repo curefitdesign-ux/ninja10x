@@ -5,7 +5,7 @@ interface CameraUIProps {
   activity: string;
   week: number;
   day: number;
-  onCapture: (imageDataUrl: string) => void;
+  onCapture: (mediaDataUrl: string, isVideo?: boolean) => void;
   onClose: () => void;
 }
 
@@ -93,19 +93,10 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
 
   const handleConfirm = () => {
     if (capturedImage) {
-      onCapture(capturedImage);
-    } else if (capturedVideo && playbackVideoRef.current && canvasRef.current) {
-      // For video, capture current frame as thumbnail
-      const video = playbackVideoRef.current;
-      const canvas = canvasRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(video, 0, 0);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-        onCapture(dataUrl);
-      }
+      onCapture(capturedImage, false);
+    } else if (capturedVideo) {
+      // Pass the video URL directly
+      onCapture(capturedVideo, true);
     }
   };
 
@@ -145,7 +136,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     
     recordingTimerRef.current = setInterval(() => {
       const elapsed = Date.now() - recordingStartRef.current;
-      const progress = Math.min(elapsed / 4000, 1);
+      const progress = Math.min(elapsed / 3000, 1); // 3 sec max
       setRecordingProgress(progress);
       
       if (progress >= 1) {
