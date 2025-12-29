@@ -13,6 +13,15 @@ import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
 
+// Background colors for each frame type
+const FRAME_COLORS: Record<FrameType, string> = {
+  shaky: 'rgba(255, 107, 107, 0.3)',    // Warm red tint
+  journal: 'rgba(139, 115, 85, 0.3)',   // Earthy brown tint
+  vogue: 'rgba(30, 30, 30, 0.4)',       // Dark sophisticated
+  fitness: 'rgba(0, 200, 150, 0.25)',   // Energetic teal
+  ticket: 'rgba(240, 220, 180, 0.3)',   // Vintage cream
+};
+
 type EditingField = 'duration' | 'pr' | null;
 
 // Generate hour options from 0 to 24
@@ -237,15 +246,20 @@ const Preview = () => {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
-      {/* Blurred background image */}
+      {/* Blurred background image with dynamic color overlay */}
       <div 
-        className="absolute inset-0 scale-150"
+        className="absolute inset-0 scale-150 transition-all duration-500"
         style={{
           backgroundImage: `url("${imageUrl}")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          filter: 'blur(50px)',
+          filter: 'blur(80px) brightness(0.7)',
         }}
+      />
+      {/* Dynamic color overlay based on current frame */}
+      <div 
+        className="absolute inset-0 transition-colors duration-500"
+        style={{ backgroundColor: FRAME_COLORS[currentFrame] }}
       />
       <div className="absolute inset-0 bg-black/20" />
 
