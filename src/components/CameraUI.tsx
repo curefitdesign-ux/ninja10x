@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, SwitchCamera, Image as ImageIcon, Check, RotateCcw } from 'lucide-react';
+import ImageCropper from './ImageCropper';
 
 interface CameraUIProps {
   activity: string;
@@ -24,6 +25,8 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedVideo, setCapturedVideo] = useState<string | null>(null);
   const [showHoldTip, setShowHoldTip] = useState(true);
+  const [showCropper, setShowCropper] = useState(false);
+  const [mediaToEdit, setMediaToEdit] = useState<{ src: string; isVideo: boolean } | null>(null);
   const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const recordingStartRef = useRef<number>(0);
@@ -93,7 +96,9 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         }
         ctx.drawImage(video, 0, 0);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-        setCapturedImage(dataUrl);
+        // Open cropper instead of directly setting captured image
+        setMediaToEdit({ src: dataUrl, isVideo: false });
+        setShowCropper(true);
         // Stop camera to avoid green dot
         stopCamera();
       }
@@ -107,6 +112,20 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
       // Pass the video URL directly
       onCapture(capturedVideo, true);
     }
+  };
+
+  const handleCropConfirm = (croppedDataUrl: string, isVideo: boolean) => {
+    setShowCropper(false);
+    setMediaToEdit(null);
+    setCapturedImage(croppedDataUrl);
+    setCapturedVideo(null);
+  };
+
+  const handleCropCancel = () => {
+    setShowCropper(false);
+    setMediaToEdit(null);
+    // Restart camera
+    startCamera();
   };
 
   const handleRetake = () => {
@@ -138,7 +157,9 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     mediaRecorder.onstop = () => {
       const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
       const videoUrl = URL.createObjectURL(blob);
-      setCapturedVideo(videoUrl);
+      // Open cropper for video too
+      setMediaToEdit({ src: videoUrl, isVideo: true });
+      setShowCropper(true);
       // Stop camera to avoid green dot
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
@@ -210,10 +231,15 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const isVideo = file.type.startsWith('video/');
       const reader = new FileReader();
       reader.onloadend = () => {
         const dataUrl = reader.result as string;
-        setCapturedImage(dataUrl);
+        // Open cropper for gallery uploads
+        setMediaToEdit({ src: dataUrl, isVideo });
+        setShowCropper(true);
+        // Stop camera
+        stopCamera();
       };
       reader.readAsDataURL(file);
     }
@@ -229,7 +255,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,video/*"
         className="hidden"
         onChange={handleFileChange}
       />
@@ -449,6 +475,16 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
           )}
         </div>
       </div>
+
+      {/* Image/Video Cropper */}
+      {showCropper && mediaToEdit && (
+        <ImageCropper
+          mediaSrc={mediaToEdit.src}
+          isVideo={mediaToEdit.isVideo}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   );
 };
