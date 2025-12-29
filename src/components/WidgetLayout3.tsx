@@ -219,60 +219,51 @@ const WidgetLayout3 = ({
             />
             {/* 12 photo blocks overlaid on film strip */}
             <div 
-              className="absolute inset-0 flex items-center justify-center"
+              className="absolute inset-0 flex items-center justify-center gap-[2px]"
               style={{ 
-                paddingLeft: '16px',
+                paddingLeft: '36px',
                 paddingRight: '3px',
-                paddingTop: '12px', 
+                paddingTop: '6px', 
                 paddingBottom: '6px' 
               }}
             >
-              {[0, 1, 2, 3].map((groupIndex) => (
-                <div 
-                  key={groupIndex} 
-                  className="flex gap-[2px]"
-                  style={{ marginRight: groupIndex < 3 ? '5px' : '0' }}
-                >
-                  {[0, 1, 2].map((itemIndex) => {
-                    const index = groupIndex * 3 + itemIndex;
-                    const photo = photos[index];
-                    return (
-                      <div 
-                        key={index}
-                        className={`overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all ${photo ? 'animate-scale-in' : ''}`}
-                        style={{ 
-                          background: '#0a0a0a',
-                          borderRadius: '3px',
-                          aspectRatio: '9/16',
-                          width: 'calc((100% - 15px) / 12)',
-                          animationDelay: photo ? `${index * 50}ms` : '0ms',
-                          animationFillMode: 'both'
-                        }}
-                        onClick={() => photo && handlePhotoTap(photo)}
-                      >
-                        {photo ? (
-                          photo.isVideo || isVideoUrl(photo.url) ? (
-                            <video
-                              src={photo.url}
-                              className="w-full h-full object-cover"
-                              style={{ borderRadius: '3px' }}
-                              muted
-                              playsInline
-                            />
-                          ) : (
-                            <img
-                              src={photo.url}
-                              alt=""
-                              className="w-full h-full object-cover"
-                              style={{ borderRadius: '3px' }}
-                            />
-                          )
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
+              {[...Array(12)].map((_, index) => {
+                const photo = photos[index];
+                return (
+                  <div 
+                    key={index}
+                    className={`flex-1 overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all ${photo ? 'animate-scale-in' : ''}`}
+                    style={{ 
+                      background: '#0a0a0a',
+                      borderRadius: '3px',
+                      aspectRatio: '9/16',
+                      maxHeight: '100%',
+                      animationDelay: photo ? `${index * 50}ms` : '0ms',
+                      animationFillMode: 'both'
+                    }}
+                    onClick={() => photo && handlePhotoTap(photo)}
+                  >
+                    {photo ? (
+                      photo.isVideo || isVideoUrl(photo.url) ? (
+                        <video
+                          src={photo.url}
+                          className="w-full h-full object-cover"
+                          style={{ borderRadius: '3px' }}
+                          muted
+                          playsInline
+                        />
+                      ) : (
+                        <img
+                          src={photo.url}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          style={{ borderRadius: '3px' }}
+                        />
+                      )
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
