@@ -7,12 +7,18 @@ import filmstripBg from '@/assets/frames/filmstrip-bg.png';
 interface Photo {
   id: string;
   url: string;
+  isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue';
   duration?: string;
   pr?: string;
   uploadDate: string;
 }
+
+// Helper to detect if URL is a video
+const isVideoUrl = (url: string) => {
+  return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
+};
 
 interface WidgetLayout3Props {
   photos: Photo[];
@@ -85,13 +91,24 @@ const WidgetLayout3 = ({
                   ))}
                 </div>
 
-                {/* Photo */}
+                {/* Photo/Video */}
                 <div className="relative pt-8 px-2">
-                  <img
-                    src={latestPhoto.url}
-                    alt={latestPhoto.activity || 'Photo'}
-                    className="w-full aspect-[4/3] object-cover rounded-lg"
-                  />
+                  {latestPhoto.isVideo || isVideoUrl(latestPhoto.url) ? (
+                    <video
+                      src={latestPhoto.url}
+                      className="w-full aspect-[4/3] object-cover rounded-lg"
+                      muted
+                      loop
+                      autoPlay
+                      playsInline
+                    />
+                  ) : (
+                    <img
+                      src={latestPhoto.url}
+                      alt={latestPhoto.activity || 'Photo'}
+                      className="w-full aspect-[4/3] object-cover rounded-lg"
+                    />
+                  )}
                   
                   {/* Activity icon */}
                   <div className="absolute bottom-2 left-3 w-8 h-8">
@@ -215,12 +232,22 @@ const WidgetLayout3 = ({
                     onClick={() => photo && handlePhotoTap(photo)}
                   >
                     {photo ? (
-                      <img
-                        src={photo.url}
-                        alt=""
-                        className="w-full h-full object-cover"
-                        style={{ borderRadius: '4px' }}
-                      />
+                      photo.isVideo || isVideoUrl(photo.url) ? (
+                        <video
+                          src={photo.url}
+                          className="w-full h-full object-cover"
+                          style={{ borderRadius: '4px' }}
+                          muted
+                          playsInline
+                        />
+                      ) : (
+                        <img
+                          src={photo.url}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          style={{ borderRadius: '4px' }}
+                        />
+                      )
                     ) : null}
                   </div>
                 );

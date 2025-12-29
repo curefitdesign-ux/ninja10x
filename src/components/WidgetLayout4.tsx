@@ -2,9 +2,14 @@ import React, { useRef } from 'react';
 import { Plus, Camera } from 'lucide-react';
 
 interface WidgetLayout4Props {
-  photos: { id: string; url: string; day: number }[];
+  photos: { id: string; url: string; day: number; isVideo?: boolean }[];
   onPhotoUpload: (file: File) => void;
 }
+
+// Helper to detect if URL is a video
+const isVideoUrl = (url: string) => {
+  return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
+};
 
 const WidgetLayout4: React.FC<WidgetLayout4Props> = ({ photos, onPhotoUpload }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -154,11 +159,22 @@ const WidgetLayout4: React.FC<WidgetLayout4Props> = ({ photos, onPhotoUpload }) 
                 <div key={photo.id} className="relative">
                   {/* Polaroid Frame */}
                   <div className="bg-white p-2 pb-6 shadow-lg transform rotate-[-2deg] hover:rotate-0 transition-transform">
-                    <img
-                      src={photo.url}
-                      alt={`Photo ${index + 1}`}
-                      className="w-[120px] h-[100px] object-cover"
-                    />
+                    {photo.isVideo || isVideoUrl(photo.url) ? (
+                      <video
+                        src={photo.url}
+                        className="w-[120px] h-[100px] object-cover"
+                        muted
+                        loop
+                        autoPlay
+                        playsInline
+                      />
+                    ) : (
+                      <img
+                        src={photo.url}
+                        alt={`Photo ${index + 1}`}
+                        className="w-[120px] h-[100px] object-cover"
+                      />
+                    )}
                     {/* Date stamp */}
                     <div className="absolute bottom-8 right-3 text-[8px] text-orange-600 font-mono">
                       {new Date().toLocaleDateString('en-GB', { 
