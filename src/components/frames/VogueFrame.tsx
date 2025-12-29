@@ -40,24 +40,24 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
       {/* Top text - Magazine masthead style with subtle animation */}
       <div className="absolute top-4 left-4 right-4">
         <h1 
-          className="font-black italic leading-[0.85] tracking-tighter animate-subtle-pulse"
+          className="font-black italic leading-[0.85] tracking-tighter animate-subtle-pulse uppercase"
           style={{
-            fontSize: 'clamp(48px, 18vw, 72px)',
-            color: 'rgba(255,255,255,0.95)',
+            fontSize: 'clamp(40px, 14vw, 60px)',
+            color: 'rgba(255,255,255,1)',
             textShadow: `
-              3px 3px 0px rgba(200,200,200,0.4),
-              6px 6px 0px rgba(180,180,180,0.25),
-              0 0 40px rgba(255,255,255,0.6)
+              3px 3px 0px rgba(0,0,0,0.3),
+              6px 6px 0px rgba(0,0,0,0.15),
+              0 0 40px rgba(255,255,255,0.4)
             `,
-            WebkitTextStroke: '1px rgba(200,200,200,0.2)',
+            WebkitTextStroke: '1px rgba(0,0,0,0.1)',
           }}
         >
-          Player
+          {activity || 'Activity'}
         </h1>
         <p 
           className="text-[10px] font-medium mt-0.5 tracking-wide animate-subtle-wave"
           style={{
-            color: 'rgba(180,180,180,0.7)',
+            color: 'rgba(255,255,255,0.85)',
           }}
         >
           Week {week} | Day {day}
@@ -70,7 +70,8 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
           className="font-bold tracking-tight"
           style={{
             fontSize: 'clamp(28px, 10vw, 40px)',
-            color: 'rgba(200,200,200,0.5)',
+            color: 'rgba(255,255,255,0.9)',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
           }}
         >
           {duration || "2hrs"}
@@ -79,7 +80,8 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
           className="font-bold tracking-tight"
           style={{
             fontSize: 'clamp(28px, 10vw, 40px)',
-            color: 'rgba(200,200,200,0.5)',
+            color: 'rgba(255,255,255,0.9)',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
           }}
         >
           {pr || "10"}
