@@ -5,7 +5,7 @@ import AuroraBackground from '@/components/AuroraBackground';
 import PhotoUploadCard from '@/components/PhotoUploadCard';
 import WidgetLayout2 from '@/components/WidgetLayout2';
 import WidgetLayout3 from '@/components/WidgetLayout3';
-import WidgetLayout4 from '@/components/WidgetLayout4';
+
 import CameraUI from '@/components/CameraUI';
 import {
   DropdownMenu,
@@ -48,7 +48,7 @@ const activities = [
   { name: 'Boxing', icon: boxingIcon },
 ];
 
-type LayoutType = 'layout1' | 'layout2' | 'layout3' | 'layout4';
+type LayoutType = 'layout1' | 'layout2' | 'layout3';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -58,7 +58,7 @@ const Index = () => {
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
   const [simulatedDate, setSimulatedDate] = useState<string | null>(null);
-  const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout4');
+  const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout3');
 
   // Get current date (or simulated date for testing)
   const getCurrentDate = () => {
@@ -103,9 +103,9 @@ const Index = () => {
         uploadDate: today,
       };
 
-      // For Layout 3 & 4, always add new photo (no day capping)
+      // For Layout 3, always add new photo (no day capping)
       // For Layout 1 & 2, check for existing today's photo
-      if (selectedLayout === 'layout3' || selectedLayout === 'layout4') {
+      if (selectedLayout === 'layout3') {
         setPhotos((prev) => [...prev, newPhoto]);
       } else {
         const existingTodayPhotoIndex = photos.findIndex(p => p.uploadDate === today);
@@ -130,8 +130,8 @@ const Index = () => {
 
   const handleCardClick = () => {
     const todaysPhoto = getTodaysPhoto();
-    // For layout3 & layout4, always open activity sheet to add new photo
-    if (selectedLayout === 'layout3' || selectedLayout === 'layout4') {
+    // For layout3, always open activity sheet to add new photo
+    if (selectedLayout === 'layout3') {
       setShowActivitySheet(true);
     } else if (todaysPhoto) {
       // Edit existing photo - go directly to preview, skip camera
@@ -209,7 +209,7 @@ const Index = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors">
-                {selectedLayout === 'layout1' ? 'Layout 1' : selectedLayout === 'layout2' ? 'Layout 2' : selectedLayout === 'layout3' ? 'Layout 3' : 'Layout 4'}
+                {selectedLayout === 'layout1' ? 'Layout 1' : selectedLayout === 'layout2' ? 'Layout 2' : 'Layout 3'}
                 <ChevronDown className="w-3 h-3" />
               </button>
             </DropdownMenuTrigger>
@@ -234,12 +234,6 @@ const Index = () => {
                 className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout3' ? 'bg-white/10' : ''}`}
               >
                 Layout 3
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => setSelectedLayout('layout4')}
-                className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout4' ? 'bg-white/10' : ''}`}
-              >
-                Layout 4
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -289,29 +283,11 @@ const Index = () => {
               hoursUntilNextUpload={getHoursUntilMidnight()}
               currentDate={getCurrentDate()}
             />
-          ) : selectedLayout === 'layout3' ? (
+          ) : (
             <WidgetLayout3 
               photos={photos} 
               onAddPhoto={handleAddPhoto}
               currentDate={getCurrentDate()}
-            />
-          ) : (
-            <WidgetLayout4 
-              photos={photos.map((p, i) => ({ id: p.id, url: p.url, day: i + 1, isVideo: p.isVideo }))} 
-              onPhotoUpload={(file) => {
-                // For direct file upload, we need to convert to data URL and add to photos
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                  const dataUrl = e.target?.result as string;
-                  const newPhoto = {
-                    id: `photo-${Date.now()}`,
-                    url: dataUrl,
-                    uploadDate: getCurrentDate(),
-                  };
-                  setPhotos(prev => [...prev, newPhoto]);
-                };
-                reader.readAsDataURL(file);
-              }}
             />
           )}
         </main>
