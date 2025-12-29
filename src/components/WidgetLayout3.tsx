@@ -193,12 +193,12 @@ const WidgetLayout3 = ({
             />
             {/* 12 photo blocks overlaid on film strip */}
             <div 
-              className="absolute inset-0 flex items-center gap-[2px]"
+              className="absolute inset-0 flex items-center justify-center gap-[3px]"
               style={{ 
                 paddingLeft: '38px',
                 paddingRight: '4px',
-                paddingTop: '10px', 
-                paddingBottom: '10px' 
+                paddingTop: '8px', 
+                paddingBottom: '8px' 
               }}
             >
               {[...Array(12)].map((_, index) => {
@@ -206,10 +206,11 @@ const WidgetLayout3 = ({
                 return (
                   <div 
                     key={index}
-                    className="h-full flex-1 overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all"
+                    className="h-full overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all"
                     style={{ 
                       background: '#0a0a0a',
-                      borderRadius: '4px'
+                      borderRadius: '4px',
+                      aspectRatio: '3/4'
                     }}
                     onClick={() => photo && handlePhotoTap(photo)}
                   >
