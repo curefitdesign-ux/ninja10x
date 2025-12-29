@@ -223,11 +223,12 @@ const WidgetLayout3 = ({
                 return (
                   <div 
                     key={index}
-                    className="h-full overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all"
+                    className="flex-1 overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all"
                     style={{ 
                       background: '#0a0a0a',
                       borderRadius: '4px',
-                      aspectRatio: '9/16'
+                      aspectRatio: '9/16',
+                      maxHeight: '100%'
                     }}
                     onClick={() => photo && handlePhotoTap(photo)}
                   >
