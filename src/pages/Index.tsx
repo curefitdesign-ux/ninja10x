@@ -296,32 +296,32 @@ const Index = () => {
         <div className="h-8" />
       </div>
 
-      {/* Activity Selection Bottom Sheet */}
+      {/* Activity Selection Bottom Sheet - Partial overlay to keep template visible */}
       {showActivitySheet && (
         <>
           <div 
-            className="fixed inset-0 bg-black/50 z-40"
+            className="fixed inset-0 bg-black/30 z-40"
             onClick={handleOverlayClick}
           />
-          <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up" style={{ height: '90vh' }}>
-            <div className="bg-black rounded-t-3xl p-6 pb-10 border-t border-white/10 h-full">
-              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
-              <h3 className="text-xl font-bold italic text-white text-center mb-8">Choose your activity</h3>
-              <div className="grid grid-cols-3 gap-4 px-2">
+          <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up" style={{ height: '55vh' }}>
+            <div className="bg-black/95 backdrop-blur-xl rounded-t-3xl p-6 pb-10 border-t border-white/10 h-full overflow-y-auto">
+              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
+              <h3 className="text-lg font-bold italic text-white text-center mb-6">Choose your activity</h3>
+              <div className="grid grid-cols-3 gap-3 px-2">
                 {activities.map((activity) => (
                   <button
                     key={activity.name}
                     onClick={() => handleActivitySelect(activity.name)}
-                    className="flex flex-col items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors"
+                    className="flex flex-col items-center gap-2 p-2 rounded-2xl hover:bg-white/5 transition-colors"
                   >
-                    <div className="w-20 h-20 rounded-full overflow-hidden">
+                    <div className="w-16 h-16 rounded-full overflow-hidden">
                       <img 
                         src={activity.icon} 
                         alt={activity.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <span className="text-sm font-semibold text-white">{activity.name}</span>
+                    <span className="text-xs font-semibold text-white">{activity.name}</span>
                   </button>
                 ))}
               </div>
