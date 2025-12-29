@@ -3,6 +3,7 @@ import journalBg from '@/assets/frames/journal-bg.png';
 
 interface JournalFrameProps {
   imageUrl: string;
+  isVideo?: boolean;
   activity: string;
   week: number;
   day: number;
@@ -16,6 +17,7 @@ interface JournalFrameProps {
 
 const JournalFrame = ({
   imageUrl,
+  isVideo,
   activity,
   week,
   day,
@@ -63,14 +65,28 @@ const JournalFrame = ({
           transform: 'rotate(10deg) scale(0.8)',
         }}
       >
-        <img 
-          src={imageUrl}
-          alt="Activity"
-          className="w-full h-full object-cover"
-          style={{
-            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-          }}
-        />
+        {isVideo ? (
+          <video 
+            src={imageUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+            style={{
+              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+            }}
+          />
+        ) : (
+          <img 
+            src={imageUrl}
+            alt="Activity"
+            className="w-full h-full object-cover"
+            style={{
+              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+            }}
+          />
+        )}
       </div>
       
       {/* Activity icon - Shuttlecock - positioned above the tilted image with animation */}

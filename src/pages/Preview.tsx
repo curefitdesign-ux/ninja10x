@@ -22,6 +22,7 @@ const Preview = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isVideo, setIsVideo] = useState(false);
   const [activity, setActivity] = useState<string | null>(null);
   const [duration, setDuration] = useState('2hrs');
   const [pr, setPr] = useState('');
@@ -47,9 +48,10 @@ const Preview = () => {
   const extendedFrames = [...FRAMES, ...FRAMES, ...FRAMES];
 
   useEffect(() => {
-    const state = location.state as { imageUrl?: string; activity?: string } | null;
+    const state = location.state as { imageUrl?: string; isVideo?: boolean; activity?: string } | null;
     if (state?.imageUrl) {
       setImageUrl(state.imageUrl);
+      setIsVideo(state.isVideo || false);
       setActivity(state.activity || null);
       // Trigger entrance animation after a brief delay
       setTimeout(() => setIsLoaded(true), 100);
@@ -84,7 +86,8 @@ const Preview = () => {
       navigate('/', { 
         state: { 
           savePhoto: true, 
-          imageUrl: framedImageUrl,
+          imageUrl: isVideo ? imageUrl : framedImageUrl,
+          isVideo,
           activity, 
           frame: currentFrame,
           duration,
@@ -97,6 +100,7 @@ const Preview = () => {
         state: { 
           savePhoto: true, 
           imageUrl, 
+          isVideo,
           activity, 
           frame: currentFrame,
           duration,
@@ -202,6 +206,7 @@ const Preview = () => {
 
   const frameProps = {
     imageUrl,
+    isVideo,
     activity: activity || '',
     week: 1,
     day: 1,

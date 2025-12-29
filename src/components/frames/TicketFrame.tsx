@@ -3,6 +3,7 @@ import ribbonAsset from '@/assets/frames/ticket-ribbon.png';
 
 interface TicketFrameProps {
   imageUrl: string;
+  isVideo?: boolean;
   activity: string;
   week: number;
   day: number;
@@ -14,23 +15,38 @@ interface TicketFrameProps {
   label2?: string;
 }
 
-const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: TicketFrameProps) => {
+const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: TicketFrameProps) => {
   const metricLabel = label1 || 'Laps';
   const durationLabel = label2 || 'Duration';
   
   return (
     <div className="w-full mx-auto aspect-[9/16] overflow-hidden relative">
-      {/* Layer 1: Background Image (full-bleed) */}
-      <div 
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: `url("${imageUrl}")`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-          transformOrigin: 'center center'
-        }}
-      />
+      {/* Layer 1: Background Image or Video (full-bleed) */}
+      {isVideo ? (
+        <video 
+          src={imageUrl}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0"
+          style={{
+            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+            transformOrigin: 'center center'
+          }}
+        />
+      ) : (
+        <div 
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: `url("${imageUrl}")`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+            transformOrigin: 'center center'
+          }}
+        />
+      )}
       
       {/* Layer 2: Ticket Frame Asset (with transparent window) - reduced size */}
       <img 

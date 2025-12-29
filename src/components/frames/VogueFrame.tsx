@@ -1,5 +1,6 @@
 interface VogueFrameProps {
   imageUrl: string;
+  isVideo?: boolean;
   activity: string;
   week: number;
   day: number;
@@ -9,18 +10,32 @@ interface VogueFrameProps {
   imageScale: number;
 }
 
-const VogueFrame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale }: VogueFrameProps) => {
+const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imagePosition, imageScale }: VogueFrameProps) => {
   return (
     <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden bg-white shadow-2xl relative">
-      {/* Background image filling the frame */}
-      <img 
-        src={imageUrl}
-        alt="Activity"
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{
-          transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-        }}
-      />
+      {/* Background image or video filling the frame */}
+      {isVideo ? (
+        <video 
+          src={imageUrl}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{
+            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+          }}
+        />
+      ) : (
+        <img 
+          src={imageUrl}
+          alt="Activity"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{
+            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+          }}
+        />
+      )}
       
       {/* Top text - Magazine masthead style with subtle animation */}
       <div className="absolute top-4 left-4 right-4">
