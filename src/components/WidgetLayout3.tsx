@@ -180,99 +180,32 @@ const WidgetLayout3 = ({
           )}
         </div>
       
-        {/* Film Strip Section */}
+        {/* Film Strip Section - 12 blocks */}
         <div className="relative z-10">
-          <div className="flex items-center">
-            {/* Film Roll */}
-            <div className="relative flex-shrink-0 z-10" style={{ marginRight: '-4px' }}>
-              <div 
-                className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{
-                  background: 'linear-gradient(135deg, #7a7a7a 0%, #4a4a4a 50%, #5a5a5a 100%)',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.5)'
-                }}
-              >
+          <div className="grid grid-cols-6 gap-1.5">
+            {[...Array(12)].map((_, index) => {
+              const photo = photos[index];
+              return (
                 <div 
-                  className="w-3 h-3 rounded-full"
-                  style={{ background: '#1a1a1a' }}
-                />
-              </div>
-              
-              {/* Dashed line */}
-              <div 
-                className="absolute top-1/2 left-full w-3"
-                style={{
-                  borderTop: '1px dashed rgba(255,255,255,0.3)',
-                  transform: 'translateY(-50%)'
-                }}
-              />
-            </div>
-
-            {/* Film Strip */}
-            <div 
-              className="flex-1 rounded-md overflow-hidden ml-2"
-              style={{
-                background: '#4a4a4a',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.4)'
-              }}
-            >
-              {/* Top sprocket holes */}
-              <div 
-                className="flex justify-between px-2 py-0.5"
-                style={{ borderBottom: '1px solid #3a3a3a' }}
-              >
-                {[...Array(12)].map((_, i) => (
-                  <div 
-                    key={i} 
-                    className="w-1 h-0.5 rounded-sm"
-                    style={{ background: '#1a1a1a' }}
-                  />
-                ))}
-              </div>
-
-              {/* Film frames - scrollable */}
-              <div className="flex px-1.5 py-1 gap-1 overflow-x-auto scrollbar-hide">
-                {photos.length > 0 ? (
-                  photos.map((photo, index) => (
-                    <div 
-                      key={photo.id}
-                      className="flex-shrink-0 w-6 aspect-[3/4] rounded-sm overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all"
-                      style={{ background: '#0a0a0a' }}
-                      onClick={() => handlePhotoTap(photo)}
-                    >
-                      <img
-                        src={photo.url}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))
-                ) : (
-                  // Empty placeholders
-                  [...Array(12)].map((_, i) => (
-                    <div 
-                      key={i}
-                      className="flex-shrink-0 w-6 aspect-[3/4] rounded-sm"
-                      style={{ background: '#0a0a0a' }}
+                  key={index}
+                  className="aspect-[3/4] overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all"
+                  style={{ 
+                    background: '#1a1a1a',
+                    borderRadius: '10px'
+                  }}
+                  onClick={() => photo && handlePhotoTap(photo)}
+                >
+                  {photo ? (
+                    <img
+                      src={photo.url}
+                      alt=""
+                      className="w-full h-full object-cover"
+                      style={{ borderRadius: '10px' }}
                     />
-                  ))
-                )}
-              </div>
-
-              {/* Bottom sprocket holes */}
-              <div 
-                className="flex justify-between px-2 py-0.5"
-                style={{ borderTop: '1px solid #3a3a3a' }}
-              >
-                {[...Array(12)].map((_, i) => (
-                  <div 
-                    key={i} 
-                    className="w-1 h-0.5 rounded-sm"
-                    style={{ background: '#1a1a1a' }}
-                  />
-                ))}
-              </div>
-            </div>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
