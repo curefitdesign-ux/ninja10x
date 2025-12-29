@@ -13,13 +13,13 @@ import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
 
-// Background colors for each frame type
+// Background colors matched from each template's actual color scheme
 const FRAME_COLORS: Record<FrameType, string> = {
-  shaky: 'rgba(255, 107, 107, 0.3)',    // Warm red tint
-  journal: 'rgba(139, 115, 85, 0.3)',   // Earthy brown tint
-  vogue: 'rgba(30, 30, 30, 0.4)',       // Dark sophisticated
-  fitness: 'rgba(0, 200, 150, 0.25)',   // Energetic teal
-  ticket: 'rgba(240, 220, 180, 0.3)',   // Vintage cream
+  shaky: 'rgba(40, 40, 50, 0.4)',         // Dark neutral - lets image show through
+  journal: 'rgba(45, 212, 168, 0.25)',    // #2DD4A8 teal/mint from badge
+  vogue: 'rgba(255, 255, 255, 0.15)',     // White/elegant minimal
+  fitness: 'rgba(107, 107, 42, 0.5)',     // #6B6B2A olive green from background
+  ticket: 'rgba(200, 197, 188, 0.35)',    // #C8C5BC cream/vintage from dashed line
 };
 
 type EditingField = 'duration' | 'pr' | null;
