@@ -330,8 +330,8 @@ const WidgetLayout2 = ({
                       return (
                         <div 
                           key={day}
-                          className="flex-1 aspect-[3/4] rounded-sm overflow-hidden"
-                          style={{ background: '#0a0a0a' }}
+                          className="flex-1 aspect-[3/4] overflow-hidden"
+                          style={{ background: '#0a0a0a', borderRadius: '2px' }}
                         >
                           {photo && (
                             photo.isVideo || isVideoUrl(photo.url) ? (

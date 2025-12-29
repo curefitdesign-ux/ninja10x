@@ -184,9 +184,9 @@ const WidgetLayout3 = ({
             <div 
               className="absolute inset-0 flex items-center justify-center gap-[2px]"
               style={{ 
-                paddingLeft: '36px',
+                paddingLeft: '16px',
                 paddingRight: '3px',
-                paddingTop: '6px', 
+                paddingTop: '16px', 
                 paddingBottom: '6px' 
               }}
             >
