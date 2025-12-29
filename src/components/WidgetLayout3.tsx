@@ -168,19 +168,28 @@ const WidgetLayout3 = ({
               </div>
             </div>
           ) : (
-            /* Empty State Card */
+            /* Empty State Card with blur background */
             <div 
               className="relative cursor-pointer"
               onClick={onAddPhoto}
             >
+              {/* Blur background layer */}
               <div 
-                className="flex flex-col items-center justify-center rounded-2xl"
+                className="absolute inset-0 rounded-2xl overflow-hidden"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(100, 100, 140, 0.6) 0%, rgba(60, 60, 100, 0.8) 100%)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                }}
+              />
+              <div 
+                className="relative flex flex-col items-center justify-center rounded-2xl"
                 style={{ 
                   width: '160px',
                   height: '200px',
-                  background: 'rgba(70, 70, 90, 0.9)',
+                  background: 'rgba(70, 70, 90, 0.5)',
                   border: '2px solid rgba(255,255,255,0.25)',
-                  boxShadow: '0 15px 40px rgba(0,0,0,0.3)',
+                  boxShadow: '0 15px 40px rgba(0,0,0,0.3), inset 0 0 30px rgba(255,255,255,0.05)',
                 }}
               >
                 <div className="relative w-16 h-16">
@@ -189,10 +198,10 @@ const WidgetLayout3 = ({
                   <div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-white/30 rounded-bl-lg" />
                   <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-white/30 rounded-br-lg" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <User className="w-8 h-8 text-white/30" strokeWidth={1.5} />
+                    <User className="w-8 h-8 text-white/40" strokeWidth={1.5} />
                   </div>
                 </div>
-                <p className="text-xs text-white/50 mt-3 font-medium">Add your first photo</p>
+                <p className="text-xs text-white/60 mt-3 font-medium">Add your first photo</p>
               </div>
             </div>
           )}
@@ -210,12 +219,12 @@ const WidgetLayout3 = ({
             />
             {/* 12 photo blocks overlaid on film strip */}
             <div 
-              className="absolute inset-0 flex items-center justify-center gap-[3px]"
+              className="absolute inset-0 flex items-center justify-center gap-[2px]"
               style={{ 
-                paddingLeft: '38px',
-                paddingRight: '4px',
-                paddingTop: '8px', 
-                paddingBottom: '8px' 
+                paddingLeft: '36px',
+                paddingRight: '3px',
+                paddingTop: '6px', 
+                paddingBottom: '6px' 
               }}
             >
               {[...Array(12)].map((_, index) => {
@@ -223,12 +232,14 @@ const WidgetLayout3 = ({
                 return (
                   <div 
                     key={index}
-                    className="flex-1 overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all"
+                    className={`flex-1 overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all ${photo ? 'animate-scale-in' : ''}`}
                     style={{ 
                       background: '#0a0a0a',
-                      borderRadius: '4px',
+                      borderRadius: '3px',
                       aspectRatio: '9/16',
-                      maxHeight: '100%'
+                      maxHeight: '100%',
+                      animationDelay: photo ? `${index * 50}ms` : '0ms',
+                      animationFillMode: 'both'
                     }}
                     onClick={() => photo && handlePhotoTap(photo)}
                   >
@@ -237,7 +248,7 @@ const WidgetLayout3 = ({
                         <video
                           src={photo.url}
                           className="w-full h-full object-cover"
-                          style={{ borderRadius: '4px' }}
+                          style={{ borderRadius: '3px' }}
                           muted
                           playsInline
                         />
@@ -246,7 +257,7 @@ const WidgetLayout3 = ({
                           src={photo.url}
                           alt=""
                           className="w-full h-full object-cover"
-                          style={{ borderRadius: '4px' }}
+                          style={{ borderRadius: '3px' }}
                         />
                       )
                     ) : null}
