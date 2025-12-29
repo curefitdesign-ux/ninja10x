@@ -39,10 +39,10 @@ const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositio
         className="absolute z-10 pointer-events-none"
         style={{ 
           objectFit: 'fill',
-          top: '4%',
-          left: '5%',
-          width: '90%',
-          height: '92%'
+          top: '6%',
+          left: '8%',
+          width: '84%',
+          height: '88%'
         }}
       />
       
@@ -50,8 +50,8 @@ const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositio
       <div 
         className="absolute z-20 left-0 right-0 flex items-center justify-center"
         style={{ 
-          top: '4%',
-          height: '8%'
+          top: '6%',
+          height: '7%'
         }}
       >
         <h1 
@@ -70,9 +70,9 @@ const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositio
       <div 
         className="absolute z-30 left-1/2 -translate-x-1/2 flex items-center justify-center"
         style={{ 
-          top: '57%',
-          width: '70%',
-          height: '6%'
+          top: '54%',
+          width: '55%',
+          height: '5%'
         }}
       >
         {/* Ribbon image */}
@@ -101,8 +101,8 @@ const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositio
       
       {/* Layer 5: Dashed Divider Line */}
       <div 
-        className="absolute z-20 left-[8%] right-[8%]"
-        style={{ top: '66%' }}
+        className="absolute z-20 left-[12%] right-[12%]"
+        style={{ top: '62%' }}
       >
         <div 
           className="w-full"
@@ -114,10 +114,10 @@ const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositio
       
       {/* Layer 6-9: Stats Section */}
       <div 
-        className="absolute z-20 left-0 right-0 px-[10%] flex items-center justify-center"
+        className="absolute z-20 left-0 right-0 px-[12%] flex items-center justify-center"
         style={{ 
-          top: '71%',
-          height: '24%'
+          top: '66%',
+          height: '26%'
         }}
       >
         <div className="flex items-center justify-center w-full">
