@@ -69,19 +69,13 @@ const JournalFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositi
       
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 p-4 pt-0">
-        {/* Badges row */}
-        <div className="flex gap-2 mb-3">
+        {/* Badge */}
+        <div className="mb-3">
           <div 
-            className="rounded-full px-3 py-1.5"
+            className="inline-flex rounded-full px-3 py-1"
             style={{ background: '#2DD4A8' }}
           >
-            <span className="text-black font-bold text-[10px] tracking-wide">WEEK {week} | DAY {day}</span>
-          </div>
-          <div 
-            className="rounded-full px-3 py-1.5"
-            style={{ background: '#2DD4A8' }}
-          >
-            <span className="text-black font-bold text-[10px] tracking-wide">Bellandur, Bangalore</span>
+            <span className="text-black font-bold text-[10px] tracking-wide whitespace-nowrap">WEEK {week} | DAY {day}</span>
           </div>
         </div>
         
