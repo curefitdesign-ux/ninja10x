@@ -32,12 +32,18 @@ const TicketFrame = ({ imageUrl, activity, week, day, duration, pr, imagePositio
         }}
       />
       
-      {/* Layer 2: Ticket Frame Asset (with transparent window) */}
+      {/* Layer 2: Ticket Frame Asset (with transparent window) - reduced size */}
       <img 
         src={ticketFrameAsset}
         alt=""
-        className="absolute inset-0 w-full h-full z-10 pointer-events-none"
-        style={{ objectFit: 'fill' }}
+        className="absolute z-10 pointer-events-none"
+        style={{ 
+          objectFit: 'fill',
+          top: '4%',
+          left: '5%',
+          width: '90%',
+          height: '92%'
+        }}
       />
       
       {/* Layer 3: Title Text (dynamic) - positioned in top cream area */}
