@@ -227,7 +227,7 @@ const WidgetLayout3 = ({
                     style={{ 
                       background: '#0a0a0a',
                       borderRadius: '4px',
-                      aspectRatio: '3/4'
+                      aspectRatio: '9/16'
                     }}
                     onClick={() => photo && handlePhotoTap(photo)}
                   >
