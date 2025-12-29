@@ -297,7 +297,7 @@ const Index = () => {
             />
           ) : (
             <WidgetLayout4 
-              photos={photos.map((p, i) => ({ id: p.id, url: p.url, day: i + 1 }))} 
+              photos={photos.map((p, i) => ({ id: p.id, url: p.url, day: i + 1, isVideo: p.isVideo }))} 
               onPhotoUpload={(file) => {
                 // For direct file upload, we need to convert to data URL and add to photos
                 const reader = new FileReader();
