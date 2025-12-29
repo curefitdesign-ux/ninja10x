@@ -60,15 +60,18 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     }
   }, [facingMode]);
 
+  // Start camera only when not in cropper mode and no captured media
   useEffect(() => {
-    startCamera();
+    if (!showCropper && !capturedImage && !capturedVideo) {
+      startCamera();
+    }
     
     return () => {
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [facingMode]);
+  }, [facingMode, showCropper, capturedImage, capturedVideo]);
 
   const handleFlipCamera = () => {
     setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
