@@ -58,7 +58,7 @@ const Preview = () => {
   const [pr, setPr] = useState('');
   const [currentFrame, setCurrentFrame] = useState<FrameType>('shaky');
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
-  const [imageScale, setImageScale] = useState(1.2);
+  const [imageScale, setImageScale] = useState(1.0);
 
   const { label1, label2 } = useActivityDataPoints(activity || '');
   

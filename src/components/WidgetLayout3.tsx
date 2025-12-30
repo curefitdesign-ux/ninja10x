@@ -44,7 +44,7 @@ const renderInFrame = (photo: Photo, containerWidth: number = 180) => {
     duration: photo.duration || '2hrs',
     pr: photo.pr || '',
     imagePosition: { x: 0, y: 0 },
-    imageScale: 1.2,
+    imageScale: 1.0,
   };
 
   const FrameComponent = () => {
