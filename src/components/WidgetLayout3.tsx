@@ -82,21 +82,22 @@ const WidgetLayout3 = ({
     <div className="px-5">
       {/* Ninja Widget */}
       <div 
-        className={`glass-card p-5 relative overflow-hidden w-full transition-all duration-500 ${isLoaded ? 'animate-liquid-enter' : 'opacity-0'}`}
+        className={`glass-card p-5 pt-8 relative overflow-hidden w-full transition-all duration-500 ${isLoaded ? 'animate-liquid-enter' : 'opacity-0'}`}
         style={{ backgroundImage: `url(${cardBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
       >
-        {/* Cult Ninja Tag */}
-        <div className={`flex justify-center mb-4 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.1s' }}>
+        {/* Cult Ninja Tag - Attached to top edge */}
+        <div className={`absolute -top-3 left-1/2 -translate-x-1/2 z-20 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.1s' }}>
           <div 
-            className={`px-4 py-2 rounded-full border border-foreground/30 bg-background/30 backdrop-blur-sm tap-bounce cursor-pointer ${tappedElement === 'tag' ? 'animate-liquid-tap' : ''}`}
+            className={`px-3 py-1 rounded-full border border-foreground/30 bg-background/60 backdrop-blur-md tap-bounce cursor-pointer shadow-lg ${tappedElement === 'tag' ? 'animate-liquid-tap' : ''}`}
             onClick={() => handleTap('tag')}
+            style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
           >
-            <span className="text-sm font-semibold text-foreground tracking-wider">CULT NINJA</span>
+            <span className="text-[10px] font-semibold text-foreground tracking-wider">CULT NINJA</span>
           </div>
         </div>
         
         {/* Title */}
-        <h2 className={`text-xl font-bold text-foreground text-center mb-6 relative z-10 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
+        <h2 className={`text-lg font-bold text-foreground text-center mb-4 relative z-10 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
           CONQUER WILL POWER
         </h2>
       
