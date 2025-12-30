@@ -1,9 +1,9 @@
 import { User, Plus } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import cardBackground from '@/assets/card-background.png';
 import filmstripBg from '@/assets/frames/filmstrip-bg.png';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
-import ShareSheet from './ShareSheet';
 import ShakyFrame from '@/components/frames/ShakyFrame';
 import JournalFrame from '@/components/frames/JournalFrame';
 import VogueFrame from '@/components/frames/VogueFrame';
@@ -29,11 +29,12 @@ const isVideoUrl = (url: string) => {
   return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
 };
 
-const renderVideoInFrame = (photo: Photo) => {
+// Render photo/video in its selected frame template (scaled for widget)
+const renderInFrame = (photo: Photo, scale: number = 0.28) => {
   const frame: FrameType = photo.frame || 'shaky';
   const frameProps = {
     imageUrl: photo.originalUrl || photo.url,
-    isVideo: true,
+    isVideo: photo.isVideo || isVideoUrl(photo.url),
     activity: photo.activity || 'Activity',
     week: 1,
     day: 1,
@@ -43,19 +44,42 @@ const renderVideoInFrame = (photo: Photo) => {
     imageScale: 1.2,
   };
 
-  switch (frame) {
-    case 'journal':
-      return <JournalFrame {...frameProps} />;
-    case 'vogue':
-      return <VogueFrame {...frameProps} />;
-    case 'fitness':
-      return <FitnessFrame {...frameProps} />;
-    case 'ticket':
-      return <TicketFrame {...frameProps} />;
-    case 'shaky':
-    default:
-      return <ShakyFrame {...frameProps} />;
-  }
+  const FrameComponent = () => {
+    switch (frame) {
+      case 'journal':
+        return <JournalFrame {...frameProps} />;
+      case 'vogue':
+        return <VogueFrame {...frameProps} />;
+      case 'fitness':
+        return <FitnessFrame {...frameProps} />;
+      case 'ticket':
+        return <TicketFrame {...frameProps} />;
+      case 'shaky':
+      default:
+        return <ShakyFrame {...frameProps} />;
+    }
+  };
+
+  return (
+    <div 
+      className="relative overflow-hidden"
+      style={{ 
+        width: '100%', 
+        height: '100%',
+      }}
+    >
+      <div 
+        style={{ 
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+          width: `${100 / scale}%`,
+          height: `${100 / scale}%`,
+        }}
+      >
+        <FrameComponent />
+      </div>
+    </div>
+  );
 };
 
 interface WidgetLayout3Props {
@@ -68,11 +92,11 @@ const WidgetLayout3 = ({
   photos, 
   onAddPhoto,
 }: WidgetLayout3Props) => {
+  const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
   const [tappedElement, setTappedElement] = useState<string | null>(null);
   const prevPhotosLength = useRef(photos.length);
   const [newPhotoIndex, setNewPhotoIndex] = useState<number | null>(null);
-  const [sharePhoto, setSharePhoto] = useState<Photo | null>(null);
   
   // Get the latest photo for center display
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
@@ -101,15 +125,23 @@ const WidgetLayout3 = ({
   const handlePhotoTap = (photo: Photo) => {
     triggerHaptic('medium');
     handleTap(`photo-${photo.id}`);
-    // Open share sheet instead of navigating to camera
+    // Navigate to preview in edit mode
     setTimeout(() => {
-      setSharePhoto(photo);
+      navigate('/preview', {
+        state: {
+          imageUrl: photo.originalUrl || photo.url,
+          originalUrl: photo.originalUrl || photo.url,
+          isVideo: photo.isVideo,
+          activity: photo.activity,
+          frame: photo.frame,
+          duration: photo.duration,
+          pr: photo.pr,
+          isReview: false, // Allow editing
+        },
+      });
     }, 200);
   };
 
-  const closeShareSheet = () => {
-    setSharePhoto(null);
-  };
 
   return (
     <div className="px-5 pt-4">
@@ -150,19 +182,8 @@ const WidgetLayout3 = ({
                 boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
               }}
             >
-              {/* Show the saved framed image directly for photos; re-render the selected template for videos */}
-              {latestPhoto.isVideo || isVideoUrl(latestPhoto.url) ? (
-                <div className="w-full h-full flex items-center justify-center bg-black">
-                  {renderVideoInFrame(latestPhoto)}
-                </div>
-              ) : (
-                <img
-                  src={latestPhoto.url}
-                  alt="Saved activity template"
-                  className="w-full h-full object-contain bg-black"
-                  loading="lazy"
-                />
-              )}
+              {/* Render in selected frame template - scaled proportionally */}
+              {renderInFrame(latestPhoto, 0.28)}
             </div>
           ) : (
             /* Empty State */
@@ -272,14 +293,6 @@ const WidgetLayout3 = ({
         </button>
       </div>
 
-      {/* Share Sheet */}
-      {sharePhoto && (
-        <ShareSheet
-          imageUrl={sharePhoto.url}
-          isVideo={sharePhoto.isVideo}
-          onClose={closeShareSheet}
-        />
-      )}
     </div>
   );
 };

@@ -26,8 +26,8 @@ const isVideoUrl = (url: string) => {
   return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
 };
 
-// Render photo/video in its selected frame template
-const renderInFrame = (photo: Photo) => {
+// Render photo/video in its selected frame template (scaled for widget)
+const renderInFrame = (photo: Photo, scale: number = 0.28) => {
   const frame: FrameType = photo.frame || 'shaky';
   const frameProps = {
     imageUrl: photo.originalUrl || photo.url,
@@ -41,19 +41,42 @@ const renderInFrame = (photo: Photo) => {
     imageScale: 1.2,
   };
 
-  switch (frame) {
-    case 'journal':
-      return <JournalFrame {...frameProps} />;
-    case 'vogue':
-      return <VogueFrame {...frameProps} />;
-    case 'fitness':
-      return <FitnessFrame {...frameProps} />;
-    case 'ticket':
-      return <TicketFrame {...frameProps} />;
-    case 'shaky':
-    default:
-      return <ShakyFrame {...frameProps} />;
-  }
+  const FrameComponent = () => {
+    switch (frame) {
+      case 'journal':
+        return <JournalFrame {...frameProps} />;
+      case 'vogue':
+        return <VogueFrame {...frameProps} />;
+      case 'fitness':
+        return <FitnessFrame {...frameProps} />;
+      case 'ticket':
+        return <TicketFrame {...frameProps} />;
+      case 'shaky':
+      default:
+        return <ShakyFrame {...frameProps} />;
+    }
+  };
+
+  return (
+    <div 
+      className="relative overflow-hidden"
+      style={{ 
+        width: '100%', 
+        height: '100%',
+      }}
+    >
+      <div 
+        style={{ 
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+          width: `${100 / scale}%`,
+          height: `${100 / scale}%`,
+        }}
+      >
+        <FrameComponent />
+      </div>
+    </div>
+  );
 };
 
 interface WidgetLayout2Props {
@@ -75,6 +98,7 @@ const WidgetLayout2 = ({
   const handlePhotoTap = (photo: Photo) => {
     const mediaUrl = photo.originalUrl || photo.url;
 
+    // Navigate to preview in edit mode
     navigate('/preview', { 
       state: { 
         imageUrl: mediaUrl,
@@ -84,7 +108,7 @@ const WidgetLayout2 = ({
         frame: photo.frame,
         duration: photo.duration,
         pr: photo.pr,
-        isReview: true
+        isReview: false // Allow editing
       } 
     });
   };
@@ -189,11 +213,9 @@ const WidgetLayout2 = ({
                 className="relative bg-white rounded-2xl overflow-hidden shadow-2xl"
                 style={{ width: '175px' }}
               >
-                {/* Template Preview - render in selected frame */}
-                <div className="relative w-full" style={{ aspectRatio: '9/16' }}>
-                  <div className="absolute inset-0 flex items-center justify-center bg-black">
-                    {renderInFrame(displayPhoto)}
-                  </div>
+                {/* Template Preview - render in selected frame scaled */}
+                <div className="relative w-full overflow-hidden rounded-2xl" style={{ aspectRatio: '9/16' }}>
+                  {renderInFrame(displayPhoto, 0.28)}
                 </div>
               </div>
             </div>
