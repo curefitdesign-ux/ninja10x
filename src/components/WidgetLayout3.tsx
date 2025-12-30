@@ -228,17 +228,16 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
                 style={{
                   top: '-4px',
                   left: '10px',
-                  width: `${Math.min(videoProgress, 25) * 1.6}%`,
-                  maxWidth: '40%',
+                  width: '25%',
                   height: 'calc(100% + 8px)',
-                  overflow: 'hidden'
+                  overflow: 'hidden',
+                  clipPath: `inset(0 ${100 - (videoProgress * 4)}% 0 0)`
                 }}
               >
                 <img 
                   src={progressBar} 
                   alt="" 
-                  className="h-full object-cover object-left"
-                  style={{ width: '100%' }}
+                  className="w-full h-full object-fill"
                 />
               </div>
               
