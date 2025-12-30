@@ -26,9 +26,13 @@ const isVideoUrl = (url: string) => {
   return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
 };
 
-// Render photo/video in its selected frame template (scaled for widget)
-const renderInFrame = (photo: Photo, scale: number = 0.28) => {
+// Render photo/video in its selected frame template (pixel-perfect scaling)
+const renderInFrame = (photo: Photo, containerWidth: number = 180) => {
   const frame: FrameType = photo.frame || 'shaky';
+  // Frame components are designed for 360px width (90% of ~400px container)
+  const baseWidth = 360;
+  const scale = containerWidth / baseWidth;
+  
   const frameProps = {
     imageUrl: photo.originalUrl || photo.url,
     isVideo: photo.isVideo || isVideoUrl(photo.url),
@@ -59,18 +63,18 @@ const renderInFrame = (photo: Photo, scale: number = 0.28) => {
 
   return (
     <div 
-      className="relative overflow-hidden"
+      className="relative overflow-hidden" 
       style={{ 
-        width: '100%', 
-        height: '100%',
+        width: `${containerWidth}px`, 
+        height: `${containerWidth * (16/9)}px` 
       }}
     >
       <div 
         style={{ 
-          transform: `scale(${scale})`,
-          transformOrigin: 'top left',
-          width: `${100 / scale}%`,
-          height: `${100 / scale}%`,
+          transform: `scale(${scale})`, 
+          transformOrigin: 'top left', 
+          width: `${baseWidth}px`,
+          marginLeft: `${(baseWidth * 0.05) * scale}px`
         }}
       >
         <FrameComponent />
@@ -214,8 +218,8 @@ const WidgetLayout2 = ({
                 style={{ width: '175px' }}
               >
                 {/* Template Preview - render in selected frame scaled */}
-                <div className="relative w-full overflow-hidden rounded-2xl" style={{ aspectRatio: '9/16' }}>
-                  {renderInFrame(displayPhoto, 0.28)}
+                <div className="relative overflow-hidden rounded-2xl">
+                  {renderInFrame(displayPhoto, 175)}
                 </div>
               </div>
             </div>

@@ -28,8 +28,13 @@ const isVideoUrl = (url: string) => {
   return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
 };
 
-const renderInFrame = (photo: Photo, scale: number = 0.28) => {
+const renderInFrame = (photo: Photo, containerWidth: number = 180) => {
   const frame: FrameType = photo.frame || 'shaky';
+  // Frame components are designed for 360px width (90% of ~400px container)
+  // Calculate scale to fit into our container while maintaining exact proportions
+  const baseWidth = 360; // Base width the frames are designed for
+  const scale = containerWidth / baseWidth;
+  
   const frameProps = {
     imageUrl: photo.originalUrl || photo.url,
     isVideo: photo.isVideo || isVideoUrl(photo.url),
@@ -59,8 +64,22 @@ const renderInFrame = (photo: Photo, scale: number = 0.28) => {
   };
 
   return (
-    <div className="relative overflow-hidden" style={{ width: '100%', height: '100%' }}>
-      <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: `${100 / scale}%`, height: `${100 / scale}%` }}>
+    <div 
+      className="relative overflow-hidden" 
+      style={{ 
+        width: `${containerWidth}px`, 
+        height: `${containerWidth * (16/9)}px` 
+      }}
+    >
+      <div 
+        style={{ 
+          transform: `scale(${scale})`, 
+          transformOrigin: 'top left', 
+          width: `${baseWidth}px`,
+          // Account for the 90% width of frame content
+          marginLeft: `${(baseWidth * 0.05) * scale}px`
+        }}
+      >
         <FrameComponent />
       </div>
     </div>
@@ -198,7 +217,7 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
                     currentSlide === index ? 'opacity-100' : 'opacity-0'
                   }`}
                 >
-                  {renderInFrame(photo, 0.5)}
+                  {renderInFrame(photo, 180)}
                 </div>
               ))}
               
@@ -330,7 +349,7 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
                     : '0 8px 32px rgba(0,0,0,0.4)'
                 }}
               >
-                {renderInFrame(latestPhoto, 0.28)}
+                {renderInFrame(latestPhoto, 180)}
                 
                 {/* Play Button Overlay - Only show when 3+ photos */}
                 {hasThreePhotos && (
