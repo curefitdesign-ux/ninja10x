@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react';
 import shuttlecockIcon from '@/assets/frames/shuttlecock.png';
 import journalBg from '@/assets/frames/journal-bg.png';
 
@@ -30,6 +31,16 @@ const JournalFrame = ({
 }: JournalFrameProps) => {
   const metricLabel = label1 || 'Metric';
   const durationLabel = label2 || 'Duration';
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Ensure video plays on mount and when URL changes
+  useEffect(() => {
+    if (isVideo && videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
+  }, [isVideo, imageUrl]);
+
   return (
     <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative">
       {/* Background image */}
@@ -67,6 +78,7 @@ const JournalFrame = ({
       >
         {isVideo ? (
           <video 
+            ref={videoRef}
             src={imageUrl}
             autoPlay
             loop
@@ -75,6 +87,7 @@ const JournalFrame = ({
             className="w-full h-full object-cover"
             style={{
               transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+              transformOrigin: 'center center',
             }}
           />
         ) : (
@@ -84,6 +97,7 @@ const JournalFrame = ({
             className="w-full h-full object-cover"
             style={{
               transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+              transformOrigin: 'center center',
             }}
           />
         )}

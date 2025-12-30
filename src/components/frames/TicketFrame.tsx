@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react';
 import ticketFrameAsset from '@/assets/frames/ticket-frame.png';
 import ribbonAsset from '@/assets/frames/ticket-ribbon.png';
 
@@ -18,12 +19,22 @@ interface TicketFrameProps {
 const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: TicketFrameProps) => {
   const metricLabel = label1 || 'Laps';
   const durationLabel = label2 || 'Duration';
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Ensure video plays on mount and when URL changes
+  useEffect(() => {
+    if (isVideo && videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
+  }, [isVideo, imageUrl]);
   
   return (
     <div className="w-[90%] mx-auto aspect-[9/16] overflow-hidden relative rounded-3xl bg-black">
       {/* Layer 1: Background Image or Video (full-bleed) */}
       {isVideo ? (
         <video 
+          ref={videoRef}
           src={imageUrl}
           autoPlay
           loop
