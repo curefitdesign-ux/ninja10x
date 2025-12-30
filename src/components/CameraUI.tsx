@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, SwitchCamera, Image as ImageIcon, Check, RotateCcw } from 'lucide-react';
+import { X, SwitchCamera, Image as ImageIcon, Check, RotateCcw, Timer, Zap, ZapOff } from 'lucide-react';
 import ImageCropper from './ImageCropper';
 
 interface CameraUIProps {
@@ -9,6 +9,8 @@ interface CameraUIProps {
   onCapture: (mediaDataUrl: string, isVideo?: boolean) => void;
   onClose: () => void;
 }
+
+type TimerOption = 0 | 5 | 10 | 15;
 
 const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -27,10 +29,18 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const [showHoldTip, setShowHoldTip] = useState(true);
   const [showCropper, setShowCropper] = useState(false);
   const [mediaToEdit, setMediaToEdit] = useState<{ src: string; isVideo: boolean } | null>(null);
+  const [selectedTimer, setSelectedTimer] = useState<TimerOption>(0);
+  const [showTimerPicker, setShowTimerPicker] = useState(false);
+  const [flashEnabled, setFlashEnabled] = useState(false);
+  const [countdownActive, setCountdownActive] = useState(false);
+  const [countdownValue, setCountdownValue] = useState(0);
   const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
   const recordingStartRef = useRef<number>(0);
   const isLongPressRef = useRef(false);
+
+  const timerOptions: TimerOption[] = [0, 5, 10, 15];
 
   // Hide the "Hold for video" tip after 5 seconds
   useEffect(() => {
@@ -39,7 +49,6 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     }, 5000);
     return () => clearTimeout(timer);
   }, []);
-
   const startCamera = useCallback(async () => {
     try {
       if (stream) {
@@ -204,20 +213,51 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     setRecordingSeconds(3);
   };
 
+  const startCountdown = (callback: () => void) => {
+    if (selectedTimer === 0) {
+      callback();
+      return;
+    }
+    
+    setCountdownActive(true);
+    setCountdownValue(selectedTimer);
+    
+    countdownTimerRef.current = setInterval(() => {
+      setCountdownValue(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownTimerRef.current!);
+          setCountdownActive(false);
+          callback();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const cancelCountdown = () => {
+    if (countdownTimerRef.current) {
+      clearInterval(countdownTimerRef.current);
+      countdownTimerRef.current = null;
+    }
+    setCountdownActive(false);
+    setCountdownValue(0);
+  };
+
   const handleShutterPress = () => {
-    if (capturedImage || capturedVideo) return; // Don't allow if already captured
+    if (capturedImage || capturedVideo || countdownActive) return;
     
     isLongPressRef.current = false;
     
     // Start timer to detect long press
     pressTimerRef.current = setTimeout(() => {
       isLongPressRef.current = true;
-      startRecording();
-    }, 300); // 300ms to trigger long press
+      startCountdown(() => startRecording());
+    }, 300);
   };
 
   const handleShutterRelease = () => {
-    if (capturedImage || capturedVideo) return; // Don't allow if already captured
+    if (capturedImage || capturedVideo) return;
     
     // Clear the long press timer
     if (pressTimerRef.current) {
@@ -225,13 +265,22 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
       pressTimerRef.current = null;
     }
     
+    if (countdownActive) return;
+    
     if (isRecording) {
-      // Was recording, stop it
       stopRecording();
     } else if (!isLongPressRef.current) {
-      // Quick tap, take photo
-      takePhoto();
+      startCountdown(() => takePhoto());
     }
+  };
+
+  const handleTimerSelect = (timer: TimerOption) => {
+    setSelectedTimer(timer);
+    setShowTimerPicker(false);
+  };
+
+  const toggleFlash = () => {
+    setFlashEnabled(prev => !prev);
   };
 
   const handleGalleryClick = () => {
@@ -367,6 +416,72 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         </div>
       </div>
 
+      {/* iOS-style Countdown Overlay */}
+      {countdownActive && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+          <div className="relative">
+            {/* Countdown number with liquid animation */}
+            <div 
+              key={countdownValue}
+              className="text-[120px] font-bold text-white animate-liquid-bounce"
+              style={{
+                textShadow: '0 0 60px rgba(255,255,255,0.5), 0 0 120px rgba(255,255,255,0.3)',
+              }}
+            >
+              {countdownValue}
+            </div>
+            {/* Expanding ring animation */}
+            <div 
+              key={`ring-${countdownValue}`}
+              className="absolute inset-0 flex items-center justify-center"
+            >
+              <div 
+                className="w-40 h-40 rounded-full border-4 border-white/40 animate-ping"
+                style={{ animationDuration: '1s' }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Timer Picker Overlay - iOS Liquid Glass Style */}
+      {showTimerPicker && (
+        <div 
+          className="absolute inset-0 z-40 flex items-center justify-center"
+          onClick={() => setShowTimerPicker(false)}
+        >
+          <div 
+            className="backdrop-blur-2xl bg-white/10 rounded-3xl p-4 border border-white/20 shadow-2xl animate-liquid-enter"
+            onClick={e => e.stopPropagation()}
+            style={{
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1)',
+            }}
+          >
+            <div className="text-white/60 text-xs font-medium text-center mb-3 uppercase tracking-wider">Timer</div>
+            <div className="flex gap-2">
+              {timerOptions.map((timer) => (
+                <button
+                  key={timer}
+                  onClick={() => handleTimerSelect(timer)}
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center font-semibold text-lg transition-all duration-300 tap-bounce ${
+                    selectedTimer === timer
+                      ? 'bg-white text-black scale-105'
+                      : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+                  style={{
+                    boxShadow: selectedTimer === timer 
+                      ? '0 10px 30px -5px rgba(255,255,255,0.3)' 
+                      : 'none',
+                  }}
+                >
+                  {timer === 0 ? 'Off' : `${timer}s`}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 p-6 pt-12 flex justify-between items-start z-10">
         <div>
@@ -382,11 +497,11 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
       </div>
 
       {/* Bottom Controls */}
-      <div className="absolute bottom-0 left-0 right-0 pb-12 px-8 z-10">
+      <div className="absolute bottom-0 left-0 right-0 pb-12 px-6 z-10">
         {/* Hold for video tip */}
         <div 
           className={`flex justify-center mb-4 transition-all duration-500 ${
-            showHoldTip && !hasCapturedMedia ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
+            showHoldTip && !hasCapturedMedia && !countdownActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
           }`}
         >
           <div className="px-4 py-2 rounded-full backdrop-blur-md bg-white/20 border border-white/10">
@@ -394,23 +509,55 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
           </div>
         </div>
 
+        {/* Timer indicator when selected */}
+        {selectedTimer > 0 && !hasCapturedMedia && !countdownActive && (
+          <div className="flex justify-center mb-3">
+            <div className="px-3 py-1.5 rounded-full backdrop-blur-md bg-yellow-500/20 border border-yellow-500/30">
+              <span className="text-yellow-400 text-xs font-medium">{selectedTimer}s timer active</span>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
-          {/* Left Button - Retake (when captured) or Flip Camera */}
-          {hasCapturedMedia ? (
-            <button
-              onClick={handleRetake}
-              className="p-4"
-            >
-              <RotateCcw className="w-8 h-8 text-white/80" />
-            </button>
-          ) : (
-            <button
-              onClick={handleFlipCamera}
-              className="p-4"
-            >
-              <SwitchCamera className="w-8 h-8 text-white/80" />
-            </button>
-          )}
+          {/* Left side controls */}
+          <div className="flex items-center gap-2">
+            {hasCapturedMedia ? (
+              <button
+                onClick={handleRetake}
+                className="p-3 rounded-full backdrop-blur-md bg-white/10 border border-white/10 tap-bounce"
+              >
+                <RotateCcw className="w-6 h-6 text-white/80" />
+              </button>
+            ) : (
+              <>
+                {/* Timer Button */}
+                <button
+                  onClick={() => setShowTimerPicker(true)}
+                  className={`p-3 rounded-full backdrop-blur-md border tap-bounce transition-all duration-300 ${
+                    selectedTimer > 0 
+                      ? 'bg-yellow-500/20 border-yellow-500/40' 
+                      : 'bg-white/10 border-white/10'
+                  }`}
+                >
+                  <div className="relative">
+                    <Timer className={`w-6 h-6 ${selectedTimer > 0 ? 'text-yellow-400' : 'text-white/80'}`} />
+                    {selectedTimer > 0 && (
+                      <span className="absolute -bottom-1 -right-1 text-[10px] font-bold text-yellow-400">
+                        {selectedTimer}
+                      </span>
+                    )}
+                  </div>
+                </button>
+                {/* Flip Camera */}
+                <button
+                  onClick={handleFlipCamera}
+                  className="p-3 rounded-full backdrop-blur-md bg-white/10 border border-white/10 tap-bounce"
+                >
+                  <SwitchCamera className="w-6 h-6 text-white/80" />
+                </button>
+              </>
+            )}
+          </div>
 
           {/* Shutter Button / Confirm Button */}
           {hasCapturedMedia ? (
@@ -418,11 +565,19 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
               onClick={handleConfirm}
               className="relative w-20 h-20 rounded-full flex items-center justify-center"
             >
-              {/* Outer ring */}
               <div className="absolute w-20 h-20 rounded-full border-4 border-white/30" />
-              {/* Inner button with check */}
               <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center">
                 <Check className="w-8 h-8 text-black" strokeWidth={3} />
+              </div>
+            </button>
+          ) : countdownActive ? (
+            <button
+              onClick={cancelCountdown}
+              className="relative w-20 h-20 rounded-full flex items-center justify-center tap-bounce"
+            >
+              <div className="absolute w-20 h-20 rounded-full border-4 border-white/30 animate-pulse" />
+              <div className="w-16 h-16 rounded-full bg-red-500/80 flex items-center justify-center">
+                <X className="w-8 h-8 text-white" strokeWidth={3} />
               </div>
             </button>
           ) : (
@@ -437,7 +592,6 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
               onTouchEnd={handleShutterRelease}
               className="relative w-20 h-20 rounded-full flex items-center justify-center"
             >
-              {/* Outer ring with progress */}
               <svg className="absolute w-20 h-20" viewBox="0 0 80 80">
                 <circle
                   cx="40"
@@ -461,7 +615,6 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
                   />
                 )}
               </svg>
-              {/* Inner button with countdown */}
               <div className={`w-16 h-16 rounded-full transition-all duration-150 flex items-center justify-center ${
                 isRecording ? 'bg-red-500 scale-75' : 'bg-white/90'
               }`}>
@@ -472,17 +625,37 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
             </button>
           )}
 
-          {/* Gallery - hidden when captured */}
-          {hasCapturedMedia ? (
-            <div className="p-4 w-16" />
-          ) : (
-            <button
-              onClick={handleGalleryClick}
-              className="p-4"
-            >
-              <ImageIcon className="w-8 h-8 text-white/80" />
-            </button>
-          )}
+          {/* Right side controls */}
+          <div className="flex items-center gap-2">
+            {hasCapturedMedia ? (
+              <div className="p-3 w-12" />
+            ) : (
+              <>
+                {/* Flash Button */}
+                <button
+                  onClick={toggleFlash}
+                  className={`p-3 rounded-full backdrop-blur-md border tap-bounce transition-all duration-300 ${
+                    flashEnabled 
+                      ? 'bg-yellow-500/20 border-yellow-500/40' 
+                      : 'bg-white/10 border-white/10'
+                  }`}
+                >
+                  {flashEnabled ? (
+                    <Zap className="w-6 h-6 text-yellow-400" fill="currentColor" />
+                  ) : (
+                    <ZapOff className="w-6 h-6 text-white/80" />
+                  )}
+                </button>
+                {/* Gallery */}
+                <button
+                  onClick={handleGalleryClick}
+                  className="p-3 rounded-full backdrop-blur-md bg-white/10 border border-white/10 tap-bounce"
+                >
+                  <ImageIcon className="w-6 h-6 text-white/80" />
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
