@@ -10,6 +10,7 @@ import TicketFrame from '@/components/frames/TicketFrame';
 import WheelPicker from '@/components/WheelPicker';
 import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
+import ActivityBackgroundEffect from '@/components/ActivityBackgroundEffect';
 
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
@@ -422,6 +423,9 @@ const Preview = () => {
         }}
       />
       <div className="absolute inset-0 bg-black/20 animate-subtle-pulse" />
+      
+      {/* Activity-specific background effect */}
+      {activity && <ActivityBackgroundEffect activity={activity} />}
 
       {/* Content */}
       <div className="relative z-10 flex flex-col min-h-screen pb-32">
