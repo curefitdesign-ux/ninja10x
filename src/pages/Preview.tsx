@@ -60,6 +60,7 @@ const Preview = () => {
   const [editingField, setEditingField] = useState<EditingField>(null);
   const [tempValue, setTempValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [tappedElement, setTappedElement] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   
@@ -67,6 +68,13 @@ const Preview = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
+
+  // Handle tap animation
+  const handleTap = (id: string) => {
+    setTappedElement(id);
+    setTimeout(() => setTappedElement(null), 400);
+  };
 
   // Single set of frames - no duplicates
 
@@ -94,8 +102,12 @@ const Preview = () => {
     if (!imageUrl || !activity || !frameRef.current) return;
     
     setIsSaving(true);
+    handleTap('save-btn');
     
     try {
+      // Start exit animation
+      setIsExiting(true);
+      
       // Capture the frame as an image
       const canvas = await html2canvas(frameRef.current, {
         backgroundColor: null,
@@ -106,37 +118,43 @@ const Preview = () => {
       
       const framedImageUrl = canvas.toDataURL('image/png', 1.0);
       
-      navigate('/', { 
-        state: { 
-          savePhoto: true, 
-          imageUrl: isVideo ? imageUrl : framedImageUrl,
-          isVideo,
-          activity, 
-          frame: currentFrame,
-          duration,
-          pr,
-        } 
-      });
+      // Wait for exit animation
+      setTimeout(() => {
+        navigate('/', { 
+          state: { 
+            savePhoto: true, 
+            imageUrl: isVideo ? imageUrl : framedImageUrl,
+            isVideo,
+            activity, 
+            frame: currentFrame,
+            duration,
+            pr,
+          } 
+        });
+      }, 400);
     } catch (error) {
       console.error('Error capturing frame:', error);
-      navigate('/', { 
-        state: { 
-          savePhoto: true, 
-          imageUrl, 
-          isVideo,
-          activity, 
-          frame: currentFrame,
-          duration,
-          pr,
-        } 
-      });
+      setTimeout(() => {
+        navigate('/', { 
+          state: { 
+            savePhoto: true, 
+            imageUrl, 
+            isVideo,
+            activity, 
+            frame: currentFrame,
+            duration,
+            pr,
+          } 
+        });
+      }, 400);
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleBack = () => {
-    navigate('/');
+    handleTap('back-btn');
+    setTimeout(() => navigate('/'), 200);
   };
 
   // Handle scroll to update current frame and calculate scale
@@ -309,18 +327,18 @@ const Preview = () => {
       <div className="relative z-10 flex flex-col min-h-screen">
         {/* Header with title aligned with arrow */}
         <div className="h-12" />
-        <div className="flex items-center gap-3 mb-4 px-5">
+        <div className={`flex items-center gap-3 mb-4 px-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`}>
           <button 
             onClick={handleBack}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm"
+            className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'back-btn' ? 'animate-liquid-tap' : ''}`}
           >
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           <h2 className="text-white/80 text-lg font-semibold">Select your frame</h2>
         </div>
         
-        {/* Frame carousel - horizontal scroll with infinite loop effect */}
-        <div className={`flex-1 flex items-center overflow-hidden ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'}`}>
+        {/* Frame carousel - horizontal scroll with liquid glass effect */}
+        <div className={`flex-1 flex items-center overflow-hidden ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''}`}>
           <div 
             ref={containerRef}
             onScroll={handleScroll}
@@ -329,6 +347,7 @@ const Preview = () => {
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
               WebkitOverflowScrolling: 'touch',
+              scrollBehavior: 'smooth',
             }}
           >
             {FRAMES.map((frame, index) => {
@@ -338,14 +357,17 @@ const Preview = () => {
               return (
                 <div 
                   key={`${frame}-${index}`}
-                  className="flex-shrink-0 snap-center h-fit flex items-center justify-center transition-all duration-150 ease-out"
+                  className="flex-shrink-0 snap-center h-fit flex items-center justify-center swipe-smooth"
                   style={{ 
                     width: 'calc(75vw)',
                     transform: `scale(${scale})`,
                     opacity,
                   }}
                 >
-                  <div ref={isActiveFrame ? frameRef : undefined} className="w-full">
+                  <div 
+                    ref={isActiveFrame ? frameRef : undefined} 
+                    className={`w-full transition-all duration-300 ${isActiveFrame ? 'animate-liquid-morph' : ''}`}
+                  >
                     {frame === 'shaky' && <ShakyFrame {...frameProps} />}
                     {frame === 'journal' && <JournalFrame {...frameProps} />}
                     {frame === 'vogue' && <VogueFrame {...frameProps} />}
@@ -359,19 +381,19 @@ const Preview = () => {
         </div>
 
         {/* Bottom section - Sticky */}
-        <div className="sticky bottom-0 left-0 right-0 space-y-4 pb-6 pt-4 px-5 bg-gradient-to-t from-black/60 via-black/30 to-transparent">
+        <div className={`sticky bottom-0 left-0 right-0 space-y-4 pb-6 pt-4 px-5 bg-gradient-to-t from-black/60 via-black/30 to-transparent ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
           {/* Editable data points - now tappable */}
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4">
             <button 
-              onClick={() => openEditSheet('duration')}
-              className="w-full flex justify-between items-center py-2 border-b border-white/10"
+              onClick={() => { handleTap('duration'); openEditSheet('duration'); }}
+              className={`w-full flex justify-between items-center py-2 border-b border-white/10 tap-bounce ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
             >
               <span className="text-white/80">{label2}</span>
               <span className="text-white font-semibold text-lg">{duration || `e.g. ${label2.toLowerCase()}`}</span>
             </button>
             <button 
-              onClick={() => openEditSheet('pr')}
-              className="w-full flex justify-between items-center py-2"
+              onClick={() => { handleTap('pr'); openEditSheet('pr'); }}
+              className={`w-full flex justify-between items-center py-2 tap-bounce ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
             >
               <span className="text-white/80">{label1} <span className="text-white/40">(Optional)</span></span>
               <span className="text-white font-semibold text-lg">{pr || '-'}</span>
@@ -379,7 +401,10 @@ const Preview = () => {
           </div>
 
           {/* Health sync widget */}
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 flex items-center gap-4">
+          <div 
+            className={`bg-white/10 backdrop-blur-xl rounded-2xl p-4 flex items-center gap-4 tap-bounce ${tappedElement === 'connect' ? 'animate-liquid-tap' : ''}`}
+            onClick={() => handleTap('connect')}
+          >
             <div className="flex-1">
               <h3 className="text-white font-semibold text-lg">Auto sync with a device</h3>
               <p className="text-white/60 text-sm">Sync your health & fitness data</p>
@@ -393,7 +418,7 @@ const Preview = () => {
           <button 
             onClick={handleSave}
             disabled={isSaving}
-            className="w-full bg-white py-4 rounded-2xl disabled:opacity-50"
+            className={`w-full bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce ${tappedElement === 'save-btn' ? 'animate-liquid-tap' : ''}`}
           >
             <span className="text-black font-bold text-lg">
               {isSaving ? 'Saving...' : 'Save Activity'}
