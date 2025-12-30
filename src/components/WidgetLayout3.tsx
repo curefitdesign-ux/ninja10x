@@ -219,28 +219,26 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
 
           {/* Fixed Film Strip at Bottom with Progress Bar Image Overlay */}
           <div className={`pb-8 pt-4 ${isVideoClosing ? 'animate-filmstrip-reverse' : 'animate-filmstrip-forward'}`}>
-            <div className="relative w-full overflow-hidden">
+            <div className="relative w-full">
+              {/* Film strip background */}
               <img src={filmstripBg} alt="" className="w-full h-auto" style={{ display: 'block' }} />
               
-              {/* Dashed progress bar image overlay - masked to first 3 cards */}
+              {/* Progress bar overlay - same size, aligned with film strip */}
               <div 
-                className="absolute pointer-events-none"
+                className="absolute inset-0 pointer-events-none"
                 style={{
-                  top: '-4px',
-                  left: '10px',
-                  width: '25%',
-                  height: 'calc(100% + 8px)',
-                  overflow: 'hidden',
-                  clipPath: `inset(0 ${100 - (videoProgress * 4)}% 0 0)`
+                  clipPath: `inset(0 ${100 - (videoProgress * 1)}% 0 0)`
                 }}
               >
                 <img 
                   src={progressBar} 
                   alt="" 
                   className="w-full h-full object-fill"
+                  style={{ filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.6))' }}
                 />
               </div>
               
+              {/* Photo thumbnails */}
               <div 
                 className="absolute inset-0 flex items-center justify-center gap-[10px]"
                 style={{ paddingLeft: '10px', paddingRight: '10px', paddingTop: '14px', paddingBottom: '6px' }}
