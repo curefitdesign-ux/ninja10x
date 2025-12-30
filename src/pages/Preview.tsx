@@ -9,6 +9,7 @@ import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
 import WheelPicker from '@/components/WheelPicker';
 import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
+import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
@@ -70,8 +71,9 @@ const Preview = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
 
-  // Handle tap animation
+  // Handle tap animation with haptic feedback
   const handleTap = (id: string) => {
+    triggerHaptic('light');
     setTappedElement(id);
     setTimeout(() => setTappedElement(null), 400);
   };
@@ -102,6 +104,7 @@ const Preview = () => {
     if (!imageUrl || !activity || !frameRef.current) return;
     
     setIsSaving(true);
+    triggerHaptic('success');
     handleTap('save-btn');
     
     try {

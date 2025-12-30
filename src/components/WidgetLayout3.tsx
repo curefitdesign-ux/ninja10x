@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import cardBackground from '@/assets/card-background.png';
 import filmstripBg from '@/assets/frames/filmstrip-bg.png';
+import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 
 interface Photo {
   id: string;
@@ -55,11 +56,13 @@ const WidgetLayout3 = ({
   }, [photos.length]);
 
   const handleTap = (id: string) => {
+    triggerHaptic('light');
     setTappedElement(id);
     setTimeout(() => setTappedElement(null), 400);
   };
 
   const handlePhotoTap = (photo: Photo) => {
+    triggerHaptic('medium');
     handleTap(`photo-${photo.id}`);
     setTimeout(() => {
       navigate('/preview', { 
