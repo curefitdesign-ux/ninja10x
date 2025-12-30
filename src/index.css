@@ -695,4 +695,176 @@
       transform: translateX(100%);
     }
   }
+
+  /* Activity-specific background effects */
+
+  /* Running - speed lines */
+  @keyframes speed-line {
+    0% {
+      transform: translateX(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.6;
+    }
+    90% {
+      opacity: 0.6;
+    }
+    100% {
+      transform: translateX(200vw);
+      opacity: 0;
+    }
+  }
+
+  .animate-speed-line {
+    animation: speed-line 1s linear infinite;
+  }
+
+  /* Trekking - cloud drift */
+  @keyframes cloud-drift {
+    0% {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(150vw);
+      opacity: 0;
+    }
+  }
+
+  .animate-cloud-drift {
+    animation: cloud-drift 25s linear infinite;
+  }
+
+  /* Swimming - water ripple */
+  @keyframes water-ripple {
+    0% {
+      transform: scale(0.5);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(3);
+      opacity: 0;
+    }
+  }
+
+  .animate-water-ripple {
+    animation: water-ripple 3s ease-out infinite;
+  }
+
+  /* Swimming - water droplet */
+  @keyframes water-drop {
+    0% {
+      transform: translateY(0) scale(1);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.8;
+    }
+    80% {
+      opacity: 0.6;
+    }
+    100% {
+      transform: translateY(120vh) scale(0.5);
+      opacity: 0;
+    }
+  }
+
+  .animate-water-drop {
+    animation: water-drop 2.5s ease-in infinite;
+  }
+
+  /* Racquet - ball bounce */
+  @keyframes ball-bounce {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+    }
+    25% {
+      transform: translateY(-120px) scale(0.9);
+    }
+    50% {
+      transform: translateY(-200px) scale(0.85);
+    }
+    75% {
+      transform: translateY(-80px) scale(0.95);
+    }
+  }
+
+  .animate-ball-bounce {
+    animation: ball-bounce 2s ease-in-out infinite;
+  }
+
+  /* Racquet - motion trail */
+  @keyframes trail-fade {
+    0%, 100% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+
+  .animate-trail-fade {
+    animation: trail-fade 1.5s ease-in-out infinite;
+  }
+
+  /* Yoga - zen float */
+  @keyframes zen-float {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+      opacity: 0.3;
+    }
+    50% {
+      transform: translateY(-20px) scale(1.2);
+      opacity: 0.6;
+    }
+  }
+
+  .animate-zen-float {
+    animation: zen-float 5s ease-in-out infinite;
+  }
+
+  /* Cycling - wind streak */
+  @keyframes wind-streak {
+    0% {
+      transform: translateX(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.5;
+    }
+    90% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: translateX(-200vw);
+      opacity: 0;
+    }
+  }
+
+  .animate-wind-streak {
+    animation: wind-streak 1.2s linear infinite;
+  }
+
+  /* Default - gentle pulse */
+  @keyframes gentle-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.2;
+    }
+    50% {
+      transform: scale(1.3);
+      opacity: 0.4;
+    }
+  }
+
+  .animate-gentle-pulse {
+    animation: gentle-pulse 4s ease-in-out infinite;
+  }
 }
