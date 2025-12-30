@@ -14,6 +14,10 @@ import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
 
+const isVideoUrl = (url: string) => {
+  return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
+};
+
 // Background colors matched from each template - dark gradient shades
 const FRAME_COLORS: Record<FrameType, { bg: string; gradient: string }> = {
   shaky: { 
@@ -63,7 +67,10 @@ const Preview = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [tappedElement, setTappedElement] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const frameRef = useRef<HTMLDivElement>(null);
+  const captureRef = useRef<HTMLDivElement>(null);
+
+  const frameItemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const scrollRaf = useRef<number | null>(null);
   
   // Carousel state
   const containerRef = useRef<HTMLDivElement>(null);
@@ -81,11 +88,29 @@ const Preview = () => {
   // Single set of frames - no duplicates
 
   useEffect(() => {
-    const state = location.state as { imageUrl?: string; isVideo?: boolean; activity?: string } | null;
-    if (state?.imageUrl) {
-      setImageUrl(state.imageUrl);
-      setIsVideo(state.isVideo || false);
-      setActivity(state.activity || null);
+    const state = location.state as {
+      imageUrl?: string;
+      originalUrl?: string;
+      isVideo?: boolean;
+      activity?: string;
+      frame?: FrameType;
+      duration?: string;
+      pr?: string;
+      isReview?: boolean;
+    } | null;
+
+    const mediaUrl = state?.originalUrl || state?.imageUrl;
+
+    if (mediaUrl && state?.activity) {
+      setImageUrl(mediaUrl);
+      setIsVideo(state.isVideo ?? isVideoUrl(mediaUrl));
+      setActivity(state.activity);
+      setDuration(state.duration || '2hrs');
+      setPr(state.pr || '');
+      if (state.frame && FRAMES.includes(state.frame)) {
+        setCurrentFrame(state.frame);
+      }
+
       // Trigger entrance animation after a brief delay
       setTimeout(() => setIsLoaded(true), 100);
     } else {
@@ -101,80 +126,83 @@ const Preview = () => {
   }, [editingField]);
 
   const handleSave = async () => {
-    if (!imageUrl || !activity || !frameRef.current) return;
-    
+    if (!imageUrl || !activity) return;
+
     setIsSaving(true);
     triggerHaptic('success');
     handleTap('save-btn');
-    
+
     // Start exit animation
     setIsExiting(true);
-    
-    // For videos, save the original video URL directly (no html2canvas capture)
-    // For images, capture the framed template as PNG
+
+    // For videos, keep the original video URL (video stays video)
+    // For images, capture the framed template as PNG (image stays image)
     if (isVideo) {
-      // Wait for exit animation then navigate with video
       setTimeout(() => {
-        navigate('/', { 
-          state: { 
-            savePhoto: true, 
-            imageUrl, // Pass original video URL
+        navigate('/', {
+          state: {
+            savePhoto: true,
+            imageUrl, // original video
             originalUrl: imageUrl,
             isVideo: true,
-            activity, 
+            activity,
             frame: currentFrame,
             duration,
             pr,
-          } 
+          },
         });
       }, 400);
       setIsSaving(false);
-    } else {
-      // For images, capture the framed template
-      try {
-        const canvas = await html2canvas(frameRef.current, {
-          backgroundColor: null,
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
+      return;
+    }
+
+    if (!captureRef.current) {
+      setIsSaving(false);
+      return;
+    }
+
+    try {
+      const canvas = await html2canvas(captureRef.current, {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+      });
+
+      const framedImageUrl = canvas.toDataURL('image/png', 1.0);
+
+      setTimeout(() => {
+        navigate('/', {
+          state: {
+            savePhoto: true,
+            imageUrl: framedImageUrl, // framed/template image
+            originalUrl: imageUrl, // original media for filmstrip + edits
+            isVideo: false,
+            activity,
+            frame: currentFrame,
+            duration,
+            pr,
+          },
         });
-        
-        const framedImageUrl = canvas.toDataURL('image/png', 1.0);
-        
-        // Wait for exit animation
-        setTimeout(() => {
-          navigate('/', { 
-            state: { 
-              savePhoto: true, 
-              imageUrl: framedImageUrl, // The framed/template image for center display
-              originalUrl: imageUrl, // Original photo for film strip
-              isVideo: false,
-              activity, 
-              frame: currentFrame,
-              duration,
-              pr,
-            } 
-          });
-        }, 400);
-      } catch (error) {
-        console.error('Error capturing frame:', error);
-        setTimeout(() => {
-          navigate('/', { 
-            state: { 
-              savePhoto: true, 
-              imageUrl, 
-              originalUrl: imageUrl,
-              isVideo: false,
-              activity, 
-              frame: currentFrame,
-              duration,
-              pr,
-            } 
-          });
-        }, 400);
-      } finally {
-        setIsSaving(false);
-      }
+      }, 400);
+    } catch (error) {
+      console.error('Error capturing frame:', error);
+      setTimeout(() => {
+        navigate('/', {
+          state: {
+            savePhoto: true,
+            imageUrl,
+            originalUrl: imageUrl,
+            isVideo: false,
+            activity,
+            frame: currentFrame,
+            duration,
+            pr,
+          },
+        });
+      }, 400);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -186,52 +214,80 @@ const Preview = () => {
   // Handle scroll to update current frame and calculate scale
   const handleScroll = useCallback(() => {
     if (!containerRef.current) return;
-    
-    const container = containerRef.current;
-    const scrollLeft = container.scrollLeft;
-    const itemWidth = container.offsetWidth * 0.75;
-    const centerOffset = (container.offsetWidth - itemWidth) / 2;
-    
-    // Calculate which frame is in center
-    const centerPosition = scrollLeft + container.offsetWidth / 2;
-    const frameIndex = Math.round((centerPosition - centerOffset) / itemWidth);
-    
-    // Map index to original frame
-    const clampedIndex = Math.max(0, Math.min(frameIndex, FRAMES.length - 1));
-    const newFrame = FRAMES[clampedIndex];
-    
-    if (newFrame !== currentFrame) {
-      setCurrentFrame(newFrame);
+
+    if (scrollRaf.current) {
+      cancelAnimationFrame(scrollRaf.current);
     }
-    
-    setScrollProgress(scrollLeft);
+
+    scrollRaf.current = requestAnimationFrame(() => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const centerX = container.scrollLeft + container.clientWidth / 2;
+      let closestFrame: FrameType = currentFrame;
+      let closestDistance = Number.POSITIVE_INFINITY;
+
+      FRAMES.forEach((frame, index) => {
+        const el = frameItemRefs.current[index];
+        if (!el) return;
+        const itemCenter = el.offsetLeft + el.offsetWidth / 2;
+        const distance = Math.abs(itemCenter - centerX);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestFrame = frame;
+        }
+      });
+
+      if (closestFrame !== currentFrame) {
+        setCurrentFrame(closestFrame);
+      }
+
+      setScrollProgress(container.scrollLeft);
+    });
   }, [currentFrame]);
 
-  // Scroll to first frame on mount
+  // Scroll to the initially-selected frame on mount
   useEffect(() => {
-    if (containerRef.current && isLoaded) {
-      const container = containerRef.current;
-      const itemWidth = container.offsetWidth * 0.75;
-      const targetScroll = (container.offsetWidth - itemWidth) / 2;
-      container.scrollLeft = 0;
-    }
+    if (!containerRef.current || !isLoaded) return;
+
+    // Wait a tick so refs/measurements are available
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const index = FRAMES.indexOf(currentFrame);
+        const el = frameItemRefs.current[index];
+        if (!el) return;
+
+        const targetScroll = el.offsetLeft - (container.clientWidth - el.offsetWidth) / 2;
+        container.scrollLeft = Math.max(0, targetScroll);
+      });
+    });
   }, [isLoaded]);
 
   // Calculate scale for each frame based on distance from center
   const getFrameScale = (index: number): { scale: number; opacity: number } => {
-    if (!containerRef.current) return { scale: index === 0 ? 1 : 0.85, opacity: index === 0 ? 1 : 0.6 };
-    
+    if (!containerRef.current) {
+      return { scale: index === 0 ? 1 : 0.85, opacity: index === 0 ? 1 : 0.6 };
+    }
+
     const container = containerRef.current;
-    const itemWidth = container.offsetWidth * 0.75;
-    const centerOffset = (container.offsetWidth - itemWidth) / 2;
-    const frameCenter = index * itemWidth + itemWidth / 2 - centerOffset;
-    const viewCenter = scrollProgress + container.offsetWidth / 2;
-    
-    const distance = Math.abs(frameCenter - viewCenter);
-    const maxDistance = itemWidth;
-    const scale = Math.max(0.85, 1 - (distance / maxDistance) * 0.15);
-    const opacity = Math.max(0.6, 1 - (distance / maxDistance) * 0.4);
-    
+    const el = frameItemRefs.current[index];
+    if (!el) {
+      return { scale: 0.85, opacity: 0.6 };
+    }
+
+    const centerX = container.scrollLeft + container.clientWidth / 2;
+    const itemCenter = el.offsetLeft + el.offsetWidth / 2;
+    const distance = Math.abs(itemCenter - centerX);
+
+    const maxDistance = el.offsetWidth;
+    const t = Math.min(distance / maxDistance, 1);
+
+    const scale = Math.max(0.85, 1 - t * 0.15);
+    const opacity = Math.max(0.6, 1 - t * 0.4);
+
     return { scale, opacity };
   };
 
@@ -369,6 +425,15 @@ const Preview = () => {
 
       {/* Content */}
       <div className="relative z-10 flex flex-col min-h-screen pb-32">
+        {/* Offscreen capture target (unscaled) for image saves */}
+        <div
+          ref={captureRef}
+          aria-hidden
+          className="fixed left-[-10000px] top-0 w-[360px] pointer-events-none"
+        >
+          {renderFrame()}
+        </div>
+
         {/* Header */}
         <div className="h-12" />
         <div className={`flex items-center justify-between mb-4 px-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`}>
@@ -402,6 +467,10 @@ const Preview = () => {
               return (
                 <div 
                   key={`${frame}-${index}`}
+                  ref={(el) => {
+                    frameItemRefs.current[index] = el;
+                  }}
+                  data-frame={frame}
                   className="flex-shrink-0 snap-center h-fit flex items-center justify-center swipe-smooth"
                   style={{ 
                     width: 'calc(75vw)',
@@ -410,7 +479,6 @@ const Preview = () => {
                   }}
                 >
                   <div 
-                    ref={isActiveFrame ? frameRef : undefined} 
                     className={`w-full transition-all duration-300 ${isActiveFrame ? 'animate-liquid-morph' : ''}`}
                   >
                     {frame === 'shaky' && <ShakyFrame {...frameProps} />}
