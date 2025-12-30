@@ -450,28 +450,31 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         />
       </div>
 
-      {/* Camera Frame - matches 9:16 aspect ratio of preview frames */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        {/* Clear crop area with 9:16 aspect ratio and matching rounded corners */}
-        <div 
-          className="relative rounded-[32px] border-2 border-white/20 overflow-hidden"
-          style={{ 
-            width: 'calc(100% - 48px)', 
-            aspectRatio: '9/16',
-          }}
-        >
-          {/* Subtle vignette effect inside capture area */}
+      {/* Camera Frame - positioned below header, above bottom controls */}
+      <div className="absolute left-0 right-0 pointer-events-none" style={{ top: '100px', bottom: '160px' }}>
+        <div className="w-full h-full flex items-center justify-center">
+          {/* Clear crop area with 9:16 aspect ratio and matching rounded corners */}
           <div 
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: 'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 50%, rgba(0,0,0,0.15) 100%)',
+            className="relative rounded-[32px] border-2 border-white/20 overflow-hidden"
+            style={{ 
+              width: 'calc(100% - 48px)',
+              height: '100%',
+              maxHeight: 'calc((100vw - 48px) * 16 / 9)',
             }}
-          />
-          {/* Corner brackets - matching the outer rounded corners */}
-          <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-white/80 rounded-tl-[32px]" />
-          <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-white/80 rounded-tr-[32px]" />
-          <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-white/80 rounded-bl-[32px]" />
-          <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-white/80 rounded-br-[32px]" />
+          >
+            {/* Subtle vignette effect inside capture area */}
+            <div 
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: 'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 50%, rgba(0,0,0,0.15) 100%)',
+              }}
+            />
+            {/* Corner brackets - matching the outer rounded corners */}
+            <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-white/80 rounded-tl-[32px]" />
+            <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-white/80 rounded-tr-[32px]" />
+            <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-white/80 rounded-bl-[32px]" />
+            <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-white/80 rounded-br-[32px]" />
+          </div>
         </div>
       </div>
 
