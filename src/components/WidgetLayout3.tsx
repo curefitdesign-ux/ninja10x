@@ -348,26 +348,6 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
       
         {/* Film Strip Section with Floating Play Button */}
         <div className={`relative z-10 -mt-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
-          {/* Blinking Progress Bar Image Above Film Strip - Only after 3 photos */}
-          {hasThreePhotos && (
-            <div 
-              className="absolute left-0 right-0 z-10 animate-blink-glow"
-              style={{ 
-                pointerEvents: 'none', 
-                top: '0px'
-              }}
-            >
-              <img 
-                src={progressBar} 
-                alt="" 
-                className="w-full h-auto"
-                style={{ 
-                  filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.6))',
-                  objectFit: 'contain'
-                }}
-              />
-            </div>
-          )}
           {/* Floating Play Button - Liquid Glass Style */}
           {hasThreePhotos && (
             <button
