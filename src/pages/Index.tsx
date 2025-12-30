@@ -92,11 +92,24 @@ const Index = () => {
   useEffect(() => {
     if (location.state?.savePhoto && location.state?.imageUrl && location.state?.activity) {
       const today = getCurrentDate();
+      const incomingUrl = location.state.imageUrl;
+      const incomingOriginalUrl = location.state.originalUrl || incomingUrl;
+      
+      // Check if this exact photo already exists (prevents duplicates on layout switch)
+      const alreadyExists = photos.some(p => 
+        p.originalUrl === incomingOriginalUrl || p.url === incomingUrl
+      );
+      
+      if (alreadyExists) {
+        // Clear the state without adding duplicate
+        window.history.replaceState({}, document.title);
+        return;
+      }
       
       const newPhoto: Photo = {
         id: `photo-${Date.now()}`,
-        url: location.state.imageUrl,
-        originalUrl: location.state.originalUrl || location.state.imageUrl,
+        url: incomingUrl,
+        originalUrl: incomingOriginalUrl,
         isVideo: location.state.isVideo || false,
         activity: location.state.activity,
         frame: location.state.frame || 'shaky',
@@ -105,57 +118,21 @@ const Index = () => {
         uploadDate: today,
       };
 
-      // For Layout 3, always add new photo (no day capping)
-      // For Layout 1 & 2, check for existing today's photo
-      if (selectedLayout === 'layout3') {
-        setPhotos((prev) => [...prev, newPhoto]);
-      } else {
-        const existingTodayPhotoIndex = photos.findIndex(p => p.uploadDate === today);
-        if (existingTodayPhotoIndex >= 0) {
-          setPhotos((prev) => {
-            const updated = [...prev];
-            updated[existingTodayPhotoIndex] = newPhoto;
-            return updated;
-          });
-        } else {
-          setPhotos((prev) => [...prev, newPhoto]);
-        }
-      }
+      // Always add new photo (allow multiple uploads per day for all layouts)
+      setPhotos((prev) => [...prev, newPhoto]);
+      
       // Clear the state
       window.history.replaceState({}, document.title);
     }
-  }, [location.state, simulatedDate, selectedLayout]);
+  }, [location.state, simulatedDate, photos]);
 
   // Calculate week and day based on photos
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
   const currentDay = (photos.length % 3) + 1;
 
   const handleCardClick = () => {
-    const todaysPhoto = getTodaysPhoto();
-    // For layout3, always open activity sheet to add new photo
-    if (selectedLayout === 'layout3') {
-      setShowActivitySheet(true);
-      return;
-    }
-    
-    if (todaysPhoto) {
-      // Edit existing photo - go directly to preview, skip camera
-      navigate('/preview', { 
-        state: { 
-          imageUrl: todaysPhoto.originalUrl || todaysPhoto.url,
-          originalUrl: todaysPhoto.originalUrl || todaysPhoto.url,
-          isVideo: todaysPhoto.isVideo,
-          activity: todaysPhoto.activity,
-          frame: todaysPhoto.frame,
-          duration: todaysPhoto.duration,
-          pr: todaysPhoto.pr,
-          isReview: true
-        } 
-      });
-    } else {
-      // New upload - show activity sheet first
-      setShowActivitySheet(true);
-    }
+    // Always open activity sheet to add new photo (allows multiple uploads)
+    setShowActivitySheet(true);
   };
 
   // Handler specifically for Layout 3's add photo button

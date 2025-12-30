@@ -26,11 +26,12 @@ const isVideoUrl = (url: string) => {
   return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
 };
 
-const renderVideoInFrame = (photo: Photo) => {
+// Render photo/video in its selected frame template
+const renderInFrame = (photo: Photo) => {
   const frame: FrameType = photo.frame || 'shaky';
   const frameProps = {
     imageUrl: photo.originalUrl || photo.url,
-    isVideo: true,
+    isVideo: photo.isVideo || isVideoUrl(photo.url),
     activity: photo.activity || 'Activity',
     week: 1,
     day: 1,
@@ -188,20 +189,11 @@ const WidgetLayout2 = ({
                 className="relative bg-white rounded-2xl overflow-hidden shadow-2xl"
                 style={{ width: '175px' }}
               >
-                {/* Template Preview (shows exactly what you saved for images; for videos, renders the selected frame template) */}
+                {/* Template Preview - render in selected frame */}
                 <div className="relative w-full" style={{ aspectRatio: '9/16' }}>
-                  {displayPhoto.isVideo || isVideoUrl(displayPhoto.url) ? (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black">
-                      {renderVideoInFrame(displayPhoto)}
-                    </div>
-                  ) : (
-                    <img
-                      src={displayPhoto.url}
-                      alt="Saved activity template"
-                      className="absolute inset-0 w-full h-full object-contain bg-black"
-                      loading="lazy"
-                    />
-                  )}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black">
+                    {renderInFrame(displayPhoto)}
+                  </div>
                 </div>
               </div>
             </div>

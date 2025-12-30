@@ -2,6 +2,11 @@ import { User, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format, subDays, addDays, startOfDay } from 'date-fns';
 import shuttlecockIcon from '@/assets/frames/shuttlecock.png';
+import ShakyFrame from '@/components/frames/ShakyFrame';
+import JournalFrame from '@/components/frames/JournalFrame';
+import VogueFrame from '@/components/frames/VogueFrame';
+import FitnessFrame from '@/components/frames/FitnessFrame';
+import TicketFrame from '@/components/frames/TicketFrame';
 
 interface Photo {
   id: string;
@@ -15,9 +20,41 @@ interface Photo {
   uploadDate: string;
 }
 
+type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
+
 // Helper to detect if URL is a video
 const isVideoUrl = (url: string) => {
   return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
+};
+
+// Render photo/video in its selected frame template
+const renderInFrame = (photo: Photo) => {
+  const frame: FrameType = photo.frame || 'shaky';
+  const frameProps = {
+    imageUrl: photo.originalUrl || photo.url,
+    isVideo: photo.isVideo || isVideoUrl(photo.url),
+    activity: photo.activity || 'Activity',
+    week: 1,
+    day: 1,
+    duration: photo.duration || '2hrs',
+    pr: photo.pr || '',
+    imagePosition: { x: 0, y: 0 },
+    imageScale: 1.2,
+  };
+
+  switch (frame) {
+    case 'journal':
+      return <JournalFrame {...frameProps} />;
+    case 'vogue':
+      return <VogueFrame {...frameProps} />;
+    case 'fitness':
+      return <FitnessFrame {...frameProps} />;
+    case 'ticket':
+      return <TicketFrame {...frameProps} />;
+    case 'shaky':
+    default:
+      return <ShakyFrame {...frameProps} />;
+  }
 };
 
 interface StackedPhotoCardsProps {
@@ -170,7 +207,7 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
       );
     }
 
-    // Render card with photo (past or uploaded today)
+    // Render card with photo (past or uploaded today) - show saved template
     if (day.photo) {
       return (
         <div
@@ -186,57 +223,9 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
           }}
           onClick={() => handlePhotoTap(day.photo!)}
         >
-          {day.photo.isVideo || isVideoUrl(day.photo.url) ? (
-            <video
-              src={day.photo.url}
-              className="w-full h-full object-cover"
-              muted
-              loop
-              autoPlay
-              playsInline
-            />
-          ) : (
-            <img
-              src={day.photo.url}
-              alt={day.photo.activity || 'Photo'}
-              className="w-full h-full object-cover"
-            />
-          )}
-          
-          {/* Small thumbnail photo in corner */}
-          <div 
-            className="absolute top-2 right-2 w-10 h-12 rounded-lg overflow-hidden border-2 border-black/50 shadow-lg"
-            style={{ transform: 'rotate(8deg)' }}
-          >
-            {day.photo.isVideo || isVideoUrl(day.photo.url) ? (
-              <video
-                src={day.photo.url}
-                className="w-full h-full object-cover"
-                muted
-                playsInline
-              />
-            ) : (
-              <img
-                src={day.photo.url}
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
-          
-          {/* Activity icon */}
-          <div className="absolute top-1 right-0 w-8 h-8">
-            <img src={shuttlecockIcon} alt="" className="w-full h-full object-contain" />
-          </div>
-          
-          {/* Date overlay */}
-          <div className="absolute bottom-2 left-2 right-2">
-            <p 
-              className="text-white text-sm font-bold tracking-wide italic"
-              style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.8)' }}
-            >
-              {day.displayDate}
-            </p>
+          {/* Render in selected frame template */}
+          <div className="w-full h-full flex items-center justify-center bg-black">
+            {renderInFrame(day.photo)}
           </div>
         </div>
       );
