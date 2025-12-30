@@ -1060,4 +1060,19 @@
   .animate-play-button-float {
     animation: play-button-float 2s ease-in-out infinite;
   }
+
+  @keyframes blink-glow {
+    0%, 100% {
+      opacity: 1;
+      filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.6));
+    }
+    50% {
+      opacity: 0.4;
+      filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.3));
+    }
+  }
+
+  .animate-blink-glow {
+    animation: blink-glow 1.5s ease-in-out infinite;
+  }
 }
