@@ -27,8 +27,8 @@ const isVideoUrl = (url: string) => {
   return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
 };
 
-// Render photo/video in its selected frame template
-const renderInFrame = (photo: Photo) => {
+// Render photo/video in its selected frame template (scaled for widget)
+const renderInFrame = (photo: Photo, scale: number = 0.25) => {
   const frame: FrameType = photo.frame || 'shaky';
   const frameProps = {
     imageUrl: photo.originalUrl || photo.url,
@@ -42,19 +42,42 @@ const renderInFrame = (photo: Photo) => {
     imageScale: 1.2,
   };
 
-  switch (frame) {
-    case 'journal':
-      return <JournalFrame {...frameProps} />;
-    case 'vogue':
-      return <VogueFrame {...frameProps} />;
-    case 'fitness':
-      return <FitnessFrame {...frameProps} />;
-    case 'ticket':
-      return <TicketFrame {...frameProps} />;
-    case 'shaky':
-    default:
-      return <ShakyFrame {...frameProps} />;
-  }
+  const FrameComponent = () => {
+    switch (frame) {
+      case 'journal':
+        return <JournalFrame {...frameProps} />;
+      case 'vogue':
+        return <VogueFrame {...frameProps} />;
+      case 'fitness':
+        return <FitnessFrame {...frameProps} />;
+      case 'ticket':
+        return <TicketFrame {...frameProps} />;
+      case 'shaky':
+      default:
+        return <ShakyFrame {...frameProps} />;
+    }
+  };
+
+  return (
+    <div 
+      className="relative overflow-hidden"
+      style={{ 
+        width: '100%', 
+        height: '100%',
+      }}
+    >
+      <div 
+        style={{ 
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+          width: `${100 / scale}%`,
+          height: `${100 / scale}%`,
+        }}
+      >
+        <FrameComponent />
+      </div>
+    </div>
+  );
 };
 
 interface StackedPhotoCardsProps {
@@ -110,6 +133,7 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
   const handlePhotoTap = (photo: Photo) => {
     const mediaUrl = photo.originalUrl || photo.url;
 
+    // Navigate to preview in edit mode
     navigate('/preview', {
       state: {
         imageUrl: mediaUrl,
@@ -119,7 +143,7 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
         frame: photo.frame,
         duration: photo.duration,
         pr: photo.pr,
-        isReview: true,
+        isReview: false, // Allow editing
       },
     });
   };
@@ -207,8 +231,11 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
       );
     }
 
-    // Render card with photo (past or uploaded today) - show saved template
+    // Render card with photo (past or uploaded today) - show saved template scaled
     if (day.photo) {
+      // Calculate scale based on card size (frame is ~400px height, card is ~200px)
+      const frameScale = cardHeight / 640;
+      
       return (
         <div
           className="absolute top-1/2 left-1/2 rounded-2xl overflow-hidden transition-all duration-500 ease-out cursor-pointer"
@@ -219,14 +246,11 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
             zIndex,
             opacity,
             boxShadow: isCenter ? '0 15px 40px rgba(0,0,0,0.4)' : '0 8px 25px rgba(0,0,0,0.2)',
-            border: '2px solid rgba(0,0,0,0.3)',
           }}
           onClick={() => handlePhotoTap(day.photo!)}
         >
-          {/* Render in selected frame template */}
-          <div className="w-full h-full flex items-center justify-center bg-black">
-            {renderInFrame(day.photo)}
-          </div>
+          {/* Render in selected frame template - scaled proportionally */}
+          {renderInFrame(day.photo, frameScale)}
         </div>
       );
     }
