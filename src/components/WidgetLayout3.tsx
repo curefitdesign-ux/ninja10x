@@ -79,11 +79,11 @@ const WidgetLayout3 = ({
   };
 
   return (
-    <div className="px-5">
+    <div className="px-5 pt-4">
       {/* Ninja Widget */}
       <div 
-        className={`glass-card p-5 pt-8 relative overflow-hidden w-full transition-all duration-500 ${isLoaded ? 'animate-liquid-enter' : 'opacity-0'}`}
-        style={{ backgroundImage: `url(${cardBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+        className={`glass-card p-5 pt-10 relative overflow-visible w-full transition-all duration-500 ${isLoaded ? 'animate-liquid-enter' : 'opacity-0'}`}
+        style={{ backgroundImage: `url(${cardBackground})`, backgroundSize: 'cover', backgroundPosition: 'center', minHeight: '420px' }}
       >
         {/* Cult Ninja Tag - Attached to top edge */}
         <div className={`absolute -top-3 left-1/2 -translate-x-1/2 z-20 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.1s' }}>
