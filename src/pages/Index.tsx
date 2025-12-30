@@ -95,19 +95,8 @@ const Index = () => {
       const incomingUrl = location.state.imageUrl;
       const incomingOriginalUrl = location.state.originalUrl || incomingUrl;
       
-      // Check if this exact photo already exists (prevents duplicates on layout switch)
-      const alreadyExists = photos.some(p => 
-        p.originalUrl === incomingOriginalUrl || p.url === incomingUrl
-      );
-      
-      if (alreadyExists) {
-        // Clear the state without adding duplicate
-        window.history.replaceState({}, document.title);
-        return;
-      }
-      
       const newPhoto: Photo = {
-        id: `photo-${Date.now()}`,
+        id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         url: incomingUrl,
         originalUrl: incomingOriginalUrl,
         isVideo: location.state.isVideo || false,
@@ -118,13 +107,13 @@ const Index = () => {
         uploadDate: today,
       };
 
-      // Always add new photo (allow multiple uploads per day for all layouts)
+      // Always add new photo
       setPhotos((prev) => [...prev, newPhoto]);
       
-      // Clear the state
+      // Clear the state immediately to prevent re-adding
       window.history.replaceState({}, document.title);
     }
-  }, [location.state, simulatedDate, photos]);
+  }, [location.state?.savePhoto, location.state?.imageUrl, location.state?.activity, simulatedDate]);
 
   // Calculate week and day based on photos
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
