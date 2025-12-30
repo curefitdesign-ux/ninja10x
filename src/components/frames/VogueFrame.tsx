@@ -1,3 +1,5 @@
+import { useRef, useEffect } from 'react';
+
 interface VogueFrameProps {
   imageUrl: string;
   isVideo?: boolean;
@@ -11,11 +13,22 @@ interface VogueFrameProps {
 }
 
 const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imagePosition, imageScale }: VogueFrameProps) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Ensure video plays on mount and when URL changes
+  useEffect(() => {
+    if (isVideo && videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
+  }, [isVideo, imageUrl]);
+
   return (
     <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden bg-black shadow-2xl relative">
       {/* Background image or video filling the frame */}
       {isVideo ? (
         <video 
+          ref={videoRef}
           src={imageUrl}
           autoPlay
           loop
@@ -24,6 +37,7 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
           className="absolute inset-0 w-full h-full object-cover"
           style={{
             transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+            transformOrigin: 'center center',
           }}
         />
       ) : (
@@ -33,6 +47,7 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
           className="absolute inset-0 w-full h-full object-cover"
           style={{
             transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+            transformOrigin: 'center center',
           }}
         />
       )}

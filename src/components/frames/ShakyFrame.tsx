@@ -1,3 +1,5 @@
+import { useRef, useEffect } from 'react';
+
 interface ShakyFrameProps {
   imageUrl: string;
   isVideo?: boolean;
@@ -15,11 +17,22 @@ interface ShakyFrameProps {
 const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: ShakyFrameProps) => {
   const metricLabel = label1 || 'Metric';
   const durationLabel = label2 || 'Duration';
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Ensure video plays on mount and when URL changes
+  useEffect(() => {
+    if (isVideo && videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
+  }, [isVideo, imageUrl]);
+
   return (
     <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative bg-black">
       {/* Background image or video filling the frame */}
       {isVideo ? (
         <video 
+          ref={videoRef}
           src={imageUrl}
           autoPlay
           loop
@@ -28,6 +41,7 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
           className="absolute inset-0 w-full h-full object-cover"
           style={{
             transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+            transformOrigin: 'center center',
           }}
         />
       ) : (
@@ -37,6 +51,7 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
           className="absolute inset-0 w-full h-full object-cover"
           style={{
             transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+            transformOrigin: 'center center',
           }}
         />
       )}

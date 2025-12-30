@@ -1,3 +1,5 @@
+import { useRef, useEffect } from 'react';
+
 interface FitnessFrameProps {
   imageUrl: string;
   isVideo?: boolean;
@@ -15,6 +17,16 @@ interface FitnessFrameProps {
 const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: FitnessFrameProps) => {
   const metricLabel = label1 || 'Metric';
   const durationLabel = label2 || 'Duration';
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Ensure video plays on mount and when URL changes
+  useEffect(() => {
+    if (isVideo && videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
+  }, [isVideo, imageUrl]);
+
   return (
     <div className="w-[90%] mx-auto aspect-[9/16] rounded-[20px] overflow-hidden shadow-2xl relative" style={{ background: '#6B6B2A' }}>
       {/* Grid background */}
@@ -127,6 +139,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
         >
           {isVideo ? (
             <video 
+              ref={videoRef}
               src={imageUrl}
               autoPlay
               loop
@@ -135,6 +148,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
               className="w-full h-full object-cover"
               style={{
                 transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+                transformOrigin: 'center center',
               }}
             />
           ) : (
@@ -144,6 +158,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
               className="w-full h-full object-cover"
               style={{
                 transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+                transformOrigin: 'center center',
               }}
             />
           )}

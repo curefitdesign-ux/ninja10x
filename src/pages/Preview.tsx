@@ -107,44 +107,20 @@ const Preview = () => {
     triggerHaptic('success');
     handleTap('save-btn');
     
-    try {
-      // Start exit animation
-      setIsExiting(true);
-      
-      // Capture the frame as an image
-      const canvas = await html2canvas(frameRef.current, {
-        backgroundColor: null,
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-      });
-      
-      const framedImageUrl = canvas.toDataURL('image/png', 1.0);
-      
-      // Wait for exit animation
+    // Start exit animation
+    setIsExiting(true);
+    
+    // For videos, save the original video URL directly (no html2canvas capture)
+    // For images, capture the framed template as PNG
+    if (isVideo) {
+      // Wait for exit animation then navigate with video
       setTimeout(() => {
         navigate('/', { 
           state: { 
             savePhoto: true, 
-            imageUrl: framedImageUrl, // The framed/template image for center display
-            originalUrl: imageUrl, // Original photo for film strip
-            isVideo,
-            activity, 
-            frame: currentFrame,
-            duration,
-            pr,
-          } 
-        });
-      }, 400);
-    } catch (error) {
-      console.error('Error capturing frame:', error);
-      setTimeout(() => {
-        navigate('/', { 
-          state: { 
-            savePhoto: true, 
-            imageUrl, 
+            imageUrl, // Pass original video URL
             originalUrl: imageUrl,
-            isVideo,
+            isVideo: true,
             activity, 
             frame: currentFrame,
             duration,
@@ -152,8 +128,53 @@ const Preview = () => {
           } 
         });
       }, 400);
-    } finally {
       setIsSaving(false);
+    } else {
+      // For images, capture the framed template
+      try {
+        const canvas = await html2canvas(frameRef.current, {
+          backgroundColor: null,
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+        });
+        
+        const framedImageUrl = canvas.toDataURL('image/png', 1.0);
+        
+        // Wait for exit animation
+        setTimeout(() => {
+          navigate('/', { 
+            state: { 
+              savePhoto: true, 
+              imageUrl: framedImageUrl, // The framed/template image for center display
+              originalUrl: imageUrl, // Original photo for film strip
+              isVideo: false,
+              activity, 
+              frame: currentFrame,
+              duration,
+              pr,
+            } 
+          });
+        }, 400);
+      } catch (error) {
+        console.error('Error capturing frame:', error);
+        setTimeout(() => {
+          navigate('/', { 
+            state: { 
+              savePhoto: true, 
+              imageUrl, 
+              originalUrl: imageUrl,
+              isVideo: false,
+              activity, 
+              frame: currentFrame,
+              duration,
+              pr,
+            } 
+          });
+        }, 400);
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
