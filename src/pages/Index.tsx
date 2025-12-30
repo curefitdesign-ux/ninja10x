@@ -135,24 +135,27 @@ const Index = () => {
     // For layout3, always open activity sheet to add new photo
     if (selectedLayout === 'layout3') {
       setShowActivitySheet(true);
-      todaysPhoto ? (
-        // Edit existing photo - go directly to preview, skip camera
-        navigate('/preview', { 
-          state: { 
-            imageUrl: todaysPhoto.originalUrl || todaysPhoto.url,
-            originalUrl: todaysPhoto.originalUrl || todaysPhoto.url,
-            isVideo: todaysPhoto.isVideo,
-            activity: todaysPhoto.activity,
-            frame: todaysPhoto.frame,
-            duration: todaysPhoto.duration,
-            pr: todaysPhoto.pr,
-            isReview: true
-          } 
-        })
-      ) : (
-        // New upload - show activity sheet first
-        setShowActivitySheet(true)
-      );
+      return;
+    }
+    
+    if (todaysPhoto) {
+      // Edit existing photo - go directly to preview, skip camera
+      navigate('/preview', { 
+        state: { 
+          imageUrl: todaysPhoto.originalUrl || todaysPhoto.url,
+          originalUrl: todaysPhoto.originalUrl || todaysPhoto.url,
+          isVideo: todaysPhoto.isVideo,
+          activity: todaysPhoto.activity,
+          frame: todaysPhoto.frame,
+          duration: todaysPhoto.duration,
+          pr: todaysPhoto.pr,
+          isReview: true
+        } 
+      });
+    } else {
+      // New upload - show activity sheet first
+      setShowActivitySheet(true);
+    }
   };
 
   // Handler specifically for Layout 3's add photo button
