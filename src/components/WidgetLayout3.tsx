@@ -318,56 +318,24 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
           CONQUER WILL POWER
         </h2>
       
-        {/* Center Photo Card with Play Button */}
+        {/* Center Photo Card - Normal display without play overlay */}
         <div 
           className={`relative z-10 mb-6 flex justify-center ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} 
           style={{ minHeight: latestPhoto ? '220px' : '160px', animationDelay: '0.3s' }}
         >
           {latestPhoto ? (
             <div className="relative">
-              {/* Glow effect for week 1 completion */}
-              {hasThreePhotos && (
-                <div 
-                  className="absolute -inset-4 rounded-2xl z-0"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(255,77,77,0.4) 0%, transparent 70%)',
-                    animation: 'pulse-glow 2s ease-in-out infinite',
-                    filter: 'blur(10px)'
-                  }}
-                />
-              )}
-              
               <div 
-                className={`relative cursor-pointer overflow-hidden rounded-xl tap-bounce ${tappedElement === `photo-${latestPhoto.id}` ? 'animate-liquid-tap' : ''} ${newPhotoIndex === photos.length - 1 ? 'animate-liquid-bounce' : ''} ${hasThreePhotos ? 'ring-2 ring-white/30' : ''}`}
-                onClick={() => !hasThreePhotos && handlePhotoTap(latestPhoto)}
+                className={`relative cursor-pointer overflow-hidden rounded-xl tap-bounce ${tappedElement === `photo-${latestPhoto.id}` ? 'animate-liquid-tap' : ''} ${newPhotoIndex === photos.length - 1 ? 'animate-liquid-bounce' : ''}`}
+                onClick={() => handlePhotoTap(latestPhoto)}
                 style={{ 
                   transform: 'rotate(2deg)',
                   width: '180px',
                   aspectRatio: '9/16',
-                  boxShadow: hasThreePhotos 
-                    ? '0 8px 32px rgba(255,77,77,0.4), 0 0 40px rgba(255,77,77,0.2)' 
-                    : '0 8px 32px rgba(0,0,0,0.4)'
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
                 }}
               >
                 {renderInFrame(latestPhoto, 180)}
-                
-                {/* Play Button Overlay - Only show when 3+ photos */}
-                {hasThreePhotos && (
-                  <div 
-                    className="absolute inset-0 flex items-center justify-center bg-black/30 cursor-pointer hover:bg-black/40 transition-colors"
-                    onClick={(e) => { e.stopPropagation(); handlePlayVideo(); }}
-                  >
-                    <div 
-                      className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center"
-                      style={{
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-                        animation: 'pulse-scale 2s ease-in-out infinite'
-                      }}
-                    >
-                      <Play className="w-8 h-8 text-black ml-1" fill="black" />
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           ) : (
@@ -393,8 +361,22 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
           )}
         </div>
       
-        {/* Film Strip Section */}
+        {/* Film Strip Section with Floating Play Button */}
         <div className={`relative z-10 -mt-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
+          {/* Floating Play Button - Top Left Corner */}
+          {hasThreePhotos && (
+            <button
+              onClick={handlePlayVideo}
+              className="absolute -top-8 left-2 z-20 w-10 h-10 rounded-full flex items-center justify-center tap-bounce"
+              style={{
+                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                boxShadow: '0 4px 15px rgba(34, 197, 94, 0.5), 0 0 20px rgba(34, 197, 94, 0.3)'
+              }}
+            >
+              <Play className="w-5 h-5 text-white ml-0.5" fill="white" />
+            </button>
+          )}
+          
           <div className="relative w-full">
             <img src={filmstripBg} alt="" className="w-full h-auto" style={{ display: 'block' }} />
             <div 
@@ -408,12 +390,12 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
                     const photo = photos[index];
                     const isNewPhoto = newPhotoIndex === index;
                     const isWeek1 = groupIndex === 0;
-                    const showPlayIcon = isVideoMinimized && isWeek1 && index === 0;
+                    const showGreenGlow = hasThreePhotos && isWeek1 && photo;
                     
                     return (
                       <div 
                         key={index}
-                        className={`overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 tap-bounce relative ${photo ? 'animate-film-shimmer' : ''} ${isNewPhoto ? 'animate-liquid-bounce' : ''} ${tappedElement === `strip-${index}` ? 'animate-liquid-tap' : ''} ${hasThreePhotos && isWeek1 && photo ? 'ring-1 ring-white/40' : ''}`}
+                        className={`overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 tap-bounce relative ${photo ? 'animate-film-shimmer' : ''} ${isNewPhoto ? 'animate-liquid-bounce' : ''} ${tappedElement === `strip-${index}` ? 'animate-liquid-tap' : ''}`}
                         style={{ 
                           background: '#1a1a1a',
                           borderRadius: '2px',
@@ -421,31 +403,19 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
                           aspectRatio: '9/16',
                           animationDelay: photo && !isNewPhoto ? `${index * 50}ms` : '0ms',
                           animationFillMode: 'both',
-                          boxShadow: hasThreePhotos && isWeek1 && photo ? '0 0 8px rgba(255,77,77,0.4)' : 'none'
+                          boxShadow: showGreenGlow ? '0 0 10px rgba(34, 197, 94, 0.6), 0 0 20px rgba(34, 197, 94, 0.3)' : 'none',
+                          border: showGreenGlow ? '1px solid rgba(34, 197, 94, 0.5)' : 'none'
                         }}
                         onClick={() => {
-                          if (showPlayIcon) {
-                            handleExpandFromFilmStrip();
-                          } else if (photo) {
+                          if (photo) {
                             handleTap(`strip-${index}`);
                             setTimeout(() => handlePhotoTap(photo), 200);
                           }
                         }}
                       >
                         {photo ? (
-                          photo.isVideo || isVideoUrl(photo.originalUrl || photo.url) ? (
-                            <video src={photo.originalUrl || photo.url} className="w-full h-full object-cover" style={{ borderRadius: '2px' }} muted playsInline />
-                          ) : (
-                            <img src={photo.originalUrl || photo.url} alt="" className="w-full h-full object-cover" style={{ borderRadius: '2px' }} />
-                          )
+                          <img src={photo.originalUrl || photo.url} alt="" className="w-full h-full object-cover" style={{ borderRadius: '2px' }} />
                         ) : null}
-                        
-                        {/* Mini Play Icon for minimized video */}
-                        {showPlayIcon && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                            <Play className="w-2 h-2 text-white" fill="white" />
-                          </div>
-                        )}
                       </div>
                     );
                   })}
