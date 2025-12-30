@@ -1,6 +1,11 @@
 import { User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import shuttlecockIcon from '@/assets/frames/shuttlecock.png';
+import ShakyFrame from '@/components/frames/ShakyFrame';
+import JournalFrame from '@/components/frames/JournalFrame';
+import VogueFrame from '@/components/frames/VogueFrame';
+import FitnessFrame from '@/components/frames/FitnessFrame';
+import TicketFrame from '@/components/frames/TicketFrame';
 
 interface Photo {
   id: string;
@@ -14,9 +19,40 @@ interface Photo {
   uploadDate: string;
 }
 
+type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
+
 // Helper to detect if URL is a video
 const isVideoUrl = (url: string) => {
   return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
+};
+
+const renderVideoInFrame = (photo: Photo) => {
+  const frame: FrameType = photo.frame || 'shaky';
+  const frameProps = {
+    imageUrl: photo.originalUrl || photo.url,
+    isVideo: true,
+    activity: photo.activity || 'Activity',
+    week: 1,
+    day: 1,
+    duration: photo.duration || '2hrs',
+    pr: photo.pr || '',
+    imagePosition: { x: 0, y: 0 },
+    imageScale: 1.2,
+  };
+
+  switch (frame) {
+    case 'journal':
+      return <JournalFrame {...frameProps} />;
+    case 'vogue':
+      return <VogueFrame {...frameProps} />;
+    case 'fitness':
+      return <FitnessFrame {...frameProps} />;
+    case 'ticket':
+      return <TicketFrame {...frameProps} />;
+    case 'shaky':
+    default:
+      return <ShakyFrame {...frameProps} />;
+  }
 };
 
 interface WidgetLayout2Props {
@@ -152,90 +188,20 @@ const WidgetLayout2 = ({
                 className="relative bg-white rounded-2xl overflow-hidden shadow-2xl"
                 style={{ width: '175px' }}
               >
-                {/* Card holes at top */}
-                <div className="absolute top-2.5 left-0 right-0 flex justify-center gap-2 z-20">
-                  {[...Array(5)].map((_, i) => (
-                    <div 
-                      key={i} 
-                      className="w-2 h-2 rounded-full"
-                      style={{ background: '#4a4a6a' }}
-                    />
-                  ))}
-                </div>
-
-                {/* Photo/Video */}
-                <div className="relative pt-8 px-2">
+                {/* Template Preview (shows exactly what you saved for images; for videos, renders the selected frame template) */}
+                <div className="relative w-full" style={{ aspectRatio: '9/16' }}>
                   {displayPhoto.isVideo || isVideoUrl(displayPhoto.url) ? (
-                    <video
-                      src={displayPhoto.url}
-                      className="w-full aspect-[4/3] object-cover rounded-lg"
-                      muted
-                      loop
-                      autoPlay
-                      playsInline
-                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black">
+                      {renderVideoInFrame(displayPhoto)}
+                    </div>
                   ) : (
                     <img
                       src={displayPhoto.url}
-                      alt={displayPhoto.activity || 'Photo'}
-                      className="w-full aspect-[4/3] object-cover rounded-lg"
+                      alt="Saved activity template"
+                      className="absolute inset-0 w-full h-full object-contain bg-black"
+                      loading="lazy"
                     />
                   )}
-                  
-                  {/* Shuttlecock icon */}
-                  <div className="absolute bottom-2 left-3 w-8 h-8">
-                    <img src={shuttlecockIcon} alt="" className="w-full h-full object-contain" />
-                  </div>
-                </div>
-
-                {/* Card Info Section */}
-                <div className="px-2.5 py-2 bg-white">
-                  {/* Week/Day and Location */}
-                  <div className="flex justify-between items-center mb-1">
-                    <div 
-                      className="px-1.5 py-0.5 rounded text-[7px] font-bold text-white uppercase"
-                      style={{ background: '#2dd4bf' }}
-                    >
-                      WEEK 1 | DAY {Math.min(photos.length, 3)}
-                    </div>
-                    <div 
-                      className="px-1 py-0.5 rounded text-[7px] font-medium"
-                      style={{ background: '#a7f3d0', color: '#047857' }}
-                    >
-                      Bellandur, Bangalore
-                    </div>
-                  </div>
-
-                  {/* Activity Name */}
-                  <h3 
-                    className="text-sm font-bold text-gray-800 mb-1"
-                    style={{ fontStyle: 'italic' }}
-                  >
-                    {displayPhoto.activity || 'Lawn Tennis'}
-                  </h3>
-
-                  {/* Horizontal lines */}
-                  <div className="space-y-0.5 mb-1.5">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="h-px bg-gray-200" />
-                    ))}
-                  </div>
-
-                  {/* Stats */}
-                  <div className="flex justify-between text-center">
-                    <div>
-                      <p className="text-[8px] text-gray-500">Duration</p>
-                      <p className="text-xs font-bold text-gray-800">{displayPhoto.duration || '02hrs'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[8px] text-gray-500">Rounds</p>
-                      <p className="text-xs font-bold text-gray-800">{displayPhoto.pr || '10'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[8px] text-gray-500">Calories</p>
-                      <p className="text-xs font-bold text-gray-800">400</p>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
