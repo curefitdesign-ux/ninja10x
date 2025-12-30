@@ -32,31 +32,35 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
   return (
     <div className="w-[90%] mx-auto aspect-[9/16] overflow-hidden relative rounded-3xl bg-black">
       {/* Layer 1: Background Image or Video (full-bleed) */}
-      {isVideo ? (
-        <video 
-          ref={videoRef}
-          src={imageUrl}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover z-0"
-          style={{
-            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-            transformOrigin: 'center center'
-          }}
-        />
-      ) : (
-        <img 
-          src={imageUrl}
-          alt="Activity"
-          className="absolute inset-0 w-full h-full object-cover z-0"
-          style={{
-            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-            transformOrigin: 'center center'
-          }}
-        />
-      )}
+      <div className="absolute inset-0 overflow-hidden z-0">
+        {isVideo ? (
+          <video 
+            ref={videoRef}
+            src={imageUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute w-full h-full object-cover"
+            style={{
+              left: '50%',
+              top: '50%',
+              transform: `translate(-50%, -50%) translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+            }}
+          />
+        ) : (
+          <img 
+            src={imageUrl}
+            alt="Activity"
+            className="absolute w-full h-full object-cover"
+            style={{
+              left: '50%',
+              top: '50%',
+              transform: `translate(-50%, -50%) translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+            }}
+          />
+        )}
+      </div>
       
       {/* Layer 2: Ticket Frame Asset (with transparent window) - reduced size */}
       <img 

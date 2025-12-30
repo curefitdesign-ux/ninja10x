@@ -137,31 +137,35 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
             boxShadow: '0 8px 32px rgba(0,0,0,0.25)'
           }}
         >
-          {isVideo ? (
-            <video 
-              ref={videoRef}
-              src={imageUrl}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-              style={{
-                transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-                transformOrigin: 'center center',
-              }}
-            />
-          ) : (
-            <img 
-              src={imageUrl}
-              alt="Activity"
-              className="w-full h-full object-cover"
-              style={{
-                transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-                transformOrigin: 'center center',
-              }}
-            />
-          )}
+          <div className="absolute inset-0 overflow-hidden">
+            {isVideo ? (
+              <video 
+                ref={videoRef}
+                src={imageUrl}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute w-full h-full object-cover"
+                style={{
+                  left: '50%',
+                  top: '50%',
+                  transform: `translate(-50%, -50%) translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+                }}
+              />
+            ) : (
+              <img 
+                src={imageUrl}
+                alt="Activity"
+                className="absolute w-full h-full object-cover"
+                style={{
+                  left: '50%',
+                  top: '50%',
+                  transform: `translate(-50%, -50%) translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+                }}
+              />
+            )}
+          </div>
         </div>
       </div>
       
