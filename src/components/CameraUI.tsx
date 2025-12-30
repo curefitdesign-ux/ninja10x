@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, SwitchCamera, Image as ImageIcon, Check, RotateCcw, Timer, Zap, ZapOff } from 'lucide-react';
 import ImageCropper from './ImageCropper';
+import VideoTrimmer from './VideoTrimmer';
 
 interface CameraUIProps {
   activity: string;
@@ -28,6 +29,8 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const [capturedVideo, setCapturedVideo] = useState<string | null>(null);
   const [showHoldTip, setShowHoldTip] = useState(true);
   const [showCropper, setShowCropper] = useState(false);
+  const [showVideoTrimmer, setShowVideoTrimmer] = useState(false);
+  const [videoToTrim, setVideoToTrim] = useState<string | null>(null);
   const [mediaToEdit, setMediaToEdit] = useState<{ src: string; isVideo: boolean } | null>(null);
   const [selectedTimer, setSelectedTimer] = useState<TimerOption>(0);
   const [showTimerPicker, setShowTimerPicker] = useState(false);
@@ -97,16 +100,45 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      
+      // Calculate 9:16 crop from center of video
+      const videoWidth = video.videoWidth;
+      const videoHeight = video.videoHeight;
+      const targetRatio = 9 / 16;
+      const videoRatio = videoWidth / videoHeight;
+      
+      let cropWidth: number, cropHeight: number, cropX: number, cropY: number;
+      
+      if (videoRatio > targetRatio) {
+        // Video is wider - crop sides
+        cropHeight = videoHeight;
+        cropWidth = videoHeight * targetRatio;
+        cropX = (videoWidth - cropWidth) / 2;
+        cropY = 0;
+      } else {
+        // Video is taller - crop top/bottom
+        cropWidth = videoWidth;
+        cropHeight = videoWidth / targetRatio;
+        cropX = 0;
+        cropY = (videoHeight - cropHeight) / 2;
+      }
+      
+      // Set canvas to 9:16 aspect ratio
+      canvas.width = cropWidth;
+      canvas.height = cropHeight;
+      
       const ctx = canvas.getContext('2d');
       if (ctx) {
         // Flip horizontally if using front camera to avoid mirror image
         if (facingMode === 'user') {
           ctx.translate(canvas.width, 0);
           ctx.scale(-1, 1);
+          // Adjust cropX for mirrored image
+          ctx.drawImage(video, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+        } else {
+          ctx.drawImage(video, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
         }
-        ctx.drawImage(video, 0, 0);
+        
         const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
         // Open cropper instead of directly setting captured image
         setMediaToEdit({ src: dataUrl, isVideo: false });
@@ -143,6 +175,21 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const handleCropCancel = () => {
     setShowCropper(false);
     setMediaToEdit(null);
+    // Restart camera
+    startCamera();
+  };
+
+  // Video trimmer handlers
+  const handleVideoTrimConfirm = (trimmedVideoUrl: string) => {
+    setShowVideoTrimmer(false);
+    setVideoToTrim(null);
+    // Pass trimmed video directly to parent
+    onCapture(trimmedVideoUrl, true);
+  };
+
+  const handleVideoTrimCancel = () => {
+    setShowVideoTrimmer(false);
+    setVideoToTrim(null);
     // Restart camera
     startCamera();
   };
@@ -291,16 +338,26 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     const file = e.target.files?.[0];
     if (file) {
       const isVideo = file.type.startsWith('video/');
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUrl = reader.result as string;
-        // Open cropper for gallery uploads
-        setMediaToEdit({ src: dataUrl, isVideo });
-        setShowCropper(true);
+      
+      if (isVideo) {
+        // For videos, show the video trimmer instead of cropper
+        const videoUrl = URL.createObjectURL(file);
+        setVideoToTrim(videoUrl);
+        setShowVideoTrimmer(true);
         // Stop camera
         stopCamera();
-      };
-      reader.readAsDataURL(file);
+      } else {
+        // For images, use the cropper
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const dataUrl = reader.result as string;
+          setMediaToEdit({ src: dataUrl, isVideo: false });
+          setShowCropper(true);
+          // Stop camera
+          stopCamera();
+        };
+        reader.readAsDataURL(file);
+      }
     }
     e.target.value = '';
   };
@@ -675,6 +732,16 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
           onConfirm={handleCropConfirm}
           onCancel={handleCropCancel}
           onRetake={handleCropRetake}
+        />
+      )}
+
+      {/* Video Trimmer for gallery videos */}
+      {showVideoTrimmer && videoToTrim && (
+        <VideoTrimmer
+          videoSrc={videoToTrim}
+          onConfirm={handleVideoTrimConfirm}
+          onCancel={handleVideoTrimCancel}
+          maxDuration={3}
         />
       )}
     </div>
