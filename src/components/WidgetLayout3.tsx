@@ -1,4 +1,4 @@
-import { User, Plus } from 'lucide-react';
+import { User, Plus, ScanFace } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import cardBackground from '@/assets/card-background.png';
@@ -186,91 +186,51 @@ const WidgetLayout3 = ({
               {renderInFrame(latestPhoto, 0.28)}
             </div>
           ) : (
-            /* Empty State - 9:16 Selfie Upload Card with Blur Background */
+            /* Empty State - 9:16 Selfie Upload Card matching reference design */
             <div 
               className={`relative cursor-pointer tap-bounce group ${tappedElement === 'empty' ? 'animate-liquid-tap' : ''}`}
               onClick={() => { handleTap('empty'); onAddPhoto(); }}
               style={{ 
-                width: '140px',
-                aspectRatio: '9/16',
-                borderRadius: '12px',
+                width: '160px',
+                aspectRatio: '3/4',
+                borderRadius: '16px',
                 overflow: 'hidden',
                 boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
               }}
             >
-              {/* Blur background layer */}
+              {/* Solid slate background */}
               <div 
                 className="absolute inset-0"
                 style={{
-                  background: 'linear-gradient(180deg, rgba(60,60,80,0.9) 0%, rgba(30,30,45,0.95) 100%)',
-                  backdropFilter: 'blur(20px)',
-                  WebkitBackdropFilter: 'blur(20px)'
+                  background: 'linear-gradient(180deg, rgba(75,85,99,0.95) 0%, rgba(55,65,81,0.98) 100%)',
                 }}
               />
               
-              {/* Frosted glass overlay */}
+              {/* Subtle gradient overlay for depth */}
               <div 
                 className="absolute inset-0"
                 style={{
-                  background: 'radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.1) 0%, transparent 60%)',
+                  background: 'radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.05) 0%, transparent 70%)',
                 }}
               />
               
-              {/* Animated pulse ring */}
-              <div 
-                className="absolute inset-0 rounded-xl opacity-60"
-                style={{
-                  background: 'radial-gradient(circle at center, rgba(255,77,77,0.2) 0%, transparent 60%)',
-                  animation: 'pulse-glow 2s ease-in-out infinite'
-                }}
-              />
-              
-              {/* Dashed border overlay */}
-              <div 
-                className="absolute inset-[3px] rounded-[10px]"
-                style={{
-                  border: '2px dashed rgba(255,255,255,0.3)',
-                }}
-              />
-              
-              {/* Content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-3 z-10">
-                {/* User silhouette with floating animation */}
-                <div 
-                  className="w-14 h-14 rounded-full flex items-center justify-center mb-3"
-                  style={{ 
-                    background: 'linear-gradient(135deg, rgba(255,77,77,0.25) 0%, rgba(255,77,77,0.08) 100%)',
-                    border: '1px solid rgba(255,77,77,0.4)',
-                    boxShadow: '0 4px 20px rgba(255,77,77,0.2)',
+              {/* Content - Face scan icon */}
+              <div className="absolute inset-0 flex items-center justify-center z-10">
+                <ScanFace 
+                  className="text-white/40" 
+                  size={64} 
+                  strokeWidth={1.2}
+                  style={{
                     animation: 'float-gentle 3s ease-in-out infinite'
                   }}
-                >
-                  <User className="w-7 h-7 text-white/80" strokeWidth={1.5} />
-                </div>
-                
-                {/* CTA Text */}
-                <p className="text-[11px] text-white/90 font-semibold text-center mb-1">Click a Selfie</p>
-                <p className="text-[9px] text-white/50 font-medium text-center">Start your journey</p>
-                
-                {/* Tap indicator */}
-                <div 
-                  className="mt-3 px-3 py-1 rounded-full"
-                  style={{
-                    background: 'linear-gradient(135deg, #FF4D4D 0%, #FF3333 100%)',
-                    boxShadow: '0 4px 15px rgba(255,77,77,0.4)',
-                    animation: 'pulse-scale 2s ease-in-out infinite'
-                  }}
-                >
-                  <Plus className="w-4 h-4 text-white" />
-                </div>
+                />
               </div>
               
-              {/* Shimmer effect on hover */}
+              {/* Subtle hover effect */}
               <div 
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20"
                 style={{
-                  background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%)',
-                  animation: 'shimmer 2s infinite'
+                  background: 'rgba(255,255,255,0.05)',
                 }}
               />
             </div>
