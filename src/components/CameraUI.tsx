@@ -223,9 +223,11 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     mediaRecorder.onstop = () => {
       const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
       const videoUrl = URL.createObjectURL(blob);
-      // Open cropper for video too
-      setMediaToEdit({ src: videoUrl, isVideo: true });
-      setShowCropper(true);
+
+      // IMPORTANT: don't send videos through ImageCropper — it intentionally outputs an image.
+      // For hold-to-record, we want to keep the recorded 3s video.
+      setCapturedVideo(videoUrl);
+
       // Stop camera to avoid green dot
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
