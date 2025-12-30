@@ -6,6 +6,7 @@ import shuttlecockIcon from '@/assets/frames/shuttlecock.png';
 interface Photo {
   id: string;
   url: string;
+  originalUrl?: string;
   isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
@@ -70,15 +71,19 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
   ];
 
   const handlePhotoTap = (photo: Photo) => {
-    navigate('/preview', { 
-      state: { 
-        imageUrl: photo.url, 
+    const mediaUrl = photo.originalUrl || photo.url;
+
+    navigate('/preview', {
+      state: {
+        imageUrl: mediaUrl,
+        originalUrl: mediaUrl,
+        isVideo: photo.isVideo,
         activity: photo.activity,
         frame: photo.frame,
         duration: photo.duration,
         pr: photo.pr,
-        isReview: true
-      } 
+        isReview: true,
+      },
     });
   };
 

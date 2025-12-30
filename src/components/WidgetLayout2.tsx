@@ -5,6 +5,7 @@ import shuttlecockIcon from '@/assets/frames/shuttlecock.png';
 interface Photo {
   id: string;
   url: string;
+  originalUrl?: string;
   isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
@@ -35,9 +36,13 @@ const WidgetLayout2 = ({
   const todaysPhoto = photos.find(p => p.uploadDate === currentDate);
 
   const handlePhotoTap = (photo: Photo) => {
+    const mediaUrl = photo.originalUrl || photo.url;
+
     navigate('/preview', { 
       state: { 
-        imageUrl: photo.url, 
+        imageUrl: mediaUrl,
+        originalUrl: mediaUrl,
+        isVideo: photo.isVideo,
         activity: photo.activity,
         frame: photo.frame,
         duration: photo.duration,
