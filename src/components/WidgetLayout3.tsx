@@ -356,7 +356,7 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
               className="absolute left-0 right-0 z-10 animate-blink-glow"
               style={{ 
                 pointerEvents: 'none', 
-                top: '-8px'
+                top: '0px'
               }}
             >
               <img 
