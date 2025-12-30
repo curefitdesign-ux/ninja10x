@@ -444,39 +444,47 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         </div>
       )}
 
-      {/* Timer Picker Overlay - iOS Liquid Glass Style */}
+      {/* Timer Picker Overlay - Positioned between camera frame and bottom controls */}
       {showTimerPicker && (
         <div 
-          className="absolute inset-0 z-40 flex items-center justify-center"
+          className="absolute inset-0 z-40"
           onClick={() => setShowTimerPicker(false)}
         >
+          {/* Timer picker positioned just above bottom controls */}
           <div 
-            className="backdrop-blur-2xl bg-white/10 rounded-3xl p-4 border border-white/20 shadow-2xl animate-liquid-enter"
-            onClick={e => e.stopPropagation()}
-            style={{
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1)',
+            className="absolute left-0 right-0 flex justify-center"
+            style={{ 
+              bottom: 'calc(80px + 48px + 24px)', // Above the bottom controls area
             }}
           >
-            <div className="text-white/60 text-xs font-medium text-center mb-3 uppercase tracking-wider">Timer</div>
-            <div className="flex gap-2">
-              {timerOptions.map((timer) => (
-                <button
-                  key={timer}
-                  onClick={() => handleTimerSelect(timer)}
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center font-semibold text-lg transition-all duration-300 tap-bounce ${
-                    selectedTimer === timer
-                      ? 'bg-white text-black scale-105'
-                      : 'bg-white/10 text-white hover:bg-white/20'
-                  }`}
-                  style={{
-                    boxShadow: selectedTimer === timer 
-                      ? '0 10px 30px -5px rgba(255,255,255,0.3)' 
-                      : 'none',
-                  }}
-                >
-                  {timer === 0 ? 'Off' : `${timer}s`}
-                </button>
-              ))}
+            <div 
+              className="backdrop-blur-2xl bg-white/10 rounded-3xl p-4 border border-white/20 shadow-2xl animate-liquid-enter"
+              onClick={e => e.stopPropagation()}
+              style={{
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1)',
+              }}
+            >
+              <div className="text-white/60 text-xs font-medium text-center mb-3 uppercase tracking-wider">Timer</div>
+              <div className="flex gap-2">
+                {timerOptions.map((timer) => (
+                  <button
+                    key={timer}
+                    onClick={() => handleTimerSelect(timer)}
+                    className={`w-14 h-14 rounded-2xl flex items-center justify-center font-semibold text-lg transition-all duration-300 tap-bounce ${
+                      selectedTimer === timer
+                        ? 'bg-white text-black scale-105'
+                        : 'bg-white/10 text-white hover:bg-white/20'
+                    }`}
+                    style={{
+                      boxShadow: selectedTimer === timer 
+                        ? '0 10px 30px -5px rgba(255,255,255,0.3)' 
+                        : 'none',
+                    }}
+                  >
+                    {timer === 0 ? 'Off' : `${timer}s`}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
