@@ -54,12 +54,29 @@ type LayoutType = 'layout1' | 'layout2' | 'layout3';
 const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [photos, setPhotos] = useState<Photo[]>(() => {
+    try {
+      const raw = localStorage.getItem('cn_photos');
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
   const [simulatedDate, setSimulatedDate] = useState<string | null>(null);
   const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout3');
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('cn_photos', JSON.stringify(photos));
+    } catch {
+      // ignore
+    }
+  }, [photos]);
 
   // Get current date (or simulated date for testing)
   const getCurrentDate = () => {
@@ -94,7 +111,7 @@ const Index = () => {
       const today = getCurrentDate();
       const incomingUrl = location.state.imageUrl;
       const incomingOriginalUrl = location.state.originalUrl || incomingUrl;
-      
+
       const newPhoto: Photo = {
         id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         url: incomingUrl,
@@ -109,9 +126,9 @@ const Index = () => {
 
       // Always add new photo
       setPhotos((prev) => [...prev, newPhoto]);
-      
-      // Clear the state immediately to prevent re-adding
-      window.history.replaceState({}, document.title);
+
+      // Clear the navigation state immediately to prevent re-adding
+      navigate('/', { replace: true, state: null });
     }
   }, [location.state?.savePhoto, location.state?.imageUrl, location.state?.activity, simulatedDate]);
 
