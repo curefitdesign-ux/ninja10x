@@ -120,8 +120,15 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const handleCropConfirm = (croppedDataUrl: string, isVideo: boolean) => {
     setShowCropper(false);
     setMediaToEdit(null);
-    setCapturedImage(croppedDataUrl);
-    setCapturedVideo(null);
+    // Directly pass to parent - skip confirmation screen
+    onCapture(croppedDataUrl, isVideo);
+  };
+
+  const handleCropRetake = () => {
+    setShowCropper(false);
+    setMediaToEdit(null);
+    // Restart camera
+    startCamera();
   };
 
   const handleCropCancel = () => {
@@ -486,6 +493,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
           isVideo={mediaToEdit.isVideo}
           onConfirm={handleCropConfirm}
           onCancel={handleCropCancel}
+          onRetake={handleCropRetake}
         />
       )}
     </div>
