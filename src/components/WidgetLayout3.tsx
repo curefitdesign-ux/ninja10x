@@ -86,8 +86,8 @@ const WidgetLayout3 = ({
         className={`glass-card p-5 pt-10 relative overflow-visible w-full transition-all duration-500 ${isLoaded ? 'animate-liquid-enter' : 'opacity-0'}`}
         style={{ backgroundImage: `url(${cardBackground})`, backgroundSize: 'cover', backgroundPosition: 'center', minHeight: '420px' }}
       >
-        {/* Cult Ninja Tag - Attached to top edge */}
-        <div className={`absolute -top-3 left-1/2 -translate-x-1/2 z-20 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.1s' }}>
+        {/* Cult Ninja Tag - Centered at top edge */}
+        <div className={`absolute -top-3 left-0 right-0 flex justify-center z-20 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.1s' }}>
           <div 
             className={`px-3 py-1 rounded-full border border-foreground/30 bg-background/60 backdrop-blur-md tap-bounce cursor-pointer shadow-lg ${tappedElement === 'tag' ? 'animate-liquid-tap' : ''}`}
             onClick={() => handleTap('tag')}
@@ -157,7 +157,7 @@ const WidgetLayout3 = ({
         </div>
       
         {/* Film Strip Section - 12 blocks in one row */}
-        <div className={`relative z-10 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
+        <div className={`relative z-10 mt-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
           {/* Film strip background image */}
           <div className="relative w-full">
             <img 
