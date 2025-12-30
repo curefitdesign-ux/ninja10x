@@ -250,7 +250,7 @@ const WidgetLayout2 = ({
         </div>
 
         {/* Film Strip Section */}
-        <div className="relative z-10 pb-4 pl-2 pr-3">
+        <div className="relative z-10 pb-4 pl-2 pr-3 mt-10">
           <div className="flex items-center">
             {/* Film Roll */}
             <div className="relative flex-shrink-0 z-10">
