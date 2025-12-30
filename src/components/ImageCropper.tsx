@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Check, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Check, X, RotateCcw } from 'lucide-react';
 
 interface ImageCropperProps {
   mediaSrc: string;
   isVideo: boolean;
   onConfirm: (croppedDataUrl: string, isVideo: boolean) => void;
   onCancel: () => void;
+  onRetake?: () => void;
 }
 
 interface Transform {
@@ -14,7 +15,7 @@ interface Transform {
   y: number;
 }
 
-const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel }: ImageCropperProps) => {
+const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: ImageCropperProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLImageElement | HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -331,21 +332,23 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel }: ImageCropperPr
       {/* Header with instructions */}
       <div className="absolute top-0 left-0 right-0 p-6 pt-12 z-10">
         <div className="flex items-center justify-between">
-          <div className="px-4 py-2 rounded-full backdrop-blur-md bg-white/20 border border-white/10">
-            <span className="text-white/90 text-sm font-medium">Pinch to zoom • Drag to adjust</span>
-          </div>
+          <div className="flex-1" />
           <button onClick={onCancel} className="p-2">
             <X className="w-6 h-6 text-white" />
           </button>
+        </div>
+        {/* Centered hint text */}
+        <div className="flex justify-center mt-4">
+          <span className="text-white/50 text-sm font-medium">Pinch to zoom • Drag to adjust</span>
         </div>
       </div>
       
       {/* Bottom controls */}
       <div className="absolute bottom-0 left-0 right-0 pb-12 px-8 z-10">
         <div className="flex items-center justify-between">
-          {/* Zoom out */}
-          <button onClick={handleZoomOut} className="p-4" disabled={transform.scale <= 1}>
-            <ZoomOut className={`w-8 h-8 ${transform.scale <= 1 ? 'text-white/30' : 'text-white/80'}`} />
+          {/* Retake button */}
+          <button onClick={onRetake || onCancel} className="p-4">
+            <RotateCcw className="w-8 h-8 text-white/80" />
           </button>
           
           {/* Confirm button */}
@@ -359,10 +362,8 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel }: ImageCropperPr
             </div>
           </button>
           
-          {/* Zoom in */}
-          <button onClick={handleZoomIn} className="p-4" disabled={transform.scale >= 3}>
-            <ZoomIn className={`w-8 h-8 ${transform.scale >= 3 ? 'text-white/30' : 'text-white/80'}`} />
-          </button>
+          {/* Empty space for balance */}
+          <div className="p-4 w-16" />
         </div>
       </div>
     </div>
