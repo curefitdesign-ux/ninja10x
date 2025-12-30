@@ -215,64 +215,59 @@ const WidgetLayout3 = ({
               className="w-full h-auto"
               style={{ display: 'block' }}
             />
-            {/* 12 photo blocks overlaid on film strip - 4 groups of 3 with spacing */}
+            {/* 12 photo blocks overlaid on film strip - evenly spread */}
             <div 
-              className="absolute inset-0 flex items-center justify-center gap-[5px]"
+              className="absolute inset-0 flex items-center justify-between"
               style={{ 
-                paddingLeft: '16px',
-                paddingRight: '3px',
-                paddingTop: '16px', 
+                paddingLeft: '12px',
+                paddingRight: '12px',
+                paddingTop: '14px', 
                 paddingBottom: '6px' 
               }}
             >
-              {[0, 1, 2, 3].map((groupIndex) => (
-                <div key={groupIndex} className="flex gap-[1px]">
-                  {[0, 1, 2].map((boxIndex) => {
-                    const index = groupIndex * 3 + boxIndex;
-                    const photo = photos[index];
-                    const isNewPhoto = newPhotoIndex === index;
-                    return (
-                      <div 
-                        key={index}
-                        className={`overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 tap-bounce ${photo ? 'animate-film-shimmer' : ''} ${isNewPhoto ? 'animate-liquid-bounce' : ''} ${tappedElement === `strip-${index}` ? 'animate-liquid-tap' : ''}`}
-                        style={{ 
-                          background: '#0a0a0a',
-                          borderRadius: '2px',
-                          width: '18px',
-                          aspectRatio: '9/16',
-                          animationDelay: photo && !isNewPhoto ? `${index * 50}ms` : '0ms',
-                          animationFillMode: 'both'
-                        }}
-                        onClick={() => {
-                          if (photo) {
-                            handleTap(`strip-${index}`);
-                            setTimeout(() => handlePhotoTap(photo), 200);
-                          }
-                        }}
-                      >
-                      {photo ? (
-                          photo.isVideo || isVideoUrl(photo.originalUrl || photo.url) ? (
-                            <video
-                              src={photo.originalUrl || photo.url}
-                              className="w-full h-full object-cover"
-                              style={{ borderRadius: '2px' }}
-                              muted
-                              playsInline
-                            />
-                          ) : (
-                            <img
-                              src={photo.originalUrl || photo.url}
-                              alt=""
-                              className="w-full h-full object-cover"
-                              style={{ borderRadius: '2px' }}
-                            />
-                          )
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
+              {Array.from({ length: 12 }).map((_, index) => {
+                const photo = photos[index];
+                const isNewPhoto = newPhotoIndex === index;
+                return (
+                  <div 
+                    key={index}
+                    className={`overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 tap-bounce ${photo ? 'animate-film-shimmer' : ''} ${isNewPhoto ? 'animate-liquid-bounce' : ''} ${tappedElement === `strip-${index}` ? 'animate-liquid-tap' : ''}`}
+                    style={{ 
+                      background: '#1a1a1a',
+                      borderRadius: '2px',
+                      width: '20px',
+                      aspectRatio: '9/16',
+                      animationDelay: photo && !isNewPhoto ? `${index * 50}ms` : '0ms',
+                      animationFillMode: 'both'
+                    }}
+                    onClick={() => {
+                      if (photo) {
+                        handleTap(`strip-${index}`);
+                        setTimeout(() => handlePhotoTap(photo), 200);
+                      }
+                    }}
+                  >
+                    {photo ? (
+                      photo.isVideo || isVideoUrl(photo.originalUrl || photo.url) ? (
+                        <video
+                          src={photo.originalUrl || photo.url}
+                          className="w-full h-full object-cover"
+                          style={{ borderRadius: '2px' }}
+                          muted
+                          playsInline
+                        />
+                      ) : (
+                        <img
+                          src={photo.originalUrl || photo.url}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          style={{ borderRadius: '2px' }}
+                        />
+                      )
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
