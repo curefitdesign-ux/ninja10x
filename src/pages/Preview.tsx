@@ -500,20 +500,33 @@ const Preview = () => {
         {/* Content section - scrollable */}
         <div className={`space-y-4 px-5 mt-4 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
           {/* Editable data points - now tappable */}
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4">
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 relative overflow-hidden animate-input-focus-pulse">
+            {/* Subtle animated border glow */}
+            <div className="absolute inset-0 rounded-2xl pointer-events-none animate-border-glow" />
+            
             <button 
               onClick={() => { handleTap('duration'); openEditSheet('duration'); }}
               className={`w-full flex justify-between items-center py-2 border-b border-white/10 tap-bounce ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
             >
-              <span className="text-white/80">{label2}</span>
-              <span className="text-white font-semibold text-lg">{duration || `e.g. ${label2.toLowerCase()}`}</span>
+              <span className="text-white/80 flex items-center gap-2">
+                {label2}
+                <span className="text-xs text-white/40 animate-pulse">tap to edit</span>
+              </span>
+              <span className={`font-semibold text-lg ${duration ? 'text-white' : 'text-white/50 italic'}`}>
+                {duration || `e.g. ${label2.toLowerCase()}`}
+              </span>
             </button>
             <button 
               onClick={() => { handleTap('pr'); openEditSheet('pr'); }}
               className={`w-full flex justify-between items-center py-2 tap-bounce ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
             >
-              <span className="text-white/80">{label1} <span className="text-white/40">(Optional)</span></span>
-              <span className="text-white font-semibold text-lg">{pr || '-'}</span>
+              <span className="text-white/80 flex items-center gap-2">
+                {label1} <span className="text-white/40">(Optional)</span>
+                <span className="text-xs text-white/40 animate-pulse">tap to edit</span>
+              </span>
+              <span className={`font-semibold text-lg ${pr ? 'text-white' : 'text-white/50'}`}>
+                {pr || '-'}
+              </span>
             </button>
           </div>
 
