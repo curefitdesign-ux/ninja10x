@@ -7,7 +7,8 @@ import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 
 interface Photo {
   id: string;
-  url: string;
+  url: string; // Framed/template image URL
+  originalUrl?: string; // Original photo for film strip
   isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
@@ -200,10 +201,10 @@ const WidgetLayout3 = ({
                           }
                         }}
                       >
-                        {photo ? (
-                          photo.isVideo || isVideoUrl(photo.url) ? (
+                      {photo ? (
+                          photo.isVideo || isVideoUrl(photo.originalUrl || photo.url) ? (
                             <video
-                              src={photo.url}
+                              src={photo.originalUrl || photo.url}
                               className="w-full h-full object-cover"
                               style={{ borderRadius: '2px' }}
                               muted
@@ -211,7 +212,7 @@ const WidgetLayout3 = ({
                             />
                           ) : (
                             <img
-                              src={photo.url}
+                              src={photo.originalUrl || photo.url}
                               alt=""
                               className="w-full h-full object-cover"
                               style={{ borderRadius: '2px' }}
