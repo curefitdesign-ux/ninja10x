@@ -952,4 +952,112 @@
   .animate-dash-flow {
     animation: dash-flow 1s linear infinite;
   }
+
+  /* Video Player Animations */
+  @keyframes video-open {
+    0% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes video-close {
+    0% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+  }
+
+  @keyframes video-expand {
+    0% {
+      opacity: 0;
+      transform: scale(0.5) translateY(100px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes video-shrink {
+    0% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.5) translateY(100px);
+    }
+  }
+
+  @keyframes filmstrip-forward {
+    0% {
+      opacity: 0;
+      transform: translateY(60px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes filmstrip-reverse {
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(60px);
+    }
+  }
+
+  @keyframes play-button-float {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.5), 0 0 30px rgba(34, 197, 94, 0.3);
+    }
+    50% {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 10px 30px rgba(34, 197, 94, 0.6), 0 0 40px rgba(34, 197, 94, 0.4);
+    }
+  }
+
+  .animate-video-open {
+    animation: video-open 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-video-close {
+    animation: video-close 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-video-expand {
+    animation: video-expand 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .animate-video-shrink {
+    animation: video-shrink 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-filmstrip-forward {
+    animation: filmstrip-forward 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+  }
+
+  .animate-filmstrip-reverse {
+    animation: filmstrip-reverse 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-play-button-float {
+    animation: play-button-float 2s ease-in-out infinite;
+  }
 }
