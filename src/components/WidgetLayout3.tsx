@@ -186,21 +186,67 @@ const WidgetLayout3 = ({
               {renderInFrame(latestPhoto, 0.28)}
             </div>
           ) : (
-            /* Empty State */
+            /* Empty State - 9:16 Selfie Upload Card */
             <div 
-              className={`flex flex-col items-center justify-center cursor-pointer tap-bounce ${tappedElement === 'empty' ? 'animate-liquid-tap' : ''}`}
+              className={`relative cursor-pointer tap-bounce group ${tappedElement === 'empty' ? 'animate-liquid-tap' : ''}`}
               onClick={() => { handleTap('empty'); onAddPhoto(); }}
+              style={{ 
+                width: '140px',
+                aspectRatio: '9/16',
+                borderRadius: '12px',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+                border: '2px dashed rgba(255,255,255,0.25)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                overflow: 'hidden'
+              }}
             >
+              {/* Animated pulse ring */}
               <div 
-                className="w-20 h-20 rounded-full flex items-center justify-center mb-3"
-                style={{ 
-                  background: 'rgba(255,255,255,0.1)',
-                  border: '2px dashed rgba(255,255,255,0.3)'
+                className="absolute inset-0 rounded-xl opacity-60"
+                style={{
+                  background: 'radial-gradient(circle at center, rgba(255,77,77,0.15) 0%, transparent 70%)',
+                  animation: 'pulse-glow 2s ease-in-out infinite'
                 }}
-              >
-                <User className="w-8 h-8 text-white/50" strokeWidth={1.5} />
+              />
+              
+              {/* Content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-3">
+                {/* User silhouette with floating animation */}
+                <div 
+                  className="w-14 h-14 rounded-full flex items-center justify-center mb-3"
+                  style={{ 
+                    background: 'linear-gradient(135deg, rgba(255,77,77,0.2) 0%, rgba(255,77,77,0.05) 100%)',
+                    border: '1px solid rgba(255,77,77,0.3)',
+                    animation: 'float-gentle 3s ease-in-out infinite'
+                  }}
+                >
+                  <User className="w-7 h-7 text-white/70" strokeWidth={1.5} />
+                </div>
+                
+                {/* CTA Text */}
+                <p className="text-[11px] text-white/80 font-semibold text-center mb-1">Click a Selfie</p>
+                <p className="text-[9px] text-white/50 font-medium text-center">Start your journey</p>
+                
+                {/* Tap indicator */}
+                <div 
+                  className="mt-3 px-3 py-1 rounded-full"
+                  style={{
+                    background: 'linear-gradient(135deg, #FF4D4D 0%, #FF3333 100%)',
+                    animation: 'pulse-scale 2s ease-in-out infinite'
+                  }}
+                >
+                  <Plus className="w-4 h-4 text-white" />
+                </div>
               </div>
-              <p className="text-sm text-white/60 font-medium">Upload your first image</p>
+              
+              {/* Shimmer effect on hover */}
+              <div 
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{
+                  background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%)',
+                  animation: 'shimmer 2s infinite'
+                }}
+              />
             </div>
           )}
         </div>
