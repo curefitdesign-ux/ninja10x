@@ -1,5 +1,6 @@
 import { User, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 import cardBackground from '@/assets/card-background.png';
 import filmstripBg from '@/assets/frames/filmstrip-bg.png';
 
@@ -30,47 +31,80 @@ const WidgetLayout3 = ({
   onAddPhoto,
 }: WidgetLayout3Props) => {
   const navigate = useNavigate();
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [tappedElement, setTappedElement] = useState<string | null>(null);
+  const prevPhotosLength = useRef(photos.length);
+  const [newPhotoIndex, setNewPhotoIndex] = useState<number | null>(null);
   
   // Get the latest photo for center display
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
 
+  // Trigger entrance animation on mount
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoaded(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Track new photo additions for animation
+  useEffect(() => {
+    if (photos.length > prevPhotosLength.current) {
+      setNewPhotoIndex(photos.length - 1);
+      setTimeout(() => setNewPhotoIndex(null), 700);
+    }
+    prevPhotosLength.current = photos.length;
+  }, [photos.length]);
+
+  const handleTap = (id: string) => {
+    setTappedElement(id);
+    setTimeout(() => setTappedElement(null), 400);
+  };
+
   const handlePhotoTap = (photo: Photo) => {
-    navigate('/preview', { 
-      state: { 
-        imageUrl: photo.url, 
-        activity: photo.activity,
-        frame: photo.frame,
-        duration: photo.duration,
-        pr: photo.pr,
-        isReview: true
-      } 
-    });
+    handleTap(`photo-${photo.id}`);
+    setTimeout(() => {
+      navigate('/preview', { 
+        state: { 
+          imageUrl: photo.url, 
+          activity: photo.activity,
+          frame: photo.frame,
+          duration: photo.duration,
+          pr: photo.pr,
+          isReview: true
+        } 
+      });
+    }, 200);
   };
 
   return (
     <div className="px-5">
       {/* Ninja Widget */}
       <div 
-        className="glass-card p-5 relative overflow-hidden w-full"
+        className={`glass-card p-5 relative overflow-hidden w-full transition-all duration-500 ${isLoaded ? 'animate-liquid-enter' : 'opacity-0'}`}
         style={{ backgroundImage: `url(${cardBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
       >
         {/* Cult Ninja Tag */}
-        <div className="flex justify-center mb-4">
-          <div className="px-4 py-2 rounded-full border border-foreground/30 bg-background/30 backdrop-blur-sm">
+        <div className={`flex justify-center mb-4 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.1s' }}>
+          <div 
+            className={`px-4 py-2 rounded-full border border-foreground/30 bg-background/30 backdrop-blur-sm tap-bounce cursor-pointer ${tappedElement === 'tag' ? 'animate-liquid-tap' : ''}`}
+            onClick={() => handleTap('tag')}
+          >
             <span className="text-sm font-semibold text-foreground tracking-wider">CULT NINJA</span>
           </div>
         </div>
         
         {/* Title */}
-        <h2 className="text-xl font-bold text-foreground text-center mb-6 relative z-10">
+        <h2 className={`text-xl font-bold text-foreground text-center mb-6 relative z-10 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
           CONQUER WILL POWER
         </h2>
       
         {/* Single Center Photo Card - Shows the captured framed image */}
-        <div className="relative z-10 mb-6 flex justify-center" style={{ minHeight: latestPhoto ? '220px' : '160px' }}>
+        <div 
+          className={`relative z-10 mb-6 flex justify-center ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} 
+          style={{ minHeight: latestPhoto ? '220px' : '160px', animationDelay: '0.3s' }}
+        >
           {latestPhoto ? (
             <div 
-              className="relative cursor-pointer overflow-hidden rounded-xl"
+              className={`relative cursor-pointer overflow-hidden rounded-xl tap-bounce ${tappedElement === `photo-${latestPhoto.id}` ? 'animate-liquid-tap' : ''} ${newPhotoIndex === photos.length - 1 ? 'animate-liquid-bounce' : ''}`}
               onClick={() => handlePhotoTap(latestPhoto)}
               style={{ 
                 transform: 'rotate(2deg)',
@@ -100,8 +134,8 @@ const WidgetLayout3 = ({
           ) : (
             /* Empty State */
             <div 
-              className="flex flex-col items-center justify-center cursor-pointer"
-              onClick={onAddPhoto}
+              className={`flex flex-col items-center justify-center cursor-pointer tap-bounce ${tappedElement === 'empty' ? 'animate-liquid-tap' : ''}`}
+              onClick={() => { handleTap('empty'); onAddPhoto(); }}
             >
               <div 
                 className="w-20 h-20 rounded-full flex items-center justify-center mb-3"
@@ -118,7 +152,7 @@ const WidgetLayout3 = ({
         </div>
       
         {/* Film Strip Section - 12 blocks in one row */}
-        <div className="relative z-10">
+        <div className={`relative z-10 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
           {/* Film strip background image */}
           <div className="relative w-full">
             <img 
@@ -142,19 +176,25 @@ const WidgetLayout3 = ({
                   {[0, 1, 2].map((boxIndex) => {
                     const index = groupIndex * 3 + boxIndex;
                     const photo = photos[index];
+                    const isNewPhoto = newPhotoIndex === index;
                     return (
                       <div 
                         key={index}
-                        className={`overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 transition-all ${photo ? 'animate-scale-in animate-film-shimmer' : ''}`}
+                        className={`overflow-hidden cursor-pointer hover:ring-1 hover:ring-white/50 tap-bounce ${photo ? 'animate-film-shimmer' : ''} ${isNewPhoto ? 'animate-liquid-bounce' : ''} ${tappedElement === `strip-${index}` ? 'animate-liquid-tap' : ''}`}
                         style={{ 
                           background: '#0a0a0a',
                           borderRadius: '2px',
                           width: '18px',
                           aspectRatio: '9/16',
-                          animationDelay: photo ? `${index * 50}ms` : '0ms',
+                          animationDelay: photo && !isNewPhoto ? `${index * 50}ms` : '0ms',
                           animationFillMode: 'both'
                         }}
-                        onClick={() => photo && handlePhotoTap(photo)}
+                        onClick={() => {
+                          if (photo) {
+                            handleTap(`strip-${index}`);
+                            setTimeout(() => handlePhotoTap(photo), 200);
+                          }
+                        }}
                       >
                         {photo ? (
                           photo.isVideo || isVideoUrl(photo.url) ? (
@@ -185,10 +225,10 @@ const WidgetLayout3 = ({
       </div>
 
       {/* Upload Button Below Widget */}
-      <div className="flex justify-center mt-4">
+      <div className={`flex justify-center mt-4 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.5s' }}>
         <button
-          onClick={onAddPhoto}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-full transition-all hover:scale-105 active:scale-95"
+          onClick={() => { handleTap('add-btn'); onAddPhoto(); }}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full tap-bounce ${tappedElement === 'add-btn' ? 'animate-liquid-tap' : ''}`}
           style={{
             background: 'linear-gradient(135deg, #FF4D4D 0%, #FF3333 100%)',
             boxShadow: '0 4px 15px rgba(255,77,77,0.4)'
