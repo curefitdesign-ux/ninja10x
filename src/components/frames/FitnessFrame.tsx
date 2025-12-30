@@ -132,7 +132,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
               loop
               muted
               playsInline
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
               style={{
                 transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
               }}
@@ -141,7 +141,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
             <img 
               src={imageUrl}
               alt="Activity"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
               style={{
                 transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
               }}

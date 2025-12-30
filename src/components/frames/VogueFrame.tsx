@@ -21,7 +21,7 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-contain"
+          className="absolute inset-0 w-full h-full object-cover"
           style={{
             transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
           }}
@@ -30,7 +30,7 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
         <img 
           src={imageUrl}
           alt="Activity"
-          className="absolute inset-0 w-full h-full object-contain"
+          className="absolute inset-0 w-full h-full object-cover"
           style={{
             transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
           }}

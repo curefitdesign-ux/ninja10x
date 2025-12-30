@@ -40,7 +40,7 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
     
     const container = containerRef.current;
     const cropWidth = container.clientWidth - 48; // 24px padding each side
-    const cropHeight = cropWidth * (4 / 3); // 3:4 aspect ratio
+    const cropHeight = cropWidth * (16 / 9); // 9:16 aspect ratio
     
     const scaledWidth = mediaWidth * t.scale;
     const scaledHeight = mediaHeight * t.scale;
@@ -159,7 +159,7 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
     
     const container = containerRef.current;
     const cropWidth = container.clientWidth - 48;
-    const cropHeight = cropWidth * (4 / 3);
+    const cropHeight = cropWidth * (16 / 9);
     
     // Set canvas to crop dimensions
     canvas.width = cropWidth * 2; // 2x for quality
@@ -282,14 +282,14 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
         <div 
           className="absolute top-0 left-0 right-0 backdrop-blur-xl bg-black/40"
           style={{ 
-            height: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)',
+            height: 'calc((100% - (100vw - 48px) * 16 / 9) / 2)',
           }}
         />
         {/* Bottom blur section */}
         <div 
           className="absolute bottom-0 left-0 right-0 backdrop-blur-xl bg-black/40"
           style={{ 
-            height: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)',
+            height: 'calc((100% - (100vw - 48px) * 16 / 9) / 2)',
           }}
         />
         {/* Left blur section */}
@@ -297,8 +297,8 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
           className="absolute left-0 backdrop-blur-xl bg-black/40"
           style={{ 
             width: '24px',
-            top: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)',
-            bottom: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)',
+            top: 'calc((100% - (100vw - 48px) * 16 / 9) / 2)',
+            bottom: 'calc((100% - (100vw - 48px) * 16 / 9) / 2)',
           }}
         />
         {/* Right blur section */}
@@ -306,8 +306,8 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
           className="absolute right-0 backdrop-blur-xl bg-black/40"
           style={{ 
             width: '24px',
-            top: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)',
-            bottom: 'calc((100% - (100vw - 48px) * 4 / 3) / 2)',
+            top: 'calc((100% - (100vw - 48px) * 16 / 9) / 2)',
+            bottom: 'calc((100% - (100vw - 48px) * 16 / 9) / 2)',
           }}
         />
       </div>
@@ -315,17 +315,17 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
       {/* Crop frame indicator */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div 
-          className="relative rounded-[32px] border-2 border-white/40 overflow-hidden"
+          className="relative rounded-[24px] border-2 border-white/40 overflow-hidden"
           style={{ 
             width: 'calc(100% - 48px)', 
-            aspectRatio: '3/4',
+            aspectRatio: '9/16',
           }}
         >
           {/* Corner brackets */}
-          <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-white rounded-tl-[32px]" />
-          <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-white rounded-tr-[32px]" />
-          <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-white rounded-bl-[32px]" />
-          <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-white rounded-br-[32px]" />
+          <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-white rounded-tl-[24px]" />
+          <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-white rounded-tr-[24px]" />
+          <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-white rounded-bl-[24px]" />
+          <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-white rounded-br-[24px]" />
         </div>
       </div>
       
