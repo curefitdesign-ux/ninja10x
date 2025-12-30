@@ -205,8 +205,8 @@ const WidgetLayout3 = ({
           )}
         </div>
       
-        {/* Film Strip Section - 12 blocks in one row */}
-        <div className={`relative z-10 mt-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
+        {/* Film Strip Section - 12 blocks in one row - moved up by 40px */}
+        <div className={`relative z-10 -mt-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
           {/* Film strip background image */}
           <div className="relative w-full">
             <img 
