@@ -4,6 +4,11 @@ import cardBackground from '@/assets/card-background.png';
 import filmstripBg from '@/assets/frames/filmstrip-bg.png';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ShareSheet from './ShareSheet';
+import ShakyFrame from '@/components/frames/ShakyFrame';
+import JournalFrame from '@/components/frames/JournalFrame';
+import VogueFrame from '@/components/frames/VogueFrame';
+import FitnessFrame from '@/components/frames/FitnessFrame';
+import TicketFrame from '@/components/frames/TicketFrame';
 
 interface Photo {
   id: string;
@@ -17,9 +22,40 @@ interface Photo {
   uploadDate: string;
 }
 
+type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
+
 // Helper to detect if URL is a video
 const isVideoUrl = (url: string) => {
   return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
+};
+
+const renderVideoInFrame = (photo: Photo) => {
+  const frame: FrameType = photo.frame || 'shaky';
+  const frameProps = {
+    imageUrl: photo.originalUrl || photo.url,
+    isVideo: true,
+    activity: photo.activity || 'Activity',
+    week: 1,
+    day: 1,
+    duration: photo.duration || '2hrs',
+    pr: photo.pr || '',
+    imagePosition: { x: 0, y: 0 },
+    imageScale: 1.2,
+  };
+
+  switch (frame) {
+    case 'journal':
+      return <JournalFrame {...frameProps} />;
+    case 'vogue':
+      return <VogueFrame {...frameProps} />;
+    case 'fitness':
+      return <FitnessFrame {...frameProps} />;
+    case 'ticket':
+      return <TicketFrame {...frameProps} />;
+    case 'shaky':
+    default:
+      return <ShakyFrame {...frameProps} />;
+  }
 };
 
 interface WidgetLayout3Props {
@@ -114,21 +150,17 @@ const WidgetLayout3 = ({
                 boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
               }}
             >
-              {/* Show the saved framed image directly - no template re-rendering */}
+              {/* Show the saved framed image directly for photos; re-render the selected template for videos */}
               {latestPhoto.isVideo || isVideoUrl(latestPhoto.url) ? (
-                <video
-                  src={latestPhoto.url}
-                  className="w-full h-full object-contain bg-black"
-                  muted
-                  playsInline
-                  loop
-                  autoPlay
-                />
+                <div className="w-full h-full flex items-center justify-center bg-black">
+                  {renderVideoInFrame(latestPhoto)}
+                </div>
               ) : (
                 <img
                   src={latestPhoto.url}
-                  alt=""
+                  alt="Saved activity template"
                   className="w-full h-full object-contain bg-black"
+                  loading="lazy"
                 />
               )}
             </div>
