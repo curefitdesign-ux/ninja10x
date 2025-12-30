@@ -47,19 +47,15 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
           }}
         />
       ) : (
-        <div 
-          className="absolute inset-0 z-0 flex items-center justify-center bg-black"
-        >
-          <img 
-            src={imageUrl}
-            alt="Activity"
-            className="w-full h-full object-cover"
-            style={{
-              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-              transformOrigin: 'center center'
-            }}
-          />
-        </div>
+        <img 
+          src={imageUrl}
+          alt="Activity"
+          className="absolute inset-0 w-full h-full object-cover z-0"
+          style={{
+            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+            transformOrigin: 'center center'
+          }}
+        />
       )}
       
       {/* Layer 2: Ticket Frame Asset (with transparent window) - reduced size */}
