@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react';
 import StackedPhotoCards from './StackedPhotoCards';
 import WeekProgress from './WeekProgress';
 import cardBackground from '@/assets/card-background.png';
@@ -24,8 +25,6 @@ interface PhotoUploadCardProps {
 const PhotoUploadCard = ({ 
   photos, 
   onCardClick, 
-  hasUploadedToday,
-  hoursUntilNextUpload,
   currentDate
 }: PhotoUploadCardProps) => {
   // Determine current week based on photos (3 photos per week = 12 total for 4 weeks)
@@ -66,20 +65,26 @@ const PhotoUploadCard = ({
             currentDate={currentDate}
           />
         </div>
-        
-        {/* Upload Status Message */}
-        {hasUploadedToday && (
-          <div className="text-center mb-4 relative z-10">
-            <p className="text-sm text-foreground/60">
-              Next upload in <span className="font-semibold text-foreground/80">{hoursUntilNextUpload}h</span>
-            </p>
-          </div>
-        )}
       
         {/* Week Progress */}
         <div className="relative z-10">
           <WeekProgress currentWeek={currentWeek} photosPerWeek={photosPerWeek} />
         </div>
+      </div>
+
+      {/* Upload Button Below Widget */}
+      <div className="flex justify-center mt-4">
+        <button
+          onClick={onCardClick}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full"
+          style={{
+            background: 'linear-gradient(135deg, #FF4D4D 0%, #FF3333 100%)',
+            boxShadow: '0 4px 15px rgba(255,77,77,0.4)'
+          }}
+        >
+          <Plus className="w-5 h-5 text-white" />
+          <span className="text-white font-semibold text-sm">Add Photo</span>
+        </button>
       </div>
     </div>
   );
