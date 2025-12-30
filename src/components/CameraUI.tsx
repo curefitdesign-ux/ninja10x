@@ -357,7 +357,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         <div 
           className="absolute top-0 left-0 right-0 backdrop-blur-xl bg-black/15"
           style={{ 
-            height: 'calc((100% - (100vw - 48px) * 4 / 3) / 2 + 24px)',
+            height: 'calc((100% - (100vw - 48px) * 16 / 9) / 2 + 24px)',
             maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.2) 80%, transparent 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.2) 80%, transparent 100%)',
           }}
@@ -366,7 +366,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         <div 
           className="absolute bottom-0 left-0 right-0 backdrop-blur-xl bg-black/15"
           style={{ 
-            height: 'calc((100% - (100vw - 48px) * 4 / 3) / 2 + 24px)',
+            height: 'calc((100% - (100vw - 48px) * 16 / 9) / 2 + 24px)',
             maskImage: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.2) 80%, transparent 100%)',
             WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.2) 80%, transparent 100%)',
           }}
@@ -391,14 +391,14 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         />
       </div>
 
-      {/* Camera Frame - matches 3:4 aspect ratio of preview frames */}
+      {/* Camera Frame - matches 9:16 aspect ratio of preview frames */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        {/* Clear crop area with 3:4 aspect ratio and matching rounded corners */}
+        {/* Clear crop area with 9:16 aspect ratio and matching rounded corners */}
         <div 
           className="relative rounded-[32px] border-2 border-white/20 overflow-hidden"
           style={{ 
             width: 'calc(100% - 48px)', 
-            aspectRatio: '3/4',
+            aspectRatio: '9/16',
           }}
         >
           {/* Subtle vignette effect inside capture area */}
