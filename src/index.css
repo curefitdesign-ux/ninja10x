@@ -867,4 +867,71 @@
   .animate-gentle-pulse {
     animation: gentle-pulse 4s ease-in-out infinite;
   }
+
+  /* Swimming - wave flow */
+  @keyframes wave-flow {
+    0% {
+      transform: translateX(-100%) scaleY(1);
+    }
+    50% {
+      transform: translateX(0%) scaleY(1.5);
+    }
+    100% {
+      transform: translateX(100%) scaleY(1);
+    }
+  }
+
+  .animate-wave-flow {
+    animation: wave-flow 4s ease-in-out infinite;
+  }
+
+  /* Yoga - breathing effect */
+  @keyframes breathe {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.08;
+    }
+    50% {
+      transform: scale(1.15);
+      opacity: 0.15;
+    }
+  }
+
+  .animate-breathe {
+    animation: breathe 4s ease-in-out infinite;
+  }
+
+  /* Racquet - arc trace */
+  @keyframes arc-trace {
+    0% {
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .animate-arc-trace {
+    animation: arc-trace 3s ease-in-out infinite;
+  }
+
+  /* Racquet - dash flow for path */
+  @keyframes dash-flow {
+    0% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: -24;
+    }
+  }
+
+  .animate-dash-flow {
+    animation: dash-flow 1s linear infinite;
+  }
 }
