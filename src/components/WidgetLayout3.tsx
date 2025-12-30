@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import cardBackground from '@/assets/card-background.png';
 import filmstripBg from '@/assets/frames/filmstrip-bg.png';
 import journeyVideo from '@/assets/journey-video.mp4';
+import progressBar from '@/assets/frames/progress-bar.png';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ShakyFrame from '@/components/frames/ShakyFrame';
 import JournalFrame from '@/components/frames/JournalFrame';
@@ -216,20 +217,30 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
             </div>
           </div>
 
-          {/* Fixed Film Strip at Bottom with Green Progress Overlay */}
+          {/* Fixed Film Strip at Bottom with Progress Bar Image Overlay */}
           <div className={`pb-8 pt-4 ${isVideoClosing ? 'animate-filmstrip-reverse' : 'animate-filmstrip-forward'}`}>
             <div className="relative w-full overflow-hidden">
               <img src={filmstripBg} alt="" className="w-full h-auto" style={{ display: 'block' }} />
               
-              {/* Green progress overlay on film strip */}
+              {/* Dashed progress bar image overlay - masked to first 3 cards */}
               <div 
-                className="absolute inset-0 pointer-events-none"
+                className="absolute pointer-events-none"
                 style={{
-                  background: 'rgba(34, 197, 94, 0.45)',
-                  clipPath: `inset(0 ${100 - videoProgress}% 0 0)`,
-                  transition: 'clip-path 0.1s linear'
+                  top: '-4px',
+                  left: '10px',
+                  width: `${Math.min(videoProgress, 25) * 1.6}%`,
+                  maxWidth: '40%',
+                  height: 'calc(100% + 8px)',
+                  overflow: 'hidden'
                 }}
-              />
+              >
+                <img 
+                  src={progressBar} 
+                  alt="" 
+                  className="h-full object-cover object-left"
+                  style={{ width: '100%' }}
+                />
+              </div>
               
               <div 
                 className="absolute inset-0 flex items-center justify-center gap-[10px]"
@@ -340,17 +351,20 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
       
         {/* Film Strip Section with Floating Play Button */}
         <div className={`relative z-10 -mt-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
-          {/* Floating Play Button - Moved Up with Animation */}
+          {/* Floating Play Button - Liquid Glass Style */}
           {hasThreePhotos && (
             <button
               onClick={handlePlayVideo}
               className="absolute -top-14 left-2 z-20 w-12 h-12 rounded-full flex items-center justify-center tap-bounce animate-play-button-float"
               style={{
-                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                boxShadow: '0 6px 20px rgba(34, 197, 94, 0.5), 0 0 30px rgba(34, 197, 94, 0.3)'
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.25) 0%, rgba(22, 163, 74, 0.15) 100%)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1.5px solid rgba(34, 197, 94, 0.4)',
+                boxShadow: '0 4px 24px rgba(34, 197, 94, 0.3), inset 0 1px 1px rgba(255,255,255,0.2), 0 0 40px rgba(34, 197, 94, 0.15)'
               }}
             >
-              <Play className="w-6 h-6 text-white ml-0.5" fill="white" />
+              <Play className="w-5 h-5 text-green-400 ml-0.5 drop-shadow-lg" fill="rgba(74, 222, 128, 0.8)" />
             </button>
           )}
           
