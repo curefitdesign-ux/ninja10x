@@ -126,7 +126,8 @@ const Preview = () => {
         navigate('/', { 
           state: { 
             savePhoto: true, 
-            imageUrl: isVideo ? imageUrl : framedImageUrl,
+            imageUrl: framedImageUrl, // The framed/template image for center display
+            originalUrl: imageUrl, // Original photo for film strip
             isVideo,
             activity, 
             frame: currentFrame,
@@ -142,6 +143,7 @@ const Preview = () => {
           state: { 
             savePhoto: true, 
             imageUrl, 
+            originalUrl: imageUrl,
             isVideo,
             activity, 
             frame: currentFrame,
@@ -289,8 +291,25 @@ const Preview = () => {
           filter: 'blur(80px) brightness(0.7)',
         }}
       />
-      {/* Subtle floating orbs for motion */}
+      
+      {/* Subtle particle/dust animation */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Floating dust particles */}
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-white/20 animate-particle-float"
+            style={{
+              width: `${Math.random() * 3 + 1}px`,
+              height: `${Math.random() * 3 + 1}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${Math.random() * 10 + 10}s`,
+            }}
+          />
+        ))}
+        {/* Floating orbs for depth */}
         <div 
           className="absolute w-64 h-64 rounded-full animate-orb-float-1"
           style={{ 
@@ -316,6 +335,7 @@ const Preview = () => {
           }}
         />
       </div>
+      
       {/* Dynamic gradient overlay based on current frame */}
       <div 
         className="absolute inset-0 transition-all duration-500 animate-color-pulse"
@@ -327,10 +347,10 @@ const Preview = () => {
       <div className="absolute inset-0 bg-black/20 animate-subtle-pulse" />
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col min-h-screen">
-        {/* Header with title aligned with arrow */}
+      <div className="relative z-10 flex flex-col min-h-screen pb-32">
+        {/* Header */}
         <div className="h-12" />
-        <div className={`flex items-center gap-3 mb-4 px-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`}>
+        <div className={`flex items-center justify-between mb-4 px-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`}>
           <button 
             onClick={handleBack}
             className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'back-btn' ? 'animate-liquid-tap' : ''}`}
@@ -338,6 +358,7 @@ const Preview = () => {
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           <h2 className="text-white/80 text-lg font-semibold">Select your frame</h2>
+          <div className="w-10" /> {/* Spacer for balance */}
         </div>
         
         {/* Frame carousel - horizontal scroll with liquid glass effect */}
@@ -383,8 +404,8 @@ const Preview = () => {
           </div>
         </div>
 
-        {/* Bottom section - Sticky */}
-        <div className={`sticky bottom-0 left-0 right-0 space-y-4 pb-6 pt-4 px-5 bg-gradient-to-t from-black/60 via-black/30 to-transparent ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
+        {/* Content section - scrollable */}
+        <div className={`space-y-4 px-5 mt-4 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
           {/* Editable data points - now tappable */}
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4">
             <button 
@@ -416,18 +437,21 @@ const Preview = () => {
               <span className="text-white font-semibold text-sm">CONNECT</span>
             </button>
           </div>
-
-          {/* Save button - White CTA with black text */}
-          <button 
-            onClick={handleSave}
-            disabled={isSaving}
-            className={`w-full bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce ${tappedElement === 'save-btn' ? 'animate-liquid-tap' : ''}`}
-          >
-            <span className="text-black font-bold text-lg">
-              {isSaving ? 'Saving...' : 'Save Activity'}
-            </span>
-          </button>
         </div>
+      </div>
+
+      {/* Floating Save Button - Fixed at bottom */}
+      <div className={`fixed bottom-0 left-0 right-0 z-30 px-5 pb-6 pt-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
+        <button 
+          onClick={handleSave}
+          disabled={isSaving}
+          className={`w-full bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce shadow-lg ${tappedElement === 'save-btn' ? 'animate-liquid-tap' : ''}`}
+          style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.3)' }}
+        >
+          <span className="text-black font-bold text-lg">
+            {isSaving ? 'Saving...' : 'Save Activity'}
+          </span>
+        </button>
       </div>
 
       {/* Bottom Sheet Keyboard Overlay */}

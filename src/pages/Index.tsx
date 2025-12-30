@@ -27,7 +27,8 @@ import yogaIcon from '@/assets/activities/yoga.png';
 
 interface Photo {
   id: string;
-  url: string;
+  url: string; // Framed/template image URL
+  originalUrl?: string; // Original photo for film strip
   isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
@@ -95,6 +96,7 @@ const Index = () => {
       const newPhoto: Photo = {
         id: `photo-${Date.now()}`,
         url: location.state.imageUrl,
+        originalUrl: location.state.originalUrl || location.state.imageUrl,
         isVideo: location.state.isVideo || false,
         activity: location.state.activity,
         frame: location.state.frame || 'shaky',

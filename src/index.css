@@ -632,4 +632,26 @@
     transform: scale(0.96);
     filter: brightness(0.95) blur(1px);
   }
+
+  /* Particle/Dust Animation */
+  @keyframes particle-float {
+    0% {
+      transform: translateY(0) translateX(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.6;
+    }
+    90% {
+      opacity: 0.4;
+    }
+    100% {
+      transform: translateY(-100vh) translateX(20px);
+      opacity: 0;
+    }
+  }
+
+  .animate-particle-float {
+    animation: particle-float linear infinite;
+  }
 }
