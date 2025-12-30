@@ -120,7 +120,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
         />
         {/* Photo card */}
         <div 
-          className="relative w-full h-full rounded-[16px] overflow-hidden bg-white"
+          className="relative w-full h-full rounded-[16px] overflow-hidden bg-black"
           style={{
             boxShadow: '0 8px 32px rgba(0,0,0,0.25)'
           }}
@@ -132,7 +132,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
               loop
               muted
               playsInline
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
               style={{
                 transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
               }}
@@ -141,7 +141,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
             <img 
               src={imageUrl}
               alt="Activity"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
               style={{
                 transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
               }}

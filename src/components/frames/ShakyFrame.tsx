@@ -16,8 +16,8 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
   const metricLabel = label1 || 'Metric';
   const durationLabel = label2 || 'Duration';
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative">
-      {/* Background image or video filling the frame */}
+    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative bg-black">
+      {/* Background image or video filling the frame - object-contain to avoid stretching */}
       {isVideo ? (
         <video 
           src={imageUrl}
@@ -25,7 +25,7 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain"
           style={{
             transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
           }}
@@ -34,7 +34,7 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
         <img 
           src={imageUrl}
           alt="Activity"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain"
           style={{
             transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
           }}

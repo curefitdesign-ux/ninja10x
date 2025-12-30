@@ -12,7 +12,7 @@ interface VogueFrameProps {
 
 const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imagePosition, imageScale }: VogueFrameProps) => {
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden bg-white shadow-2xl relative">
+    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden bg-black shadow-2xl relative">
       {/* Background image or video filling the frame */}
       {isVideo ? (
         <video 
@@ -21,7 +21,7 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain"
           style={{
             transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
           }}
@@ -30,7 +30,7 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
         <img 
           src={imageUrl}
           alt="Activity"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain"
           style={{
             transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
           }}
