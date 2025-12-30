@@ -60,7 +60,7 @@ const JournalFrame = ({
       
       {/* Photo area filling the frame - tilted 10deg, 90% size */}
       <div 
-        className="absolute top-10 left-4 right-4 bottom-[140px] rounded-xl overflow-hidden bg-gray-100"
+        className="absolute top-10 left-4 right-4 bottom-[140px] rounded-xl overflow-hidden bg-black"
         style={{
           transform: 'rotate(10deg) scale(0.8)',
         }}
@@ -72,7 +72,7 @@ const JournalFrame = ({
             loop
             muted
             playsInline
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
             style={{
               transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
             }}
@@ -81,7 +81,7 @@ const JournalFrame = ({
           <img 
             src={imageUrl}
             alt="Activity"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
             style={{
               transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
             }}

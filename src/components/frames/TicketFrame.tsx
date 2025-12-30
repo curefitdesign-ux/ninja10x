@@ -20,7 +20,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
   const durationLabel = label2 || 'Duration';
   
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] overflow-hidden relative rounded-3xl">
+    <div className="w-[90%] mx-auto aspect-[9/16] overflow-hidden relative rounded-3xl bg-black">
       {/* Layer 1: Background Image or Video (full-bleed) */}
       {isVideo ? (
         <video 
@@ -29,7 +29,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-cover z-0"
+          className="absolute inset-0 w-full h-full object-contain z-0"
           style={{
             transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
             transformOrigin: 'center center'
@@ -37,15 +37,18 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
         />
       ) : (
         <div 
-          className="absolute inset-0 z-0"
-          style={{
-            backgroundImage: `url("${imageUrl}")`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-            transformOrigin: 'center center'
-          }}
-        />
+          className="absolute inset-0 z-0 flex items-center justify-center bg-black"
+        >
+          <img 
+            src={imageUrl}
+            alt="Activity"
+            className="max-w-full max-h-full object-contain"
+            style={{
+              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+              transformOrigin: 'center center'
+            }}
+          />
+        </div>
       )}
       
       {/* Layer 2: Ticket Frame Asset (with transparent window) - reduced size */}

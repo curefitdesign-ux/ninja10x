@@ -1,9 +1,9 @@
 import { User, Plus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import cardBackground from '@/assets/card-background.png';
 import filmstripBg from '@/assets/frames/filmstrip-bg.png';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
+import ShareSheet from './ShareSheet';
 
 interface Photo {
   id: string;
@@ -32,11 +32,11 @@ const WidgetLayout3 = ({
   photos, 
   onAddPhoto,
 }: WidgetLayout3Props) => {
-  const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
   const [tappedElement, setTappedElement] = useState<string | null>(null);
   const prevPhotosLength = useRef(photos.length);
   const [newPhotoIndex, setNewPhotoIndex] = useState<number | null>(null);
+  const [sharePhoto, setSharePhoto] = useState<Photo | null>(null);
   
   // Get the latest photo for center display
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
@@ -65,18 +65,14 @@ const WidgetLayout3 = ({
   const handlePhotoTap = (photo: Photo) => {
     triggerHaptic('medium');
     handleTap(`photo-${photo.id}`);
+    // Open share sheet instead of navigating to camera
     setTimeout(() => {
-      navigate('/preview', { 
-        state: { 
-          imageUrl: photo.url, 
-          activity: photo.activity,
-          frame: photo.frame,
-          duration: photo.duration,
-          pr: photo.pr,
-          isReview: true
-        } 
-      });
+      setSharePhoto(photo);
     }, 200);
+  };
+
+  const closeShareSheet = () => {
+    setSharePhoto(null);
   };
 
   return (
@@ -122,7 +118,7 @@ const WidgetLayout3 = ({
               {latestPhoto.isVideo || isVideoUrl(latestPhoto.url) ? (
                 <video
                   src={latestPhoto.url}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain bg-black"
                   muted
                   playsInline
                   loop
@@ -132,7 +128,7 @@ const WidgetLayout3 = ({
                 <img
                   src={latestPhoto.url}
                   alt=""
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain bg-black"
                 />
               )}
             </div>
@@ -243,6 +239,15 @@ const WidgetLayout3 = ({
           <span className="text-white font-semibold text-sm">Add Photo</span>
         </button>
       </div>
+
+      {/* Share Sheet */}
+      {sharePhoto && (
+        <ShareSheet
+          imageUrl={sharePhoto.url}
+          isVideo={sharePhoto.isVideo}
+          onClose={closeShareSheet}
+        />
+      )}
     </div>
   );
 };
