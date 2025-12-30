@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import cardBackground from '@/assets/card-background.png';
 import filmstripBg from '@/assets/frames/filmstrip-bg.png';
+import journeyVideo from '@/assets/journey-video.mp4';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ShakyFrame from '@/components/frames/ShakyFrame';
 import JournalFrame from '@/components/frames/JournalFrame';
@@ -30,9 +31,7 @@ const isVideoUrl = (url: string) => {
 
 const renderInFrame = (photo: Photo, containerWidth: number = 180) => {
   const frame: FrameType = photo.frame || 'shaky';
-  // Frame components are designed for 360px width (90% of ~400px container)
-  // Calculate scale to fit into our container while maintaining exact proportions
-  const baseWidth = 360; // Base width the frames are designed for
+  const baseWidth = 360;
   const scale = containerWidth / baseWidth;
   
   const frameProps = {
@@ -76,7 +75,6 @@ const renderInFrame = (photo: Photo, containerWidth: number = 180) => {
           transform: `scale(${scale})`, 
           transformOrigin: 'top left', 
           width: `${baseWidth}px`,
-          // Account for the 90% width of frame content
           marginLeft: `${(baseWidth * 0.05) * scale}px`
         }}
       >
@@ -99,13 +97,12 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
   const prevPhotosLength = useRef(photos.length);
   const [newPhotoIndex, setNewPhotoIndex] = useState<number | null>(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isVideoMinimized, setIsVideoMinimized] = useState(false);
-  const [isCreatingVideo, setIsCreatingVideo] = useState(false);
+  const [isVideoClosing, setIsVideoClosing] = useState(false);
+  const [filmStripOffset, setFilmStripOffset] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
   
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
   const hasThreePhotos = photos.length >= 3;
-  const week1Photos = photos.slice(0, 3);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 100);
@@ -120,15 +117,18 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
     prevPhotosLength.current = photos.length;
   }, [photos.length]);
 
-  // Auto-advance slideshow when video is playing
+  // Animate film strip when video is playing
   useEffect(() => {
-    if (isVideoPlaying && !isVideoMinimized && week1Photos.length > 0) {
+    if (isVideoPlaying && !isVideoClosing) {
       const interval = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % week1Photos.length);
-      }, 2000);
+        setFilmStripOffset(prev => {
+          const newOffset = prev + 0.5;
+          return newOffset > 100 ? 0 : newOffset;
+        });
+      }, 50);
       return () => clearInterval(interval);
     }
-  }, [isVideoPlaying, isVideoMinimized, week1Photos.length]);
+  }, [isVideoPlaying, isVideoClosing]);
 
   const handleTap = (id: string) => {
     triggerHaptic('light');
@@ -157,87 +157,75 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
 
   const handlePlayVideo = () => {
     triggerHaptic('medium');
-    setIsCreatingVideo(true);
-    setCurrentSlide(0);
-    
-    // Simulate video creation loading
-    setTimeout(() => {
-      setIsCreatingVideo(false);
-      setIsVideoPlaying(true);
-      setIsVideoMinimized(false);
-    }, 1500);
+    setIsVideoPlaying(true);
+    setIsVideoClosing(false);
+    setFilmStripOffset(0);
   };
 
-  const handleMinimizeVideo = () => {
+  const handleCloseVideo = () => {
     triggerHaptic('light');
-    setIsVideoMinimized(true);
-    setIsVideoPlaying(false);
-  };
-
-  const handleExpandFromFilmStrip = () => {
-    if (isVideoMinimized && hasThreePhotos) {
-      triggerHaptic('medium');
-      setIsVideoMinimized(false);
-      setIsVideoPlaying(true);
-    }
+    setIsVideoClosing(true);
+    // Reverse animation - wait for it to complete
+    setTimeout(() => {
+      setIsVideoPlaying(false);
+      setIsVideoClosing(false);
+      setFilmStripOffset(0);
+    }, 600);
   };
 
   return (
     <div className="px-5 pt-4">
       {/* Full Screen Video Player Overlay */}
-      {isVideoPlaying && !isVideoMinimized && (
+      {isVideoPlaying && (
         <div 
-          className="fixed inset-0 z-50 bg-black/95 flex flex-col animate-fade-in"
-          style={{ padding: '30px' }}
+          className={`fixed inset-0 z-50 bg-black flex flex-col ${isVideoClosing ? 'animate-video-close' : 'animate-video-open'}`}
         >
           {/* Close Button */}
           <button
-            onClick={handleMinimizeVideo}
-            className="absolute top-10 right-8 z-60 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
+            onClick={handleCloseVideo}
+            className={`absolute top-10 right-6 z-60 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-all duration-300 ${isVideoClosing ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}`}
+            style={{ transitionDelay: isVideoClosing ? '0ms' : '400ms' }}
           >
-            <X className="w-5 h-5 text-white" />
+            <X className="w-6 h-6 text-white" />
           </button>
 
-          {/* Video Content Area - 9:16 ratio */}
-          <div className="flex-1 flex items-center justify-center">
+          {/* Video Content Area */}
+          <div className="flex-1 flex items-center justify-center px-4">
             <div 
-              className="relative overflow-hidden rounded-2xl"
+              className={`relative overflow-hidden rounded-3xl ${isVideoClosing ? 'animate-video-shrink' : 'animate-video-expand'}`}
               style={{ 
                 aspectRatio: '9/16',
-                maxHeight: 'calc(100vh - 180px)',
+                maxHeight: 'calc(100vh - 160px)',
                 width: 'auto',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.5)'
+                boxShadow: '0 25px 80px rgba(0,0,0,0.6)'
               }}
             >
-              {/* Slideshow of photos */}
-              {week1Photos.map((photo, index) => (
-                <div
-                  key={photo.id}
-                  className={`absolute inset-0 transition-opacity duration-700 ${
-                    currentSlide === index ? 'opacity-100' : 'opacity-0'
-                  }`}
-                >
-                  {renderInFrame(photo, 180)}
-                </div>
-              ))}
+              <video
+                ref={videoRef}
+                src={journeyVideo}
+                className="w-full h-full object-cover"
+                autoPlay
+                loop
+                playsInline
+                muted={false}
+              />
               
-              {/* Progress indicators */}
-              <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
-                {week1Photos.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`h-1 rounded-full transition-all duration-300 ${
-                      currentSlide === index ? 'w-6 bg-white' : 'w-2 bg-white/40'
-                    }`}
-                  />
-                ))}
+              {/* Video progress bar */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+                <div 
+                  className="h-full bg-gradient-to-r from-green-400 to-green-500 transition-all duration-100"
+                  style={{ width: `${filmStripOffset}%` }}
+                />
               </div>
             </div>
           </div>
 
-          {/* Film Strip at Bottom with Loader */}
-          <div className="mt-4">
-            <div className="relative w-full">
+          {/* Animated Film Strip at Bottom */}
+          <div className={`pb-8 pt-4 ${isVideoClosing ? 'animate-filmstrip-reverse' : 'animate-filmstrip-forward'}`}>
+            <div 
+              className="relative w-full overflow-hidden"
+              style={{ transform: `translateX(-${filmStripOffset * 0.3}px)` }}
+            >
               <img src={filmstripBg} alt="" className="w-full h-auto" style={{ display: 'block' }} />
               <div 
                 className="absolute inset-0 flex items-center justify-center gap-[10px]"
@@ -248,16 +236,16 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
                     {[0, 1, 2].map((boxIndex) => {
                       const index = groupIndex * 3 + boxIndex;
                       const photo = photos[index];
-                      const isCurrentSlide = index === currentSlide && groupIndex === 0;
                       return (
                         <div 
                           key={index}
-                          className={`overflow-hidden ${isCurrentSlide ? 'ring-2 ring-white animate-pulse' : ''}`}
+                          className="overflow-hidden"
                           style={{ 
                             background: '#1a1a1a',
                             borderRadius: '2px',
                             width: '16px',
                             aspectRatio: '9/16',
+                            boxShadow: photo ? '0 0 8px rgba(34, 197, 94, 0.4)' : 'none'
                           }}
                         >
                           {photo ? (
@@ -268,7 +256,6 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
                               style={{ borderRadius: '2px' }}
                             />
                           ) : (
-                            /* Loader animation for empty slots */
                             <div 
                               className="w-full h-full"
                               style={{
@@ -286,14 +273,6 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
               </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Video Creating Overlay */}
-      {isCreatingVideo && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center animate-fade-in">
-          <div className="w-16 h-16 rounded-full border-4 border-white/20 border-t-white animate-spin mb-4" />
-          <p className="text-white font-medium">Creating your journey...</p>
         </div>
       )}
 
@@ -318,7 +297,7 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
           CONQUER WILL POWER
         </h2>
       
-        {/* Center Photo Card - Normal display without play overlay */}
+        {/* Center Photo Card */}
         <div 
           className={`relative z-10 mb-6 flex justify-center ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} 
           style={{ minHeight: latestPhoto ? '220px' : '160px', animationDelay: '0.3s' }}
@@ -339,7 +318,6 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
               </div>
             </div>
           ) : (
-            /* Empty State - Selfie Upload Card */
             <div 
               className={`relative cursor-pointer tap-bounce group ${tappedElement === 'empty' ? 'animate-liquid-tap' : ''}`}
               onClick={() => { handleTap('empty'); onAddPhoto(); }}
@@ -363,17 +341,17 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
       
         {/* Film Strip Section with Floating Play Button */}
         <div className={`relative z-10 -mt-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
-          {/* Floating Play Button - Top Left Corner */}
+          {/* Floating Play Button - Moved Up with Animation */}
           {hasThreePhotos && (
             <button
               onClick={handlePlayVideo}
-              className="absolute -top-8 left-2 z-20 w-10 h-10 rounded-full flex items-center justify-center tap-bounce"
+              className="absolute -top-14 left-2 z-20 w-12 h-12 rounded-full flex items-center justify-center tap-bounce animate-play-button-float"
               style={{
                 background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                boxShadow: '0 4px 15px rgba(34, 197, 94, 0.5), 0 0 20px rgba(34, 197, 94, 0.3)'
+                boxShadow: '0 6px 20px rgba(34, 197, 94, 0.5), 0 0 30px rgba(34, 197, 94, 0.3)'
               }}
             >
-              <Play className="w-5 h-5 text-white ml-0.5" fill="white" />
+              <Play className="w-6 h-6 text-white ml-0.5" fill="white" />
             </button>
           )}
           
