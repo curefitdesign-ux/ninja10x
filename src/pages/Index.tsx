@@ -182,6 +182,11 @@ const Index = () => {
     setSimulatedDate(null);
   };
 
+  const clearAllPhotos = () => {
+    setPhotos([]);
+    localStorage.removeItem('cn_photos');
+  };
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       {/* Aurora Background */}
@@ -234,6 +239,12 @@ const Index = () => {
               className="px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors"
             >
               Test: Next Day
+            </button>
+            <button
+              onClick={clearAllPhotos}
+              className="px-3 py-1.5 text-xs bg-red-500/20 backdrop-blur-sm rounded-full text-red-400 hover:bg-red-500/30 transition-colors"
+            >
+              Clear Photos
             </button>
             {simulatedDate && (
               <>
