@@ -98,7 +98,7 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
   const [newPhotoIndex, setNewPhotoIndex] = useState<number | null>(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isVideoClosing, setIsVideoClosing] = useState(false);
-  const [filmStripOffset, setFilmStripOffset] = useState(0);
+  const [videoProgress, setVideoProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
@@ -117,16 +117,18 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
     prevPhotosLength.current = photos.length;
   }, [photos.length]);
 
-  // Animate film strip when video is playing
+  // Handle video time update for progress
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      const progress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+      setVideoProgress(progress);
+    }
+  };
+
+  // Play video when overlay opens
   useEffect(() => {
-    if (isVideoPlaying && !isVideoClosing) {
-      const interval = setInterval(() => {
-        setFilmStripOffset(prev => {
-          const newOffset = prev + 0.5;
-          return newOffset > 100 ? 0 : newOffset;
-        });
-      }, 50);
-      return () => clearInterval(interval);
+    if (isVideoPlaying && !isVideoClosing && videoRef.current) {
+      videoRef.current.play().catch(console.error);
     }
   }, [isVideoPlaying, isVideoClosing]);
 
@@ -159,17 +161,20 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
     triggerHaptic('medium');
     setIsVideoPlaying(true);
     setIsVideoClosing(false);
-    setFilmStripOffset(0);
+    setVideoProgress(0);
   };
 
   const handleCloseVideo = () => {
     triggerHaptic('light');
     setIsVideoClosing(true);
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
     // Reverse animation - wait for it to complete
     setTimeout(() => {
       setIsVideoPlaying(false);
       setIsVideoClosing(false);
-      setFilmStripOffset(0);
+      setVideoProgress(0);
     }, 600);
   };
 
@@ -204,29 +209,28 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
                 ref={videoRef}
                 src={journeyVideo}
                 className="w-full h-full object-cover"
-                autoPlay
                 loop
                 playsInline
-                muted={false}
+                onTimeUpdate={handleTimeUpdate}
               />
-              
-              {/* Video progress bar */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-                <div 
-                  className="h-full bg-gradient-to-r from-green-400 to-green-500 transition-all duration-100"
-                  style={{ width: `${filmStripOffset}%` }}
-                />
-              </div>
             </div>
           </div>
 
-          {/* Animated Film Strip at Bottom */}
+          {/* Fixed Film Strip at Bottom with Green Progress Overlay */}
           <div className={`pb-8 pt-4 ${isVideoClosing ? 'animate-filmstrip-reverse' : 'animate-filmstrip-forward'}`}>
-            <div 
-              className="relative w-full overflow-hidden"
-              style={{ transform: `translateX(-${filmStripOffset * 0.3}px)` }}
-            >
+            <div className="relative w-full overflow-hidden">
               <img src={filmstripBg} alt="" className="w-full h-auto" style={{ display: 'block' }} />
+              
+              {/* Green progress overlay on film strip */}
+              <div 
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: 'rgba(34, 197, 94, 0.45)',
+                  clipPath: `inset(0 ${100 - videoProgress}% 0 0)`,
+                  transition: 'clip-path 0.1s linear'
+                }}
+              />
+              
               <div 
                 className="absolute inset-0 flex items-center justify-center gap-[10px]"
                 style={{ paddingLeft: '10px', paddingRight: '10px', paddingTop: '14px', paddingBottom: '6px' }}
@@ -244,8 +248,7 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
                             background: '#1a1a1a',
                             borderRadius: '2px',
                             width: '16px',
-                            aspectRatio: '9/16',
-                            boxShadow: photo ? '0 0 8px rgba(34, 197, 94, 0.4)' : 'none'
+                            aspectRatio: '9/16'
                           }}
                         >
                           {photo ? (
@@ -258,11 +261,7 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
                           ) : (
                             <div 
                               className="w-full h-full"
-                              style={{
-                                background: 'linear-gradient(90deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%)',
-                                backgroundSize: '200% 100%',
-                                animation: 'shimmer 1.5s infinite'
-                              }}
+                              style={{ background: '#1a1a1a' }}
                             />
                           )}
                         </div>
