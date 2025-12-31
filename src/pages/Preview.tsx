@@ -58,6 +58,7 @@ const Preview = () => {
   const [duration, setDuration] = useState('2hrs');
   const [pr, setPr] = useState('');
   const [currentFrame, setCurrentFrame] = useState<FrameType>('shaky');
+  const [originalFrame, setOriginalFrame] = useState<FrameType | null>(null);
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [imageScale, setImageScale] = useState(1.0);
 
@@ -120,6 +121,7 @@ const Preview = () => {
       setPhotoId(state.photoId || null);
       if (state.frame && FRAMES.includes(state.frame)) {
         setCurrentFrame(state.frame);
+        setOriginalFrame(state.frame);
       }
 
       // Trigger entrance animation after a brief delay
@@ -628,7 +630,7 @@ const Preview = () => {
           style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.3)' }}
         >
           <span className="text-black font-bold text-lg">
-            {isSaving ? 'Preparing...' : 'SAVE'}
+            {isSaving ? 'Preparing...' : (originalFrame && currentFrame !== originalFrame ? 'CHANGE' : 'SHARE')}
           </span>
         </button>
       </div>
