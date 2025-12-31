@@ -691,7 +691,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
               <button
                 onClick={() => setCaptureMode('video')}
                 className={`relative z-10 px-7 py-3 rounded-full text-sm font-bold tracking-wider transition-all duration-300 ${
-                  captureMode === 'video' ? 'text-red-400' : 'text-white/40'
+                  captureMode === 'video' ? 'text-white' : 'text-white/40'
                 }`}
               >
                 VIDEO
