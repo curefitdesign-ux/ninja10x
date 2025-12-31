@@ -135,6 +135,23 @@ const Index = () => {
     }
   }, [location.state?.savePhoto, location.state?.imageUrl, location.state?.activity, simulatedDate]);
 
+  // Handle retake from preview - open camera directly with the activity
+  useEffect(() => {
+    if (location.state?.openCameraWithActivity) {
+      const activityName = location.state.openCameraWithActivity;
+      setSelectedActivity(activityName);
+      setShowCamera(true);
+      setCameraEntering(true);
+      
+      // Clear the navigation state
+      navigate('/', { replace: true, state: null });
+      
+      setTimeout(() => {
+        setCameraEntering(false);
+      }, 500);
+    }
+  }, [location.state?.openCameraWithActivity]);
+
   // Calculate week and day based on photos
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
   const currentDay = (photos.length % 3) + 1;
