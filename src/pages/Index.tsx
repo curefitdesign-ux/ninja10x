@@ -159,27 +159,27 @@ const Index = () => {
     // Phase 1: Morph sheet into acknowledgement
     setSheetPhase('acknowledge');
     
-    // Phase 2: After showing acknowledgement, prepare exit
+    // Phase 2: After showing acknowledgement, prepare exit (increased time)
     setTimeout(() => {
       setSheetPhase('exit');
-    }, 1500);
+    }, 2200);
     
-    // Phase 3: Open camera with entrance animation
+    // Phase 3: Open camera with entrance animation (more delay)
     setTimeout(() => {
       setCameraEntering(true);
       setShowCamera(true);
-    }, 1800);
+    }, 2600);
     
     // Phase 4: Close sheet and reset
     setTimeout(() => {
       setShowActivitySheet(false);
       setSheetPhase('select');
       setAcknowledgedActivity(null);
-    }, 1900);
+    }, 2700);
     
     setTimeout(() => {
       setCameraEntering(false);
-    }, 2300);
+    }, 3100);
   }, []);
 
   const handleCapture = (mediaDataUrl: string, isVideo?: boolean) => {
@@ -388,10 +388,10 @@ const Index = () => {
                 }`}
               >
                 {acknowledgedActivity && (
-                  <>
+                  <div className="flex flex-col items-center">
                     {/* Activity Icon with animated entry */}
                     <div className="relative animate-acknowledge-icon">
-                      <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-white/20">
+                      <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white/20 shadow-2xl">
                         <img 
                           src={acknowledgedActivity.icon} 
                           alt={acknowledgedActivity.name}
@@ -399,40 +399,43 @@ const Index = () => {
                         />
                       </div>
                       
-                      {/* Animated Check Badge */}
+                      {/* Animated Check Badge - positioned better */}
                       <div 
-                        className="absolute -bottom-1 -right-1 w-10 h-10 rounded-full flex items-center justify-center animate-check-pop"
+                        className="absolute bottom-0 right-0 w-11 h-11 rounded-full flex items-center justify-center animate-check-pop shadow-lg"
                         style={{
                           background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
                           boxShadow: '0 4px 20px rgba(74, 222, 128, 0.5)',
+                          transform: 'translate(4px, 4px)',
                         }}
                       >
-                        <Check className="w-5 h-5 text-white" strokeWidth={3} />
+                        <Check className="w-6 h-6 text-white" strokeWidth={3} />
                       </div>
                     </div>
                     
                     {/* Text */}
-                    <div className="mt-6 text-center animate-acknowledge-text">
-                      <p className="text-white text-xl font-semibold tracking-tight">
+                    <div className="mt-8 text-center animate-acknowledge-text">
+                      <p className="text-white text-2xl font-bold tracking-tight">
                         {acknowledgedActivity.name} logged
                       </p>
-                      <p className="text-white/50 text-sm mt-1">
+                      <p className="text-white/50 text-base mt-2">
                         Opening camera...
                       </p>
                     </div>
                     
-                    {/* Ripple effect */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    {/* Ripple effect - positioned around icon */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" style={{ marginTop: '-24px' }}>
                       <div 
-                        className="w-40 h-40 rounded-full border-2 border-green-400/30 animate-ripple-out"
-                        style={{ animationDelay: '0.2s' }}
-                      />
-                      <div 
-                        className="absolute w-40 h-40 rounded-full border-2 border-green-400/20 animate-ripple-out"
-                        style={{ animationDelay: '0.5s' }}
+                        className="w-48 h-48 rounded-full border-2 border-green-400/30 animate-ripple-out"
+                        style={{ animationDelay: '0.3s' }}
                       />
                     </div>
-                  </>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" style={{ marginTop: '-24px' }}>
+                      <div 
+                        className="w-48 h-48 rounded-full border-2 border-green-400/20 animate-ripple-out"
+                        style={{ animationDelay: '0.6s' }}
+                      />
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
