@@ -527,16 +527,16 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
         />
       </div>
 
-      {/* Camera Frame - positioned below header, above bottom controls */}
-      <div className="absolute left-0 right-0 pointer-events-none" style={{ top: '100px', bottom: '160px' }}>
+      {/* Camera Frame - positioned below header, above bottom controls - reduced height */}
+      <div className="absolute left-0 right-0 pointer-events-none" style={{ top: '120px', bottom: '180px' }}>
         <div className="w-full h-full flex items-center justify-center">
           {/* Clear crop area with 9:16 aspect ratio and matching rounded corners */}
           <div 
             className="relative rounded-[32px] border-2 border-white/20 overflow-hidden"
             style={{ 
-              width: 'calc(100% - 48px)',
+              width: 'calc(100% - 56px)',
               height: '100%',
-              maxHeight: 'calc((100vw - 48px) * 16 / 9)',
+              maxHeight: 'calc((100vw - 56px) * 16 / 9)',
             }}
           >
             {/* Subtle vignette effect inside capture area */}
@@ -547,10 +547,10 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
               }}
             />
             {/* Corner brackets - matching the outer rounded corners */}
-            <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-white/80 rounded-tl-[32px]" />
-            <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-white/80 rounded-tr-[32px]" />
-            <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-white/80 rounded-bl-[32px]" />
-            <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-white/80 rounded-br-[32px]" />
+            <div className="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 border-white/80 rounded-tl-[32px]" />
+            <div className="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-white/80 rounded-tr-[32px]" />
+            <div className="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-white/80 rounded-bl-[32px]" />
+            <div className="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 border-white/80 rounded-br-[32px]" />
           </div>
         </div>
       </div>
@@ -669,21 +669,15 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
                 border: '1px solid rgba(255,255,255,0.15)',
               }}
             >
-              {/* Liquid sliding indicator */}
+              {/* Liquid sliding indicator - no red background for video */}
               <div 
                 className="absolute top-1.5 bottom-1.5 rounded-full transition-all duration-500 ease-out"
                 style={{
                   width: 'calc(50% - 6px)',
                   left: captureMode === 'photo' ? '6px' : 'calc(50%)',
-                  background: captureMode === 'photo' 
-                    ? 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%)'
-                    : 'linear-gradient(135deg, rgba(255,59,48,0.4) 0%, rgba(255,59,48,0.2) 100%)',
-                  boxShadow: captureMode === 'photo'
-                    ? 'inset 0 1px 1px rgba(255,255,255,0.2), 0 2px 8px rgba(0,0,0,0.2)'
-                    : 'inset 0 1px 1px rgba(255,59,48,0.3), 0 2px 8px rgba(255,59,48,0.2)',
-                  border: captureMode === 'photo' 
-                    ? '1px solid rgba(255,255,255,0.2)'
-                    : '1px solid rgba(255,59,48,0.3)',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%)',
+                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.2), 0 2px 8px rgba(0,0,0,0.2)',
+                  border: '1px solid rgba(255,255,255,0.2)',
                 }}
               />
               <button
@@ -706,14 +700,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
           </div>
         )}
 
-        {/* Timer indicator when selected */}
-        {selectedTimer > 0 && !hasCapturedMedia && !countdownActive && (
-          <div className="flex justify-center mb-3">
-            <div className="px-3 py-1.5 rounded-full backdrop-blur-md bg-yellow-500/20 border border-yellow-500/30">
-              <span className="text-yellow-400 text-xs font-medium">{selectedTimer}s timer active</span>
-            </div>
-          </div>
-        )}
+        {/* Timer indicator removed - timer is shown on the timer button itself */}
 
         <div className="flex items-center justify-between">
           {/* Left side controls */}
