@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check } from 'lucide-react';
+import { X, Check, RotateCcw } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import ShakyFrame from '@/components/frames/ShakyFrame';
@@ -11,6 +11,7 @@ import WheelPicker from '@/components/WheelPicker';
 import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ActivityBackgroundEffect from '@/components/ActivityBackgroundEffect';
+import ShareSheet from '@/components/ShareSheet';
 
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
@@ -67,6 +68,8 @@ const Preview = () => {
   const [tempValue, setTempValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [tappedElement, setTappedElement] = useState<string | null>(null);
+  const [showShareSheet, setShowShareSheet] = useState(false);
+  const [framedImageUrl, setFramedImageUrl] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
 
@@ -126,41 +129,11 @@ const Preview = () => {
     }
   }, [editingField]);
 
-  const handleSave = async () => {
-    if (!imageUrl || !activity) return;
+  // Capture framed image for sharing
+  const captureFramedImage = async (): Promise<string | null> => {
+    if (isVideo) return imageUrl; // For videos, use original
 
-    setIsSaving(true);
-    triggerHaptic('success');
-    handleTap('save-btn');
-
-    // Start exit animation
-    setIsExiting(true);
-
-    // For videos, keep the original video URL (video stays video)
-    // For images, capture the framed template as PNG (image stays image)
-    if (isVideo) {
-      setTimeout(() => {
-        navigate('/', {
-          state: {
-            savePhoto: true,
-            imageUrl, // original video
-            originalUrl: imageUrl,
-            isVideo: true,
-            activity,
-            frame: currentFrame,
-            duration,
-            pr,
-          },
-        });
-      }, 400);
-      setIsSaving(false);
-      return;
-    }
-
-    if (!captureRef.current) {
-      setIsSaving(false);
-      return;
-    }
+    if (!captureRef.current) return null;
 
     try {
       const canvas = await html2canvas(captureRef.current, {
@@ -169,46 +142,82 @@ const Preview = () => {
         useCORS: true,
         allowTaint: true,
       });
-
-      const framedImageUrl = canvas.toDataURL('image/png', 1.0);
-
-      setTimeout(() => {
-        navigate('/', {
-          state: {
-            savePhoto: true,
-            imageUrl: framedImageUrl, // framed/template image
-            originalUrl: imageUrl, // original media for filmstrip + edits
-            isVideo: false,
-            activity,
-            frame: currentFrame,
-            duration,
-            pr,
-          },
-        });
-      }, 400);
+      return canvas.toDataURL('image/png', 1.0);
     } catch (error) {
       console.error('Error capturing frame:', error);
-      setTimeout(() => {
-        navigate('/', {
-          state: {
-            savePhoto: true,
-            imageUrl,
-            originalUrl: imageUrl,
-            isVideo: false,
-            activity,
-            frame: currentFrame,
-            duration,
-            pr,
-          },
-        });
-      }, 400);
-    } finally {
-      setIsSaving(false);
+      return null;
     }
   };
 
-  const handleBack = () => {
-    handleTap('back-btn');
+  // Open share sheet (capture template first)
+  const handleOpenShareSheet = async () => {
+    if (!imageUrl || !activity) return;
+
+    setIsSaving(true);
+    triggerHaptic('light');
+    handleTap('share-btn');
+
+    const capturedUrl = await captureFramedImage();
+    setFramedImageUrl(capturedUrl);
+    setShowShareSheet(true);
+    setIsSaving(false);
+  };
+
+  // Save with template (from share sheet or directly)
+  const handleSaveWithTemplate = async () => {
+    if (!imageUrl || !activity) return;
+
+    triggerHaptic('success');
+    setIsExiting(true);
+    setShowShareSheet(false);
+
+    const finalUrl = framedImageUrl || (await captureFramedImage());
+
+    setTimeout(() => {
+      navigate('/', {
+        state: {
+          savePhoto: true,
+          imageUrl: finalUrl || imageUrl, // framed/template image
+          originalUrl: imageUrl, // original media for filmstrip + edits
+          isVideo,
+          activity,
+          frame: currentFrame,
+          duration,
+          pr,
+        },
+      });
+    }, 400);
+  };
+
+  // Save without template (cross button)
+  const handleSaveWithoutTemplate = () => {
+    if (!imageUrl || !activity) return;
+
+    triggerHaptic('light');
+    handleTap('close-btn');
+    setIsExiting(true);
+
+    setTimeout(() => {
+      navigate('/', {
+        state: {
+          savePhoto: true,
+          imageUrl, // original image without template
+          originalUrl: imageUrl,
+          isVideo,
+          activity,
+          frame: undefined, // no frame
+          duration,
+          pr,
+        },
+      });
+    }, 400);
+  };
+
+  // Retake - go back to camera
+  const handleRetake = () => {
+    triggerHaptic('light');
+    handleTap('retake-btn');
+    // Navigate back - will need to go through activity selection again
     setTimeout(() => navigate('/'), 200);
   };
 
@@ -442,13 +451,18 @@ const Preview = () => {
         <div className="h-12" />
         <div className={`flex items-center justify-between mb-4 px-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`}>
           <button 
-            onClick={handleBack}
-            className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'back-btn' ? 'animate-liquid-tap' : ''}`}
+            onClick={handleSaveWithoutTemplate}
+            className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'close-btn' ? 'animate-liquid-tap' : ''}`}
           >
-            <ArrowLeft className="w-5 h-5 text-white" />
+            <X className="w-5 h-5 text-white" />
           </button>
           <h2 className="text-white/80 text-lg font-semibold">Select your frame</h2>
-          <div className="w-10" /> {/* Spacer for balance */}
+          <button 
+            onClick={handleRetake}
+            className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'retake-btn' ? 'animate-liquid-tap' : ''}`}
+          >
+            <RotateCcw className="w-5 h-5 text-white" />
+          </button>
         </div>
         
         {/* Frame carousel - horizontal scroll with liquid glass effect */}
@@ -546,19 +560,29 @@ const Preview = () => {
         </div>
       </div>
 
-      {/* Floating Save Button - Fixed at bottom */}
+      {/* Floating Share Template Button - Fixed at bottom */}
       <div className={`fixed bottom-0 left-0 right-0 z-30 px-5 pb-6 pt-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
         <button 
-          onClick={handleSave}
+          onClick={handleOpenShareSheet}
           disabled={isSaving}
-          className={`w-full bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce shadow-lg ${tappedElement === 'save-btn' ? 'animate-liquid-tap' : ''}`}
+          className={`w-full bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce shadow-lg ${tappedElement === 'share-btn' ? 'animate-liquid-tap' : ''}`}
           style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.3)' }}
         >
           <span className="text-black font-bold text-lg">
-            {isSaving ? 'Saving...' : 'Save Activity'}
+            {isSaving ? 'Preparing...' : 'Share template'}
           </span>
         </button>
       </div>
+
+      {/* Share Sheet */}
+      {showShareSheet && framedImageUrl && (
+        <ShareSheet
+          imageUrl={framedImageUrl}
+          isVideo={isVideo}
+          onClose={() => setShowShareSheet(false)}
+          onSaveWithTemplate={handleSaveWithTemplate}
+        />
+      )}
 
       {/* Bottom Sheet Keyboard Overlay */}
       {editingField && (

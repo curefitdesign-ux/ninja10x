@@ -1,10 +1,11 @@
-import { X, Download, Link, MessageCircle } from 'lucide-react';
+import { X, Download, Link, MessageCircle, Check } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 
 interface ShareSheetProps {
   imageUrl: string;
   isVideo?: boolean;
   onClose: () => void;
+  onSaveWithTemplate?: () => void;
 }
 
 // Social platform icons with brand colors
@@ -67,7 +68,7 @@ const socialApps = [
   },
 ];
 
-const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
+const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate }: ShareSheetProps) => {
   
   const handleShare = async (app: typeof socialApps[0]) => {
     triggerHaptic('medium');
@@ -204,7 +205,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
           </div>
           
           {/* Action Buttons */}
-          <div className="px-6 pb-8 pt-2 flex gap-3">
+          <div className="px-6 pb-4 pt-2 flex gap-3">
             <button
               onClick={handleCopyLink}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-white/10 tap-bounce"
@@ -220,6 +221,19 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
               <span className="text-white/80 font-medium text-sm">Save Image</span>
             </button>
           </div>
+          
+          {/* Save with Template Button */}
+          {onSaveWithTemplate && (
+            <div className="px-6 pb-8">
+              <button
+                onClick={onSaveWithTemplate}
+                className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-white tap-bounce"
+              >
+                <Check className="w-5 h-5 text-black" />
+                <span className="text-black font-bold text-base">Save template</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </>
