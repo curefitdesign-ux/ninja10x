@@ -13,6 +13,8 @@ interface CameraUIProps {
 
 type TimerOption = 0 | 5 | 10 | 15;
 
+type CaptureMode = 'photo' | 'video';
+
 const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playbackVideoRef = useRef<HTMLVideoElement>(null);
@@ -27,7 +29,6 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const [recordingSeconds, setRecordingSeconds] = useState(3);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedVideo, setCapturedVideo] = useState<string | null>(null);
-  const [showHoldTip, setShowHoldTip] = useState(true);
   const [showCropper, setShowCropper] = useState(false);
   const [showVideoTrimmer, setShowVideoTrimmer] = useState(false);
   const [videoToTrim, setVideoToTrim] = useState<string | null>(null);
@@ -37,6 +38,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const [flashEnabled, setFlashEnabled] = useState(false);
   const [countdownActive, setCountdownActive] = useState(false);
   const [countdownValue, setCountdownValue] = useState(0);
+  const [captureMode, setCaptureMode] = useState<CaptureMode>('photo');
   const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -44,14 +46,6 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const isLongPressRef = useRef(false);
 
   const timerOptions: TimerOption[] = [0, 5, 10, 15];
-
-  // Hide the "Hold for video" tip after 5 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowHoldTip(false);
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, []);
   const startCamera = useCallback(async () => {
     try {
       if (stream) {
@@ -296,30 +290,23 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const handleShutterPress = () => {
     if (capturedImage || capturedVideo || countdownActive) return;
     
-    isLongPressRef.current = false;
-    
-    // Start timer to detect long press
-    pressTimerRef.current = setTimeout(() => {
-      isLongPressRef.current = true;
-      startCountdown(() => startRecording());
-    }, 300);
+    if (captureMode === 'video') {
+      // Video mode - start recording on press
+      if (!isRecording) {
+        startCountdown(() => startRecording());
+      }
+    } else {
+      // Photo mode - take photo immediately
+      startCountdown(() => takePhoto());
+    }
   };
 
   const handleShutterRelease = () => {
     if (capturedImage || capturedVideo) return;
-    
-    // Clear the long press timer
-    if (pressTimerRef.current) {
-      clearTimeout(pressTimerRef.current);
-      pressTimerRef.current = null;
-    }
-    
     if (countdownActive) return;
     
-    if (isRecording) {
+    if (captureMode === 'video' && isRecording) {
       stopRecording();
-    } else if (!isLongPressRef.current) {
-      startCountdown(() => takePhoto());
     }
   };
 
@@ -552,32 +539,65 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         </div>
       )}
 
-      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 p-6 pt-12 flex justify-between items-start z-10">
-        <div>
-          <h2 className="text-2xl font-bold text-white">{activity}</h2>
-          <p className="text-white/80 text-sm">Week {week} • Day {day}</p>
+      {/* Header - Activity Log Info */}
+      <div className="absolute top-0 left-0 right-0 pt-12 px-4 z-10">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full backdrop-blur-md bg-black/20"
+          >
+            <X className="w-5 h-5 text-white" />
+          </button>
+          
+          {/* Activity Log Badge - Center */}
+          <div className="flex-1 flex justify-center">
+            <div className="px-4 py-2 rounded-full backdrop-blur-xl bg-white/10 border border-white/20">
+              <p className="text-white text-sm font-medium">
+                <span className="text-white/60">Week {week}</span>
+                <span className="mx-2 text-white/40">•</span>
+                <span className="text-white">{activity}</span>
+                <span className="mx-2 text-white/40">•</span>
+                <span className="text-white/60">Day {day}</span>
+              </p>
+            </div>
+          </div>
+          
+          <div className="w-9" /> {/* Spacer for balance */}
         </div>
-        <button
-          onClick={onClose}
-          className="p-2 rounded-full"
-        >
-          <X className="w-6 h-6 text-white" />
-        </button>
       </div>
 
       {/* Bottom Controls */}
       <div className="absolute bottom-0 left-0 right-0 pb-12 px-6 z-10">
-        {/* Hold for video tip */}
-        <div 
-          className={`flex justify-center mb-4 transition-all duration-500 ${
-            showHoldTip && !hasCapturedMedia && !countdownActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
-          }`}
-        >
-          <div className="px-4 py-2 rounded-full backdrop-blur-md bg-white/20 border border-white/10">
-            <span className="text-white/90 text-sm font-medium">Hold for video</span>
+        {/* Apple-style Photo/Video Mode Toggle */}
+        {!hasCapturedMedia && !countdownActive && (
+          <div className="flex justify-center mb-5">
+            <div className="relative flex items-center gap-1 p-1 rounded-full backdrop-blur-xl bg-black/30 border border-white/10">
+              {/* Sliding indicator */}
+              <div 
+                className="absolute top-1 bottom-1 w-[72px] rounded-full bg-white/20 transition-all duration-300 ease-out"
+                style={{
+                  left: captureMode === 'photo' ? '4px' : 'calc(50% + 2px)',
+                }}
+              />
+              <button
+                onClick={() => setCaptureMode('photo')}
+                className={`relative z-10 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
+                  captureMode === 'photo' ? 'text-yellow-400' : 'text-white/60'
+                }`}
+              >
+                PHOTO
+              </button>
+              <button
+                onClick={() => setCaptureMode('video')}
+                className={`relative z-10 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
+                  captureMode === 'video' ? 'text-red-400' : 'text-white/60'
+                }`}
+              >
+                VIDEO
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Timer indicator when selected */}
         {selectedTimer > 0 && !hasCapturedMedia && !countdownActive && (
@@ -655,7 +675,6 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
               onMouseDown={handleShutterPress}
               onMouseUp={handleShutterRelease}
               onMouseLeave={() => {
-                if (pressTimerRef.current) clearTimeout(pressTimerRef.current);
                 if (isRecording) stopRecording();
               }}
               onTouchStart={handleShutterPress}
@@ -668,7 +687,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
                   cy="40"
                   r="36"
                   fill="none"
-                  stroke="rgba(255,255,255,0.3)"
+                  stroke={captureMode === 'video' ? 'rgba(255,59,48,0.4)' : 'rgba(255,255,255,0.3)'}
                   strokeWidth="4"
                 />
                 {isRecording && (
@@ -685,11 +704,16 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
                   />
                 )}
               </svg>
-              <div className={`w-16 h-16 rounded-full transition-all duration-150 flex items-center justify-center ${
-                isRecording ? 'bg-red-500 scale-75' : 'bg-white/90'
+              {/* Shutter button inner - changes based on mode */}
+              <div className={`transition-all duration-300 flex items-center justify-center ${
+                isRecording 
+                  ? 'w-8 h-8 rounded-md bg-red-500' 
+                  : captureMode === 'video'
+                    ? 'w-16 h-16 rounded-full bg-red-500'
+                    : 'w-16 h-16 rounded-full bg-white/90'
               }`}>
                 {isRecording && (
-                  <span className="text-white font-bold text-xl">{recordingSeconds}</span>
+                  <span className="text-white font-bold text-sm">{recordingSeconds}</span>
                 )}
               </div>
             </button>
