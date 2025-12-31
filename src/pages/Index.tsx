@@ -115,21 +115,38 @@ const Index = () => {
       const today = getCurrentDate();
       const incomingUrl = location.state.imageUrl;
       const incomingOriginalUrl = location.state.originalUrl || incomingUrl;
+      const isReview = location.state.isReview;
+      const photoId = location.state.photoId;
 
-      const newPhoto: Photo = {
-        id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        url: incomingUrl,
-        originalUrl: incomingOriginalUrl,
-        isVideo: location.state.isVideo || false,
-        activity: location.state.activity,
-        frame: location.state.frame || 'shaky',
-        duration: location.state.duration,
-        pr: location.state.pr,
-        uploadDate: today,
-      };
-
-      // Always add new photo
-      setPhotos((prev) => [...prev, newPhoto]);
+      if (isReview && photoId) {
+        // Update existing photo (reviewing/editing)
+        setPhotos((prev) => prev.map(photo => 
+          photo.id === photoId 
+            ? {
+                ...photo,
+                url: incomingUrl,
+                originalUrl: incomingOriginalUrl,
+                frame: location.state.frame || photo.frame,
+                duration: location.state.duration || photo.duration,
+                pr: location.state.pr || photo.pr,
+              }
+            : photo
+        ));
+      } else {
+        // Add new photo (from camera/add photo flow)
+        const newPhoto: Photo = {
+          id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          url: incomingUrl,
+          originalUrl: incomingOriginalUrl,
+          isVideo: location.state.isVideo || false,
+          activity: location.state.activity,
+          frame: location.state.frame || 'shaky',
+          duration: location.state.duration,
+          pr: location.state.pr,
+          uploadDate: today,
+        };
+        setPhotos((prev) => [...prev, newPhoto]);
+      }
 
       // Clear the navigation state immediately to prevent re-adding
       navigate('/', { replace: true, state: null });

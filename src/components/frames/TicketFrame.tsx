@@ -41,22 +41,18 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
             loop
             muted
             playsInline
-            className="absolute w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover"
             style={{
-              left: '50%',
-              top: '50%',
-              transform: `translate(-50%, -50%) translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
             }}
           />
         ) : (
           <img 
             src={imageUrl}
             alt="Activity"
-            className="absolute w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover"
             style={{
-              left: '50%',
-              top: '50%',
-              transform: `translate(-50%, -50%) translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
             }}
           />
         )}
