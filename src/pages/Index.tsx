@@ -67,10 +67,8 @@ const Index = () => {
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
-  const [showActivityToast, setShowActivityToast] = useState(false);
-  const [toastActivity, setToastActivity] = useState<string | null>(null);
-  const [toastPhase, setToastPhase] = useState<'enter' | 'hold' | 'expand'>('enter');
-  const [sheetExiting, setSheetExiting] = useState(false);
+  const [sheetPhase, setSheetPhase] = useState<'select' | 'acknowledge' | 'exit'>('select');
+  const [acknowledgedActivity, setAcknowledgedActivity] = useState<{ name: string; icon: string } | null>(null);
   const [cameraEntering, setCameraEntering] = useState(false);
   const [simulatedDate, setSimulatedDate] = useState<string | null>(null);
   const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout3');
@@ -152,44 +150,36 @@ const Index = () => {
   };
 
   const handleActivitySelect = useCallback((activity: string) => {
+    const activityData = activities.find(a => a.name === activity);
+    if (!activityData) return;
+    
     setSelectedActivity(activity);
-    setToastActivity(activity);
+    setAcknowledgedActivity(activityData);
     
-    // Phase 1: Sheet exit animation
-    setSheetExiting(true);
+    // Phase 1: Morph sheet into acknowledgement
+    setSheetPhase('acknowledge');
     
-    // Phase 2: Show toast rising from bottom (where sheet was)
+    // Phase 2: After showing acknowledgement, prepare exit
     setTimeout(() => {
-      setShowActivitySheet(false);
-      setSheetExiting(false);
-      setToastPhase('enter');
-      setShowActivityToast(true);
-    }, 250);
+      setSheetPhase('exit');
+    }, 1500);
     
-    // Phase 3: Toast holds briefly
-    setTimeout(() => {
-      setToastPhase('hold');
-    }, 700);
-    
-    // Phase 4: Toast expands into camera
-    setTimeout(() => {
-      setToastPhase('expand');
-    }, 1200);
-    
-    // Phase 5: Open camera and hide toast
+    // Phase 3: Open camera with entrance animation
     setTimeout(() => {
       setCameraEntering(true);
       setShowCamera(true);
-    }, 1450);
+    }, 1800);
     
+    // Phase 4: Close sheet and reset
     setTimeout(() => {
-      setShowActivityToast(false);
-      setToastPhase('enter');
-    }, 1550);
+      setShowActivitySheet(false);
+      setSheetPhase('select');
+      setAcknowledgedActivity(null);
+    }, 1900);
     
     setTimeout(() => {
       setCameraEntering(false);
-    }, 1900);
+    }, 2300);
   }, []);
 
   const handleCapture = (mediaDataUrl: string, isVideo?: boolean) => {
@@ -340,117 +330,114 @@ const Index = () => {
       {showActivitySheet && (
         <>
           <div 
-            className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 ${sheetExiting ? 'opacity-0' : 'opacity-100'}`}
-            onClick={handleOverlayClick}
+            className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-500 ${
+              sheetPhase === 'exit' ? 'opacity-0' : 'opacity-100'
+            }`}
+            onClick={sheetPhase === 'select' ? handleOverlayClick : undefined}
           />
           <div 
-            className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ease-out ${
-              sheetExiting 
-                ? 'translate-y-full opacity-0 scale-95' 
+            className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
+              sheetPhase === 'exit' 
+                ? 'translate-y-full opacity-0' 
                 : 'animate-slide-up'
             }`} 
-            style={{ height: '90vh' }}
+            style={{ 
+              height: sheetPhase === 'acknowledge' ? '50vh' : '90vh',
+              transition: 'height 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s ease-out, opacity 0.5s ease-out',
+            }}
           >
-            <div className="bg-black rounded-t-3xl p-6 pb-10 border-t border-white/10 h-full">
-              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
-              <h3 className="text-xl font-bold italic text-white text-center mb-8">Choose your activity</h3>
-              <div className="grid grid-cols-3 gap-4 px-2">
-                {activities.map((activity) => (
-                  <button
-                    key={activity.name}
-                    onClick={() => handleActivitySelect(activity.name)}
-                    className="flex flex-col items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors"
-                  >
-                    <div className="w-20 h-20 rounded-full overflow-hidden">
-                      <img 
-                        src={activity.icon} 
-                        alt={activity.name}
-                        className="w-full h-full object-cover"
+            <div className="bg-black rounded-t-3xl border-t border-white/10 h-full overflow-hidden">
+              {/* Select Phase - Activity Grid */}
+              <div 
+                className={`absolute inset-0 p-6 pb-10 transition-all duration-500 ${
+                  sheetPhase === 'select' 
+                    ? 'opacity-100 translate-y-0' 
+                    : 'opacity-0 -translate-y-8 pointer-events-none'
+                }`}
+              >
+                <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
+                <h3 className="text-xl font-bold italic text-white text-center mb-8">Choose your activity</h3>
+                <div className="grid grid-cols-3 gap-4 px-2">
+                  {activities.map((activity) => (
+                    <button
+                      key={activity.name}
+                      onClick={() => handleActivitySelect(activity.name)}
+                      className="flex flex-col items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors"
+                    >
+                      <div className="w-20 h-20 rounded-full overflow-hidden">
+                        <img 
+                          src={activity.icon} 
+                          alt={activity.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <span className="text-sm font-semibold text-white">{activity.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Acknowledge Phase - Icon centered with tick */}
+              <div 
+                className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 ${
+                  sheetPhase === 'acknowledge' 
+                    ? 'opacity-100 scale-100' 
+                    : sheetPhase === 'exit'
+                    ? 'opacity-0 scale-110'
+                    : 'opacity-0 scale-90 pointer-events-none'
+                }`}
+              >
+                {acknowledgedActivity && (
+                  <>
+                    {/* Activity Icon with animated entry */}
+                    <div className="relative animate-acknowledge-icon">
+                      <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-white/20">
+                        <img 
+                          src={acknowledgedActivity.icon} 
+                          alt={acknowledgedActivity.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      
+                      {/* Animated Check Badge */}
+                      <div 
+                        className="absolute -bottom-1 -right-1 w-10 h-10 rounded-full flex items-center justify-center animate-check-pop"
+                        style={{
+                          background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
+                          boxShadow: '0 4px 20px rgba(74, 222, 128, 0.5)',
+                        }}
+                      >
+                        <Check className="w-5 h-5 text-white" strokeWidth={3} />
+                      </div>
+                    </div>
+                    
+                    {/* Text */}
+                    <div className="mt-6 text-center animate-acknowledge-text">
+                      <p className="text-white text-xl font-semibold tracking-tight">
+                        {acknowledgedActivity.name} logged
+                      </p>
+                      <p className="text-white/50 text-sm mt-1">
+                        Opening camera...
+                      </p>
+                    </div>
+                    
+                    {/* Ripple effect */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div 
+                        className="w-40 h-40 rounded-full border-2 border-green-400/30 animate-ripple-out"
+                        style={{ animationDelay: '0.2s' }}
+                      />
+                      <div 
+                        className="absolute w-40 h-40 rounded-full border-2 border-green-400/20 animate-ripple-out"
+                        style={{ animationDelay: '0.5s' }}
                       />
                     </div>
-                    <span className="text-sm font-semibold text-white">{activity.name}</span>
-                  </button>
-                ))}
+                  </>
+                )}
               </div>
             </div>
           </div>
         </>
-      )}
-
-      {/* Activity Logged Toast - Contextual Transition */}
-      {showActivityToast && toastActivity && (
-        <div 
-          className={`fixed inset-0 z-[60] flex items-end justify-center pointer-events-none pb-32 transition-all duration-500 ease-out ${
-            toastPhase === 'enter' ? 'items-end pb-32' : 
-            toastPhase === 'hold' ? 'items-center pb-0' : 
-            'items-center pb-0'
-          }`}
-        >
-          <div 
-            className={`relative backdrop-blur-2xl transition-all ease-out ${
-              toastPhase === 'enter' 
-                ? 'px-8 py-5 rounded-3xl animate-toast-rise' 
-                : toastPhase === 'hold'
-                ? 'px-8 py-5 rounded-3xl animate-toast-float'
-                : 'px-12 py-8 rounded-[2rem] animate-toast-expand'
-            }`}
-            style={{
-              background: toastPhase === 'expand' 
-                ? 'radial-gradient(ellipse at center, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%)'
-                : 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
-              boxShadow: toastPhase === 'expand'
-                ? '0 0 120px rgba(74,222,128,0.3), 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
-                : '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2), 0 0 80px rgba(74,222,128,0.15)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              transform: toastPhase === 'expand' ? 'scale(1.15)' : 'scale(1)',
-            }}
-          >
-            {/* Glow effect that intensifies on expand */}
-            <div 
-              className={`absolute inset-0 rounded-3xl transition-opacity duration-500 ${
-                toastPhase === 'expand' ? 'opacity-70' : 'opacity-40'
-              }`}
-              style={{
-                background: 'radial-gradient(ellipse at center, rgba(74,222,128,0.25) 0%, transparent 70%)',
-              }}
-            />
-            
-            {/* Content */}
-            <div className={`relative flex flex-col items-center gap-3 transition-all duration-300 ${
-              toastPhase === 'expand' ? 'opacity-0 scale-110' : 'opacity-100 scale-100'
-            }`}>
-              {/* Check icon */}
-              <div 
-                className="w-12 h-12 rounded-full flex items-center justify-center"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(74,222,128,0.3) 0%, rgba(74,222,128,0.1) 100%)',
-                  boxShadow: '0 0 20px rgba(74,222,128,0.3)',
-                }}
-              >
-                <Check className="w-6 h-6 text-green-400" strokeWidth={3} />
-              </div>
-              
-              {/* Text */}
-              <div className="text-center">
-                <p className="text-white/90 font-semibold text-lg tracking-tight">
-                  {toastActivity} logged
-                </p>
-                <p className="text-white/50 text-sm mt-0.5">
-                  Now make it memorable
-                </p>
-              </div>
-            </div>
-            
-            {/* Camera icon appears on expand */}
-            <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${
-              toastPhase === 'expand' ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
-            }`}>
-              <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
-                <div className="w-8 h-8 rounded-full border-4 border-white/60" />
-              </div>
-            </div>
-          </div>
-        </div>
       )}
 
       {/* Camera UI */}
