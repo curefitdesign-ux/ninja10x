@@ -415,11 +415,15 @@ const Index = () => {
                     {/* Text */}
                     <div className="mt-8 text-center animate-acknowledge-text">
                       <p className="text-white text-2xl font-bold tracking-tight">
-                        {acknowledgedActivity.name} logged
+                        {acknowledgedActivity.name} activity logged
                       </p>
-                      <p className="text-white/50 text-base mt-2">
-                        Opening camera...
+                      <p className="text-white/70 text-base mt-3">
+                        Capture your moment
                       </p>
+                      <div className="flex items-center justify-center gap-2 mt-2 text-white/50 text-sm">
+                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                        <span>Camera opening...</span>
+                      </div>
                     </div>
                     
                     {/* Ripple effect - positioned around icon */}

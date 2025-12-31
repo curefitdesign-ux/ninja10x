@@ -366,7 +366,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     if (capturedImage || capturedVideo || countdownActive) return;
     
     if (captureMode === 'video') {
-      // Video mode - start recording on press
+      // Video mode - tap to start 3 second auto-recording
       if (!isRecording) {
         startCountdown(() => startRecording());
       }
@@ -377,11 +377,25 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   };
 
   const handleShutterRelease = () => {
-    if (capturedImage || capturedVideo) return;
-    if (countdownActive) return;
+    // Don't stop on release anymore - let it run full 3 seconds for video
+    // Only allow manual stop if user taps again while recording
+  };
+
+  const handleShutterClick = () => {
+    if (capturedImage || capturedVideo || countdownActive) return;
     
-    if (captureMode === 'video' && isRecording) {
-      stopRecording();
+    if (captureMode === 'video') {
+      // Video mode - tap toggles recording
+      if (isRecording) {
+        // Second tap stops recording early
+        stopRecording();
+      } else {
+        // First tap starts 3 second recording
+        startCountdown(() => startRecording());
+      }
+    } else {
+      // Photo mode - take photo
+      startCountdown(() => takePhoto());
     }
   };
 
@@ -746,13 +760,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
             </button>
           ) : (
             <button
-              onMouseDown={handleShutterPress}
-              onMouseUp={handleShutterRelease}
-              onMouseLeave={() => {
-                if (isRecording) stopRecording();
-              }}
-              onTouchStart={handleShutterPress}
-              onTouchEnd={handleShutterRelease}
+              onClick={handleShutterClick}
               className="relative w-20 h-20 rounded-full flex items-center justify-center"
             >
               <svg className="absolute w-20 h-20" viewBox="0 0 80 80">
