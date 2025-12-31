@@ -70,6 +70,8 @@ const Preview = () => {
   const [tappedElement, setTappedElement] = useState<string | null>(null);
   const [showShareSheet, setShowShareSheet] = useState(false);
   const [framedImageUrl, setFramedImageUrl] = useState<string | null>(null);
+  const [isReview, setIsReview] = useState(false);
+  const [photoId, setPhotoId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
 
@@ -101,6 +103,7 @@ const Preview = () => {
       duration?: string;
       pr?: string;
       isReview?: boolean;
+      photoId?: string;
     } | null;
 
     const mediaUrl = state?.originalUrl || state?.imageUrl;
@@ -111,6 +114,8 @@ const Preview = () => {
       setActivity(state.activity);
       setDuration(state.duration || '2hrs');
       setPr(state.pr || '');
+      setIsReview(state.isReview || false);
+      setPhotoId(state.photoId || null);
       if (state.frame && FRAMES.includes(state.frame)) {
         setCurrentFrame(state.frame);
       }
@@ -184,6 +189,8 @@ const Preview = () => {
           frame: currentFrame,
           duration,
           pr,
+          isReview,
+          photoId,
         },
       });
     }, 400);
@@ -208,6 +215,8 @@ const Preview = () => {
           frame: undefined, // no frame
           duration,
           pr,
+          isReview,
+          photoId,
         },
       });
     }, 400);

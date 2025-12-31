@@ -102,7 +102,7 @@ const WidgetLayout2 = ({
   const handlePhotoTap = (photo: Photo) => {
     const mediaUrl = photo.originalUrl || photo.url;
 
-    // Navigate to preview in edit mode
+    // Navigate to preview in review mode (editing existing photo)
     navigate('/preview', { 
       state: { 
         imageUrl: mediaUrl,
@@ -112,7 +112,8 @@ const WidgetLayout2 = ({
         frame: photo.frame,
         duration: photo.duration,
         pr: photo.pr,
-        isReview: false // Allow editing
+        isReview: true, // Mark as reviewing existing photo
+        photoId: photo.id, // Pass photo ID for updating
       } 
     });
   };

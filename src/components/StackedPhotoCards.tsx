@@ -105,7 +105,8 @@ const StackedPhotoCards = ({ photos, onCardClick, currentDate }: StackedPhotoCar
         frame: photo.frame,
         duration: photo.duration,
         pr: photo.pr,
-        isReview: false,
+        isReview: true, // Mark as reviewing existing photo
+        photoId: photo.id, // Pass photo ID for updating
       },
     });
   };

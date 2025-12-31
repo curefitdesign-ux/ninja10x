@@ -152,7 +152,8 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
           frame: photo.frame,
           duration: photo.duration,
           pr: photo.pr,
-          isReview: false,
+          isReview: true, // Mark as reviewing existing photo
+          photoId: photo.id, // Pass the photo ID for updating
         },
       });
     }, 200);
