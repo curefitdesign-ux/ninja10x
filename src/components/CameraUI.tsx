@@ -636,14 +636,6 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
           <p className="text-white/80 text-sm">Week {week} • Day {day}</p>
         </div>
         
-        {/* Recording indicator - simple red dot when recording */}
-        {isRecording && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/20 backdrop-blur-md border border-red-500/30">
-            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-red-400 text-xs font-semibold">REC</span>
-          </div>
-        )}
-        
         <button
           onClick={handleClose}
           className="p-2 rounded-full backdrop-blur-md bg-white/10"
