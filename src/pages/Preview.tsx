@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil, Share2 } from 'lucide-react';
+import { X, Check, Pencil, Share2, Smartphone } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import ShakyFrame from '@/components/frames/ShakyFrame';
@@ -70,6 +70,7 @@ const Preview = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [tappedElement, setTappedElement] = useState<string | null>(null);
   const [showShareSheet, setShowShareSheet] = useState(false);
+  const [showSyncPopup, setShowSyncPopup] = useState(false);
   const [framedImageUrl, setFramedImageUrl] = useState<string | null>(null);
   
   const [elementsHidden, setElementsHidden] = useState(false);
@@ -495,7 +496,7 @@ const Preview = () => {
       {/* Activity-specific background effect */}
       {activity && <ActivityBackgroundEffect activity={activity} />}
 
-      {/* Content */}
+      {/* Content - with extra bottom padding for floating buttons */}
       <div className="relative z-10 flex flex-col min-h-screen pb-32">
         {/* Offscreen capture target (unscaled) for image saves */}
         <div
@@ -633,7 +634,7 @@ const Preview = () => {
           {/* Health sync widget */}
           <div 
             className={`bg-white/10 backdrop-blur-xl rounded-2xl p-4 flex items-center gap-4 tap-bounce ${tappedElement === 'connect' ? 'animate-liquid-tap' : ''}`}
-            onClick={() => handleTap('connect')}
+            onClick={() => { handleTap('connect'); setShowSyncPopup(true); }}
           >
             <div className="flex-1">
               <h3 className="text-white font-semibold text-lg">Auto sync with a device</h3>
@@ -643,6 +644,9 @@ const Preview = () => {
               <span className="text-white font-semibold text-sm">CONNECT</span>
             </button>
           </div>
+
+          {/* Bottom spacer for floating buttons */}
+          <div className="h-24" />
         </div>
       </div>
 
@@ -736,6 +740,59 @@ const Preview = () => {
                 className="mx-auto px-8 py-2 flex items-center justify-center rounded-full bg-white"
               >
                 <span className="text-black font-semibold text-sm">Confirm</span>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Sync Popup */}
+      {showSyncPopup && (
+        <>
+          <div 
+            className="fixed inset-0 z-40 backdrop-blur-md bg-black/70"
+            onClick={() => setShowSyncPopup(false)}
+          />
+          <div className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom duration-300">
+            <div className="bg-white/10 backdrop-blur-2xl border-t border-white/20 rounded-t-3xl p-6 pb-10">
+              <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-6" />
+              
+              <div className="flex items-center gap-3 mb-4">
+                <Smartphone className="w-6 h-6 text-white" />
+                <h3 className="text-white text-xl font-semibold">Connect Health Data</h3>
+              </div>
+              
+              <p className="text-white/70 text-sm mb-6">
+                You can connect to Apple Health or Google Fit to automatically sync your fitness data.
+              </p>
+              
+              <div className="space-y-3">
+                <button className="w-full flex items-center gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-4 transition-colors">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center">
+                    <span className="text-white text-2xl">❤️</span>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <h4 className="text-white font-semibold">Apple Health</h4>
+                    <p className="text-white/60 text-sm">For iPhone users</p>
+                  </div>
+                </button>
+                
+                <button className="w-full flex items-center gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-4 transition-colors">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center">
+                    <span className="text-white text-2xl">💚</span>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <h4 className="text-white font-semibold">Google Fit</h4>
+                    <p className="text-white/60 text-sm">For Android users</p>
+                  </div>
+                </button>
+              </div>
+              
+              <button
+                onClick={() => setShowSyncPopup(false)}
+                className="mt-6 mx-auto px-8 py-2 flex items-center justify-center rounded-full bg-white/20"
+              >
+                <span className="text-white font-semibold text-sm">Maybe Later</span>
               </button>
             </div>
           </div>
