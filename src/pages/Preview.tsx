@@ -11,7 +11,7 @@ import WheelPicker from '@/components/WheelPicker';
 import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ActivityBackgroundEffect from '@/components/ActivityBackgroundEffect';
-import MiniSharePopup from '@/components/MiniSharePopup';
+
 
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
@@ -71,7 +71,7 @@ const Preview = () => {
   const [tappedElement, setTappedElement] = useState<string | null>(null);
   const [showShareSheet, setShowShareSheet] = useState(false);
   const [framedImageUrl, setFramedImageUrl] = useState<string | null>(null);
-  const [showMiniSharePopup, setShowMiniSharePopup] = useState(false);
+  
   const [elementsHidden, setElementsHidden] = useState(false);
   const [isReview, setIsReview] = useState(false);
   const [photoId, setPhotoId] = useState<string | null>(null);
@@ -158,7 +158,7 @@ const Preview = () => {
     }
   };
 
-  // Open save flow with animations
+  // Open native share sheet
   const handleSaveClick = async () => {
     if (!imageUrl || !activity) return;
 
@@ -172,17 +172,42 @@ const Preview = () => {
     // Start hiding animations
     setElementsHidden(true);
     
-    // After animation completes, show mini popup
-    setTimeout(() => {
-      setShowMiniSharePopup(true);
+    // After animation, trigger native share
+    setTimeout(async () => {
       setIsSaving(false);
+      
+      try {
+        const urlToShare = capturedUrl || imageUrl;
+        
+        // Convert data URL to blob for native share
+        const response = await fetch(urlToShare);
+        const blob = await response.blob();
+        const file = new File([blob], isVideo ? 'cult-ninja.mp4' : 'cult-ninja.png', { 
+          type: isVideo ? 'video/mp4' : 'image/png' 
+        });
+
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'Cult Ninja',
+            text: `My ${activity} moment 💪`,
+          });
+          // After successful share, save and go back
+          handleSaveWithTemplate();
+        } else {
+          // Fallback: download the file
+          const link = document.createElement('a');
+          link.href = urlToShare;
+          link.download = isVideo ? 'cult-ninja.mp4' : 'cult-ninja.png';
+          link.click();
+          handleSaveWithTemplate();
+        }
+      } catch (error) {
+        // User cancelled share or error occurred
+        console.log('Share cancelled or failed:', error);
+        setElementsHidden(false);
+      }
     }, 500);
-  };
-  
-  // Close mini share popup
-  const handleCloseMiniPopup = () => {
-    setShowMiniSharePopup(false);
-    setElementsHidden(false);
   };
 
   // Save with template (from share sheet or directly)
@@ -638,15 +663,6 @@ const Preview = () => {
         </button>
       </div>
 
-      {/* iOS Liquid Glass Mini Share Popup */}
-      {showMiniSharePopup && (
-        <MiniSharePopup
-          imageUrl={framedImageUrl || imageUrl}
-          isVideo={isVideo}
-          onClose={handleCloseMiniPopup}
-          onDone={handleSaveWithTemplate}
-        />
-      )}
 
       {/* Bottom Sheet Keyboard Overlay */}
       {editingField && (
