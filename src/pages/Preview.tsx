@@ -11,7 +11,7 @@ import WheelPicker from '@/components/WheelPicker';
 import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ActivityBackgroundEffect from '@/components/ActivityBackgroundEffect';
-import ShareSheet from '@/components/ShareSheet';
+import MiniSharePopup from '@/components/MiniSharePopup';
 
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
@@ -70,6 +70,8 @@ const Preview = () => {
   const [tappedElement, setTappedElement] = useState<string | null>(null);
   const [showShareSheet, setShowShareSheet] = useState(false);
   const [framedImageUrl, setFramedImageUrl] = useState<string | null>(null);
+  const [showMiniSharePopup, setShowMiniSharePopup] = useState(false);
+  const [elementsHidden, setElementsHidden] = useState(false);
   const [isReview, setIsReview] = useState(false);
   const [photoId, setPhotoId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -154,8 +156,8 @@ const Preview = () => {
     }
   };
 
-  // Open share sheet (capture template first)
-  const handleOpenShareSheet = async () => {
+  // Open save flow with animations
+  const handleSaveClick = async () => {
     if (!imageUrl || !activity) return;
 
     setIsSaving(true);
@@ -164,8 +166,21 @@ const Preview = () => {
 
     const capturedUrl = await captureFramedImage();
     setFramedImageUrl(capturedUrl);
-    setShowShareSheet(true);
-    setIsSaving(false);
+    
+    // Start hiding animations
+    setElementsHidden(true);
+    
+    // After animation completes, show mini popup
+    setTimeout(() => {
+      setShowMiniSharePopup(true);
+      setIsSaving(false);
+    }, 500);
+  };
+  
+  // Close mini share popup
+  const handleCloseMiniPopup = () => {
+    setShowMiniSharePopup(false);
+    setElementsHidden(false);
   };
 
   // Save with template (from share sheet or directly)
@@ -463,9 +478,9 @@ const Preview = () => {
           {renderFrame()}
         </div>
 
-        {/* Header - hide when share sheet is open */}
+        {/* Header - hide when elements are hidden */}
         <div className="h-12" />
-        <div className={`flex items-center justify-between mb-4 px-5 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${showShareSheet ? 'opacity-0 -translate-y-4 pointer-events-none' : ''}`}>
+        <div className={`flex items-center justify-between mb-4 px-5 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 -translate-y-8 pointer-events-none' : ''}`}>
           <button 
             onClick={handleSaveWithoutTemplate}
             className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'close-btn' ? 'animate-liquid-tap' : ''}`}
@@ -482,9 +497,9 @@ const Preview = () => {
         </div>
         
         {/* Frame carousel - horizontal scroll with liquid glass effect */}
-        <div className={`flex-1 flex items-center overflow-hidden transition-all duration-500 ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''} ${showShareSheet ? 'justify-center' : ''}`}>
-          {showShareSheet ? (
-            /* When share sheet is open, show only the current frame centered */
+        <div className={`flex-1 flex items-center overflow-hidden transition-all duration-500 ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''}`}>
+          {elementsHidden ? (
+            /* When elements are hidden, show only the current frame centered */
             <div className="flex items-center justify-center w-full px-6 animate-scale-in">
               <div className="w-[70vw] max-w-[320px]">
                 {currentFrame === 'shaky' && <ShakyFrame {...frameProps} />}
@@ -510,6 +525,9 @@ const Preview = () => {
               {FRAMES.map((frame, index) => {
                 const { scale, opacity } = getFrameScale(index);
                 const isActiveFrame = frame === currentFrame;
+                const currentIndex = FRAMES.indexOf(currentFrame);
+                const isLeftOfCurrent = index < currentIndex;
+                const isRightOfCurrent = index > currentIndex;
                 
                 return (
                   <div 
@@ -518,11 +536,15 @@ const Preview = () => {
                       frameItemRefs.current[index] = el;
                     }}
                     data-frame={frame}
-                    className="flex-shrink-0 snap-center h-fit flex items-center justify-center swipe-smooth"
+                    className={`flex-shrink-0 snap-center h-fit flex items-center justify-center swipe-smooth transition-all duration-500 ${
+                      elementsHidden && isLeftOfCurrent ? 'opacity-0 -translate-x-full' : ''
+                    } ${
+                      elementsHidden && isRightOfCurrent ? 'opacity-0 translate-x-full' : ''
+                    }`}
                     style={{ 
                       width: 'calc(75vw)',
                       transform: `scale(${scale})`,
-                      opacity,
+                      opacity: elementsHidden && !isActiveFrame ? 0 : opacity,
                     }}
                   >
                     <div 
@@ -541,9 +563,9 @@ const Preview = () => {
           )}
         </div>
 
-        {/* Content section - hide when share sheet is open */}
+        {/* Content section - hide when elements are hidden */}
         <div 
-          className={`space-y-4 px-5 mt-4 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${showShareSheet ? 'opacity-0 translate-y-8 pointer-events-none h-0 overflow-hidden mt-0' : ''}`} 
+          className={`space-y-4 px-5 mt-4 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
           style={{ animationDelay: '0.3s' }}
         >
           {/* Editable data points - now tappable */}
@@ -593,30 +615,30 @@ const Preview = () => {
         </div>
       </div>
 
-      {/* Floating Share Template Button - Fixed at bottom, hide when share sheet is open */}
+      {/* Floating SAVE Button - Fixed at bottom, hide when elements are hidden */}
       <div 
-        className={`fixed bottom-0 left-0 right-0 z-30 px-5 pb-6 pt-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${showShareSheet ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
+        className={`fixed bottom-0 left-0 right-0 z-30 px-5 pb-6 pt-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
         style={{ animationDelay: '0.4s' }}
       >
         <button 
-          onClick={handleOpenShareSheet}
+          onClick={handleSaveClick}
           disabled={isSaving}
           className={`w-full bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce shadow-lg ${tappedElement === 'share-btn' ? 'animate-liquid-tap' : ''}`}
           style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.3)' }}
         >
           <span className="text-black font-bold text-lg">
-            {isSaving ? 'Preparing...' : 'Share template'}
+            {isSaving ? 'Preparing...' : 'SAVE'}
           </span>
         </button>
       </div>
 
-      {/* Share Sheet */}
-      {showShareSheet && framedImageUrl && (
-        <ShareSheet
-          imageUrl={framedImageUrl}
+      {/* iOS Liquid Glass Mini Share Popup */}
+      {showMiniSharePopup && (
+        <MiniSharePopup
+          imageUrl={framedImageUrl || imageUrl}
           isVideo={isVideo}
-          onClose={() => setShowShareSheet(false)}
-          onSaveWithTemplate={handleSaveWithTemplate}
+          onClose={handleCloseMiniPopup}
+          onDone={handleSaveWithTemplate}
         />
       )}
 
