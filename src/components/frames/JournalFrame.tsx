@@ -85,7 +85,7 @@ const JournalFrame = ({
               loop
               muted
               playsInline
-              className="absolute inset-0 w-full h-full object-contain"
+              className="absolute inset-0 w-full h-full object-cover"
               style={{
                 transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
               }}
@@ -94,7 +94,7 @@ const JournalFrame = ({
             <img 
               src={imageUrl}
               alt="Activity"
-              className="absolute inset-0 w-full h-full object-contain"
+              className="absolute inset-0 w-full h-full object-cover"
               style={{
                 transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
               }}
