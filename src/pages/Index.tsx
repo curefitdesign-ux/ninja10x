@@ -69,6 +69,9 @@ const Index = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [showActivityToast, setShowActivityToast] = useState(false);
   const [toastActivity, setToastActivity] = useState<string | null>(null);
+  const [toastPhase, setToastPhase] = useState<'enter' | 'hold' | 'expand'>('enter');
+  const [sheetExiting, setSheetExiting] = useState(false);
+  const [cameraEntering, setCameraEntering] = useState(false);
   const [simulatedDate, setSimulatedDate] = useState<string | null>(null);
   const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout3');
 
@@ -151,21 +154,42 @@ const Index = () => {
   const handleActivitySelect = useCallback((activity: string) => {
     setSelectedActivity(activity);
     setToastActivity(activity);
-    setShowActivitySheet(false);
     
-    // Show toast with liquid glass animation
+    // Phase 1: Sheet exit animation
+    setSheetExiting(true);
+    
+    // Phase 2: Show toast rising from bottom (where sheet was)
     setTimeout(() => {
+      setShowActivitySheet(false);
+      setSheetExiting(false);
+      setToastPhase('enter');
       setShowActivityToast(true);
-    }, 150);
+    }, 250);
     
-    // Auto-dismiss toast and open camera with smooth transition
+    // Phase 3: Toast holds briefly
+    setTimeout(() => {
+      setToastPhase('hold');
+    }, 700);
+    
+    // Phase 4: Toast expands into camera
+    setTimeout(() => {
+      setToastPhase('expand');
+    }, 1200);
+    
+    // Phase 5: Open camera and hide toast
+    setTimeout(() => {
+      setCameraEntering(true);
+      setShowCamera(true);
+    }, 1450);
+    
     setTimeout(() => {
       setShowActivityToast(false);
-    }, 1400);
+      setToastPhase('enter');
+    }, 1550);
     
     setTimeout(() => {
-      setShowCamera(true);
-    }, 1600);
+      setCameraEntering(false);
+    }, 1900);
   }, []);
 
   const handleCapture = (mediaDataUrl: string, isVideo?: boolean) => {
@@ -316,10 +340,17 @@ const Index = () => {
       {showActivitySheet && (
         <>
           <div 
-            className="fixed inset-0 bg-black/50 z-40"
+            className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 ${sheetExiting ? 'opacity-0' : 'opacity-100'}`}
             onClick={handleOverlayClick}
           />
-          <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up" style={{ height: '90vh' }}>
+          <div 
+            className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ease-out ${
+              sheetExiting 
+                ? 'translate-y-full opacity-0 scale-95' 
+                : 'animate-slide-up'
+            }`} 
+            style={{ height: '90vh' }}
+          >
             <div className="bg-black rounded-t-3xl p-6 pb-10 border-t border-white/10 h-full">
               <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
               <h3 className="text-xl font-bold italic text-white text-center mb-8">Choose your activity</h3>
@@ -346,30 +377,51 @@ const Index = () => {
         </>
       )}
 
-      {/* Activity Logged Toast - Liquid Glass */}
+      {/* Activity Logged Toast - Contextual Transition */}
       {showActivityToast && toastActivity && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none">
+        <div 
+          className={`fixed inset-0 z-[60] flex items-end justify-center pointer-events-none pb-32 transition-all duration-500 ease-out ${
+            toastPhase === 'enter' ? 'items-end pb-32' : 
+            toastPhase === 'hold' ? 'items-center pb-0' : 
+            'items-center pb-0'
+          }`}
+        >
           <div 
-            className="relative px-8 py-5 rounded-3xl backdrop-blur-2xl animate-liquid-enter"
+            className={`relative backdrop-blur-2xl transition-all ease-out ${
+              toastPhase === 'enter' 
+                ? 'px-8 py-5 rounded-3xl animate-toast-rise' 
+                : toastPhase === 'hold'
+                ? 'px-8 py-5 rounded-3xl animate-toast-float'
+                : 'px-12 py-8 rounded-[2rem] animate-toast-expand'
+            }`}
             style={{
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2), 0 0 80px rgba(74,222,128,0.15)',
+              background: toastPhase === 'expand' 
+                ? 'radial-gradient(ellipse at center, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%)'
+                : 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
+              boxShadow: toastPhase === 'expand'
+                ? '0 0 120px rgba(74,222,128,0.3), 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                : '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2), 0 0 80px rgba(74,222,128,0.15)',
               border: '1px solid rgba(255,255,255,0.15)',
+              transform: toastPhase === 'expand' ? 'scale(1.15)' : 'scale(1)',
             }}
           >
-            {/* Subtle glow effect */}
+            {/* Glow effect that intensifies on expand */}
             <div 
-              className="absolute inset-0 rounded-3xl opacity-40"
+              className={`absolute inset-0 rounded-3xl transition-opacity duration-500 ${
+                toastPhase === 'expand' ? 'opacity-70' : 'opacity-40'
+              }`}
               style={{
-                background: 'radial-gradient(ellipse at center, rgba(74,222,128,0.2) 0%, transparent 70%)',
+                background: 'radial-gradient(ellipse at center, rgba(74,222,128,0.25) 0%, transparent 70%)',
               }}
             />
             
             {/* Content */}
-            <div className="relative flex flex-col items-center gap-3">
-              {/* Check icon with pulse */}
+            <div className={`relative flex flex-col items-center gap-3 transition-all duration-300 ${
+              toastPhase === 'expand' ? 'opacity-0 scale-110' : 'opacity-100 scale-100'
+            }`}>
+              {/* Check icon */}
               <div 
-                className="w-12 h-12 rounded-full flex items-center justify-center animate-liquid-bounce"
+                className="w-12 h-12 rounded-full flex items-center justify-center"
                 style={{
                   background: 'linear-gradient(135deg, rgba(74,222,128,0.3) 0%, rgba(74,222,128,0.1) 100%)',
                   boxShadow: '0 0 20px rgba(74,222,128,0.3)',
@@ -388,19 +440,32 @@ const Index = () => {
                 </p>
               </div>
             </div>
+            
+            {/* Camera icon appears on expand */}
+            <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${
+              toastPhase === 'expand' ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+            }`}>
+              <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full border-4 border-white/60" />
+              </div>
+            </div>
           </div>
         </div>
       )}
 
       {/* Camera UI */}
       {showCamera && selectedActivity && (
-        <CameraUI
-          activity={selectedActivity}
-          week={currentWeek}
-          day={currentDay}
-          onCapture={handleCapture}
-          onClose={handleCameraClose}
-        />
+        <div className={`transition-all duration-500 ease-out ${
+          cameraEntering ? 'animate-camera-enter' : ''
+        }`}>
+          <CameraUI
+            activity={selectedActivity}
+            week={currentWeek}
+            day={currentDay}
+            onCapture={handleCapture}
+            onClose={handleCameraClose}
+          />
+        </div>
       )}
     </div>
   );
