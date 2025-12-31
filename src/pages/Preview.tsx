@@ -213,7 +213,7 @@ const Preview = () => {
     }, 400);
   };
 
-  // Retake - go back to camera with same activity
+  // Retake - go back to camera with same activity and capture mode
   const handleRetake = () => {
     triggerHaptic('light');
     handleTap('retake-btn');
@@ -222,6 +222,7 @@ const Preview = () => {
       navigate('/', {
         state: {
           openCameraWithActivity: activity,
+          captureMode: isVideo ? 'video' : 'photo',
         },
       });
     }, 200);

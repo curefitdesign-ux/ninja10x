@@ -72,6 +72,7 @@ const Index = () => {
   const [cameraEntering, setCameraEntering] = useState(false);
   const [simulatedDate, setSimulatedDate] = useState<string | null>(null);
   const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout3');
+  const [initialCaptureMode, setInitialCaptureMode] = useState<'photo' | 'video'>('photo');
 
   useEffect(() => {
     try {
@@ -135,11 +136,14 @@ const Index = () => {
     }
   }, [location.state?.savePhoto, location.state?.imageUrl, location.state?.activity, simulatedDate]);
 
-  // Handle retake from preview - open camera directly with the activity
+  // Handle retake from preview - open camera directly with the activity and capture mode
   useEffect(() => {
     if (location.state?.openCameraWithActivity) {
       const activityName = location.state.openCameraWithActivity;
+      const captureMode = location.state.captureMode || 'photo';
+      
       setSelectedActivity(activityName);
+      setInitialCaptureMode(captureMode);
       setShowCamera(true);
       setCameraEntering(true);
       
@@ -150,7 +154,7 @@ const Index = () => {
         setCameraEntering(false);
       }, 500);
     }
-  }, [location.state?.openCameraWithActivity]);
+  }, [location.state?.openCameraWithActivity, location.state?.captureMode]);
 
   // Calculate week and day based on photos
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
@@ -475,6 +479,7 @@ const Index = () => {
             day={currentDay}
             onCapture={handleCapture}
             onClose={handleCameraClose}
+            initialCaptureMode={initialCaptureMode}
           />
         </div>
       )}
