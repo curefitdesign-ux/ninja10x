@@ -118,42 +118,40 @@ const MiniSharePopup = ({ imageUrl, isVideo, onClose, onDone }: MiniSharePopupPr
   };
 
   return (
-    <div className="fixed bottom-6 left-4 right-4 z-50 animate-in slide-in-from-bottom-8 fade-in duration-400">
+    <div className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom duration-400">
       {/* iOS Liquid Glass Container */}
       <div 
-        className="relative rounded-[28px] overflow-hidden"
+        className="relative rounded-t-[28px] overflow-hidden"
         style={{
           background: 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.15) 100%)',
           backdropFilter: 'blur(40px) saturate(180%)',
           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(255,255,255,0.1)',
+          boxShadow: '0 -8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.3)',
           border: '1px solid rgba(255,255,255,0.2)',
+          borderBottom: 'none',
         }}
       >
         {/* Inner glow effect */}
         <div 
-          className="absolute inset-0 rounded-[28px] pointer-events-none"
+          className="absolute inset-0 rounded-t-[28px] pointer-events-none"
           style={{
             background: 'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.2) 0%, transparent 60%)',
           }}
         />
         
-        <div className="relative p-4">
-          {/* Header with Done button */}
-          <div className="flex items-center justify-between mb-4">
+        <div className="relative p-4 pb-6">
+          {/* Handle bar */}
+          <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-4" />
+          
+          {/* Header */}
+          <div className="flex items-center justify-center mb-4">
             <button 
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 tap-bounce"
+              className="absolute left-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 tap-bounce"
             >
               <X className="w-4 h-4 text-white/80" />
             </button>
             <span className="text-white/90 font-medium text-sm">Share</span>
-            <button 
-              onClick={onDone}
-              className="px-3 py-1.5 rounded-full bg-white/20 tap-bounce"
-            >
-              <span className="text-white font-semibold text-sm">Done</span>
-            </button>
           </div>
           
           {/* Social Apps Row */}
@@ -179,7 +177,7 @@ const MiniSharePopup = ({ imageUrl, isVideo, onClose, onDone }: MiniSharePopupPr
           </div>
           
           {/* Action Buttons Row */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 mb-4">
             <button
               onClick={handleCopyLink}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/10 tap-bounce transition-all"
@@ -207,6 +205,15 @@ const MiniSharePopup = ({ imageUrl, isVideo, onClose, onDone }: MiniSharePopupPr
               <span className="text-white/80 font-medium text-sm">Save</span>
             </button>
           </div>
+          
+          {/* Done CTA Button */}
+          <button 
+            onClick={onDone}
+            className="w-full bg-white py-4 rounded-2xl tap-bounce shadow-lg"
+            style={{ boxShadow: '0 4px 20px rgba(255,255,255,0.3)' }}
+          >
+            <span className="text-black font-bold text-lg">Done</span>
+          </button>
         </div>
       </div>
     </div>
