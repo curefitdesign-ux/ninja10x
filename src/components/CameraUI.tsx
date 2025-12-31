@@ -26,7 +26,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const [isRecording, setIsRecording] = useState(false);
   const [recordingProgress, setRecordingProgress] = useState(0);
-  const [recordingSeconds, setRecordingSeconds] = useState(3);
+  const [recordingElapsed, setRecordingElapsed] = useState(0); // in milliseconds
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedVideo, setCapturedVideo] = useState<string | null>(null);
   const [showCropper, setShowCropper] = useState(false);
@@ -202,6 +202,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     
     setIsRecording(true);
     recordingStartRef.current = Date.now();
+    setRecordingElapsed(0);
     recordedChunksRef.current = [];
     
     // Setup MediaRecorder
@@ -231,17 +232,17 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     
     mediaRecorder.start(100);
     
+    // Update timer every 10ms for smooth display
     recordingTimerRef.current = setInterval(() => {
       const elapsed = Date.now() - recordingStartRef.current;
       const progress = Math.min(elapsed / 3000, 1); // 3 sec max
-      const remaining = Math.ceil((3000 - elapsed) / 1000);
       setRecordingProgress(progress);
-      setRecordingSeconds(Math.max(remaining, 0));
+      setRecordingElapsed(elapsed);
       
       if (progress >= 1) {
         stopRecording();
       }
-    }, 100);
+    }, 10);
   };
 
   const stopRecording = () => {
@@ -253,7 +254,16 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     }
     setIsRecording(false);
     setRecordingProgress(0);
-    setRecordingSeconds(3);
+    setRecordingElapsed(0);
+  };
+
+  // Format elapsed time as MM:SS:ms
+  const formatRecordingTime = (ms: number) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    const centiseconds = Math.floor((ms % 1000) / 10);
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${centiseconds.toString().padStart(2, '0')}`;
   };
 
   const startCountdown = (callback: () => void) => {
@@ -539,31 +549,29 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         </div>
       )}
 
-      {/* Header - Activity Log Info */}
-      <div className="absolute top-0 left-0 right-0 pt-12 px-4 z-10">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full backdrop-blur-md bg-black/20"
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
-          
-          {/* Activity Log Badge - Center */}
-          <div className="flex-1 flex justify-center">
-            <div className="px-4 py-2 rounded-full backdrop-blur-xl bg-white/10 border border-white/20">
-              <p className="text-white text-sm font-medium">
-                <span className="text-white/60">Week {week}</span>
-                <span className="mx-2 text-white/40">•</span>
-                <span className="text-white">{activity}</span>
-                <span className="mx-2 text-white/40">•</span>
-                <span className="text-white/60">Day {day}</span>
-              </p>
-            </div>
-          </div>
-          
-          <div className="w-9" /> {/* Spacer for balance */}
+      {/* Header */}
+      <div className="absolute top-0 left-0 right-0 p-6 pt-12 flex justify-between items-start z-10">
+        <div>
+          <h2 className="text-2xl font-bold text-white">{activity}</h2>
+          <p className="text-white/80 text-sm">Week {week} • Day {day}</p>
         </div>
+        
+        {/* Recording Timer - shows when recording */}
+        {isRecording && (
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/20 backdrop-blur-md border border-red-500/30">
+            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            <span className="text-red-400 text-sm font-mono font-semibold tracking-wider">
+              {formatRecordingTime(recordingElapsed)}
+            </span>
+          </div>
+        )}
+        
+        <button
+          onClick={onClose}
+          className="p-2 rounded-full backdrop-blur-md bg-white/10"
+        >
+          <X className="w-6 h-6 text-white" />
+        </button>
       </div>
 
       {/* Bottom Controls */}
@@ -707,14 +715,11 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
               {/* Shutter button inner - changes based on mode */}
               <div className={`transition-all duration-300 flex items-center justify-center ${
                 isRecording 
-                  ? 'w-8 h-8 rounded-md bg-red-500' 
+                  ? 'w-7 h-7 rounded-sm bg-red-500' 
                   : captureMode === 'video'
                     ? 'w-16 h-16 rounded-full bg-red-500'
                     : 'w-16 h-16 rounded-full bg-white/90'
               }`}>
-                {isRecording && (
-                  <span className="text-white font-bold text-sm">{recordingSeconds}</span>
-                )}
               </div>
             </button>
           )}
