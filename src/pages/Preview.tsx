@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil, Share2, Smartphone } from 'lucide-react';
+import { X, Check, Pencil, Share2, Smartphone, Loader2 } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import ShakyFrame from '@/components/frames/ShakyFrame';
@@ -11,6 +11,7 @@ import WheelPicker from '@/components/WheelPicker';
 import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ActivityBackgroundEffect from '@/components/ActivityBackgroundEffect';
+import { healthService } from '@/services/health-service';
 
 
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
@@ -72,6 +73,8 @@ const Preview = () => {
   const [showShareSheet, setShowShareSheet] = useState(false);
   const [showSyncPopup, setShowSyncPopup] = useState(false);
   const [framedImageUrl, setFramedImageUrl] = useState<string | null>(null);
+  const [isConnectingHealth, setIsConnectingHealth] = useState(false);
+  const [healthConnected, setHealthConnected] = useState<string | null>(null);
   
   const [elementsHidden, setElementsHidden] = useState(false);
   const [isReview, setIsReview] = useState(false);
@@ -763,13 +766,40 @@ const Preview = () => {
               </div>
               
               <p className="text-white/70 text-sm mb-6">
-                You can connect to Apple Health or Google Fit to automatically sync your fitness data.
+                Connect to Apple Health or Google Fit to automatically sync your fitness data.
               </p>
               
+              {healthConnected && (
+                <div className="mb-4 p-3 bg-green-500/20 rounded-xl border border-green-500/30">
+                  <p className="text-green-400 text-sm font-medium">✓ Connected to {healthConnected}</p>
+                </div>
+              )}
+              
               <div className="space-y-3">
-                <button className="w-full flex items-center gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-4 transition-colors">
+                <button 
+                  onClick={async () => {
+                    setIsConnectingHealth(true);
+                    triggerHaptic('light');
+                    const result = await healthService.connect();
+                    setIsConnectingHealth(false);
+                    if (result.success) {
+                      setHealthConnected(result.platform);
+                      triggerHaptic('success');
+                    } else if (result.message) {
+                      // Show message in console for web users
+                      console.log(result.message);
+                      triggerHaptic('error');
+                    }
+                  }}
+                  disabled={isConnectingHealth}
+                  className="w-full flex items-center gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-4 transition-colors disabled:opacity-50"
+                >
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center">
-                    <span className="text-white text-2xl">❤️</span>
+                    {isConnectingHealth ? (
+                      <Loader2 className="w-6 h-6 text-white animate-spin" />
+                    ) : (
+                      <span className="text-white text-2xl">❤️</span>
+                    )}
                   </div>
                   <div className="flex-1 text-left">
                     <h4 className="text-white font-semibold">Apple Health</h4>
@@ -777,9 +807,29 @@ const Preview = () => {
                   </div>
                 </button>
                 
-                <button className="w-full flex items-center gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-4 transition-colors">
+                <button 
+                  onClick={async () => {
+                    setIsConnectingHealth(true);
+                    triggerHaptic('light');
+                    const result = await healthService.connect();
+                    setIsConnectingHealth(false);
+                    if (result.success) {
+                      setHealthConnected(result.platform);
+                      triggerHaptic('success');
+                    } else if (result.message) {
+                      console.log(result.message);
+                      triggerHaptic('error');
+                    }
+                  }}
+                  disabled={isConnectingHealth}
+                  className="w-full flex items-center gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-4 transition-colors disabled:opacity-50"
+                >
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center">
-                    <span className="text-white text-2xl">💚</span>
+                    {isConnectingHealth ? (
+                      <Loader2 className="w-6 h-6 text-white animate-spin" />
+                    ) : (
+                      <span className="text-white text-2xl">💚</span>
+                    )}
                   </div>
                   <div className="flex-1 text-left">
                     <h4 className="text-white font-semibold">Google Fit</h4>
