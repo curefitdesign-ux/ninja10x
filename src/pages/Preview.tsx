@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil } from 'lucide-react';
+import { X, Check, Pencil, Share2 } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import ShakyFrame from '@/components/frames/ShakyFrame';
@@ -506,9 +506,8 @@ const Preview = () => {
           {renderFrame()}
         </div>
 
-        {/* Header - hide when elements are hidden */}
-        <div className="h-12" />
-        <div className={`flex items-center justify-between mb-4 px-5 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 -translate-y-8 pointer-events-none' : ''}`}>
+        {/* Header - minimal, hide when elements are hidden */}
+        <div className={`flex items-center justify-between py-4 px-5 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 -translate-y-8 pointer-events-none' : ''}`}>
           <button 
             onClick={handleSaveWithoutTemplate}
             className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'close-btn' ? 'animate-liquid-tap' : ''}`}
@@ -524,8 +523,8 @@ const Preview = () => {
           </button>
         </div>
         
-        {/* Frame carousel - horizontal scroll with liquid glass effect */}
-        <div className={`flex-1 flex items-center overflow-hidden transition-all duration-500 ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''}`}>
+        {/* Frame carousel - horizontal scroll with smooth liquid transitions */}
+        <div className={`flex-1 flex items-center overflow-hidden transition-all duration-700 ease-out ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''}`}>
           {elementsHidden ? (
             /* When elements are hidden, show only the current frame centered */
             <div className="flex items-center justify-center w-full px-6 animate-scale-in">
@@ -538,7 +537,7 @@ const Preview = () => {
               </div>
             </div>
           ) : (
-            /* Normal carousel view */
+            /* Normal carousel view with smooth transitions */
             <div 
               ref={containerRef}
               onScroll={handleScroll}
@@ -547,15 +546,14 @@ const Preview = () => {
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
-                scrollBehavior: 'smooth',
               }}
             >
               {FRAMES.map((frame, index) => {
                 const { scale, opacity } = getFrameScale(index);
                 const isActiveFrame = frame === currentFrame;
-                const currentIndex = FRAMES.indexOf(currentFrame);
-                const isLeftOfCurrent = index < currentIndex;
-                const isRightOfCurrent = index > currentIndex;
+                const activeIndex = FRAMES.indexOf(currentFrame);
+                const isLeftOfCurrent = index < activeIndex;
+                const isRightOfCurrent = index > activeIndex;
                 
                 return (
                   <div 
@@ -564,7 +562,7 @@ const Preview = () => {
                       frameItemRefs.current[index] = el;
                     }}
                     data-frame={frame}
-                    className={`flex-shrink-0 snap-center h-fit flex items-center justify-center swipe-smooth transition-all duration-500 ${
+                    className={`flex-shrink-0 snap-center h-fit flex items-center justify-center ${
                       elementsHidden && isLeftOfCurrent ? 'opacity-0 -translate-x-full' : ''
                     } ${
                       elementsHidden && isRightOfCurrent ? 'opacity-0 translate-x-full' : ''
@@ -573,10 +571,15 @@ const Preview = () => {
                       width: 'calc(75vw)',
                       transform: `scale(${scale})`,
                       opacity: elementsHidden && !isActiveFrame ? 0 : opacity,
+                      transition: 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.35s ease-out',
+                      willChange: 'transform, opacity',
                     }}
                   >
                     <div 
-                      className={`w-full transition-all duration-300 ${isActiveFrame ? 'animate-liquid-morph' : ''}`}
+                      className="w-full"
+                      style={{
+                        transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                      }}
                     >
                       {frame === 'shaky' && <ShakyFrame {...frameProps} />}
                       {frame === 'journal' && <JournalFrame {...frameProps} />}
@@ -643,24 +646,32 @@ const Preview = () => {
         </div>
       </div>
 
-      {/* Floating SAVE Button - Fixed at bottom, hide when elements are hidden */}
+      {/* Floating CTA - Always visible with DONE and Share */}
       <div 
-        className={`fixed bottom-0 left-0 right-0 z-30 px-5 pb-6 pt-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
-        style={{ animationDelay: '0.4s' }}
+        className={`fixed bottom-0 left-0 right-0 z-30 px-5 pb-8 pt-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`} 
       >
-        <button 
-          onClick={handleSaveClick}
-          disabled={isSaving}
-          className={`w-full bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce shadow-lg ${tappedElement === 'share-btn' ? 'animate-liquid-tap' : ''}`}
-          style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.3)' }}
-        >
-          <span 
-            key={originalFrame && currentFrame !== originalFrame ? 'change' : 'share'}
-            className="text-black font-bold text-lg inline-block animate-[cta-pop_0.3s_ease-out]"
+        <div className="flex items-center gap-3">
+          {/* DONE Button */}
+          <button 
+            onClick={handleSaveWithTemplate}
+            disabled={isSaving}
+            className={`flex-1 bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce shadow-lg ${tappedElement === 'done-btn' ? 'animate-liquid-tap' : ''}`}
+            style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}
           >
-            {isSaving ? 'Preparing...' : (originalFrame && currentFrame !== originalFrame ? 'CHANGE' : 'SHARE')}
-          </span>
-        </button>
+            <span className="text-black font-bold text-lg">
+              {isSaving ? 'Saving...' : 'DONE'}
+            </span>
+          </button>
+          
+          {/* Share Icon Button */}
+          <button 
+            onClick={handleSaveClick}
+            disabled={isSaving}
+            className={`w-14 h-14 flex items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 tap-bounce ${tappedElement === 'share-btn' ? 'animate-liquid-tap' : ''}`}
+          >
+            <Share2 className="w-6 h-6 text-white" />
+          </button>
+        </div>
       </div>
 
 

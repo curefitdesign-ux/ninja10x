@@ -527,16 +527,16 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
         />
       </div>
 
-      {/* Camera Frame - positioned below header, above bottom controls - reduced height */}
-      <div className="absolute left-0 right-0 pointer-events-none" style={{ top: '120px', bottom: '180px' }}>
+      {/* Camera Frame - positioned higher and slightly smaller */}
+      <div className="absolute left-0 right-0 pointer-events-none" style={{ top: '100px', bottom: '200px' }}>
         <div className="w-full h-full flex items-center justify-center">
           {/* Clear crop area with 9:16 aspect ratio and matching rounded corners */}
           <div 
-            className="relative rounded-[32px] border-2 border-white/20 overflow-hidden"
+            className="relative rounded-[28px] border-2 border-white/20 overflow-hidden"
             style={{ 
-              width: 'calc(100% - 56px)',
+              width: 'calc(100% - 72px)',
               height: '100%',
-              maxHeight: 'calc((100vw - 56px) * 16 / 9)',
+              maxHeight: 'calc((100vw - 72px) * 16 / 9)',
             }}
           >
             {/* Subtle vignette effect inside capture area */}
@@ -547,10 +547,10 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
               }}
             />
             {/* Corner brackets - matching the outer rounded corners */}
-            <div className="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 border-white/80 rounded-tl-[32px]" />
-            <div className="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-white/80 rounded-tr-[32px]" />
-            <div className="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-white/80 rounded-bl-[32px]" />
-            <div className="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 border-white/80 rounded-br-[32px]" />
+            <div className="absolute top-0 left-0 w-8 h-8 border-t-3 border-l-3 border-white/80 rounded-tl-[28px]" />
+            <div className="absolute top-0 right-0 w-8 h-8 border-t-3 border-r-3 border-white/80 rounded-tr-[28px]" />
+            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-3 border-l-3 border-white/80 rounded-bl-[28px]" />
+            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-3 border-r-3 border-white/80 rounded-br-[28px]" />
           </div>
         </div>
       </div>
@@ -656,11 +656,11 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
 
       {/* Bottom Controls */}
       <div className="absolute bottom-0 left-0 right-0 pb-12 px-6 z-10">
-        {/* Photo/Video Mode Toggle - Liquid glass design */}
+        {/* Photo/Video Mode Toggle - Compact liquid glass design */}
         {!hasCapturedMedia && !countdownActive && (
-          <div className="flex justify-center mb-5">
+          <div className="flex justify-center mb-4">
             <div 
-              className="relative flex items-center rounded-full p-1.5 overflow-hidden"
+              className="relative flex items-center rounded-full p-1 overflow-hidden"
               style={{
                 background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
                 backdropFilter: 'blur(20px)',
@@ -669,12 +669,12 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
                 border: '1px solid rgba(255,255,255,0.15)',
               }}
             >
-              {/* Liquid sliding indicator - no red background for video */}
+              {/* Liquid sliding indicator */}
               <div 
-                className="absolute top-1.5 bottom-1.5 rounded-full transition-all duration-500 ease-out"
+                className="absolute top-1 bottom-1 rounded-full transition-all duration-500 ease-out"
                 style={{
-                  width: 'calc(50% - 6px)',
-                  left: captureMode === 'photo' ? '6px' : 'calc(50%)',
+                  width: 'calc(50% - 4px)',
+                  left: captureMode === 'photo' ? '4px' : 'calc(50%)',
                   background: 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%)',
                   boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.2), 0 2px 8px rgba(0,0,0,0.2)',
                   border: '1px solid rgba(255,255,255,0.2)',
@@ -682,7 +682,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
               />
               <button
                 onClick={() => setCaptureMode('photo')}
-                className={`relative z-10 px-7 py-3 rounded-full text-sm font-bold tracking-wider transition-all duration-300 ${
+                className={`relative z-10 px-5 py-2 rounded-full text-xs font-bold tracking-wider transition-all duration-300 ${
                   captureMode === 'photo' ? 'text-white' : 'text-white/40'
                 }`}
               >
@@ -690,7 +690,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
               </button>
               <button
                 onClick={() => setCaptureMode('video')}
-                className={`relative z-10 px-7 py-3 rounded-full text-sm font-bold tracking-wider transition-all duration-300 ${
+                className={`relative z-10 px-5 py-2 rounded-full text-xs font-bold tracking-wider transition-all duration-300 ${
                   captureMode === 'video' ? 'text-white' : 'text-white/40'
                 }`}
               >
