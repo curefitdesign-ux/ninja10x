@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Check, X, Play, Pause } from 'lucide-react';
+import { Check, X, Play, Pause, Loader2 } from 'lucide-react';
 
 interface VideoTrimmerProps {
   videoSrc: string;
@@ -17,6 +17,7 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
   const [isPlaying, setIsPlaying] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [thumbnails, setThumbnails] = useState<string[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
   const animationRef = useRef<number>();
 
   // Generate video thumbnails
@@ -63,7 +64,7 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
     };
   }, [videoSrc]);
 
-  // Video time update
+  // Video time update and auto-play when loaded
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -78,8 +79,23 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
       }
     };
 
+    const handleLoadedData = () => {
+      // Auto-play when video is loaded
+      video.currentTime = startTime;
+      video.play().then(() => {
+        setIsPlaying(true);
+      }).catch(err => {
+        console.log('Auto-play prevented:', err);
+      });
+    };
+
     video.addEventListener('timeupdate', handleTimeUpdate);
-    return () => video.removeEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('loadeddata', handleLoadedData);
+    
+    return () => {
+      video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('loadeddata', handleLoadedData);
+    };
   }, [startTime, maxDuration]);
 
   // Handle timeline drag
@@ -144,7 +160,9 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
   // Trim and confirm video
   const handleConfirm = async () => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || isProcessing) return;
+
+    setIsProcessing(true);
 
     // For now, we'll pass the full video with start time info
     // In production, you'd use MediaRecorder or server-side trimming
@@ -175,6 +193,7 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
+        setIsProcessing(false);
         onConfirm(url);
       };
       
@@ -197,6 +216,7 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
       drawFrame();
     } catch (error) {
       console.error('Error trimming video:', error);
+      setIsProcessing(false);
       // Fallback: just pass the original video URL with timing metadata
       onConfirm(videoSrc);
     }
@@ -351,13 +371,23 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
         {/* Confirm Button - more prominent with better visibility */}
         <button
           onClick={handleConfirm}
-          className="w-full py-4 rounded-2xl bg-white flex items-center justify-center gap-2 mt-5 active:scale-[0.98] transition-transform"
+          disabled={isProcessing}
+          className="w-full py-4 rounded-2xl bg-white flex items-center justify-center gap-2 mt-5 active:scale-[0.98] transition-transform disabled:opacity-80"
           style={{
             boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
           }}
         >
-          <Check className="w-5 h-5 text-black" />
-          <span className="text-black font-bold text-lg">Use this clip</span>
+          {isProcessing ? (
+            <>
+              <Loader2 className="w-5 h-5 text-black animate-spin" />
+              <span className="text-black font-bold text-lg">Processing...</span>
+            </>
+          ) : (
+            <>
+              <Check className="w-5 h-5 text-black" />
+              <span className="text-black font-bold text-lg">Use this clip</span>
+            </>
+          )}
         </button>
       </div>
     </div>
