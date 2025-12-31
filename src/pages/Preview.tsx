@@ -1,6 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil, Share2, Smartphone } from 'lucide-react';
-import { toast } from 'sonner';
+import { X, Check, Pencil, Share2 } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import ShakyFrame from '@/components/frames/ShakyFrame';
@@ -427,7 +426,7 @@ const Preview = () => {
   const currentIndex = FRAMES.indexOf(currentFrame);
 
   return (
-    <div className="fixed inset-0 w-full h-full overflow-hidden">
+    <div className="relative min-h-screen w-full overflow-hidden">
       {/* Blurred background image with dynamic color overlay */}
       <div 
         className="absolute inset-0 scale-150 transition-all duration-500 animate-bg-drift"
@@ -497,7 +496,7 @@ const Preview = () => {
       {activity && <ActivityBackgroundEffect activity={activity} />}
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col h-full overflow-y-auto pb-32">
+      <div className="relative z-10 flex flex-col min-h-screen pb-32">
         {/* Offscreen capture target (unscaled) for image saves */}
         <div
           ref={captureRef}
@@ -597,7 +596,7 @@ const Preview = () => {
 
         {/* Content section - hide when elements are hidden */}
         <div 
-          className={`space-y-4 px-5 mt-4 pb-32 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
+          className={`space-y-4 px-5 mt-4 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
           style={{ animationDelay: '0.3s' }}
         >
           {/* Editable data points - now tappable */}
@@ -633,15 +632,8 @@ const Preview = () => {
 
           {/* Health sync widget */}
           <div 
-            className={`bg-white/10 backdrop-blur-xl rounded-2xl p-4 flex items-center gap-4 tap-bounce cursor-pointer ${tappedElement === 'connect' ? 'animate-liquid-tap' : ''}`}
-            onClick={() => {
-              handleTap('connect');
-              toast('Connect to Health Data', {
-                description: 'You can connect to Apple Health and Google Fit to auto-sync your fitness data.',
-                icon: <Smartphone className="w-5 h-5" />,
-                duration: 4000,
-              });
-            }}
+            className={`bg-white/10 backdrop-blur-xl rounded-2xl p-4 flex items-center gap-4 tap-bounce ${tappedElement === 'connect' ? 'animate-liquid-tap' : ''}`}
+            onClick={() => handleTap('connect')}
           >
             <div className="flex-1">
               <h3 className="text-white font-semibold text-lg">Auto sync with a device</h3>

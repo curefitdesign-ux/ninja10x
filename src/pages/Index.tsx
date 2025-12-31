@@ -266,15 +266,15 @@ const Index = () => {
   };
 
   return (
-    <div className="fixed inset-0 w-full h-full overflow-hidden">
+    <div className="relative min-h-screen w-full overflow-hidden">
       {/* Aurora Background - hidden when instant camera */}
       {!instantCamera && <AuroraBackground />}
       
       {/* Content - hidden when instant camera */}
       {!instantCamera && (
-        <div className="relative z-10 flex flex-col h-full overflow-y-auto">
+        <div className="relative z-10 flex flex-col min-h-screen">
           {/* Status Bar Space */}
-          <div className="h-6" />
+          <div className="h-12" />
           
           {/* Top Controls Row */}
           <div className="flex justify-between items-start px-4">
