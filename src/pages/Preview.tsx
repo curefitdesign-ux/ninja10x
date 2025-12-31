@@ -447,9 +447,9 @@ const Preview = () => {
           {renderFrame()}
         </div>
 
-        {/* Header */}
+        {/* Header - hide when share sheet is open */}
         <div className="h-12" />
-        <div className={`flex items-center justify-between mb-4 px-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`}>
+        <div className={`flex items-center justify-between mb-4 px-5 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${showShareSheet ? 'opacity-0 -translate-y-4 pointer-events-none' : ''}`}>
           <button 
             onClick={handleSaveWithoutTemplate}
             className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'close-btn' ? 'animate-liquid-tap' : ''}`}
@@ -466,55 +466,72 @@ const Preview = () => {
         </div>
         
         {/* Frame carousel - horizontal scroll with liquid glass effect */}
-        <div className={`flex-1 flex items-center overflow-hidden ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''}`}>
-          <div 
-            ref={containerRef}
-            onScroll={handleScroll}
-            className="flex gap-0 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center px-[12.5vw]"
-            style={{ 
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch',
-              scrollBehavior: 'smooth',
-            }}
-          >
-            {FRAMES.map((frame, index) => {
-              const { scale, opacity } = getFrameScale(index);
-              const isActiveFrame = frame === currentFrame;
-              
-              return (
-                <div 
-                  key={`${frame}-${index}`}
-                  ref={(el) => {
-                    frameItemRefs.current[index] = el;
-                  }}
-                  data-frame={frame}
-                  className="flex-shrink-0 snap-center h-fit flex items-center justify-center swipe-smooth"
-                  style={{ 
-                    width: 'calc(75vw)',
-                    transform: `scale(${scale})`,
-                    opacity,
-                  }}
-                >
+        <div className={`flex-1 flex items-center overflow-hidden transition-all duration-500 ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''} ${showShareSheet ? 'justify-center' : ''}`}>
+          {showShareSheet ? (
+            /* When share sheet is open, show only the current frame centered */
+            <div className="flex items-center justify-center w-full px-6 animate-scale-in">
+              <div className="w-[70vw] max-w-[320px]">
+                {currentFrame === 'shaky' && <ShakyFrame {...frameProps} />}
+                {currentFrame === 'journal' && <JournalFrame {...frameProps} />}
+                {currentFrame === 'vogue' && <VogueFrame {...frameProps} />}
+                {currentFrame === 'fitness' && <FitnessFrame {...frameProps} />}
+                {currentFrame === 'ticket' && <TicketFrame {...frameProps} />}
+              </div>
+            </div>
+          ) : (
+            /* Normal carousel view */
+            <div 
+              ref={containerRef}
+              onScroll={handleScroll}
+              className="flex gap-0 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center px-[12.5vw]"
+              style={{ 
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch',
+                scrollBehavior: 'smooth',
+              }}
+            >
+              {FRAMES.map((frame, index) => {
+                const { scale, opacity } = getFrameScale(index);
+                const isActiveFrame = frame === currentFrame;
+                
+                return (
                   <div 
-                    className={`w-full transition-all duration-300 ${isActiveFrame ? 'animate-liquid-morph' : ''}`}
+                    key={`${frame}-${index}`}
+                    ref={(el) => {
+                      frameItemRefs.current[index] = el;
+                    }}
+                    data-frame={frame}
+                    className="flex-shrink-0 snap-center h-fit flex items-center justify-center swipe-smooth"
+                    style={{ 
+                      width: 'calc(75vw)',
+                      transform: `scale(${scale})`,
+                      opacity,
+                    }}
                   >
-                    {frame === 'shaky' && <ShakyFrame {...frameProps} />}
-                    {frame === 'journal' && <JournalFrame {...frameProps} />}
-                    {frame === 'vogue' && <VogueFrame {...frameProps} />}
-                    {frame === 'fitness' && <FitnessFrame {...frameProps} />}
-                    {frame === 'ticket' && <TicketFrame {...frameProps} />}
+                    <div 
+                      className={`w-full transition-all duration-300 ${isActiveFrame ? 'animate-liquid-morph' : ''}`}
+                    >
+                      {frame === 'shaky' && <ShakyFrame {...frameProps} />}
+                      {frame === 'journal' && <JournalFrame {...frameProps} />}
+                      {frame === 'vogue' && <VogueFrame {...frameProps} />}
+                      {frame === 'fitness' && <FitnessFrame {...frameProps} />}
+                      {frame === 'ticket' && <TicketFrame {...frameProps} />}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Content section - scrollable */}
-        <div className={`space-y-4 px-5 mt-4 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
+        {/* Content section - hide when share sheet is open */}
+        <div 
+          className={`space-y-4 px-5 mt-4 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${showShareSheet ? 'opacity-0 translate-y-8 pointer-events-none h-0 overflow-hidden mt-0' : ''}`} 
+          style={{ animationDelay: '0.3s' }}
+        >
           {/* Editable data points - now tappable */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 relative overflow-hidden animate-input-focus-pulse">
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 relative overflow-hidden animate-input-focus-pulse">
             {/* Subtle animated border glow */}
             <div className="absolute inset-0 rounded-2xl pointer-events-none animate-border-glow" />
             
@@ -560,8 +577,11 @@ const Preview = () => {
         </div>
       </div>
 
-      {/* Floating Share Template Button - Fixed at bottom */}
-      <div className={`fixed bottom-0 left-0 right-0 z-30 px-5 pb-6 pt-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
+      {/* Floating Share Template Button - Fixed at bottom, hide when share sheet is open */}
+      <div 
+        className={`fixed bottom-0 left-0 right-0 z-30 px-5 pb-6 pt-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${showShareSheet ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
+        style={{ animationDelay: '0.4s' }}
+      >
         <button 
           onClick={handleOpenShareSheet}
           disabled={isSaving}
