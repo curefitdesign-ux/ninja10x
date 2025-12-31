@@ -154,24 +154,32 @@ const Index = () => {
   }, [location.state?.savePhoto, location.state?.imageUrl, location.state?.activity, simulatedDate]);
 
   // Handle retake from preview - open camera directly with the activity and capture mode
+  const [instantCamera, setInstantCamera] = useState(() => {
+    // Check if we should show camera immediately on mount
+    return !!(location.state?.openCameraWithActivity && location.state?.instantCamera);
+  });
+
   useEffect(() => {
     if (location.state?.openCameraWithActivity) {
       const activityName = location.state.openCameraWithActivity;
       const captureMode = location.state.captureMode || 'photo';
+      const isInstant = location.state.instantCamera;
       
       setSelectedActivity(activityName);
       setInitialCaptureMode(captureMode);
       setShowCamera(true);
-      setCameraEntering(true);
+      
+      if (!isInstant) {
+        setCameraEntering(true);
+        setTimeout(() => {
+          setCameraEntering(false);
+        }, 500);
+      }
       
       // Clear the navigation state
       navigate('/', { replace: true, state: null });
-      
-      setTimeout(() => {
-        setCameraEntering(false);
-      }, 500);
     }
-  }, [location.state?.openCameraWithActivity, location.state?.captureMode]);
+  }, [location.state?.openCameraWithActivity, location.state?.captureMode, location.state?.instantCamera]);
 
   // Calculate week and day based on photos
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
@@ -257,112 +265,114 @@ const Index = () => {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
-      {/* Aurora Background */}
-      <AuroraBackground />
+      {/* Aurora Background - hidden when instant camera */}
+      {!instantCamera && <AuroraBackground />}
       
-      {/* Content */}
-      <div className="relative z-10 flex flex-col min-h-screen">
-        {/* Status Bar Space */}
-        <div className="h-12" />
-        
-        {/* Top Controls Row */}
-        <div className="flex justify-between items-start px-4">
-          {/* Layout Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors">
-                {selectedLayout === 'layout1' ? 'Layout 1' : selectedLayout === 'layout2' ? 'Layout 2' : 'Layout 3'}
-                <ChevronDown className="w-3 h-3" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              className="bg-black/90 backdrop-blur-xl border border-white/20 rounded-xl z-50"
-              align="start"
-            >
-              <DropdownMenuItem 
-                onClick={() => setSelectedLayout('layout1')}
-                className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout1' ? 'bg-white/10' : ''}`}
-              >
-                Layout 1
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => setSelectedLayout('layout2')}
-                className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout2' ? 'bg-white/10' : ''}`}
-              >
-                Layout 2
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => setSelectedLayout('layout3')}
-                className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout3' ? 'bg-white/10' : ''}`}
-              >
-                Layout 3
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Test Controls */}
-          <div className="flex flex-col gap-2 items-end">
-            <button
-              onClick={simulateNextDay}
-              className="px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors"
-            >
-              Test: Next Day
-            </button>
-            <button
-              onClick={clearAllPhotos}
-              className="px-3 py-1.5 text-xs bg-red-500/20 backdrop-blur-sm rounded-full text-red-400 hover:bg-red-500/30 transition-colors"
-            >
-              Clear Photos
-            </button>
-            {simulatedDate && (
-              <>
-                <span className="text-[10px] text-foreground/50 text-center">
-                  {simulatedDate}
-                </span>
-                <button
-                  onClick={resetSimulation}
-                  className="px-3 py-1 text-[10px] text-foreground/50 hover:text-foreground/70 transition-colors"
-                >
-                  Reset
+      {/* Content - hidden when instant camera */}
+      {!instantCamera && (
+        <div className="relative z-10 flex flex-col min-h-screen">
+          {/* Status Bar Space */}
+          <div className="h-12" />
+          
+          {/* Top Controls Row */}
+          <div className="flex justify-between items-start px-4">
+            {/* Layout Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors">
+                  {selectedLayout === 'layout1' ? 'Layout 1' : selectedLayout === 'layout2' ? 'Layout 2' : 'Layout 3'}
+                  <ChevronDown className="w-3 h-3" />
                 </button>
-              </>
-            )}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                className="bg-black/90 backdrop-blur-xl border border-white/20 rounded-xl z-50"
+                align="start"
+              >
+                <DropdownMenuItem 
+                  onClick={() => setSelectedLayout('layout1')}
+                  className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout1' ? 'bg-white/10' : ''}`}
+                >
+                  Layout 1
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setSelectedLayout('layout2')}
+                  className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout2' ? 'bg-white/10' : ''}`}
+                >
+                  Layout 2
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setSelectedLayout('layout3')}
+                  className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout3' ? 'bg-white/10' : ''}`}
+                >
+                  Layout 3
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Test Controls */}
+            <div className="flex flex-col gap-2 items-end">
+              <button
+                onClick={simulateNextDay}
+                className="px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors"
+              >
+                Test: Next Day
+              </button>
+              <button
+                onClick={clearAllPhotos}
+                className="px-3 py-1.5 text-xs bg-red-500/20 backdrop-blur-sm rounded-full text-red-400 hover:bg-red-500/30 transition-colors"
+              >
+                Clear Photos
+              </button>
+              {simulatedDate && (
+                <>
+                  <span className="text-[10px] text-foreground/50 text-center">
+                    {simulatedDate}
+                  </span>
+                  <button
+                    onClick={resetSimulation}
+                    className="px-3 py-1 text-[10px] text-foreground/50 hover:text-foreground/70 transition-colors"
+                  >
+                    Reset
+                  </button>
+                </>
+              )}
+            </div>
           </div>
+          
+          {/* Spacer */}
+          <div className="py-2" />
+          
+          {/* Main Content */}
+          <main className="flex-1 flex flex-col justify-center py-6 -mt-[100px]">
+            {selectedLayout === 'layout1' ? (
+              <PhotoUploadCard 
+                photos={photos} 
+                onCardClick={handleCardClick}
+                hasUploadedToday={hasUploadedToday()}
+                hoursUntilNextUpload={getHoursUntilMidnight()}
+                currentDate={getCurrentDate()}
+              />
+            ) : selectedLayout === 'layout2' ? (
+              <WidgetLayout2 
+                photos={photos} 
+                onCardClick={handleCardClick}
+                hasUploadedToday={hasUploadedToday()}
+                hoursUntilNextUpload={getHoursUntilMidnight()}
+                currentDate={getCurrentDate()}
+              />
+            ) : (
+              <WidgetLayout3 
+                photos={photos} 
+                onAddPhoto={handleAddPhoto}
+                currentDate={getCurrentDate()}
+              />
+            )}
+          </main>
+          
+          {/* Bottom Safe Area */}
+          <div className="h-8" />
         </div>
-        
-        {/* Spacer */}
-        <div className="py-2" />
-        
-        {/* Main Content */}
-        <main className="flex-1 flex flex-col justify-center py-6 -mt-[100px]">
-          {selectedLayout === 'layout1' ? (
-            <PhotoUploadCard 
-              photos={photos} 
-              onCardClick={handleCardClick}
-              hasUploadedToday={hasUploadedToday()}
-              hoursUntilNextUpload={getHoursUntilMidnight()}
-              currentDate={getCurrentDate()}
-            />
-          ) : selectedLayout === 'layout2' ? (
-            <WidgetLayout2 
-              photos={photos} 
-              onCardClick={handleCardClick}
-              hasUploadedToday={hasUploadedToday()}
-              hoursUntilNextUpload={getHoursUntilMidnight()}
-              currentDate={getCurrentDate()}
-            />
-          ) : (
-            <WidgetLayout3 
-              photos={photos} 
-              onAddPhoto={handleAddPhoto}
-              currentDate={getCurrentDate()}
-            />
-          )}
-        </main>
-        
-        {/* Bottom Safe Area */}
-        <div className="h-8" />
-      </div>
+      )}
 
       {/* Activity Selection Bottom Sheet */}
       {showActivitySheet && (
@@ -488,14 +498,20 @@ const Index = () => {
       {/* Camera UI */}
       {showCamera && selectedActivity && (
         <div className={`transition-all duration-500 ease-out ${
-          cameraEntering ? 'animate-camera-enter' : ''
+          cameraEntering && !instantCamera ? 'animate-camera-enter' : ''
         }`}>
           <CameraUI
             activity={selectedActivity}
             week={currentWeek}
             day={currentDay}
-            onCapture={handleCapture}
-            onClose={handleCameraClose}
+            onCapture={(imageUrl, mode) => {
+              handleCapture(imageUrl, mode);
+              setInstantCamera(false);
+            }}
+            onClose={() => {
+              handleCameraClose();
+              setInstantCamera(false);
+            }}
             initialCaptureMode={initialCaptureMode}
           />
         </div>

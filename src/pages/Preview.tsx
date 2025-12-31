@@ -249,6 +249,7 @@ const Preview = () => {
         state: {
           openCameraWithActivity: activity,
           captureMode: isVideo ? 'video' : 'photo',
+          instantCamera: true,
         },
       });
     }, 200);
