@@ -655,30 +655,48 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
 
       {/* Bottom Controls */}
       <div className="absolute bottom-0 left-0 right-0 pb-12 px-6 z-10">
-        {/* Photo/Video Mode Toggle - iOS style */}
+        {/* Photo/Video Mode Toggle - Liquid glass design */}
         {!hasCapturedMedia && !countdownActive && (
           <div className="flex justify-center mb-5">
-            <div className="relative flex items-center rounded-full backdrop-blur-xl bg-neutral-800/90 p-1">
-              {/* Sliding indicator pill */}
+            <div 
+              className="relative flex items-center rounded-full p-1.5 overflow-hidden"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 24px rgba(0,0,0,0.3)',
+                border: '1px solid rgba(255,255,255,0.15)',
+              }}
+            >
+              {/* Liquid sliding indicator */}
               <div 
-                className="absolute top-1 bottom-1 rounded-full bg-neutral-600 transition-all duration-300 ease-out"
+                className="absolute top-1.5 bottom-1.5 rounded-full transition-all duration-500 ease-out"
                 style={{
-                  width: 'calc(50% - 4px)',
-                  left: captureMode === 'photo' ? '4px' : 'calc(50%)',
+                  width: 'calc(50% - 6px)',
+                  left: captureMode === 'photo' ? '6px' : 'calc(50%)',
+                  background: captureMode === 'photo' 
+                    ? 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%)'
+                    : 'linear-gradient(135deg, rgba(255,59,48,0.4) 0%, rgba(255,59,48,0.2) 100%)',
+                  boxShadow: captureMode === 'photo'
+                    ? 'inset 0 1px 1px rgba(255,255,255,0.2), 0 2px 8px rgba(0,0,0,0.2)'
+                    : 'inset 0 1px 1px rgba(255,59,48,0.3), 0 2px 8px rgba(255,59,48,0.2)',
+                  border: captureMode === 'photo' 
+                    ? '1px solid rgba(255,255,255,0.2)'
+                    : '1px solid rgba(255,59,48,0.3)',
                 }}
               />
               <button
                 onClick={() => setCaptureMode('photo')}
-                className={`relative z-10 px-6 py-2.5 rounded-full text-sm font-semibold tracking-wide transition-all duration-300 ${
-                  captureMode === 'photo' ? 'text-white' : 'text-white/50'
+                className={`relative z-10 px-7 py-3 rounded-full text-sm font-bold tracking-wider transition-all duration-300 ${
+                  captureMode === 'photo' ? 'text-white' : 'text-white/40'
                 }`}
               >
                 PHOTO
               </button>
               <button
                 onClick={() => setCaptureMode('video')}
-                className={`relative z-10 px-6 py-2.5 rounded-full text-sm font-semibold tracking-wide transition-all duration-300 ${
-                  captureMode === 'video' ? 'text-red-400' : 'text-white/50'
+                className={`relative z-10 px-7 py-3 rounded-full text-sm font-bold tracking-wider transition-all duration-300 ${
+                  captureMode === 'video' ? 'text-red-400' : 'text-white/40'
                 }`}
               >
                 VIDEO

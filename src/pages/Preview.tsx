@@ -213,12 +213,18 @@ const Preview = () => {
     }, 400);
   };
 
-  // Retake - go back to camera
+  // Retake - go back to camera with same activity
   const handleRetake = () => {
     triggerHaptic('light');
     handleTap('retake-btn');
-    // Navigate back - will need to go through activity selection again
-    setTimeout(() => navigate('/'), 200);
+    // Navigate back to home which will trigger camera with the activity
+    setTimeout(() => {
+      navigate('/', {
+        state: {
+          openCameraWithActivity: activity,
+        },
+      });
+    }, 200);
   };
 
   // Handle scroll to update current frame and calculate scale
