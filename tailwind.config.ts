@@ -104,6 +104,26 @@ export default {
           "0%, 100%": { borderColor: "rgba(255, 255, 255, 0)" },
           "50%": { borderColor: "rgba(255, 255, 255, 0.3)" },
         },
+        "toast-rise": {
+          "0%": { opacity: "0", transform: "translateY(100px) scale(0.8)", filter: "blur(8px)" },
+          "60%": { opacity: "1", transform: "translateY(-15px) scale(1.05)", filter: "blur(0)" },
+          "80%": { transform: "translateY(5px) scale(0.98)" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)", filter: "blur(0)" },
+        },
+        "toast-float": {
+          "0%, 100%": { transform: "translateY(0) scale(1)" },
+          "50%": { transform: "translateY(-5px) scale(1.02)" },
+        },
+        "toast-expand": {
+          "0%": { transform: "scale(1)", opacity: "1" },
+          "40%": { transform: "scale(1.3)", opacity: "1" },
+          "100%": { transform: "scale(15)", opacity: "0", filter: "blur(10px)" },
+        },
+        "camera-enter": {
+          "0%": { opacity: "0", transform: "scale(0.9)", filter: "blur(5px)" },
+          "50%": { opacity: "1", transform: "scale(1.02)", filter: "blur(0)" },
+          "100%": { opacity: "1", transform: "scale(1)", filter: "blur(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -112,6 +132,10 @@ export default {
         "liquid-enter": "liquid-enter 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
         "input-focus-pulse": "input-focus-pulse 2s ease-in-out infinite",
         "border-glow": "border-glow 2s ease-in-out infinite",
+        "toast-rise": "toast-rise 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+        "toast-float": "toast-float 1.5s ease-in-out infinite",
+        "toast-expand": "toast-expand 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards",
+        "camera-enter": "camera-enter 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards",
       },
     },
   },
