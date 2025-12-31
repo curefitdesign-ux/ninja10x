@@ -66,7 +66,6 @@ const Index = () => {
   });
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
-  const [showActivityAcknowledgement, setShowActivityAcknowledgement] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [simulatedDate, setSimulatedDate] = useState<string | null>(null);
   const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout3');
@@ -150,13 +149,7 @@ const Index = () => {
   const handleActivitySelect = (activity: string) => {
     setSelectedActivity(activity);
     setShowActivitySheet(false);
-    setShowActivityAcknowledgement(true);
-    
-    // Auto-transition to camera after brief acknowledgement
-    setTimeout(() => {
-      setShowActivityAcknowledgement(false);
-      setShowCamera(true);
-    }, 1200);
+    setShowCamera(true);
   };
 
   const handleCapture = (mediaDataUrl: string, isVideo?: boolean) => {
@@ -335,30 +328,6 @@ const Index = () => {
             </div>
           </div>
         </>
-      )}
-
-      {/* Activity Acknowledgement Overlay */}
-      {showActivityAcknowledgement && selectedActivity && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="flex flex-col items-center gap-4 animate-scale-in">
-            {/* Activity Icon */}
-            <div className="w-24 h-24 rounded-full overflow-hidden ring-2 ring-white/20 shadow-2xl">
-              <img 
-                src={activities.find(a => a.name === selectedActivity)?.icon} 
-                alt={selectedActivity}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            {/* Activity Name */}
-            <span className="text-lg font-semibold text-white/90">{selectedActivity}</span>
-            {/* Subtle Loading Indicator */}
-            <div className="flex gap-1 mt-2">
-              <span className="w-1.5 h-1.5 bg-white/40 rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
-              <span className="w-1.5 h-1.5 bg-white/40 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
-              <span className="w-1.5 h-1.5 bg-white/40 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
-            </div>
-          </div>
-        </div>
       )}
 
       {/* Camera UI */}
