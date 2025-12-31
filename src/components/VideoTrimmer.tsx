@@ -18,6 +18,7 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
   const [isDragging, setIsDragging] = useState(false);
   const [thumbnails, setThumbnails] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [posterUrl, setPosterUrl] = useState<string>('');
   const animationRef = useRef<number>();
 
   // Generate video thumbnails
@@ -40,6 +41,7 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
       
       const thumbs: string[] = [];
       let currentThumb = 0;
+      let firstFrameCaptured = false;
       
       const captureFrame = () => {
         if (currentThumb >= numThumbnails) {
@@ -54,7 +56,23 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
       video.onseeked = () => {
         if (ctx && currentThumb < numThumbnails) {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          thumbs.push(canvas.toDataURL('image/jpeg', 0.5));
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+          thumbs.push(dataUrl);
+          
+          // Capture first frame as poster
+          if (!firstFrameCaptured) {
+            firstFrameCaptured = true;
+            // Create higher quality poster from first frame
+            const posterCanvas = document.createElement('canvas');
+            const posterCtx = posterCanvas.getContext('2d');
+            posterCanvas.width = video.videoWidth || 320;
+            posterCanvas.height = video.videoHeight || 568;
+            if (posterCtx) {
+              posterCtx.drawImage(video, 0, 0, posterCanvas.width, posterCanvas.height);
+              setPosterUrl(posterCanvas.toDataURL('image/jpeg', 0.8));
+            }
+          }
+          
           currentThumb++;
           captureFrame();
         }
@@ -248,10 +266,12 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
           <video
             ref={videoRef}
             src={videoSrc}
+            poster={posterUrl}
             className="w-full h-full object-cover"
             playsInline
             muted
             loop
+            autoPlay
           />
           
           {/* Play/Pause overlay */}
