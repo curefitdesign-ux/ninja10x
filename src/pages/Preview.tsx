@@ -629,7 +629,10 @@ const Preview = () => {
           className={`w-full bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce shadow-lg ${tappedElement === 'share-btn' ? 'animate-liquid-tap' : ''}`}
           style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.3)' }}
         >
-          <span className="text-black font-bold text-lg">
+          <span 
+            key={originalFrame && currentFrame !== originalFrame ? 'change' : 'share'}
+            className="text-black font-bold text-lg inline-block animate-[cta-pop_0.3s_ease-out]"
+          >
             {isSaving ? 'Preparing...' : (originalFrame && currentFrame !== originalFrame ? 'CHANGE' : 'SHARE')}
           </span>
         </button>
