@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Check } from 'lucide-react';
 import AuroraBackground from '@/components/AuroraBackground';
 import PhotoUploadCard from '@/components/PhotoUploadCard';
 import WidgetLayout2 from '@/components/WidgetLayout2';
@@ -67,6 +67,8 @@ const Index = () => {
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
+  const [showActivityToast, setShowActivityToast] = useState(false);
+  const [toastActivity, setToastActivity] = useState<string | null>(null);
   const [simulatedDate, setSimulatedDate] = useState<string | null>(null);
   const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout3');
 
@@ -146,11 +148,25 @@ const Index = () => {
     setShowActivitySheet(true);
   };
 
-  const handleActivitySelect = (activity: string) => {
+  const handleActivitySelect = useCallback((activity: string) => {
     setSelectedActivity(activity);
+    setToastActivity(activity);
     setShowActivitySheet(false);
-    setShowCamera(true);
-  };
+    
+    // Show toast with liquid glass animation
+    setTimeout(() => {
+      setShowActivityToast(true);
+    }, 150);
+    
+    // Auto-dismiss toast and open camera with smooth transition
+    setTimeout(() => {
+      setShowActivityToast(false);
+    }, 1400);
+    
+    setTimeout(() => {
+      setShowCamera(true);
+    }, 1600);
+  }, []);
 
   const handleCapture = (mediaDataUrl: string, isVideo?: boolean) => {
     setShowCamera(false);
@@ -328,6 +344,52 @@ const Index = () => {
             </div>
           </div>
         </>
+      )}
+
+      {/* Activity Logged Toast - Liquid Glass */}
+      {showActivityToast && toastActivity && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none">
+          <div 
+            className="relative px-8 py-5 rounded-3xl backdrop-blur-2xl animate-liquid-enter"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2), 0 0 80px rgba(74,222,128,0.15)',
+              border: '1px solid rgba(255,255,255,0.15)',
+            }}
+          >
+            {/* Subtle glow effect */}
+            <div 
+              className="absolute inset-0 rounded-3xl opacity-40"
+              style={{
+                background: 'radial-gradient(ellipse at center, rgba(74,222,128,0.2) 0%, transparent 70%)',
+              }}
+            />
+            
+            {/* Content */}
+            <div className="relative flex flex-col items-center gap-3">
+              {/* Check icon with pulse */}
+              <div 
+                className="w-12 h-12 rounded-full flex items-center justify-center animate-liquid-bounce"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(74,222,128,0.3) 0%, rgba(74,222,128,0.1) 100%)',
+                  boxShadow: '0 0 20px rgba(74,222,128,0.3)',
+                }}
+              >
+                <Check className="w-6 h-6 text-green-400" strokeWidth={3} />
+              </div>
+              
+              {/* Text */}
+              <div className="text-center">
+                <p className="text-white/90 font-semibold text-lg tracking-tight">
+                  {toastActivity} logged
+                </p>
+                <p className="text-white/50 text-sm mt-0.5">
+                  Now make it memorable
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Camera UI */}
