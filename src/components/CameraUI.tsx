@@ -9,13 +9,14 @@ interface CameraUIProps {
   day: number;
   onCapture: (mediaDataUrl: string, isVideo?: boolean) => void;
   onClose: () => void;
+  initialCaptureMode?: 'photo' | 'video';
 }
 
 type TimerOption = 0 | 5 | 10 | 15;
 
 type CaptureMode = 'photo' | 'video';
 
-const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) => {
+const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode = 'photo' }: CameraUIProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playbackVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -38,7 +39,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const [flashEnabled, setFlashEnabled] = useState(false);
   const [countdownActive, setCountdownActive] = useState(false);
   const [countdownValue, setCountdownValue] = useState(0);
-  const [captureMode, setCaptureMode] = useState<CaptureMode>('photo');
+  const [captureMode, setCaptureMode] = useState<CaptureMode>(initialCaptureMode);
   const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
