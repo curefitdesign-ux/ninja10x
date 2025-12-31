@@ -46,6 +46,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const isLongPressRef = useRef(false);
 
   const timerOptions: TimerOption[] = [0, 5, 10, 15];
+  
   const startCamera = useCallback(async () => {
     try {
       if (stream) {
@@ -54,7 +55,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
       
       const newStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode },
-        audio: false
+        audio: true // Enable audio for video recording
       });
       
       setStream(newStream);
@@ -63,32 +64,76 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
+      // Fallback without audio if permission denied
+      try {
+        const fallbackStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode },
+          audio: false
+        });
+        setStream(fallbackStream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = fallbackStream;
+        }
+      } catch (fallbackErr) {
+        console.error('Error accessing camera without audio:', fallbackErr);
+      }
     }
   }, [facingMode]);
-
-  // Start camera only when not in cropper mode and no captured media
-  useEffect(() => {
-    if (!showCropper && !capturedImage && !capturedVideo) {
-      startCamera();
-    }
-    
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, [facingMode, showCropper, capturedImage, capturedVideo]);
-
-  const handleFlipCamera = () => {
-    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
-  };
 
   const stopCamera = useCallback(() => {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
       setStream(null);
     }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
   }, [stream]);
+
+  // Start camera only when not in cropper mode and no captured media
+  useEffect(() => {
+    if (!showCropper && !capturedImage && !capturedVideo && !showVideoTrimmer) {
+      startCamera();
+    }
+    
+    return () => {
+      // Cleanup on unmount
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [facingMode, showCropper, capturedImage, capturedVideo, showVideoTrimmer]);
+
+  // Auto disconnect camera when component becomes inactive/closes
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopCamera();
+      } else if (!showCropper && !capturedImage && !capturedVideo && !showVideoTrimmer) {
+        startCamera();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      // Ensure camera is stopped when component unmounts
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [stream, showCropper, capturedImage, capturedVideo, showVideoTrimmer]);
+
+  const handleFlipCamera = () => {
+    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
+  };
+
+  // Handle close with camera cleanup
+  const handleClose = useCallback(() => {
+    stopCamera();
+    onClose();
+  }, [stopCamera, onClose]);
 
   const takePhoto = () => {
     if (videoRef.current && canvasRef.current) {
@@ -144,6 +189,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   };
 
   const handleConfirm = () => {
+    stopCamera(); // Ensure camera is stopped before navigation
     if (capturedImage) {
       onCapture(capturedImage, false);
     } else if (capturedVideo) {
@@ -155,6 +201,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const handleCropConfirm = (croppedDataUrl: string, isVideo: boolean) => {
     setShowCropper(false);
     setMediaToEdit(null);
+    stopCamera(); // Ensure camera is stopped before navigation
     // Directly pass to parent - skip confirmation screen
     onCapture(croppedDataUrl, isVideo);
   };
@@ -177,6 +224,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   const handleVideoTrimConfirm = (trimmedVideoUrl: string) => {
     setShowVideoTrimmer(false);
     setVideoToTrim(null);
+    stopCamera(); // Ensure camera is stopped before navigation
     // Pass trimmed video directly to parent
     onCapture(trimmedVideoUrl, true);
   };
@@ -198,15 +246,35 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
   };
 
   const startRecording = () => {
-    if (!stream) return;
+    if (!stream) {
+      console.error('No stream available for recording');
+      return;
+    }
     
     setIsRecording(true);
     recordingStartRef.current = Date.now();
     setRecordingElapsed(0);
     recordedChunksRef.current = [];
     
+    // Determine best supported MIME type
+    const mimeTypes = [
+      'video/webm;codecs=vp9',
+      'video/webm;codecs=vp8',
+      'video/webm',
+      'video/mp4',
+    ];
+    
+    let selectedMimeType = '';
+    for (const mimeType of mimeTypes) {
+      if (MediaRecorder.isTypeSupported(mimeType)) {
+        selectedMimeType = mimeType;
+        break;
+      }
+    }
+    
     // Setup MediaRecorder
-    const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+    const options = selectedMimeType ? { mimeType: selectedMimeType } : undefined;
+    const mediaRecorder = new MediaRecorder(stream, options);
     mediaRecorderRef.current = mediaRecorder;
     
     mediaRecorder.ondataavailable = (event) => {
@@ -216,7 +284,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
     };
     
     mediaRecorder.onstop = () => {
-      const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+      const blob = new Blob(recordedChunksRef.current, { type: selectedMimeType || 'video/webm' });
       const videoUrl = URL.createObjectURL(blob);
 
       // IMPORTANT: don't send videos through ImageCropper — it intentionally outputs an image.
@@ -224,10 +292,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
       setCapturedVideo(videoUrl);
 
       // Stop camera to avoid green dot
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        setStream(null);
-      }
+      stopCamera();
     };
     
     mediaRecorder.start(100);
@@ -567,7 +632,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
         )}
         
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="p-2 rounded-full backdrop-blur-md bg-white/10"
         >
           <X className="w-6 h-6 text-white" />
