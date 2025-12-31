@@ -76,9 +76,11 @@ const Index = () => {
 
   useEffect(() => {
     try {
-      localStorage.setItem('cn_photos', JSON.stringify(photos));
-    } catch {
-      // ignore
+      const data = JSON.stringify(photos);
+      localStorage.setItem('cn_photos', data);
+    } catch (e) {
+      console.error('Failed to save photos to localStorage:', e);
+      // Storage might be full - we could notify user or compress images
     }
   }, [photos]);
 

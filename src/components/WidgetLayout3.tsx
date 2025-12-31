@@ -266,6 +266,9 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
                               alt=""
                               className="w-full h-full object-cover"
                               style={{ borderRadius: '2px' }}
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
                             />
                           ) : (
                             <div 
@@ -403,7 +406,16 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
                         }}
                       >
                         {photo ? (
-                          <img src={photo.originalUrl || photo.url} alt="" className="w-full h-full object-cover" style={{ borderRadius: '2px' }} />
+                          <img 
+                            src={photo.originalUrl || photo.url} 
+                            alt="" 
+                            className="w-full h-full object-cover" 
+                            style={{ borderRadius: '2px' }} 
+                            onError={(e) => {
+                              console.error('Image failed to load:', photo.originalUrl || photo.url);
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
                         ) : null}
                       </div>
                     );
