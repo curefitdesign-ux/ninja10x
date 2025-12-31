@@ -1,4 +1,4 @@
-import { X, Download, Link, Check, MessageCircle } from 'lucide-react';
+import { Download, Link, Check, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 
@@ -145,12 +145,6 @@ const MiniSharePopup = ({ imageUrl, isVideo, onClose, onDone }: MiniSharePopupPr
           
           {/* Header */}
           <div className="flex items-center justify-center mb-4">
-            <button 
-              onClick={onClose}
-              className="absolute left-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 tap-bounce"
-            >
-              <X className="w-4 h-4 text-white/80" />
-            </button>
             <span className="text-white/90 font-medium text-sm">Share</span>
           </div>
           
