@@ -217,12 +217,12 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
       </div>
       
       {/* Video Preview - takes remaining space between header and bottom section */}
-      <div className="flex-1 flex items-center justify-center px-4 min-h-0">
+      <div className="flex-1 flex items-center justify-center px-6 min-h-0 pb-4">
         <div 
-          className="relative rounded-[24px] overflow-hidden bg-black w-full max-w-[calc(100%-48px)]"
+          className="relative rounded-[24px] overflow-hidden bg-black w-full max-w-[320px]"
           style={{ 
             aspectRatio: '9/16',
-            maxHeight: '100%'
+            maxHeight: 'calc(100% - 16px)'
           }}
         >
           <video
@@ -250,17 +250,18 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
         </div>
       </div>
       
-      {/* Bottom Section - Timeline + Button - always visible */}
-      <div className="flex-shrink-0 px-4 pb-8 pt-4">
+      {/* Bottom Section - Timeline + Button - always visible with safe area */}
+      <div className="flex-shrink-0 px-4 pb-10 pt-2 bg-gradient-to-t from-black via-black/95 to-transparent">
         <div className="mb-3 text-center">
           <span className="text-white/60 text-sm">
             Drag to select {maxDuration} seconds
           </span>
         </div>
         
+        {/* Timeline Container */}
         <div 
           ref={timelineRef}
-          className="relative h-14 bg-white/10 rounded-xl overflow-hidden touch-none cursor-pointer"
+          className="relative h-16 bg-white/10 rounded-2xl overflow-hidden touch-none cursor-pointer"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -286,53 +287,77 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
           
           {/* Dimmed overlay outside selection */}
           <div 
-            className="absolute inset-y-0 left-0 bg-black/60"
+            className="absolute inset-y-0 left-0 bg-black/70 transition-all duration-100"
             style={{ width: `${selectionStart}%` }}
           />
           <div 
-            className="absolute inset-y-0 right-0 bg-black/60"
+            className="absolute inset-y-0 right-0 bg-black/70 transition-all duration-100"
             style={{ width: `${100 - selectionStart - selectionWidth}%` }}
           />
           
-          {/* Selection box */}
+          {/* Selection box - more prominent yellow/gold border */}
           <div 
-            className="absolute inset-y-0 border-2 border-white rounded-lg"
+            className="absolute inset-y-0 transition-all duration-100"
             style={{ 
               left: `${selectionStart}%`, 
               width: `${selectionWidth}%`,
-              boxShadow: '0 0 20px rgba(255,255,255,0.3)'
             }}
           >
-            {/* Left handle */}
-            <div className="absolute left-0 inset-y-0 w-3 bg-white rounded-l-lg flex items-center justify-center">
-              <div className="w-0.5 h-6 bg-black/30 rounded-full" />
+            {/* Selection frame with yellow border */}
+            <div 
+              className="absolute inset-0 border-[3px] border-yellow-400 rounded-xl"
+              style={{
+                boxShadow: '0 0 0 1px rgba(0,0,0,0.3), 0 0 20px rgba(250,204,21,0.4), inset 0 0 0 1px rgba(250,204,21,0.2)',
+              }}
+            />
+            
+            {/* Left handle - larger and more visible */}
+            <div 
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-[2px] w-4 h-10 bg-yellow-400 rounded-lg flex items-center justify-center"
+              style={{
+                boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+              }}
+            >
+              <div className="w-[3px] h-5 bg-yellow-600/50 rounded-full" />
             </div>
-            {/* Right handle */}
-            <div className="absolute right-0 inset-y-0 w-3 bg-white rounded-r-lg flex items-center justify-center">
-              <div className="w-0.5 h-6 bg-black/30 rounded-full" />
+            
+            {/* Right handle - larger and more visible */}
+            <div 
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-[2px] w-4 h-10 bg-yellow-400 rounded-lg flex items-center justify-center"
+              style={{
+                boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+              }}
+            >
+              <div className="w-[3px] h-5 bg-yellow-600/50 rounded-full" />
             </div>
           </div>
           
-          {/* Current time indicator */}
+          {/* Current time indicator - playhead */}
           <div 
-            className="absolute top-0 bottom-0 w-0.5 bg-yellow-400 z-10"
-            style={{ left: `${(currentTime / duration) * 100}%` }}
+            className="absolute top-0 bottom-0 w-1 bg-white z-10 rounded-full"
+            style={{ 
+              left: `${(currentTime / duration) * 100}%`,
+              boxShadow: '0 0 8px rgba(255,255,255,0.8)',
+            }}
           />
         </div>
         
         {/* Time display */}
-        <div className="flex justify-between mt-2 text-white/60 text-xs">
+        <div className="flex justify-between mt-2 text-white/60 text-sm px-1">
           <span>{formatTime(startTime)}</span>
           <span>{formatTime(startTime + maxDuration)}</span>
         </div>
         
-        {/* Confirm Button - always visible */}
+        {/* Confirm Button - more prominent with better visibility */}
         <button
           onClick={handleConfirm}
-          className="w-full py-4 rounded-2xl bg-cream-100 flex items-center justify-center gap-2 mt-4"
+          className="w-full py-4 rounded-2xl bg-white flex items-center justify-center gap-2 mt-5 active:scale-[0.98] transition-transform"
+          style={{
+            boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
+          }}
         >
           <Check className="w-5 h-5 text-black" />
-          <span className="text-black font-bold">Use this clip</span>
+          <span className="text-black font-bold text-lg">Use this clip</span>
         </button>
       </div>
     </div>
