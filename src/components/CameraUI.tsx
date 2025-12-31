@@ -576,29 +576,30 @@ const CameraUI = ({ activity, week, day, onCapture, onClose }: CameraUIProps) =>
 
       {/* Bottom Controls */}
       <div className="absolute bottom-0 left-0 right-0 pb-12 px-6 z-10">
-        {/* Apple-style Photo/Video Mode Toggle */}
+        {/* Photo/Video Mode Toggle - iOS style */}
         {!hasCapturedMedia && !countdownActive && (
           <div className="flex justify-center mb-5">
-            <div className="relative flex items-center gap-1 p-1 rounded-full backdrop-blur-xl bg-black/30 border border-white/10">
-              {/* Sliding indicator */}
+            <div className="relative flex items-center rounded-full backdrop-blur-xl bg-neutral-800/90 p-1">
+              {/* Sliding indicator pill */}
               <div 
-                className="absolute top-1 bottom-1 w-[72px] rounded-full bg-white/20 transition-all duration-300 ease-out"
+                className="absolute top-1 bottom-1 rounded-full bg-neutral-600 transition-all duration-300 ease-out"
                 style={{
-                  left: captureMode === 'photo' ? '4px' : 'calc(50% + 2px)',
+                  width: 'calc(50% - 4px)',
+                  left: captureMode === 'photo' ? '4px' : 'calc(50%)',
                 }}
               />
               <button
                 onClick={() => setCaptureMode('photo')}
-                className={`relative z-10 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
-                  captureMode === 'photo' ? 'text-yellow-400' : 'text-white/60'
+                className={`relative z-10 px-6 py-2.5 rounded-full text-sm font-semibold tracking-wide transition-all duration-300 ${
+                  captureMode === 'photo' ? 'text-white' : 'text-white/50'
                 }`}
               >
                 PHOTO
               </button>
               <button
                 onClick={() => setCaptureMode('video')}
-                className={`relative z-10 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
-                  captureMode === 'video' ? 'text-red-400' : 'text-white/60'
+                className={`relative z-10 px-6 py-2.5 rounded-full text-sm font-semibold tracking-wide transition-all duration-300 ${
+                  captureMode === 'video' ? 'text-red-400' : 'text-white/50'
                 }`}
               >
                 VIDEO

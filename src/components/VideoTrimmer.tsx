@@ -216,14 +216,13 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
         <div className="w-10" />
       </div>
       
-      {/* Video Preview */}
-      <div className="flex-1 flex items-center justify-center p-4">
+      {/* Video Preview - takes remaining space between header and bottom section */}
+      <div className="flex-1 flex items-center justify-center px-4 min-h-0">
         <div 
-          className="relative rounded-[24px] overflow-hidden bg-black"
+          className="relative rounded-[24px] overflow-hidden bg-black w-full max-w-[calc(100%-48px)]"
           style={{ 
-            width: 'calc(100% - 48px)', 
             aspectRatio: '9/16',
-            maxHeight: '60vh'
+            maxHeight: '100%'
           }}
         >
           <video
@@ -251,9 +250,9 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
         </div>
       </div>
       
-      {/* Timeline Scrubber */}
-      <div className="px-4 pb-8">
-        <div className="mb-4 text-center">
+      {/* Bottom Section - Timeline + Button - always visible */}
+      <div className="flex-shrink-0 px-4 pb-8 pt-4">
+        <div className="mb-3 text-center">
           <span className="text-white/60 text-sm">
             Drag to select {maxDuration} seconds
           </span>
@@ -261,7 +260,7 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
         
         <div 
           ref={timelineRef}
-          className="relative h-16 bg-white/10 rounded-xl overflow-hidden touch-none cursor-pointer"
+          className="relative h-14 bg-white/10 rounded-xl overflow-hidden touch-none cursor-pointer"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -326,13 +325,11 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
           <span>{formatTime(startTime)}</span>
           <span>{formatTime(startTime + maxDuration)}</span>
         </div>
-      </div>
-      
-      {/* Confirm Button */}
-      <div className="px-4 pb-12">
+        
+        {/* Confirm Button - always visible */}
         <button
           onClick={handleConfirm}
-          className="w-full py-4 rounded-2xl bg-white flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-2xl bg-cream-100 flex items-center justify-center gap-2 mt-4"
         >
           <Check className="w-5 h-5 text-black" />
           <span className="text-black font-bold">Use this clip</span>
