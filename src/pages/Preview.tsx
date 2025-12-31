@@ -650,9 +650,10 @@ const Preview = () => {
         </div>
       </div>
 
-      {/* Floating CTA - Always sticky at bottom with DONE and Share */}
+      {/* Floating CTA - Always visible and sticky at bottom */}
       <div 
-        className={`fixed bottom-0 left-0 right-0 z-40 px-5 pb-8 pt-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`} 
+        className="fixed bottom-0 left-0 right-0 z-50 px-5 pb-8 pt-4 bg-gradient-to-t from-black via-black/80 to-transparent"
+        style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
       >
         <div className="flex items-center gap-3">
           {/* DONE Button */}
