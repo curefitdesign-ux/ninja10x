@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, RotateCcw } from 'lucide-react';
+import { X, Check, Pencil } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import ShakyFrame from '@/components/frames/ShakyFrame';
@@ -492,10 +492,9 @@ const Preview = () => {
           <h2 className="text-white/80 text-lg font-semibold">Select your frame</h2>
           <button 
             onClick={handleRetake}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'retake-btn' ? 'animate-liquid-tap' : ''}`}
+            className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'retake-btn' ? 'animate-liquid-tap' : ''}`}
           >
-            <RotateCcw className="w-4 h-4 text-white" />
-            <span className="text-white text-sm font-medium">Retake</span>
+            <Pencil className="w-5 h-5 text-white" />
           </button>
         </div>
         
