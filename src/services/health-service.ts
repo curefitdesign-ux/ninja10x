@@ -23,22 +23,67 @@ export interface WorkoutData {
 class HealthService {
   private isNative: boolean = false;
   private platform: 'ios' | 'android' | 'web' = 'web';
+  private detectedDeviceType: 'ios' | 'android' | 'unknown' = 'unknown';
+  private platformDetected: boolean = false;
 
   constructor() {
     this.detectPlatform();
   }
 
   private async detectPlatform() {
+    // First detect device type from user agent (works in web browser too)
+    this.detectedDeviceType = this.detectDeviceFromUserAgent();
+    
     try {
       const { Capacitor } = await import('@capacitor/core');
       this.isNative = Capacitor.isNativePlatform();
       if (this.isNative) {
         this.platform = Capacitor.getPlatform() as 'ios' | 'android';
+      } else {
+        this.platform = 'web';
       }
     } catch {
       // Running in web mode
       this.isNative = false;
       this.platform = 'web';
+    }
+    this.platformDetected = true;
+  }
+
+  private detectDeviceFromUserAgent(): 'ios' | 'android' | 'unknown' {
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera || '';
+    
+    // iOS detection
+    if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
+      return 'ios';
+    }
+    
+    // Android detection
+    if (/android/i.test(userAgent)) {
+      return 'android';
+    }
+    
+    // macOS could indicate user might have iPhone
+    if (/Macintosh/.test(userAgent)) {
+      return 'ios';
+    }
+    
+    return 'unknown';
+  }
+
+  /**
+   * Get detected device type (works even in web browser)
+   */
+  getDetectedDevice(): 'ios' | 'android' | 'unknown' {
+    return this.detectedDeviceType;
+  }
+
+  /**
+   * Ensure platform detection is complete
+   */
+  async ensureDetected(): Promise<void> {
+    if (!this.platformDetected) {
+      await this.detectPlatform();
     }
   }
 
