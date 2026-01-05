@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, SwitchCamera, Image as ImageIcon, Check, RotateCcw, Timer, Zap, ZapOff, Lock } from 'lucide-react';
-import { toast } from 'sonner';
+import { X, SwitchCamera, Image as ImageIcon, Check, RotateCcw, Timer, Zap, ZapOff } from 'lucide-react';
 import ImageCropper from './ImageCropper';
 import VideoTrimmer from './VideoTrimmer';
+import CustomGallery from './CustomGallery';
 
 interface CameraUIProps {
   activity: string;
@@ -21,7 +21,6 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
   const videoRef = useRef<HTMLVideoElement>(null);
   const playbackVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -41,6 +40,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
   const [countdownActive, setCountdownActive] = useState(false);
   const [countdownValue, setCountdownValue] = useState(0);
   const [captureMode, setCaptureMode] = useState<CaptureMode>(initialCaptureMode);
+  const [showGallery, setShowGallery] = useState(false);
   const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -411,49 +411,35 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
   };
 
   const handleGalleryClick = () => {
-    fileInputRef.current?.click();
+    setShowGallery(true);
+    stopCamera();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Check if file was captured/modified within the last 24 hours
-      const now = Date.now();
-      const fileTime = file.lastModified;
-      const twentyFourHoursMs = 24 * 60 * 60 * 1000;
-      
-      if (now - fileTime > twentyFourHoursMs) {
-        toast.error('Photo too old', {
-          description: 'Please select a photo captured within the last 24 hours',
-          icon: <Lock className="w-5 h-5" />,
-        });
-        e.target.value = '';
-        return;
-      }
-      
-      const isVideo = file.type.startsWith('video/');
-      
-      if (isVideo) {
-        // For videos, show the video trimmer instead of cropper
-        const videoUrl = URL.createObjectURL(file);
-        setVideoToTrim(videoUrl);
-        setShowVideoTrimmer(true);
-        // Stop camera
-        stopCamera();
-      } else {
-        // For images, use the cropper
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const dataUrl = reader.result as string;
-          setMediaToEdit({ src: dataUrl, isVideo: false });
-          setShowCropper(true);
-          // Stop camera
-          stopCamera();
-        };
-        reader.readAsDataURL(file);
-      }
+  const handleGalleryClose = () => {
+    setShowGallery(false);
+    startCamera();
+  };
+
+  const handleGallerySelect = (file: File) => {
+    setShowGallery(false);
+    
+    const isVideo = file.type.startsWith('video/');
+    
+    if (isVideo) {
+      // For videos, show the video trimmer instead of cropper
+      const videoUrl = URL.createObjectURL(file);
+      setVideoToTrim(videoUrl);
+      setShowVideoTrimmer(true);
+    } else {
+      // For images, use the cropper
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        setMediaToEdit({ src: dataUrl, isVideo: false });
+        setShowCropper(true);
+      };
+      reader.readAsDataURL(file);
     }
-    e.target.value = '';
   };
 
   const hasCapturedMedia = capturedImage || capturedVideo;
@@ -462,13 +448,14 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
     <div className="fixed inset-0 z-50 bg-black">
       {/* Hidden elements */}
       <canvas ref={canvasRef} className="hidden" />
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*,video/*"
-        className="hidden"
-        onChange={handleFileChange}
-      />
+
+      {/* Custom Gallery */}
+      {showGallery && (
+        <CustomGallery
+          onSelectPhoto={handleGallerySelect}
+          onClose={handleGalleryClose}
+        />
+      )}
 
       {/* Camera Feed, Captured Image, or Captured Video */}
       {capturedVideo ? (
