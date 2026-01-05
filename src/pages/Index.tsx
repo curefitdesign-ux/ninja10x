@@ -5,6 +5,7 @@ import AuroraBackground from '@/components/AuroraBackground';
 import PhotoUploadCard from '@/components/PhotoUploadCard';
 import WidgetLayout2 from '@/components/WidgetLayout2';
 import WidgetLayout3 from '@/components/WidgetLayout3';
+import RecentPhotosGallery from '@/components/RecentPhotosGallery';
 
 import CameraUI from '@/components/CameraUI';
 import {
@@ -73,6 +74,7 @@ const Index = () => {
   const [simulatedDate, setSimulatedDate] = useState<string | null>(null);
   const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout3');
   const [initialCaptureMode, setInitialCaptureMode] = useState<'photo' | 'video'>('photo');
+  const [showRecentGallery, setShowRecentGallery] = useState(false);
 
   useEffect(() => {
     try {
@@ -192,9 +194,18 @@ const Index = () => {
     setShowActivitySheet(true);
   };
 
-  // Handler specifically for Layout 3's add photo button
+  // Handler specifically for Layout 3's add photo button - opens gallery directly
   const handleAddPhoto = () => {
-    setShowActivitySheet(true);
+    setShowRecentGallery(true);
+  };
+
+  // Handle photo selected from gallery
+  const handleGalleryPhotoSelect = (photoDataUrl: string) => {
+    setShowRecentGallery(false);
+    // Navigate to preview with default activity - user can change in preview
+    navigate('/preview', { 
+      state: { imageUrl: photoDataUrl, isVideo: false, activity: 'Activity' } 
+    });
   };
 
   const handleActivitySelect = useCallback((activity: string) => {
@@ -496,6 +507,13 @@ const Index = () => {
           </div>
         </>
       )}
+
+      {/* Recent Photos Gallery */}
+      <RecentPhotosGallery
+        isOpen={showRecentGallery}
+        onClose={() => setShowRecentGallery(false)}
+        onSelectPhoto={handleGalleryPhotoSelect}
+      />
 
       {/* Camera UI */}
       {showCamera && selectedActivity && (
