@@ -11,13 +11,15 @@ interface CameraUIProps {
   onCapture: (mediaDataUrl: string, isVideo?: boolean) => void;
   onClose: () => void;
   initialCaptureMode?: 'photo' | 'video';
+  /** When true, opens the custom gallery immediately (skips activity sheet flow). */
+  openGalleryOnMount?: boolean;
 }
 
 type TimerOption = 0 | 5 | 10 | 15;
 
 type CaptureMode = 'photo' | 'video';
 
-const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode = 'photo' }: CameraUIProps) => {
+const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode = 'photo', openGalleryOnMount = false }: CameraUIProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playbackVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -40,7 +42,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
   const [countdownActive, setCountdownActive] = useState(false);
   const [countdownValue, setCountdownValue] = useState(0);
   const [captureMode, setCaptureMode] = useState<CaptureMode>(initialCaptureMode);
-  const [showGallery, setShowGallery] = useState(false);
+  const [showGallery, setShowGallery] = useState(openGalleryOnMount);
   const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -94,30 +96,30 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
 
   // Start camera only when not in cropper mode and no captured media
   useEffect(() => {
-    if (!showCropper && !capturedImage && !capturedVideo && !showVideoTrimmer) {
+    if (!showGallery && !showCropper && !capturedImage && !capturedVideo && !showVideoTrimmer) {
       startCamera();
     }
-    
+
     return () => {
       // Cleanup on unmount
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [facingMode, showCropper, capturedImage, capturedVideo, showVideoTrimmer]);
+  }, [facingMode, showGallery, showCropper, capturedImage, capturedVideo, showVideoTrimmer]);
 
   // Auto disconnect camera when component becomes inactive/closes
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
         stopCamera();
-      } else if (!showCropper && !capturedImage && !capturedVideo && !showVideoTrimmer) {
+      } else if (!showGallery && !showCropper && !capturedImage && !capturedVideo && !showVideoTrimmer) {
         startCamera();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       // Ensure camera is stopped when component unmounts
@@ -125,7 +127,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [stream, showCropper, capturedImage, capturedVideo, showVideoTrimmer]);
+  }, [stream, showGallery, showCropper, capturedImage, capturedVideo, showVideoTrimmer]);
 
   const handleFlipCamera = () => {
     setFacingMode(prev => prev === 'user' ? 'environment' : 'user');

@@ -187,14 +187,33 @@ const Index = () => {
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
   const currentDay = (photos.length % 3) + 1;
 
+  const getDefaultActivity = useCallback(() => {
+    // When skipping activity selection, fall back to the most recent activity or a sensible default.
+    return photos[photos.length - 1]?.activity || 'Running';
+  }, [photos]);
+
+  const openGalleryFlow = useCallback(() => {
+    const activity = getDefaultActivity();
+    setSelectedActivity(activity);
+    setInitialCaptureMode('photo');
+    setShowActivitySheet(false);
+    setSheetPhase('select');
+    setAcknowledgedActivity(null);
+
+    setCameraEntering(true);
+    setShowCamera(true);
+    setTimeout(() => setCameraEntering(false), 500);
+  }, [getDefaultActivity]);
+
   const handleCardClick = () => {
-    // Always open activity sheet to add new photo (allows multiple uploads)
-    setShowActivitySheet(true);
+    // Open gallery directly (skip activity bottom sheet)
+    openGalleryFlow();
   };
 
   // Handler specifically for Layout 3's add photo button
   const handleAddPhoto = () => {
-    setShowActivitySheet(true);
+    // Open gallery directly (skip activity bottom sheet)
+    openGalleryFlow();
   };
 
   const handleActivitySelect = useCallback((activity: string) => {
@@ -515,6 +534,7 @@ const Index = () => {
               setInstantCamera(false);
             }}
             initialCaptureMode={initialCaptureMode}
+            openGalleryOnMount
           />
         </div>
       )}
