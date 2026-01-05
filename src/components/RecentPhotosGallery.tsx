@@ -80,48 +80,38 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
     }
 
     setIsProcessing(true);
-    const now = new Date();
-    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const validPhotos: GalleryPhoto[] = [];
     let processedCount = 0;
     const totalFiles = files.length;
 
     Array.from(files).forEach((file, index) => {
       const fileDate = new Date(file.lastModified);
-      
-      if (fileDate >= twentyFourHoursAgo) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          if (event.target?.result) {
-            validPhotos.push({
-              id: `photo-${index}-${Date.now()}`,
-              dataUrl: event.target.result as string,
-              webPath: '',
-              timestamp: fileDate,
-            });
-            
-            validPhotos.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-            setPhotos([...validPhotos]);
-          }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          validPhotos.push({
+            id: `photo-${index}-${Date.now()}`,
+            dataUrl: event.target.result as string,
+            webPath: '',
+            timestamp: fileDate,
+          });
           
-          processedCount++;
-          if (processedCount === totalFiles) {
-            setIsProcessing(false);
-          }
-        };
-        reader.onerror = () => {
-          processedCount++;
-          if (processedCount === totalFiles) {
-            setIsProcessing(false);
-          }
-        };
-        reader.readAsDataURL(file);
-      } else {
+          validPhotos.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+          setPhotos([...validPhotos]);
+        }
+        
         processedCount++;
         if (processedCount === totalFiles) {
           setIsProcessing(false);
         }
-      }
+      };
+      reader.onerror = () => {
+        processedCount++;
+        if (processedCount === totalFiles) {
+          setIsProcessing(false);
+        }
+      };
+      reader.readAsDataURL(file);
     });
 
     if (totalFiles === 0) {
@@ -202,8 +192,8 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
             </button>
             
             <div className="text-center">
-              <h3 className="text-lg font-bold text-foreground">Recent Photos</h3>
-              <p className="text-xs text-foreground/50">Last 24 hours only</p>
+              <h3 className="text-lg font-bold text-foreground">Gallery</h3>
+              <p className="text-xs text-foreground/50">Select a photo</p>
             </div>
             
             <button
@@ -234,10 +224,9 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
                   <ImageIcon className="w-10 h-10 text-foreground/30" />
                 </div>
                 <div className="text-center">
-                  <p className="text-foreground font-semibold mb-1">No Recent Photos</p>
+                  <p className="text-foreground font-semibold mb-1">No Photos</p>
                   <p className="text-foreground/50 text-sm">
-                    Only photos taken in the last 24 hours can be uploaded. 
-                    Take a new photo of your activity!
+                    Select photos from your gallery or take a new one.
                   </p>
                 </div>
                 <div className="flex gap-3 mt-4">
@@ -273,11 +262,6 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
                       className="w-full h-full object-cover"
                     />
                     
-                    {/* Time badge */}
-                    <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 rounded text-[10px] text-white">
-                      {formatTimeAgo(photo.timestamp)}
-                    </div>
-                    
                     {/* Selection indicator */}
                     <div className={`absolute inset-0 transition-all ${
                       selectedPhoto === photo.id 
@@ -300,8 +284,8 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
           <div className="p-4 border-t border-foreground/10 bg-foreground/5 flex items-center justify-between">
             <p className="text-xs text-foreground/40">
               {photos.length > 0 
-                ? `${photos.length} photo${photos.length !== 1 ? 's' : ''} from last 24h`
-                : 'Select recent photos'
+                ? `${photos.length} photo${photos.length !== 1 ? 's' : ''} selected`
+                : 'Select photos'
               }
             </p>
             <div className="flex gap-2">
