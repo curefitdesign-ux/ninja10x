@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { X, Check, Image as ImageIcon } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { X, Check, Image as ImageIcon, RefreshCw } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 
 interface RecentPhotosGalleryProps {
@@ -17,40 +17,57 @@ interface GalleryPhoto {
 const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGalleryProps) => {
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [hasTriggered, setHasTriggered] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Request access to device photos and filter last 24 hours
+  // Auto-trigger file picker immediately when opened
+  const triggerFilePicker = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''; // Reset to allow re-selection
+      fileInputRef.current.click();
+    }
+  }, []);
+
   useEffect(() => {
-    if (isOpen) {
-      setIsLoading(true);
+    if (isOpen && !hasTriggered) {
       setPhotos([]);
       setSelectedPhoto(null);
+      setHasTriggered(true);
       
-      // Auto-trigger file picker on open
-      setTimeout(() => {
-        fileInputRef.current?.click();
-        setIsLoading(false);
-      }, 300);
+      // Immediate trigger for file picker
+      requestAnimationFrame(() => {
+        triggerFilePicker();
+      });
     }
-  }, [isOpen]);
+    
+    if (!isOpen) {
+      setHasTriggered(false);
+    }
+  }, [isOpen, hasTriggered, triggerFilePicker]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) {
-      setIsLoading(false);
+      // User cancelled - close if no photos loaded
+      if (photos.length === 0) {
+        onClose();
+      }
       return;
     }
 
+    setIsProcessing(true);
     const now = new Date();
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const validPhotos: GalleryPhoto[] = [];
+    let processedCount = 0;
+    const totalFiles = files.length;
 
     Array.from(files).forEach((file, index) => {
-      // Check if file was modified/created within last 24 hours
       const fileDate = new Date(file.lastModified);
       
+      // Check if file was modified/created within last 24 hours
       if (fileDate >= twentyFourHoursAgo) {
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -65,13 +82,31 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
             validPhotos.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
             setPhotos([...validPhotos]);
           }
+          
+          processedCount++;
+          if (processedCount === totalFiles) {
+            setIsProcessing(false);
+          }
+        };
+        reader.onerror = () => {
+          processedCount++;
+          if (processedCount === totalFiles) {
+            setIsProcessing(false);
+          }
         };
         reader.readAsDataURL(file);
+      } else {
+        processedCount++;
+        if (processedCount === totalFiles) {
+          setIsProcessing(false);
+        }
       }
     });
 
-    setIsLoading(false);
-    setHasPermission(true);
+    // If no files to process
+    if (totalFiles === 0) {
+      setIsProcessing(false);
+    }
   };
 
   const handlePhotoTap = (photo: GalleryPhoto) => {
@@ -103,13 +138,12 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
 
   return (
     <>
-      {/* Hidden file input for gallery access */}
+      {/* Hidden file input - auto triggers on open */}
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
         multiple
-        capture={undefined}
         className="hidden"
         onChange={handleFileSelect}
       />
@@ -155,10 +189,10 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-2">
-            {isLoading ? (
+            {isProcessing ? (
               <div className="flex flex-col items-center justify-center h-full gap-4">
                 <div className="w-12 h-12 rounded-full border-2 border-foreground/20 border-t-foreground animate-spin" />
-                <p className="text-foreground/50 text-sm">Loading photos...</p>
+                <p className="text-foreground/50 text-sm">Processing photos...</p>
               </div>
             ) : photos.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full gap-4 px-8">
@@ -173,9 +207,10 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
                   </p>
                 </div>
                 <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="mt-4 px-6 py-3 bg-foreground/10 rounded-full text-foreground font-medium"
+                  onClick={triggerFilePicker}
+                  className="mt-4 px-6 py-3 bg-foreground/10 rounded-full text-foreground font-medium flex items-center gap-2"
                 >
+                  <RefreshCw className="w-4 h-4" />
                   Select Photos
                 </button>
               </div>
@@ -216,14 +251,23 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
             )}
           </div>
 
-          {/* Footer info */}
-          <div className="p-4 border-t border-foreground/10 bg-foreground/5">
-            <p className="text-center text-xs text-foreground/40">
+          {/* Footer with add more button */}
+          <div className="p-4 border-t border-foreground/10 bg-foreground/5 flex items-center justify-between">
+            <p className="text-xs text-foreground/40">
               {photos.length > 0 
-                ? `${photos.length} photo${photos.length !== 1 ? 's' : ''} from the last 24 hours`
-                : 'Capture your fitness moments while they\'re fresh!'
+                ? `${photos.length} photo${photos.length !== 1 ? 's' : ''} from last 24h`
+                : 'Select recent photos'
               }
             </p>
+            {photos.length > 0 && (
+              <button
+                onClick={triggerFilePicker}
+                className="px-4 py-2 bg-foreground/10 rounded-full text-xs text-foreground font-medium flex items-center gap-1.5"
+              >
+                <RefreshCw className="w-3 h-3" />
+                Add More
+              </button>
+            )}
           </div>
         </div>
       </div>
