@@ -7,7 +7,6 @@ import WidgetLayout2 from '@/components/WidgetLayout2';
 import WidgetLayout3 from '@/components/WidgetLayout3';
 
 import CameraUI from '@/components/CameraUI';
-import CustomGallery from '@/components/CustomGallery';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,7 +67,6 @@ const Index = () => {
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
-  const [showGallery, setShowGallery] = useState(false);
   const [sheetPhase, setSheetPhase] = useState<'select' | 'acknowledge' | 'exit'>('select');
   const [acknowledgedActivity, setAcknowledgedActivity] = useState<{ name: string; icon: string } | null>(null);
   const [cameraEntering, setCameraEntering] = useState(false);
@@ -189,47 +187,14 @@ const Index = () => {
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
   const currentDay = (photos.length % 3) + 1;
 
-  const getDefaultActivity = useCallback(() => {
-    // When skipping activity selection, fall back to the most recent activity or a sensible default.
-    return photos[photos.length - 1]?.activity || 'Running';
-  }, [photos]);
-
-  const openGalleryFlow = useCallback(() => {
-    const activity = getDefaultActivity();
-    setSelectedActivity(activity);
-    setShowGallery(true);
-  }, [getDefaultActivity]);
-
   const handleCardClick = () => {
-    // Open gallery directly (skip activity bottom sheet and camera)
-    openGalleryFlow();
+    // Always open activity sheet to add new photo (allows multiple uploads)
+    setShowActivitySheet(true);
   };
 
   // Handler specifically for Layout 3's add photo button
   const handleAddPhoto = () => {
-    // Open gallery directly (skip activity bottom sheet and camera)
-    openGalleryFlow();
-  };
-
-  const handleGalleryClose = () => {
-    setShowGallery(false);
-    setSelectedActivity(null);
-  };
-
-  const handleGallerySelect = (file: File) => {
-    setShowGallery(false);
-    
-    const isVideo = file.type.startsWith('video/');
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const dataUrl = reader.result as string;
-      // Navigate to preview page with the selected media
-      navigate('/preview', { 
-        state: { imageUrl: dataUrl, isVideo, activity: selectedActivity } 
-      });
-      setSelectedActivity(null);
-    };
-    reader.readAsDataURL(file);
+    setShowActivitySheet(true);
   };
 
   const handleActivitySelect = useCallback((activity: string) => {
@@ -530,14 +495,6 @@ const Index = () => {
             </div>
           </div>
         </>
-      )}
-
-      {/* Custom Gallery (opens directly on Add Photo tap) */}
-      {showGallery && (
-        <CustomGallery
-          onSelectPhoto={handleGallerySelect}
-          onClose={handleGalleryClose}
-        />
       )}
 
       {/* Camera UI */}

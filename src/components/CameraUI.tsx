@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, SwitchCamera, Image as ImageIcon, Check, RotateCcw, Timer, Zap, ZapOff } from 'lucide-react';
 import ImageCropper from './ImageCropper';
 import VideoTrimmer from './VideoTrimmer';
-import CustomGallery from './CustomGallery';
 
 interface CameraUIProps {
   activity: string;
@@ -11,18 +10,17 @@ interface CameraUIProps {
   onCapture: (mediaDataUrl: string, isVideo?: boolean) => void;
   onClose: () => void;
   initialCaptureMode?: 'photo' | 'video';
-  /** When true, opens the custom gallery immediately (skips activity sheet flow). */
-  openGalleryOnMount?: boolean;
 }
 
 type TimerOption = 0 | 5 | 10 | 15;
 
 type CaptureMode = 'photo' | 'video';
 
-const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode = 'photo', openGalleryOnMount = false }: CameraUIProps) => {
+const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode = 'photo' }: CameraUIProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playbackVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -42,7 +40,6 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
   const [countdownActive, setCountdownActive] = useState(false);
   const [countdownValue, setCountdownValue] = useState(0);
   const [captureMode, setCaptureMode] = useState<CaptureMode>(initialCaptureMode);
-  const [showGallery, setShowGallery] = useState(openGalleryOnMount);
   const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -96,30 +93,30 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
 
   // Start camera only when not in cropper mode and no captured media
   useEffect(() => {
-    if (!showGallery && !showCropper && !capturedImage && !capturedVideo && !showVideoTrimmer) {
+    if (!showCropper && !capturedImage && !capturedVideo && !showVideoTrimmer) {
       startCamera();
     }
-
+    
     return () => {
       // Cleanup on unmount
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [facingMode, showGallery, showCropper, capturedImage, capturedVideo, showVideoTrimmer]);
+  }, [facingMode, showCropper, capturedImage, capturedVideo, showVideoTrimmer]);
 
   // Auto disconnect camera when component becomes inactive/closes
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
         stopCamera();
-      } else if (!showGallery && !showCropper && !capturedImage && !capturedVideo && !showVideoTrimmer) {
+      } else if (!showCropper && !capturedImage && !capturedVideo && !showVideoTrimmer) {
         startCamera();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-
+    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       // Ensure camera is stopped when component unmounts
@@ -127,7 +124,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [stream, showGallery, showCropper, capturedImage, capturedVideo, showVideoTrimmer]);
+  }, [stream, showCropper, capturedImage, capturedVideo, showVideoTrimmer]);
 
   const handleFlipCamera = () => {
     setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
@@ -413,35 +410,35 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
   };
 
   const handleGalleryClick = () => {
-    setShowGallery(true);
-    stopCamera();
+    fileInputRef.current?.click();
   };
 
-  const handleGalleryClose = () => {
-    setShowGallery(false);
-    startCamera();
-  };
-
-  const handleGallerySelect = (file: File) => {
-    setShowGallery(false);
-    
-    const isVideo = file.type.startsWith('video/');
-    
-    if (isVideo) {
-      // For videos, show the video trimmer instead of cropper
-      const videoUrl = URL.createObjectURL(file);
-      setVideoToTrim(videoUrl);
-      setShowVideoTrimmer(true);
-    } else {
-      // For images, use the cropper
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUrl = reader.result as string;
-        setMediaToEdit({ src: dataUrl, isVideo: false });
-        setShowCropper(true);
-      };
-      reader.readAsDataURL(file);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const isVideo = file.type.startsWith('video/');
+      
+      if (isVideo) {
+        // For videos, show the video trimmer instead of cropper
+        const videoUrl = URL.createObjectURL(file);
+        setVideoToTrim(videoUrl);
+        setShowVideoTrimmer(true);
+        // Stop camera
+        stopCamera();
+      } else {
+        // For images, use the cropper
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const dataUrl = reader.result as string;
+          setMediaToEdit({ src: dataUrl, isVideo: false });
+          setShowCropper(true);
+          // Stop camera
+          stopCamera();
+        };
+        reader.readAsDataURL(file);
+      }
     }
+    e.target.value = '';
   };
 
   const hasCapturedMedia = capturedImage || capturedVideo;
@@ -450,14 +447,13 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
     <div className="fixed inset-0 z-50 bg-black">
       {/* Hidden elements */}
       <canvas ref={canvasRef} className="hidden" />
-
-      {/* Custom Gallery */}
-      {showGallery && (
-        <CustomGallery
-          onSelectPhoto={handleGallerySelect}
-          onClose={handleGalleryClose}
-        />
-      )}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,video/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
 
       {/* Camera Feed, Captured Image, or Captured Video */}
       {capturedVideo ? (
