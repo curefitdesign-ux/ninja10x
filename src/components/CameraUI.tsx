@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, SwitchCamera, Image as ImageIcon, Check, RotateCcw, Timer, Zap, ZapOff } from 'lucide-react';
+import { X, SwitchCamera, Image as ImageIcon, Check, RotateCcw, Timer, Zap, ZapOff, Lock } from 'lucide-react';
+import { toast } from 'sonner';
 import ImageCropper from './ImageCropper';
 import VideoTrimmer from './VideoTrimmer';
 
@@ -422,7 +423,10 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
       const twentyFourHoursMs = 24 * 60 * 60 * 1000;
       
       if (now - fileTime > twentyFourHoursMs) {
-        alert('Please select a photo or video captured within the last 24 hours.');
+        toast.error('Photo too old', {
+          description: 'Please select a photo captured within the last 24 hours',
+          icon: <Lock className="w-5 h-5" />,
+        });
         e.target.value = '';
         return;
       }
