@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Check, Image as ImageIcon, RefreshCw, Camera } from 'lucide-react';
+import { X, Image as ImageIcon, RefreshCw, Camera } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { nativeGalleryService, GalleryPhoto } from '@/services/native-gallery-service';
 import { Capacitor } from '@capacitor/core';
@@ -12,7 +12,6 @@ interface RecentPhotosGalleryProps {
 
 const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGalleryProps) => {
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
-  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasTriggered, setHasTriggered] = useState(false);
@@ -55,7 +54,6 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
   useEffect(() => {
     if (isOpen && !hasTriggered) {
       setPhotos([]);
-      setSelectedPhoto(null);
       setHasTriggered(true);
       
       // Auto-trigger photo fetch
@@ -120,16 +118,8 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
   };
 
   const handlePhotoTap = (photo: GalleryPhoto) => {
-    triggerHaptic('light');
-    setSelectedPhoto(photo.id === selectedPhoto ? null : photo.id);
-  };
-
-  const handleConfirm = () => {
-    const photo = photos.find(p => p.id === selectedPhoto);
-    if (photo) {
-      triggerHaptic('medium');
-      onSelectPhoto(photo.dataUrl);
-    }
+    triggerHaptic('medium');
+    onSelectPhoto(photo.dataUrl);
   };
 
   const handleTakePhoto = async () => {
@@ -193,20 +183,10 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
             
             <div className="text-center">
               <h3 className="text-lg font-bold text-foreground">Gallery</h3>
-              <p className="text-xs text-foreground/50">Select a photo</p>
+              <p className="text-xs text-foreground/50">Tap to select</p>
             </div>
             
-            <button
-              onClick={handleConfirm}
-              disabled={!selectedPhoto}
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                selectedPhoto 
-                  ? 'bg-green-500 text-white' 
-                  : 'bg-foreground/10 text-foreground/30'
-              }`}
-            >
-              <Check className="w-5 h-5" />
-            </button>
+            <div className="w-10" />
           </div>
 
           {/* Content */}
@@ -254,26 +234,13 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
                   <button
                     key={photo.id}
                     onClick={() => handlePhotoTap(photo)}
-                    className="relative aspect-square overflow-hidden rounded-lg"
+                    className="relative aspect-square overflow-hidden rounded-lg hover:opacity-80 active:scale-95 transition-all"
                   >
                     <img
                       src={photo.dataUrl}
                       alt=""
                       className="w-full h-full object-cover"
                     />
-                    
-                    {/* Selection indicator */}
-                    <div className={`absolute inset-0 transition-all ${
-                      selectedPhoto === photo.id 
-                        ? 'bg-green-500/30 ring-2 ring-green-500 ring-inset' 
-                        : ''
-                    }`}>
-                      {selectedPhoto === photo.id && (
-                        <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
-                          <Check className="w-4 h-4 text-white" />
-                        </div>
-                      )}
-                    </div>
                   </button>
                 ))}
               </div>
