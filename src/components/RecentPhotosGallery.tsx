@@ -104,9 +104,14 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
         onChange={handleFileSelect}
       />
 
-      {/* Overlay */}
+      {/* Overlay with blur */}
       <div 
-        className="fixed inset-0 bg-black/60 z-40 transition-opacity duration-300"
+        className="fixed inset-0 z-40 transition-all duration-300"
+        style={{
+          background: 'rgba(0, 0, 0, 0.4)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+        }}
         onClick={onClose}
       />
 
