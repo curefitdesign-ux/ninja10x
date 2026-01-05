@@ -550,6 +550,7 @@ const Preview = () => {
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
+                scrollBehavior: 'smooth',
               }}
             >
               {FRAMES.map((frame, index) => {
@@ -655,15 +656,18 @@ const Preview = () => {
 
       {/* Floating CTA - Always visible with DONE and Share */}
       <div 
-        className={`fixed bottom-0 left-0 right-0 z-30 px-5 pb-8 pt-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`} 
+        className="fixed bottom-0 left-0 right-0 z-50 px-5 pb-8 pt-6 pointer-events-none" 
+        style={{ 
+          background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 40%, rgba(0,0,0,0.4) 70%, transparent 100%)',
+        }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 pointer-events-auto">
           {/* DONE Button */}
           <button 
             onClick={handleSaveWithTemplate}
             disabled={isSaving}
-            className={`flex-1 bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce shadow-lg ${tappedElement === 'done-btn' ? 'animate-liquid-tap' : ''}`}
-            style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}
+            className={`flex-1 bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce shadow-2xl ${tappedElement === 'done-btn' ? 'animate-liquid-tap' : ''}`}
+            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
           >
             <span className="text-black font-bold text-lg">
               {isSaving ? 'Saving...' : 'DONE'}
@@ -674,7 +678,8 @@ const Preview = () => {
           <button 
             onClick={handleSaveClick}
             disabled={isSaving}
-            className={`w-14 h-14 flex items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 tap-bounce ${tappedElement === 'share-btn' ? 'animate-liquid-tap' : ''}`}
+            className={`w-14 h-14 flex items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 tap-bounce shadow-2xl ${tappedElement === 'share-btn' ? 'animate-liquid-tap' : ''}`}
+            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
           >
             <Share2 className="w-6 h-6 text-white" />
           </button>
