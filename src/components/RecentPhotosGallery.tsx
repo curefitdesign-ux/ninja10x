@@ -1,17 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Check, Image as ImageIcon, RefreshCw } from 'lucide-react';
+import { X, Check, Image as ImageIcon, RefreshCw, Camera } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
+import { nativeGalleryService, GalleryPhoto } from '@/services/native-gallery-service';
+import { Capacitor } from '@capacitor/core';
 
 interface RecentPhotosGalleryProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectPhoto: (photoDataUrl: string) => void;
-}
-
-interface GalleryPhoto {
-  id: string;
-  dataUrl: string;
-  timestamp: Date;
 }
 
 const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGalleryProps) => {
@@ -20,15 +16,41 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasTriggered, setHasTriggered] = useState(false);
+  const [isNative, setIsNative] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-trigger file picker immediately when opened
-  const triggerFilePicker = useCallback(() => {
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''; // Reset to allow re-selection
-      fileInputRef.current.click();
-    }
+  // Check if running on native platform
+  useEffect(() => {
+    setIsNative(Capacitor.isNativePlatform());
   }, []);
+
+  // Auto-fetch photos when opened
+  const fetchPhotos = useCallback(async () => {
+    if (isNative) {
+      // Native: Use Capacitor Camera plugin
+      setIsLoading(true);
+      try {
+        const hasPermission = await nativeGalleryService.checkPermissions();
+        if (!hasPermission) {
+          await nativeGalleryService.requestPermissions();
+        }
+        
+        // Pick multiple photos from gallery
+        const galleryPhotos = await nativeGalleryService.pickMultiplePhotos(20);
+        setPhotos(galleryPhotos);
+      } catch (error) {
+        console.error('Failed to fetch photos:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Web: Trigger file picker
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+        fileInputRef.current.click();
+      }
+    }
+  }, [isNative]);
 
   useEffect(() => {
     if (isOpen && !hasTriggered) {
@@ -36,21 +58,21 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
       setSelectedPhoto(null);
       setHasTriggered(true);
       
-      // Immediate trigger for file picker
+      // Auto-trigger photo fetch
       requestAnimationFrame(() => {
-        triggerFilePicker();
+        fetchPhotos();
       });
     }
     
     if (!isOpen) {
       setHasTriggered(false);
     }
-  }, [isOpen, hasTriggered, triggerFilePicker]);
+  }, [isOpen, hasTriggered, fetchPhotos]);
 
+  // Web fallback: Handle file input
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) {
-      // User cancelled - close if no photos loaded
       if (photos.length === 0) {
         onClose();
       }
@@ -67,7 +89,6 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
     Array.from(files).forEach((file, index) => {
       const fileDate = new Date(file.lastModified);
       
-      // Check if file was modified/created within last 24 hours
       if (fileDate >= twentyFourHoursAgo) {
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -75,10 +96,10 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
             validPhotos.push({
               id: `photo-${index}-${Date.now()}`,
               dataUrl: event.target.result as string,
+              webPath: '',
               timestamp: fileDate,
             });
             
-            // Sort by most recent first
             validPhotos.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
             setPhotos([...validPhotos]);
           }
@@ -103,7 +124,6 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
       }
     });
 
-    // If no files to process
     if (totalFiles === 0) {
       setIsProcessing(false);
     }
@@ -119,6 +139,16 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
     if (photo) {
       triggerHaptic('medium');
       onSelectPhoto(photo.dataUrl);
+    }
+  };
+
+  const handleTakePhoto = async () => {
+    if (isNative) {
+      const photo = await nativeGalleryService.takePhoto();
+      if (photo) {
+        triggerHaptic('medium');
+        onSelectPhoto(photo.dataUrl);
+      }
     }
   };
 
@@ -138,15 +168,17 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
 
   return (
     <>
-      {/* Hidden file input - auto triggers on open */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        multiple
-        className="hidden"
-        onChange={handleFileSelect}
-      />
+      {/* Hidden file input for web fallback */}
+      {!isNative && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={handleFileSelect}
+        />
+      )}
 
       {/* Overlay */}
       <div 
@@ -189,10 +221,12 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-2">
-            {isProcessing ? (
+            {isLoading || isProcessing ? (
               <div className="flex flex-col items-center justify-center h-full gap-4">
                 <div className="w-12 h-12 rounded-full border-2 border-foreground/20 border-t-foreground animate-spin" />
-                <p className="text-foreground/50 text-sm">Processing photos...</p>
+                <p className="text-foreground/50 text-sm">
+                  {isLoading ? 'Loading gallery...' : 'Processing photos...'}
+                </p>
               </div>
             ) : photos.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full gap-4 px-8">
@@ -206,13 +240,24 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
                     Take a new photo of your activity!
                   </p>
                 </div>
-                <button
-                  onClick={triggerFilePicker}
-                  className="mt-4 px-6 py-3 bg-foreground/10 rounded-full text-foreground font-medium flex items-center gap-2"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  Select Photos
-                </button>
+                <div className="flex gap-3 mt-4">
+                  {isNative && (
+                    <button
+                      onClick={handleTakePhoto}
+                      className="px-6 py-3 bg-green-500 rounded-full text-white font-medium flex items-center gap-2"
+                    >
+                      <Camera className="w-4 h-4" />
+                      Take Photo
+                    </button>
+                  )}
+                  <button
+                    onClick={fetchPhotos}
+                    className="px-6 py-3 bg-foreground/10 rounded-full text-foreground font-medium flex items-center gap-2"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Select Photos
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-1">
@@ -251,7 +296,7 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
             )}
           </div>
 
-          {/* Footer with add more button */}
+          {/* Footer */}
           <div className="p-4 border-t border-foreground/10 bg-foreground/5 flex items-center justify-between">
             <p className="text-xs text-foreground/40">
               {photos.length > 0 
@@ -259,15 +304,26 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
                 : 'Select recent photos'
               }
             </p>
-            {photos.length > 0 && (
-              <button
-                onClick={triggerFilePicker}
-                className="px-4 py-2 bg-foreground/10 rounded-full text-xs text-foreground font-medium flex items-center gap-1.5"
-              >
-                <RefreshCw className="w-3 h-3" />
-                Add More
-              </button>
-            )}
+            <div className="flex gap-2">
+              {isNative && (
+                <button
+                  onClick={handleTakePhoto}
+                  className="px-4 py-2 bg-green-500/20 rounded-full text-xs text-green-400 font-medium flex items-center gap-1.5"
+                >
+                  <Camera className="w-3 h-3" />
+                  Camera
+                </button>
+              )}
+              {photos.length > 0 && (
+                <button
+                  onClick={fetchPhotos}
+                  className="px-4 py-2 bg-foreground/10 rounded-full text-xs text-foreground font-medium flex items-center gap-1.5"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  Add More
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
