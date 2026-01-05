@@ -550,7 +550,6 @@ const Preview = () => {
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
-                scrollBehavior: 'smooth',
               }}
             >
               {FRAMES.map((frame, index) => {
@@ -562,7 +561,7 @@ const Preview = () => {
                 
                 return (
                   <div 
-                    key={`${frame}-${index}`}
+                    key={frame}
                     ref={(el) => {
                       frameItemRefs.current[index] = el;
                     }}
@@ -576,16 +575,10 @@ const Preview = () => {
                       width: 'calc(75vw)',
                       transform: `scale(${scale})`,
                       opacity: elementsHidden && !isActiveFrame ? 0 : opacity,
-                      transition: 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.35s ease-out',
-                      willChange: 'transform, opacity',
+                      transition: 'transform 0.15s ease-out, opacity 0.15s ease-out',
                     }}
                   >
-                    <div 
-                      className="w-full"
-                      style={{
-                        transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                      }}
-                    >
+                    <div className="w-full">
                       {frame === 'shaky' && <ShakyFrame {...frameProps} />}
                       {frame === 'journal' && <JournalFrame {...frameProps} />}
                       {frame === 'vogue' && <VogueFrame {...frameProps} />}
@@ -656,18 +649,20 @@ const Preview = () => {
 
       {/* Floating CTA - Always visible with DONE and Share */}
       <div 
-        className="fixed bottom-0 left-0 right-0 z-50 px-5 pb-8 pt-6 pointer-events-none" 
+        className="fixed left-0 right-0 z-[100] px-5 pt-4"
         style={{ 
-          background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 40%, rgba(0,0,0,0.4) 70%, transparent 100%)',
+          bottom: 0,
+          paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 24px)',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.9) 50%, rgba(0,0,0,0.6) 80%, transparent 100%)',
         }}
       >
-        <div className="flex items-center gap-3 pointer-events-auto">
+        <div className="flex items-center gap-3">
           {/* DONE Button */}
           <button 
             onClick={handleSaveWithTemplate}
             disabled={isSaving}
-            className={`flex-1 bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce shadow-2xl ${tappedElement === 'done-btn' ? 'animate-liquid-tap' : ''}`}
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
+            className={`flex-1 bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce ${tappedElement === 'done-btn' ? 'animate-liquid-tap' : ''}`}
+            style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
           >
             <span className="text-black font-bold text-lg">
               {isSaving ? 'Saving...' : 'DONE'}
@@ -678,8 +673,8 @@ const Preview = () => {
           <button 
             onClick={handleSaveClick}
             disabled={isSaving}
-            className={`w-14 h-14 flex items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 tap-bounce shadow-2xl ${tappedElement === 'share-btn' ? 'animate-liquid-tap' : ''}`}
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
+            className={`w-14 h-14 flex items-center justify-center rounded-2xl bg-white/25 backdrop-blur-md border border-white/30 tap-bounce ${tappedElement === 'share-btn' ? 'animate-liquid-tap' : ''}`}
+            style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}
           >
             <Share2 className="w-6 h-6 text-white" />
           </button>
