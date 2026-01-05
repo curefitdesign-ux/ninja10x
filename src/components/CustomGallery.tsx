@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Lock, ChevronLeft } from 'lucide-react';
-import { toast } from 'sonner';
+import { Lock, ChevronLeft } from 'lucide-react';
 
 interface GalleryPhoto {
   file: File;
@@ -57,18 +56,6 @@ const CustomGallery = ({ onSelectPhoto, onClose }: CustomGalleryProps) => {
   };
 
   const handlePhotoClick = (photo: GalleryPhoto) => {
-    if (!photo.isRecent) {
-      const hoursAgo = Math.floor((Date.now() - photo.timestamp) / (1000 * 60 * 60));
-      const daysAgo = Math.floor(hoursAgo / 24);
-      
-      toast.error('Photo too old', {
-        description: daysAgo > 0 
-          ? `This photo is ${daysAgo} day${daysAgo > 1 ? 's' : ''} old. Please select a photo from the last 24 hours.`
-          : `This photo is ${hoursAgo} hours old. Please select a photo from the last 24 hours.`,
-        icon: <Lock className="w-5 h-5" />,
-      });
-      return;
-    }
     setSelectedPhoto(photo);
   };
 
@@ -90,8 +77,8 @@ const CustomGallery = ({ onSelectPhoto, onClose }: CustomGalleryProps) => {
     return `${days}d ago`;
   };
 
+  // Only show recent photos (last 24 hours)
   const recentPhotos = photos.filter(p => p.isRecent);
-  const olderPhotos = photos.filter(p => !p.isRecent);
 
   // Cleanup URLs on unmount
   useEffect(() => {
@@ -121,7 +108,7 @@ const CustomGallery = ({ onSelectPhoto, onClose }: CustomGalleryProps) => {
           <ChevronLeft className="w-5 h-5" />
           <span>Cancel</span>
         </button>
-        <h1 className="text-white text-[17px] font-semibold">Recents</h1>
+        <h1 className="text-white text-[17px] font-semibold">Last 24 Hours</h1>
         <div className="w-16" /> {/* Spacer for centering */}
       </div>
 
@@ -134,137 +121,77 @@ const CustomGallery = ({ onSelectPhoto, onClose }: CustomGalleryProps) => {
               <p className="text-sm text-white/40">Hold to select multiple</p>
             </div>
           </div>
-        ) : photos.length === 0 ? (
+        ) : recentPhotos.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-white/60 text-center px-8">
-              <p className="text-lg mb-2">No photos selected</p>
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 mb-4">
+                <Lock className="w-8 h-8 text-white/50" />
+              </div>
+              <p className="text-lg font-medium mb-2">No recent photos</p>
+              <p className="text-white/40 text-sm mb-6">
+                You can only upload photos taken in the last 24 hours
+              </p>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="mt-4 px-6 py-2 bg-[#0A84FF] text-white rounded-full text-sm font-medium"
+                className="px-6 py-2 bg-[#0A84FF] text-white rounded-full text-sm font-medium"
               >
-                Select Photos
+                Select Different Photos
               </button>
             </div>
           </div>
         ) : (
           <div className="pb-20">
-            {/* Recent Photos Section (Last 24 Hours) */}
-            {recentPhotos.length > 0 && (
-              <div>
-                <div className="px-4 py-3 bg-black/50 sticky top-0 z-10 backdrop-blur-sm">
-                  <h2 className="text-white text-[15px] font-semibold">
-                    Last 24 Hours
-                  </h2>
-                  <p className="text-white/50 text-[13px]">{recentPhotos.length} items</p>
-                </div>
-                <div className="grid grid-cols-3 gap-[2px]">
-                  {recentPhotos.map((photo, index) => (
-                    <button
-                      key={`recent-${index}`}
-                      onClick={() => handlePhotoClick(photo)}
-                      className={`relative aspect-square overflow-hidden ${
-                        selectedPhoto?.url === photo.url ? 'ring-2 ring-[#0A84FF] ring-inset' : ''
-                      }`}
-                    >
-                      {photo.file.type.startsWith('video/') ? (
-                        <video
-                          src={photo.url}
-                          className="w-full h-full object-cover"
-                          muted
-                          preload="metadata"
-                        />
-                      ) : (
-                        <img
-                          src={photo.url}
-                          alt=""
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                      )}
-                      {/* Time badge */}
-                      <div className="absolute bottom-1 left-1 bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] text-white font-medium">
-                        {formatTimeAgo(photo.timestamp)}
-                      </div>
-                      {/* Video indicator */}
-                      {photo.file.type.startsWith('video/') && (
-                        <div className="absolute bottom-1 right-1 bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] text-white">
-                          VIDEO
-                        </div>
-                      )}
-                      {/* Selection checkmark */}
-                      {selectedPhoto?.url === photo.url && (
-                        <div className="absolute top-2 right-2 w-6 h-6 bg-[#0A84FF] rounded-full flex items-center justify-center">
-                          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Older Photos Section (Locked) */}
-            {olderPhotos.length > 0 && (
-              <div className="mt-4">
-                <div className="px-4 py-3 bg-black/50 sticky top-0 z-10 backdrop-blur-sm">
-                  <h2 className="text-white/50 text-[15px] font-semibold flex items-center gap-2">
-                    <Lock className="w-4 h-4" />
-                    Older Photos
-                  </h2>
-                  <p className="text-white/30 text-[13px]">Not available for upload</p>
-                </div>
-                <div className="grid grid-cols-3 gap-[2px]">
-                  {olderPhotos.map((photo, index) => (
-                    <button
-                      key={`older-${index}`}
-                      onClick={() => handlePhotoClick(photo)}
-                      className="relative aspect-square overflow-hidden"
-                    >
-                      {photo.file.type.startsWith('video/') ? (
-                        <video
-                          src={photo.url}
-                          className="w-full h-full object-cover blur-[6px] brightness-50"
-                          muted
-                          preload="metadata"
-                        />
-                      ) : (
-                        <img
-                          src={photo.url}
-                          alt=""
-                          className="w-full h-full object-cover blur-[6px] brightness-50"
-                          loading="lazy"
-                        />
-                      )}
-                      {/* Lock overlay */}
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                        <div className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center">
-                          <Lock className="w-5 h-5 text-white/70" />
-                        </div>
-                      </div>
-                      {/* Time badge */}
-                      <div className="absolute bottom-1 left-1 bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] text-white/50 font-medium">
-                        {formatTimeAgo(photo.timestamp)}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* No recent photos message */}
-            {recentPhotos.length === 0 && olderPhotos.length > 0 && (
-              <div className="px-4 py-8 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 mb-4">
-                  <Lock className="w-8 h-8 text-white/50" />
-                </div>
-                <p className="text-white/60 text-lg font-medium mb-2">No recent photos</p>
-                <p className="text-white/40 text-sm">
-                  You can only upload photos taken in the last 24 hours
-                </p>
-              </div>
-            )}
+            {/* Recent Photos Header */}
+            <div className="px-4 py-3 bg-black/50 sticky top-0 z-10 backdrop-blur-sm">
+              <p className="text-white/50 text-[13px]">{recentPhotos.length} photo{recentPhotos.length !== 1 ? 's' : ''} available</p>
+            </div>
+            
+            {/* Photo Grid */}
+            <div className="grid grid-cols-3 gap-[2px]">
+              {recentPhotos.map((photo, index) => (
+                <button
+                  key={`recent-${index}`}
+                  onClick={() => handlePhotoClick(photo)}
+                  className={`relative aspect-square overflow-hidden ${
+                    selectedPhoto?.url === photo.url ? 'ring-2 ring-[#0A84FF] ring-inset' : ''
+                  }`}
+                >
+                  {photo.file.type.startsWith('video/') ? (
+                    <video
+                      src={photo.url}
+                      className="w-full h-full object-cover"
+                      muted
+                      preload="metadata"
+                    />
+                  ) : (
+                    <img
+                      src={photo.url}
+                      alt=""
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  )}
+                  {/* Time badge */}
+                  <div className="absolute bottom-1 left-1 bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] text-white font-medium">
+                    {formatTimeAgo(photo.timestamp)}
+                  </div>
+                  {/* Video indicator */}
+                  {photo.file.type.startsWith('video/') && (
+                    <div className="absolute bottom-1 right-1 bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] text-white">
+                      VIDEO
+                    </div>
+                  )}
+                  {/* Selection checkmark */}
+                  {selectedPhoto?.url === photo.url && (
+                    <div className="absolute top-2 right-2 w-6 h-6 bg-[#0A84FF] rounded-full flex items-center justify-center">
+                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
