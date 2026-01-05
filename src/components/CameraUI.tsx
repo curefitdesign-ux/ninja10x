@@ -416,6 +416,17 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check if file was captured/modified within the last 24 hours
+      const now = Date.now();
+      const fileTime = file.lastModified;
+      const twentyFourHoursMs = 24 * 60 * 60 * 1000;
+      
+      if (now - fileTime > twentyFourHoursMs) {
+        alert('Please select a photo or video captured within the last 24 hours.');
+        e.target.value = '';
+        return;
+      }
+      
       const isVideo = file.type.startsWith('video/');
       
       if (isVideo) {
