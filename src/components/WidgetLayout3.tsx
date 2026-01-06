@@ -1,4 +1,4 @@
-import { User, Plus, ScanFace, Play, X } from 'lucide-react';
+import { User, Plus, ScanFace, Play, X, Camera } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import cardBackground from '@/assets/card-background.png';
@@ -88,11 +88,12 @@ const renderInFrame = (photo: Photo, containerWidth: number = 180) => {
 interface WidgetLayout3Props {
   photos: Photo[];
   onAddPhoto: () => void;
+  onOpenCamera: () => void;
   currentDate: string;
   onGenerateReel?: (photos: Photo[]) => void;
 }
 
-const WidgetLayout3 = ({ photos, onAddPhoto, onGenerateReel }: WidgetLayout3Props) => {
+const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel }: WidgetLayout3Props) => {
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
   const [tappedElement, setTappedElement] = useState<string | null>(null);
@@ -434,8 +435,21 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onGenerateReel }: WidgetLayout3Prop
         </div>
       </div>
 
-      {/* Upload Button Below Widget */}
-      <div className={`flex justify-center mt-4 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.5s' }}>
+      {/* Upload Buttons Below Widget */}
+      <div className={`flex justify-center gap-3 mt-4 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.5s' }}>
+        <button
+          onClick={() => { handleTap('camera-btn'); onOpenCamera(); }}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full tap-bounce ${tappedElement === 'camera-btn' ? 'animate-liquid-tap' : ''}`}
+          style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+          }}
+        >
+          <Camera className="w-5 h-5 text-white" />
+          <span className="text-white font-semibold text-sm">Camera</span>
+        </button>
         <button
           onClick={() => { handleTap('add-btn'); onAddPhoto(); }}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-full tap-bounce ${tappedElement === 'add-btn' ? 'animate-liquid-tap' : ''}`}
@@ -445,7 +459,7 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onGenerateReel }: WidgetLayout3Prop
           }}
         >
           <Plus className="w-5 h-5 text-white" />
-          <span className="text-white font-semibold text-sm">Add Photo</span>
+          <span className="text-white font-semibold text-sm">Gallery</span>
         </button>
       </div>
     </div>

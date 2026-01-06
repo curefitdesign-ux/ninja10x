@@ -263,6 +263,11 @@ const Index = () => {
     setShowRecentGallery(true);
   };
 
+  // Handler for Layout 3's camera button - opens activity sheet first
+  const handleOpenCamera = () => {
+    setShowActivitySheet(true);
+  };
+
   // Handle photo selected from gallery
   const handleGalleryPhotoSelect = (photoDataUrl: string) => {
     setShowRecentGallery(false);
@@ -451,6 +456,7 @@ const Index = () => {
               <WidgetLayout3 
                 photos={photos} 
                 onAddPhoto={handleAddPhoto}
+                onOpenCamera={handleOpenCamera}
                 currentDate={getCurrentDate()}
                 onGenerateReel={handleGenerateReel}
               />
