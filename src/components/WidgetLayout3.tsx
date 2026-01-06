@@ -89,9 +89,10 @@ interface WidgetLayout3Props {
   photos: Photo[];
   onAddPhoto: () => void;
   currentDate: string;
+  onGenerateReel?: (photos: Photo[]) => void;
 }
 
-const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
+const WidgetLayout3 = ({ photos, onAddPhoto, onGenerateReel }: WidgetLayout3Props) => {
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
   const [tappedElement, setTappedElement] = useState<string | null>(null);
@@ -161,6 +162,12 @@ const WidgetLayout3 = ({ photos, onAddPhoto }: WidgetLayout3Props) => {
 
   const handlePlayVideo = () => {
     triggerHaptic('medium');
+    
+    // Trigger AI reel generation if callback provided
+    if (onGenerateReel && photos.length >= 3) {
+      onGenerateReel(photos.slice(0, 3)); // Pass first 3 photos for reel
+    }
+    
     setIsVideoPlaying(true);
     setIsVideoClosing(false);
     setVideoProgress(0);

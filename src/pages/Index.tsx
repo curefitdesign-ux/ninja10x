@@ -6,6 +6,7 @@ import PhotoUploadCard from '@/components/PhotoUploadCard';
 import WidgetLayout2 from '@/components/WidgetLayout2';
 import WidgetLayout3 from '@/components/WidgetLayout3';
 import RecentPhotosGallery from '@/components/RecentPhotosGallery';
+import { useFitnessReel } from '@/hooks/use-fitness-reel';
 
 import CameraUI from '@/components/CameraUI';
 import {
@@ -75,6 +76,24 @@ const Index = () => {
   const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout3');
   const [initialCaptureMode, setInitialCaptureMode] = useState<'photo' | 'video'>('photo');
   const [showRecentGallery, setShowRecentGallery] = useState(false);
+  
+  // Fitness reel generation
+  const { generateReel, isGenerating } = useFitnessReel();
+  
+  const handleGenerateReel = useCallback((photosToProcess: typeof photos) => {
+    // Transform photos to the format expected by the API
+    const photoData = photosToProcess.map((photo, index) => ({
+      id: photo.id,
+      imageUrl: photo.originalUrl || photo.url,
+      activity: photo.activity || 'Activity',
+      duration: photo.duration,
+      pr: photo.pr,
+      uploadDate: photo.uploadDate,
+      dayNumber: index + 1,
+    }));
+    
+    generateReel(photoData);
+  }, [generateReel]);
 
   useEffect(() => {
     try {
@@ -385,6 +404,7 @@ const Index = () => {
                 photos={photos} 
                 onAddPhoto={handleAddPhoto}
                 currentDate={getCurrentDate()}
+                onGenerateReel={handleGenerateReel}
               />
             )}
           </main>
