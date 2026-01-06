@@ -1,10 +1,8 @@
-import { User, Plus, ScanFace, Play, X, Camera } from 'lucide-react';
+import { Plus, ScanFace, X, Camera, Sparkles } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import cardBackground from '@/assets/card-background.png';
 import filmstripBg from '@/assets/frames/filmstrip-bg.png';
-import journeyVideo from '@/assets/journey-video.mp4';
-import progressBar from '@/assets/frames/progress-bar.png';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ShakyFrame from '@/components/frames/ShakyFrame';
 import JournalFrame from '@/components/frames/JournalFrame';
@@ -100,10 +98,6 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
   const [tappedElement, setTappedElement] = useState<string | null>(null);
   const prevPhotosLength = useRef(photos.length);
   const [newPhotoIndex, setNewPhotoIndex] = useState<number | null>(null);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const [isVideoClosing, setIsVideoClosing] = useState(false);
-  const [videoProgress, setVideoProgress] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
   
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
   const hasThreePhotos = photos.length >= 3;
@@ -120,21 +114,6 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
     }
     prevPhotosLength.current = photos.length;
   }, [photos.length]);
-
-  // Handle video time update for progress
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      const progress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
-      setVideoProgress(progress);
-    }
-  };
-
-  // Play video when overlay opens
-  useEffect(() => {
-    if (isVideoPlaying && !isVideoClosing && videoRef.current) {
-      videoRef.current.play().catch(console.error);
-    }
-  }, [isVideoPlaying, isVideoClosing]);
 
   const handleTap = (id: string) => {
     triggerHaptic('light');
@@ -155,22 +134,13 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
           frame: photo.frame,
           duration: photo.duration,
           pr: photo.pr,
-          isReview: true, // Mark as reviewing existing photo
-          photoId: photo.id, // Pass the photo ID for updating
+          isReview: true,
+          photoId: photo.id,
         },
       });
     }, 200);
   };
 
-  const handlePlayVideo = () => {
-    triggerHaptic('medium');
-    // Just play the preset video, don't trigger generation
-    setIsVideoPlaying(true);
-    setIsVideoClosing(false);
-    setVideoProgress(0);
-  };
-  
-  // Only generate reel when explicitly requested
   const handleGenerateReel = () => {
     triggerHaptic('medium');
     if (onGenerateReel && photos.length >= 3) {
@@ -186,127 +156,8 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
     }
   };
 
-  const handleCloseVideo = () => {
-    triggerHaptic('light');
-    setIsVideoClosing(true);
-    if (videoRef.current) {
-      videoRef.current.pause();
-    }
-    // Reverse animation - wait for it to complete
-    setTimeout(() => {
-      setIsVideoPlaying(false);
-      setIsVideoClosing(false);
-      setVideoProgress(0);
-    }, 600);
-  };
-
   return (
     <div className="px-5 pt-4">
-      {/* Full Screen Video Player Overlay */}
-      {isVideoPlaying && (
-        <div 
-          className={`fixed inset-0 z-50 bg-black flex flex-col ${isVideoClosing ? 'animate-video-close' : 'animate-video-open'}`}
-        >
-          {/* Close Button */}
-          <button
-            onClick={handleCloseVideo}
-            className={`absolute top-10 right-6 z-60 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-all duration-300 ${isVideoClosing ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}`}
-            style={{ transitionDelay: isVideoClosing ? '0ms' : '400ms' }}
-          >
-            <X className="w-6 h-6 text-white" />
-          </button>
-
-          {/* Video Content Area */}
-          <div className="flex-1 flex items-center justify-center px-4">
-            <div 
-              className={`relative overflow-hidden rounded-3xl ${isVideoClosing ? 'animate-video-shrink' : 'animate-video-expand'}`}
-              style={{ 
-                aspectRatio: '9/16',
-                maxHeight: 'calc(100vh - 160px)',
-                width: 'auto',
-                boxShadow: '0 25px 80px rgba(0,0,0,0.6)'
-              }}
-            >
-              <video
-                ref={videoRef}
-                src={journeyVideo}
-                className="w-full h-full object-cover"
-                loop
-                playsInline
-                onTimeUpdate={handleTimeUpdate}
-              />
-            </div>
-          </div>
-
-          {/* Fixed Film Strip at Bottom with Progress Bar Image Overlay */}
-          <div className={`pb-8 pt-4 ${isVideoClosing ? 'animate-filmstrip-reverse' : 'animate-filmstrip-forward'}`}>
-            <div className="relative w-full">
-              {/* Film strip background */}
-              <img src={filmstripBg} alt="" className="w-full h-auto" style={{ display: 'block' }} />
-              
-              {/* Progress bar overlay - same size, aligned with film strip */}
-              <div 
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  clipPath: `inset(0 ${100 - (videoProgress * 1)}% 0 0)`
-                }}
-              >
-                <img 
-                  src={progressBar} 
-                  alt="" 
-                  className="w-full h-full object-fill"
-                  style={{ filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.6))' }}
-                />
-              </div>
-              
-              {/* Photo thumbnails */}
-              <div 
-                className="absolute inset-0 flex items-center justify-center gap-[10px]"
-                style={{ paddingLeft: '10px', paddingRight: '10px', paddingTop: '14px', paddingBottom: '6px' }}
-              >
-                {[0, 1, 2, 3].map((groupIndex) => (
-                  <div key={groupIndex} className="flex gap-[2px]">
-                    {[0, 1, 2].map((boxIndex) => {
-                      const index = groupIndex * 3 + boxIndex;
-                      const photo = photos[index];
-                      return (
-                        <div 
-                          key={index}
-                          className="overflow-hidden"
-                          style={{ 
-                            background: '#1a1a1a',
-                            borderRadius: '2px',
-                            width: '16px',
-                            aspectRatio: '9/16'
-                          }}
-                        >
-                          {photo ? (
-                            <img
-                              src={photo.originalUrl || photo.url}
-                              alt=""
-                              className="w-full h-full object-cover"
-                              style={{ borderRadius: '2px' }}
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
-                              }}
-                            />
-                          ) : (
-                            <div 
-                              className="w-full h-full"
-                              style={{ background: '#1a1a1a' }}
-                            />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Ninja Widget */}
       <div 
         className={`glass-card p-5 pt-10 relative overflow-visible w-full transition-all duration-500 ${isLoaded ? 'animate-liquid-enter' : 'opacity-0'}`}
@@ -392,22 +243,23 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
           )}
         </div>
       
-        {/* Film Strip Section with Floating Play Button */}
+        {/* Film Strip Section with Create Reel Button */}
         <div className={`relative z-10 -mt-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
-          {/* Floating Play Button - Liquid Glass Style */}
+          {/* Create Reel Button - Liquid Glass Style */}
           {hasThreePhotos && (
             <button
-              onClick={handlePlayVideo}
-              className="absolute -top-14 left-2 z-20 w-12 h-12 rounded-full flex items-center justify-center tap-bounce animate-play-button-float"
+              onClick={handleGenerateReel}
+              className="absolute -top-14 left-2 z-20 flex items-center gap-2 px-4 py-2.5 rounded-full tap-bounce animate-play-button-float"
               style={{
-                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.25) 0%, rgba(22, 163, 74, 0.15) 100%)',
+                background: 'linear-gradient(135deg, rgba(250, 204, 21, 0.25) 0%, rgba(234, 179, 8, 0.15) 100%)',
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
-                border: '1.5px solid rgba(34, 197, 94, 0.4)',
-                boxShadow: '0 4px 24px rgba(34, 197, 94, 0.3), inset 0 1px 1px rgba(255,255,255,0.2), 0 0 40px rgba(34, 197, 94, 0.15)'
+                border: '1.5px solid rgba(250, 204, 21, 0.4)',
+                boxShadow: '0 4px 24px rgba(250, 204, 21, 0.3), inset 0 1px 1px rgba(255,255,255,0.2), 0 0 40px rgba(250, 204, 21, 0.15)'
               }}
             >
-              <Play className="w-5 h-5 text-green-400 ml-0.5 drop-shadow-lg" fill="rgba(74, 222, 128, 0.8)" />
+              <Sparkles className="w-4 h-4 text-yellow-400 drop-shadow-lg" />
+              <span className="text-xs font-semibold text-yellow-400">Create Reel</span>
             </button>
           )}
           
