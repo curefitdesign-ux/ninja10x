@@ -39,16 +39,6 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
     }
   }, [isOpen, hasTriggered]);
 
-  // Auto-hide warning after 3 seconds
-  useEffect(() => {
-    if (showWarning) {
-      const timer = setTimeout(() => {
-        setShowWarning(false);
-        onClose();
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [showWarning, onClose]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     setShowInfoPopup(false);
@@ -177,11 +167,11 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
         </div>
       )}
 
-      {/* Warning Popup - Auto closes */}
+      {/* Warning Popup */}
       {showWarning && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
           <div 
-            className="rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-300 relative overflow-hidden"
+            className="rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.12)',
               backdropFilter: 'blur(40px) saturate(180%)',
@@ -190,14 +180,6 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 40px rgba(239, 68, 68, 0.1)',
             }}
           >
-            {/* Auto-close progress bar */}
-            <div 
-              className="absolute top-0 left-0 h-1 bg-red-400/50"
-              style={{
-                animation: 'shrink-width 3s linear forwards',
-                width: '100%',
-              }}
-            />
             
             <div className="flex flex-col items-center text-center gap-4">
               <div 
@@ -235,13 +217,6 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
         </div>
       )}
 
-      {/* Keyframe for progress bar */}
-      <style>{`
-        @keyframes shrink-width {
-          from { width: 100%; }
-          to { width: 0%; }
-        }
-      `}</style>
     </>
   );
 };
