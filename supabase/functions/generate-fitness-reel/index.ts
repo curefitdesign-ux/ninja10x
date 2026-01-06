@@ -191,36 +191,68 @@ Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
 
     // Use the first photo as the starting frame
     const firstPhotoUrl = photos[0].imageUrl;
-    
-    // RunwayML Gen-3 Alpha image-to-video API - 5 second clips (3 clips = ~15 sec total)
-    const runwayResponse = await fetch("https://api.runwayml.com/v1/image_to_video", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${RUNWAYML_API_KEY}`,
-        "Content-Type": "application/json",
-        "X-Runway-Version": "2024-11-06",
-      },
-      body: JSON.stringify({
-        model: "gen3a_turbo",
-        promptImage: firstPhotoUrl,
-        promptText: videoPrompt,
-        duration: 5, // 5 seconds per clip, we'll request multiple if needed
-        watermark: false,
-        ratio: "9:16", // Vertical mobile format
-      }),
-    });
 
-    let videoTaskId = null;
-    let videoUrl = null;
+    let videoTaskId: string | null = null;
+    let videoUrl: string | null = null;
+
+    // RunwayML requires a publicly accessible URL. If we have a data URI, we need to skip video gen or use text-to-video.
+    const isDataUri = firstPhotoUrl?.startsWith('data:');
     
-    if (runwayResponse.ok) {
-      const runwayData = await runwayResponse.json();
-      videoTaskId = runwayData.id;
-      console.log("RunwayML task initiated:", videoTaskId);
+    if (isDataUri) {
+      // Fall back to text-to-video since we can't use the base64 image directly
+      console.log("Photo is a data URI - using text_to_video instead of image_to_video");
+      
+      const runwayResponse = await fetch("https://api.runwayml.com/v1/text_to_video", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${RUNWAYML_API_KEY}`,
+          "Content-Type": "application/json",
+          "X-Runway-Version": "2024-11-06",
+        },
+        body: JSON.stringify({
+          model: "gen3a_turbo",
+          promptText: videoPrompt,
+          duration: 5,
+          watermark: false,
+          ratio: "9:16",
+        }),
+      });
+
+      if (runwayResponse.ok) {
+        const runwayData = await runwayResponse.json();
+        videoTaskId = runwayData.id;
+        console.log("RunwayML text_to_video task initiated:", videoTaskId);
+      } else {
+        const errorText = await runwayResponse.text();
+        console.error("RunwayML text_to_video error:", errorText);
+      }
     } else {
-      const errorText = await runwayResponse.text();
-      console.error("RunwayML error:", errorText);
-      // Continue without video - we'll return what we have
+      // We have a public URL, use image_to_video
+      const runwayResponse = await fetch("https://api.runwayml.com/v1/image_to_video", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${RUNWAYML_API_KEY}`,
+          "Content-Type": "application/json",
+          "X-Runway-Version": "2024-11-06",
+        },
+        body: JSON.stringify({
+          model: "gen3a_turbo",
+          promptImage: firstPhotoUrl,
+          promptText: videoPrompt,
+          duration: 5,
+          watermark: false,
+          ratio: "9:16",
+        }),
+      });
+
+      if (runwayResponse.ok) {
+        const runwayData = await runwayResponse.json();
+        videoTaskId = runwayData.id;
+        console.log("RunwayML image_to_video task initiated:", videoTaskId);
+      } else {
+        const errorText = await runwayResponse.text();
+        console.error("RunwayML image_to_video error:", errorText);
+      }
     }
 
     // Return the generated content
