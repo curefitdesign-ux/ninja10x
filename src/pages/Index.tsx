@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronDown, Check } from 'lucide-react';
+import { ChevronDown, Check, Film } from 'lucide-react';
 import AuroraBackground from '@/components/AuroraBackground';
 import PhotoUploadCard from '@/components/PhotoUploadCard';
 import WidgetLayout2 from '@/components/WidgetLayout2';
@@ -8,6 +8,7 @@ import WidgetLayout3 from '@/components/WidgetLayout3';
 import RecentPhotosGallery from '@/components/RecentPhotosGallery';
 import ReelGenerationOverlay from '@/components/ReelGenerationOverlay';
 import ReelPreviewScreen from '@/components/ReelPreviewScreen';
+import ReelHistoryGallery from '@/components/ReelHistoryGallery';
 import { useFitnessReel } from '@/hooks/use-fitness-reel';
 
 import CameraUI from '@/components/CameraUI';
@@ -78,6 +79,7 @@ const Index = () => {
   const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout3');
   const [initialCaptureMode, setInitialCaptureMode] = useState<'photo' | 'video'>('photo');
   const [showRecentGallery, setShowRecentGallery] = useState(false);
+  const [showReelHistoryGallery, setShowReelHistoryGallery] = useState(false);
   
   // Fitness reel generation
   const { 
@@ -124,6 +126,12 @@ const Index = () => {
       handleGenerateReel(lastGeneratedPhotos);
     }
   }, [lastGeneratedPhotos, handleGenerateReel]);
+
+  const handleSelectReelFromGallery = useCallback((index: number) => {
+    setCurrentReelIndex(index);
+    setShowReelHistoryGallery(false);
+    setShowReelPreview(true);
+  }, [setCurrentReelIndex]);
 
   useEffect(() => {
     try {
@@ -378,8 +386,18 @@ const Index = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Test Controls */}
+            {/* Right Controls */}
             <div className="flex flex-col gap-2 items-end">
+              {/* Reel History Button */}
+              {reelHistory.length > 0 && (
+                <button
+                  onClick={() => setShowReelHistoryGallery(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-yellow-400/20 backdrop-blur-sm rounded-full text-yellow-400 hover:bg-yellow-400/30 transition-colors"
+                >
+                  <Film className="w-3 h-3" />
+                  Reels ({reelHistory.length})
+                </button>
+              )}
               <button
                 onClick={simulateNextDay}
                 className="px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors"
@@ -608,6 +626,15 @@ const Index = () => {
         onIndexChange={setCurrentReelIndex}
         onClose={handleCloseReelPreview}
         onRecreate={handleRecreateReel}
+      />
+
+      {/* Reel History Gallery */}
+      <ReelHistoryGallery
+        isOpen={showReelHistoryGallery}
+        reelHistory={reelHistory}
+        onClose={() => setShowReelHistoryGallery(false)}
+        onSelectReel={handleSelectReelFromGallery}
+        onClearHistory={clearHistory}
       />
     </div>
   );
