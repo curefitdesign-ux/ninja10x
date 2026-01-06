@@ -629,42 +629,19 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
         </div>
       )}
 
-      {/* Header with Activity Selection - Liquid Glass Design */}
-      <div className="absolute top-0 left-0 right-0 p-4 pt-14 z-10">
-        <div className="flex items-center justify-between gap-3">
-          {/* Activity Pill - Liquid Glass */}
-          <div 
-            className="flex-1 flex items-center gap-3 px-4 py-3 rounded-2xl"
-            style={{
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-              boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.15), 0 8px 32px rgba(0,0,0,0.2)',
-              border: '1px solid rgba(255,255,255,0.2)',
-            }}
-          >
-            {/* Activity Icon/Name */}
-            <div className="flex-1">
-              <h2 className="text-lg font-bold text-white truncate">{activity}</h2>
-              <p className="text-white/60 text-xs">Week {week} • Day {day}</p>
-            </div>
-          </div>
-          
-          {/* Close Button - Liquid Glass */}
-          <button
-            onClick={handleClose}
-            className="p-3 rounded-2xl transition-all duration-300 active:scale-95"
-            style={{
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-              boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.15), 0 8px 32px rgba(0,0,0,0.2)',
-              border: '1px solid rgba(255,255,255,0.2)',
-            }}
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
+      {/* Header */}
+      <div className="absolute top-0 left-0 right-0 p-6 pt-12 flex justify-between items-start z-10">
+        <div>
+          <h2 className="text-2xl font-bold text-white">{activity}</h2>
+          <p className="text-white/80 text-sm">Week {week} • Day {day}</p>
         </div>
+        
+        <button
+          onClick={handleClose}
+          className="p-2 rounded-full backdrop-blur-md bg-white/10"
+        >
+          <X className="w-6 h-6 text-white" />
+        </button>
       </div>
 
       {/* Bottom Controls */}
