@@ -86,22 +86,22 @@ const RecentPhotosGallery = ({
       {/* Info Popup */}
       {showInfoPopup && <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-white/5">
           <div className="relative">
-            {/* Close button outside box */}
-            <button onClick={onClose} className="absolute -top-12 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90" style={{
-          background: 'rgba(255, 255, 255, 0.15)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)'
-        }}>
-              <X className="w-5 h-5 text-white/80" />
-            </button>
-            
             <div style={{
           background: 'rgba(255, 255, 255, 0.12)',
           backdropFilter: 'blur(40px) saturate(180%)',
           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
           border: '1px solid rgba(255, 255, 255, 0.18)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-        }} className="rounded-3xl p-6 max-w-sm w-full animate-in zoom-in-95 fade-in duration-300 bg-black/0 border-black/0 shadow-none">
+        }} className="rounded-3xl p-6 max-w-sm w-full animate-in zoom-in-95 fade-in duration-300 bg-black/0 border-black/0 shadow-none relative">
+              {/* Close button inside box - top right */}
+              <button onClick={onClose} className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90" style={{
+            background: 'rgba(255, 255, 255, 0.15)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}>
+                <X className="w-4 h-4 text-white/80" />
+              </button>
+              
               <div className="flex flex-col items-center text-center gap-4">
                 <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{
               background: 'rgba(251, 191, 36, 0.2)',
