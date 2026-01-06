@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import type { GenerationStep } from '@/components/ReelGenerationOverlay';
 
@@ -35,6 +35,8 @@ const REEL_STYLES = [
 
 const STORAGE_KEY = 'cn_reels_history';
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 export const useFitnessReel = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState<GenerationStep>('narration');
@@ -42,10 +44,15 @@ export const useFitnessReel = () => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       return stored ? JSON.parse(stored) : [];
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   });
   const [currentReelIndex, setCurrentReelIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  // Prevent duplicate polling loops
+  const pollingTasksRef = useRef<Set<string>>(new Set());
 
   // Persist reel history
   useEffect(() => {
@@ -53,13 +60,78 @@ export const useFitnessReel = () => {
   }, [reelHistory]);
 
   const getNextStyle = useCallback(() => {
-    const usedStyles = reelHistory.map(r => r.style);
-    const availableStyles = REEL_STYLES.filter(s => !usedStyles.includes(s.id));
+    const usedStyles = reelHistory.map((r) => r.style);
+    const availableStyles = REEL_STYLES.filter((s) => !usedStyles.includes(s.id));
     if (availableStyles.length > 0) {
       return availableStyles[Math.floor(Math.random() * availableStyles.length)];
     }
     return REEL_STYLES[Math.floor(Math.random() * REEL_STYLES.length)];
   }, [reelHistory]);
+
+  const fetchTaskStatus = useCallback(async (taskId: string) => {
+    const res = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-fitness-reel`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ action: 'status', taskId }),
+      }
+    );
+
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      throw new Error(txt || 'Failed to fetch render status');
+    }
+
+    return res.json() as Promise<{ success: boolean; status: string; videoUrl: string | null }>;
+  }, []);
+
+  const startPollingIfNeeded = useCallback((reelId: string, taskId: string) => {
+    if (!taskId) return;
+    if (pollingTasksRef.current.has(taskId)) return;
+    pollingTasksRef.current.add(taskId);
+
+    (async () => {
+      try {
+        // ~2.5 min max (30 * 5s)
+        for (let attempt = 0; attempt < 30; attempt++) {
+          await sleep(5000);
+          const status = await fetchTaskStatus(taskId);
+
+          if (status?.videoUrl) {
+            setReelHistory((prev) =>
+              prev.map((r) => (r.id === reelId ? { ...r, videoUrl: status.videoUrl, message: 'Ready' } : r))
+            );
+            return;
+          }
+
+          if (['FAILED', 'CANCELED'].includes((status?.status || '').toUpperCase())) {
+            setReelHistory((prev) =>
+              prev.map((r) => (r.id === reelId ? { ...r, message: 'Video failed to render' } : r))
+            );
+            return;
+          }
+        }
+
+        // Timed out
+        setReelHistory((prev) =>
+          prev.map((r) => (r.id === reelId ? { ...r, message: 'Still rendering… open again soon' } : r))
+        );
+      } catch (e) {
+        console.error('Polling error:', e);
+      }
+    })();
+  }, [fetchTaskStatus]);
+
+  // Resume polling after refresh if we have pending tasks
+  useEffect(() => {
+    for (const r of reelHistory) {
+      if (r.videoTaskId && !r.videoUrl) startPollingIfNeeded(r.id, r.videoTaskId);
+    }
+  }, [reelHistory, startPollingIfNeeded]);
 
   const generateReel = useCallback(async (photos: PhotoData[]) => {
     if (photos.length < 3) {
@@ -74,7 +146,7 @@ export const useFitnessReel = () => {
 
     try {
       setCurrentStep('narration');
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await sleep(500);
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-fitness-reel`,
@@ -84,7 +156,7 @@ export const useFitnessReel = () => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ photos, stylePrompt: style.prompt, styleId: style.id }),
+          body: JSON.stringify({ photos, stylePrompt: style.prompt, styleId: style.id, action: 'create' }),
         }
       );
 
@@ -96,24 +168,32 @@ export const useFitnessReel = () => {
       }
 
       setCurrentStep('voiceover');
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await sleep(1200);
       setCurrentStep('video');
-      await new Promise(resolve => setTimeout(resolve, 2000));
 
       const result = await response.json();
+      const reelId = `reel-${Date.now()}`;
       const newReel: ReelResult = {
         ...result,
-        id: `reel-${Date.now()}`,
+        id: reelId,
         style: style.id,
         createdAt: Date.now(),
+        // If the backend returns only a taskId, we’ll auto-poll until videoUrl is ready.
+        message: result?.videoUrl ? 'Ready' : 'Video rendering…',
       };
-      
-      setReelHistory(prev => [newReel, ...prev]);
+
+      setReelHistory((prev) => [newReel, ...prev]);
       setCurrentReelIndex(0);
+
+      // Start background polling (does not consume credits)
+      if (newReel.videoTaskId && !newReel.videoUrl) {
+        startPollingIfNeeded(reelId, newReel.videoTaskId);
+      }
+
       setCurrentStep('complete');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success(`${style.name} reel ready! 🎬`);
+      await sleep(300);
+
+      toast.success(`${style.name} reel ${newReel.videoUrl ? 'ready' : 'rendering'}!`);
       return newReel;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to generate reel';
@@ -123,7 +203,7 @@ export const useFitnessReel = () => {
     } finally {
       setIsGenerating(false);
     }
-  }, [getNextStyle]);
+  }, [getNextStyle, startPollingIfNeeded]);
 
   return {
     generateReel,
@@ -134,6 +214,9 @@ export const useFitnessReel = () => {
     currentReelIndex,
     setCurrentReelIndex,
     error,
-    clearHistory: () => { setReelHistory([]); localStorage.removeItem(STORAGE_KEY); },
+    clearHistory: () => {
+      setReelHistory([]);
+      localStorage.removeItem(STORAGE_KEY);
+    },
   };
 };

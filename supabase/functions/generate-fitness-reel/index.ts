@@ -16,20 +16,69 @@ interface PhotoData {
 }
 
 interface GenerateReelRequest {
-  photos: PhotoData[];
+  photos?: PhotoData[];
+  stylePrompt?: string;
+  styleId?: string;
+  /** When action is "status", taskId is required */
+  action?: 'create' | 'status';
+  taskId?: string;
   referenceVideoUrl?: string;
 }
 
 serve(async (req) => {
   console.log("Generate fitness reel request received");
-  
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const RUNWAYML_API_KEY = Deno.env.get("RUNWAYML_API_KEY");
+
   try {
-    const { photos } = await req.json() as GenerateReelRequest;
-    
+    const body = (await req.json().catch(() => ({}))) as GenerateReelRequest;
+    const action = body.action ?? (body.taskId ? 'status' : 'create');
+
+    // ---- Task status proxy (client cannot call Runway directly) ----
+    if (action === 'status') {
+      if (!RUNWAYML_API_KEY) throw new Error("RUNWAYML_API_KEY is not configured");
+      if (!body.taskId) {
+        return new Response(
+          JSON.stringify({ error: 'taskId is required' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const taskRes = await fetch(`https://api.runwayml.com/v1/tasks/${body.taskId}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${RUNWAYML_API_KEY}`,
+          'Content-Type': 'application/json',
+          'X-Runway-Version': '2024-11-06',
+        },
+      });
+
+      const taskText = await taskRes.text();
+      if (!taskRes.ok) {
+        console.error('Runway task status error:', taskText);
+        return new Response(
+          JSON.stringify({ error: 'Failed to fetch task status' }),
+          { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const task = JSON.parse(taskText);
+      const output = task?.output;
+      const videoUrl = Array.isArray(output) ? output[0] : (typeof output === 'string' ? output : null);
+
+      return new Response(
+        JSON.stringify({ success: true, status: task?.status ?? 'UNKNOWN', videoUrl }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // ---- Create ----
+    const { photos = [], stylePrompt, styleId } = body;
+
     if (!photos || photos.length < 3) {
       return new Response(
         JSON.stringify({ error: 'At least 3 photos are required' }),
@@ -41,21 +90,10 @@ serve(async (req) => {
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
-    const RUNWAYML_API_KEY = Deno.env.get("RUNWAYML_API_KEY");
 
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
-    if (!ELEVENLABS_API_KEY) {
-      throw new Error("ELEVENLABS_API_KEY is not configured");
-    }
-    if (!RUNWAYML_API_KEY) {
-      throw new Error("RUNWAYML_API_KEY is not configured");
-    }
-
-    // Step 1: Generate narration text using Lovable AI
-    console.log("Step 1: Generating narration with Lovable AI...");
-    
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    if (!ELEVENLABS_API_KEY) throw new Error("ELEVENLABS_API_KEY is not configured");
+    if (!RUNWAYML_API_KEY) throw new Error("RUNWAYML_API_KEY is not configured");
     const photosSummary = photos.map((p, i) => {
       let details = `Day ${p.dayNumber}: ${p.activity}`;
       if (p.duration) details += ` for ${p.duration}`;
@@ -140,13 +178,16 @@ Style: Brutalist, gritty, underground. Think boxing gym, not Instagram fitness. 
 
     // Step 3: Generate video with RunwayML
     console.log("Step 3: Initiating video generation with RunwayML...");
-    
+
+    const chosenStyle = (styleId || 'brutalist').toLowerCase();
+    const extraStyle = stylePrompt ? `\nStyle notes: ${stylePrompt}` : '';
+
     // Brutalist style video prompt - gritty, high contrast, film grain aesthetic
-    const videoPrompt = `Vertical mobile video, brutalist graphic design style, fitness vlog aesthetic. 
-A gritty cinematic montage of ${photos.map(p => p.activity.toLowerCase()).join(' and ')} training. 
-Heavy film grain, noise textures, high contrast black and white with flashes of bright yellow. 
-Split-screen collage effects, fast-paced editing, glitch transitions. 
-Urban underground atmosphere, raw athletic power, 4k resolution.`;
+    const videoPrompt = `Vertical mobile video, ${chosenStyle} design style, fitness vlog aesthetic.
+A gritty cinematic montage of ${photos.map(p => p.activity.toLowerCase()).join(' and ')} training.
+Heavy film grain, noise textures, high contrast black and white with flashes of bright yellow.
+Split-screen collage effects, fast-paced editing, glitch transitions.
+Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
 
     // Use the first photo as the starting frame
     const firstPhotoUrl = photos[0].imageUrl;
