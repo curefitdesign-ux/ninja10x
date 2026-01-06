@@ -439,46 +439,36 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel }: Wid
       <div className={`flex justify-center gap-3 mt-4 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.5s' }}>
         <button
           onClick={() => { handleTap('camera-btn'); onOpenCamera(); }}
-          className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl tap-bounce transition-all duration-300 ${tappedElement === 'camera-btn' ? 'animate-liquid-tap scale-95' : 'hover:scale-[1.02]'}`}
+          className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl transition-all duration-150 ${tappedElement === 'camera-btn' ? 'scale-[0.92] brightness-110' : 'hover:scale-[1.02] active:scale-[0.96]'}`}
           style={{
             background: 'linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.12) 100%)',
             backdropFilter: 'blur(20px) saturate(180%)',
             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
             border: '1px solid rgba(255,255,255,0.25)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.05)'
+            boxShadow: tappedElement === 'camera-btn' 
+              ? '0 2px 8px rgba(0,0,0,0.2), inset 0 2px 4px rgba(0,0,0,0.1)' 
+              : '0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.05)',
+            transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
         >
-          <div 
-            className="w-8 h-8 rounded-xl flex items-center justify-center"
-            style={{
-              background: 'linear-gradient(135deg, rgba(255,77,77,0.3) 0%, rgba(255,77,77,0.15) 100%)',
-              boxShadow: '0 2px 8px rgba(255,77,77,0.2)'
-            }}
-          >
-            <Camera className="w-4 h-4 text-white" />
-          </div>
+          <Camera className="w-5 h-5 text-white/90" />
           <span className="text-white/90 font-medium text-sm tracking-wide">Camera</span>
         </button>
         <button
           onClick={() => { handleTap('add-btn'); onAddPhoto(); }}
-          className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl tap-bounce transition-all duration-300 ${tappedElement === 'add-btn' ? 'animate-liquid-tap scale-95' : 'hover:scale-[1.02]'}`}
+          className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl transition-all duration-150 ${tappedElement === 'add-btn' ? 'scale-[0.92] brightness-110' : 'hover:scale-[1.02] active:scale-[0.96]'}`}
           style={{
             background: 'linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.12) 100%)',
             backdropFilter: 'blur(20px) saturate(180%)',
             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
             border: '1px solid rgba(255,255,255,0.25)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.05)'
+            boxShadow: tappedElement === 'add-btn' 
+              ? '0 2px 8px rgba(0,0,0,0.2), inset 0 2px 4px rgba(0,0,0,0.1)' 
+              : '0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.05)',
+            transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
         >
-          <div 
-            className="w-8 h-8 rounded-xl flex items-center justify-center"
-            style={{
-              background: 'linear-gradient(135deg, rgba(147,51,234,0.3) 0%, rgba(147,51,234,0.15) 100%)',
-              boxShadow: '0 2px 8px rgba(147,51,234,0.2)'
-            }}
-          >
-            <Plus className="w-4 h-4 text-white" />
-          </div>
+          <Plus className="w-5 h-5 text-white/90" />
           <span className="text-white/90 font-medium text-sm tracking-wide">Gallery</span>
         </button>
       </div>
