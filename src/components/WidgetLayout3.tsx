@@ -91,9 +91,10 @@ interface WidgetLayout3Props {
   onOpenCamera: () => void;
   currentDate: string;
   onGenerateReel?: (photos: Photo[]) => void;
+  onRemovePhoto?: (photoId: string) => void;
 }
 
-const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel }: WidgetLayout3Props) => {
+const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRemovePhoto }: WidgetLayout3Props) => {
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
   const [tappedElement, setTappedElement] = useState<string | null>(null);
@@ -163,15 +164,26 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel }: Wid
 
   const handlePlayVideo = () => {
     triggerHaptic('medium');
-    
-    // Trigger AI reel generation if callback provided
-    if (onGenerateReel && photos.length >= 3) {
-      onGenerateReel(photos.slice(0, 3)); // Pass first 3 photos for reel
-    }
-    
+    // Just play the preset video, don't trigger generation
     setIsVideoPlaying(true);
     setIsVideoClosing(false);
     setVideoProgress(0);
+  };
+  
+  // Only generate reel when explicitly requested
+  const handleGenerateReel = () => {
+    triggerHaptic('medium');
+    if (onGenerateReel && photos.length >= 3) {
+      onGenerateReel(photos.slice(0, 3));
+    }
+  };
+
+  const handleRemovePhoto = (photoId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    triggerHaptic('light');
+    if (onRemovePhoto) {
+      onRemovePhoto(photoId);
+    }
   };
 
   const handleCloseVideo = () => {
@@ -340,6 +352,22 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel }: Wid
                 }}
               >
                 {renderInFrame(latestPhoto, 180)}
+                
+                {/* Remove button */}
+                {onRemovePhoto && (
+                  <button
+                    onClick={(e) => handleRemovePhoto(latestPhoto.id, e)}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center z-20 transition-all duration-200 hover:scale-110"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%)',
+                      backdropFilter: 'blur(8px)',
+                      WebkitBackdropFilter: 'blur(8px)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                    }}
+                  >
+                    <X className="w-4 h-4 text-white/80" />
+                  </button>
+                )}
               </div>
             </div>
           ) : (

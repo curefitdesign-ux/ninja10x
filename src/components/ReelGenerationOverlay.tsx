@@ -11,14 +11,14 @@ interface ReelGenerationOverlayProps {
 }
 
 const steps = [
-  { id: 'narration', label: 'Writing Script', icon: Sparkles, description: 'AI is crafting your story...', duration: 8 },
-  { id: 'voiceover', label: 'Recording Voice', icon: Mic, description: 'Generating voiceover...', duration: 12 },
-  { id: 'video', label: 'Creating Video', icon: Film, description: 'Rendering your reel...', duration: 45 },
+  { id: 'narration', label: 'WRITING SCRIPT', icon: Sparkles, duration: 8 },
+  { id: 'voiceover', label: 'RECORDING VOICE', icon: Mic, duration: 12 },
+  { id: 'video', label: 'CREATING VIDEO', icon: Film, description: 'Rendering your reel...', duration: 45 },
 ];
 
-const TOTAL_ESTIMATED_TIME = 65; // seconds
+const TOTAL_ESTIMATED_TIME = 65;
 
-const ReelGenerationOverlay = ({ isVisible, currentStep, onClose }: ReelGenerationOverlayProps) => {
+const ReelGenerationOverlay = ({ isVisible, currentStep }: ReelGenerationOverlayProps) => {
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
   const [elapsedTime, setElapsedTime] = useState(0);
   const startTimeRef = useRef<number | null>(null);
@@ -27,9 +27,11 @@ const ReelGenerationOverlay = ({ isVisible, currentStep, onClose }: ReelGenerati
     if (isVisible && !startTimeRef.current) {
       startTimeRef.current = Date.now();
       setElapsedTime(0);
+      setCompletedSteps(new Set());
     } else if (!isVisible) {
       startTimeRef.current = null;
       setElapsedTime(0);
+      setCompletedSteps(new Set());
     }
   }, [isVisible]);
 
@@ -63,34 +65,25 @@ const ReelGenerationOverlay = ({ isVisible, currentStep, onClose }: ReelGenerati
     return 'pending';
   };
 
-  // Calculate progress percentage based on current step
   const getProgressPercentage = () => {
     if (currentStep === 'complete') return 100;
     
     const stepIndex = steps.findIndex(s => s.id === currentStep);
     if (stepIndex === -1) return 0;
     
-    // Base progress from completed steps
     let baseProgress = 0;
     for (let i = 0; i < stepIndex; i++) {
       baseProgress += (steps[i].duration / TOTAL_ESTIMATED_TIME) * 100;
     }
     
-    // Add partial progress within current step
     const currentStepData = steps[stepIndex];
     const stepProgress = Math.min(elapsedTime / currentStepData.duration, 0.9) * (currentStepData.duration / TOTAL_ESTIMATED_TIME) * 100;
     
     return Math.min(Math.round(baseProgress + stepProgress), 95);
   };
 
-  // Calculate ETA
   const getETA = () => {
     const remaining = Math.max(TOTAL_ESTIMATED_TIME - elapsedTime, 5);
-    if (remaining >= 60) {
-      const mins = Math.floor(remaining / 60);
-      const secs = remaining % 60;
-      return `~${mins}m ${secs}s`;
-    }
     return `~${remaining}s`;
   };
 
@@ -105,122 +98,120 @@ const ReelGenerationOverlay = ({ isVisible, currentStep, onClose }: ReelGenerati
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] flex items-center justify-center"
         >
-          {/* Brutalist background with film grain */}
-          <div className="absolute inset-0 bg-black">
-            {/* Noise texture overlay */}
+          {/* Liquid Glass Background */}
+          <div className="absolute inset-0 bg-black/95 backdrop-blur-xl">
+            {/* Subtle gradient overlay */}
             <div 
-              className="absolute inset-0 opacity-30 mix-blend-overlay"
+              className="absolute inset-0"
               style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                background: 'radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.03) 0%, transparent 60%)'
               }}
             />
-            {/* Yellow accent line */}
+            {/* Top accent line */}
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className="absolute top-0 left-0 right-0 h-1 bg-yellow-400 origin-left"
-            />
-            {/* Glitch lines */}
-            <motion.div
-              animate={{
-                opacity: [0, 1, 0],
-                y: [0, 100, 200],
-              }}
-              transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
-              className="absolute left-0 right-0 h-px bg-yellow-400/50"
+              className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-yellow-400 to-transparent origin-center"
             />
           </div>
 
           {/* Content */}
-          <div className="relative z-10 w-full max-w-sm mx-4">
+          <div className="relative z-10 w-full max-w-sm mx-6 px-2">
             {/* Header */}
             <motion.div
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-center mb-8"
+              className="text-center mb-10"
             >
-              <h2 className="text-3xl font-black uppercase tracking-tight text-white">
+              <h2 className="text-2xl font-bold uppercase tracking-tight text-white">
                 Creating
               </h2>
-              <h2 className="text-3xl font-black uppercase tracking-tight text-yellow-400">
+              <h2 className="text-2xl font-bold uppercase tracking-tight text-yellow-400">
                 Your Reel
               </h2>
               
-              {/* Progress percentage */}
+              {/* Progress percentage and ETA */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="mt-4 flex items-center justify-center gap-3"
+                className="mt-6 flex items-center justify-center gap-4"
               >
-                <span className="text-4xl font-black text-yellow-400">{progress}%</span>
+                <span className="text-5xl font-black text-yellow-400">{progress}%</span>
                 <div className="text-left">
-                  <p className="text-xs text-white/50 uppercase tracking-wider">Time left</p>
-                  <p className="text-sm font-bold text-white">{getETA()}</p>
+                  <p className="text-[10px] text-white/40 uppercase tracking-widest">Time left</p>
+                  <p className="text-base font-semibold text-white/80">{getETA()}</p>
                 </div>
               </motion.div>
             </motion.div>
 
-            {/* Steps */}
-            <div className="space-y-6">
+            {/* Steps - Liquid Glass Cards */}
+            <div className="space-y-3">
               {steps.map((step, index) => {
                 const status = getStepStatus(step.id);
                 const Icon = step.icon;
+                const isActive = status === 'active';
+                const isCompleted = status === 'completed';
 
                 return (
                   <motion.div
                     key={step.id}
-                    initial={{ x: -50, opacity: 0 }}
+                    initial={{ x: -30, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.3 + index * 0.1 }}
                     className="relative"
                   >
-                    <div className={`
-                      flex items-center gap-4 p-4 border-2 transition-all duration-300
-                      ${status === 'active' 
-                        ? 'border-yellow-400 bg-yellow-400/10' 
-                        : status === 'completed'
-                          ? 'border-white/30 bg-white/5'
-                          : 'border-white/10 bg-transparent'
-                      }
-                    `}>
+                    <div 
+                      className="flex items-center gap-4 p-4 rounded-2xl transition-all duration-300"
+                      style={{
+                        background: isActive 
+                          ? 'linear-gradient(135deg, rgba(250,204,21,0.15) 0%, rgba(250,204,21,0.05) 100%)'
+                          : 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+                        backdropFilter: 'blur(20px)',
+                        WebkitBackdropFilter: 'blur(20px)',
+                        border: isActive 
+                          ? '1px solid rgba(250,204,21,0.4)' 
+                          : '1px solid rgba(255,255,255,0.08)',
+                        boxShadow: isActive 
+                          ? '0 8px 32px rgba(250,204,21,0.15), inset 0 1px 0 rgba(255,255,255,0.1)'
+                          : 'inset 0 1px 0 rgba(255,255,255,0.05)'
+                      }}
+                    >
                       {/* Icon container */}
-                      <div className={`
-                        w-12 h-12 flex items-center justify-center transition-all duration-300
-                        ${status === 'active' 
-                          ? 'bg-yellow-400 text-black' 
-                          : status === 'completed'
-                            ? 'bg-white text-black'
-                            : 'bg-white/10 text-white/40'
-                        }
-                      `}>
-                        {status === 'completed' ? (
-                          <Check className="w-6 h-6" />
+                      <div 
+                        className="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300"
+                        style={{
+                          background: isCompleted 
+                            ? 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.9) 100%)'
+                            : isActive 
+                              ? 'linear-gradient(135deg, rgba(250,204,21,0.9) 0%, rgba(234,179,8,0.9) 100%)'
+                              : 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                          boxShadow: isActive || isCompleted
+                            ? '0 4px 12px rgba(0,0,0,0.2)'
+                            : 'none'
+                        }}
+                      >
+                        {isCompleted ? (
+                          <Check className="w-5 h-5 text-black" strokeWidth={3} />
                         ) : (
-                          <Icon className="w-6 h-6" />
+                          <Icon className={`w-5 h-5 ${isActive ? 'text-black' : 'text-white/30'}`} />
                         )}
                       </div>
 
                       {/* Text */}
                       <div className="flex-1">
-                        <p className={`
-                          font-bold uppercase tracking-wide text-sm transition-colors duration-300
-                          ${status === 'active' 
-                            ? 'text-yellow-400' 
-                            : status === 'completed'
-                              ? 'text-white'
-                              : 'text-white/40'
-                          }
-                        `}>
+                        <p className={`font-semibold uppercase tracking-wider text-xs transition-colors duration-300 ${
+                          isActive ? 'text-yellow-400' : isCompleted ? 'text-white/80' : 'text-white/30'
+                        }`}>
                           {step.label}
                         </p>
-                        {status === 'active' && (
+                        {isActive && step.description && (
                           <motion.p
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="text-xs text-white/60 mt-1"
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-[11px] text-white/50 mt-0.5"
                           >
                             {step.description}
                           </motion.p>
@@ -228,47 +219,61 @@ const ReelGenerationOverlay = ({ isVisible, currentStep, onClose }: ReelGenerati
                       </div>
 
                       {/* Active indicator */}
-                      {status === 'active' && (
+                      {isActive && (
                         <motion.div
-                          animate={{ opacity: [0.5, 1, 0.5] }}
-                          transition={{ duration: 1.5, repeat: Infinity }}
-                          className="w-3 h-3 bg-yellow-400"
+                          animate={{ opacity: [0.4, 1, 0.4] }}
+                          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                          className="w-2.5 h-2.5 bg-yellow-400 rounded-sm"
                         />
                       )}
                     </div>
 
                     {/* Connector line */}
                     {index < steps.length - 1 && (
-                      <div className={`
-                        absolute left-8 top-full w-0.5 h-6 -translate-x-1/2 transition-colors duration-300
-                        ${completedSteps.has(step.id) ? 'bg-white/30' : 'bg-white/10'}
-                      `} />
+                      <div 
+                        className="absolute left-[30px] top-full w-px h-3 transition-colors duration-300"
+                        style={{
+                          background: isCompleted 
+                            ? 'linear-gradient(to bottom, rgba(255,255,255,0.3), rgba(255,255,255,0.1))'
+                            : 'linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.05))'
+                        }}
+                      />
                     )}
                   </motion.div>
                 );
               })}
             </div>
 
-            {/* Progress bar */}
+            {/* Progress bar - Liquid Glass Style */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="mt-12"
+              className="mt-10"
             >
-              <div className="h-2 bg-white/10 overflow-hidden">
+              <div 
+                className="h-1.5 rounded-full overflow-hidden"
+                style={{
+                  background: 'linear-gradient(90deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
+                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.3)'
+                }}
+              >
                 <motion.div
-                  className="h-full bg-yellow-400"
+                  className="h-full rounded-full"
+                  style={{
+                    background: 'linear-gradient(90deg, rgba(250,204,21,0.9) 0%, rgba(234,179,8,1) 100%)',
+                    boxShadow: '0 0 12px rgba(250,204,21,0.5)'
+                  }}
                   initial={{ width: '0%' }}
                   animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
                 />
               </div>
               <div className="flex justify-between mt-3">
-                <p className="text-xs text-white/40 uppercase tracking-widest">
+                <p className="text-[10px] text-white/30 uppercase tracking-widest font-medium">
                   ~15 sec reel
                 </p>
-                <p className="text-xs text-white/60">
+                <p className="text-[10px] text-white/40 font-medium">
                   {elapsedTime}s elapsed
                 </p>
               </div>

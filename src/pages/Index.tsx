@@ -344,6 +344,10 @@ const Index = () => {
     localStorage.removeItem('cn_photos');
   };
 
+  const handleRemovePhoto = (photoId: string) => {
+    setPhotos((prev) => prev.filter((p) => p.id !== photoId));
+  };
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       {/* Aurora Background - hidden when instant camera */}
@@ -458,6 +462,7 @@ const Index = () => {
                 onOpenCamera={handleOpenCamera}
                 currentDate={getCurrentDate()}
                 onGenerateReel={handleGenerateReel}
+                onRemovePhoto={handleRemovePhoto}
               />
             )}
           </main>
