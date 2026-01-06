@@ -139,6 +139,11 @@ const ReelHistoryGallery = ({
                         className="w-full h-full object-cover"
                         muted
                         playsInline
+                        preload="metadata"
+                        onLoadedData={(e) => {
+                          // Seek to first frame for thumbnail
+                          (e.target as HTMLVideoElement).currentTime = 0.1;
+                        }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-white/5 to-white/10">
