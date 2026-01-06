@@ -80,6 +80,7 @@ const Index = () => {
   const [initialCaptureMode, setInitialCaptureMode] = useState<'photo' | 'video'>('photo');
   const [showRecentGallery, setShowRecentGallery] = useState(false);
   const [showReelHistoryGallery, setShowReelHistoryGallery] = useState(false);
+  const [pendingMedia, setPendingMedia] = useState<{ url: string; isVideo: boolean } | null>(null);
   
   // Fitness reel generation
   const { 
@@ -263,18 +264,18 @@ const Index = () => {
     setShowRecentGallery(true);
   };
 
-  // Handler for Layout 3's camera button - opens activity sheet first
+  // Handler for Layout 3's camera button - opens camera directly
   const handleOpenCamera = () => {
-    setShowActivitySheet(true);
+    setCameraEntering(true);
+    setShowCamera(true);
+    setTimeout(() => setCameraEntering(false), 500);
   };
 
-  // Handle photo selected from gallery
-  const handleGalleryPhotoSelect = (photoDataUrl: string) => {
+  // Handle photo selected from gallery - show activity selection
+  const handleGalleryPhotoSelect = (photoDataUrl: string, isVideo?: boolean) => {
     setShowRecentGallery(false);
-    // Navigate to preview with default activity - user can change in preview
-    navigate('/preview', { 
-      state: { imageUrl: photoDataUrl, isVideo: false, activity: 'Activity' } 
-    });
+    setPendingMedia({ url: photoDataUrl, isVideo: isVideo || false });
+    setShowActivitySheet(true);
   };
 
   const handleActivitySelect = useCallback((activity: string) => {
@@ -287,46 +288,44 @@ const Index = () => {
     // Phase 1: Morph sheet into acknowledgement
     setSheetPhase('acknowledge');
     
-    // Phase 2: After showing acknowledgement, prepare exit (increased time)
+    // Phase 2: After showing acknowledgement, prepare exit
     setTimeout(() => {
       setSheetPhase('exit');
-    }, 2200);
+    }, 1200);
     
-    // Phase 3: Open camera with entrance animation (more delay)
-    setTimeout(() => {
-      setCameraEntering(true);
-      setShowCamera(true);
-    }, 2600);
-    
-    // Phase 4: Close sheet and reset
+    // Phase 3: Navigate to preview with selected activity
     setTimeout(() => {
       setShowActivitySheet(false);
       setSheetPhase('select');
       setAcknowledgedActivity(null);
-    }, 2700);
-    
-    setTimeout(() => {
-      setCameraEntering(false);
-    }, 3100);
-  }, []);
+      
+      if (pendingMedia) {
+        navigate('/preview', { 
+          state: { imageUrl: pendingMedia.url, isVideo: pendingMedia.isVideo, activity } 
+        });
+        setPendingMedia(null);
+      }
+      setSelectedActivity(null);
+    }, 1600);
+  }, [pendingMedia, navigate]);
 
   const handleCapture = (mediaDataUrl: string, isVideo?: boolean) => {
     setShowCamera(false);
-    // Navigate to preview page with the media data URL
-    navigate('/preview', { 
-      state: { imageUrl: mediaDataUrl, isVideo, activity: selectedActivity } 
-    });
-    setSelectedActivity(null);
+    // Store pending media and show activity selection
+    setPendingMedia({ url: mediaDataUrl, isVideo: isVideo || false });
+    setShowActivitySheet(true);
   };
 
   const handleCameraClose = () => {
     setShowCamera(false);
     setSelectedActivity(null);
+    setPendingMedia(null);
   };
 
   const handleOverlayClick = () => {
     setShowActivitySheet(false);
     setSelectedActivity(null);
+    setPendingMedia(null);
   };
 
   // Simulate next day for testing

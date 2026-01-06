@@ -4,7 +4,7 @@ import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 interface RecentPhotosGalleryProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectPhoto: (photoDataUrl: string) => void;
+  onSelectPhoto: (photoDataUrl: string, isVideo?: boolean) => void;
 }
 const RecentPhotosGallery = ({
   isOpen,
@@ -61,12 +61,13 @@ const RecentPhotosGallery = ({
       return;
     }
 
-    // Photo is valid, read and proceed
+    // File is valid, read and proceed
+    const isVideo = file.type.startsWith('video/');
     const reader = new FileReader();
     reader.onload = event => {
       if (event.target?.result) {
         triggerHaptic('medium');
-        onSelectPhoto(event.target.result as string);
+        onSelectPhoto(event.target.result as string, isVideo);
       }
     };
     reader.readAsDataURL(file);
@@ -74,7 +75,7 @@ const RecentPhotosGallery = ({
   if (!isOpen) return null;
   return <>
       {/* Hidden file input */}
-      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+      <input ref={fileInputRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleFileSelect} />
 
       {/* Overlay with blur */}
       <div className="fixed inset-0 z-40 transition-all duration-300" style={{
