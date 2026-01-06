@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Mic, Film, Check } from 'lucide-react';
 
@@ -11,13 +11,39 @@ interface ReelGenerationOverlayProps {
 }
 
 const steps = [
-  { id: 'narration', label: 'Writing Script', icon: Sparkles, description: 'AI is crafting your story...' },
-  { id: 'voiceover', label: 'Recording Voice', icon: Mic, description: 'Generating voiceover...' },
-  { id: 'video', label: 'Creating Video', icon: Film, description: 'Rendering your reel...' },
+  { id: 'narration', label: 'Writing Script', icon: Sparkles, description: 'AI is crafting your story...', duration: 8 },
+  { id: 'voiceover', label: 'Recording Voice', icon: Mic, description: 'Generating voiceover...', duration: 12 },
+  { id: 'video', label: 'Creating Video', icon: Film, description: 'Rendering your reel...', duration: 45 },
 ];
+
+const TOTAL_ESTIMATED_TIME = 65; // seconds
 
 const ReelGenerationOverlay = ({ isVisible, currentStep, onClose }: ReelGenerationOverlayProps) => {
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const startTimeRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (isVisible && !startTimeRef.current) {
+      startTimeRef.current = Date.now();
+      setElapsedTime(0);
+    } else if (!isVisible) {
+      startTimeRef.current = null;
+      setElapsedTime(0);
+    }
+  }, [isVisible]);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    
+    const interval = setInterval(() => {
+      if (startTimeRef.current) {
+        setElapsedTime(Math.floor((Date.now() - startTimeRef.current) / 1000));
+      }
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [isVisible]);
 
   useEffect(() => {
     if (currentStep === 'voiceover') {
@@ -36,6 +62,39 @@ const ReelGenerationOverlay = ({ isVisible, currentStep, onClose }: ReelGenerati
     if (stepId === currentStep) return 'active';
     return 'pending';
   };
+
+  // Calculate progress percentage based on current step
+  const getProgressPercentage = () => {
+    if (currentStep === 'complete') return 100;
+    
+    const stepIndex = steps.findIndex(s => s.id === currentStep);
+    if (stepIndex === -1) return 0;
+    
+    // Base progress from completed steps
+    let baseProgress = 0;
+    for (let i = 0; i < stepIndex; i++) {
+      baseProgress += (steps[i].duration / TOTAL_ESTIMATED_TIME) * 100;
+    }
+    
+    // Add partial progress within current step
+    const currentStepData = steps[stepIndex];
+    const stepProgress = Math.min(elapsedTime / currentStepData.duration, 0.9) * (currentStepData.duration / TOTAL_ESTIMATED_TIME) * 100;
+    
+    return Math.min(Math.round(baseProgress + stepProgress), 95);
+  };
+
+  // Calculate ETA
+  const getETA = () => {
+    const remaining = Math.max(TOTAL_ESTIMATED_TIME - elapsedTime, 5);
+    if (remaining >= 60) {
+      const mins = Math.floor(remaining / 60);
+      const secs = remaining % 60;
+      return `~${mins}m ${secs}s`;
+    }
+    return `~${remaining}s`;
+  };
+
+  const progress = getProgressPercentage();
 
   return (
     <AnimatePresence>
@@ -80,7 +139,7 @@ const ReelGenerationOverlay = ({ isVisible, currentStep, onClose }: ReelGenerati
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-center mb-12"
+              className="text-center mb-8"
             >
               <h2 className="text-3xl font-black uppercase tracking-tight text-white">
                 Creating
@@ -88,6 +147,20 @@ const ReelGenerationOverlay = ({ isVisible, currentStep, onClose }: ReelGenerati
               <h2 className="text-3xl font-black uppercase tracking-tight text-yellow-400">
                 Your Reel
               </h2>
+              
+              {/* Progress percentage */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="mt-4 flex items-center justify-center gap-3"
+              >
+                <span className="text-4xl font-black text-yellow-400">{progress}%</span>
+                <div className="text-left">
+                  <p className="text-xs text-white/50 uppercase tracking-wider">Time left</p>
+                  <p className="text-sm font-bold text-white">{getETA()}</p>
+                </div>
+              </motion.div>
             </motion.div>
 
             {/* Steps */}
@@ -183,22 +256,22 @@ const ReelGenerationOverlay = ({ isVisible, currentStep, onClose }: ReelGenerati
               transition={{ delay: 0.6 }}
               className="mt-12"
             >
-              <div className="h-1 bg-white/10 overflow-hidden">
+              <div className="h-2 bg-white/10 overflow-hidden">
                 <motion.div
                   className="h-full bg-yellow-400"
                   initial={{ width: '0%' }}
-                  animate={{
-                    width: currentStep === 'narration' ? '33%' 
-                         : currentStep === 'voiceover' ? '66%'
-                         : currentStep === 'video' ? '90%'
-                         : '100%'
-                  }}
+                  animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.5 }}
                 />
               </div>
-              <p className="text-center text-xs text-white/40 mt-3 uppercase tracking-widest">
-                ~15 sec reel
-              </p>
+              <div className="flex justify-between mt-3">
+                <p className="text-xs text-white/40 uppercase tracking-widest">
+                  ~15 sec reel
+                </p>
+                <p className="text-xs text-white/60">
+                  {elapsedTime}s elapsed
+                </p>
+              </div>
             </motion.div>
           </div>
         </motion.div>
