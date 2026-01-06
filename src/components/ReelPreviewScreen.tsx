@@ -114,20 +114,35 @@ const ReelPreviewScreen = ({
 
           {/* Video Area */}
           <div className="absolute inset-0 flex items-center justify-center pt-36 pb-48 px-4">
-            <motion.div key={currentReel.id} initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative w-full max-w-sm aspect-[9/16] bg-white/5 border-2 border-white/20 overflow-hidden">
+            <motion.div key={currentReel.id} initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative w-full max-w-sm aspect-[9/16] bg-white/5 border-2 border-white/20 overflow-hidden rounded-2xl">
               {currentReel.videoUrl ? (
-                <video ref={videoRef} src={currentReel.videoUrl} className="w-full h-full object-cover" loop playsInline onEnded={() => setIsPlaying(false)} />
+                <>
+                  <video 
+                    ref={videoRef} 
+                    src={currentReel.videoUrl} 
+                    className="w-full h-full object-cover" 
+                    loop 
+                    playsInline 
+                    onEnded={() => setIsPlaying(false)}
+                    onClick={togglePlay}
+                  />
+                  {/* Play/Pause overlay - only show when paused */}
+                  {!isPlaying && (
+                    <button onClick={togglePlay} className="absolute inset-0 flex items-center justify-center bg-black/30">
+                      <div className="w-16 h-16 bg-yellow-400 flex items-center justify-center rounded-full">
+                        <Play className="w-8 h-8 text-black ml-1" />
+                      </div>
+                    </button>
+                  )}
+                </>
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center p-6">
-                  <Play className="w-12 h-12 text-yellow-400 mb-4" />
+                  <div className="w-16 h-16 bg-yellow-400/20 rounded-2xl flex items-center justify-center mb-4">
+                    <Play className="w-8 h-8 text-yellow-400" />
+                  </div>
                   <p className="text-white/60 text-sm">Video rendering...</p>
                 </div>
               )}
-              <button onClick={togglePlay} className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30">
-                <div className="w-16 h-16 bg-yellow-400 flex items-center justify-center">
-                  {isPlaying ? <Pause className="w-8 h-8 text-black" /> : <Play className="w-8 h-8 text-black ml-1" />}
-                </div>
-              </button>
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
                 <p className="text-white text-sm">"{currentReel.narration}"</p>
               </div>
