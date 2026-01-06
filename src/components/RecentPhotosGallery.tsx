@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { AlertTriangle, Clock, X, Image } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
+import ImageCropper from './ImageCropper';
+import VideoTrimmer from './VideoTrimmer';
+
 interface RecentPhotosGalleryProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectPhoto: (photoDataUrl: string, isVideo?: boolean) => void;
 }
+
 const RecentPhotosGallery = ({
   isOpen,
   onClose,
@@ -16,6 +20,12 @@ const RecentPhotosGallery = ({
   const [warningMessage, setWarningMessage] = useState('');
   const [hasTriggered, setHasTriggered] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Cropper and trimmer states
+  const [showCropper, setShowCropper] = useState(false);
+  const [showTrimmer, setShowTrimmer] = useState(false);
+  const [mediaToEdit, setMediaToEdit] = useState<string | null>(null);
+  const [isVideoMedia, setIsVideoMedia] = useState(false);
 
   // Show info popup, then trigger file picker
   useEffect(() => {
@@ -37,8 +47,12 @@ const RecentPhotosGallery = ({
       setHasTriggered(false);
       setShowInfoPopup(false);
       setShowWarning(false);
+      setShowCropper(false);
+      setShowTrimmer(false);
+      setMediaToEdit(null);
     }
   }, [isOpen, hasTriggered]);
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     setShowInfoPopup(false);
     const files = e.target.files;
@@ -51,6 +65,7 @@ const RecentPhotosGallery = ({
     const now = new Date();
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const isRecent = fileDate >= twentyFourHoursAgo;
+
     if (!isRecent) {
       // Calculate how old the photo is
       const diffHours = Math.floor((now.getTime() - fileDate.getTime()) / (1000 * 60 * 60));
@@ -61,54 +76,146 @@ const RecentPhotosGallery = ({
       return;
     }
 
-    // File is valid, read and proceed
+    // File is valid, read and show cropper/trimmer
     const isVideo = file.type.startsWith('video/');
     const reader = new FileReader();
     reader.onload = event => {
       if (event.target?.result) {
         triggerHaptic('medium');
-        onSelectPhoto(event.target.result as string, isVideo);
+        const mediaDataUrl = event.target.result as string;
+        setMediaToEdit(mediaDataUrl);
+        setIsVideoMedia(isVideo);
+        
+        if (isVideo) {
+          setShowTrimmer(true);
+        } else {
+          setShowCropper(true);
+        }
       }
     };
     reader.readAsDataURL(file);
   };
+
+  const handleCropConfirm = (croppedImageUrl: string) => {
+    setShowCropper(false);
+    setMediaToEdit(null);
+    onSelectPhoto(croppedImageUrl, false);
+  };
+
+  const handleCropCancel = () => {
+    setShowCropper(false);
+    setMediaToEdit(null);
+    setShowInfoPopup(true);
+  };
+
+  const handleTrimConfirm = (trimmedVideoUrl: string) => {
+    setShowTrimmer(false);
+    setMediaToEdit(null);
+    onSelectPhoto(trimmedVideoUrl, true);
+  };
+
+  const handleTrimCancel = () => {
+    setShowTrimmer(false);
+    setMediaToEdit(null);
+    setShowInfoPopup(true);
+  };
+
+  const handleRetake = () => {
+    setShowCropper(false);
+    setShowTrimmer(false);
+    setMediaToEdit(null);
+    // Trigger file picker again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
   if (!isOpen) return null;
-  return <>
+
+  // Show cropper for images
+  if (showCropper && mediaToEdit) {
+    return (
+      <ImageCropper
+        mediaSrc={mediaToEdit}
+        isVideo={false}
+        onConfirm={handleCropConfirm}
+        onCancel={handleCropCancel}
+        onRetake={handleRetake}
+      />
+    );
+  }
+
+  // Show trimmer for videos
+  if (showTrimmer && mediaToEdit) {
+    return (
+      <VideoTrimmer
+        videoSrc={mediaToEdit}
+        onConfirm={handleTrimConfirm}
+        onCancel={handleTrimCancel}
+        maxDuration={3}
+      />
+    );
+  }
+
+  return (
+    <>
       {/* Hidden file input */}
-      <input ref={fileInputRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleFileSelect} />
+      <input 
+        ref={fileInputRef} 
+        type="file" 
+        accept="image/*,video/*" 
+        className="hidden" 
+        onChange={handleFileSelect} 
+      />
 
       {/* Overlay with blur */}
-      <div className="fixed inset-0 z-40 transition-all duration-300" style={{
-      background: 'rgba(0, 0, 0, 0.4)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)'
-    }} onClick={onClose} />
+      <div 
+        className="fixed inset-0 z-40 transition-all duration-300" 
+        style={{
+          background: 'rgba(0, 0, 0, 0.4)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)'
+        }} 
+        onClick={onClose} 
+      />
 
       {/* Info Popup */}
-      {showInfoPopup && <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-white/5">
+      {showInfoPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-white/5">
           <div className="relative">
-            <div style={{
-          background: 'rgba(255, 255, 255, 0.12)',
-          backdropFilter: 'blur(40px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-          border: '1px solid rgba(255, 255, 255, 0.18)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-        }} className="rounded-3xl p-6 max-w-sm w-full animate-in zoom-in-95 fade-in duration-300 bg-black/0 border-black/0 shadow-none relative">
+            <div 
+              style={{
+                background: 'rgba(255, 255, 255, 0.12)',
+                backdropFilter: 'blur(40px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+              }} 
+              className="rounded-3xl p-6 max-w-sm w-full animate-in zoom-in-95 fade-in duration-300 bg-black/0 border-black/0 shadow-none relative"
+            >
               {/* Close button inside box - top right */}
-              <button onClick={onClose} className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90" style={{
-            background: 'rgba(255, 255, 255, 0.15)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
-          }}>
+              <button 
+                onClick={onClose} 
+                className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90" 
+                style={{
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)'
+                }}
+              >
                 <X className="w-4 h-4 text-white/80" />
               </button>
               
               <div className="flex flex-col items-center text-center gap-4">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{
-              background: 'rgba(251, 191, 36, 0.2)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(251, 191, 36, 0.3)'
-            }}>
+                <div 
+                  className="w-16 h-16 rounded-full flex items-center justify-center" 
+                  style={{
+                    background: 'rgba(251, 191, 36, 0.2)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(251, 191, 36, 0.3)'
+                  }}
+                >
                   <Clock className="w-8 h-8 text-amber-400" />
                 </div>
                 <div>
@@ -119,39 +226,50 @@ const RecentPhotosGallery = ({
                 </div>
                 
                 {/* Add Photo button with icon */}
-                <button onClick={() => {
-              if (fileInputRef.current) {
-                fileInputRef.current.click();
-              }
-            }} className="w-full py-3.5 px-4 rounded-2xl font-medium text-sm text-white mt-2 transition-all active:scale-95 flex items-center justify-center gap-2" style={{
-              background: 'rgba(255, 255, 255, 0.25)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)'
-            }}>
+                <button 
+                  onClick={() => {
+                    if (fileInputRef.current) {
+                      fileInputRef.current.click();
+                    }
+                  }} 
+                  className="w-full py-3.5 px-4 rounded-2xl font-medium text-sm text-white mt-2 transition-all active:scale-95 flex items-center justify-center gap-2" 
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.25)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+                  }}
+                >
                   <Image className="w-5 h-5" />
                   Add Photo
                 </button>
               </div>
             </div>
           </div>
-        </div>}
+        </div>
+      )}
 
       {/* Warning Popup */}
-      {showWarning && <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-          <div className="rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-300" style={{
-        background: 'rgba(255, 255, 255, 0.12)',
-        backdropFilter: 'blur(40px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-        border: '1px solid rgba(239, 68, 68, 0.3)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 40px rgba(239, 68, 68, 0.1)'
-      }}>
-            
+      {showWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+          <div 
+            className="rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-300" 
+            style={{
+              background: 'rgba(255, 255, 255, 0.12)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 40px rgba(239, 68, 68, 0.1)'
+            }}
+          >
             <div className="flex flex-col items-center text-center gap-4">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{
-            background: 'rgba(239, 68, 68, 0.2)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(239, 68, 68, 0.3)'
-          }}>
+              <div 
+                className="w-16 h-16 rounded-full flex items-center justify-center" 
+                style={{
+                  background: 'rgba(239, 68, 68, 0.2)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)'
+                }}
+              >
                 <AlertTriangle className="w-8 h-8 text-red-400" />
               </div>
               <div>
@@ -160,20 +278,26 @@ const RecentPhotosGallery = ({
                   {warningMessage}
                 </p>
               </div>
-              <button onClick={() => {
-            setShowWarning(false);
-            setShowInfoPopup(true);
-          }} className="w-full py-3 px-4 rounded-2xl font-medium text-sm text-white mt-2 transition-all active:scale-95" style={{
-            background: 'rgba(255, 255, 255, 0.2)',
-            border: '1px solid rgba(255, 255, 255, 0.25)',
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)'
-          }}>
+              <button 
+                onClick={() => {
+                  setShowWarning(false);
+                  setShowInfoPopup(true);
+                }} 
+                className="w-full py-3 px-4 rounded-2xl font-medium text-sm text-white mt-2 transition-all active:scale-95" 
+                style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+                }}
+              >
                 Try Another Photo
               </button>
             </div>
           </div>
-        </div>}
-
-    </>;
+        </div>
+      )}
+    </>
+  );
 };
+
 export default RecentPhotosGallery;
