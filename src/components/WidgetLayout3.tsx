@@ -300,16 +300,30 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
                         }}
                       >
                         {photo ? (
-                          <img 
-                            src={photo.originalUrl || photo.url} 
-                            alt="" 
-                            className="w-full h-full object-cover" 
-                            style={{ borderRadius: '2px' }} 
-                            onError={(e) => {
-                              console.error('Image failed to load:', photo.originalUrl || photo.url);
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
+                          photo.isVideo || isVideoUrl(photo.originalUrl || photo.url) ? (
+                            <video
+                              src={photo.originalUrl || photo.url}
+                              className="w-full h-full object-cover"
+                              style={{ borderRadius: '2px' }}
+                              muted
+                              playsInline
+                              preload="metadata"
+                              onLoadedData={(e) => {
+                                (e.target as HTMLVideoElement).currentTime = 0.1;
+                              }}
+                            />
+                          ) : (
+                            <img 
+                              src={photo.originalUrl || photo.url} 
+                              alt="" 
+                              className="w-full h-full object-cover" 
+                              style={{ borderRadius: '2px' }} 
+                              onError={(e) => {
+                                console.error('Image failed to load:', photo.originalUrl || photo.url);
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          )
                         ) : null}
                       </div>
                     );
