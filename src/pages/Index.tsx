@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronDown, Check, Film } from 'lucide-react';
+import { ChevronDown, Film, Check } from 'lucide-react';
+import { toast } from 'sonner';
 import AuroraBackground from '@/components/AuroraBackground';
 import PhotoUploadCard from '@/components/PhotoUploadCard';
 import WidgetLayout2 from '@/components/WidgetLayout2';
@@ -10,6 +11,7 @@ import ReelGenerationOverlay from '@/components/ReelGenerationOverlay';
 import ReelPreviewScreen from '@/components/ReelPreviewScreen';
 import ReelHistoryGallery from '@/components/ReelHistoryGallery';
 import { useFitnessReel } from '@/hooks/use-fitness-reel';
+import { uploadToStorage } from '@/services/storage-service';
 
 import CameraUI from '@/components/CameraUI';
 import {
@@ -33,7 +35,8 @@ import yogaIcon from '@/assets/activities/yoga.png';
 interface Photo {
   id: string;
   url: string; // Framed/template image URL
-  originalUrl?: string; // Original photo for film strip
+  originalUrl?: string; // Original photo for film strip (local data URI)
+  storageUrl?: string; // Public URL from Supabase Storage (for API calls)
   isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
@@ -103,11 +106,18 @@ const Index = () => {
   }, [reelHistory, isGenerating, currentStep]);
   
   const handleGenerateReel = useCallback((photosToProcess: typeof photos) => {
+    // Check if all photos have storage URLs
+    const missingStorage = photosToProcess.filter(p => !p.storageUrl);
+    if (missingStorage.length > 0) {
+      toast.error('Some photos are still uploading. Please wait...');
+      return;
+    }
+
     setLastGeneratedPhotos(photosToProcess);
-    // Transform photos to the format expected by the API
+    // Transform photos to the format expected by the API - use storageUrl for public access
     const photoData = photosToProcess.map((photo, index) => ({
       id: photo.id,
-      imageUrl: photo.originalUrl || photo.url,
+      imageUrl: photo.storageUrl || photo.originalUrl || photo.url,
       activity: photo.activity || 'Activity',
       duration: photo.duration,
       pr: photo.pr,
@@ -171,56 +181,79 @@ const Index = () => {
     return Math.ceil(diff / (1000 * 60 * 60));
   };
 
-  // Handle save from preview page
+  // Handle save from preview page - upload to storage for public URLs
   useEffect(() => {
     if (location.state?.savePhoto && location.state?.imageUrl && location.state?.activity) {
-      const today = getCurrentDate();
       const incomingUrl = location.state.imageUrl;
       const incomingOriginalUrl = location.state.originalUrl || incomingUrl;
       const isReview = location.state.isReview;
       const photoId = location.state.photoId;
+      const isVideo = location.state.isVideo || false;
 
-      if (isReview && photoId) {
-        // Update existing photo (reviewing/editing)
-        setPhotos((prev) => prev.map(photo => 
-          photo.id === photoId 
-            ? {
-                ...photo,
-                url: incomingUrl,
-                originalUrl: incomingOriginalUrl,
-                frame: location.state.frame || photo.frame,
-                duration: location.state.duration || photo.duration,
-                pr: location.state.pr || photo.pr,
-              }
-            : photo
-        ));
-      } else {
-        // Add new photo - each photo gets a unique "day" by calculating based on photo count
-        // This treats each upload as a separate day entry
-        setPhotos((prev) => {
-          const uniqueDate = new Date();
-          uniqueDate.setDate(uniqueDate.getDate() + prev.length); // Each photo gets a "future" unique day
-          const uniqueDateStr = uniqueDate.toISOString().split('T')[0];
-          
-          const newPhoto: Photo = {
-            id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            url: incomingUrl,
-            originalUrl: incomingOriginalUrl,
-            isVideo: location.state.isVideo || false,
-            activity: location.state.activity,
-            frame: location.state.frame || 'shaky',
-            duration: location.state.duration,
-            pr: location.state.pr,
-            uploadDate: uniqueDateStr,
-          };
-          return [...prev, newPhoto];
-        });
-      }
+      // Upload to storage in background
+      const uploadAndSave = async () => {
+        // Upload original to storage for public URL (needed for Runway API)
+        let storageUrl: string | null = null;
+        if (incomingOriginalUrl.startsWith('data:')) {
+          storageUrl = await uploadToStorage(
+            incomingOriginalUrl,
+            `journey-${Date.now()}`,
+            isVideo
+          );
+          if (storageUrl) {
+            toast.success('Photo uploaded successfully!');
+          } else {
+            toast.error('Failed to upload - using local storage');
+          }
+        }
 
-      // Clear the navigation state immediately to prevent re-adding
+        if (isReview && photoId) {
+          // Update existing photo
+          setPhotos((prev) =>
+            prev.map((photo) =>
+              photo.id === photoId
+                ? {
+                    ...photo,
+                    url: incomingUrl,
+                    originalUrl: incomingOriginalUrl,
+                    storageUrl: storageUrl || photo.storageUrl,
+                    frame: location.state.frame || photo.frame,
+                    duration: location.state.duration || photo.duration,
+                    pr: location.state.pr || photo.pr,
+                  }
+                : photo
+            )
+          );
+        } else {
+          // Add new photo
+          setPhotos((prev) => {
+            const uniqueDate = new Date();
+            uniqueDate.setDate(uniqueDate.getDate() + prev.length);
+            const uniqueDateStr = uniqueDate.toISOString().split('T')[0];
+
+            const newPhoto: Photo = {
+              id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              url: incomingUrl,
+              originalUrl: incomingOriginalUrl,
+              storageUrl: storageUrl || undefined,
+              isVideo,
+              activity: location.state.activity,
+              frame: location.state.frame || 'shaky',
+              duration: location.state.duration,
+              pr: location.state.pr,
+              uploadDate: uniqueDateStr,
+            };
+            return [...prev, newPhoto];
+          });
+        }
+      };
+
+      uploadAndSave();
+
+      // Clear the navigation state immediately
       navigate('/', { replace: true, state: null });
     }
-  }, [location.state?.savePhoto, location.state?.imageUrl, location.state?.activity, simulatedDate]);
+  }, [location.state?.savePhoto, location.state?.imageUrl, location.state?.activity, navigate]);
 
   // Handle retake from preview - open camera directly with the activity and capture mode
   const [instantCamera, setInstantCamera] = useState(() => {

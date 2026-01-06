@@ -14,6 +14,7 @@ interface Photo {
   id: string;
   url: string;
   originalUrl?: string;
+  storageUrl?: string;
   isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
@@ -101,6 +102,8 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
   
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
   const hasThreePhotos = photos.length >= 3;
+  const allPhotosUploaded = photos.slice(0, 3).every(p => p.storageUrl);
+  const isUploading = hasThreePhotos && !allPhotosUploaded;
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 100);
@@ -249,17 +252,27 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
           {hasThreePhotos && (
             <button
               onClick={handleGenerateReel}
-              className="absolute -top-14 left-2 z-20 flex items-center gap-2 px-4 py-2.5 rounded-full tap-bounce animate-play-button-float"
+              disabled={isUploading}
+              className={`absolute -top-14 left-2 z-20 flex items-center gap-2 px-4 py-2.5 rounded-full tap-bounce ${!isUploading ? 'animate-play-button-float' : ''}`}
               style={{
-                background: 'linear-gradient(135deg, rgba(250, 204, 21, 0.25) 0%, rgba(234, 179, 8, 0.15) 100%)',
+                background: isUploading
+                  ? 'linear-gradient(135deg, rgba(150, 150, 150, 0.25) 0%, rgba(100, 100, 100, 0.15) 100%)'
+                  : 'linear-gradient(135deg, rgba(250, 204, 21, 0.25) 0%, rgba(234, 179, 8, 0.15) 100%)',
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
-                border: '1.5px solid rgba(250, 204, 21, 0.4)',
-                boxShadow: '0 4px 24px rgba(250, 204, 21, 0.3), inset 0 1px 1px rgba(255,255,255,0.2), 0 0 40px rgba(250, 204, 21, 0.15)'
+                border: isUploading
+                  ? '1.5px solid rgba(150, 150, 150, 0.4)'
+                  : '1.5px solid rgba(250, 204, 21, 0.4)',
+                boxShadow: isUploading
+                  ? 'none'
+                  : '0 4px 24px rgba(250, 204, 21, 0.3), inset 0 1px 1px rgba(255,255,255,0.2), 0 0 40px rgba(250, 204, 21, 0.15)',
+                opacity: isUploading ? 0.7 : 1,
               }}
             >
-              <Sparkles className="w-4 h-4 text-yellow-400 drop-shadow-lg" />
-              <span className="text-xs font-semibold text-yellow-400">Create Reel</span>
+              <Sparkles className={`w-4 h-4 drop-shadow-lg ${isUploading ? 'text-gray-400' : 'text-yellow-400'}`} />
+              <span className={`text-xs font-semibold ${isUploading ? 'text-gray-400' : 'text-yellow-400'}`}>
+                {isUploading ? 'Uploading...' : 'Create Reel'}
+              </span>
             </button>
           )}
           
