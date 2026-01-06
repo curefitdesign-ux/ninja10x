@@ -47,7 +47,16 @@ const PhotoUploadCard = ({
       >
         {/* Cult Ninja Tag */}
         <div className="flex justify-center mb-4">
-          <div className="px-4 py-2 rounded-full border border-foreground/30 bg-background/30 backdrop-blur-sm">
+          <div 
+            className="px-4 py-2 rounded-full"
+            style={{ 
+              background: 'linear-gradient(180deg, rgba(90,90,90,0.85) 0%, rgba(61,61,61,0.85) 100%)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 15px rgba(0,0,0,0.5)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.1)'
+            }}
+          >
             <span className="text-sm font-semibold text-foreground tracking-wider">CULT NINJA</span>
           </div>
         </div>
