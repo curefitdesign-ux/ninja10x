@@ -163,10 +163,12 @@ const WidgetLayout2 = ({
         {/* CULT NINJA Badge - positioned at top, partially outside */}
         <div className="flex justify-center relative z-20" style={{ marginTop: '-12px' }}>
           <div 
-            className="px-5 py-2.5 rounded-2xl"
+            className="px-5 py-2.5 rounded-2xl backdrop-blur-md"
             style={{ 
-              background: 'linear-gradient(180deg, #5a5a5a 0%, #3d3d3d 100%)',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 15px rgba(0,0,0,0.5)'
+              background: 'linear-gradient(180deg, rgba(90,90,90,0.85) 0%, rgba(61,61,61,0.85) 100%)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 15px rgba(0,0,0,0.5)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)'
             }}
           >
             <span 
