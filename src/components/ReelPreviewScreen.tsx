@@ -43,11 +43,17 @@ const ReelPreviewScreen = ({
     videoRef.current?.pause();
   }, [currentIndex]);
 
-  const togglePlay = () => {
+  const togglePlay = async () => {
     if (videoRef.current) {
-      if (isPlaying) videoRef.current.pause();
-      else videoRef.current.play();
-      setIsPlaying(!isPlaying);
+      try {
+        if (isPlaying) {
+          videoRef.current.pause();
+        } else {
+          await videoRef.current.play();
+        }
+      } catch (err) {
+        console.error('Video playback error:', err);
+      }
     }
   };
 
@@ -122,9 +128,13 @@ const ReelPreviewScreen = ({
                     src={currentReel.videoUrl} 
                     className="w-full h-full object-cover" 
                     loop 
-                    playsInline 
+                    playsInline
+                    preload="auto"
                     onEnded={() => setIsPlaying(false)}
                     onClick={togglePlay}
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
+                    onError={(e) => console.error('Video error:', e)}
                   />
                   {/* Play/Pause overlay - only show when paused */}
                   {!isPlaying && (
