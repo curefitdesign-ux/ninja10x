@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Check, X, RotateCcw } from 'lucide-react';
+import { Check, X, RotateCcw, RotateCw, ZoomIn } from 'lucide-react';
 
 interface ImageCropperProps {
   mediaSrc: string;
@@ -13,6 +13,7 @@ interface Transform {
   scale: number;
   x: number;
   y: number;
+  rotation: number;
 }
 
 const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: ImageCropperProps) => {
@@ -20,12 +21,14 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
   const mediaRef = useRef<HTMLImageElement | HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
-  const [transform, setTransform] = useState<Transform>({ scale: 1, x: 0, y: 0 });
+  const [transform, setTransform] = useState<Transform>({ scale: 1, x: 0, y: 0, rotation: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialDistance, setInitialDistance] = useState<number | null>(null);
   const [initialScale, setInitialScale] = useState(1);
   const [mediaDimensions, setMediaDimensions] = useState({ width: 0, height: 0 });
+  const [showZoomIndicator, setShowZoomIndicator] = useState(false);
+  const zoomIndicatorTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Calculate distance between two touch points
   const getDistance = (touch1: React.Touch, touch2: React.Touch) => {
@@ -35,7 +38,7 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
   };
 
   // Constrain transform to keep media covering the crop area
-  const constrainTransform = useCallback((t: Transform, mediaWidth: number, mediaHeight: number) => {
+  const constrainTransform = useCallback((t: Transform, mediaWidth: number, mediaHeight: number): Transform => {
     if (!containerRef.current) return t;
     
     const container = containerRef.current;
@@ -53,6 +56,7 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
       scale: Math.max(1, Math.min(3, t.scale)),
       x: Math.max(-maxX, Math.min(maxX, t.x)),
       y: Math.max(-maxY, Math.min(maxY, t.y)),
+      rotation: t.rotation,
     };
   }, []);
 
@@ -124,6 +128,17 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
     setIsDragging(false);
   };
 
+  // Show zoom indicator with auto-hide
+  const showZoomIndicatorWithTimeout = useCallback(() => {
+    setShowZoomIndicator(true);
+    if (zoomIndicatorTimeout.current) {
+      clearTimeout(zoomIndicatorTimeout.current);
+    }
+    zoomIndicatorTimeout.current = setTimeout(() => {
+      setShowZoomIndicator(false);
+    }, 1500);
+  }, []);
+
   // Zoom buttons
   const handleZoomIn = () => {
     setTransform(prev => constrainTransform(
@@ -131,6 +146,7 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
       mediaDimensions.width,
       mediaDimensions.height
     ));
+    showZoomIndicatorWithTimeout();
   };
 
   const handleZoomOut = () => {
@@ -139,7 +155,26 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
       mediaDimensions.width,
       mediaDimensions.height
     ));
+    showZoomIndicatorWithTimeout();
   };
+
+  // Rotation controls
+  const handleRotateLeft = () => {
+    setTransform(prev => ({ ...prev, rotation: prev.rotation - 90 }));
+  };
+
+  const handleRotateRight = () => {
+    setTransform(prev => ({ ...prev, rotation: prev.rotation + 90 }));
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (zoomIndicatorTimeout.current) {
+        clearTimeout(zoomIndicatorTimeout.current);
+      }
+    };
+  }, []);
 
   // Handle media load
   const handleMediaLoad = (e: React.SyntheticEvent<HTMLImageElement | HTMLVideoElement>) => {
@@ -249,8 +284,8 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
         <div 
           className="absolute inset-0 flex items-center justify-center"
           style={{
-            transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
-            transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+            transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale}) rotate(${transform.rotation}deg)`,
+            transition: isDragging ? 'none' : 'transform 0.2s ease-out',
           }}
         >
           {isVideo ? (
@@ -273,6 +308,16 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
               onLoad={handleMediaLoad}
             />
           )}
+        </div>
+      </div>
+      
+      {/* Zoom indicator */}
+      <div 
+        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none transition-opacity duration-300 ${showZoomIndicator ? 'opacity-100' : 'opacity-0'}`}
+      >
+        <div className="flex items-center gap-2 bg-black/70 backdrop-blur-sm px-4 py-2 rounded-full">
+          <ZoomIn className="w-5 h-5 text-white" />
+          <span className="text-white font-semibold text-lg">{Math.round(transform.scale * 100)}%</span>
         </div>
       </div>
       
@@ -345,6 +390,24 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
       
       {/* Bottom controls */}
       <div className="absolute bottom-0 left-0 right-0 pb-12 px-8 z-10">
+        {/* Rotation controls - only for images */}
+        {!isVideo && (
+          <div className="flex justify-center gap-6 mb-6">
+            <button 
+              onClick={handleRotateLeft} 
+              className="p-3 bg-white/10 backdrop-blur-sm rounded-full active:scale-95 transition-transform"
+            >
+              <RotateCcw className="w-6 h-6 text-white" />
+            </button>
+            <button 
+              onClick={handleRotateRight}
+              className="p-3 bg-white/10 backdrop-blur-sm rounded-full active:scale-95 transition-transform"
+            >
+              <RotateCw className="w-6 h-6 text-white" />
+            </button>
+          </div>
+        )}
+        
         <div className="flex items-center justify-between">
           {/* Retake button */}
           <button onClick={onRetake || onCancel} className="p-4">
