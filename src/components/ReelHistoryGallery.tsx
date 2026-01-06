@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Play, Film, Share2, Download, Trash2 } from 'lucide-react';
+import { X, Play, Film, Download, Trash2 } from 'lucide-react';
 import type { ReelResult } from '@/hooks/use-fitness-reel';
 
 interface ReelHistoryGalleryProps {
@@ -11,13 +11,13 @@ interface ReelHistoryGalleryProps {
   onClearHistory: () => void;
 }
 
-const ReelHistoryGallery = ({
+const ReelHistoryGallery = forwardRef<HTMLDivElement, ReelHistoryGalleryProps>(({
   isOpen,
   reelHistory,
   onClose,
   onSelectReel,
   onClearHistory,
-}: ReelHistoryGalleryProps) => {
+}, ref) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const formatDate = (timestamp: number) => {
@@ -199,6 +199,8 @@ const ReelHistoryGallery = ({
       )}
     </AnimatePresence>
   );
-};
+});
+
+ReelHistoryGallery.displayName = 'ReelHistoryGallery';
 
 export default ReelHistoryGallery;
