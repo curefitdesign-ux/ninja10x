@@ -441,10 +441,8 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel }: Wid
           onClick={() => { handleTap('camera-btn'); onOpenCamera(); }}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-full tap-bounce ${tappedElement === 'camera-btn' ? 'animate-liquid-tap' : ''}`}
           style={{
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+            background: 'linear-gradient(135deg, #FF4D4D 0%, #FF3333 100%)',
+            boxShadow: '0 4px 15px rgba(255,77,77,0.4)'
           }}
         >
           <Camera className="w-5 h-5 text-white" />
