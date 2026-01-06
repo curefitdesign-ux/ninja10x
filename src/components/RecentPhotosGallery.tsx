@@ -104,55 +104,30 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
         onChange={handleFileSelect}
       />
 
-      {/* Overlay with blur */}
+      {/* Overlay */}
       <div 
-        className="fixed inset-0 z-40 transition-all duration-300"
-        style={{
-          background: 'rgba(0, 0, 0, 0.4)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-        }}
+        className="fixed inset-0 bg-black/60 z-40 transition-opacity duration-300"
         onClick={onClose}
       />
 
       {/* Info Popup */}
       {showInfoPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-          <div 
-            className="rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-300"
-            style={{
-              background: 'rgba(255, 255, 255, 0.12)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              border: '1px solid rgba(255, 255, 255, 0.18)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-            }}
-          >
+          <div className="bg-background/95 backdrop-blur-xl rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-foreground/10 animate-in zoom-in-95 fade-in duration-300">
             <div className="flex flex-col items-center text-center gap-4">
-              <div 
-                className="w-16 h-16 rounded-full flex items-center justify-center"
-                style={{
-                  background: 'rgba(251, 191, 36, 0.2)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(251, 191, 36, 0.3)',
-                }}
-              >
-                <Clock className="w-8 h-8 text-amber-400" />
+              <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center">
+                <Clock className="w-8 h-8 text-amber-500" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white mb-2">24 Hour Photos Only</h3>
-                <p className="text-white/60 text-sm leading-relaxed">
+                <h3 className="text-lg font-bold text-foreground mb-2">24 Hour Photos Only</h3>
+                <p className="text-foreground/60 text-sm leading-relaxed">
                   Only photos taken in the last 24 hours can be uploaded. Take a new photo of your activity!
                 </p>
               </div>
               <div className="flex gap-3 w-full mt-2">
                 <button
                   onClick={onClose}
-                  className="flex-1 py-3 px-4 rounded-2xl font-medium text-sm text-white/80 transition-all active:scale-95"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                  }}
+                  className="flex-1 py-3 px-4 rounded-xl bg-foreground/10 text-foreground font-medium text-sm"
                 >
                   Cancel
                 </button>
@@ -162,12 +137,7 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
                       fileInputRef.current.click();
                     }
                   }}
-                  className="flex-1 py-3 px-4 rounded-2xl font-medium text-sm text-white transition-all active:scale-95"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.25)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)',
-                  }}
+                  className="flex-1 py-3 px-4 rounded-xl bg-foreground text-background font-medium text-sm"
                 >
                   Select Photo
                 </button>
@@ -177,42 +147,17 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
         </div>
       )}
 
-      {/* Warning Popup - Auto closes */}
+      {/* Warning Popup */}
       {showWarning && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-          <div 
-            className="rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-300 relative overflow-hidden"
-            style={{
-              background: 'rgba(255, 255, 255, 0.12)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 40px rgba(239, 68, 68, 0.1)',
-            }}
-          >
-            {/* Auto-close progress bar */}
-            <div 
-              className="absolute top-0 left-0 h-1 bg-red-400/50"
-              style={{
-                animation: 'shrink-width 3s linear forwards',
-                width: '100%',
-              }}
-            />
-            
+          <div className="bg-background/95 backdrop-blur-xl rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-red-500/30 animate-in zoom-in-95 fade-in duration-300">
             <div className="flex flex-col items-center text-center gap-4">
-              <div 
-                className="w-16 h-16 rounded-full flex items-center justify-center"
-                style={{
-                  background: 'rgba(239, 68, 68, 0.2)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                }}
-              >
-                <AlertTriangle className="w-8 h-8 text-red-400" />
+              <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center">
+                <AlertTriangle className="w-8 h-8 text-red-500" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white mb-2">Photo Too Old</h3>
-                <p className="text-white/60 text-sm leading-relaxed">
+                <h3 className="text-lg font-bold text-foreground mb-2">Photo Too Old</h3>
+                <p className="text-foreground/60 text-sm leading-relaxed">
                   {warningMessage}
                 </p>
               </div>
@@ -221,12 +166,7 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
                   setShowWarning(false);
                   setShowInfoPopup(true);
                 }}
-                className="w-full py-3 px-4 rounded-2xl font-medium text-sm text-white mt-2 transition-all active:scale-95"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  border: '1px solid rgba(255, 255, 255, 0.25)',
-                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)',
-                }}
+                className="w-full py-3 px-4 rounded-xl bg-foreground text-background font-medium text-sm mt-2"
               >
                 Try Another Photo
               </button>
@@ -234,14 +174,6 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
           </div>
         </div>
       )}
-
-      {/* Keyframe for progress bar */}
-      <style>{`
-        @keyframes shrink-width {
-          from { width: 100%; }
-          to { width: 0%; }
-        }
-      `}</style>
     </>
   );
 };
