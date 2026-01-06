@@ -15,19 +15,19 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
   const [hasTriggered, setHasTriggered] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Show info popup, then trigger file picker
+  // Show info popup and auto-trigger file picker
   useEffect(() => {
     if (isOpen && !hasTriggered) {
       setHasTriggered(true);
       setShowInfoPopup(true);
       
-      // Auto-trigger file picker after showing info
+      // Auto-trigger file picker immediately
       const timer = setTimeout(() => {
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
           fileInputRef.current.click();
         }
-      }, 2000); // Show info for 2 seconds before opening picker
+      }, 300); // Small delay for popup to render
       
       return () => clearTimeout(timer);
     }
@@ -149,24 +149,6 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
                     Only photos taken in the last 24 hours can be uploaded. Take a new photo of your activity!
                   </p>
                 </div>
-                
-                {/* Add Photo button with icon */}
-                <button
-                  onClick={() => {
-                    if (fileInputRef.current) {
-                      fileInputRef.current.click();
-                    }
-                  }}
-                  className="w-full py-3.5 px-4 rounded-2xl font-medium text-sm text-white mt-2 transition-all active:scale-95 flex items-center justify-center gap-2"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.25)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)',
-                  }}
-                >
-                  <Image className="w-5 h-5" />
-                  Add Photo
-                </button>
               </div>
             </div>
           </div>
