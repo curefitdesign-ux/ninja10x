@@ -74,18 +74,19 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are creating a motivational, energetic voiceover script for a fitness journey video reel. 
-Keep it SHORT (30-45 seconds when spoken). Be inspiring, use action words, and celebrate the user's achievements.
-The tone should be upbeat and encouraging, like a fitness influencer or motivational coach.
+            content: `You are creating a short, punchy voiceover script for a brutalist-style fitness video reel.
+Keep it VERY SHORT (10-15 seconds when spoken, max 30 words). Raw, gritty, powerful.
+The tone should be intense and underground - like a boxing gym trainer, not a cheerful influencer.
+Use short, punchy sentences. No fluff. Just raw energy.
 Format: Just the narration text, no formatting or stage directions.`
           },
           {
             role: "user",
-            content: `Create a short, punchy voiceover narration for this fitness week:
+            content: `Create a short, intense voiceover for this fitness week:
 
 ${photosSummary}
 
-Make it feel like an Instagram fitness reel - energetic, motivating, and shareable!`
+Style: Brutalist, gritty, underground. Think boxing gym, not Instagram fitness. Max 30 words.`
           }
         ],
       }),
@@ -140,17 +141,17 @@ Make it feel like an Instagram fitness reel - energetic, motivating, and shareab
     // Step 3: Generate video with RunwayML
     console.log("Step 3: Initiating video generation with RunwayML...");
     
-    // For RunwayML Gen-3 Alpha, we need to use their image-to-video API
-    // First, let's prepare the prompt for the video generation
-    const videoPrompt = `Cinematic fitness montage, dynamic camera movements, motivational energy, 
-${photos.map(p => p.activity).join(', ')} activities, 
-slow motion action shots transitioning smoothly, professional sports documentary style, 
-golden hour lighting, epic and inspiring atmosphere`;
+    // Brutalist style video prompt - gritty, high contrast, film grain aesthetic
+    const videoPrompt = `Vertical mobile video, brutalist graphic design style, fitness vlog aesthetic. 
+A gritty cinematic montage of ${photos.map(p => p.activity.toLowerCase()).join(' and ')} training. 
+Heavy film grain, noise textures, high contrast black and white with flashes of bright yellow. 
+Split-screen collage effects, fast-paced editing, glitch transitions. 
+Urban underground atmosphere, raw athletic power, 4k resolution.`;
 
     // Use the first photo as the starting frame
     const firstPhotoUrl = photos[0].imageUrl;
     
-    // Check if RunwayML API key format (they use different API structure)
+    // RunwayML Gen-3 Alpha image-to-video API - 5 second clips (3 clips = ~15 sec total)
     const runwayResponse = await fetch("https://api.runwayml.com/v1/image_to_video", {
       method: "POST",
       headers: {
@@ -162,9 +163,9 @@ golden hour lighting, epic and inspiring atmosphere`;
         model: "gen3a_turbo",
         promptImage: firstPhotoUrl,
         promptText: videoPrompt,
-        duration: 5,
+        duration: 5, // 5 seconds per clip, we'll request multiple if needed
         watermark: false,
-        ratio: "9:16",
+        ratio: "9:16", // Vertical mobile format
       }),
     });
 
