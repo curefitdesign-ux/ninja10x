@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { AlertTriangle, Camera, ImageIcon, X } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { AlertTriangle, Clock, X } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 
 interface RecentPhotosGalleryProps {
@@ -14,13 +14,22 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
   const [warningMessage, setWarningMessage] = useState('');
   const [hasTriggered, setHasTriggered] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  // Show info popup when opened
+  // Show info popup, then trigger file picker
   useEffect(() => {
     if (isOpen && !hasTriggered) {
       setHasTriggered(true);
       setShowInfoPopup(true);
+      
+      // Auto-trigger file picker after showing info
+      const timer = setTimeout(() => {
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+          fileInputRef.current.click();
+        }
+      }, 2000); // Show info for 2 seconds before opening picker
+      
+      return () => clearTimeout(timer);
     }
     
     if (!isOpen) {
@@ -30,12 +39,23 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
     }
   }, [isOpen, hasTriggered]);
 
+  // Auto-hide warning after 3 seconds
+  useEffect(() => {
+    if (showWarning) {
+      const timer = setTimeout(() => {
+        setShowWarning(false);
+        onClose();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showWarning, onClose]);
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     setShowInfoPopup(false);
     
     const files = e.target.files;
     if (!files || files.length === 0) {
-      setShowInfoPopup(true);
+      onClose();
       return;
     }
 
@@ -46,6 +66,7 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
     const isRecent = fileDate >= twentyFourHoursAgo;
 
     if (!isRecent) {
+      // Calculate how old the photo is
       const diffHours = Math.floor((now.getTime() - fileDate.getTime()) / (1000 * 60 * 60));
       const diffDays = Math.floor(diffHours / 24);
       
@@ -59,6 +80,7 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
       return;
     }
 
+    // Photo is valid, read and proceed
     const reader = new FileReader();
     reader.onload = (event) => {
       if (event.target?.result) {
@@ -69,27 +91,11 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
     reader.readAsDataURL(file);
   };
 
-  const handleGalleryClick = () => {
-    triggerHaptic('light');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-      fileInputRef.current.click();
-    }
-  };
-
-  const handleCameraClick = () => {
-    triggerHaptic('light');
-    if (cameraInputRef.current) {
-      cameraInputRef.current.value = '';
-      cameraInputRef.current.click();
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
     <>
-      {/* Hidden file inputs */}
+      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -97,175 +103,120 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
         className="hidden"
         onChange={handleFileSelect}
       />
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handleFileSelect}
-      />
 
-      {/* Full-screen blur overlay */}
+      {/* Overlay */}
       <div 
-        className="fixed inset-0 z-40 transition-all duration-300"
-        style={{
-          background: 'rgba(0, 0, 0, 0.7)',
-          backdropFilter: 'blur(30px)',
-          WebkitBackdropFilter: 'blur(30px)',
-        }}
+        className="fixed inset-0 bg-black/60 z-40 transition-opacity duration-300"
+        onClick={onClose}
       />
 
-      {/* Info Popup - Full screen experience */}
+      {/* Info Popup */}
       {showInfoPopup && (
-        <div className="fixed inset-0 z-50 flex flex-col">
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-6 left-6 w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-90"
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+          <div 
+            className="rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-300"
             style={{
-              background: 'rgba(255, 255, 255, 0.15)',
-              backdropFilter: 'blur(10px)',
+              background: 'rgba(255, 255, 255, 0.12)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              border: '1px solid rgba(255, 255, 255, 0.18)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
             }}
           >
-            <X className="w-6 h-6 text-white" />
-          </button>
-
-          {/* Content */}
-          <div className="flex-1 flex flex-col items-center justify-center px-8 pb-8">
-            {/* Icon */}
-            <div 
-              className="w-24 h-24 rounded-full flex items-center justify-center mb-8"
-              style={{
-                background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.2))',
-                boxShadow: '0 0 60px rgba(251, 191, 36, 0.3)',
-              }}
-            >
-              <Camera className="w-12 h-12 text-amber-400" />
+            <div className="flex flex-col items-center text-center gap-4">
+              <div 
+                className="w-16 h-16 rounded-full flex items-center justify-center"
+                style={{
+                  background: 'rgba(251, 191, 36, 0.2)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(251, 191, 36, 0.3)',
+                }}
+              >
+                <Clock className="w-8 h-8 text-amber-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white mb-2">24 Hour Photos Only</h3>
+                <p className="text-white/60 text-sm leading-relaxed">
+                  Only photos taken in the last 24 hours can be uploaded. Take a new photo of your activity!
+                </p>
+              </div>
+              <div className="flex gap-3 w-full mt-2">
+                <button
+                  onClick={onClose}
+                  className="flex-1 py-3 px-4 rounded-2xl font-medium text-sm text-white/80 transition-all active:scale-95"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (fileInputRef.current) {
+                      fileInputRef.current.click();
+                    }
+                  }}
+                  className="flex-1 py-3 px-4 rounded-2xl font-medium text-sm text-white transition-all active:scale-95"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.25)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+                  }}
+                >
+                  Select Photo
+                </button>
+              </div>
             </div>
-
-            {/* Highlight text */}
-            <span 
-              className="text-sm font-semibold tracking-wider uppercase mb-4"
-              style={{ color: '#F59E0B' }}
-            >
-              Fresh Moments Only
-            </span>
-
-            {/* Main headline */}
-            <h1 className="text-3xl font-bold text-white text-center mb-4 leading-tight">
-              Capture Your<br />Activity Now!
-            </h1>
-
-            {/* Subtitle */}
-            <p className="text-white/50 text-center text-base leading-relaxed max-w-xs mb-12">
-              Share a photo from the last 24 hours to log your activity. Fresh content keeps your journey authentic!
-            </p>
-          </div>
-
-          {/* CTAs at bottom */}
-          <div className="px-6 pb-10 space-y-4">
-            {/* Primary CTA - From Gallery */}
-            <button
-              onClick={handleGalleryClick}
-              className="w-full py-4 rounded-2xl font-semibold text-base transition-all active:scale-[0.98] flex items-center justify-center gap-3"
-              style={{
-                background: '#1a1a1a',
-                color: 'white',
-              }}
-            >
-              <ImageIcon className="w-5 h-5" />
-              From Gallery
-            </button>
-
-            {/* Secondary CTA - Camera */}
-            <button
-              onClick={handleCameraClick}
-              className="w-full py-4 font-medium text-base text-white/60 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-            >
-              <Camera className="w-5 h-5" />
-              Open Camera
-            </button>
           </div>
         </div>
       )}
 
-      {/* Warning Popup - Full screen */}
+      {/* Warning Popup */}
       {showWarning && (
-        <div className="fixed inset-0 z-50 flex flex-col">
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-6 left-6 w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-90"
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+          <div 
+            className="rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-300"
             style={{
-              background: 'rgba(255, 255, 255, 0.15)',
-              backdropFilter: 'blur(10px)',
+              background: 'rgba(255, 255, 255, 0.12)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 40px rgba(239, 68, 68, 0.1)',
             }}
           >
-            <X className="w-6 h-6 text-white" />
-          </button>
-
-          {/* Content */}
-          <div className="flex-1 flex flex-col items-center justify-center px-8 pb-8">
-            {/* Icon */}
-            <div 
-              className="w-24 h-24 rounded-full flex items-center justify-center mb-8"
-              style={{
-                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.2))',
-                boxShadow: '0 0 60px rgba(239, 68, 68, 0.3)',
-              }}
-            >
-              <AlertTriangle className="w-12 h-12 text-red-400" />
+            <div className="flex flex-col items-center text-center gap-4">
+              <div 
+                className="w-16 h-16 rounded-full flex items-center justify-center"
+                style={{
+                  background: 'rgba(239, 68, 68, 0.2)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                }}
+              >
+                <AlertTriangle className="w-8 h-8 text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white mb-2">Photo Too Old</h3>
+                <p className="text-white/60 text-sm leading-relaxed">
+                  {warningMessage}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowWarning(false);
+                  setShowInfoPopup(true);
+                }}
+                className="w-full py-3 px-4 rounded-2xl font-medium text-sm text-white mt-2 transition-all active:scale-95"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+                }}
+              >
+                Try Another Photo
+              </button>
             </div>
-
-            {/* Highlight text */}
-            <span 
-              className="text-sm font-semibold tracking-wider uppercase mb-4"
-              style={{ color: '#EF4444' }}
-            >
-              Photo Too Old
-            </span>
-
-            {/* Main headline */}
-            <h1 className="text-3xl font-bold text-white text-center mb-4 leading-tight">
-              Try a Recent<br />Photo Instead
-            </h1>
-
-            {/* Subtitle */}
-            <p className="text-white/50 text-center text-base leading-relaxed max-w-xs mb-12">
-              {warningMessage}
-            </p>
-          </div>
-
-          {/* CTAs at bottom */}
-          <div className="px-6 pb-10 space-y-4">
-            {/* Primary CTA - From Gallery */}
-            <button
-              onClick={() => {
-                setShowWarning(false);
-                handleGalleryClick();
-              }}
-              className="w-full py-4 rounded-2xl font-semibold text-base transition-all active:scale-[0.98] flex items-center justify-center gap-3"
-              style={{
-                background: '#1a1a1a',
-                color: 'white',
-              }}
-            >
-              <ImageIcon className="w-5 h-5" />
-              Try Another Photo
-            </button>
-
-            {/* Secondary CTA - Camera */}
-            <button
-              onClick={() => {
-                setShowWarning(false);
-                handleCameraClick();
-              }}
-              className="w-full py-4 font-medium text-base text-white/60 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-            >
-              <Camera className="w-5 h-5" />
-              Take New Photo
-            </button>
           </div>
         </div>
       )}
