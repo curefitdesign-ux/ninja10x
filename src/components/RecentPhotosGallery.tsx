@@ -39,16 +39,6 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
     }
   }, [isOpen, hasTriggered]);
 
-  // Auto-hide warning after 3 seconds
-  useEffect(() => {
-    if (showWarning) {
-      const timer = setTimeout(() => {
-        setShowWarning(false);
-        onClose();
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [showWarning, onClose]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     setShowInfoPopup(false);
@@ -104,9 +94,14 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
         onChange={handleFileSelect}
       />
 
-      {/* Overlay */}
+      {/* Overlay with blur */}
       <div 
-        className="fixed inset-0 bg-black/60 z-40 transition-opacity duration-300"
+        className="fixed inset-0 z-40 transition-all duration-300"
+        style={{
+          background: 'rgba(0, 0, 0, 0.4)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+        }}
         onClick={onClose}
       />
 
@@ -185,6 +180,7 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 40px rgba(239, 68, 68, 0.1)',
             }}
           >
+            
             <div className="flex flex-col items-center text-center gap-4">
               <div 
                 className="w-16 h-16 rounded-full flex items-center justify-center"
@@ -220,6 +216,7 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
           </div>
         </div>
       )}
+
     </>
   );
 };
