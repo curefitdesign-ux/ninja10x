@@ -80,16 +80,24 @@ const Index = () => {
   const [showRecentGallery, setShowRecentGallery] = useState(false);
   
   // Fitness reel generation
-  const { generateReel, isGenerating, currentStep, reelResult, clearResult } = useFitnessReel();
+  const { 
+    generateReel, 
+    isGenerating, 
+    currentStep, 
+    reelHistory, 
+    currentReelIndex, 
+    setCurrentReelIndex,
+    clearHistory 
+  } = useFitnessReel();
   const [showReelPreview, setShowReelPreview] = useState(false);
   const [lastGeneratedPhotos, setLastGeneratedPhotos] = useState<typeof photos>([]);
   
   // Show preview when reel is ready
   useEffect(() => {
-    if (reelResult?.success && !isGenerating) {
+    if (reelHistory.length > 0 && !isGenerating && currentStep === 'complete') {
       setShowReelPreview(true);
     }
-  }, [reelResult, isGenerating]);
+  }, [reelHistory, isGenerating, currentStep]);
   
   const handleGenerateReel = useCallback((photosToProcess: typeof photos) => {
     setLastGeneratedPhotos(photosToProcess);
@@ -109,16 +117,13 @@ const Index = () => {
 
   const handleCloseReelPreview = useCallback(() => {
     setShowReelPreview(false);
-    clearResult();
-  }, [clearResult]);
+  }, []);
 
-  const handleRetryReel = useCallback(() => {
-    setShowReelPreview(false);
-    clearResult();
+  const handleRecreateReel = useCallback(() => {
     if (lastGeneratedPhotos.length >= 3) {
       handleGenerateReel(lastGeneratedPhotos);
     }
-  }, [clearResult, lastGeneratedPhotos, handleGenerateReel]);
+  }, [lastGeneratedPhotos, handleGenerateReel]);
 
   useEffect(() => {
     try {
@@ -598,10 +603,11 @@ const Index = () => {
       {/* Reel Preview Screen */}
       <ReelPreviewScreen
         isVisible={showReelPreview}
-        videoUrl={reelResult?.videoUrl}
-        narration={reelResult?.narration || ''}
+        reelHistory={reelHistory}
+        currentIndex={currentReelIndex}
+        onIndexChange={setCurrentReelIndex}
         onClose={handleCloseReelPreview}
-        onRetry={handleRetryReel}
+        onRecreate={handleRecreateReel}
       />
     </div>
   );
