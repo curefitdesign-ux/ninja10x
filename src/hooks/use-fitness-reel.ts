@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
+import type { GenerationStep } from '@/components/ReelGenerationOverlay';
 
 interface PhotoData {
   id: string;
@@ -23,10 +24,11 @@ interface ReelResult {
 
 export const useFitnessReel = () => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [currentStep, setCurrentStep] = useState<GenerationStep>('narration');
   const [reelResult, setReelResult] = useState<ReelResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const generateReel = async (photos: PhotoData[]) => {
+  const generateReel = useCallback(async (photos: PhotoData[]) => {
     if (photos.length < 3) {
       toast.error('Need at least 3 photos to generate a reel');
       return null;
@@ -35,9 +37,12 @@ export const useFitnessReel = () => {
     setIsGenerating(true);
     setError(null);
     setReelResult(null);
+    setCurrentStep('narration');
 
     try {
-      toast.loading('Creating your AI fitness reel...', { id: 'reel-generation' });
+      // Step 1: Narration
+      setCurrentStep('narration');
+      await new Promise(resolve => setTimeout(resolve, 500)); // Brief delay for UI feedback
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-fitness-reel`,
@@ -62,21 +67,31 @@ export const useFitnessReel = () => {
         throw new Error(errorData.error || 'Failed to generate reel');
       }
 
+      // Simulate step progression (the backend does all steps, but we animate through them)
+      setCurrentStep('voiceover');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setCurrentStep('video');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
       const result: ReelResult = await response.json();
       setReelResult(result);
       
-      toast.success('Your fitness reel is ready! 🎬', { id: 'reel-generation' });
+      setCurrentStep('complete');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.success('Your fitness reel is ready! 🎬');
       
       return result;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to generate reel';
       setError(message);
-      toast.error(message, { id: 'reel-generation' });
+      toast.error(message);
       return null;
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, []);
 
   const generateVoiceover = async (text: string): Promise<string | null> => {
     try {
@@ -108,6 +123,7 @@ export const useFitnessReel = () => {
     generateReel,
     generateVoiceover,
     isGenerating,
+    currentStep,
     reelResult,
     error,
     clearResult: () => setReelResult(null),

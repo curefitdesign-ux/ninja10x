@@ -6,6 +6,7 @@ import PhotoUploadCard from '@/components/PhotoUploadCard';
 import WidgetLayout2 from '@/components/WidgetLayout2';
 import WidgetLayout3 from '@/components/WidgetLayout3';
 import RecentPhotosGallery from '@/components/RecentPhotosGallery';
+import ReelGenerationOverlay from '@/components/ReelGenerationOverlay';
 import { useFitnessReel } from '@/hooks/use-fitness-reel';
 
 import CameraUI from '@/components/CameraUI';
@@ -78,7 +79,7 @@ const Index = () => {
   const [showRecentGallery, setShowRecentGallery] = useState(false);
   
   // Fitness reel generation
-  const { generateReel, isGenerating } = useFitnessReel();
+  const { generateReel, isGenerating, currentStep } = useFitnessReel();
   
   const handleGenerateReel = useCallback((photosToProcess: typeof photos) => {
     // Transform photos to the format expected by the API
@@ -563,6 +564,12 @@ const Index = () => {
           />
         </div>
       )}
+
+      {/* Reel Generation Overlay */}
+      <ReelGenerationOverlay 
+        isVisible={isGenerating} 
+        currentStep={currentStep} 
+      />
     </div>
   );
 };
