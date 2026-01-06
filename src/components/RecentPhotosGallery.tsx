@@ -99,30 +99,15 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
       {/* Info Popup */}
       {showInfoPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-          <div className="relative">
-            {/* Close button outside box */}
-            <button
-              onClick={onClose}
-              className="absolute -top-12 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
-              style={{
-                background: 'rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-              }}
-            >
-              <X className="w-5 h-5 text-white/80" />
-            </button>
-            
+          <div className="relative flex flex-col items-center gap-4">
             {/* Make entire card a label that triggers file input */}
             <label 
               htmlFor="photo-upload-input"
               className="rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-300 block cursor-pointer active:scale-[0.98] transition-transform"
               style={{
-                background: 'rgba(255, 255, 255, 0.12)',
+                background: 'rgba(255, 255, 255, 0.2)',
                 backdropFilter: 'blur(40px) saturate(180%)',
                 WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                border: '1px solid rgba(255, 255, 255, 0.18)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
               }}
             >
               <div className="flex flex-col items-center text-center gap-4">
@@ -145,6 +130,18 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
                 <p className="text-white/40 text-xs">Tap to select photo</p>
               </div>
             </label>
+            
+            {/* Close button below popup */}
+            <button
+              onClick={onClose}
+              className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
+              style={{
+                background: 'rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(10px)',
+              }}
+            >
+              <X className="w-5 h-5 text-white/80" />
+            </button>
           </div>
         </div>
       )}
