@@ -15,11 +15,21 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
   const [hasTriggered, setHasTriggered] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Show info popup when opened
+  // Show info popup, then trigger file picker
   useEffect(() => {
     if (isOpen && !hasTriggered) {
       setHasTriggered(true);
       setShowInfoPopup(true);
+      
+      // Auto-trigger file picker after showing info
+      const timer = setTimeout(() => {
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+          fileInputRef.current.click();
+        }
+      }, 2000); // Show info for 2 seconds before opening picker
+      
+      return () => clearTimeout(timer);
     }
     
     if (!isOpen) {
@@ -75,9 +85,8 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
 
   return (
     <>
-      {/* Hidden file input with id for label */}
+      {/* Hidden file input */}
       <input
-        id="photo-upload-input"
         ref={fileInputRef}
         type="file"
         accept="image/*"
@@ -99,15 +108,28 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
       {/* Info Popup */}
       {showInfoPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-          <div className="relative flex flex-col items-center gap-4">
-            {/* Make entire card a label that triggers file input */}
-            <label 
-              htmlFor="photo-upload-input"
-              className="rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-300 block cursor-pointer active:scale-[0.98] transition-transform"
+          <div className="relative">
+            {/* Close button outside box */}
+            <button
+              onClick={onClose}
+              className="absolute -top-12 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
               style={{
-                background: 'rgba(255, 255, 255, 0.2)',
+                background: 'rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+              }}
+            >
+              <X className="w-5 h-5 text-white/80" />
+            </button>
+            
+            <div 
+              className="rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-300"
+              style={{
+                background: 'rgba(255, 255, 255, 0.12)',
                 backdropFilter: 'blur(40px) saturate(180%)',
                 WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
               }}
             >
               <div className="flex flex-col items-center text-center gap-4">
@@ -127,21 +149,26 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
                     Only photos taken in the last 24 hours can be uploaded. Take a new photo of your activity!
                   </p>
                 </div>
-                <p className="text-white/40 text-xs">Tap to select photo</p>
+                
+                {/* Add Photo button with icon */}
+                <button
+                  onClick={() => {
+                    if (fileInputRef.current) {
+                      fileInputRef.current.click();
+                    }
+                  }}
+                  className="w-full py-3.5 px-4 rounded-2xl font-medium text-sm text-white mt-2 transition-all active:scale-95 flex items-center justify-center gap-2"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.25)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+                  }}
+                >
+                  <Image className="w-5 h-5" />
+                  Add Photo
+                </button>
               </div>
-            </label>
-            
-            {/* Close button below popup */}
-            <button
-              onClick={onClose}
-              className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
-              style={{
-                background: 'rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(10px)',
-              }}
-            >
-              <X className="w-5 h-5 text-white/80" />
-            </button>
+            </div>
           </div>
         </div>
       )}
