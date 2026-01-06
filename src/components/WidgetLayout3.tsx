@@ -303,9 +303,15 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel }: Wid
         {/* Cult Ninja Tag */}
         <div className={`absolute -top-3 left-0 right-0 flex justify-center z-20 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.1s' }}>
           <div 
-            className={`px-3 py-1 rounded-full border border-foreground/30 bg-background/60 backdrop-blur-md tap-bounce cursor-pointer shadow-lg ${tappedElement === 'tag' ? 'animate-liquid-tap' : ''}`}
+            className={`px-3 py-1 rounded-full tap-bounce cursor-pointer shadow-lg ${tappedElement === 'tag' ? 'animate-liquid-tap' : ''}`}
             onClick={() => handleTap('tag')}
-            style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
+            style={{ 
+              background: 'linear-gradient(180deg, rgba(90,90,90,0.85) 0%, rgba(61,61,61,0.85) 100%)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 15px rgba(0,0,0,0.5)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.1)'
+            }}
           >
             <span className="text-[10px] font-semibold text-foreground tracking-wider">CULT NINJA</span>
           </div>
