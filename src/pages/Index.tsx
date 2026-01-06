@@ -596,12 +596,12 @@ const Index = () => {
       />
 
       {/* Camera UI */}
-      {showCamera && selectedActivity && (
+      {showCamera && (
         <div className={`transition-all duration-500 ease-out ${
           cameraEntering && !instantCamera ? 'animate-camera-enter' : ''
         }`}>
           <CameraUI
-            activity={selectedActivity}
+            activity={selectedActivity || 'Activity'}
             week={currentWeek}
             day={currentDay}
             onCapture={(imageUrl, mode) => {
