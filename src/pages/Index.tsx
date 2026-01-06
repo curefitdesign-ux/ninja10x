@@ -137,19 +137,26 @@ const Index = () => {
             : photo
         ));
       } else {
-        // Add new photo (from camera/add photo flow)
-        const newPhoto: Photo = {
-          id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          url: incomingUrl,
-          originalUrl: incomingOriginalUrl,
-          isVideo: location.state.isVideo || false,
-          activity: location.state.activity,
-          frame: location.state.frame || 'shaky',
-          duration: location.state.duration,
-          pr: location.state.pr,
-          uploadDate: today,
-        };
-        setPhotos((prev) => [...prev, newPhoto]);
+        // Add new photo - each photo gets a unique "day" by calculating based on photo count
+        // This treats each upload as a separate day entry
+        setPhotos((prev) => {
+          const uniqueDate = new Date();
+          uniqueDate.setDate(uniqueDate.getDate() + prev.length); // Each photo gets a "future" unique day
+          const uniqueDateStr = uniqueDate.toISOString().split('T')[0];
+          
+          const newPhoto: Photo = {
+            id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            url: incomingUrl,
+            originalUrl: incomingOriginalUrl,
+            isVideo: location.state.isVideo || false,
+            activity: location.state.activity,
+            frame: location.state.frame || 'shaky',
+            duration: location.state.duration,
+            pr: location.state.pr,
+            uploadDate: uniqueDateStr,
+          };
+          return [...prev, newPhoto];
+        });
       }
 
       // Clear the navigation state immediately to prevent re-adding
