@@ -15,21 +15,11 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
   const [hasTriggered, setHasTriggered] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Show info popup and auto-trigger file picker
+  // Show info popup when opened
   useEffect(() => {
     if (isOpen && !hasTriggered) {
       setHasTriggered(true);
       setShowInfoPopup(true);
-      
-      // Auto-trigger file picker immediately
-      const timer = setTimeout(() => {
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-          fileInputRef.current.click();
-        }
-      }, 300); // Small delay for popup to render
-      
-      return () => clearTimeout(timer);
     }
     
     if (!isOpen) {
@@ -85,8 +75,9 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
 
   return (
     <>
-      {/* Hidden file input */}
+      {/* Hidden file input with id for label */}
       <input
+        id="photo-upload-input"
         ref={fileInputRef}
         type="file"
         accept="image/*"
@@ -122,8 +113,10 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
               <X className="w-5 h-5 text-white/80" />
             </button>
             
-            <div 
-              className="rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-300"
+            {/* Make entire card a label that triggers file input */}
+            <label 
+              htmlFor="photo-upload-input"
+              className="rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-300 block cursor-pointer active:scale-[0.98] transition-transform"
               style={{
                 background: 'rgba(255, 255, 255, 0.12)',
                 backdropFilter: 'blur(40px) saturate(180%)',
@@ -149,8 +142,9 @@ const RecentPhotosGallery = ({ isOpen, onClose, onSelectPhoto }: RecentPhotosGal
                     Only photos taken in the last 24 hours can be uploaded. Take a new photo of your activity!
                   </p>
                 </div>
+                <p className="text-white/40 text-xs">Tap to select photo</p>
               </div>
-            </div>
+            </label>
           </div>
         </div>
       )}
