@@ -630,7 +630,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
       )}
 
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 p-6 pt-12 flex justify-between items-start z-10">
+      <div className="absolute top-0 left-0 right-0 p-6 pt-6 flex justify-between items-start z-10">
         <div>
           <h2 className="text-2xl font-bold text-white">{activity}</h2>
           <p className="text-white/80 text-sm">Week {week} • Day {day}</p>
