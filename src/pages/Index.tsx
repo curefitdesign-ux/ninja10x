@@ -7,6 +7,7 @@ import WidgetLayout2 from '@/components/WidgetLayout2';
 import WidgetLayout3 from '@/components/WidgetLayout3';
 import RecentPhotosGallery from '@/components/RecentPhotosGallery';
 import ReelGenerationOverlay from '@/components/ReelGenerationOverlay';
+import ReelPreviewScreen from '@/components/ReelPreviewScreen';
 import { useFitnessReel } from '@/hooks/use-fitness-reel';
 
 import CameraUI from '@/components/CameraUI';
@@ -79,9 +80,19 @@ const Index = () => {
   const [showRecentGallery, setShowRecentGallery] = useState(false);
   
   // Fitness reel generation
-  const { generateReel, isGenerating, currentStep } = useFitnessReel();
+  const { generateReel, isGenerating, currentStep, reelResult, clearResult } = useFitnessReel();
+  const [showReelPreview, setShowReelPreview] = useState(false);
+  const [lastGeneratedPhotos, setLastGeneratedPhotos] = useState<typeof photos>([]);
+  
+  // Show preview when reel is ready
+  useEffect(() => {
+    if (reelResult?.success && !isGenerating) {
+      setShowReelPreview(true);
+    }
+  }, [reelResult, isGenerating]);
   
   const handleGenerateReel = useCallback((photosToProcess: typeof photos) => {
+    setLastGeneratedPhotos(photosToProcess);
     // Transform photos to the format expected by the API
     const photoData = photosToProcess.map((photo, index) => ({
       id: photo.id,
@@ -95,6 +106,19 @@ const Index = () => {
     
     generateReel(photoData);
   }, [generateReel]);
+
+  const handleCloseReelPreview = useCallback(() => {
+    setShowReelPreview(false);
+    clearResult();
+  }, [clearResult]);
+
+  const handleRetryReel = useCallback(() => {
+    setShowReelPreview(false);
+    clearResult();
+    if (lastGeneratedPhotos.length >= 3) {
+      handleGenerateReel(lastGeneratedPhotos);
+    }
+  }, [clearResult, lastGeneratedPhotos, handleGenerateReel]);
 
   useEffect(() => {
     try {
@@ -569,6 +593,15 @@ const Index = () => {
       <ReelGenerationOverlay 
         isVisible={isGenerating} 
         currentStep={currentStep} 
+      />
+
+      {/* Reel Preview Screen */}
+      <ReelPreviewScreen
+        isVisible={showReelPreview}
+        videoUrl={reelResult?.videoUrl}
+        narration={reelResult?.narration || ''}
+        onClose={handleCloseReelPreview}
+        onRetry={handleRetryReel}
       />
     </div>
   );
