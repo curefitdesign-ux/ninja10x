@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import type { GenerationStep } from '@/components/ReelGenerationOverlay';
+import { composeVideo } from '@/lib/video-compositor';
 
 interface PhotoData {
   id: string;
@@ -161,9 +162,9 @@ export const useFitnessReel = () => {
     setCurrentStep('narration');
 
     try {
+      // Step 1: Generate narration via backend
       setCurrentStep('narration');
-      await sleep(500);
-
+      
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-fitness-reel`,
         {
@@ -184,32 +185,51 @@ export const useFitnessReel = () => {
         throw new Error(errorData.error || 'Failed to generate reel');
       }
 
+      const backendResult = await response.json();
+      
       setCurrentStep('voiceover');
-      await sleep(1200);
+      await sleep(800);
+
+      // Step 2: Compose video locally using all photos
       setCurrentStep('video');
 
-      const result = await response.json();
+      const videoUrl = await composeVideo({
+        photos: photos.map((p) => ({
+          imageUrl: p.imageUrl,
+          activity: p.activity,
+          dayNumber: p.dayNumber,
+        })),
+        durationPerPhoto: 1.2,
+        transitionDuration: 0.25,
+        fps: 24,
+        width: 720,
+        height: 1280,
+        style: style.id as 'brutalist' | 'neon' | 'vintage' | 'minimal' | 'grunge',
+        onProgress: (percent, phase) => {
+          console.log(`Video composition: ${percent.toFixed(0)}% - ${phase}`);
+        },
+      });
+
       const reelId = `reel-${Date.now()}`;
       const newReel: ReelResult = {
-        ...result,
         id: reelId,
+        success: true,
+        narration: backendResult.narration || 'Your fitness journey this week!',
+        audioBase64: backendResult.audioBase64,
+        audioSize: backendResult.audioSize,
+        videoUrl,
+        message: 'Ready',
         style: style.id,
         createdAt: Date.now(),
-        message: result?.videoUrl ? 'Ready' : 'Video rendering…',
       };
 
       setReelHistory((prev) => [newReel, ...prev]);
       setCurrentReelIndex(0);
 
-      // Start background polling
-      if (newReel.videoTaskId && !newReel.videoUrl) {
-        startPollingIfNeeded(reelId, newReel.videoTaskId);
-      }
-
       setCurrentStep('complete');
       await sleep(300);
 
-      toast.success(`${style.name} reel ${newReel.videoUrl ? 'ready' : 'rendering'}!`);
+      toast.success(`${style.name} reel ready!`);
       return newReel;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to generate reel';
@@ -219,7 +239,7 @@ export const useFitnessReel = () => {
     } finally {
       setIsGenerating(false);
     }
-  }, [getNextStyle, startPollingIfNeeded]);
+  }, [getNextStyle]);
 
   return {
     generateReel,
