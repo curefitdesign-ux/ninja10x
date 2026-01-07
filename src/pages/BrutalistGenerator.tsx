@@ -1,11 +1,15 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Key, Play, Loader2, CheckCircle, AlertCircle, Video } from 'lucide-react';
+import { Key, Play, Loader2, CheckCircle, AlertCircle, Video, Upload, Image, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { BrutalistCard } from '@/components/BrutalistCard';
-import { generateRunwayVideo, pollTaskStatus } from '@/services/runway-service';
+import { 
+  generateVideosForAllImages, 
+  type ImageInput,
+  type GenerationResult 
+} from '@/services/runway-service';
 
 // Configuration data for 3 days
 const DAYS_CONFIG = [
@@ -15,21 +19,31 @@ const DAYS_CONFIG = [
 ];
 
 interface DayStatus {
-  status: 'idle' | 'generating' | 'polling' | 'complete' | 'error';
-  taskId?: string;
-  videoUrl?: string;
+  status: 'idle' | 'uploading' | 'generating' | 'stitching' | 'complete' | 'error';
+  images: ImageInput[];
+  videoResults: GenerationResult[];
+  finalVideoUrls: string[];
+  progress?: { completed: number; total: number };
   error?: string;
 }
+
+const createInitialDayStatus = (): DayStatus => ({
+  status: 'idle',
+  images: [],
+  videoResults: [],
+  finalVideoUrls: [],
+});
 
 export default function BrutalistGenerator() {
   const [apiKey, setApiKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
   const [dayStatuses, setDayStatuses] = useState<Record<number, DayStatus>>({
-    1: { status: 'idle' },
-    2: { status: 'idle' },
-    3: { status: 'idle' },
+    1: createInitialDayStatus(),
+    2: createInitialDayStatus(),
+    3: createInitialDayStatus(),
   });
   const [isGeneratingAll, setIsGeneratingAll] = useState(false);
+  const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   const updateDayStatus = useCallback((day: number, update: Partial<DayStatus>) => {
     setDayStatuses(prev => ({
@@ -38,32 +52,91 @@ export default function BrutalistGenerator() {
     }));
   }, []);
 
+  const handleImageUpload = useCallback((day: number, files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    const newImages: ImageInput[] = [];
+    
+    Array.from(files).forEach((file) => {
+      if (file.type.startsWith('image/')) {
+        const url = URL.createObjectURL(file);
+        newImages.push({ url, name: file.name });
+      }
+    });
+
+    if (newImages.length > 0) {
+      setDayStatuses(prev => ({
+        ...prev,
+        [day]: {
+          ...prev[day],
+          images: [...prev[day].images, ...newImages],
+        },
+      }));
+      toast.success(`Added ${newImages.length} image(s) to Day ${day}`);
+    }
+  }, []);
+
+  const removeImage = useCallback((day: number, index: number) => {
+    setDayStatuses(prev => {
+      const newImages = [...prev[day].images];
+      // Revoke the object URL to free memory
+      URL.revokeObjectURL(newImages[index].url);
+      newImages.splice(index, 1);
+      return {
+        ...prev,
+        [day]: { ...prev[day], images: newImages },
+      };
+    });
+  }, []);
+
   const generateForDay = useCallback(async (day: number, activity: string) => {
+    const status = dayStatuses[day];
+    
     if (!apiKey.trim()) {
       toast.error('Please enter your RunwayML API key');
       return;
     }
 
-    updateDayStatus(day, { status: 'generating', error: undefined });
+    if (status.images.length === 0) {
+      toast.error(`Please upload at least one image for Day ${day}`);
+      return;
+    }
+
+    updateDayStatus(day, { 
+      status: 'generating', 
+      error: undefined,
+      progress: { completed: 0, total: status.images.length }
+    });
 
     try {
-      // Step 1: Submit to RunwayML
-      const taskId = await generateRunwayVideo(activity, apiKey);
-      updateDayStatus(day, { status: 'polling', taskId });
+      const results = await generateVideosForAllImages(
+        status.images,
+        activity,
+        apiKey,
+        (completed, total, result) => {
+          updateDayStatus(day, { 
+            progress: { completed, total },
+            videoResults: result ? [...dayStatuses[day].videoResults, result] : dayStatuses[day].videoResults,
+          });
+        }
+      );
 
-      // Step 2: Poll for completion
-      const videoUrl = await pollTaskStatus(taskId, apiKey, (status) => {
-        console.log(`Day ${day} status: ${status}`);
+      // All videos generated - collect all URLs
+      const finalVideoUrls = results.map(r => r.videoUrl);
+      
+      updateDayStatus(day, { 
+        status: 'complete', 
+        videoResults: results,
+        finalVideoUrls,
       });
-
-      updateDayStatus(day, { status: 'complete', videoUrl });
-      toast.success(`Day ${day} video ready!`);
+      
+      toast.success(`Day ${day}: Generated ${results.length} video(s)!`);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Generation failed';
       updateDayStatus(day, { status: 'error', error: message });
       toast.error(`Day ${day}: ${message}`);
     }
-  }, [apiKey, updateDayStatus]);
+  }, [apiKey, updateDayStatus, dayStatuses]);
 
   const generateAll = useCallback(async () => {
     if (!apiKey.trim()) {
@@ -71,20 +144,30 @@ export default function BrutalistGenerator() {
       return;
     }
 
+    const daysWithImages = DAYS_CONFIG.filter(({ day }) => dayStatuses[day].images.length > 0);
+    
+    if (daysWithImages.length === 0) {
+      toast.error('Please upload images for at least one day');
+      return;
+    }
+
     setIsGeneratingAll(true);
 
-    // Generate all days in parallel
-    await Promise.all(
-      DAYS_CONFIG.map(({ day, activity }) => generateForDay(day, activity))
-    );
+    // Generate sequentially to avoid rate limits
+    for (const { day, activity } of daysWithImages) {
+      await generateForDay(day, activity);
+    }
 
     setIsGeneratingAll(false);
-  }, [apiKey, generateForDay]);
+  }, [apiKey, generateForDay, dayStatuses]);
 
-  const allComplete = Object.values(dayStatuses).every(s => s.status === 'complete');
-  const anyGenerating = Object.values(dayStatuses).some(s => 
-    s.status === 'generating' || s.status === 'polling'
+  const allComplete = Object.values(dayStatuses).every(s => 
+    s.images.length === 0 || s.status === 'complete'
   );
+  const anyGenerating = Object.values(dayStatuses).some(s => 
+    s.status === 'generating' || s.status === 'stitching'
+  );
+  const hasAnyImages = Object.values(dayStatuses).some(s => s.images.length > 0);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -154,102 +237,154 @@ export default function BrutalistGenerator() {
                 transition={{ delay: 0.3 + index * 0.1 }}
                 className="relative"
               >
-                {status.videoUrl ? (
+                {/* Hidden file input */}
+                <input
+                  type="file"
+                  ref={(el) => { fileInputRefs.current[day] = el; }}
+                  onChange={(e) => handleImageUpload(day, e.target.files)}
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                />
+
+                {status.finalVideoUrls.length > 0 ? (
                   <BrutalistCard
-                    videoUrl={status.videoUrl}
+                    videoUrls={status.finalVideoUrls}
                     dayNumber={day}
                     activityName={activity}
                   />
                 ) : (
-                  <div className="aspect-[9/16] bg-neutral-900 border-2 border-neutral-800 rounded-lg flex flex-col items-center justify-center p-6">
+                  <div className="aspect-[9/16] bg-neutral-900 border-2 border-neutral-800 rounded-lg flex flex-col p-4">
                     {/* Day indicator */}
-                    <div className="absolute top-4 left-4 font-mono text-sm text-neutral-500">
-                      DAY {day}
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="font-mono text-sm text-neutral-500">DAY {day}</span>
+                      <span className="text-yellow-400 font-bold">{activity}</span>
                     </div>
 
+                    {/* Image thumbnails */}
+                    {status.images.length > 0 && (
+                      <div className="flex-1 overflow-y-auto mb-4">
+                        <div className="grid grid-cols-3 gap-2">
+                          {status.images.map((img, idx) => (
+                            <div key={idx} className="relative aspect-square group">
+                              <img
+                                src={img.url}
+                                alt={img.name || `Image ${idx + 1}`}
+                                className="w-full h-full object-cover rounded"
+                              />
+                              <button
+                                onClick={() => removeImage(day, idx)}
+                                className="absolute -top-1 -right-1 bg-red-500 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                              {status.videoResults[idx] && (
+                                <div className="absolute inset-0 bg-green-500/30 flex items-center justify-center rounded">
+                                  <CheckCircle className="w-6 h-6 text-green-400" />
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Status indicator */}
-                    <AnimatePresence mode="wait">
-                      {status.status === 'idle' && (
-                        <motion.div
-                          key="idle"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="text-center"
-                        >
-                          <Video className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
-                          <h3 className="text-2xl font-black text-yellow-400 mb-2">
-                            {activity}
-                          </h3>
-                          <p className="text-sm text-neutral-500 font-mono">
-                            Ready to generate
-                          </p>
-                        </motion.div>
-                      )}
+                    <div className="flex-1 flex flex-col items-center justify-center">
+                      <AnimatePresence mode="wait">
+                        {status.status === 'idle' && status.images.length === 0 && (
+                          <motion.div
+                            key="idle"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="text-center"
+                          >
+                            <Image className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
+                            <p className="text-sm text-neutral-500 font-mono mb-4">
+                              Upload images to generate
+                            </p>
+                          </motion.div>
+                        )}
 
-                      {(status.status === 'generating' || status.status === 'polling') && (
-                        <motion.div
-                          key="generating"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="text-center"
-                        >
-                          <Loader2 className="w-12 h-12 text-yellow-400 mx-auto mb-4 animate-spin" />
-                          <h3 className="text-xl font-bold text-white mb-2">
-                            {status.status === 'generating' ? 'SUBMITTING...' : 'RENDERING...'}
-                          </h3>
-                          <p className="text-sm text-neutral-400 font-mono">
-                            {activity}
-                          </p>
-                        </motion.div>
-                      )}
+                        {status.status === 'generating' && (
+                          <motion.div
+                            key="generating"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="text-center"
+                          >
+                            <Loader2 className="w-12 h-12 text-yellow-400 mx-auto mb-4 animate-spin" />
+                            <h3 className="text-xl font-bold text-white mb-2">
+                              GENERATING...
+                            </h3>
+                            {status.progress && (
+                              <p className="text-sm text-neutral-400 font-mono">
+                                {status.progress.completed}/{status.progress.total} videos
+                              </p>
+                            )}
+                          </motion.div>
+                        )}
 
-                      {status.status === 'complete' && (
-                        <motion.div
-                          key="complete"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="text-center"
-                        >
-                          <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-                          <h3 className="text-xl font-bold text-white mb-2">
-                            COMPLETE
-                          </h3>
-                        </motion.div>
-                      )}
+                        {status.status === 'stitching' && (
+                          <motion.div
+                            key="stitching"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="text-center"
+                          >
+                            <Loader2 className="w-12 h-12 text-green-400 mx-auto mb-4 animate-spin" />
+                            <h3 className="text-xl font-bold text-white mb-2">
+                              STITCHING...
+                            </h3>
+                          </motion.div>
+                        )}
 
-                      {status.status === 'error' && (
-                        <motion.div
-                          key="error"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="text-center"
-                        >
-                          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                          <h3 className="text-xl font-bold text-red-400 mb-2">
-                            ERROR
-                          </h3>
-                          <p className="text-xs text-neutral-500 font-mono max-w-[200px]">
-                            {status.error}
-                          </p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                        {status.status === 'error' && (
+                          <motion.div
+                            key="error"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="text-center"
+                          >
+                            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                            <h3 className="text-xl font-bold text-red-400 mb-2">
+                              ERROR
+                            </h3>
+                            <p className="text-xs text-neutral-500 font-mono max-w-[200px]">
+                              {status.error}
+                            </p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
 
-                    {/* Individual generate button */}
-                    {status.status === 'idle' || status.status === 'error' ? (
+                    {/* Action buttons */}
+                    <div className="space-y-2 mt-4">
                       <Button
-                        onClick={() => generateForDay(day, activity)}
-                        disabled={!apiKey.trim() || anyGenerating}
-                        className="mt-6 bg-yellow-400 text-black hover:bg-yellow-300 font-bold"
+                        onClick={() => fileInputRefs.current[day]?.click()}
+                        disabled={status.status === 'generating' || status.status === 'stitching'}
+                        variant="outline"
+                        className="w-full border-neutral-700 text-neutral-300 hover:text-white"
                       >
-                        <Play className="w-4 h-4 mr-2" />
-                        GENERATE
+                        <Upload className="w-4 h-4 mr-2" />
+                        ADD IMAGES ({status.images.length})
                       </Button>
-                    ) : null}
+
+                      {status.images.length > 0 && (status.status === 'idle' || status.status === 'error') && (
+                        <Button
+                          onClick={() => generateForDay(day, activity)}
+                          disabled={!apiKey.trim() || anyGenerating}
+                          className="w-full bg-yellow-400 text-black hover:bg-yellow-300 font-bold"
+                        >
+                          <Play className="w-4 h-4 mr-2" />
+                          GENERATE {status.images.length} VIDEO{status.images.length > 1 ? 'S' : ''}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 )}
               </motion.div>
@@ -266,7 +401,7 @@ export default function BrutalistGenerator() {
         >
           <Button
             onClick={generateAll}
-            disabled={!apiKey.trim() || isGeneratingAll || anyGenerating || allComplete}
+            disabled={!apiKey.trim() || isGeneratingAll || anyGenerating || !hasAnyImages || allComplete}
             size="lg"
             className="bg-yellow-400 text-black hover:bg-yellow-300 font-black text-xl px-12 py-6 h-auto"
           >
@@ -275,7 +410,7 @@ export default function BrutalistGenerator() {
                 <Loader2 className="w-6 h-6 mr-3 animate-spin" />
                 GENERATING...
               </>
-            ) : allComplete ? (
+            ) : allComplete && hasAnyImages ? (
               <>
                 <CheckCircle className="w-6 h-6 mr-3" />
                 ALL COMPLETE
@@ -289,7 +424,7 @@ export default function BrutalistGenerator() {
           </Button>
 
           <p className="mt-4 text-sm text-neutral-500 font-mono">
-            Each video takes ~60-90 seconds to render
+            Each image generates a 5-second video (~60-90s each)
           </p>
         </motion.div>
       </div>
