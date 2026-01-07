@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import type { GenerationStep } from '@/components/ReelGenerationOverlay';
 
 interface PhotoData {
@@ -69,19 +70,27 @@ export const useFitnessReel = () => {
   }, [reelHistory]);
 
   const fetchTaskStatus = useCallback(async (taskId: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      throw new Error('Not authenticated');
+    }
+
     const res = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-fitness-reel`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ action: 'status', taskId }),
       }
     );
 
     if (!res.ok) {
+      if (res.status === 401) {
+        throw new Error('Session expired. Please sign in again.');
+      }
       const txt = await res.text().catch(() => '');
       throw new Error(txt || 'Failed to fetch render status');
     }
@@ -139,6 +148,13 @@ export const useFitnessReel = () => {
       return null;
     }
 
+    // Get authenticated session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      toast.error('Please sign in to generate reels');
+      return null;
+    }
+
     const style = getNextStyle();
     setIsGenerating(true);
     setError(null);
@@ -154,13 +170,14 @@ export const useFitnessReel = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            'Authorization': `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({ photos, stylePrompt: style.prompt, styleId: style.id, action: 'create' }),
         }
       );
 
       if (!response.ok) {
+        if (response.status === 401) throw new Error('Session expired. Please sign in again.');
         if (response.status === 429) throw new Error('Rate limit exceeded. Please try again later.');
         if (response.status === 402) throw new Error('Please add credits to continue using AI features.');
         const errorData = await response.json();
@@ -178,14 +195,13 @@ export const useFitnessReel = () => {
         id: reelId,
         style: style.id,
         createdAt: Date.now(),
-        // If the backend returns only a taskId, we’ll auto-poll until videoUrl is ready.
         message: result?.videoUrl ? 'Ready' : 'Video rendering…',
       };
 
       setReelHistory((prev) => [newReel, ...prev]);
       setCurrentReelIndex(0);
 
-      // Start background polling (does not consume credits)
+      // Start background polling
       if (newReel.videoTaskId && !newReel.videoUrl) {
         startPollingIfNeeded(reelId, newReel.videoTaskId);
       }

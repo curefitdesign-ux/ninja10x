@@ -5,6 +5,7 @@ const BUCKET_NAME = 'journey-uploads';
 /**
  * Uploads a file (base64 data URI or Blob) to Supabase Storage
  * Returns the public URL
+ * Files are stored in user-specific folders for RLS enforcement
  */
 export async function uploadToStorage(
   dataOrBlob: string | Blob,
@@ -12,6 +13,13 @@ export async function uploadToStorage(
   isVideo = false
 ): Promise<string | null> {
   try {
+    // Get authenticated user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('Storage upload error: User not authenticated');
+      return null;
+    }
+
     let blob: Blob;
 
     if (typeof dataOrBlob === 'string') {
@@ -22,11 +30,12 @@ export async function uploadToStorage(
       blob = dataOrBlob;
     }
 
-    // Generate unique file path
+    // Generate unique file path scoped to user
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(2, 9);
     const extension = isVideo ? 'mp4' : 'jpg';
-    const filePath = `uploads/${timestamp}-${randomId}-${fileName}.${extension}`;
+    // Store files in user-specific folder for RLS
+    const filePath = `${user.id}/${timestamp}-${randomId}-${fileName}.${extension}`;
 
     // Upload to Supabase Storage
     const { data, error } = await supabase.storage
@@ -57,14 +66,28 @@ export async function uploadToStorage(
 
 /**
  * Deletes a file from Supabase Storage by its public URL
+ * Only the file owner can delete their files
  */
 export async function deleteFromStorage(publicUrl: string): Promise<boolean> {
   try {
+    // Get authenticated user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('Storage delete error: User not authenticated');
+      return false;
+    }
+
     // Extract file path from public URL
     const urlParts = publicUrl.split(`${BUCKET_NAME}/`);
     if (urlParts.length < 2) return false;
 
     const filePath = urlParts[1];
+    
+    // Verify the file belongs to the user (path starts with user ID)
+    if (!filePath.startsWith(user.id)) {
+      console.error('Storage delete error: Cannot delete files owned by other users');
+      return false;
+    }
 
     const { error } = await supabase.storage
       .from(BUCKET_NAME)
