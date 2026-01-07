@@ -91,9 +91,11 @@ interface WidgetLayout3Props {
   currentDate: string;
   onGenerateReel?: (photos: Photo[]) => void;
   onRemovePhoto?: (photoId: string) => void;
+  isGenerating?: boolean;
+  isUploading?: boolean;
 }
 
-const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRemovePhoto }: WidgetLayout3Props) => {
+const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRemovePhoto, isGenerating = false, isUploading = false }: WidgetLayout3Props) => {
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
   const [tappedElement, setTappedElement] = useState<string | null>(null);
@@ -103,7 +105,9 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
   const hasThreePhotos = photos.length >= 3;
   const allPhotosUploaded = photos.slice(0, 3).every(p => p.storageUrl);
-  const canCreateReel = hasThreePhotos && allPhotosUploaded;
+  // Show play button when 3+ photos exist, but disable if still uploading
+  const showPlayButton = hasThreePhotos;
+  const canCreateReel = hasThreePhotos && allPhotosUploaded && !isGenerating && !isUploading;
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 100);
@@ -248,20 +252,33 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
       
         {/* Film Strip Section with Play Button */}
         <div className={`relative z-10 -mt-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
-          {/* Play Button - Shows when 3+ photos are ready */}
-          {canCreateReel && (
+          {/* Play Button - Shows when 3+ photos exist */}
+          {showPlayButton && (
             <button
               onClick={handleGenerateReel}
-              className="absolute -top-14 left-2 z-20 w-12 h-12 rounded-full tap-bounce animate-play-button-float flex items-center justify-center"
+              disabled={!canCreateReel}
+              className={`absolute -top-14 left-2 z-20 w-12 h-12 rounded-full tap-bounce flex items-center justify-center transition-all duration-300 ${canCreateReel ? 'animate-play-button-float' : 'opacity-60'}`}
               style={{
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%)',
+                background: canCreateReel 
+                  ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%)'
+                  : 'linear-gradient(135deg, rgba(150, 150, 150, 0.2) 0%, rgba(100, 100, 100, 0.1) 100%)',
                 backdropFilter: 'blur(20px)',
                 WebkitBackdropFilter: 'blur(20px)',
-                border: '1.5px solid rgba(255, 255, 255, 0.3)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255,255,255,0.3)',
+                border: canCreateReel 
+                  ? '1.5px solid rgba(255, 255, 255, 0.3)'
+                  : '1.5px solid rgba(150, 150, 150, 0.2)',
+                boxShadow: canCreateReel 
+                  ? '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255,255,255,0.3)'
+                  : 'none',
               }}
             >
-              <Play className="w-5 h-5 text-white ml-0.5" fill="rgba(255,255,255,0.9)" />
+              {isUploading || isGenerating ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white/80 rounded-full animate-spin" />
+              ) : !allPhotosUploaded ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white/60 rounded-full animate-spin" />
+              ) : (
+                <Play className="w-5 h-5 text-white ml-0.5" fill="rgba(255,255,255,0.9)" />
+              )}
             </button>
           )}
           
