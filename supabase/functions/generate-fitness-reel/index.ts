@@ -194,7 +194,7 @@ serve(async (req) => {
         );
       }
 
-      const taskRes = await fetch(`https://api.runwayml.com/v1/tasks/${body.taskId}`, {
+      const taskRes = await fetch(`https://api.dev.runwayml.com/v1/tasks/${body.taskId}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${RUNWAYML_API_KEY}`,
@@ -345,7 +345,7 @@ Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
     if (isDataUri) {
       console.log("Photo is a data URI - using text_to_video instead of image_to_video");
       
-      const runwayResponse = await fetch("https://api.runwayml.com/v1/text_to_video", {
+      const runwayResponse = await fetch("https://api.dev.runwayml.com/v1/text_to_video", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${RUNWAYML_API_KEY}`,
@@ -370,7 +370,7 @@ Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
         console.error("RunwayML text_to_video error:", errorText);
       }
     } else {
-      const runwayResponse = await fetch("https://api.runwayml.com/v1/image_to_video", {
+      const runwayResponse = await fetch("https://api.dev.runwayml.com/v1/image_to_video", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${RUNWAYML_API_KEY}`,
