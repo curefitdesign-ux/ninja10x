@@ -9,36 +9,34 @@ import TicketFrame from '@/components/frames/TicketFrame';
 
 interface Photo {
   id: string;
-  url: string;
-  originalUrl?: string;
+  storageUrl: string;
   isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
   duration?: string;
   pr?: string;
-  uploadDate: string;
+  dayNumber: number;
 }
 
 type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
 
-// Helper to detect if URL is a video
 const isVideoUrl = (url: string) => {
   return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
 };
 
-// Render photo/video in its selected frame template (pixel-perfect scaling)
 const renderInFrame = (photo: Photo, containerWidth: number = 180) => {
   const frame: FrameType = photo.frame || 'shaky';
-  // Frame components are designed for 360px width (90% of ~400px container)
   const baseWidth = 360;
   const scale = containerWidth / baseWidth;
+  const week = Math.ceil(photo.dayNumber / 3);
+  const day = ((photo.dayNumber - 1) % 3) + 1;
   
   const frameProps = {
-    imageUrl: photo.originalUrl || photo.url,
-    isVideo: photo.isVideo || isVideoUrl(photo.url),
+    imageUrl: photo.storageUrl,
+    isVideo: photo.isVideo || isVideoUrl(photo.storageUrl),
     activity: photo.activity || 'Activity',
-    week: 1,
-    day: 1,
+    week,
+    day,
     duration: photo.duration || '2hrs',
     pr: photo.pr || '',
     imagePosition: { x: 0, y: 0 },
@@ -47,36 +45,17 @@ const renderInFrame = (photo: Photo, containerWidth: number = 180) => {
 
   const FrameComponent = () => {
     switch (frame) {
-      case 'journal':
-        return <JournalFrame {...frameProps} />;
-      case 'vogue':
-        return <VogueFrame {...frameProps} />;
-      case 'fitness':
-        return <FitnessFrame {...frameProps} />;
-      case 'ticket':
-        return <TicketFrame {...frameProps} />;
-      case 'shaky':
-      default:
-        return <ShakyFrame {...frameProps} />;
+      case 'journal': return <JournalFrame {...frameProps} />;
+      case 'vogue': return <VogueFrame {...frameProps} />;
+      case 'fitness': return <FitnessFrame {...frameProps} />;
+      case 'ticket': return <TicketFrame {...frameProps} />;
+      default: return <ShakyFrame {...frameProps} />;
     }
   };
 
   return (
-    <div 
-      className="relative overflow-hidden" 
-      style={{ 
-        width: `${containerWidth}px`, 
-        height: `${containerWidth * (16/9)}px` 
-      }}
-    >
-      <div 
-        style={{ 
-          transform: `scale(${scale})`, 
-          transformOrigin: 'top left', 
-          width: `${baseWidth}px`,
-          marginLeft: `${(baseWidth * 0.05) * scale}px`
-        }}
-      >
+    <div className="relative overflow-hidden" style={{ width: `${containerWidth}px`, height: `${containerWidth * (16/9)}px` }}>
+      <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: `${baseWidth}px`, marginLeft: `${(baseWidth * 0.05) * scale}px` }}>
         <FrameComponent />
       </div>
     </div>
@@ -91,228 +70,78 @@ interface WidgetLayout2Props {
   currentDate: string;
 }
 
-const WidgetLayout2 = ({ 
-  photos, 
-  onCardClick, 
-  currentDate
-}: WidgetLayout2Props) => {
+const WidgetLayout2 = ({ photos, onCardClick }: WidgetLayout2Props) => {
   const navigate = useNavigate();
-  const todaysPhoto = photos.find(p => p.uploadDate === currentDate);
+  const displayPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
 
   const handlePhotoTap = (photo: Photo) => {
-    const mediaUrl = photo.originalUrl || photo.url;
-
-    // Navigate to preview in review mode (editing existing photo)
     navigate('/preview', { 
       state: { 
-        imageUrl: mediaUrl,
-        originalUrl: mediaUrl,
+        imageUrl: photo.storageUrl,
+        originalUrl: photo.storageUrl,
         isVideo: photo.isVideo,
         activity: photo.activity,
         frame: photo.frame,
         duration: photo.duration,
         pr: photo.pr,
-        isReview: true, // Mark as reviewing existing photo
-        photoId: photo.id, // Pass photo ID for updating
+        isReview: true,
+        photoId: photo.id,
       } 
     });
   };
 
-  const displayPhoto = todaysPhoto || (photos.length > 0 ? photos[photos.length - 1] : null);
-
   return (
     <div className="px-4">
-      <div 
-        className="relative overflow-visible w-full rounded-3xl"
-        style={{ 
-          background: 'linear-gradient(180deg, #4a4578 0%, #352f5e 30%, #1f1a40 70%, #0d0a1a 100%)',
-          border: '1px solid rgba(255,255,255,0.08)'
-        }}
-      >
-        {/* Grid Background */}
-        <div 
-          className="absolute inset-0 rounded-3xl overflow-hidden"
-        >
-          <div 
-            className="absolute inset-0 opacity-20"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px)
-              `,
-              backgroundSize: '26px 26px'
-            }}
-          />
+      <div className="relative overflow-visible w-full rounded-3xl" style={{ background: 'linear-gradient(180deg, #4a4578 0%, #352f5e 30%, #1f1a40 70%, #0d0a1a 100%)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="absolute inset-0 rounded-3xl overflow-hidden">
+          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px)`, backgroundSize: '26px 26px' }} />
         </div>
 
-        {/* Sparkle dots */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-3xl">
-          {[...Array(25)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-0.5 h-0.5 bg-white rounded-full"
-              style={{
-                left: `${10 + Math.random() * 80}%`,
-                top: `${10 + Math.random() * 80}%`,
-                opacity: 0.2 + Math.random() * 0.4
-              }}
-            />
-          ))}
-        </div>
-
-        {/* CULT NINJA Badge - positioned at top, partially outside */}
         <div className="flex justify-center relative z-20" style={{ marginTop: '-12px' }}>
-          <div 
-            className="px-5 py-2.5 rounded-2xl backdrop-blur-md"
-            style={{ 
-              background: 'linear-gradient(180deg, rgba(90,90,90,0.85) 0%, rgba(61,61,61,0.85) 100%)',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 15px rgba(0,0,0,0.5)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)'
-            }}
-          >
-            <span 
-              className="font-bold text-sm tracking-[0.15em]"
-              style={{ 
-                color: '#c9a87c',
-                fontFamily: 'system-ui, -apple-system, sans-serif'
-              }}
-            >
-              CULT NINJA
-            </span>
+          <div className="px-5 py-2.5 rounded-2xl backdrop-blur-md" style={{ background: 'linear-gradient(180deg, rgba(90,90,90,0.85) 0%, rgba(61,61,61,0.85) 100%)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 15px rgba(0,0,0,0.5)' }}>
+            <span className="font-bold text-sm tracking-[0.15em]" style={{ color: '#c9a87c' }}>CULT NINJA</span>
           </div>
         </div>
 
-        {/* Title */}
         <div className="pt-5 pb-3 relative z-10">
-          <h2 
-            className="text-xl font-bold text-white text-center tracking-wide"
-            style={{ 
-              fontFamily: 'system-ui, -apple-system, sans-serif',
-              fontStyle: 'italic'
-            }}
-          >
-            CONQUER WILL POWER
-          </h2>
+          <h2 className="text-xl font-bold text-white text-center tracking-wide italic">CONQUER WILL POWER</h2>
         </div>
 
-        {/* Main Card Section */}
         <div className="relative z-10 flex justify-center items-center pb-4" style={{ minHeight: '280px' }}>
           {displayPhoto ? (
-            /* Photo Card with details */
-            <div 
-              className="relative cursor-pointer"
-              onClick={() => handlePhotoTap(displayPhoto)}
-              style={{ transform: 'rotate(4deg)' }}
-            >
-              {/* Back shadow card */}
-              <div 
-                className="absolute w-full h-full rounded-2xl"
-                style={{ 
-                  background: 'rgba(255,255,255,0.12)',
-                  transform: 'rotate(-10deg) translateX(-12px)',
-                  top: '-3px'
-                }}
-              />
-              
-              {/* Main Card */}
-              <div 
-                className="relative bg-white rounded-2xl overflow-hidden shadow-2xl"
-                style={{ width: '175px' }}
-              >
-                {/* Template Preview - render in selected frame scaled */}
-                <div className="relative overflow-hidden rounded-2xl">
-                  {renderInFrame(displayPhoto, 175)}
-                </div>
+            <div className="relative cursor-pointer" onClick={() => handlePhotoTap(displayPhoto)} style={{ transform: 'rotate(4deg)' }}>
+              <div className="absolute w-full h-full rounded-2xl" style={{ background: 'rgba(255,255,255,0.12)', transform: 'rotate(-10deg) translateX(-12px)', top: '-3px' }} />
+              <div className="relative bg-white rounded-2xl overflow-hidden shadow-2xl" style={{ width: '175px' }}>
+                <div className="relative overflow-hidden rounded-2xl">{renderInFrame(displayPhoto, 175)}</div>
               </div>
             </div>
           ) : (
-            /* Empty State Card */
-            <div 
-              className="relative cursor-pointer"
-              onClick={onCardClick}
-            >
-              <div 
-                className="flex flex-col items-center justify-center rounded-2xl"
-                style={{ 
-                  width: '160px',
-                  height: '210px',
-                  background: 'linear-gradient(180deg, #5a5872 0%, #4a4860 100%)',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.3)'
-                }}
-              >
-                {/* Camera frame with user icon */}
+            <div className="relative cursor-pointer" onClick={onCardClick}>
+              <div className="flex flex-col items-center justify-center rounded-2xl" style={{ width: '160px', height: '210px', background: 'linear-gradient(180deg, #5a5872 0%, #4a4860 100%)', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' }}>
                 <div className="relative w-12 h-12">
                   <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-white/40 rounded-tl" />
                   <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-white/40 rounded-tr" />
                   <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-white/40 rounded-bl" />
                   <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-white/40 rounded-br" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <User className="w-7 h-7 text-white/40" strokeWidth={1.5} />
-                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center"><User className="w-7 h-7 text-white/40" strokeWidth={1.5} /></div>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Film Strip Section */}
         <div className="relative z-10 pb-4 pl-2 pr-3 mt-10">
           <div className="flex items-center">
-            {/* Film Roll */}
             <div className="relative flex-shrink-0 z-10">
-              {/* Outer ring with 3D effect */}
-              <div 
-                className="w-9 h-9 rounded-full flex items-center justify-center"
-                style={{
-                  background: 'linear-gradient(135deg, #8a8a8a 0%, #5a5a5a 30%, #3a3a3a 70%, #4a4a4a 100%)',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2)'
-                }}
-              >
-                {/* Inner dark circle */}
-                <div 
-                  className="w-3.5 h-3.5 rounded-full"
-                  style={{ 
-                    background: '#0a0a0a',
-                    boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.8)'
-                  }}
-                />
+              <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #8a8a8a 0%, #5a5a5a 30%, #3a3a3a 70%, #4a4a4a 100%)', boxShadow: '0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2)' }}>
+                <div className="w-3.5 h-3.5 rounded-full" style={{ background: '#0a0a0a', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.8)' }} />
               </div>
-              
-              {/* Dashed line from roll to strip */}
-              <div 
-                className="absolute top-1/2 left-full"
-                style={{
-                  width: '8px',
-                  borderTop: '1px dashed rgba(255,255,255,0.25)',
-                  transform: 'translateY(-50%)'
-                }}
-              />
+              <div className="absolute top-1/2 left-full" style={{ width: '8px', borderTop: '1px dashed rgba(255,255,255,0.25)', transform: 'translateY(-50%)' }} />
             </div>
-
-            {/* Film Strip */}
-            <div 
-              className="flex-1 rounded-md overflow-hidden ml-2"
-              style={{
-                background: '#555555',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.4)'
-              }}
-            >
-              {/* Top sprocket holes */}
-              <div 
-                className="flex justify-between px-2 py-0.5"
-                style={{ borderBottom: '1px solid #3a3a3a' }}
-              >
-                {[...Array(12)].map((_, i) => (
-                  <div 
-                    key={i} 
-                    className="w-1.5 h-1 rounded-sm"
-                    style={{ background: '#1a1a1a' }}
-                  />
-                ))}
+            <div className="flex-1 rounded-md overflow-hidden ml-2" style={{ background: '#555555', boxShadow: '0 4px 15px rgba(0,0,0,0.4)' }}>
+              <div className="flex justify-between px-2 py-0.5" style={{ borderBottom: '1px solid #3a3a3a' }}>
+                {[...Array(12)].map((_, i) => <div key={i} className="w-1.5 h-1 rounded-sm" style={{ background: '#1a1a1a' }} />)}
               </div>
-
-              {/* Film frames - 4 groups of 3 */}
               <div className="flex px-1.5 py-1 gap-1">
                 {[0, 1, 2, 3].map((week) => (
                   <div key={week} className="flex gap-0.5 flex-1">
@@ -320,46 +149,16 @@ const WidgetLayout2 = ({
                       const photoIndex = week * 3 + day;
                       const photo = photos[photoIndex];
                       return (
-                        <div 
-                          key={day}
-                          className="flex-1 aspect-[3/4] overflow-hidden"
-                          style={{ background: '#0a0a0a', borderRadius: '2px' }}
-                        >
-                          {photo && (
-                            photo.isVideo || isVideoUrl(photo.url) ? (
-                              <video
-                                src={photo.url}
-                                className="w-full h-full object-cover"
-                                muted
-                                playsInline
-                              />
-                            ) : (
-                              <img
-                                src={photo.url}
-                                alt=""
-                                className="w-full h-full object-cover"
-                              />
-                            )
-                          )}
+                        <div key={day} className="flex-1 aspect-[3/4] overflow-hidden" style={{ background: '#0a0a0a', borderRadius: '2px' }}>
+                          {photo && (photo.isVideo || isVideoUrl(photo.storageUrl) ? <video src={photo.storageUrl} className="w-full h-full object-cover" muted playsInline /> : <img src={photo.storageUrl} alt="" className="w-full h-full object-cover" />)}
                         </div>
                       );
                     })}
                   </div>
                 ))}
               </div>
-
-              {/* Bottom sprocket holes */}
-              <div 
-                className="flex justify-between px-2 py-0.5"
-                style={{ borderTop: '1px solid #3a3a3a' }}
-              >
-                {[...Array(12)].map((_, i) => (
-                  <div 
-                    key={i} 
-                    className="w-1.5 h-1 rounded-sm"
-                    style={{ background: '#1a1a1a' }}
-                  />
-                ))}
+              <div className="flex justify-between px-2 py-0.5" style={{ borderTop: '1px solid #3a3a3a' }}>
+                {[...Array(12)].map((_, i) => <div key={i} className="w-1.5 h-1 rounded-sm" style={{ background: '#1a1a1a' }} />)}
               </div>
             </div>
           </div>
