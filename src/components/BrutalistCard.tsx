@@ -1,46 +1,75 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface BrutalistCardProps {
-  videoUrls: string[];
+interface DayVideoData {
   dayNumber: number;
   activityName: string;
+  videoUrl: string;
+  rawImageUrl?: string;
 }
 
-export function BrutalistCard({ videoUrls, dayNumber, activityName }: BrutalistCardProps) {
-  const [phase, setPhase] = useState<1 | 2>(1);
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const currentVideoUrl = videoUrls[currentVideoIndex] || videoUrls[0];
+interface BrutalistCardProps {
+  videoUrls?: string[];
+  dayNumber?: number;
+  activityName?: string;
+  // New: array of all days for combined reel
+  allDaysData?: DayVideoData[];
+}
 
-  // Phase transition after 1 second
+export function BrutalistCard({ 
+  videoUrls, 
+  dayNumber, 
+  activityName,
+  allDaysData 
+}: BrutalistCardProps) {
+  const [currentDayIndex, setCurrentDayIndex] = useState(0);
+  const [phase, setPhase] = useState<1 | 2>(1);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Determine if we're in single-day or multi-day mode
+  const isMultiDay = allDaysData && allDaysData.length > 0;
+  
+  // Get current day data
+  const currentDay = isMultiDay 
+    ? allDaysData[currentDayIndex] 
+    : { dayNumber: dayNumber || 1, activityName: activityName || '', videoUrl: videoUrls?.[0] || '' };
+  
+  const currentVideoUrl = currentDay.videoUrl;
+  const currentDayNumber = currentDay.dayNumber;
+  const currentActivityName = currentDay.activityName;
+
+  // Reset phase when day changes
   useEffect(() => {
+    setPhase(1);
     const timer = setTimeout(() => {
       setPhase(2);
     }, 1000);
-
     return () => clearTimeout(timer);
-  }, []);
+  }, [currentDayIndex]);
 
   // Play video when entering phase 2
   useEffect(() => {
     if (phase === 2 && videoRef.current) {
+      videoRef.current.currentTime = 0;
       videoRef.current.play().catch(console.error);
     }
-  }, [phase]);
+  }, [phase, currentDayIndex]);
 
-  // Handle video end - cycle to next video
+  // Handle video end - move to next day in multi-day mode
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || videoUrls.length <= 1) return;
+    if (!video) return;
 
     const handleEnded = () => {
-      setCurrentVideoIndex(prev => (prev + 1) % videoUrls.length);
+      if (isMultiDay && allDaysData && allDaysData.length > 1) {
+        // Move to next day
+        setCurrentDayIndex(prev => (prev + 1) % allDaysData.length);
+      }
     };
 
     video.addEventListener('ended', handleEnded);
     return () => video.removeEventListener('ended', handleEnded);
-  }, [videoUrls.length]);
+  }, [isMultiDay, allDaysData]);
 
   return (
     <div className="relative aspect-[9/16] overflow-hidden rounded-lg bg-black">
@@ -52,11 +81,28 @@ export function BrutalistCard({ videoUrls, dayNumber, activityName }: BrutalistC
         }}
       />
 
+      {/* Day indicator dots for multi-day mode */}
+      {isMultiDay && allDaysData && allDaysData.length > 1 && (
+        <div className="absolute top-4 left-0 right-0 flex justify-center gap-2 z-50">
+          {allDaysData.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentDayIndex(idx)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                idx === currentDayIndex 
+                  ? 'bg-yellow-400 scale-125' 
+                  : 'bg-white/40 hover:bg-white/60'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+
       <AnimatePresence mode="wait">
         {phase === 1 ? (
           /* Phase 1: Paper texture with brown "DAY X" text */
           <motion.div
-            key="phase1"
+            key={`phase1-${currentDayIndex}`}
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.05 }} // Hard cut
@@ -81,13 +127,13 @@ export function BrutalistCard({ videoUrls, dayNumber, activityName }: BrutalistC
                 textShadow: '2px 2px 0px rgba(0,0,0,0.1)',
               }}
             >
-              DAY {dayNumber}
+              DAY {currentDayNumber}
             </motion.h1>
           </motion.div>
         ) : (
           /* Phase 2: Black background with split-screen video */
           <motion.div
-            key="phase2"
+            key={`phase2-${currentDayIndex}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.05 }} // Hard cut
@@ -113,7 +159,7 @@ export function BrutalistCard({ videoUrls, dayNumber, activityName }: BrutalistC
                       ease: 'linear',
                     }}
                   >
-                    {activityName} • {activityName} • {activityName} • {activityName} • {activityName} •
+                    {currentActivityName} • {currentActivityName} • {currentActivityName} • {currentActivityName} • {currentActivityName} •
                   </motion.div>
                 ))}
               </div>
@@ -133,7 +179,6 @@ export function BrutalistCard({ videoUrls, dayNumber, activityName }: BrutalistC
                     ref={col === 1 ? videoRef : undefined}
                     src={currentVideoUrl}
                     muted
-                    loop={videoUrls.length === 1}
                     playsInline
                     className="absolute w-[300%] h-full object-cover"
                     style={{
@@ -163,7 +208,7 @@ export function BrutalistCard({ videoUrls, dayNumber, activityName }: BrutalistC
                   textShadow: '0 4px 20px rgba(0,0,0,0.8)',
                 }}
               >
-                DAY {dayNumber}
+                DAY {currentDayNumber}
               </motion.h2>
               
               <motion.h3
@@ -176,7 +221,7 @@ export function BrutalistCard({ videoUrls, dayNumber, activityName }: BrutalistC
                   textShadow: '0 4px 20px rgba(0,0,0,0.8)',
                 }}
               >
-                {activityName}
+                {currentActivityName}
               </motion.h3>
             </div>
 
