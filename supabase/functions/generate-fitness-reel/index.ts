@@ -364,7 +364,7 @@ Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
           promptText: videoPrompt,
           duration: 5,
           watermark: false,
-          ratio: "9:16",
+          ratio: "768:1280",
         }),
       });
 
@@ -375,6 +375,7 @@ Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
       } else {
         const errorText = await runwayResponse.text();
         console.error("RunwayML text_to_video error:", errorText);
+        throw new Error(`RunwayML text_to_video error: ${errorText}`);
       }
     } else {
       const runwayResponse = await fetch("https://api.dev.runwayml.com/v1/image_to_video", {
@@ -390,7 +391,7 @@ Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
           promptText: videoPrompt,
           duration: 5,
           watermark: false,
-          ratio: "9:16",
+          ratio: "768:1280",
         }),
       });
 
@@ -401,6 +402,7 @@ Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
       } else {
         const errorText = await runwayResponse.text();
         console.error("RunwayML image_to_video error:", errorText);
+        throw new Error(`RunwayML image_to_video error: ${errorText}`);
       }
     }
 
@@ -427,9 +429,10 @@ Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
 
   } catch (error) {
     console.error("Error generating fitness reel:", error);
+    const message = error instanceof Error ? error.message : 'An error occurred while processing your request';
     return new Response(
       JSON.stringify({ 
-        error: 'An error occurred while processing your request',
+        error: message,
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
