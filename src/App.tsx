@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Preview from "./pages/Preview";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import BrutalistGenerator from "./pages/BrutalistGenerator";
 import PageTransition from "./components/PageTransition";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const AnimatedRoutes = () => {
         <Route path="/auth" element={<Auth />} />
         <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
         <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
+        <Route path="/brutalist" element={<BrutalistGenerator />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
