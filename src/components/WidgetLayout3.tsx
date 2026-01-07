@@ -230,17 +230,6 @@ const WidgetLayout3 = ({
               >
                 {renderInFrame(latestPhoto, 180)}
                 
-                {/* Day badge */}
-                <div 
-                  className="absolute top-2 left-2 px-2 py-0.5 rounded-full z-20"
-                  style={{
-                    background: 'rgba(0,0,0,0.6)',
-                    backdropFilter: 'blur(8px)',
-                  }}
-                >
-                  <span className="text-[9px] font-bold text-white">DAY {latestPhoto.dayNumber}</span>
-                </div>
-                
                 {/* Remove button */}
                 {onRemovePhoto && (
                   <button
