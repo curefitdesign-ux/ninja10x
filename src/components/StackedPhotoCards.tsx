@@ -41,7 +41,18 @@ const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
 
   const handlePhotoTap = (photo: Photo) => {
     navigate('/preview', {
-      state: { imageUrl: photo.storageUrl, originalUrl: photo.storageUrl, isVideo: photo.isVideo, activity: photo.activity, frame: photo.frame, duration: photo.duration, pr: photo.pr, isReview: true, photoId: photo.id },
+      state: { 
+        imageUrl: photo.storageUrl, 
+        originalUrl: photo.storageUrl, 
+        isVideo: photo.isVideo, 
+        activity: photo.activity, 
+        frame: photo.frame, 
+        duration: photo.duration, 
+        pr: photo.pr, 
+        isReview: true, 
+        photoId: photo.id,
+        dayNumber: photo.dayNumber,
+      },
     });
   };
 
