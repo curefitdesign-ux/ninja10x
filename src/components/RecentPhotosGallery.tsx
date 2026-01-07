@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { AlertTriangle, Clock, X, Image } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ImageCropper from './ImageCropper';
 import VideoTrimmer from './VideoTrimmer';
@@ -15,7 +15,6 @@ const RecentPhotosGallery = ({
   onClose,
   onSelectPhoto
 }: RecentPhotosGalleryProps) => {
-  const [showInfoPopup, setShowInfoPopup] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
   const [hasTriggered, setHasTriggered] = useState(false);
@@ -27,25 +26,18 @@ const RecentPhotosGallery = ({
   const [mediaToEdit, setMediaToEdit] = useState<string | null>(null);
   const [isVideoMedia, setIsVideoMedia] = useState(false);
 
-  // Show info popup, then trigger file picker
+  // Immediately trigger file picker when opened
   useEffect(() => {
     if (isOpen && !hasTriggered) {
       setHasTriggered(true);
-      setShowInfoPopup(true);
-
-      // Auto-trigger file picker after showing info
-      const timer = setTimeout(() => {
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-          fileInputRef.current.click();
-        }
-      }, 2000); // Show info for 2 seconds before opening picker
-
-      return () => clearTimeout(timer);
+      // Immediately open file picker
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+        fileInputRef.current.click();
+      }
     }
     if (!isOpen) {
       setHasTriggered(false);
-      setShowInfoPopup(false);
       setShowWarning(false);
       setShowCropper(false);
       setShowTrimmer(false);
@@ -54,7 +46,6 @@ const RecentPhotosGallery = ({
   }, [isOpen, hasTriggered]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setShowInfoPopup(false);
     const files = e.target.files;
     if (!files || files.length === 0) {
       onClose();
@@ -105,7 +96,7 @@ const RecentPhotosGallery = ({
   const handleCropCancel = () => {
     setShowCropper(false);
     setMediaToEdit(null);
-    setShowInfoPopup(true);
+    onClose();
   };
 
   const handleTrimConfirm = (trimmedVideoUrl: string) => {
@@ -117,7 +108,7 @@ const RecentPhotosGallery = ({
   const handleTrimCancel = () => {
     setShowTrimmer(false);
     setMediaToEdit(null);
-    setShowInfoPopup(true);
+    onClose();
   };
 
   const handleRetake = () => {
@@ -158,6 +149,19 @@ const RecentPhotosGallery = ({
     );
   }
 
+  // Only show overlay when warning is visible
+  if (!showWarning) {
+    return (
+      <input 
+        ref={fileInputRef} 
+        type="file" 
+        accept="image/*,video/*" 
+        className="hidden" 
+        onChange={handleFileSelect} 
+      />
+    );
+  }
+
   return (
     <>
       {/* Hidden file input */}
@@ -169,7 +173,7 @@ const RecentPhotosGallery = ({
         onChange={handleFileSelect} 
       />
 
-      {/* Overlay with blur */}
+      {/* Overlay with blur - only shown with warning */}
       <div 
         className="fixed inset-0 z-40 transition-all duration-300" 
         style={{
@@ -180,122 +184,56 @@ const RecentPhotosGallery = ({
         onClick={onClose} 
       />
 
-      {/* Info Popup */}
-      {showInfoPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-white/5">
-          <div className="relative">
-            <div 
-              style={{
-                background: 'rgba(255, 255, 255, 0.12)',
-                backdropFilter: 'blur(40px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                border: '1px solid rgba(255, 255, 255, 0.18)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-              }} 
-              className="rounded-3xl p-6 max-w-sm w-full animate-in zoom-in-95 fade-in duration-300 bg-black/0 border-black/0 shadow-none relative"
-            >
-              {/* Close button inside box - top right */}
-              <button 
-                onClick={onClose} 
-                className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90" 
-                style={{
-                  background: 'rgba(255, 255, 255, 0.15)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)'
-                }}
-              >
-                <X className="w-4 h-4 text-white/80" />
-              </button>
-              
-              <div className="flex flex-col items-center text-center gap-4">
-                <div 
-                  className="w-16 h-16 rounded-full flex items-center justify-center" 
-                  style={{
-                    background: 'rgba(251, 191, 36, 0.2)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(251, 191, 36, 0.3)'
-                  }}
-                >
-                  <Clock className="w-8 h-8 text-amber-400" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-2">24 Hour Photos Only</h3>
-                  <p className="text-white/60 text-sm leading-relaxed">
-                    Only photos taken in the last 24 hours can be uploaded. Take a new photo of your activity!
-                  </p>
-                </div>
-                
-                {/* Add Photo button with icon */}
-                <button 
-                  onClick={() => {
-                    if (fileInputRef.current) {
-                      fileInputRef.current.click();
-                    }
-                  }} 
-                  className="w-full py-3.5 px-4 rounded-2xl font-medium text-sm text-white mt-2 transition-all active:scale-95 flex items-center justify-center gap-2" 
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.25)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)'
-                  }}
-                >
-                  <Image className="w-5 h-5" />
-                  Add Photo
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Warning Popup */}
-      {showWarning && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-          <div 
-            className="rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-300" 
-            style={{
-              background: 'rgba(255, 255, 255, 0.12)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 40px rgba(239, 68, 68, 0.1)'
-            }}
-          >
-            <div className="flex flex-col items-center text-center gap-4">
-              <div 
-                className="w-16 h-16 rounded-full flex items-center justify-center" 
-                style={{
-                  background: 'rgba(239, 68, 68, 0.2)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)'
-                }}
-              >
-                <AlertTriangle className="w-8 h-8 text-red-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white mb-2">Photo Too Old</h3>
-                <p className="text-white/60 text-sm leading-relaxed">
-                  {warningMessage}
-                </p>
-              </div>
-              <button 
-                onClick={() => {
-                  setShowWarning(false);
-                  setShowInfoPopup(true);
-                }} 
-                className="w-full py-3 px-4 rounded-2xl font-medium text-sm text-white mt-2 transition-all active:scale-95" 
-                style={{
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  border: '1px solid rgba(255, 255, 255, 0.25)',
-                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)'
-                }}
-              >
-                Try Another Photo
-              </button>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+        <div 
+          className="rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 fade-in duration-300" 
+          style={{
+            background: 'rgba(255, 255, 255, 0.12)',
+            backdropFilter: 'blur(40px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 40px rgba(239, 68, 68, 0.1)'
+          }}
+        >
+          <div className="flex flex-col items-center text-center gap-4">
+            <div 
+              className="w-16 h-16 rounded-full flex items-center justify-center" 
+              style={{
+                background: 'rgba(239, 68, 68, 0.2)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(239, 68, 68, 0.3)'
+              }}
+            >
+              <AlertTriangle className="w-8 h-8 text-red-400" />
             </div>
+            <div>
+              <h3 className="text-lg font-bold text-white mb-2">Photo Too Old</h3>
+              <p className="text-white/60 text-sm leading-relaxed">
+                {warningMessage}
+              </p>
+            </div>
+            <button 
+              onClick={() => {
+                setShowWarning(false);
+                // Re-trigger file picker
+                if (fileInputRef.current) {
+                  fileInputRef.current.value = '';
+                  fileInputRef.current.click();
+                }
+              }} 
+              className="w-full py-3 px-4 rounded-2xl font-medium text-sm text-white mt-2 transition-all active:scale-95" 
+              style={{
+                background: 'rgba(255, 255, 255, 0.2)',
+                border: '1px solid rgba(255, 255, 255, 0.25)',
+                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+              }}
+            >
+              Try Another Photo
+            </button>
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 };
