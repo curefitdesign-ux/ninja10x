@@ -7,15 +7,26 @@ interface RunwayTaskResponse {
   error?: string;
 }
 
-export interface ImageInput {
-  url: string;
-  name?: string;
+export interface DayData {
+  dayNumber: number;
+  activity: string;
+  imageUrl: string;
+  distanceKm?: number;
+  durationMinutes?: number;
+  calories?: number;
 }
 
 export interface GenerationResult {
+  dayNumber: number;
+  activity: string;
   imageUrl: string;
   videoUrl: string;
   taskId: string;
+  metadata: {
+    distanceKm?: number;
+    durationMinutes?: number;
+    calories?: number;
+  };
 }
 
 /**
@@ -72,89 +83,45 @@ export async function generateRunwayVideoFromImage(
 }
 
 /**
- * Generate a video using RunwayML without an image (text-to-video)
- * Returns the task ID for polling
+ * Generate videos for all days with their data
+ * Processes sequentially and returns results with full metadata
  */
-export async function generateRunwayVideo(
-  activityName: string,
-  apiKey: string
-): Promise<string> {
-  const prompt = `Cinematic gritty handheld shot of a person ${activityName.toLowerCase()}, underground gym atmosphere, heavy film grain, high contrast, sweat, volumetric lighting, 4k, brutalist aesthetic.`;
-
-  const response = await fetch(`${RUNWAY_API_URL}/image_to_video`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      'X-Runway-Version': '2024-11-06',
-    },
-    body: JSON.stringify({
-      model: 'gen4_turbo',
-      promptText: prompt,
-      duration: 5,
-      ratio: '720:1280',
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('RunwayML API error:', errorText);
-    
-    if (response.status === 401) {
-      throw new Error('Invalid API key');
-    }
-    if (response.status === 429) {
-      throw new Error('Rate limit exceeded. Please wait and try again.');
-    }
-    if (response.status === 402) {
-      throw new Error('Insufficient credits');
-    }
-    
-    throw new Error(`API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  
-  if (!data.id) {
-    throw new Error('No task ID returned');
-  }
-
-  return data.id;
-}
-
-/**
- * Generate videos for all images and return results as they complete
- */
-export async function generateVideosForAllImages(
-  images: ImageInput[],
-  activityName: string,
+export async function generateVideosForAllDays(
+  days: DayData[],
   apiKey: string,
   onProgress?: (completed: number, total: number, result?: GenerationResult) => void
 ): Promise<GenerationResult[]> {
   const results: GenerationResult[] = [];
-  const total = images.length;
+  const total = days.length;
 
-  // Process images sequentially to avoid rate limits
-  for (let i = 0; i < images.length; i++) {
-    const image = images[i];
+  // Process days sequentially to avoid rate limits
+  for (let i = 0; i < days.length; i++) {
+    const day = days[i];
     
     try {
-      // Generate video from this image
-      const taskId = await generateRunwayVideoFromImage(image.url, activityName, apiKey);
+      // Generate video from this day's image
+      const taskId = await generateRunwayVideoFromImage(day.imageUrl, day.activity, apiKey);
       
       // Poll for completion
       const videoUrl = await pollTaskStatus(taskId, apiKey);
       
       const result: GenerationResult = {
-        imageUrl: image.url,
+        dayNumber: day.dayNumber,
+        activity: day.activity,
+        imageUrl: day.imageUrl,
         videoUrl,
         taskId,
+        metadata: {
+          distanceKm: day.distanceKm,
+          durationMinutes: day.durationMinutes,
+          calories: day.calories,
+        },
       };
       
       results.push(result);
       onProgress?.(i + 1, total, result);
     } catch (error) {
-      console.error(`Failed to generate video for image ${i + 1}:`, error);
+      console.error(`Failed to generate video for Day ${day.dayNumber}:`, error);
       throw error;
     }
   }
