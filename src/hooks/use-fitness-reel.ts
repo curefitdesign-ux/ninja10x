@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import type { GenerationStep } from '@/components/ReelGenerationOverlay';
-import { composeVideo } from '@/lib/video-compositor';
 
 interface PhotoData {
   id: string;
@@ -188,27 +187,10 @@ export const useFitnessReel = () => {
       const backendResult = await response.json();
       
       setCurrentStep('voiceover');
-      await sleep(800);
+      await sleep(500);
 
-      // Step 2: Compose video locally using all photos
+      // Step 2: Video is being rendered by RunwayML
       setCurrentStep('video');
-
-      const videoUrl = await composeVideo({
-        photos: photos.map((p) => ({
-          imageUrl: p.imageUrl,
-          activity: p.activity,
-          dayNumber: p.dayNumber,
-        })),
-        durationPerPhoto: 1.2,
-        transitionDuration: 0.25,
-        fps: 24,
-        width: 720,
-        height: 1280,
-        style: style.id as 'brutalist' | 'neon' | 'vintage' | 'minimal' | 'grunge',
-        onProgress: (percent, phase) => {
-          console.log(`Video composition: ${percent.toFixed(0)}% - ${phase}`);
-        },
-      });
 
       const reelId = `reel-${Date.now()}`;
       const newReel: ReelResult = {
@@ -217,8 +199,9 @@ export const useFitnessReel = () => {
         narration: backendResult.narration || 'Your fitness journey this week!',
         audioBase64: backendResult.audioBase64,
         audioSize: backendResult.audioSize,
-        videoUrl,
-        message: 'Ready',
+        videoTaskId: backendResult.videoTaskId,
+        videoUrl: undefined, // Will be populated by polling
+        message: 'Video rendering... (~1-2 min)',
         style: style.id,
         createdAt: Date.now(),
       };
@@ -226,10 +209,15 @@ export const useFitnessReel = () => {
       setReelHistory((prev) => [newReel, ...prev]);
       setCurrentReelIndex(0);
 
+      // Start polling for video completion
+      if (backendResult.videoTaskId) {
+        startPollingIfNeeded(reelId, backendResult.videoTaskId);
+      }
+
       setCurrentStep('complete');
       await sleep(300);
 
-      toast.success(`${style.name} reel ready!`);
+      toast.success(`${style.name} reel submitted! Video rendering...`);
       return newReel;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to generate reel';
