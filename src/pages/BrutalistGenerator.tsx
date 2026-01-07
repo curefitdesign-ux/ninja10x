@@ -172,7 +172,17 @@ export default function BrutalistGenerator() {
   const allComplete = Object.values(dayStatuses).every(s => 
     s.image === null || s.status === 'complete'
   );
+  const hasAnyComplete = Object.values(dayStatuses).some(s => s.status === 'complete');
 
+  // Collect all completed days for the final reel
+  const allCompletedDays = DAYS_CONFIG
+    .filter(({ day }) => dayStatuses[day].status === 'complete' && dayStatuses[day].videoResult)
+    .map(({ day, activity }) => ({
+      dayNumber: day,
+      activityName: activity,
+      videoUrl: dayStatuses[day].videoResult!.videoUrl,
+      rawImageUrl: dayStatuses[day].image?.url,
+    }));
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Noise overlay */}
@@ -411,6 +421,25 @@ export default function BrutalistGenerator() {
                   </div>
                 );
               })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Combined Final Reel - shows when any day is complete */}
+        {hasAnyComplete && allCompletedDays.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-12"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Play className="w-5 h-5 text-yellow-400" />
+              <h3 className="text-lg font-mono text-neutral-400">
+                FINAL REEL ({allCompletedDays.length} DAY{allCompletedDays.length > 1 ? 'S' : ''})
+              </h3>
+            </div>
+            <div className="max-w-sm mx-auto">
+              <BrutalistCard allDaysData={allCompletedDays} />
             </div>
           </motion.div>
         )}
