@@ -2,14 +2,16 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface BrutalistCardProps {
-  videoUrl: string;
+  videoUrls: string[];
   dayNumber: number;
   activityName: string;
 }
 
-export function BrutalistCard({ videoUrl, dayNumber, activityName }: BrutalistCardProps) {
+export function BrutalistCard({ videoUrls, dayNumber, activityName }: BrutalistCardProps) {
   const [phase, setPhase] = useState<1 | 2>(1);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const currentVideoUrl = videoUrls[currentVideoIndex] || videoUrls[0];
 
   // Phase transition after 1 second
   useEffect(() => {
@@ -26,6 +28,19 @@ export function BrutalistCard({ videoUrl, dayNumber, activityName }: BrutalistCa
       videoRef.current.play().catch(console.error);
     }
   }, [phase]);
+
+  // Handle video end - cycle to next video
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || videoUrls.length <= 1) return;
+
+    const handleEnded = () => {
+      setCurrentVideoIndex(prev => (prev + 1) % videoUrls.length);
+    };
+
+    video.addEventListener('ended', handleEnded);
+    return () => video.removeEventListener('ended', handleEnded);
+  }, [videoUrls.length]);
 
   return (
     <div className="relative aspect-[9/16] overflow-hidden rounded-lg bg-black">
@@ -116,9 +131,9 @@ export function BrutalistCard({ videoUrl, dayNumber, activityName }: BrutalistCa
                 >
                   <video
                     ref={col === 1 ? videoRef : undefined}
-                    src={videoUrl}
+                    src={currentVideoUrl}
                     muted
-                    loop
+                    loop={videoUrls.length === 1}
                     playsInline
                     className="absolute w-[300%] h-full object-cover"
                     style={{
