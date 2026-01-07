@@ -193,13 +193,12 @@ const Index = () => {
       const photoId = location.state.photoId;
       const isVideo = location.state.isVideo || false;
 
-      // Upload to storage in background
+      // Upload original to storage for public URL (needed for Runway API)
       const uploadAndSave = async () => {
-        // Upload original to storage for public URL (needed for Runway API)
         let storageUrl: string | null = null;
         if (incomingOriginalUrl.startsWith('data:')) {
           setIsUploading(true);
-          setUploadProgress(30);
+          setUploadProgress(50);
           
           storageUrl = await uploadToStorage(
             incomingOriginalUrl,
@@ -208,13 +207,13 @@ const Index = () => {
           );
           
           setUploadProgress(100);
-          setTimeout(() => {
-            setIsUploading(false);
-            setUploadProgress(0);
-          }, 500);
+          
+          // Quick dismiss - don't wait
+          setIsUploading(false);
+          setUploadProgress(0);
           
           if (!storageUrl) {
-            toast.error('Failed to upload - using local storage');
+            toast.error('Upload failed');
           }
         }
 
