@@ -79,6 +79,7 @@ const Preview = () => {
   const [elementsHidden, setElementsHidden] = useState(false);
   const [isReview, setIsReview] = useState(false);
   const [photoId, setPhotoId] = useState<string | null>(null);
+  const [dayNumber, setDayNumber] = useState<number>(1);
   const inputRef = useRef<HTMLInputElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
 
@@ -111,6 +112,7 @@ const Preview = () => {
       pr?: string;
       isReview?: boolean;
       photoId?: string;
+      dayNumber?: number;
     } | null;
 
     const mediaUrl = state?.originalUrl || state?.imageUrl;
@@ -123,6 +125,7 @@ const Preview = () => {
       setPr(state.pr || '');
       setIsReview(state.isReview || false);
       setPhotoId(state.photoId || null);
+      setDayNumber(state.dayNumber || 1);
       if (state.frame && FRAMES.includes(state.frame)) {
         setCurrentFrame(state.frame);
         setOriginalFrame(state.frame);
@@ -398,12 +401,15 @@ const Preview = () => {
     return null;
   }
 
+  // Calculate week from dayNumber (1-3 = week 1, 4-6 = week 2, etc.)
+  const calculatedWeek = Math.ceil(dayNumber / 3);
+
   const frameProps = {
     imageUrl,
     isVideo,
     activity: activity || '',
-    week: 1,
-    day: 1,
+    week: calculatedWeek,
+    day: dayNumber,
     duration,
     pr,
     imagePosition,

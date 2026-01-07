@@ -86,6 +86,7 @@ const WidgetLayout2 = ({ photos, onCardClick }: WidgetLayout2Props) => {
         pr: photo.pr,
         isReview: true,
         photoId: photo.id,
+        dayNumber: photo.dayNumber,
       } 
     });
   };

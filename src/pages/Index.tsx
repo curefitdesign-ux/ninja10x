@@ -333,6 +333,10 @@ const Index = () => {
       setAcknowledgedActivity(null);
       
       if (pendingMedia) {
+        // For new uploads, calculate next day; for edits, use existing photo's day
+        const editingPhoto = editingPhotoId ? photos.find(p => p.id === editingPhotoId) : null;
+        const targetDayNumber = editingPhoto ? editingPhoto.dayNumber : getNextDayNumber();
+        
         navigate('/preview', { 
           state: { 
             imageUrl: pendingMedia.url, 
@@ -340,6 +344,7 @@ const Index = () => {
             activity,
             isReview: !!editingPhotoId,
             photoId: editingPhotoId,
+            dayNumber: targetDayNumber,
           } 
         });
         setPendingMedia(null);
@@ -406,6 +411,7 @@ const Index = () => {
         pr: photo.pr,
         isReview: true,
         photoId: photo.id,
+        dayNumber: photo.dayNumber,
       },
     });
   };

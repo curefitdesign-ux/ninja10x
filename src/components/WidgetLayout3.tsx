@@ -159,6 +159,7 @@ const WidgetLayout3 = ({
             pr: photo.pr,
             isReview: true,
             photoId: photo.id,
+            dayNumber: photo.dayNumber,
           },
         });
       }
