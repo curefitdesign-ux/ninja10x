@@ -1,9 +1,24 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schemas (manual since zod isn't available in Deno edge by default)
+const MAX_PHOTOS = 30;
+const MIN_PHOTOS = 3;
+const MAX_STRING_LENGTH = 200;
+const MAX_URL_LENGTH = 2000;
+const MAX_TASK_ID_LENGTH = 100;
+
+// Allowed voice IDs for ElevenLabs
+const ALLOWED_VOICE_IDS = [
+  "JBFqnCBsd6RMkjVDRZzb", // George
+  "21m00Tcm4TlvDq8ikWAM", // Rachel
+  "EXAVITQu4vr4xnSDxMaL", // Bella
+];
 
 interface PhotoData {
   id: string;
@@ -19,10 +34,116 @@ interface GenerateReelRequest {
   photos?: PhotoData[];
   stylePrompt?: string;
   styleId?: string;
-  /** When action is "status", taskId is required */
   action?: 'create' | 'status';
   taskId?: string;
   referenceVideoUrl?: string;
+}
+
+// Validation functions
+function validateString(value: unknown, maxLength: number, fieldName: string): string {
+  if (typeof value !== 'string') {
+    throw new Error(`${fieldName} must be a string`);
+  }
+  if (value.length > maxLength) {
+    throw new Error(`${fieldName} exceeds maximum length of ${maxLength}`);
+  }
+  // Basic sanitization - remove potential script tags
+  return value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+}
+
+function validateUrl(value: unknown, fieldName: string): string {
+  const str = validateString(value, MAX_URL_LENGTH, fieldName);
+  // Allow data URIs and http(s) URLs only
+  if (!str.startsWith('data:') && !str.startsWith('http://') && !str.startsWith('https://')) {
+    throw new Error(`${fieldName} must be a valid URL`);
+  }
+  return str;
+}
+
+function validatePhoto(photo: unknown, index: number): PhotoData {
+  if (!photo || typeof photo !== 'object') {
+    throw new Error(`Photo ${index} is invalid`);
+  }
+  
+  const p = photo as Record<string, unknown>;
+  
+  return {
+    id: validateString(p.id, 100, `Photo ${index} id`),
+    imageUrl: validateUrl(p.imageUrl, `Photo ${index} imageUrl`),
+    activity: validateString(p.activity, 50, `Photo ${index} activity`),
+    duration: p.duration ? validateString(p.duration, 50, `Photo ${index} duration`) : undefined,
+    pr: p.pr ? validateString(p.pr, 100, `Photo ${index} pr`) : undefined,
+    uploadDate: validateString(p.uploadDate, 20, `Photo ${index} uploadDate`),
+    dayNumber: typeof p.dayNumber === 'number' && p.dayNumber >= 1 && p.dayNumber <= 365 
+      ? p.dayNumber 
+      : (() => { throw new Error(`Photo ${index} dayNumber must be between 1 and 365`); })(),
+  };
+}
+
+function validateRequest(body: unknown): GenerateReelRequest {
+  if (!body || typeof body !== 'object') {
+    throw new Error('Request body must be an object');
+  }
+  
+  const req = body as Record<string, unknown>;
+  const result: GenerateReelRequest = {};
+  
+  // Validate action
+  if (req.action !== undefined) {
+    if (req.action !== 'create' && req.action !== 'status') {
+      throw new Error('action must be "create" or "status"');
+    }
+    result.action = req.action;
+  }
+  
+  // Validate taskId
+  if (req.taskId !== undefined) {
+    result.taskId = validateString(req.taskId, MAX_TASK_ID_LENGTH, 'taskId');
+  }
+  
+  // Validate photos array
+  if (req.photos !== undefined) {
+    if (!Array.isArray(req.photos)) {
+      throw new Error('photos must be an array');
+    }
+    if (req.photos.length > MAX_PHOTOS) {
+      throw new Error(`Maximum ${MAX_PHOTOS} photos allowed`);
+    }
+    result.photos = req.photos.map((p, i) => validatePhoto(p, i));
+  }
+  
+  // Validate style fields
+  if (req.stylePrompt !== undefined) {
+    result.stylePrompt = validateString(req.stylePrompt, MAX_STRING_LENGTH, 'stylePrompt');
+  }
+  if (req.styleId !== undefined) {
+    result.styleId = validateString(req.styleId, 50, 'styleId');
+  }
+  
+  return result;
+}
+
+// Authenticate user using JWT
+async function authenticateRequest(req: Request): Promise<string> {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    throw new Error('Unauthorized: Missing or invalid Authorization header');
+  }
+
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_ANON_KEY')!,
+    { global: { headers: { Authorization: authHeader } } }
+  );
+
+  const token = authHeader.replace('Bearer ', '');
+  const { data, error } = await supabase.auth.getClaims(token);
+  
+  if (error || !data?.claims) {
+    throw new Error('Unauthorized: Invalid token');
+  }
+
+  return data.claims.sub as string;
 }
 
 serve(async (req) => {
@@ -32,13 +153,37 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const RUNWAYML_API_KEY = Deno.env.get("RUNWAYML_API_KEY");
-
   try {
-    const body = (await req.json().catch(() => ({}))) as GenerateReelRequest;
-    const action = body.action ?? (body.taskId ? 'status' : 'create');
+    // Authenticate user
+    let userId: string;
+    try {
+      userId = await authenticateRequest(req);
+      console.log("Authenticated user:", userId);
+    } catch (authError) {
+      console.error("Authentication failed:", authError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    // ---- Task status proxy (client cannot call Runway directly) ----
+    // Validate input
+    let body: GenerateReelRequest;
+    try {
+      const rawBody = await req.json().catch(() => ({}));
+      body = validateRequest(rawBody);
+    } catch (validationError) {
+      console.error("Validation failed:", validationError);
+      return new Response(
+        JSON.stringify({ error: validationError instanceof Error ? validationError.message : 'Invalid request' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const action = body.action ?? (body.taskId ? 'status' : 'create');
+    const RUNWAYML_API_KEY = Deno.env.get("RUNWAYML_API_KEY");
+
+    // ---- Task status proxy ----
     if (action === 'status') {
       if (!RUNWAYML_API_KEY) throw new Error("RUNWAYML_API_KEY is not configured");
       if (!body.taskId) {
@@ -79,14 +224,14 @@ serve(async (req) => {
     // ---- Create ----
     const { photos = [], stylePrompt, styleId } = body;
 
-    if (!photos || photos.length < 3) {
+    if (photos.length < MIN_PHOTOS) {
       return new Response(
-        JSON.stringify({ error: 'At least 3 photos are required' }),
+        JSON.stringify({ error: `At least ${MIN_PHOTOS} photos are required` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`Processing ${photos.length} photos for reel generation`);
+    console.log(`Processing ${photos.length} photos for user ${userId}`);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
@@ -94,7 +239,8 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
     if (!ELEVENLABS_API_KEY) throw new Error("ELEVENLABS_API_KEY is not configured");
     if (!RUNWAYML_API_KEY) throw new Error("RUNWAYML_API_KEY is not configured");
-    const photosSummary = photos.map((p, i) => {
+
+    const photosSummary = photos.map((p) => {
       let details = `Day ${p.dayNumber}: ${p.activity}`;
       if (p.duration) details += ` for ${p.duration}`;
       if (p.pr) details += ` - Personal Record: ${p.pr}`;
@@ -143,7 +289,7 @@ Style: Brutalist, gritty, underground. Think boxing gym, not Instagram fitness. 
     // Step 2: Generate voiceover audio with ElevenLabs
     console.log("Step 2: Generating voiceover with ElevenLabs...");
     
-    const voiceId = "JBFqnCBsd6RMkjVDRZzb"; // George - energetic male voice
+    const voiceId = ALLOWED_VOICE_IDS[0]; // Use first allowed voice
     const voiceResponse = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
       {
@@ -182,24 +328,20 @@ Style: Brutalist, gritty, underground. Think boxing gym, not Instagram fitness. 
     const chosenStyle = (styleId || 'brutalist').toLowerCase();
     const extraStyle = stylePrompt ? `\nStyle notes: ${stylePrompt}` : '';
 
-    // Brutalist style video prompt - gritty, high contrast, film grain aesthetic
     const videoPrompt = `Vertical mobile video, ${chosenStyle} design style, fitness vlog aesthetic.
 A gritty cinematic montage of ${photos.map(p => p.activity.toLowerCase()).join(' and ')} training.
 Heavy film grain, noise textures, high contrast black and white with flashes of bright yellow.
 Split-screen collage effects, fast-paced editing, glitch transitions.
 Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
 
-    // Use the first photo as the starting frame
     const firstPhotoUrl = photos[0].imageUrl;
 
     let videoTaskId: string | null = null;
     let videoUrl: string | null = null;
 
-    // RunwayML requires a publicly accessible URL. If we have a data URI, we need to skip video gen or use text-to-video.
     const isDataUri = firstPhotoUrl?.startsWith('data:');
     
     if (isDataUri) {
-      // Fall back to text-to-video since we can't use the base64 image directly
       console.log("Photo is a data URI - using text_to_video instead of image_to_video");
       
       const runwayResponse = await fetch("https://api.runwayml.com/v1/text_to_video", {
@@ -227,7 +369,6 @@ Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
         console.error("RunwayML text_to_video error:", errorText);
       }
     } else {
-      // We have a public URL, use image_to_video
       const runwayResponse = await fetch("https://api.runwayml.com/v1/image_to_video", {
         method: "POST",
         headers: {
@@ -255,12 +396,11 @@ Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
       }
     }
 
-    // Return the generated content
     return new Response(
       JSON.stringify({
         success: true,
         narration: narrationText,
-        audioBase64: audioBase64.substring(0, 1000) + "...", // Truncated for response
+        audioBase64: audioBase64.substring(0, 1000) + "...",
         audioSize: audioBuffer.byteLength,
         videoTaskId,
         videoUrl,
@@ -281,8 +421,7 @@ Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
     console.error("Error generating fitness reel:", error);
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error',
-        details: "Failed to generate fitness reel"
+        error: 'An error occurred while processing your request',
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
