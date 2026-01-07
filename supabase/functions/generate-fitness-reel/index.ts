@@ -330,81 +330,9 @@ Style: Brutalist, gritty, underground. Think boxing gym, not Instagram fitness. 
       console.warn("ElevenLabs failed (continuing without audio):", voiceError);
     }
 
-    // Step 3: Generate video with RunwayML
-    console.log("Step 3: Initiating video generation with RunwayML...");
-
-    const chosenStyle = (styleId || 'brutalist').toLowerCase();
-    const extraStyle = stylePrompt ? `\nStyle notes: ${stylePrompt}` : '';
-
-    const videoPrompt = `Vertical mobile video, ${chosenStyle} design style, fitness vlog aesthetic.
-A gritty cinematic montage of ${photos.map(p => p.activity.toLowerCase()).join(' and ')} training.
-Heavy film grain, noise textures, high contrast black and white with flashes of bright yellow.
-Split-screen collage effects, fast-paced editing, glitch transitions.
-Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
-
-    const firstPhotoUrl = photos[0].imageUrl;
-
-    let videoTaskId: string | null = null;
-    let videoUrl: string | null = null;
-
-    const isDataUri = firstPhotoUrl?.startsWith('data:');
-    
-    if (isDataUri) {
-      console.log("Photo is a data URI - using text_to_video instead of image_to_video");
-      
-      const runwayResponse = await fetch("https://api.dev.runwayml.com/v1/text_to_video", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${RUNWAYML_API_KEY}`,
-          "Content-Type": "application/json",
-          "X-Runway-Version": "2024-11-06",
-        },
-        body: JSON.stringify({
-          model: "gen3a_turbo",
-          promptText: videoPrompt,
-          duration: 5,
-          watermark: false,
-          ratio: "768:1280",
-        }),
-      });
-
-      if (runwayResponse.ok) {
-        const runwayData = await runwayResponse.json();
-        videoTaskId = runwayData.id;
-        console.log("RunwayML text_to_video task initiated:", videoTaskId);
-      } else {
-        const errorText = await runwayResponse.text();
-        console.error("RunwayML text_to_video error:", errorText);
-        throw new Error(`RunwayML text_to_video error: ${errorText}`);
-      }
-    } else {
-      const runwayResponse = await fetch("https://api.dev.runwayml.com/v1/image_to_video", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${RUNWAYML_API_KEY}`,
-          "Content-Type": "application/json",
-          "X-Runway-Version": "2024-11-06",
-        },
-        body: JSON.stringify({
-          model: "gen3a_turbo",
-          promptImage: firstPhotoUrl,
-          promptText: videoPrompt,
-          duration: 5,
-          watermark: false,
-          ratio: "768:1280",
-        }),
-      });
-
-      if (runwayResponse.ok) {
-        const runwayData = await runwayResponse.json();
-        videoTaskId = runwayData.id;
-        console.log("RunwayML image_to_video task initiated:", videoTaskId);
-      } else {
-        const errorText = await runwayResponse.text();
-        console.error("RunwayML image_to_video error:", errorText);
-        throw new Error(`RunwayML image_to_video error: ${errorText}`);
-      }
-    }
+    // Video is now composed on the frontend using all photos
+    // Backend just returns narration + audio for the client to use
+    console.log("Narration and audio ready - video will be composed on frontend");
 
     return new Response(
       JSON.stringify({
@@ -412,17 +340,13 @@ Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
         narration: narrationText,
         audioBase64: audioBase64 ? audioBase64.substring(0, 1000) + "..." : null,
         audioSize,
-        videoTaskId,
-        videoUrl,
         photos: photos.map(p => ({
           dayNumber: p.dayNumber,
           activity: p.activity,
           duration: p.duration,
           pr: p.pr,
         })),
-        message: videoTaskId 
-          ? "Video generation started! Check back in 1-2 minutes." 
-          : "Narration and voiceover ready! Video generation pending.",
+        message: "Narration ready! Video will be composed locally.",
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
