@@ -200,19 +200,19 @@ const Index = () => {
       }
 
       const uploadAndSave = async () => {
-        // Only upload if it's a data URI
+        // Upload anything that's NOT already a remote URL (data: and blob: are both uploadable via fetch())
         let storageUrl: string | null = null;
-        if (originalUrl.startsWith('data:')) {
+        if (originalUrl.startsWith('data:') || originalUrl.startsWith('blob:')) {
           setIsUploading(true);
-          
+
           storageUrl = await uploadToStorage(
             originalUrl,
             `journey-${Date.now()}`,
             isVideo
           );
-          
+
           setIsUploading(false);
-          
+
           if (!storageUrl) {
             toast.error('Upload failed. Please try again.');
             navigate('/', { replace: true, state: null });
@@ -222,7 +222,7 @@ const Index = () => {
           // Already a storage URL - use as-is
           storageUrl = originalUrl;
         } else {
-          toast.error('Invalid image format');
+          toast.error('Invalid media format');
           navigate('/', { replace: true, state: null });
           return;
         }

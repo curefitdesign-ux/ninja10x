@@ -258,13 +258,13 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
     recordedChunksRef.current = [];
     
     // Determine best supported MIME type
+    // Prefer MP4 for broad playback compatibility (esp. iOS Safari), fallback to WebM.
     const mimeTypes = [
+      'video/mp4',
       'video/webm;codecs=vp9',
       'video/webm;codecs=vp8',
       'video/webm',
-      'video/mp4',
     ];
-    
     let selectedMimeType = '';
     for (const mimeType of mimeTypes) {
       if (MediaRecorder.isTypeSupported(mimeType)) {

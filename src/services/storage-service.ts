@@ -33,15 +33,26 @@ export async function uploadToStorage(
     // Generate unique file path scoped to user
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(2, 9);
-    const extension = isVideo ? 'mp4' : 'jpg';
+
+    const contentType = blob.type || (isVideo ? 'video/mp4' : 'image/jpeg');
+    const extension = (() => {
+      if (contentType.includes('image/png')) return 'png';
+      if (contentType.includes('image/webp')) return 'webp';
+      if (contentType.includes('image/')) return 'jpg';
+      if (contentType.includes('video/mp4')) return 'mp4';
+      if (contentType.includes('video/webm')) return 'webm';
+      if (contentType.includes('video/')) return 'mp4';
+      return 'bin';
+    })();
+
     // Store files in user-specific folder for RLS
     const filePath = `${user.id}/${timestamp}-${randomId}-${fileName}.${extension}`;
 
-    // Upload to Supabase Storage
+    // Upload to storage
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
       .upload(filePath, blob, {
-        contentType: isVideo ? 'video/mp4' : 'image/jpeg',
+        contentType,
         cacheControl: '3600',
         upsert: false,
       });
