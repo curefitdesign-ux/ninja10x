@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Play, Pause, Download, Share2, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Play, Pause, Download, Share2, Sparkles, ChevronLeft, ChevronRight, Volume2, VolumeX, RefreshCw, AlertTriangle } from 'lucide-react';
 import type { ReelResult } from '@/hooks/use-fitness-reel';
 
 const InstagramIcon = ({ className }: { className?: string }) => (
@@ -34,14 +34,35 @@ const ReelPreviewScreen = ({
 }: ReelPreviewScreenProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const currentReel = reelHistory[currentIndex];
 
   useEffect(() => {
     setIsPlaying(false);
+    setVideoError(false);
+    setIsMuted(false);
     videoRef.current?.pause();
   }, [currentIndex]);
+
+  // Attempt autoplay when video is ready
+  useEffect(() => {
+    if (currentReel?.videoUrl && videoRef.current) {
+      const video = videoRef.current;
+      video.load();
+      
+      // Try unmuted autoplay first, fall back to muted
+      video.play().catch(() => {
+        video.muted = true;
+        setIsMuted(true);
+        video.play().catch((err) => {
+          console.warn('Autoplay failed even muted:', err);
+        });
+      });
+    }
+  }, [currentReel?.videoUrl]);
 
   const togglePlay = async () => {
     if (videoRef.current) {
@@ -53,7 +74,28 @@ const ReelPreviewScreen = ({
         }
       } catch (err) {
         console.error('Video playback error:', err);
+        setVideoError(true);
       }
+    }
+  };
+
+  const retryPlayback = () => {
+    if (videoRef.current) {
+      setVideoError(false);
+      videoRef.current.load();
+      videoRef.current.muted = true;
+      setIsMuted(true);
+      videoRef.current.play().catch((err) => {
+        console.error('Retry playback failed:', err);
+        setVideoError(true);
+      });
+    }
+  };
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
     }
   };
 
@@ -132,28 +174,65 @@ const ReelPreviewScreen = ({
                     preload="auto"
                     onEnded={() => setIsPlaying(false)}
                     onClick={togglePlay}
-                    onPlay={() => setIsPlaying(true)}
+                    onPlay={() => { setIsPlaying(true); setVideoError(false); }}
                     onPause={() => setIsPlaying(false)}
-                    onError={(e) => console.error('Video error:', e)}
+                    onError={() => setVideoError(true)}
                   />
-                  {/* Play/Pause overlay - only show when paused */}
-                  {!isPlaying && (
+
+                  {/* Error overlay */}
+                  {videoError && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 p-6">
+                      <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mb-4">
+                        <AlertTriangle className="w-8 h-8 text-red-400" />
+                      </div>
+                      <p className="text-white/80 text-sm mb-4 text-center">Video failed to load</p>
+                      <button 
+                        onClick={retryPlayback} 
+                        className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-black font-semibold rounded-lg hover:bg-yellow-300 transition-colors"
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                        Retry Playback
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Play/Pause overlay - only show when paused and no error */}
+                  {!isPlaying && !videoError && (
                     <button onClick={togglePlay} className="absolute inset-0 flex items-center justify-center bg-black/30">
                       <div className="w-16 h-16 bg-yellow-400 flex items-center justify-center rounded-full">
                         <Play className="w-8 h-8 text-black ml-1" />
                       </div>
                     </button>
                   )}
+
+                  {/* Mute indicator + toggle */}
+                  {isMuted && !videoError && (
+                    <button 
+                      onClick={toggleMute} 
+                      className="absolute top-3 right-3 w-10 h-10 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/80 transition-colors"
+                    >
+                      <VolumeX className="w-5 h-5 text-white/80" />
+                    </button>
+                  )}
+                  {!isMuted && isPlaying && !videoError && (
+                    <button 
+                      onClick={toggleMute} 
+                      className="absolute top-3 right-3 w-10 h-10 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
+                    >
+                      <Volume2 className="w-5 h-5 text-white/80" />
+                    </button>
+                  )}
                 </>
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center p-6">
-                  <div className="w-16 h-16 bg-yellow-400/20 rounded-2xl flex items-center justify-center mb-4">
+                  <div className="w-16 h-16 bg-yellow-400/20 rounded-2xl flex items-center justify-center mb-4 animate-pulse">
                     <Play className="w-8 h-8 text-yellow-400" />
                   </div>
                   <p className="text-white/60 text-sm">Video rendering...</p>
+                  <p className="text-white/40 text-xs mt-1">This may take 1-2 minutes</p>
                 </div>
               )}
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
                 <p className="text-white text-sm">"{currentReel.narration}"</p>
               </div>
 
