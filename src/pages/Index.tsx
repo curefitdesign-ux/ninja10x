@@ -1,15 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronDown, Film, Check } from 'lucide-react';
+import { ChevronDown, Film } from 'lucide-react';
 import { toast } from 'sonner';
 import AuroraBackground from '@/components/AuroraBackground';
 import PhotoUploadCard from '@/components/PhotoUploadCard';
 import WidgetLayout2 from '@/components/WidgetLayout2';
 import WidgetLayout3 from '@/components/WidgetLayout3';
 import RecentPhotosGallery from '@/components/RecentPhotosGallery';
-import ReelGenerationOverlay from '@/components/ReelGenerationOverlay';
+import LiquidGlassLoader from '@/components/LiquidGlassLoader';
 import ReelPreviewScreen from '@/components/ReelPreviewScreen';
 import ReelHistoryGallery from '@/components/ReelHistoryGallery';
+import PullToRefresh from '@/components/PullToRefresh';
 import { useFitnessReel } from '@/hooks/use-fitness-reel';
 import { uploadToStorage } from '@/services/storage-service';
 
@@ -97,6 +98,8 @@ const Index = () => {
   } = useFitnessReel();
   const [showReelPreview, setShowReelPreview] = useState(false);
   const [lastGeneratedPhotos, setLastGeneratedPhotos] = useState<typeof photos>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   
   // Show preview when reel is ready
   useEffect(() => {
@@ -195,14 +198,22 @@ const Index = () => {
         // Upload original to storage for public URL (needed for Runway API)
         let storageUrl: string | null = null;
         if (incomingOriginalUrl.startsWith('data:')) {
+          setIsUploading(true);
+          setUploadProgress(30);
+          
           storageUrl = await uploadToStorage(
             incomingOriginalUrl,
             `journey-${Date.now()}`,
             isVideo
           );
-          if (storageUrl) {
-            toast.success('Photo uploaded successfully!');
-          } else {
+          
+          setUploadProgress(100);
+          setTimeout(() => {
+            setIsUploading(false);
+            setUploadProgress(0);
+          }, 500);
+          
+          if (!storageUrl) {
             toast.error('Failed to upload - using local storage');
           }
         }
@@ -381,6 +392,23 @@ const Index = () => {
     setPhotos((prev) => prev.filter((p) => p.id !== photoId));
   };
 
+  // Pull to refresh handler
+  const handleRefresh = useCallback(async () => {
+    // Simulate refresh - reload photos from localStorage
+    await new Promise(resolve => setTimeout(resolve, 800));
+    const raw = localStorage.getItem('cn_photos');
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          setPhotos(parsed);
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }, []);
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       {/* Aurora Background - hidden when instant camera */}
@@ -388,9 +416,10 @@ const Index = () => {
       
       {/* Content - hidden when instant camera */}
       {!instantCamera && (
-        <div className="relative z-10 flex flex-col min-h-screen">
-          {/* Status Bar Space */}
-          <div className="h-12" />
+        <PullToRefresh onRefresh={handleRefresh}>
+          <div className="relative z-10 flex flex-col min-h-screen">
+            {/* Status Bar Space */}
+            <div className="h-12" />
           
           {/* Top Controls Row */}
           <div className="flex justify-between items-start px-4">
@@ -433,7 +462,10 @@ const Index = () => {
               {reelHistory.length > 0 && (
                 <button
                   onClick={() => setShowReelHistoryGallery(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-yellow-400/20 backdrop-blur-sm rounded-full text-yellow-400 hover:bg-yellow-400/30 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-white/15 backdrop-blur-sm rounded-full text-white/80 hover:bg-white/25 transition-colors"
+                  style={{
+                    border: '1px solid rgba(255,255,255,0.2)',
+                  }}
                 >
                   <Film className="w-3 h-3" />
                   Reels ({reelHistory.length})
@@ -502,7 +534,8 @@ const Index = () => {
           
           {/* Bottom Safe Area */}
           <div className="h-8" />
-        </div>
+          </div>
+        </PullToRefresh>
       )}
 
       {/* Activity Selection Bottom Sheet */}
@@ -587,7 +620,9 @@ const Index = () => {
                           transform: 'translate(4px, 4px)',
                         }}
                       >
-                        <Check className="w-6 h-6 text-white" strokeWidth={3} />
+                        <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
                       </div>
                     </div>
                     
@@ -655,10 +690,12 @@ const Index = () => {
         </div>
       )}
 
-      {/* Reel Generation Overlay */}
-      <ReelGenerationOverlay 
-        isVisible={isGenerating} 
-        currentStep={currentStep} 
+      {/* Liquid Glass Loader - handles both uploading and reel generation */}
+      <LiquidGlassLoader 
+        isVisible={isGenerating || isUploading} 
+        type={isUploading ? 'uploading' : 'generating'}
+        currentStep={currentStep}
+        uploadProgress={uploadProgress}
       />
 
       {/* Reel Preview Screen */}

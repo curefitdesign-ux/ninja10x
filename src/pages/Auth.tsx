@@ -162,13 +162,19 @@ const Auth = () => {
             )}
           </div>
 
-          <Button
+          <button
             type="submit"
-            className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold"
             disabled={loading}
+            className="w-full py-3 rounded-xl font-semibold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.25)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
+            }}
           >
             {loading ? 'Loading...' : isLogin ? 'Sign In' : 'Create Account'}
-          </Button>
+          </button>
         </form>
 
         <div className="mt-6 text-center">
