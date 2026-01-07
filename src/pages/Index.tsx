@@ -184,22 +184,29 @@ const Index = () => {
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
   const currentDay = (photos.length % 3) + 1;
 
-  // Handle save from preview page - upload to storage and add/update photo
+  // Handle save from preview page - upload ORIGINAL to storage (not the framed version)
   useEffect(() => {
-    if (location.state?.savePhoto && location.state?.imageUrl && location.state?.activity) {
-      const incomingUrl = location.state.imageUrl;
+    if (location.state?.savePhoto && location.state?.activity) {
+      // IMPORTANT: Use originalUrl (the raw photo/video) for storage, NOT imageUrl (which may be framed)
+      const originalUrl = location.state.originalUrl || location.state.imageUrl;
       const isReview = location.state.isReview;
       const photoId = location.state.photoId;
       const isVideo = location.state.isVideo || false;
 
+      if (!originalUrl) {
+        toast.error('No media to save');
+        navigate('/', { replace: true, state: null });
+        return;
+      }
+
       const uploadAndSave = async () => {
         // Only upload if it's a data URI
         let storageUrl: string | null = null;
-        if (incomingUrl.startsWith('data:')) {
+        if (originalUrl.startsWith('data:')) {
           setIsUploading(true);
           
           storageUrl = await uploadToStorage(
-            incomingUrl,
+            originalUrl,
             `journey-${Date.now()}`,
             isVideo
           );
@@ -211,9 +218,9 @@ const Index = () => {
             navigate('/', { replace: true, state: null });
             return;
           }
-        } else if (incomingUrl.startsWith('http')) {
-          // Already a storage URL
-          storageUrl = incomingUrl;
+        } else if (originalUrl.startsWith('http')) {
+          // Already a storage URL - use as-is
+          storageUrl = originalUrl;
         } else {
           toast.error('Invalid image format');
           navigate('/', { replace: true, state: null });
@@ -264,7 +271,7 @@ const Index = () => {
       uploadAndSave();
       navigate('/', { replace: true, state: null });
     }
-  }, [location.state?.savePhoto, location.state?.imageUrl, location.state?.activity, navigate, photos]);
+  }, [location.state?.savePhoto, location.state?.originalUrl, location.state?.imageUrl, location.state?.activity, navigate, photos]);
 
   // Handle retake from preview
   const [instantCamera, setInstantCamera] = useState(() => {
