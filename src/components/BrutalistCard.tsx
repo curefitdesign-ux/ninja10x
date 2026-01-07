@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface DayVideoData {
+interface DayMediaData {
   dayNumber: number;
   activityName: string;
-  videoUrl: string;
+  mediaUrl: string; // Can be image or video URL
+  mediaType: 'image' | 'video';
   rawImageUrl?: string;
 }
 
@@ -12,8 +13,8 @@ interface BrutalistCardProps {
   videoUrls?: string[];
   dayNumber?: number;
   activityName?: string;
-  // New: array of all days for combined reel
-  allDaysData?: DayVideoData[];
+  // New: array of all days for combined reel (supports images and videos)
+  allDaysData?: DayMediaData[];
 }
 
 export function BrutalistCard({ 
@@ -32,9 +33,10 @@ export function BrutalistCard({
   // Get current day data
   const currentDay = isMultiDay 
     ? allDaysData[currentDayIndex] 
-    : { dayNumber: dayNumber || 1, activityName: activityName || '', videoUrl: videoUrls?.[0] || '' };
+    : { dayNumber: dayNumber || 1, activityName: activityName || '', mediaUrl: videoUrls?.[0] || '', mediaType: 'video' as const };
   
-  const currentVideoUrl = currentDay.videoUrl;
+  const currentMediaUrl = currentDay.mediaUrl;
+  const currentMediaType = currentDay.mediaType;
   const currentDayNumber = currentDay.dayNumber;
   const currentActivityName = currentDay.activityName;
 
@@ -47,13 +49,23 @@ export function BrutalistCard({
     return () => clearTimeout(timer);
   }, [currentDayIndex]);
 
-  // Play video when entering phase 2
+  // Play video when entering phase 2 (only if it's a video)
   useEffect(() => {
-    if (phase === 2 && videoRef.current) {
+    if (phase === 2 && videoRef.current && currentMediaType === 'video') {
       videoRef.current.currentTime = 0;
       videoRef.current.play().catch(console.error);
     }
-  }, [phase, currentDayIndex]);
+  }, [phase, currentDayIndex, currentMediaType]);
+
+  // Auto-advance for images after 3 seconds
+  useEffect(() => {
+    if (phase === 2 && currentMediaType === 'image' && isMultiDay && allDaysData && allDaysData.length > 1) {
+      const timer = setTimeout(() => {
+        setCurrentDayIndex(prev => (prev + 1) % allDaysData.length);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [phase, currentDayIndex, currentMediaType, isMultiDay, allDaysData]);
 
   // Handle video end - move to next day in multi-day mode
   useEffect(() => {
@@ -165,7 +177,7 @@ export function BrutalistCard({
               </div>
             </div>
 
-            {/* 3-column split-screen video */}
+            {/* 3-column split-screen media (video or image) */}
             <div className="absolute inset-0 flex">
               {[0, 1, 2].map((col) => (
                 <div
@@ -175,17 +187,29 @@ export function BrutalistCard({
                     clipPath: `inset(0 ${col === 2 ? 0 : 2}px 0 ${col === 0 ? 0 : 2}px)`,
                   }}
                 >
-                  <video
-                    ref={col === 1 ? videoRef : undefined}
-                    src={currentVideoUrl}
-                    muted
-                    playsInline
-                    className="absolute w-[300%] h-full object-cover"
-                    style={{
-                      left: `-${col * 100}%`,
-                      filter: 'contrast(1.2) saturate(0.9)',
-                    }}
-                  />
+                  {currentMediaType === 'video' ? (
+                    <video
+                      ref={col === 1 ? videoRef : undefined}
+                      src={currentMediaUrl}
+                      muted
+                      playsInline
+                      className="absolute w-[300%] h-full object-cover"
+                      style={{
+                        left: `-${col * 100}%`,
+                        filter: 'contrast(1.2) saturate(0.9)',
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={currentMediaUrl}
+                      alt={`Day ${currentDayNumber}`}
+                      className="absolute w-[300%] h-full object-cover"
+                      style={{
+                        left: `-${col * 100}%`,
+                        filter: 'contrast(1.2) saturate(0.9)',
+                      }}
+                    />
+                  )}
                 </div>
               ))}
             </div>

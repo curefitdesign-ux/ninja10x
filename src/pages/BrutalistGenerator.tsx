@@ -174,15 +174,30 @@ export default function BrutalistGenerator() {
   );
   const hasAnyComplete = Object.values(dayStatuses).some(s => s.status === 'complete');
 
-  // Collect all completed days for the final reel
-  const allCompletedDays = DAYS_CONFIG
-    .filter(({ day }) => dayStatuses[day].status === 'complete' && dayStatuses[day].videoResult)
-    .map(({ day, activity }) => ({
-      dayNumber: day,
-      activityName: activity,
-      videoUrl: dayStatuses[day].videoResult!.videoUrl,
-      rawImageUrl: dayStatuses[day].image?.url,
-    }));
+  // Helper to detect if URL is a video
+  const isVideoUrl = (url: string) => {
+    return url.includes('.mp4') || url.includes('.mov') || url.includes('.webm') || url.includes('video');
+  };
+
+  // Collect ALL days with media (uploaded images/videos) for the final reel preview
+  const allDaysWithMedia = DAYS_CONFIG
+    .filter(({ day }) => dayStatuses[day].image !== null)
+    .map(({ day, activity }) => {
+      const status = dayStatuses[day];
+      // Use generated video if available, otherwise use uploaded image/video
+      const mediaUrl = status.videoResult?.videoUrl || status.image?.url || '';
+      const mediaType = status.videoResult 
+        ? 'video' as const
+        : (isVideoUrl(mediaUrl) ? 'video' as const : 'image' as const);
+      
+      return {
+        dayNumber: day,
+        activityName: activity,
+        mediaUrl,
+        mediaType,
+        rawImageUrl: status.image?.url,
+      };
+    });
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Noise overlay */}
@@ -425,8 +440,8 @@ export default function BrutalistGenerator() {
           </motion.div>
         )}
 
-        {/* Combined Final Reel - shows when any day is complete */}
-        {hasAnyComplete && allCompletedDays.length > 0 && (
+        {/* Combined Final Reel - shows when any media is uploaded */}
+        {hasAnyImages && allDaysWithMedia.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -435,11 +450,11 @@ export default function BrutalistGenerator() {
             <div className="flex items-center gap-2 mb-4">
               <Play className="w-5 h-5 text-yellow-400" />
               <h3 className="text-lg font-mono text-neutral-400">
-                FINAL REEL ({allCompletedDays.length} DAY{allCompletedDays.length > 1 ? 'S' : ''})
+                FINAL REEL PREVIEW ({allDaysWithMedia.length} DAY{allDaysWithMedia.length > 1 ? 'S' : ''})
               </h3>
             </div>
             <div className="max-w-sm mx-auto">
-              <BrutalistCard allDaysData={allCompletedDays} />
+              <BrutalistCard allDaysData={allDaysWithMedia} />
             </div>
           </motion.div>
         )}
