@@ -1,4 +1,4 @@
-import { Plus, ScanFace, X, Camera, Sparkles } from 'lucide-react';
+import { Plus, ScanFace, X, Camera, Play } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import cardBackground from '@/assets/card-background.png';
@@ -103,7 +103,7 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
   const hasThreePhotos = photos.length >= 3;
   const allPhotosUploaded = photos.slice(0, 3).every(p => p.storageUrl);
-  const isUploading = hasThreePhotos && !allPhotosUploaded;
+  const canCreateReel = hasThreePhotos && allPhotosUploaded;
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 100);
@@ -246,33 +246,22 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
           )}
         </div>
       
-        {/* Film Strip Section with Create Reel Button */}
+        {/* Film Strip Section with Play Button */}
         <div className={`relative z-10 -mt-5 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
-          {/* Create Reel Button - Liquid Glass Style */}
-          {hasThreePhotos && (
+          {/* Play Button - Shows when 3+ photos are ready */}
+          {canCreateReel && (
             <button
               onClick={handleGenerateReel}
-              disabled={isUploading}
-              className={`absolute -top-14 left-2 z-20 flex items-center gap-2 px-4 py-2.5 rounded-full tap-bounce ${!isUploading ? 'animate-play-button-float' : ''}`}
+              className="absolute -top-14 left-2 z-20 w-12 h-12 rounded-full tap-bounce animate-play-button-float flex items-center justify-center"
               style={{
-                background: isUploading
-                  ? 'linear-gradient(135deg, rgba(150, 150, 150, 0.25) 0%, rgba(100, 100, 100, 0.15) 100%)'
-                  : 'linear-gradient(135deg, rgba(250, 204, 21, 0.25) 0%, rgba(234, 179, 8, 0.15) 100%)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                border: isUploading
-                  ? '1.5px solid rgba(150, 150, 150, 0.4)'
-                  : '1.5px solid rgba(250, 204, 21, 0.4)',
-                boxShadow: isUploading
-                  ? 'none'
-                  : '0 4px 24px rgba(250, 204, 21, 0.3), inset 0 1px 1px rgba(255,255,255,0.2), 0 0 40px rgba(250, 204, 21, 0.15)',
-                opacity: isUploading ? 0.7 : 1,
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1.5px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255,255,255,0.3)',
               }}
             >
-              <Sparkles className={`w-4 h-4 drop-shadow-lg ${isUploading ? 'text-gray-400' : 'text-yellow-400'}`} />
-              <span className={`text-xs font-semibold ${isUploading ? 'text-gray-400' : 'text-yellow-400'}`}>
-                {isUploading ? 'Uploading...' : 'Create Reel'}
-              </span>
+              <Play className="w-5 h-5 text-white ml-0.5" fill="rgba(255,255,255,0.9)" />
             </button>
           )}
           
