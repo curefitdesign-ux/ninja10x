@@ -330,9 +330,43 @@ Style: Brutalist, gritty, underground. Think boxing gym, not Instagram fitness. 
       console.warn("ElevenLabs failed (continuing without audio):", voiceError);
     }
 
-    // Video is now composed on the frontend using all photos
-    // Backend just returns narration + audio for the client to use
-    console.log("Narration and audio ready - video will be composed on frontend");
+    // Step 3: Create collage image from all photos for RunwayML
+    console.log("Step 3: Creating collage from all photos for RunwayML...");
+    
+    // Use first photo as the primary image for RunwayML (it will animate this with transitions)
+    // In future, we could create a proper collage on backend
+    const primaryPhotoUrl = photos[0].imageUrl;
+    
+    // Step 4: Generate AI video with RunwayML using brutalist style prompt
+    console.log("Step 4: Submitting to RunwayML for AI video generation...");
+    
+    const runwayPrompt = `Vertical mobile video, brutalist graphic design style, fitness vlog aesthetic. A gritty cinematic montage showing intense athletic training. Visual style involves heavy film grain, noise textures, and high contrast black and white aesthetics with flashes of bright yellow. The composition uses split-screens and collage effects showing rapid transitions between ${photos.length} different workout moments. Fast-paced editing with glitch transitions, urban underground atmosphere. Dynamic camera movements, zoom punches, and shake effects. Each transition reveals a new powerful moment of physical achievement. 4k resolution, trending on social media, ${stylePrompt || 'raw energy and power'}.`;
+
+    const runwayResponse = await fetch("https://api.dev.runwayml.com/v1/image_to_video", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${RUNWAYML_API_KEY}`,
+        "Content-Type": "application/json",
+        "X-Runway-Version": "2024-11-06",
+      },
+      body: JSON.stringify({
+        model: "gen4_turbo",
+        promptImage: primaryPhotoUrl,
+        promptText: runwayPrompt,
+        duration: 10,
+        ratio: "720:1280",
+      }),
+    });
+
+    if (!runwayResponse.ok) {
+      const errorText = await runwayResponse.text();
+      console.error("RunwayML submission failed:", errorText);
+      throw new Error("Failed to submit video to RunwayML");
+    }
+
+    const runwayData = await runwayResponse.json();
+    const videoTaskId = runwayData.id;
+    console.log("RunwayML task submitted:", videoTaskId);
 
     return new Response(
       JSON.stringify({
@@ -340,13 +374,14 @@ Style: Brutalist, gritty, underground. Think boxing gym, not Instagram fitness. 
         narration: narrationText,
         audioBase64: audioBase64 ? audioBase64.substring(0, 1000) + "..." : null,
         audioSize,
+        videoTaskId,
         photos: photos.map(p => ({
           dayNumber: p.dayNumber,
           activity: p.activity,
           duration: p.duration,
           pr: p.pr,
         })),
-        message: "Narration ready! Video will be composed locally.",
+        message: "Video rendering started! This takes 1-2 minutes.",
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
