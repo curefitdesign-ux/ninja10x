@@ -287,41 +287,48 @@ Style: Brutalist, gritty, underground. Think boxing gym, not Instagram fitness. 
     const narrationText = narrationData.choices?.[0]?.message?.content || "Your incredible fitness journey this week!";
     console.log("Generated narration:", narrationText);
 
-    // Step 2: Generate voiceover audio with ElevenLabs
+    // Step 2: Generate voiceover audio with ElevenLabs (optional - continue if it fails)
     console.log("Step 2: Generating voiceover with ElevenLabs...");
     
-    const voiceId = ALLOWED_VOICE_IDS[0]; // Use first allowed voice
-    const voiceResponse = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
-      {
-        method: "POST",
-        headers: {
-          "xi-api-key": ELEVENLABS_API_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text: narrationText,
-          model_id: "eleven_turbo_v2_5",
-          voice_settings: {
-            stability: 0.4,
-            similarity_boost: 0.75,
-            style: 0.6,
-            use_speaker_boost: true,
-            speed: 1.1,
+    let audioBase64: string | null = null;
+    let audioSize = 0;
+
+    try {
+      const voiceId = ALLOWED_VOICE_IDS[0]; // Use first allowed voice
+      const voiceResponse = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
+        {
+          method: "POST",
+          headers: {
+            "xi-api-key": ELEVENLABS_API_KEY,
+            "Content-Type": "application/json",
           },
-        }),
+          body: JSON.stringify({
+            text: narrationText,
+            model_id: "eleven_turbo_v2_5",
+            voice_settings: {
+              stability: 0.4,
+              similarity_boost: 0.75,
+              style: 0.6,
+              use_speaker_boost: true,
+              speed: 1.1,
+            },
+          }),
+        }
+      );
+
+      if (voiceResponse.ok) {
+        const audioBuffer = await voiceResponse.arrayBuffer();
+        audioBase64 = btoa(String.fromCharCode(...new Uint8Array(audioBuffer).slice(0, 50000)));
+        audioSize = audioBuffer.byteLength;
+        console.log("Voiceover generated successfully, size:", audioSize);
+      } else {
+        const errorText = await voiceResponse.text();
+        console.warn("ElevenLabs error (continuing without audio):", errorText);
       }
-    );
-
-    if (!voiceResponse.ok) {
-      const errorText = await voiceResponse.text();
-      console.error("ElevenLabs error:", errorText);
-      throw new Error("Failed to generate voiceover");
+    } catch (voiceError) {
+      console.warn("ElevenLabs failed (continuing without audio):", voiceError);
     }
-
-    const audioBuffer = await voiceResponse.arrayBuffer();
-    const audioBase64 = btoa(String.fromCharCode(...new Uint8Array(audioBuffer).slice(0, 50000)));
-    console.log("Voiceover generated successfully, size:", audioBuffer.byteLength);
 
     // Step 3: Generate video with RunwayML
     console.log("Step 3: Initiating video generation with RunwayML...");
@@ -401,8 +408,8 @@ Urban underground atmosphere, raw athletic power, 4k resolution.${extraStyle}`;
       JSON.stringify({
         success: true,
         narration: narrationText,
-        audioBase64: audioBase64.substring(0, 1000) + "...",
-        audioSize: audioBuffer.byteLength,
+        audioBase64: audioBase64 ? audioBase64.substring(0, 1000) + "..." : null,
+        audioSize,
         videoTaskId,
         videoUrl,
         photos: photos.map(p => ({
