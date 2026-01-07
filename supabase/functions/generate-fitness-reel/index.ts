@@ -136,14 +136,15 @@ async function authenticateRequest(req: Request): Promise<string> {
     { global: { headers: { Authorization: authHeader } } }
   );
 
-  const token = authHeader.replace('Bearer ', '');
-  const { data, error } = await supabase.auth.getClaims(token);
+  // Use getUser instead of getClaims (which doesn't exist in v2)
+  const { data: { user }, error } = await supabase.auth.getUser();
   
-  if (error || !data?.claims) {
+  if (error || !user) {
+    console.error('Auth error:', error?.message);
     throw new Error('Unauthorized: Invalid token');
   }
 
-  return data.claims.sub as string;
+  return user.id;
 }
 
 serve(async (req) => {
