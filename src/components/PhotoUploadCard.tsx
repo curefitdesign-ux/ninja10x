@@ -5,13 +5,13 @@ import cardBackground from '@/assets/card-background.png';
 
 interface Photo {
   id: string;
-  url: string;
+  storageUrl: string;
   isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
   duration?: string;
   pr?: string;
-  uploadDate: string;
+  dayNumber: number;
 }
 
 interface PhotoUploadCardProps {

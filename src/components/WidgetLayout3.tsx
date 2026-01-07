@@ -12,15 +12,13 @@ import TicketFrame from '@/components/frames/TicketFrame';
 
 interface Photo {
   id: string;
-  url: string;
-  originalUrl?: string;
-  storageUrl?: string;
+  storageUrl: string;
   isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
   duration?: string;
   pr?: string;
-  uploadDate: string;
+  dayNumber: number;
 }
 
 type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
@@ -34,12 +32,17 @@ const renderInFrame = (photo: Photo, containerWidth: number = 180) => {
   const baseWidth = 360;
   const scale = containerWidth / baseWidth;
   
+  // Calculate week and day from dayNumber (3 days per week)
+  const week = Math.ceil(photo.dayNumber / 3);
+  const day = ((photo.dayNumber - 1) % 3) + 1;
+  
   const frameProps = {
-    imageUrl: photo.originalUrl || photo.url,
-    isVideo: photo.isVideo || isVideoUrl(photo.url),
+    imageUrl: photo.storageUrl,
+    isVideo: photo.isVideo || isVideoUrl(photo.storageUrl),
     activity: photo.activity || 'Activity',
-    week: 1,
-    day: 1,
+    week,
+    day,
+    dayNumber: photo.dayNumber,
     duration: photo.duration || '2hrs',
     pr: photo.pr || '',
     imagePosition: { x: 0, y: 0 },
@@ -91,11 +94,21 @@ interface WidgetLayout3Props {
   currentDate: string;
   onGenerateReel?: (photos: Photo[]) => void;
   onRemovePhoto?: (photoId: string) => void;
+  onEditPhoto?: (photo: Photo) => void;
   isGenerating?: boolean;
   isUploading?: boolean;
 }
 
-const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRemovePhoto, isGenerating = false, isUploading = false }: WidgetLayout3Props) => {
+const WidgetLayout3 = ({ 
+  photos, 
+  onAddPhoto, 
+  onOpenCamera, 
+  onGenerateReel, 
+  onRemovePhoto, 
+  onEditPhoto,
+  isGenerating = false, 
+  isUploading = false 
+}: WidgetLayout3Props) => {
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
   const [tappedElement, setTappedElement] = useState<string | null>(null);
@@ -104,8 +117,7 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
   
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
   const hasThreePhotos = photos.length >= 3;
-  const allPhotosUploaded = photos.slice(0, 3).every(p => p.storageUrl);
-  // Show play button when 3+ photos exist, but disable if still uploading
+  const allPhotosUploaded = photos.every(p => p.storageUrl);
   const showPlayButton = hasThreePhotos;
   const canCreateReel = hasThreePhotos && allPhotosUploaded && !isGenerating && !isUploading;
 
@@ -132,26 +144,32 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
     triggerHaptic('medium');
     handleTap(`photo-${photo.id}`);
     setTimeout(() => {
-      navigate('/preview', {
-        state: {
-          imageUrl: photo.originalUrl || photo.url,
-          originalUrl: photo.originalUrl || photo.url,
-          isVideo: photo.isVideo,
-          activity: photo.activity,
-          frame: photo.frame,
-          duration: photo.duration,
-          pr: photo.pr,
-          isReview: true,
-          photoId: photo.id,
-        },
-      });
+      // Use onEditPhoto if provided, otherwise navigate
+      if (onEditPhoto) {
+        onEditPhoto(photo);
+      } else {
+        navigate('/preview', {
+          state: {
+            imageUrl: photo.storageUrl,
+            originalUrl: photo.storageUrl,
+            isVideo: photo.isVideo,
+            activity: photo.activity,
+            frame: photo.frame,
+            duration: photo.duration,
+            pr: photo.pr,
+            isReview: true,
+            photoId: photo.id,
+          },
+        });
+      }
     }, 200);
   };
 
   const handleGenerateReel = () => {
     triggerHaptic('medium');
     if (onGenerateReel && photos.length >= 3) {
-      onGenerateReel(photos.slice(0, 3));
+      // Use latest 3 photos for reel
+      onGenerateReel(photos.slice(-3));
     }
   };
 
@@ -210,6 +228,17 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
                 }}
               >
                 {renderInFrame(latestPhoto, 180)}
+                
+                {/* Day badge */}
+                <div 
+                  className="absolute top-2 left-2 px-2 py-0.5 rounded-full z-20"
+                  style={{
+                    background: 'rgba(0,0,0,0.6)',
+                    backdropFilter: 'blur(8px)',
+                  }}
+                >
+                  <span className="text-[9px] font-bold text-white">DAY {latestPhoto.dayNumber}</span>
+                </div>
                 
                 {/* Remove button */}
                 {onRemovePhoto && (
@@ -274,8 +303,6 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
             >
               {isUploading || isGenerating ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white/80 rounded-full animate-spin" />
-              ) : !allPhotosUploaded ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white/60 rounded-full animate-spin" />
               ) : (
                 <Play className="w-5 h-5 text-white ml-0.5" fill="rgba(255,255,255,0.9)" />
               )}
@@ -294,8 +321,9 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
                     const index = groupIndex * 3 + boxIndex;
                     const photo = photos[index];
                     const isNewPhoto = newPhotoIndex === index;
-                    const isWeek1 = groupIndex === 0;
-                    const showGreenGlow = hasThreePhotos && isWeek1 && photo;
+                    // Highlight latest 3 for reel (when we have 3+)
+                    const latest3Start = Math.max(0, photos.length - 3);
+                    const isInLatest3 = hasThreePhotos && index >= latest3Start && index < photos.length;
                     
                     return (
                       <div 
@@ -308,8 +336,8 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
                           aspectRatio: '9/16',
                           animationDelay: photo && !isNewPhoto ? `${index * 50}ms` : '0ms',
                           animationFillMode: 'both',
-                          boxShadow: showGreenGlow ? '0 0 10px rgba(34, 197, 94, 0.6), 0 0 20px rgba(34, 197, 94, 0.3)' : 'none',
-                          border: showGreenGlow ? '1px solid rgba(34, 197, 94, 0.5)' : 'none'
+                          boxShadow: isInLatest3 ? '0 0 10px rgba(34, 197, 94, 0.6), 0 0 20px rgba(34, 197, 94, 0.3)' : 'none',
+                          border: isInLatest3 ? '1px solid rgba(34, 197, 94, 0.5)' : 'none'
                         }}
                         onClick={() => {
                           if (photo) {
@@ -319,9 +347,9 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
                         }}
                       >
                         {photo ? (
-                          photo.isVideo || isVideoUrl(photo.originalUrl || photo.url) ? (
+                          photo.isVideo || isVideoUrl(photo.storageUrl) ? (
                             <video
-                              src={photo.originalUrl || photo.url}
+                              src={photo.storageUrl}
                               className="w-full h-full object-cover"
                               style={{ borderRadius: '2px' }}
                               muted
@@ -333,12 +361,12 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
                             />
                           ) : (
                             <img 
-                              src={photo.originalUrl || photo.url} 
+                              src={photo.storageUrl} 
                               alt="" 
                               className="w-full h-full object-cover" 
                               style={{ borderRadius: '2px' }} 
                               onError={(e) => {
-                                console.error('Image failed to load:', photo.originalUrl || photo.url);
+                                console.error('Image failed to load:', photo.storageUrl);
                                 (e.target as HTMLImageElement).style.display = 'none';
                               }}
                             />
@@ -354,7 +382,7 @@ const WidgetLayout3 = ({ photos, onAddPhoto, onOpenCamera, onGenerateReel, onRem
         </div>
       </div>
 
-      {/* Upload Buttons Below Widget - Liquid Glass Design */}
+      {/* Upload Buttons Below Widget */}
       <div className={`flex justify-center gap-3 mt-4 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'}`} style={{ animationDelay: '0.5s' }}>
         <button
           onClick={() => { handleTap('camera-btn'); onOpenCamera(); }}

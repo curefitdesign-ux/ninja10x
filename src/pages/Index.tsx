@@ -7,7 +7,7 @@ import PhotoUploadCard from '@/components/PhotoUploadCard';
 import WidgetLayout2 from '@/components/WidgetLayout2';
 import WidgetLayout3 from '@/components/WidgetLayout3';
 import RecentPhotosGallery from '@/components/RecentPhotosGallery';
-import LiquidGlassLoader from '@/components/LiquidGlassLoader';
+import ReelGenerationOverlay from '@/components/ReelGenerationOverlay';
 import ReelPreviewScreen from '@/components/ReelPreviewScreen';
 import ReelHistoryGallery from '@/components/ReelHistoryGallery';
 import PullToRefresh from '@/components/PullToRefresh';
@@ -33,18 +33,20 @@ import trekkingIcon from '@/assets/activities/trekking.png';
 import boxingIcon from '@/assets/activities/boxing.png';
 import yogaIcon from '@/assets/activities/yoga.png';
 
-interface Photo {
+// Photo interface - storage-first: only storageUrl is persisted
+export interface Photo {
   id: string;
-  url: string; // Framed/template image URL
-  originalUrl?: string; // Original photo for film strip (local data URI)
-  storageUrl?: string; // Public URL from Supabase Storage (for API calls)
+  storageUrl: string; // Public URL from Supabase Storage (required for persistence)
   isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
   duration?: string;
   pr?: string;
-  uploadDate: string; // YYYY-MM-DD format
+  dayNumber: number; // 1-12, each upload = new day
 }
+
+const MAX_DAYS = 12;
+const STORAGE_KEY = 'cn_photos_v2';
 
 const activities = [
   { name: 'Running', icon: runningIcon },
@@ -63,16 +65,20 @@ type LayoutType = 'layout1' | 'layout2' | 'layout3';
 const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Load photos from localStorage - storage-first (only metadata + storageUrl)
   const [photos, setPhotos] = useState<Photo[]>(() => {
     try {
-      const raw = localStorage.getItem('cn_photos');
+      const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return [];
       const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
+      // Filter out any photos without storageUrl (invalid)
+      return Array.isArray(parsed) ? parsed.filter((p: Photo) => p.storageUrl) : [];
     } catch {
       return [];
     }
   });
+  
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
@@ -85,6 +91,7 @@ const Index = () => {
   const [showRecentGallery, setShowRecentGallery] = useState(false);
   const [showReelHistoryGallery, setShowReelHistoryGallery] = useState(false);
   const [pendingMedia, setPendingMedia] = useState<{ url: string; isVideo: boolean } | null>(null);
+  const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
   
   // Fitness reel generation
   const { 
@@ -99,7 +106,6 @@ const Index = () => {
   const [showReelPreview, setShowReelPreview] = useState(false);
   const [lastGeneratedPhotos, setLastGeneratedPhotos] = useState<typeof photos>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   
   // Show preview when reel is ready
   useEffect(() => {
@@ -108,24 +114,28 @@ const Index = () => {
     }
   }, [reelHistory, isGenerating, currentStep]);
   
+  // Generate reel from latest 3 photos
   const handleGenerateReel = useCallback((photosToProcess: typeof photos) => {
+    // Use latest 3 photos
+    const latest3 = photosToProcess.slice(-3);
+    
     // Check if all photos have storage URLs
-    const missingStorage = photosToProcess.filter(p => !p.storageUrl);
+    const missingStorage = latest3.filter(p => !p.storageUrl);
     if (missingStorage.length > 0) {
       toast.error('Some photos are still uploading. Please wait...');
       return;
     }
 
-    setLastGeneratedPhotos(photosToProcess);
-    // Transform photos to the format expected by the API - use storageUrl for public access
-    const photoData = photosToProcess.map((photo, index) => ({
+    setLastGeneratedPhotos(latest3);
+    // Transform photos to the format expected by the API
+    const photoData = latest3.map((photo) => ({
       id: photo.id,
-      imageUrl: photo.storageUrl || photo.originalUrl || photo.url,
+      imageUrl: photo.storageUrl,
       activity: photo.activity || 'Activity',
       duration: photo.duration,
       pr: photo.pr,
-      uploadDate: photo.uploadDate,
-      dayNumber: index + 1,
+      uploadDate: new Date().toISOString().split('T')[0],
+      dayNumber: photo.dayNumber,
     }));
     
     generateReel(photoData);
@@ -147,13 +157,14 @@ const Index = () => {
     setShowReelPreview(true);
   }, [setCurrentReelIndex]);
 
+  // Persist photos to localStorage (storage-first: only metadata + storageUrl)
   useEffect(() => {
     try {
-      const data = JSON.stringify(photos);
-      localStorage.setItem('cn_photos', data);
+      // Only persist photos with storageUrl
+      const validPhotos = photos.filter(p => p.storageUrl);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(validPhotos));
     } catch (e) {
       console.error('Failed to save photos to localStorage:', e);
-      // Storage might be full - we could notify user or compress images
     }
   }, [photos]);
 
@@ -163,111 +174,100 @@ const Index = () => {
     return new Date().toISOString().split('T')[0];
   };
 
-  // Check if user has already uploaded today
-  const hasUploadedToday = () => {
-    const today = getCurrentDate();
-    return photos.some(photo => photo.uploadDate === today);
+  // Get next available day number (1-12)
+  const getNextDayNumber = () => {
+    if (photos.length >= MAX_DAYS) return MAX_DAYS;
+    return photos.length + 1;
   };
 
-  // Get today's photo if exists
-  const getTodaysPhoto = () => {
-    const today = getCurrentDate();
-    return photos.find(photo => photo.uploadDate === today);
-  };
+  // Calculate week and day based on photos
+  const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
+  const currentDay = (photos.length % 3) + 1;
 
-  // Calculate hours left until midnight
-  const getHoursUntilMidnight = () => {
-    const now = new Date();
-    const midnight = new Date();
-    midnight.setHours(24, 0, 0, 0);
-    const diff = midnight.getTime() - now.getTime();
-    return Math.ceil(diff / (1000 * 60 * 60));
-  };
-
-  // Handle save from preview page - upload to storage for public URLs
+  // Handle save from preview page - upload to storage and add/update photo
   useEffect(() => {
     if (location.state?.savePhoto && location.state?.imageUrl && location.state?.activity) {
       const incomingUrl = location.state.imageUrl;
-      const incomingOriginalUrl = location.state.originalUrl || incomingUrl;
       const isReview = location.state.isReview;
       const photoId = location.state.photoId;
       const isVideo = location.state.isVideo || false;
 
-      // Upload original to storage for public URL (needed for Runway API)
       const uploadAndSave = async () => {
+        // Only upload if it's a data URI
         let storageUrl: string | null = null;
-        if (incomingOriginalUrl.startsWith('data:')) {
+        if (incomingUrl.startsWith('data:')) {
           setIsUploading(true);
-          setUploadProgress(50);
           
           storageUrl = await uploadToStorage(
-            incomingOriginalUrl,
+            incomingUrl,
             `journey-${Date.now()}`,
             isVideo
           );
           
-          setUploadProgress(100);
-          
-          // Quick dismiss - don't wait
           setIsUploading(false);
-          setUploadProgress(0);
           
           if (!storageUrl) {
-            toast.error('Upload failed');
+            toast.error('Upload failed. Please try again.');
+            navigate('/', { replace: true, state: null });
+            return;
           }
+        } else if (incomingUrl.startsWith('http')) {
+          // Already a storage URL
+          storageUrl = incomingUrl;
+        } else {
+          toast.error('Invalid image format');
+          navigate('/', { replace: true, state: null });
+          return;
         }
 
         if (isReview && photoId) {
-          // Update existing photo
+          // EDIT: Update existing photo (same day, don't add new)
           setPhotos((prev) =>
             prev.map((photo) =>
               photo.id === photoId
                 ? {
                     ...photo,
-                    url: incomingUrl,
-                    originalUrl: incomingOriginalUrl,
-                    storageUrl: storageUrl || photo.storageUrl,
+                    storageUrl: storageUrl!,
                     frame: location.state.frame || photo.frame,
                     duration: location.state.duration || photo.duration,
                     pr: location.state.pr || photo.pr,
+                    // Keep the same dayNumber
                   }
                 : photo
             )
           );
+          toast.success(`Day ${photos.find(p => p.id === photoId)?.dayNumber || ''} updated!`);
         } else {
-          // Add new photo
-          setPhotos((prev) => {
-            const uniqueDate = new Date();
-            uniqueDate.setDate(uniqueDate.getDate() + prev.length);
-            const uniqueDateStr = uniqueDate.toISOString().split('T')[0];
+          // NEW: Add new photo as next day
+          const nextDay = getNextDayNumber();
+          if (nextDay > MAX_DAYS && photos.length >= MAX_DAYS) {
+            toast.error('Maximum 12 days reached. Edit existing days instead.');
+            navigate('/', { replace: true, state: null });
+            return;
+          }
 
-            const newPhoto: Photo = {
-              id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-              url: incomingUrl,
-              originalUrl: incomingOriginalUrl,
-              storageUrl: storageUrl || undefined,
-              isVideo,
-              activity: location.state.activity,
-              frame: location.state.frame || 'shaky',
-              duration: location.state.duration,
-              pr: location.state.pr,
-              uploadDate: uniqueDateStr,
-            };
-            return [...prev, newPhoto];
-          });
+          const newPhoto: Photo = {
+            id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            storageUrl: storageUrl!,
+            isVideo,
+            activity: location.state.activity,
+            frame: location.state.frame || 'shaky',
+            duration: location.state.duration,
+            pr: location.state.pr,
+            dayNumber: nextDay,
+          };
+          setPhotos((prev) => [...prev, newPhoto]);
+          toast.success(`Day ${nextDay} added!`);
         }
       };
 
       uploadAndSave();
-
-      // Clear the navigation state immediately
       navigate('/', { replace: true, state: null });
     }
-  }, [location.state?.savePhoto, location.state?.imageUrl, location.state?.activity, navigate]);
+  }, [location.state?.savePhoto, location.state?.imageUrl, location.state?.activity, navigate, photos]);
 
-  // Handle retake from preview - open camera directly with the activity and capture mode
+  // Handle retake from preview
   const [instantCamera, setInstantCamera] = useState(() => {
-    // Check if we should show camera immediately on mount
     return !!(location.state?.openCameraWithActivity && location.state?.instantCamera);
   });
 
@@ -288,33 +288,26 @@ const Index = () => {
         }, 500);
       }
       
-      // Clear the navigation state
       navigate('/', { replace: true, state: null });
     }
-  }, [location.state?.openCameraWithActivity, location.state?.captureMode, location.state?.instantCamera]);
-
-  // Calculate week and day based on photos
-  const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
-  const currentDay = (photos.length % 3) + 1;
+  }, [location.state?.openCameraWithActivity, location.state?.captureMode, location.state?.instantCamera, navigate]);
 
   const handleCardClick = () => {
-    // Always open activity sheet to add new photo (allows multiple uploads)
     setShowActivitySheet(true);
   };
 
-  // Handler specifically for Layout 3's add photo button - opens gallery directly
   const handleAddPhoto = () => {
+    setEditingPhotoId(null);
     setShowRecentGallery(true);
   };
 
-  // Handler for Layout 3's camera button - opens camera directly
   const handleOpenCamera = () => {
+    setEditingPhotoId(null);
     setCameraEntering(true);
     setShowCamera(true);
     setTimeout(() => setCameraEntering(false), 500);
   };
 
-  // Handle photo selected from gallery - show activity selection
   const handleGalleryPhotoSelect = (photoDataUrl: string, isVideo?: boolean) => {
     setShowRecentGallery(false);
     setPendingMedia({ url: photoDataUrl, isVideo: isVideo || false });
@@ -328,15 +321,12 @@ const Index = () => {
     setSelectedActivity(activity);
     setAcknowledgedActivity(activityData);
     
-    // Phase 1: Morph sheet into acknowledgement
     setSheetPhase('acknowledge');
     
-    // Phase 2: After showing acknowledgement, prepare exit
     setTimeout(() => {
       setSheetPhase('exit');
     }, 1200);
     
-    // Phase 3: Navigate to preview with selected activity
     setTimeout(() => {
       setShowActivitySheet(false);
       setSheetPhase('select');
@@ -344,17 +334,23 @@ const Index = () => {
       
       if (pendingMedia) {
         navigate('/preview', { 
-          state: { imageUrl: pendingMedia.url, isVideo: pendingMedia.isVideo, activity } 
+          state: { 
+            imageUrl: pendingMedia.url, 
+            isVideo: pendingMedia.isVideo, 
+            activity,
+            isReview: !!editingPhotoId,
+            photoId: editingPhotoId,
+          } 
         });
         setPendingMedia(null);
+        setEditingPhotoId(null);
       }
       setSelectedActivity(null);
     }, 1600);
-  }, [pendingMedia, navigate]);
+  }, [pendingMedia, navigate, editingPhotoId]);
 
   const handleCapture = (mediaDataUrl: string, isVideo?: boolean) => {
     setShowCamera(false);
-    // Store pending media and show activity selection
     setPendingMedia({ url: mediaDataUrl, isVideo: isVideo || false });
     setShowActivitySheet(true);
   };
@@ -363,15 +359,16 @@ const Index = () => {
     setShowCamera(false);
     setSelectedActivity(null);
     setPendingMedia(null);
+    setEditingPhotoId(null);
   };
 
   const handleOverlayClick = () => {
     setShowActivitySheet(false);
     setSelectedActivity(null);
     setPendingMedia(null);
+    setEditingPhotoId(null);
   };
 
-  // Simulate next day for testing
   const simulateNextDay = () => {
     const current = simulatedDate ? new Date(simulatedDate) : new Date();
     current.setDate(current.getDate() + 1);
@@ -384,23 +381,43 @@ const Index = () => {
 
   const clearAllPhotos = () => {
     setPhotos([]);
-    localStorage.removeItem('cn_photos');
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   const handleRemovePhoto = (photoId: string) => {
-    setPhotos((prev) => prev.filter((p) => p.id !== photoId));
+    setPhotos((prev) => {
+      const filtered = prev.filter((p) => p.id !== photoId);
+      // Re-number days after removal
+      return filtered.map((p, idx) => ({ ...p, dayNumber: idx + 1 }));
+    });
   };
 
-  // Pull to refresh handler
+  // Handle edit photo - opens preview to re-edit same day
+  const handleEditPhoto = (photo: Photo) => {
+    setEditingPhotoId(photo.id);
+    navigate('/preview', {
+      state: {
+        imageUrl: photo.storageUrl,
+        originalUrl: photo.storageUrl,
+        isVideo: photo.isVideo,
+        activity: photo.activity,
+        frame: photo.frame,
+        duration: photo.duration,
+        pr: photo.pr,
+        isReview: true,
+        photoId: photo.id,
+      },
+    });
+  };
+
   const handleRefresh = useCallback(async () => {
-    // Simulate refresh - reload photos from localStorage
     await new Promise(resolve => setTimeout(resolve, 800));
-    const raw = localStorage.getItem('cn_photos');
+    const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       try {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-          setPhotos(parsed);
+          setPhotos(parsed.filter((p: Photo) => p.storageUrl));
         }
       } catch {
         // ignore
@@ -408,133 +425,136 @@ const Index = () => {
     }
   }, []);
 
+  // Calculate hours left until midnight
+  const getHoursUntilMidnight = () => {
+    const now = new Date();
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0);
+    const diff = midnight.getTime() - now.getTime();
+    return Math.ceil(diff / (1000 * 60 * 60));
+  };
+
+  const hasUploadedToday = () => false; // Not used in new logic
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
-      {/* Aurora Background - hidden when instant camera */}
       {!instantCamera && <AuroraBackground />}
       
-      {/* Content - hidden when instant camera */}
       {!instantCamera && (
         <PullToRefresh onRefresh={handleRefresh}>
           <div className="relative z-10 flex flex-col min-h-screen">
-            {/* Status Bar Space */}
             <div className="h-12" />
           
-          {/* Top Controls Row */}
-          <div className="flex justify-between items-start px-4">
-            {/* Layout Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors">
-                  {selectedLayout === 'layout1' ? 'Layout 1' : selectedLayout === 'layout2' ? 'Layout 2' : 'Layout 3'}
-                  <ChevronDown className="w-3 h-3" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                className="bg-black/90 backdrop-blur-xl border border-white/20 rounded-xl z-50"
-                align="start"
-              >
-                <DropdownMenuItem 
-                  onClick={() => setSelectedLayout('layout1')}
-                  className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout1' ? 'bg-white/10' : ''}`}
-                >
-                  Layout 1
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => setSelectedLayout('layout2')}
-                  className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout2' ? 'bg-white/10' : ''}`}
-                >
-                  Layout 2
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => setSelectedLayout('layout3')}
-                  className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout3' ? 'bg-white/10' : ''}`}
-                >
-                  Layout 3
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Right Controls */}
-            <div className="flex flex-col gap-2 items-end">
-              {/* Reel History Button */}
-              {reelHistory.length > 0 && (
-                <button
-                  onClick={() => setShowReelHistoryGallery(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-white/15 backdrop-blur-sm rounded-full text-white/80 hover:bg-white/25 transition-colors"
-                  style={{
-                    border: '1px solid rgba(255,255,255,0.2)',
-                  }}
-                >
-                  <Film className="w-3 h-3" />
-                  Reels ({reelHistory.length})
-                </button>
-              )}
-              <button
-                onClick={simulateNextDay}
-                className="px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors"
-              >
-                Test: Next Day
-              </button>
-              <button
-                onClick={clearAllPhotos}
-                className="px-3 py-1.5 text-xs bg-red-500/20 backdrop-blur-sm rounded-full text-red-400 hover:bg-red-500/30 transition-colors"
-              >
-                Clear Photos
-              </button>
-              {simulatedDate && (
-                <>
-                  <span className="text-[10px] text-foreground/50 text-center">
-                    {simulatedDate}
-                  </span>
-                  <button
-                    onClick={resetSimulation}
-                    className="px-3 py-1 text-[10px] text-foreground/50 hover:text-foreground/70 transition-colors"
-                  >
-                    Reset
+            {/* Top Controls Row */}
+            <div className="flex justify-between items-start px-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors">
+                    {selectedLayout === 'layout1' ? 'Layout 1' : selectedLayout === 'layout2' ? 'Layout 2' : 'Layout 3'}
+                    <ChevronDown className="w-3 h-3" />
                   </button>
-                </>
-              )}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  className="bg-black/90 backdrop-blur-xl border border-white/20 rounded-xl z-50"
+                  align="start"
+                >
+                  <DropdownMenuItem 
+                    onClick={() => setSelectedLayout('layout1')}
+                    className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout1' ? 'bg-white/10' : ''}`}
+                  >
+                    Layout 1
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => setSelectedLayout('layout2')}
+                    className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout2' ? 'bg-white/10' : ''}`}
+                  >
+                    Layout 2
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => setSelectedLayout('layout3')}
+                    className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout3' ? 'bg-white/10' : ''}`}
+                  >
+                    Layout 3
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <div className="flex flex-col gap-2 items-end">
+                {reelHistory.length > 0 && (
+                  <button
+                    onClick={() => setShowReelHistoryGallery(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-white/15 backdrop-blur-sm rounded-full text-white/80 hover:bg-white/25 transition-colors"
+                    style={{
+                      border: '1px solid rgba(255,255,255,0.2)',
+                    }}
+                  >
+                    <Film className="w-3 h-3" />
+                    Reels ({reelHistory.length})
+                  </button>
+                )}
+                <button
+                  onClick={simulateNextDay}
+                  className="px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors"
+                >
+                  Test: Next Day
+                </button>
+                <button
+                  onClick={clearAllPhotos}
+                  className="px-3 py-1.5 text-xs bg-red-500/20 backdrop-blur-sm rounded-full text-red-400 hover:bg-red-500/30 transition-colors"
+                >
+                  Clear Photos
+                </button>
+                {simulatedDate && (
+                  <>
+                    <span className="text-[10px] text-foreground/50 text-center">
+                      {simulatedDate}
+                    </span>
+                    <button
+                      onClick={resetSimulation}
+                      className="px-3 py-1 text-[10px] text-foreground/50 hover:text-foreground/70 transition-colors"
+                    >
+                      Reset
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-          
-          {/* Spacer */}
-          <div className="py-2" />
-          
-          {/* Main Content */}
-          <main className="flex-1 flex flex-col justify-center py-6 -mt-[100px]">
-            {selectedLayout === 'layout1' ? (
-              <PhotoUploadCard 
-                photos={photos} 
-                onCardClick={handleCardClick}
-                hasUploadedToday={hasUploadedToday()}
-                hoursUntilNextUpload={getHoursUntilMidnight()}
-                currentDate={getCurrentDate()}
-              />
-            ) : selectedLayout === 'layout2' ? (
-              <WidgetLayout2 
-                photos={photos} 
-                onCardClick={handleCardClick}
-                hasUploadedToday={hasUploadedToday()}
-                hoursUntilNextUpload={getHoursUntilMidnight()}
-                currentDate={getCurrentDate()}
-              />
-            ) : (
-              <WidgetLayout3 
-                photos={photos} 
-                onAddPhoto={handleAddPhoto}
-                onOpenCamera={handleOpenCamera}
-                currentDate={getCurrentDate()}
-                onGenerateReel={handleGenerateReel}
-                onRemovePhoto={handleRemovePhoto}
-                isGenerating={isGenerating}
-                isUploading={isUploading}
-              />
-            )}
-          </main>
-          
-          {/* Bottom Safe Area */}
-          <div className="h-8" />
+            
+            <div className="py-2" />
+            
+            <main className="flex-1 flex flex-col justify-center py-6 -mt-[100px]">
+              {selectedLayout === 'layout1' ? (
+                <PhotoUploadCard 
+                  photos={photos} 
+                  onCardClick={handleCardClick}
+                  hasUploadedToday={hasUploadedToday()}
+                  hoursUntilNextUpload={getHoursUntilMidnight()}
+                  currentDate={getCurrentDate()}
+                />
+              ) : selectedLayout === 'layout2' ? (
+                <WidgetLayout2 
+                  photos={photos} 
+                  onCardClick={handleCardClick}
+                  hasUploadedToday={hasUploadedToday()}
+                  hoursUntilNextUpload={getHoursUntilMidnight()}
+                  currentDate={getCurrentDate()}
+                />
+              ) : (
+                <WidgetLayout3 
+                  photos={photos} 
+                  onAddPhoto={handleAddPhoto}
+                  onOpenCamera={handleOpenCamera}
+                  currentDate={getCurrentDate()}
+                  onGenerateReel={handleGenerateReel}
+                  onRemovePhoto={handleRemovePhoto}
+                  onEditPhoto={handleEditPhoto}
+                  isGenerating={isGenerating}
+                  isUploading={isUploading}
+                />
+              )}
+            </main>
+            
+            <div className="h-8" />
           </div>
         </PullToRefresh>
       )}
@@ -560,7 +580,6 @@ const Index = () => {
             }}
           >
             <div className="bg-black rounded-t-3xl border-t border-white/10 h-full overflow-hidden">
-              {/* Select Phase - Activity Grid */}
               <div 
                 className={`absolute inset-0 p-6 pb-10 transition-all duration-500 ${
                   sheetPhase === 'select' 
@@ -590,7 +609,6 @@ const Index = () => {
                 </div>
               </div>
               
-              {/* Acknowledge Phase - Icon centered with tick */}
               <div 
                 className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 ${
                   sheetPhase === 'acknowledge' 
@@ -602,7 +620,6 @@ const Index = () => {
               >
                 {acknowledgedActivity && (
                   <div className="flex flex-col items-center">
-                    {/* Activity Icon with animated entry */}
                     <div className="relative animate-acknowledge-icon">
                       <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white/20 shadow-2xl">
                         <img 
@@ -612,7 +629,6 @@ const Index = () => {
                         />
                       </div>
                       
-                      {/* Animated Check Badge - positioned better */}
                       <div 
                         className="absolute bottom-0 right-0 w-11 h-11 rounded-full flex items-center justify-center animate-check-pop shadow-lg"
                         style={{
@@ -627,7 +643,6 @@ const Index = () => {
                       </div>
                     </div>
                     
-                    {/* Text */}
                     <div className="mt-8 text-center animate-acknowledge-text">
                       <p className="text-white text-2xl font-bold tracking-tight">
                         {acknowledgedActivity.name} activity logged
@@ -641,7 +656,6 @@ const Index = () => {
                       </div>
                     </div>
                     
-                    {/* Ripple effect - positioned around icon */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" style={{ marginTop: '-24px' }}>
                       <div 
                         className="w-48 h-48 rounded-full border-2 border-green-400/30 animate-ripple-out"
@@ -662,14 +676,12 @@ const Index = () => {
         </>
       )}
 
-      {/* Recent Photos Gallery */}
       <RecentPhotosGallery
         isOpen={showRecentGallery}
         onClose={() => setShowRecentGallery(false)}
         onSelectPhoto={handleGalleryPhotoSelect}
       />
 
-      {/* Camera UI */}
       {showCamera && (
         <div className={`transition-all duration-500 ease-out ${
           cameraEntering && !instantCamera ? 'animate-camera-enter' : ''
@@ -691,15 +703,12 @@ const Index = () => {
         </div>
       )}
 
-      {/* Liquid Glass Loader - handles both uploading and reel generation */}
-      <LiquidGlassLoader 
-        isVisible={isGenerating || isUploading} 
-        type={isUploading ? 'uploading' : 'generating'}
+      {/* Reel Generation Overlay - shows on play button tap */}
+      <ReelGenerationOverlay 
+        isVisible={isGenerating} 
         currentStep={currentStep}
-        uploadProgress={uploadProgress}
       />
 
-      {/* Reel Preview Screen */}
       <ReelPreviewScreen
         isVisible={showReelPreview}
         reelHistory={reelHistory}
@@ -709,7 +718,6 @@ const Index = () => {
         onRecreate={handleRecreateReel}
       />
 
-      {/* Reel History Gallery */}
       <ReelHistoryGallery
         isOpen={showReelHistoryGallery}
         reelHistory={reelHistory}
