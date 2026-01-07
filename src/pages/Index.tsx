@@ -527,6 +527,8 @@ const Index = () => {
                 currentDate={getCurrentDate()}
                 onGenerateReel={handleGenerateReel}
                 onRemovePhoto={handleRemovePhoto}
+                isGenerating={isGenerating}
+                isUploading={isUploading}
               />
             )}
           </main>
