@@ -13,20 +13,19 @@ import {
 
 // Import test assets
 import testBoxing from '@/assets/test-images/boxing.avif';
-import testTrekking from '@/assets/test-images/trekking.png';
 import testVideo from '@/assets/test-images/video.mp4';
 
 // Configuration data for 3 days
 const DAYS_CONFIG = [
   { day: 1, activity: 'BOXING', defaultDistance: 0, defaultDuration: 45, defaultCalories: 400 },
-  { day: 2, activity: 'TREKKING', defaultDistance: 5, defaultDuration: 90, defaultCalories: 500 },
+  { day: 2, activity: 'SPRINTS', defaultDistance: 2, defaultDuration: 30, defaultCalories: 350 },
   { day: 3, activity: 'WORKOUT', defaultDistance: 0, defaultDuration: 60, defaultCalories: 300 },
 ];
 
-// Test mode sample data
+// Test mode sample data (uses boxing image for both image slots)
 const TEST_SAMPLES = [
   { day: 1, url: testBoxing, name: 'boxing.avif', mediaType: 'image' as const },
-  { day: 2, url: testTrekking, name: 'trekking.png', mediaType: 'image' as const },
+  { day: 2, url: testBoxing, name: 'boxing.avif', mediaType: 'image' as const },
   { day: 3, url: testVideo, name: 'video.mp4', mediaType: 'video' as const },
 ];
 
