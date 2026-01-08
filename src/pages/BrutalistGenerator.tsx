@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Key, Play, Loader2, CheckCircle, AlertCircle, Image, X, Film } from 'lucide-react';
+import { Key, Play, Loader2, CheckCircle, AlertCircle, Image, X, Film, TestTube } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -11,11 +11,23 @@ import {
   type GenerationResult 
 } from '@/services/runway-service';
 
+// Import test assets
+import testBoxing from '@/assets/test-images/boxing.avif';
+import testTrekking from '@/assets/test-images/trekking.png';
+import testVideo from '@/assets/test-images/video.mp4';
+
 // Configuration data for 3 days
 const DAYS_CONFIG = [
   { day: 1, activity: 'BOXING', defaultDistance: 0, defaultDuration: 45, defaultCalories: 400 },
-  { day: 2, activity: 'SPRINTS', defaultDistance: 2, defaultDuration: 30, defaultCalories: 350 },
-  { day: 3, activity: 'LIFTING', defaultDistance: 0, defaultDuration: 60, defaultCalories: 300 },
+  { day: 2, activity: 'TREKKING', defaultDistance: 5, defaultDuration: 90, defaultCalories: 500 },
+  { day: 3, activity: 'WORKOUT', defaultDistance: 0, defaultDuration: 60, defaultCalories: 300 },
+];
+
+// Test mode sample data
+const TEST_SAMPLES = [
+  { day: 1, url: testBoxing, name: 'boxing.avif', mediaType: 'image' as const },
+  { day: 2, url: testTrekking, name: 'trekking.png', mediaType: 'image' as const },
+  { day: 3, url: testVideo, name: 'video.mp4', mediaType: 'video' as const },
 ];
 
 interface DayStatus {
@@ -87,7 +99,7 @@ export default function BrutalistGenerator() {
 
   const removeImage = useCallback((day: number) => {
     const image = dayStatuses[day].image;
-    if (image?.url) {
+    if (image?.url && image.url.startsWith('blob:')) {
       URL.revokeObjectURL(image.url);
     }
     updateDayStatus(day, { 
@@ -96,6 +108,18 @@ export default function BrutalistGenerator() {
       videoResult: null 
     });
   }, [dayStatuses, updateDayStatus]);
+
+  // Load test mode samples
+  const loadTestMode = useCallback(() => {
+    TEST_SAMPLES.forEach(({ day, url, name, mediaType }) => {
+      updateDayStatus(day, {
+        image: { url, name, mediaType },
+        status: 'idle',
+        videoResult: null,
+      });
+    });
+    toast.success('Test mode: loaded 3 sample files');
+  }, [updateDayStatus]);
 
   const updateMetadata = useCallback((day: number, field: 'distanceKm' | 'durationMinutes' | 'calories', value: number) => {
     updateDayStatus(day, { [field]: value });
@@ -256,6 +280,14 @@ export default function BrutalistGenerator() {
               className="border-neutral-700 text-neutral-400 hover:text-white"
             >
               {showApiKey ? 'HIDE' : 'SHOW'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={loadTestMode}
+              className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20"
+            >
+              <TestTube className="w-4 h-4 mr-2" />
+              TEST
             </Button>
           </div>
         </motion.div>
