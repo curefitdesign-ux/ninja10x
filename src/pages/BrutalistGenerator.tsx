@@ -9,7 +9,7 @@ import {
   generateVideosForAllDays, 
   type DayData,
   type GenerationResult 
-} from '@/services/runway-service';
+} from '@/services/replicate-service';
 
 // Import test assets
 import testBoxing from '@/assets/test-images/boxing.avif';
@@ -126,7 +126,7 @@ export default function BrutalistGenerator() {
 
   const generateAll = useCallback(async () => {
     if (!apiKey.trim()) {
-      toast.error('Please enter your RunwayML API key');
+      toast.error('Please enter your Replicate API key');
       return;
     }
 
@@ -260,7 +260,7 @@ export default function BrutalistGenerator() {
           className="max-w-xl mx-auto mb-12"
         >
           <label className="block text-sm font-mono text-neutral-400 mb-2">
-            RUNWAY API KEY
+            REPLICATE API KEY
           </label>
           <div className="flex gap-3">
             <div className="relative flex-1">
@@ -269,7 +269,7 @@ export default function BrutalistGenerator() {
                 type={showApiKey ? 'text' : 'password'}
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                placeholder="rl_xxxxxxxxxxxx"
+                placeholder="r8_xxxxxxxxxxxx"
                 className="pl-11 bg-neutral-900 border-neutral-700 text-white font-mono"
               />
             </div>
@@ -532,7 +532,7 @@ export default function BrutalistGenerator() {
           </Button>
 
           <p className="mt-4 text-sm text-neutral-500 font-mono">
-            Each day generates a 5-second video (~60-90s per day)
+            Each day generates a ~3 second video using Replicate
           </p>
         </motion.div>
       </div>
