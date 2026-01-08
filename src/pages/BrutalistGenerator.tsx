@@ -20,7 +20,7 @@ const DAYS_CONFIG = [
 
 interface DayStatus {
   status: 'idle' | 'generating' | 'complete' | 'error';
-  image: { url: string; name: string; file?: File } | null;
+  image: { url: string; name: string; file?: File; mediaType: 'image' | 'video' } | null;
   distanceKm: number;
   durationMinutes: number;
   calories: number;
@@ -58,12 +58,15 @@ export default function BrutalistGenerator() {
     }));
   }, []);
 
-  const handleImageUpload = useCallback((day: number, files: FileList | null) => {
+  const handleFileUpload = useCallback((day: number, files: FileList | null) => {
     if (!files || files.length === 0) return;
 
     const file = files[0];
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
+    const isVideo = file.type.startsWith('video/');
+    const isImage = file.type.startsWith('image/');
+    
+    if (!isImage && !isVideo) {
+      toast.error('Please upload an image or video file');
       return;
     }
 
@@ -75,11 +78,11 @@ export default function BrutalistGenerator() {
 
     const url = URL.createObjectURL(file);
     updateDayStatus(day, { 
-      image: { url, name: file.name, file },
+      image: { url, name: file.name, file, mediaType: isVideo ? 'video' : 'image' },
       status: 'idle',
       videoResult: null,
     });
-    toast.success(`Day ${day} image set`);
+    toast.success(`Day ${day} ${isVideo ? 'video' : 'image'} set`);
   }, [dayStatuses, updateDayStatus]);
 
   const removeImage = useCallback((day: number) => {
@@ -104,15 +107,17 @@ export default function BrutalistGenerator() {
       return;
     }
 
-    // Collect days with images
-    const daysWithImages: DayData[] = [];
+    // Collect days with images/videos
+    const daysWithMedia: DayData[] = [];
     DAYS_CONFIG.forEach(({ day, activity }) => {
       const status = dayStatuses[day];
       if (status.image) {
-        daysWithImages.push({
+        daysWithMedia.push({
           dayNumber: day,
           activity,
           imageUrl: status.image.url,
+          file: status.image.file,
+          mediaType: status.image.mediaType,
           distanceKm: status.distanceKm,
           durationMinutes: status.durationMinutes,
           calories: status.calories,
@@ -120,22 +125,24 @@ export default function BrutalistGenerator() {
       }
     });
 
-    if (daysWithImages.length === 0) {
-      toast.error('Please upload at least one image');
+    console.log('Days with media to process:', daysWithMedia);
+
+    if (daysWithMedia.length === 0) {
+      toast.error('Please upload at least one image or video');
       return;
     }
 
     setIsGeneratingAll(true);
-    setGenerationProgress({ completed: 0, total: daysWithImages.length });
+    setGenerationProgress({ completed: 0, total: daysWithMedia.length });
 
-    // Mark all days with images as generating
-    daysWithImages.forEach(d => {
+    // Mark all days with media as generating
+    daysWithMedia.forEach(d => {
       updateDayStatus(d.dayNumber, { status: 'generating', error: undefined });
     });
 
     try {
       const results = await generateVideosForAllDays(
-        daysWithImages,
+        daysWithMedia,
         apiKey,
         (completed, total, result) => {
           setGenerationProgress({ completed, total });
@@ -266,12 +273,12 @@ export default function BrutalistGenerator() {
                 transition={{ delay: 0.3 + index * 0.1 }}
                 className="relative"
               >
-                {/* Hidden file input - single file only */}
+                {/* Hidden file input - accepts images and videos */}
                 <input
                   type="file"
                   ref={(el) => { fileInputRefs.current[day] = el; }}
-                  onChange={(e) => handleImageUpload(day, e.target.files)}
-                  accept="image/*"
+                  onChange={(e) => handleFileUpload(day, e.target.files)}
+                  accept="image/*,video/*"
                   className="hidden"
                 />
 
