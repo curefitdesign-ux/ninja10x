@@ -10,7 +10,9 @@ interface RunwayTaskResponse {
 export interface DayData {
   dayNumber: number;
   activity: string;
-  imageUrl: string;
+  imageUrl: string;  // Can be blob URL or base64 data URL
+  file?: File;       // Original file for base64 conversion
+  mediaType: 'image' | 'video';
   distanceKm?: number;
   durationMinutes?: number;
   calories?: number;
@@ -27,6 +29,18 @@ export interface GenerationResult {
     durationMinutes?: number;
     calories?: number;
   };
+}
+
+/**
+ * Convert a File to base64 data URL
+ */
+export async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 /**
@@ -94,16 +108,57 @@ export async function generateVideosForAllDays(
   const results: GenerationResult[] = [];
   const total = days.length;
 
+  console.log(`Starting generation for ${total} days:`, days.map(d => ({ 
+    day: d.dayNumber, 
+    activity: d.activity,
+    mediaType: d.mediaType,
+    hasFile: !!d.file,
+  })));
+
   // Process days sequentially to avoid rate limits
   for (let i = 0; i < days.length; i++) {
     const day = days[i];
     
+    console.log(`Processing Day ${day.dayNumber}: ${day.activity} (${day.mediaType})`);
+    
     try {
+      // Convert file to base64 if available, otherwise use the URL
+      let mediaUrl = day.imageUrl;
+      
+      if (day.file) {
+        console.log(`Converting file to base64 for Day ${day.dayNumber}...`);
+        mediaUrl = await fileToBase64(day.file);
+        console.log(`Base64 conversion complete for Day ${day.dayNumber}, length: ${mediaUrl.length}`);
+      }
+      
+      // For videos, we skip generation and use the original
+      if (day.mediaType === 'video') {
+        console.log(`Day ${day.dayNumber} is a video, using original`);
+        const result: GenerationResult = {
+          dayNumber: day.dayNumber,
+          activity: day.activity,
+          imageUrl: day.imageUrl,
+          videoUrl: day.imageUrl, // Use original video
+          taskId: 'original-video',
+          metadata: {
+            distanceKm: day.distanceKm,
+            durationMinutes: day.durationMinutes,
+            calories: day.calories,
+          },
+        };
+        results.push(result);
+        onProgress?.(i + 1, total, result);
+        continue;
+      }
+      
       // Generate video from this day's image
-      const taskId = await generateRunwayVideoFromImage(day.imageUrl, day.activity, apiKey);
+      console.log(`Sending to RunwayML for Day ${day.dayNumber}...`);
+      const taskId = await generateRunwayVideoFromImage(mediaUrl, day.activity, apiKey);
+      console.log(`Task created for Day ${day.dayNumber}: ${taskId}`);
       
       // Poll for completion
       const videoUrl = await pollTaskStatus(taskId, apiKey);
+      console.log(`Video ready for Day ${day.dayNumber}: ${videoUrl}`);
       
       const result: GenerationResult = {
         dayNumber: day.dayNumber,
@@ -126,6 +181,7 @@ export async function generateVideosForAllDays(
     }
   }
 
+  console.log(`Generation complete! ${results.length} results:`, results);
   return results;
 }
 
