@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Key, Play, Loader2, CheckCircle, AlertCircle, Image, X, Film, TestTube } from 'lucide-react';
+import { Key, Play, Loader2, CheckCircle, AlertCircle, Image, X, Film, TestTube, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -15,11 +15,23 @@ import {
 import testBoxing from '@/assets/test-images/boxing.avif';
 import testVideo from '@/assets/test-images/video.mp4';
 
+// Import demo videos (pre-generated)
+import demoRunning from '@/assets/demo-videos/running.mp4';
+import demoCycling from '@/assets/demo-videos/cycling.mp4';
+import demoBoxing from '@/assets/demo-videos/boxing.mp4';
+
 // Configuration data for 3 days
 const DAYS_CONFIG = [
   { day: 1, activity: 'BOXING', defaultDistance: 0, defaultDuration: 45, defaultCalories: 400 },
   { day: 2, activity: 'SPRINTS', defaultDistance: 2, defaultDuration: 30, defaultCalories: 350 },
   { day: 3, activity: 'WORKOUT', defaultDistance: 0, defaultDuration: 60, defaultCalories: 300 },
+];
+
+// Demo mode: pre-generated videos for instant preview
+const DEMO_VIDEOS = [
+  { day: 1, videoUrl: demoBoxing, activity: 'BOXING' },
+  { day: 2, videoUrl: demoCycling, activity: 'SPRINTS' },
+  { day: 3, videoUrl: demoRunning, activity: 'WORKOUT' },
 ];
 
 // Test mode sample data (uses boxing image for both image slots)
@@ -118,6 +130,25 @@ export default function BrutalistGenerator() {
       });
     });
     toast.success('Test mode: loaded 3 sample files');
+  }, [updateDayStatus]);
+
+  // Load demo mode - instantly show pre-generated videos
+  const loadDemoMode = useCallback(() => {
+    DEMO_VIDEOS.forEach(({ day, videoUrl, activity }) => {
+      updateDayStatus(day, {
+        image: { url: videoUrl, name: `demo-${day}.mp4`, mediaType: 'video' },
+        status: 'complete',
+        videoResult: {
+          dayNumber: day,
+          activity,
+          imageUrl: videoUrl,
+          videoUrl: videoUrl,
+          taskId: 'demo',
+          metadata: {},
+        },
+      });
+    });
+    toast.success('🎬 Demo mode: Loaded pre-generated fitness videos!');
   }, [updateDayStatus]);
 
   const updateMetadata = useCallback((day: number, field: 'distanceKm' | 'durationMinutes' | 'calories', value: number) => {
@@ -287,6 +318,13 @@ export default function BrutalistGenerator() {
             >
               <TestTube className="w-4 h-4 mr-2" />
               TEST
+            </Button>
+            <Button
+              onClick={loadDemoMode}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              DEMO
             </Button>
           </div>
         </motion.div>
