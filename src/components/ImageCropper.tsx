@@ -220,20 +220,37 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
     // Calculate the effective scale (base scale * user zoom)
     const effectiveScale = baseScale * transform.scale;
     
-    // Calculate the scaled media dimensions
+    // The crop area dimensions in screen pixels
+    const cropWidth = cropDimensions.width;
+    const cropHeight = cropDimensions.height;
+    
+    // The media is displayed at: mediaDimensions * effectiveScale
+    // The media is centered in the container, then offset by transform.x/y
+    // The crop area is centered in the container
+    
+    // Convert crop area bounds to source image coordinates:
+    // 1. The media's center is at (scaledMediaWidth/2, scaledMediaHeight/2) in its own coordinate system
+    // 2. On screen, the media center is offset by transform.x, transform.y from the crop center
+    // 3. So the crop center in scaled media coords is: (scaledMediaWidth/2 - transform.x, scaledMediaHeight/2 - transform.y)
+    
     const scaledMediaWidth = mediaDimensions.width * effectiveScale;
     const scaledMediaHeight = mediaDimensions.height * effectiveScale;
     
-    // Calculate the visible crop area in the original media coordinates
-    // The crop area is centered, and transform.x/y are offsets from center
-    const cropCenterX = scaledMediaWidth / 2 - transform.x;
-    const cropCenterY = scaledMediaHeight / 2 - transform.y;
+    // Crop center in scaled media coordinates
+    const cropCenterInScaledX = scaledMediaWidth / 2 - transform.x;
+    const cropCenterInScaledY = scaledMediaHeight / 2 - transform.y;
     
-    // Calculate source rectangle in original media coordinates
-    const srcWidth = cropDimensions.width / effectiveScale;
-    const srcHeight = cropDimensions.height / effectiveScale;
-    const srcX = (cropCenterX / effectiveScale) - (srcWidth / 2);
-    const srcY = (cropCenterY / effectiveScale) - (srcHeight / 2);
+    // Convert to original media coordinates by dividing by effectiveScale
+    const srcCenterX = cropCenterInScaledX / effectiveScale;
+    const srcCenterY = cropCenterInScaledY / effectiveScale;
+    
+    // The crop dimensions in original media coordinates
+    const srcWidth = cropWidth / effectiveScale;
+    const srcHeight = cropHeight / effectiveScale;
+    
+    // Source rectangle top-left
+    const srcX = srcCenterX - srcWidth / 2;
+    const srcY = srcCenterY - srcHeight / 2;
     
     // Fill background (in case of any gaps)
     ctx.fillStyle = '#000000';
@@ -247,7 +264,7 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
       ctx.translate(-outputWidth / 2, -outputHeight / 2);
     }
     
-    // Draw the cropped portion
+    // Draw the cropped portion - maintaining aspect ratio perfectly
     ctx.drawImage(
       media,
       srcX, srcY, srcWidth, srcHeight,
