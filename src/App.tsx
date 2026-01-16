@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-route
 import { useAuth } from "@/hooks/use-auth";
 import Index from "./pages/Index";
 import Preview from "./pages/Preview";
+import Activity from "./pages/Activity";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import BrutalistGenerator from "./pages/BrutalistGenerator";
@@ -39,7 +40,8 @@ const AnimatedRoutes = () => {
     <PageTransition key={location.pathname}>
       <Routes location={location}>
         <Route path="/auth" element={<Auth />} />
-        <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+        <Route path="/" element={<ProtectedRoute><Activity /></ProtectedRoute>} />
+        <Route path="/create" element={<ProtectedRoute><Index /></ProtectedRoute>} />
         <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
         <Route path="/brutalist" element={<BrutalistGenerator />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
