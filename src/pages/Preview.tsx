@@ -655,9 +655,8 @@ const Preview = () => {
 
       {/* Floating CTA - Always visible with DONE and Share */}
       <div 
-        className="fixed left-0 right-0 z-[100] px-5 pt-4"
+        className={`fixed bottom-0 left-0 right-0 z-[100] px-5 pt-4 transition-all duration-500 ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : 'opacity-100 translate-y-0'}`}
         style={{ 
-          bottom: 0,
           paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 24px)',
           background: 'linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.9) 50%, rgba(0,0,0,0.6) 80%, transparent 100%)',
         }}
