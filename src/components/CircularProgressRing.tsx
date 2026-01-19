@@ -46,7 +46,29 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
     // Bars fill sequentially left to right (clockwise)
     const activeBarCount = currentDay;
     
-    // Draw 12 bars in 4 groups of 3
+    // Calculate group arc span (3 bars + 2 gaps between them)
+    const groupArcSpan = barAngle * 3 + barGap * 2;
+    
+    // First pass: Draw 10% white background for each week group
+    let bgAngle = startAngleDeg;
+    for (let week = 0; week < 4; week++) {
+      const groupStart = bgAngle;
+      const groupEnd = bgAngle + groupArcSpan;
+      
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, ringRadius, toRad(groupStart), toRad(groupEnd));
+      ctx.lineCap = "round";
+      ctx.lineWidth = strokeWidth;
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+      ctx.stroke();
+      ctx.restore();
+      
+      // Move to next group position
+      bgAngle = groupEnd + weekGap;
+    }
+    
+    // Second pass: Draw 12 bars in 4 groups of 3
     for (let week = 0; week < 4; week++) {
       for (let bar = 0; bar < 3; bar++) {
         const barIndex = week * 3 + bar + 1; // 1-indexed
@@ -82,8 +104,6 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
           // Create radial gradient from inner to outer edge
           const innerRadius = ringRadius - strokeWidth / 2;
           const outerRadius = ringRadius + strokeWidth / 2;
-          const gradientCenterX = centerX + Math.cos(midAngle) * ringRadius;
-          const gradientCenterY = centerY + Math.sin(midAngle) * ringRadius;
           
           // Linear gradient perpendicular to the arc (inner to outer)
           const perpAngle = midAngle; // Points outward from center
@@ -98,16 +118,6 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
           gradient.addColorStop(1, "rgba(40, 220, 100, 0.9)"); // Outer edge - slightly dimmer
           
           ctx.strokeStyle = gradient;
-          ctx.stroke();
-          ctx.restore();
-        } else {
-          // Inactive bar - grey
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, ringRadius, toRad(barStart), toRad(barEnd));
-          ctx.lineCap = "round";
-          ctx.lineWidth = strokeWidth;
-          ctx.strokeStyle = "rgba(180, 180, 190, 0.45)";
           ctx.stroke();
           ctx.restore();
         }
