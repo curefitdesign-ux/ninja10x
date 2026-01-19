@@ -17,7 +17,7 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
   
   // 12 bars total, 3 bars per week = 4 weeks
   // Arc spans from ~7 o'clock (210°) going clockwise around
-  const barAngle = 7.27; // Bar arc length reduced by 5%
+  const barAngle = 6.91; // Bar arc length reduced by 5%
   const barGap = 10; // Gap between bars within a week
   const weekGap = 25; // Gap between week groups
   
@@ -46,11 +46,15 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
     // Bars fill sequentially left to right (clockwise)
     const activeBarCount = currentDay;
     
+    // Determine which week is active (1-indexed)
+    const activeWeekIndex = currentWeek - 1;
+    
     // Draw 12 bars in 4 groups of 3
     for (let week = 0; week < 4; week++) {
       // Calculate the start and end angles for this week's group background
       const weekStartAngle = currentAngle;
       const weekEndAngle = currentAngle + (barAngle * 3) + (barGap * 2);
+      const isActiveWeek = week === activeWeekIndex;
       
       // Draw glassmorphic background behind each group of 3 bars
       // Layer 1: Outer soft blur glow
@@ -59,7 +63,7 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
       ctx.arc(centerX, centerY, ringRadius, toRad(weekStartAngle - 3), toRad(weekEndAngle + 3));
       ctx.lineCap = "round";
       ctx.lineWidth = strokeWidth + 14;
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+      ctx.strokeStyle = isActiveWeek ? "rgba(57, 255, 133, 0.08)" : "rgba(255, 255, 255, 0.04)";
       ctx.filter = "blur(4px)";
       ctx.stroke();
       ctx.restore();
@@ -79,22 +83,26 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
         centerX + Math.cos(midAngleWeek) * (ringRadius + 20),
         centerY + Math.sin(midAngleWeek) * (ringRadius + 20)
       );
-      glassGradient.addColorStop(0, "rgba(255, 255, 255, 0.12)");
-      glassGradient.addColorStop(0.5, "rgba(255, 255, 255, 0.06)");
-      glassGradient.addColorStop(1, "rgba(255, 255, 255, 0.1)");
+      
+      if (isActiveWeek) {
+        glassGradient.addColorStop(0, "rgba(57, 255, 133, 0.15)");
+        glassGradient.addColorStop(0.5, "rgba(57, 255, 133, 0.08)");
+        glassGradient.addColorStop(1, "rgba(57, 255, 133, 0.12)");
+      } else {
+        glassGradient.addColorStop(0, "rgba(255, 255, 255, 0.12)");
+        glassGradient.addColorStop(0.5, "rgba(255, 255, 255, 0.06)");
+        glassGradient.addColorStop(1, "rgba(255, 255, 255, 0.1)");
+      }
       
       ctx.strokeStyle = glassGradient;
       ctx.stroke();
-      ctx.restore();
       
-      // Layer 3: Inner highlight edge
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, ringRadius - strokeWidth/2 - 2, toRad(weekStartAngle - 1), toRad(weekEndAngle + 1));
-      ctx.lineCap = "round";
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
-      ctx.stroke();
+      // Add green glow for active week
+      if (isActiveWeek) {
+        ctx.shadowColor = "rgba(57, 255, 133, 0.5)";
+        ctx.shadowBlur = 12;
+        ctx.stroke();
+      }
       ctx.restore();
       
       for (let bar = 0; bar < 3; bar++) {
