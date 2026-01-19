@@ -49,7 +49,20 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
     // Calculate group arc span (3 bars + 2 gaps between them)
     const groupArcSpan = barAngle * 3 + barGap * 2;
     
-    // First pass: Draw 10% white background for each week group
+    // Calculate total arc span for all 4 groups
+    const totalArcSpan = groupArcSpan * 4 + weekGap * 3;
+    
+    // First pass: Draw background behind all 4 groups
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, ringRadius, toRad(startAngleDeg), toRad(startAngleDeg + totalArcSpan));
+    ctx.lineCap = "round";
+    ctx.lineWidth = strokeWidth;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+    ctx.stroke();
+    ctx.restore();
+    
+    // Second pass: Draw 10% white background for each week group
     let bgAngle = startAngleDeg;
     for (let week = 0; week < 4; week++) {
       const groupStart = bgAngle;
