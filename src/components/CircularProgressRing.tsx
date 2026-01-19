@@ -12,17 +12,17 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
   const size = 280;
   const centerX = size / 2;
   const centerY = size / 2;
-  const ringRadius = 115;
-  const strokeWidth = 18;
-  const totalDays = 12;
-  const daysPerWeek = 3;
-  const gapAngle = 4; // Gap between segments in degrees
+  const ringRadius = 110;
+  const strokeWidth = 22;
   
-  // Start at 12 o'clock (-90 degrees) and end at 6 o'clock (90 degrees) for the arc
-  // Text will complete the bottom half
-  const startAngle = -135; // Start angle in degrees (upper left)
-  const endAngle = -45; // End angle in degrees (upper right)
-  const totalArcAngle = 270; // Total arc span for 12 segments
+  // 12 days total, 3 days per week = 4 weeks
+  // Ring starts at bottom-left, goes clockwise, ends at bottom-right
+  // Bottom ~90 degrees reserved for text
+  const totalArcDegrees = 270; // Arc spans 270 degrees (leaving 90 for text at bottom)
+  const weekArcDegrees = totalArcDegrees / 4; // Each week segment = 67.5 degrees
+  
+  // Start angle: bottom-left (225 degrees from 3 o'clock position)
+  const startAngleDeg = 135; // Start from left side going down
   
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -40,65 +40,104 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
     // Clear canvas
     ctx.clearRect(0, 0, size, size);
     
-    // Calculate segment angles
-    const segmentAngle = (totalArcAngle - (totalDays - 1) * gapAngle) / totalDays;
-    const segmentWithGap = segmentAngle + gapAngle;
+    // Convert degrees to radians
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
     
-    // Draw each segment
-    for (let i = 0; i < totalDays; i++) {
-      const weekIndex = Math.floor(i / daysPerWeek);
-      const dayInWeek = i % daysPerWeek;
-      const isActiveWeek = weekIndex === currentWeek - 1;
-      const isCompletedDay = i < currentDay;
-      
-      // Calculate segment start and end angles
-      // Start from bottom-left, go clockwise, end at bottom-right
-      const segStart = (225 + i * segmentWithGap) * (Math.PI / 180);
-      const segEnd = (225 + i * segmentWithGap + segmentAngle) * (Math.PI / 180);
-      
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, ringRadius, segStart, segEnd);
-      ctx.lineCap = "round";
-      ctx.lineWidth = strokeWidth;
-      
-      if (isActiveWeek) {
-        if (isCompletedDay) {
-          // Completed day in active week - bright neon green with glow
-          ctx.strokeStyle = "#39FF85";
-          ctx.shadowColor = "#39FF85";
-          ctx.shadowBlur = 15;
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 0;
-        } else {
-          // Active week but not completed - glassmorphic light green
-          const gradient = ctx.createLinearGradient(
-            centerX + ringRadius * Math.cos(segStart),
-            centerY + ringRadius * Math.sin(segStart),
-            centerX + ringRadius * Math.cos(segEnd),
-            centerY + ringRadius * Math.sin(segEnd)
-          );
-          gradient.addColorStop(0, "rgba(57, 255, 133, 0.25)");
-          gradient.addColorStop(0.5, "rgba(57, 255, 133, 0.35)");
-          gradient.addColorStop(1, "rgba(57, 255, 133, 0.25)");
-          ctx.strokeStyle = gradient;
-          ctx.shadowColor = "rgba(57, 255, 133, 0.3)";
-          ctx.shadowBlur = 10;
-        }
-      } else {
-        // Inactive weeks - neutral grey
-        ctx.strokeStyle = "rgba(180, 180, 180, 0.45)";
-        ctx.shadowBlur = 0;
-      }
-      
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-    }
+    // Draw background grey ring (continuous, full arc)
+    ctx.beginPath();
+    ctx.arc(
+      centerX, 
+      centerY, 
+      ringRadius, 
+      toRad(startAngleDeg), 
+      toRad(startAngleDeg + totalArcDegrees)
+    );
+    ctx.lineCap = "round";
+    ctx.lineWidth = strokeWidth;
+    ctx.strokeStyle = "rgba(180, 180, 190, 0.5)";
+    ctx.stroke();
+    
+    // Calculate active week segment position
+    // Week 1 starts at the beginning (left side)
+    const weekStartAngle = startAngleDeg + (currentWeek - 1) * weekArcDegrees;
+    const weekEndAngle = weekStartAngle + weekArcDegrees;
+    
+    // Draw glassmorphic active week segment
+    // First, draw the glow/shadow
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(
+      centerX, 
+      centerY, 
+      ringRadius, 
+      toRad(weekStartAngle + 2), 
+      toRad(weekEndAngle - 2)
+    );
+    ctx.lineCap = "round";
+    ctx.lineWidth = strokeWidth + 4;
+    ctx.strokeStyle = "rgba(57, 255, 133, 0.15)";
+    ctx.shadowColor = "rgba(57, 255, 133, 0.4)";
+    ctx.shadowBlur = 20;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.stroke();
+    ctx.restore();
+    
+    // Draw inner glow layer
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(
+      centerX, 
+      centerY, 
+      ringRadius, 
+      toRad(weekStartAngle + 2), 
+      toRad(weekEndAngle - 2)
+    );
+    ctx.lineCap = "round";
+    ctx.lineWidth = strokeWidth;
+    
+    // Create gradient for glassmorphic effect
+    const gradientStartX = centerX + ringRadius * Math.cos(toRad(weekStartAngle));
+    const gradientStartY = centerY + ringRadius * Math.sin(toRad(weekStartAngle));
+    const gradientEndX = centerX + ringRadius * Math.cos(toRad(weekEndAngle));
+    const gradientEndY = centerY + ringRadius * Math.sin(toRad(weekEndAngle));
+    
+    const gradient = ctx.createLinearGradient(
+      gradientStartX, gradientStartY,
+      gradientEndX, gradientEndY
+    );
+    gradient.addColorStop(0, "rgba(57, 255, 133, 0.25)");
+    gradient.addColorStop(0.3, "rgba(100, 255, 160, 0.45)");
+    gradient.addColorStop(0.5, "rgba(57, 255, 133, 0.55)");
+    gradient.addColorStop(0.7, "rgba(100, 255, 160, 0.45)");
+    gradient.addColorStop(1, "rgba(57, 255, 133, 0.25)");
+    
+    ctx.strokeStyle = gradient;
+    ctx.shadowColor = "rgba(57, 255, 133, 0.5)";
+    ctx.shadowBlur = 15;
+    ctx.stroke();
+    ctx.restore();
+    
+    // Draw highlight edge on inner side for glass effect
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(
+      centerX, 
+      centerY, 
+      ringRadius - strokeWidth / 3, 
+      toRad(weekStartAngle + 5), 
+      toRad(weekEndAngle - 5)
+    );
+    ctx.lineCap = "round";
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+    ctx.stroke();
+    ctx.restore();
     
   }, [currentDay, currentWeek]);
   
-  // Generate curved text path
-  const textRadius = ringRadius + 28;
-  const text = "cult ninja  •  Week 1  •  Day 1";
+  // Calculate day in current week for display
+  const dayInWeek = ((currentDay - 1) % 3) + 1;
   
   return (
     <div className={`relative ${className}`} style={{ width: size, height: size }}>
@@ -116,62 +155,63 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
         style={{ width: size, height: size }}
       >
         <defs>
-          {/* Path for curved text at bottom */}
+          {/* Path for curved text at bottom - follows the ring */}
           <path
             id="curvedTextPath"
-            d={`M ${centerX - textRadius * 0.85} ${centerY + 15}
-                A ${textRadius * 0.9} ${textRadius * 0.9} 0 0 0 ${centerX + textRadius * 0.85} ${centerY + 15}`}
+            d={`M ${centerX - 95} ${centerY + 45}
+                A 100 100 0 0 0 ${centerX + 95} ${centerY + 45}`}
             fill="none"
           />
         </defs>
         
         <text
-          fill="rgba(255, 255, 255, 0.65)"
-          fontSize="13"
+          fill="rgba(255, 255, 255, 0.6)"
+          fontSize="14"
           fontFamily="system-ui, -apple-system, sans-serif"
           fontWeight="400"
-          letterSpacing="1.5px"
+          letterSpacing="2px"
+          fontStyle="italic"
         >
           <textPath
             href="#curvedTextPath"
             startOffset="50%"
             textAnchor="middle"
           >
-            cult ninja  •  Week {currentWeek}  •  Day {((currentDay - 1) % 3) + 1}
+            cult ninja  •  Week {currentWeek}  •  Day {dayInWeek}
           </textPath>
         </text>
       </svg>
       
       {/* Confetti elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Teal confetti pieces */}
+        {/* Teal confetti pieces positioned around mascot */}
         <div 
-          className="absolute w-3 h-2 rounded-sm bg-cyan-400/80 blur-[0.5px]"
-          style={{ top: '25%', left: '35%', transform: 'rotate(45deg)' }}
+          className="absolute w-3 h-2 rounded-sm bg-cyan-400/80"
+          style={{ top: '28%', left: '38%', transform: 'rotate(45deg)' }}
         />
         <div 
-          className="absolute w-2 h-3 rounded-sm bg-cyan-300/70 blur-[0.5px]"
-          style={{ top: '30%', right: '32%', transform: 'rotate(-30deg)' }}
+          className="absolute w-2 h-3 rounded-sm bg-cyan-300/70"
+          style={{ top: '32%', right: '35%', transform: 'rotate(-30deg)' }}
         />
         <div 
-          className="absolute w-2.5 h-1.5 rounded-sm bg-teal-400/75 blur-[0.5px]"
-          style={{ top: '22%', left: '45%', transform: 'rotate(15deg)' }}
+          className="absolute w-2.5 h-1.5 rounded-sm bg-teal-400/75"
+          style={{ top: '25%', left: '48%', transform: 'rotate(15deg)' }}
         />
         <div 
-          className="absolute w-1.5 h-2.5 rounded-sm bg-cyan-400/65 blur-[0.5px]"
-          style={{ top: '35%', left: '30%', transform: 'rotate(-60deg)' }}
+          className="absolute w-1.5 h-2.5 rounded-sm bg-cyan-400/65"
+          style={{ top: '38%', left: '32%', transform: 'rotate(-60deg)' }}
         />
         <div 
-          className="absolute w-2 h-1.5 rounded-sm bg-teal-300/70 blur-[0.5px]"
-          style={{ top: '40%', right: '28%', transform: 'rotate(75deg)' }}
+          className="absolute w-2 h-1.5 rounded-sm bg-teal-300/70"
+          style={{ top: '42%', right: '30%', transform: 'rotate(75deg)' }}
         />
         <div 
-          className="absolute w-1.5 h-2 rounded-sm bg-cyan-400/60 blur-[0.5px]"
-          style={{ top: '55%', left: '28%', transform: 'rotate(20deg)' }}
+          className="absolute w-1.5 h-2 rounded-sm bg-cyan-400/60"
+          style={{ top: '55%', left: '30%', transform: 'rotate(20deg)' }}
         />
         <div 
-          className="absolute w-2 h-1.5 rounded-sm bg-teal-400/65 blur-[0.5px]"
-          style={{ top: '58%', right: '30%', transform: 'rotate(-45deg)' }}
+          className="absolute w-2 h-1.5 rounded-sm bg-teal-400/65"
+          style={{ top: '56%', right: '32%', transform: 'rotate(-45deg)' }}
         />
       </div>
       
@@ -180,10 +220,10 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
         <img 
           src={curoMascot} 
           alt="Curo mascot" 
-          className="w-44 h-44 object-contain drop-shadow-2xl"
+          className="w-44 h-44 object-contain"
           style={{ 
-            marginTop: '-10px',
-            filter: 'drop-shadow(0 10px 25px rgba(139, 92, 246, 0.3))'
+            marginTop: '-8px',
+            filter: 'drop-shadow(0 8px 20px rgba(139, 92, 246, 0.25))'
           }}
         />
       </div>
