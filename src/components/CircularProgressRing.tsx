@@ -19,7 +19,7 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
   // Arc spans from ~7 o'clock (210°) going clockwise around
   const barAngle = 10; // Shorter bar arc length in degrees
   const barGap = 6; // Gap between bars within a week
-  const weekGap = 28; // Larger gap between week groups
+  const weekGap = 16; // Gap between week groups
   
   // Start at ~7 o'clock position (210°) where green bar starts in reference
   const startAngleDeg = 210;
