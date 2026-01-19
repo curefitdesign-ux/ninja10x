@@ -200,19 +200,18 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
         <defs>
           <path
             id="curvedTextPath"
-            d={`M ${centerX - 80} ${centerY + 38}
-                A 85 85 0 0 0 ${centerX + 80} ${centerY + 38}`}
+            d={`M ${centerX - 75} ${centerY + 32}
+                A 80 80 0 0 0 ${centerX + 75} ${centerY + 32}`}
             fill="none"
           />
         </defs>
         
         <text
           fill="rgba(255, 255, 255, 0.55)"
-          fontSize="11"
-          fontFamily="system-ui, -apple-system, sans-serif"
-          fontWeight="400"
-          letterSpacing="1.5px"
-          fontStyle="italic"
+          fontSize="10"
+          fontFamily="Inter, sans-serif"
+          fontWeight="500"
+          letterSpacing="1.2px"
         >
           <textPath
             href="#curvedTextPath"
