@@ -52,13 +52,48 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
       const weekStartAngle = currentAngle;
       const weekEndAngle = currentAngle + (barAngle * 3) + (barGap * 2);
       
-      // Draw 10% white background behind each group of 3 bars
+      // Draw glassmorphic background behind each group of 3 bars
+      // Layer 1: Outer soft blur glow
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, ringRadius, toRad(weekStartAngle - 3), toRad(weekEndAngle + 3));
+      ctx.lineCap = "round";
+      ctx.lineWidth = strokeWidth + 14;
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+      ctx.filter = "blur(4px)";
+      ctx.stroke();
+      ctx.restore();
+      
+      // Layer 2: Mid glass layer with gradient
       ctx.save();
       ctx.beginPath();
       ctx.arc(centerX, centerY, ringRadius, toRad(weekStartAngle - 2), toRad(weekEndAngle + 2));
       ctx.lineCap = "round";
-      ctx.lineWidth = strokeWidth + 8; // Slightly wider than bars
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+      ctx.lineWidth = strokeWidth + 10;
+      
+      // Create gradient for glass effect
+      const midAngleWeek = toRad((weekStartAngle + weekEndAngle) / 2);
+      const glassGradient = ctx.createLinearGradient(
+        centerX + Math.cos(midAngleWeek) * (ringRadius - 20),
+        centerY + Math.sin(midAngleWeek) * (ringRadius - 20),
+        centerX + Math.cos(midAngleWeek) * (ringRadius + 20),
+        centerY + Math.sin(midAngleWeek) * (ringRadius + 20)
+      );
+      glassGradient.addColorStop(0, "rgba(255, 255, 255, 0.12)");
+      glassGradient.addColorStop(0.5, "rgba(255, 255, 255, 0.06)");
+      glassGradient.addColorStop(1, "rgba(255, 255, 255, 0.1)");
+      
+      ctx.strokeStyle = glassGradient;
+      ctx.stroke();
+      ctx.restore();
+      
+      // Layer 3: Inner highlight edge
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, ringRadius - strokeWidth/2 - 2, toRad(weekStartAngle - 1), toRad(weekEndAngle + 1));
+      ctx.lineCap = "round";
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
       ctx.stroke();
       ctx.restore();
       
