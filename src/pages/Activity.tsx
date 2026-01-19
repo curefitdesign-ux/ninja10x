@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Play, Plus, ArrowRight, Home, Dumbbell, Activity as ActivityIcon, ShoppingBag, Users, Flame, Footprints } from "lucide-react";
+import CircularProgressRing from "@/components/CircularProgressRing";
 
 // Import assets
-import curoMascot from "@/assets/activity-page/curo-mascot.png";
 import bookClassIcon from "@/assets/activity-page/book-class-icon.png";
 import checkinGymIcon from "@/assets/activity-page/checkin-gym-icon.png";
 import playSportsIcon from "@/assets/activity-page/play-sports-icon.png";
@@ -76,59 +76,14 @@ const Activity = () => {
           </div>
         </div>
 
-        {/* Mascot Section */}
+        {/* Mascot Section with Circular Progress */}
         <div className="relative px-4 mt-6">
           <div className="relative flex flex-col items-center">
-            {/* Circular Progress Ring */}
-            <div className="relative w-48 h-48">
-              {/* Progress circle background */}
-              <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="45"
-                  fill="none"
-                  stroke="rgba(255,255,255,0.1)"
-                  strokeWidth="3"
-                />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="45"
-                  fill="none"
-                  stroke="url(#progressGradient)"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeDasharray="283"
-                  strokeDashoffset="70"
-                />
-                <defs>
-                  <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#4ade80" />
-                    <stop offset="50%" stopColor="#22d3d1" />
-                    <stop offset="100%" stopColor="#818cf8" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              
-              {/* Ring markers */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-4 h-4 rounded-full bg-[#1a1a2e] border-2 border-cyan-400/60" />
-              <div className="absolute top-0 right-4 w-4 h-4 rounded-full bg-[#1a1a2e] border-2 border-green-400/60" />
-              
-              {/* Mascot */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <img 
-                  src={curoMascot} 
-                  alt="Curo mascot" 
-                  className="w-32 h-32 object-contain drop-shadow-2xl"
-                />
-              </div>
-              
-              {/* Week indicator */}
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-white/40 whitespace-nowrap">
-                Cult ninja • Week 1 • Day 1
-              </div>
-            </div>
+            {/* Pixel-perfect Circular Progress Ring */}
+            <CircularProgressRing 
+              currentDay={1} 
+              currentWeek={1}
+            />
 
             {/* Chat Bubble */}
             <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-3 text-center">
