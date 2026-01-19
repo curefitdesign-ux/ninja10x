@@ -200,8 +200,8 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
         <defs>
           <path
             id="curvedTextPath"
-            d={`M ${centerX - 75} ${centerY + 32}
-                A 80 80 0 0 0 ${centerX + 75} ${centerY + 32}`}
+            d={`M ${centerX - 70} ${centerY + 58}
+                A 75 75 0 0 0 ${centerX + 70} ${centerY + 58}`}
             fill="none"
           />
         </defs>
