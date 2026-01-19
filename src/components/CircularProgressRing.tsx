@@ -20,7 +20,7 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
   const totalArcDegrees = 280;
   const totalBars = 12;
   const barsPerWeek = 3;
-  const barAngle = 12; // Short bar length
+  const barAngle = 8; // Shorter bar length
   const barGap = 4; // Small gap between bars within a week
   const weekGap = 18; // Large gap between week groups
   
