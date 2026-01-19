@@ -16,16 +16,26 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
   const strokeWidth = 16;
   
   // 12 bars total, 3 bars per week = 4 weeks
-  // Arc spans ~280 degrees, leaving space for text at bottom
-  const totalArcDegrees = 280;
-  const totalBars = 12;
+  // Arc spans ~260 degrees, leaving space for text at bottom
+  const totalArcDegrees = 260;
   const barsPerWeek = 3;
-  const barAngle = 8; // Shorter bar length
-  const barGap = 4; // Small gap between bars within a week
-  const weekGap = 18; // Large gap between week groups
+  const numGroups = 4;
   
-  // Start from left side
-  const startAngleDeg = 140;
+  // Spacing configuration
+  const barGap = 3; // Micro-gap between bars within a group
+  const groupGap = 14; // Larger gap between groups
+  
+  // Calculate bar angle to fit all bars with gaps
+  // Total gaps: 4 groups × 2 bar gaps (inside each group) + 3 group gaps (between groups)
+  const totalBarGaps = numGroups * (barsPerWeek - 1) * barGap; // 4 × 2 × 3 = 24
+  const totalGroupGaps = (numGroups - 1) * groupGap; // 3 × 14 = 42
+  const availableForBars = totalArcDegrees - totalBarGaps - totalGroupGaps;
+  const barAngle = availableForBars / 12; // ~16.2 degrees per bar
+  
+  // Start at 7-8 o'clock position (around 210-225 degrees in standard coords)
+  // Canvas uses: 0° = right (3 o'clock), 90° = bottom, 180° = left, 270° = top
+  // 7-8 o'clock is roughly 210-240 degrees
+  const startAngleDeg = 220;
   
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -88,9 +98,9 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
         currentAngle = barEnd + barGap;
       }
       
-      // Add week gap after each week (except last)
+      // Add group gap after each group (except last)
       if (week < 3) {
-        currentAngle += (weekGap - barGap);
+        currentAngle += (groupGap - barGap);
       }
     }
     
