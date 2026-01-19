@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Play, Plus, ArrowRight, Home, Dumbbell, Activity as ActivityIcon, ShoppingBag, Users, Flame, Footprints } from "lucide-react";
 import CircularProgressRing from "@/components/CircularProgressRing";
-
+import GradientMeshBackground from "@/components/GradientMeshBackground";
 // Import assets
 import bookClassIcon from "@/assets/activity-page/book-class-icon.png";
 import checkinGymIcon from "@/assets/activity-page/checkin-gym-icon.png";
@@ -42,9 +42,12 @@ const Activity = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#0a0a12] text-white overflow-x-hidden relative">
+      {/* Gradient Mesh Background */}
+      <GradientMeshBackground />
+      
       {/* Scrollable Content */}
-      <div className="pb-24 overflow-y-auto">
+      <div className="relative z-10 pb-24 overflow-y-auto">
         {/* Stats Header */}
         <div className="px-4 pt-4">
           <div className="flex gap-3">
