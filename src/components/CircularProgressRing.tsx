@@ -48,6 +48,20 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
     
     // Draw 12 bars in 4 groups of 3
     for (let week = 0; week < 4; week++) {
+      // Calculate the start and end angles for this week's group background
+      const weekStartAngle = currentAngle;
+      const weekEndAngle = currentAngle + (barAngle * 3) + (barGap * 2);
+      
+      // Draw 10% white background behind each group of 3 bars
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, ringRadius, toRad(weekStartAngle - 2), toRad(weekEndAngle + 2));
+      ctx.lineCap = "round";
+      ctx.lineWidth = strokeWidth + 8; // Slightly wider than bars
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+      ctx.stroke();
+      ctx.restore();
+      
       for (let bar = 0; bar < 3; bar++) {
         const barIndex = week * 3 + bar + 1; // 1-indexed
         const isActiveBar = barIndex <= activeBarCount;
