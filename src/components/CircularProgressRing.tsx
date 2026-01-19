@@ -13,11 +13,11 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
   const centerX = size / 2;
   const centerY = size / 2;
   const ringRadius = 95;
-  const strokeWidth = 16;
+  const strokeWidth = 14.4; // Reduced by 10%
   
   // 12 bars total, 3 bars per week = 4 weeks
   // Arc spans from ~7 o'clock (210°) going clockwise around
-  const barAngle = 8.5; // Bar arc length reduced by 15%
+  const barAngle = 7.65; // Bar arc length reduced by 10%
   const barGap = 15; // Gap between bars within a week
   const weekGap = 30; // Gap between week groups
   
