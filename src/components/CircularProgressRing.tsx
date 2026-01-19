@@ -42,44 +42,75 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
     
     let currentAngle = startAngleDeg;
     
+    // Calculate which bars are "active" based on currentDay (1-12)
+    // Bars fill sequentially left to right (clockwise)
+    const activeBarCount = currentDay;
+    
     // Draw 12 bars in 4 groups of 3
     for (let week = 0; week < 4; week++) {
-      const isActiveWeek = week === currentWeek - 1;
-      
       for (let bar = 0; bar < 3; bar++) {
-        const barIndex = week * 3 + bar;
+        const barIndex = week * 3 + bar + 1; // 1-indexed
+        const isActiveBar = barIndex <= activeBarCount;
         const barStart = currentAngle;
         const barEnd = currentAngle + barAngle;
         
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, ringRadius, toRad(barStart), toRad(barEnd));
-        ctx.lineCap = "round";
-        ctx.lineWidth = strokeWidth;
+        // Calculate mid angle for radial gradient
+        const midAngle = toRad((barStart + barEnd) / 2);
         
-        if (isActiveWeek) {
-          // Active week - glassmorphic green with glow
+        if (isActiveBar) {
+          // Draw outer glow layer first (bleeds outside the ring)
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, ringRadius, toRad(barStart), toRad(barEnd));
+          ctx.lineCap = "round";
+          ctx.lineWidth = strokeWidth;
+          ctx.strokeStyle = "rgba(57, 255, 133, 0.4)";
+          ctx.shadowColor = "rgba(57, 255, 133, 0.7)";
+          ctx.shadowBlur = 18;
+          ctx.shadowOffsetX = Math.cos(midAngle) * 2;
+          ctx.shadowOffsetY = Math.sin(midAngle) * 2;
+          ctx.stroke();
+          ctx.restore();
+          
+          // Draw main active bar with radial gradient (inner brighter)
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, ringRadius, toRad(barStart), toRad(barEnd));
+          ctx.lineCap = "round";
+          ctx.lineWidth = strokeWidth;
+          
+          // Create radial gradient from inner to outer edge
+          const innerRadius = ringRadius - strokeWidth / 2;
+          const outerRadius = ringRadius + strokeWidth / 2;
+          const gradientCenterX = centerX + Math.cos(midAngle) * ringRadius;
+          const gradientCenterY = centerY + Math.sin(midAngle) * ringRadius;
+          
+          // Linear gradient perpendicular to the arc (inner to outer)
+          const perpAngle = midAngle; // Points outward from center
           const gradient = ctx.createLinearGradient(
-            centerX + ringRadius * Math.cos(toRad(barStart)),
-            centerY + ringRadius * Math.sin(toRad(barStart)),
-            centerX + ringRadius * Math.cos(toRad(barEnd)),
-            centerY + ringRadius * Math.sin(toRad(barEnd))
+            centerX + Math.cos(perpAngle) * innerRadius,
+            centerY + Math.sin(perpAngle) * innerRadius,
+            centerX + Math.cos(perpAngle) * outerRadius,
+            centerY + Math.sin(perpAngle) * outerRadius
           );
-          gradient.addColorStop(0, "rgba(57, 255, 133, 0.3)");
-          gradient.addColorStop(0.5, "rgba(100, 255, 160, 0.5)");
-          gradient.addColorStop(1, "rgba(57, 255, 133, 0.3)");
+          gradient.addColorStop(0, "rgba(160, 255, 200, 1)"); // Inner edge - brighter
+          gradient.addColorStop(0.3, "rgba(57, 255, 133, 1)"); // Neon green
+          gradient.addColorStop(1, "rgba(40, 220, 100, 0.9)"); // Outer edge - slightly dimmer
           
           ctx.strokeStyle = gradient;
-          ctx.shadowColor = "rgba(57, 255, 133, 0.5)";
-          ctx.shadowBlur = 12;
+          ctx.stroke();
+          ctx.restore();
         } else {
-          // Inactive weeks - grey
+          // Inactive bar - grey
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, ringRadius, toRad(barStart), toRad(barEnd));
+          ctx.lineCap = "round";
+          ctx.lineWidth = strokeWidth;
           ctx.strokeStyle = "rgba(180, 180, 190, 0.45)";
-          ctx.shadowBlur = 0;
+          ctx.stroke();
+          ctx.restore();
         }
-        
-        ctx.stroke();
-        ctx.restore();
         
         // Move to next bar position
         currentAngle = barEnd + barGap;
