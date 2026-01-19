@@ -13,11 +13,11 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
   const centerX = size / 2;
   const centerY = size / 2;
   const ringRadius = 95;
-  const strokeWidth = 14.4; // Reduced by 10%
+  const strokeWidth = 12; // Reduced thickness
   
   // 12 bars total, 3 bars per week = 4 weeks
   // Arc spans from ~7 o'clock (210°) going clockwise around
-  const barAngle = 6.91; // Bar arc length reduced by 5%
+  const barAngle = 5.5; // Reduced bar length
   const barGap = 10; // Gap between bars within a week
   const weekGap = 25; // Gap between week groups
   
@@ -200,8 +200,8 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
         <defs>
           <path
             id="curvedTextPath"
-            d={`M ${centerX - 70} ${centerY + 58}
-                A 75 75 0 0 0 ${centerX + 70} ${centerY + 58}`}
+            d={`M ${centerX - 68} ${centerY + 62}
+                A ${ringRadius - 2} ${ringRadius - 2} 0 0 0 ${centerX + 68} ${centerY + 62}`}
             fill="none"
           />
         </defs>
