@@ -21,8 +21,8 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
   const barGap = 10; // Gap between bars within a week
   const weekGap = 25; // Gap between week groups
   
-  // Start position - rotated 10% anti-clockwise (36°) from previous position
-  const startAngleDeg = 139;
+  // Start position - rotated 5% clockwise (18°) from previous position
+  const startAngleDeg = 157;
   
   useEffect(() => {
     const canvas = canvasRef.current;
