@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Camera, Image as ImageIcon } from "lucide-react";
+import { Plus, Camera, Image as ImageIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 // Activity icons
@@ -40,230 +40,251 @@ export interface LoggedPhoto {
 
 interface PhotoLoggingWidgetProps {
   photos?: LoggedPhoto[];
-  onPhotoAdd?: (weekIndex: number, dayIndex: number) => void;
   onPhotoTap?: (photo: LoggedPhoto) => void;
   currentWeek?: number;
   currentDay?: number;
 }
 
-interface CardClusterProps {
+interface WeekCardProps {
   weekIndex: number;
   photos: (LoggedPhoto | null)[];
   isActiveWeek: boolean;
-  isExpanded: boolean;
+  isPastWeek: boolean;
+  position: 'left' | 'center' | 'right' | 'far-right';
   onTap: () => void;
   onCardTap: (dayIndex: number, photo: LoggedPhoto | null) => void;
+  isExpanded: boolean;
 }
 
-const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCardTap }: CardClusterProps) => {
-  const baseCardWidth = 48;
-  const baseCardHeight = 64;
-  const borderRadius = 10;
-  
-  // Scale up for active week
-  const scale = isActiveWeek ? 1.25 : 0.9;
-  const cardWidth = baseCardWidth * scale;
-  const cardHeight = baseCardHeight * scale;
-  
-  // Check if any photo is logged in this week
-  const hasAnyPhoto = photos.some(p => p !== null);
-  
-  // Card positions for stacked state
-  const getStackedPositions = (index: number) => {
-    const rotations = [-6, 4, -2];
-    const xOffsets = [-3, 6, 0];
-    const yOffsets = [0, 3, 6];
-    return {
-      rotate: rotations[index],
-      x: xOffsets[index],
-      y: yOffsets[index],
-    };
+const WeekCard = ({ 
+  weekIndex, 
+  photos, 
+  isActiveWeek, 
+  isPastWeek,
+  position, 
+  onTap, 
+  onCardTap,
+  isExpanded 
+}: WeekCardProps) => {
+  // Size based on position - center is largest
+  const getSize = () => {
+    if (isExpanded) return { width: 200, height: 100 };
+    switch (position) {
+      case 'center': return { width: 100, height: 120 };
+      case 'left': return { width: 72, height: 88 };
+      case 'right': return { width: 68, height: 84 };
+      case 'far-right': return { width: 56, height: 72 };
+      default: return { width: 68, height: 84 };
+    }
   };
 
-  const renderCard = (index: number, zIndex: number, opacity: number) => {
-    const photo = photos[index];
-    const hasPhoto = photo !== null;
-    const isActiveDay = isActiveWeek && !hasPhoto && index === photos.findIndex(p => p === null);
-    const dayNumber = weekIndex * 3 + index + 1;
-    
-    // Calculate expanded position
-    const expandedX = (index - 1) * (cardWidth + 8);
-    
-    const stackedPos = getStackedPositions(index);
+  const { width, height } = getSize();
+  const hasPhotos = photos.some(p => p !== null);
+  const lastPhoto = [...photos].reverse().find(p => p !== null);
+  const photosCount = photos.filter(p => p !== null).length;
+
+  // Get position offset for centering active week
+  const getPositionStyle = () => {
+    if (isExpanded) {
+      return { x: 0, scale: 1 };
+    }
+    switch (position) {
+      case 'left': return { x: 0, scale: 1 };
+      case 'center': return { x: 0, scale: 1 };
+      case 'right': return { x: 0, scale: 1 };
+      case 'far-right': return { x: 0, scale: 1 };
+      default: return { x: 0, scale: 1 };
+    }
+  };
+
+  const posStyle = getPositionStyle();
+
+  // Expanded view - show 3 cards
+  if (isExpanded) {
+    const cardWidth = 56;
+    const cardHeight = 72;
+    const gap = 12;
     
     return (
-      <motion.button
-        key={index}
-        className={`absolute rounded-xl overflow-hidden border shadow-lg ${
-          hasPhoto 
-            ? 'border-emerald-400/40' 
-            : isActiveDay 
-              ? 'border-white/30' 
-              : 'border-white/15'
-        }`}
-        style={{
-          width: cardWidth,
-          height: cardHeight,
-          borderRadius: borderRadius * scale,
-          background: hasPhoto ? 'transparent' : 'rgba(255,255,255,0.06)',
-          backdropFilter: hasPhoto ? 'none' : 'blur(12px)',
-          zIndex,
-        }}
-        initial={false}
-        animate={
-          isExpanded
-            ? {
-                left: `calc(50% + ${expandedX}px)`,
-                top: 8,
-                rotate: 0,
-                x: "-50%",
-                y: 0,
-                opacity: 1,
-                scale: 1,
-              }
-            : {
-                left: 10 + stackedPos.x,
-                top: stackedPos.y,
-                rotate: stackedPos.rotate,
-                x: 0,
-                y: 0,
-                opacity: opacity,
-                scale: 1,
-              }
-        }
-        transition={{
-          type: "spring",
-          stiffness: 280,
-          damping: 24,
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (isExpanded) {
-            onCardTap(index, photo);
-          }
-        }}
-        whileTap={{ scale: 0.95 }}
+      <motion.div
+        className="relative flex items-center justify-center gap-3"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        style={{ width: cardWidth * 3 + gap * 2 + 24, height: cardHeight + 32 }}
       >
-        {/* Photo or empty state */}
-        {hasPhoto ? (
-          <>
-            <img 
-              src={photo.storageUrl} 
-              alt={`Day ${dayNumber}`}
-              className="w-full h-full object-cover"
-            />
-            {/* Green glow overlay for logged photos */}
-            <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/20 to-transparent pointer-events-none" />
-          </>
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            {isActiveDay && isExpanded && (
-              <motion.div 
-                className="p-2 rounded-full bg-white/10 backdrop-blur-sm"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                <Upload className="w-4 h-4 text-white/70" strokeWidth={2} />
-              </motion.div>
-            )}
-          </div>
-        )}
-        
-        {/* Day number indicator */}
-        {isExpanded && (
-          <motion.div 
-            className="absolute bottom-1 left-1/2 transform -translate-x-1/2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.15 }}
-          >
-            <span className="text-[8px] text-white/50 font-medium">
-              D{dayNumber}
-            </span>
-          </motion.div>
-        )}
-      </motion.button>
-    );
-  };
+        {/* Week label */}
+        <motion.div
+          className="absolute -top-5 left-1/2 transform -translate-x-1/2 z-10"
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <span className="text-[10px] text-white/50 font-medium tracking-wide uppercase">
+            Week {weekIndex + 1}
+          </span>
+        </motion.div>
 
+        {[0, 1, 2].map((dayIdx) => {
+          const photo = photos[dayIdx];
+          const hasPhoto = photo !== null;
+          const dayNumber = weekIndex * 3 + dayIdx + 1;
+          const isNextToFill = !hasPhoto && photos.slice(0, dayIdx).every(p => p !== null) && 
+            (dayIdx === 0 || photos[dayIdx - 1] !== null);
+
+          return (
+            <motion.button
+              key={dayIdx}
+              initial={{ opacity: 0, y: 10, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: dayIdx * 0.08, type: "spring", stiffness: 300 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onCardTap(dayIdx, photo);
+              }}
+              className={`relative rounded-xl overflow-hidden border shadow-lg ${
+                hasPhoto 
+                  ? 'border-emerald-400/30' 
+                  : isNextToFill
+                    ? 'border-emerald-400/40'
+                    : 'border-white/15'
+              }`}
+              style={{
+                width: cardWidth,
+                height: cardHeight,
+                background: hasPhoto ? 'transparent' : 'rgba(255,255,255,0.06)',
+                backdropFilter: hasPhoto ? 'none' : 'blur(8px)',
+              }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {hasPhoto ? (
+                <>
+                  <img 
+                    src={photo.storageUrl} 
+                    alt={`Day ${dayNumber}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                </>
+              ) : isNextToFill ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <Plus className="w-5 h-5 text-emerald-400" strokeWidth={2.5} />
+                  </div>
+                </div>
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Plus className="w-4 h-4 text-white/30" strokeWidth={2} />
+                </div>
+              )}
+              
+              {/* Day indicator */}
+              <div className="absolute bottom-1 left-1/2 -translate-x-1/2">
+                <span className="text-[8px] text-white/60 font-medium">D{dayNumber}</span>
+              </div>
+            </motion.button>
+          );
+        })}
+      </motion.div>
+    );
+  }
+
+  // Collapsed week card view
   return (
     <motion.button
       onClick={onTap}
       className="relative flex-shrink-0"
-      style={{ 
-        width: isExpanded ? (cardWidth * 3 + 32) : (cardWidth + 20),
-        height: cardHeight + 24,
-      }}
-      animate={{
-        zIndex: isActiveWeek ? 10 : 1,
-      }}
-      whileTap={{ scale: isExpanded ? 1 : 0.97 }}
+      style={{ width, height }}
+      animate={posStyle}
+      transition={{ type: "spring", stiffness: 300, damping: 28 }}
+      whileTap={{ scale: 0.96 }}
     >
       {/* Glow effect for active week */}
       {isActiveWeek && (
         <motion.div 
-          className="absolute rounded-2xl blur-xl"
+          className="absolute -inset-3 rounded-3xl blur-xl pointer-events-none"
           style={{
-            width: isExpanded ? cardWidth * 3 + 40 : cardWidth * 1.6,
-            height: cardHeight * 0.8,
-            top: -12,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 0,
-            background: hasAnyPhoto 
-              ? "rgba(52, 211, 153, 0.15)" 
-              : "rgba(255,255,255,0.08)",
+            background: "linear-gradient(135deg, rgba(52, 211, 153, 0.25), rgba(59, 130, 246, 0.15))",
           }}
           animate={{
-            opacity: [0.6, 0.9, 0.6],
+            opacity: [0.5, 0.8, 0.5],
+            scale: [1, 1.05, 1],
           }}
           transition={{
-            duration: 2.5,
+            duration: 3,
             repeat: Infinity,
             ease: "easeInOut",
           }}
         />
       )}
       
-      {/* Week label */}
+      {/* Main card */}
       <motion.div
-        className="absolute -top-5 left-1/2 transform -translate-x-1/2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isExpanded ? 1 : 0 }}
-        transition={{ duration: 0.2 }}
+        className={`relative w-full h-full rounded-2xl overflow-hidden border ${
+          isActiveWeek 
+            ? 'border-emerald-400/30 bg-gradient-to-br from-white/10 to-white/5' 
+            : isPastWeek && hasPhotos
+              ? 'border-white/20'
+              : 'border-white/10 bg-white/5'
+        }`}
+        style={{
+          backdropFilter: 'blur(12px)',
+        }}
       >
-        <span className="text-[9px] text-white/40 font-medium tracking-wide uppercase">
-          Week {weekIndex + 1}
-        </span>
+        {/* Show last photo for past weeks with photos */}
+        {isPastWeek && lastPhoto ? (
+          <>
+            <img 
+              src={lastPhoto.storageUrl} 
+              alt={`Week ${weekIndex + 1}`}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+            {/* Photo count badge */}
+            <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-black/40 backdrop-blur-sm">
+              <span className="text-[9px] text-white/80 font-medium">{photosCount}/3</span>
+            </div>
+          </>
+        ) : (
+          /* Plus icon for active/future weeks */
+          <div className="absolute inset-0 flex items-center justify-center">
+            {isActiveWeek ? (
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Plus className="w-10 h-10 text-emerald-400" strokeWidth={2} />
+              </motion.div>
+            ) : (
+              <Plus className="w-6 h-6 text-white/40" strokeWidth={2} />
+            )}
+          </div>
+        )}
+        
+        {/* Week label at bottom */}
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
+          <span className={`text-[9px] font-medium ${
+            isActiveWeek ? 'text-emerald-300/80' : 'text-white/40'
+          }`}>
+            W{weekIndex + 1}
+          </span>
+        </div>
       </motion.div>
-      
-      {/* Render 3 cards */}
-      {[0, 1, 2].map((index) => 
-        renderCard(index, index + 1, [0.5, 0.65, 0.85][index])
-      )}
     </motion.button>
   );
 };
 
 const PhotoLoggingWidget = ({ 
   photos = [], 
-  onPhotoAdd,
   onPhotoTap,
   currentWeek = 1,
   currentDay = 1,
 }: PhotoLoggingWidgetProps) => {
   const navigate = useNavigate();
-  const [expandedWeeks, setExpandedWeeks] = useState<Set<number>>(new Set());
+  const [expandedWeek, setExpandedWeek] = useState<number | null>(null);
   const [showActivitySheet, setShowActivitySheet] = useState(false);
-  const [pendingUpload, setPendingUpload] = useState<{ weekIndex: number; dayIndex: number } | null>(null);
   const [showUploadOptions, setShowUploadOptions] = useState(false);
-  
-  // Auto-expand active week on mount and when it changes
-  useEffect(() => {
-    const activeWeekIndex = currentWeek - 1;
-    setExpandedWeeks(new Set([activeWeekIndex]));
-  }, [currentWeek]);
+  const [pendingUpload, setPendingUpload] = useState<{ weekIndex: number; dayIndex: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Get photos for each week (3 photos per week)
   const getWeekPhotos = useCallback((weekIndex: number): (LoggedPhoto | null)[] => {
@@ -274,34 +295,29 @@ const PhotoLoggingWidget = ({
     });
   }, [photos]);
 
-  // Determine which weeks are active (have photos or are current)
-  const getWeekStatus = useCallback((weekIndex: number) => {
-    const weekPhotos = getWeekPhotos(weekIndex);
-    const hasPhotos = weekPhotos.some(p => p !== null);
-    const isCurrentWeek = weekIndex === currentWeek - 1;
-    return { hasPhotos, isCurrentWeek, isActive: hasPhotos || isCurrentWeek };
-  }, [getWeekPhotos, currentWeek]);
+  // Determine card positions relative to active week
+  const getCardPosition = (weekIndex: number): 'left' | 'center' | 'right' | 'far-right' => {
+    const activeWeekIndex = currentWeek - 1;
+    const diff = weekIndex - activeWeekIndex;
+    
+    if (diff < 0) return 'left';
+    if (diff === 0) return 'center';
+    if (diff === 1) return 'right';
+    return 'far-right';
+  };
 
-  const handleClusterTap = (weekIndex: number) => {
-    setExpandedWeeks(prev => {
-      const next = new Set(prev);
-      if (next.has(weekIndex)) {
-        // Don't collapse current week
-        if (weekIndex === currentWeek - 1) return prev;
-        next.delete(weekIndex);
-      } else {
-        next.add(weekIndex);
-      }
-      return next;
-    });
+  const handleWeekTap = (weekIndex: number) => {
+    if (expandedWeek === weekIndex) {
+      setExpandedWeek(null);
+    } else {
+      setExpandedWeek(weekIndex);
+    }
   };
 
   const handleCardTap = (weekIndex: number, dayIndex: number, photo: LoggedPhoto | null) => {
     if (photo) {
-      // Tap on existing photo - open preview/edit
       onPhotoTap?.(photo);
     } else {
-      // Tap on empty card - start upload flow
       setPendingUpload({ weekIndex, dayIndex });
       setShowUploadOptions(true);
     }
@@ -309,13 +325,7 @@ const PhotoLoggingWidget = ({
 
   const handleUploadOptionSelect = (option: 'camera' | 'gallery') => {
     setShowUploadOptions(false);
-    if (option === 'camera') {
-      // Open camera directly
-      setShowActivitySheet(true);
-    } else {
-      // Open gallery then activity sheet
-      setShowActivitySheet(true);
-    }
+    setShowActivitySheet(true);
   };
 
   const handleActivitySelect = (activity: string) => {
@@ -331,73 +341,109 @@ const PhotoLoggingWidget = ({
       });
     }
     setPendingUpload(null);
+    setExpandedWeek(null);
   };
   
-  // 4 clusters representing 4 weeks
+  // 4 weeks
   const weeks = [0, 1, 2, 3];
+  const activeWeekIndex = currentWeek - 1;
+
+  // Reorder weeks so active week renders last (on top)
+  const orderedWeeks = [...weeks].sort((a, b) => {
+    if (a === activeWeekIndex) return 1;
+    if (b === activeWeekIndex) return -1;
+    return a - b;
+  });
   
   return (
     <>
-      <div className="relative w-full" style={{ height: 140 }}>
+      <div className="relative w-full" style={{ height: 160 }}>
         {/* Timeline Path - SVG curved dashed line */}
         <svg 
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          viewBox="0 0 400 100"
+          className="absolute inset-0 w-full h-full pointer-events-none z-0"
+          viewBox="0 0 400 120"
           preserveAspectRatio="xMidYMid meet"
           style={{ overflow: "visible" }}
         >
           <path
-            d="M 10 55 Q 50 30, 110 48 Q 170 66, 230 42 Q 290 18, 350 48 Q 390 68, 410 52"
+            d="M -10 70 Q 40 40, 100 60 Q 160 80, 200 55 Q 240 30, 300 55 Q 360 80, 420 55"
             fill="none"
-            stroke="rgba(255,255,255,0.25)"
+            stroke="rgba(255,255,255,0.15)"
             strokeWidth="1.5"
-            strokeDasharray="5 4"
+            strokeDasharray="6 5"
             strokeLinecap="round"
           />
         </svg>
         
-        {/* Cards Container - horizontal scroll */}
-        <motion.div 
-          className="relative flex items-center justify-center gap-2 px-3 py-3 overflow-x-auto scrollbar-hide h-full"
-          layout
+        {/* Cards Container - centered layout */}
+        <div 
+          ref={containerRef}
+          className="relative flex items-center justify-center h-full px-4 z-10"
         >
           <AnimatePresence mode="sync">
-            {weeks.map((weekIndex) => {
-              const { isActive, isCurrentWeek } = getWeekStatus(weekIndex);
-              const isExpanded = expandedWeeks.has(weekIndex);
-              const weekPhotos = getWeekPhotos(weekIndex);
-              
-              return (
-                <motion.div
-                  key={weekIndex}
-                  initial={{ opacity: 0, y: 15, scale: 0.92 }}
-                  animate={{ 
-                    opacity: 1, 
-                    y: 0,
-                    scale: 1,
-                  }}
-                  transition={{ 
-                    duration: 0.45, 
-                    delay: 0.08 * weekIndex,
-                    type: "spring",
-                    stiffness: 220,
-                    damping: 22,
-                  }}
-                  layout
-                >
-                  <CardCluster 
-                    weekIndex={weekIndex}
-                    photos={weekPhotos}
-                    isActiveWeek={isCurrentWeek}
-                    isExpanded={isExpanded}
-                    onTap={() => handleClusterTap(weekIndex)}
-                    onCardTap={(dayIndex, photo) => handleCardTap(weekIndex, dayIndex, photo)}
-                  />
-                </motion.div>
-              );
-            })}
+            {expandedWeek !== null ? (
+              /* Expanded view - single week */
+              <WeekCard
+                key={`expanded-${expandedWeek}`}
+                weekIndex={expandedWeek}
+                photos={getWeekPhotos(expandedWeek)}
+                isActiveWeek={expandedWeek === activeWeekIndex}
+                isPastWeek={expandedWeek < activeWeekIndex}
+                position="center"
+                isExpanded={true}
+                onTap={() => setExpandedWeek(null)}
+                onCardTap={(dayIdx, photo) => handleCardTap(expandedWeek, dayIdx, photo)}
+              />
+            ) : (
+              /* Collapsed view - all weeks with active centered */
+              <motion.div 
+                className="flex items-center justify-center gap-3"
+                initial={false}
+                layout
+              >
+                {orderedWeeks.map((weekIndex) => {
+                  const position = getCardPosition(weekIndex);
+                  const weekPhotos = getWeekPhotos(weekIndex);
+                  const isActive = weekIndex === activeWeekIndex;
+                  const isPast = weekIndex < activeWeekIndex;
+                  
+                  return (
+                    <motion.div
+                      key={weekIndex}
+                      layout
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ 
+                        opacity: 1, 
+                        scale: 1,
+                        zIndex: isActive ? 10 : weekIndex,
+                      }}
+                      transition={{ 
+                        type: "spring", 
+                        stiffness: 280, 
+                        damping: 26,
+                        delay: weekIndex * 0.05,
+                      }}
+                      style={{
+                        order: position === 'left' ? 0 : position === 'center' ? 1 : position === 'right' ? 2 : 3,
+                      }}
+                    >
+                      <WeekCard
+                        weekIndex={weekIndex}
+                        photos={weekPhotos}
+                        isActiveWeek={isActive}
+                        isPastWeek={isPast}
+                        position={position}
+                        isExpanded={false}
+                        onTap={() => handleWeekTap(weekIndex)}
+                        onCardTap={(dayIdx, photo) => handleCardTap(weekIndex, dayIdx, photo)}
+                      />
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            )}
           </AnimatePresence>
-        </motion.div>
+        </div>
       </div>
 
       {/* Upload Options Sheet */}
