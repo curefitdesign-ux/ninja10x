@@ -56,12 +56,12 @@ interface CardClusterProps {
 }
 
 const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCardTap }: CardClusterProps) => {
-  const baseCardWidth = 52;
-  const baseCardHeight = 68;
+  const baseCardWidth = 48;
+  const baseCardHeight = 64;
   const borderRadius = 12;
   
-  // Scale based on state
-  const scale = isExpanded ? 1.15 : 0.85;
+  // Scale based on state - larger for expanded
+  const scale = isExpanded ? 1.35 : 0.8;
   const cardWidth = baseCardWidth * scale;
   const cardHeight = baseCardHeight * scale;
   
@@ -87,7 +87,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
     const dayNumber = weekIndex * 3 + index + 1;
     
     // Expanded position - fan out from center
-    const expandedX = (index - 1) * (cardWidth + 12);
+    const expandedX = (index - 1) * (cardWidth + 14);
     
     const stackedPos = getStackedPositions(index);
     
@@ -98,14 +98,14 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           hasPhoto 
             ? 'border-emerald-400/40' 
             : isActiveDay 
-              ? 'border-white/25' 
+              ? 'border-emerald-400/50 ring-2 ring-emerald-400/30' 
               : 'border-white/10'
         }`}
         style={{
           width: cardWidth,
           height: cardHeight,
           borderRadius: borderRadius * scale,
-          background: hasPhoto ? 'transparent' : 'rgba(255,255,255,0.05)',
+          background: hasPhoto ? 'transparent' : isActiveDay ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.05)',
           backdropFilter: hasPhoto ? 'none' : 'blur(16px)',
           zIndex,
         }}
@@ -160,12 +160,12 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           <div className="absolute inset-0 flex items-center justify-center">
             {isActiveDay && isExpanded && (
               <motion.div 
-                className="p-2.5 rounded-full bg-white/10 backdrop-blur-sm"
+                className="p-3 rounded-full bg-emerald-500/20 backdrop-blur-sm"
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.25, type: "spring", stiffness: 400 }}
               >
-                <Upload className="w-4 h-4 text-white/80" strokeWidth={2.5} />
+                <Upload className="w-5 h-5 text-emerald-400" strokeWidth={2.5} />
               </motion.div>
             )}
           </div>
@@ -174,12 +174,12 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
         {/* Day number indicator */}
         {isExpanded && (
           <motion.div 
-            className="absolute bottom-1.5 left-1/2 transform -translate-x-1/2"
+            className="absolute bottom-2 left-1/2 transform -translate-x-1/2"
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <span className="text-[9px] text-white/50 font-medium">
+            <span className={`text-[10px] font-medium ${isActiveDay ? 'text-emerald-400' : 'text-white/50'}`}>
               D{dayNumber}
             </span>
           </motion.div>
@@ -189,8 +189,8 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
   };
 
   // Calculate container width based on expanded state
-  const containerWidth = isExpanded ? (cardWidth * 3 + 40) : (baseCardWidth * 0.85 + 24);
-  const containerHeight = cardHeight + 16;
+  const containerWidth = isExpanded ? (cardWidth * 3 + 48) : (baseCardWidth * 0.8 + 20);
+  const containerHeight = cardHeight + 20;
 
   return (
     <motion.button
@@ -224,8 +224,8 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
             background: hasAnyPhoto 
               ? "rgba(52, 211, 153, 0.12)" 
               : isActiveWeek 
-                ? "rgba(255,255,255,0.06)"
-                : "transparent",
+                ? "rgba(52, 211, 153, 0.08)"
+                : "rgba(255,255,255,0.04)",
           }}
           initial={{ opacity: 0, x: "-50%", y: "-50%" }}
           animate={{
@@ -242,23 +242,6 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           }}
         />
       )}
-      
-      {/* Week label - only visible when expanded */}
-      <motion.div
-        className="absolute -top-6 left-1/2 transform -translate-x-1/2"
-        initial={{ opacity: 0, y: 4 }}
-        animate={{ 
-          opacity: isExpanded ? 1 : 0,
-          y: isExpanded ? 0 : 4,
-        }}
-        transition={{ duration: 0.25 }}
-      >
-        <span className={`text-[10px] font-medium tracking-wide uppercase ${
-          isActiveWeek ? 'text-emerald-400/70' : 'text-white/40'
-        }`}>
-          Week {weekIndex + 1}
-        </span>
-      </motion.div>
       
       {/* Render 3 cards */}
       {[0, 1, 2].map((index) => 
@@ -371,7 +354,7 @@ const PhotoLoggingWidget = ({
   
   return (
     <>
-      <div className="relative w-full" style={{ height: 150 }}>
+      <div className="relative w-full" style={{ height: 160 }}>
         {/* Timeline Path - SVG curved dashed line */}
         <svg 
           className="absolute inset-0 w-full h-full pointer-events-none"
@@ -389,14 +372,15 @@ const PhotoLoggingWidget = ({
           />
         </svg>
         
-        {/* Cards Container - centered layout */}
+        {/* Cards Container - centered layout with offset for balance */}
         <motion.div 
-          className="relative flex items-center justify-center gap-1 px-4 py-4 h-full"
+          className="relative flex items-center justify-center gap-2 px-6 py-4 h-full"
+          style={{ marginLeft: 12 }}
           layout
         >
           <AnimatePresence mode="sync">
             {weeks.map((weekIndex, displayIdx) => {
-              const { isActive, isCurrentWeek } = getWeekStatus(weekIndex);
+              const { isCurrentWeek } = getWeekStatus(weekIndex);
               const isExpanded = expandedWeeks.has(weekIndex);
               const weekPhotos = getWeekPhotos(weekIndex);
               
