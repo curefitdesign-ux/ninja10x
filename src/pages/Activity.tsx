@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Play, Plus, ArrowRight, Home, Dumbbell, Activity as ActivityIcon, ShoppingBag, Users, Flame, Footprints } from "lucide-react";
 import CircularProgressRing from "@/components/CircularProgressRing";
 import GradientMeshBackground from "@/components/GradientMeshBackground";
-// Import assets
-import bookClassIcon from "@/assets/activity-page/book-class-icon.png";
-import checkinGymIcon from "@/assets/activity-page/checkin-gym-icon.png";
-import playSportsIcon from "@/assets/activity-page/play-sports-icon.png";
-import workoutAtHomeIcon from "@/assets/activity-page/workout-at-home-icon.png";
+import PullToRefresh from "@/components/PullToRefresh";
+// Import new activity icons
+import bookClassIcon from "@/assets/activity-icons/book-class.png";
+import checkinGymIcon from "@/assets/activity-icons/checkin-gym.png";
+import playSportsIcon from "@/assets/activity-icons/play-sports.png";
+import workoutAtHomeIcon from "@/assets/activity-icons/workout-home.png";
+// Import feature assets
 import connectFitnessDevice from "@/assets/activity-page/connect-fitness-device.png";
 import workoutWithFriends from "@/assets/activity-page/workout-with-friends.png";
 import smartWorkoutPlan from "@/assets/activity-page/smart-workout-plan.png";
@@ -30,6 +32,12 @@ const Activity = () => {
     { id: "play", label: "play a\nsport", icon: playSportsIcon },
     { id: "workout", label: "workout\nat home", icon: workoutAtHomeIcon },
   ];
+
+  const handleRefresh = useCallback(async () => {
+    // Simulate refresh delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Could refetch data here
+  }, []);
 
   const fitnessPrograms = [
     { id: 1, image: yogaBeginners },
@@ -53,10 +61,12 @@ const Activity = () => {
       {/* Gradient Mesh Background */}
       <GradientMeshBackground />
       
-      {/* Scrollable Content */}
-      <div className="relative z-10 pb-24 overflow-y-auto">
-        {/* Stats Header - Glassmorphic */}
-        <div className="px-4 pt-4">
+      {/* Pull to Refresh Wrapper */}
+      <PullToRefresh onRefresh={handleRefresh}>
+        {/* Scrollable Content */}
+        <div className="relative z-10 pb-28 pt-2">
+          {/* Stats Header - Glassmorphic */}
+          <div className="px-4 pt-4">
           <div className="flex gap-3">
             {/* Days Streak */}
             <motion.div 
@@ -199,13 +209,13 @@ const Activity = () => {
                 <div className="relative">
                   {/* Glow on hover */}
                   <div className="absolute -inset-1 bg-gradient-to-br from-purple-500/20 to-cyan-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="relative w-16 h-16 rounded-2xl bg-white/[0.08] backdrop-blur-xl border border-white/[0.12] flex items-center justify-center mb-2 overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_4px_16px_rgba(0,0,0,0.2)]">
+                  <div className="relative w-20 h-20 rounded-2xl bg-white/[0.06] backdrop-blur-xl border border-white/[0.1] flex items-center justify-center mb-2 overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_4px_16px_rgba(0,0,0,0.2)]">
                     {/* Inner gradient shine */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-transparent" />
                     <img 
                       src={activity.icon} 
                       alt={activity.label}
-                      className="w-12 h-12 object-contain relative z-10"
+                      className="w-14 h-14 object-contain relative z-10"
                     />
                   </div>
                 </div>
@@ -283,28 +293,31 @@ const Activity = () => {
             ))}
           </div>
         </div>
-      </div>
+        </div>
+      </PullToRefresh>
 
-      {/* Bottom Navigation */}
+      {/* Bottom Navigation - Glassmorphic Liquid */}
       <div className="fixed bottom-0 left-0 right-0 z-50">
-        <div className="bg-[#0a0a0f]/95 backdrop-blur-xl border-t border-white/5">
-          <div className="flex items-center justify-around py-2 px-2" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)' }}>
+        {/* Glow effect behind nav */}
+        <div className="absolute inset-x-0 -top-4 h-8 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+        <div className="relative bg-white/[0.08] backdrop-blur-2xl border-t border-white/[0.12] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_-8px_32px_rgba(0,0,0,0.4)]">
+          <div className="flex items-center justify-around py-2 px-2" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 12px)' }}>
             {navItems.map((item) => (
               <motion.button
                 key={item.id}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex flex-col items-center py-2 px-4 rounded-2xl ${
+                className={`flex flex-col items-center py-2 px-4 rounded-2xl transition-all duration-200 ${
                   item.isCenter && activeTab === item.id
-                    ? 'bg-gradient-to-r from-rose-500 to-pink-500'
+                    ? ''
                     : ''
                 }`}
               >
                 {item.isCenter && activeTab === item.id ? (
                   <div className="relative">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-rose-500 to-pink-500 rounded-full blur opacity-60" />
-                    <div className="relative w-10 h-10 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center">
-                      <item.icon className="w-5 h-5 text-white" />
+                    <div className="absolute -inset-2 bg-gradient-to-r from-rose-500/50 to-pink-500/50 rounded-full blur-lg" />
+                    <div className="relative w-12 h-12 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center shadow-[0_0_24px_rgba(244,63,94,0.5)]">
+                      <item.icon className="w-6 h-6 text-white" />
                     </div>
                   </div>
                 ) : (
