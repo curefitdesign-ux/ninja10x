@@ -12,6 +12,13 @@ import workoutAtHomeIcon from "@/assets/activity-page/workout-at-home-icon.png";
 import connectFitnessDevice from "@/assets/activity-page/connect-fitness-device.png";
 import workoutWithFriends from "@/assets/activity-page/workout-with-friends.png";
 import smartWorkoutPlan from "@/assets/activity-page/smart-workout-plan.png";
+// Fitness program images
+import yogaBeginners from "@/assets/programs/yoga-beginners.png";
+import workoutBeginners from "@/assets/programs/workout-beginners.png";
+import bellyBurn from "@/assets/programs/belly-burn.png";
+import walkFitness from "@/assets/programs/walk-fitness.png";
+import cultJunior from "@/assets/programs/cult-junior.png";
+import prenatalYoga from "@/assets/programs/prenatal-yoga.png";
 
 const Activity = () => {
   const navigate = useNavigate();
@@ -25,12 +32,12 @@ const Activity = () => {
   ];
 
   const fitnessPrograms = [
-    { id: 1, title: "YOGA", subtitle: "FOR BEGINNERS", gradient: "from-purple-900/80 to-purple-600/60" },
-    { id: 2, title: "WORKOUT", subtitle: "FOR BEGINNERS", gradient: "from-slate-700/80 to-slate-500/60" },
-    { id: 3, title: "Belly\nBurn", subtitle: "", gradient: "from-rose-800/80 to-rose-500/60" },
-    { id: 4, title: "walk\nfitness", subtitle: "", gradient: "from-amber-700/80 to-amber-400/60" },
-    { id: 5, title: "CULT\nJUNIOR", subtitle: "", gradient: "from-indigo-900/80 to-indigo-600/60" },
-    { id: 6, title: "Prenatal\nYoga", subtitle: "", gradient: "from-cyan-700/80 to-cyan-400/60" },
+    { id: 1, image: yogaBeginners },
+    { id: 2, image: workoutBeginners },
+    { id: 3, image: bellyBurn },
+    { id: 4, image: walkFitness },
+    { id: 5, image: cultJunior },
+    { id: 6, image: prenatalYoga },
   ];
 
   const navItems = [
@@ -209,19 +216,13 @@ const Activity = () => {
               <motion.button
                 key={program.id}
                 whileTap={{ scale: 0.98 }}
-                className={`relative aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br ${program.gradient}`}
+                className="relative aspect-[4/5] rounded-2xl overflow-hidden"
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                <div className="absolute bottom-4 left-4 text-left">
-                  <h3 className="text-xl font-bold text-white whitespace-pre-line leading-tight">
-                    {program.title}
-                  </h3>
-                  {program.subtitle && (
-                    <p className="text-[10px] text-white/60 uppercase tracking-wider mt-1">
-                      {program.subtitle}
-                    </p>
-                  )}
-                </div>
+                <img 
+                  src={program.image} 
+                  alt={`Fitness program ${program.id}`}
+                  className="w-full h-full object-cover"
+                />
               </motion.button>
             ))}
           </div>
