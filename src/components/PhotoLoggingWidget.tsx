@@ -334,19 +334,22 @@ const PhotoLoggingWidget = ({
       // Tap on existing photo - open preview/edit
       onPhotoTap?.(photo);
     } else {
-      // Tap on empty card - start upload flow
-      setPendingUpload({ weekIndex, dayIndex });
-      setShowUploadOptions(true);
+      // Tap on empty card - use parent's camera flow if callback provided
+      if (onPhotoAdd) {
+        onPhotoAdd(weekIndex, dayIndex);
+      } else {
+        // Fallback to internal flow
+        setPendingUpload({ weekIndex, dayIndex });
+        setShowUploadOptions(true);
+      }
     }
   };
 
   const handleUploadOptionSelect = (option: 'camera' | 'gallery') => {
     setShowUploadOptions(false);
     if (option === 'camera') {
-      // Open camera directly
       setShowActivitySheet(true);
     } else {
-      // Open gallery then activity sheet
       setShowActivitySheet(true);
     }
   };
