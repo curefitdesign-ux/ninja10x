@@ -56,12 +56,12 @@ interface CardClusterProps {
 }
 
 const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCardTap }: CardClusterProps) => {
-  const baseCardWidth = 48;
-  const baseCardHeight = 64;
+  const baseCardWidth = 52;
+  const baseCardHeight = 70;
   const borderRadius = 12;
   
   // Scale based on state - larger for expanded
-  const scale = isExpanded ? 1.35 : 0.8;
+  const scale = isExpanded ? 1.55 : 0.75;
   const cardWidth = baseCardWidth * scale;
   const cardHeight = baseCardHeight * scale;
   
@@ -80,6 +80,17 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
     };
   };
 
+  const handleCardClick = (e: React.MouseEvent, index: number, photo: LoggedPhoto | null) => {
+    e.stopPropagation();
+    if (!isExpanded) {
+      // If not expanded, expand the cluster
+      onTap();
+    } else {
+      // If expanded, handle individual card tap
+      onCardTap(index, photo);
+    }
+  };
+
   const renderCard = (index: number, zIndex: number, opacity: number) => {
     const photo = photos[index];
     const hasPhoto = photo !== null;
@@ -87,7 +98,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
     const dayNumber = weekIndex * 3 + index + 1;
     
     // Expanded position - fan out from center
-    const expandedX = (index - 1) * (cardWidth + 14);
+    const expandedX = (index - 1) * (cardWidth + 16);
     
     const stackedPos = getStackedPositions(index);
     
@@ -137,12 +148,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           damping: 28,
           mass: 0.8,
         }}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (isExpanded) {
-            onCardTap(index, photo);
-          }
-        }}
+        onClick={(e) => handleCardClick(e, index, photo)}
         whileTap={{ scale: 0.95 }}
       >
         {/* Photo or empty state */}
@@ -165,7 +171,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.25, type: "spring", stiffness: 400 }}
               >
-                <Upload className="w-5 h-5 text-emerald-400" strokeWidth={2.5} />
+                <Upload className="w-6 h-6 text-emerald-400" strokeWidth={2.5} />
               </motion.div>
             )}
           </div>
@@ -179,7 +185,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <span className={`text-[10px] font-medium ${isActiveDay ? 'text-emerald-400' : 'text-white/50'}`}>
+            <span className={`text-xs font-medium ${isActiveDay ? 'text-emerald-400' : 'text-white/50'}`}>
               D{dayNumber}
             </span>
           </motion.div>
@@ -189,13 +195,13 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
   };
 
   // Calculate container width based on expanded state
-  const containerWidth = isExpanded ? (cardWidth * 3 + 48) : (baseCardWidth * 0.8 + 20);
-  const containerHeight = cardHeight + 20;
+  const containerWidth = isExpanded ? (cardWidth * 3 + 52) : (baseCardWidth * 0.75 + 20);
+  const containerHeight = cardHeight + 24;
 
   return (
-    <motion.button
+    <motion.div
       onClick={onTap}
-      className="relative flex-shrink-0"
+      className="relative flex-shrink-0 cursor-pointer"
       style={{ 
         height: containerHeight,
       }}
@@ -209,7 +215,6 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
         stiffness: 300,
         damping: 26,
       }}
-      whileTap={{ scale: isExpanded ? 1 : 0.97 }}
     >
       {/* Glow effect for active/expanded week */}
       {isExpanded && (
@@ -247,7 +252,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
       {[0, 1, 2].map((index) => 
         renderCard(index, index + 1, [0.4, 0.6, 0.85][index])
       )}
-    </motion.button>
+    </motion.div>
   );
 };
 
@@ -374,8 +379,7 @@ const PhotoLoggingWidget = ({
         
         {/* Cards Container - centered layout with offset for balance */}
         <motion.div 
-          className="relative flex items-center justify-center gap-2 px-6 py-4 h-full"
-          style={{ marginLeft: 12 }}
+          className="relative flex items-center justify-center gap-3 px-6 py-4 h-full"
           layout
         >
           <AnimatePresence mode="sync">
@@ -383,6 +387,7 @@ const PhotoLoggingWidget = ({
               const { isCurrentWeek } = getWeekStatus(weekIndex);
               const isExpanded = expandedWeeks.has(weekIndex);
               const weekPhotos = getWeekPhotos(weekIndex);
+              const isFirstWeek = weekIndex === 0;
               
               return (
                 <motion.div
@@ -402,6 +407,9 @@ const PhotoLoggingWidget = ({
                   }}
                   layout
                   layoutId={`week-${weekIndex}`}
+                  style={{
+                    marginLeft: isFirstWeek ? 32 : 0,
+                  }}
                 >
                   <CardCluster 
                     weekIndex={weekIndex}
