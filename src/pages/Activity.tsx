@@ -55,105 +55,170 @@ const Activity = () => {
       
       {/* Scrollable Content */}
       <div className="relative z-10 pb-24 overflow-y-auto">
-        {/* Stats Header */}
+        {/* Stats Header - Glassmorphic */}
         <div className="px-4 pt-4">
           <div className="flex gap-3">
             {/* Days Streak */}
-            <div className="flex-1 bg-gradient-to-br from-[#1a1a2e] to-[#16161a] rounded-2xl p-4 border border-white/5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-3xl font-bold text-white">4</span>
-                  <p className="text-[10px] text-white/50 uppercase tracking-wider mt-1">DAYS STREAK</p>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
-                  <Flame className="w-4 h-4 text-white" />
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex-1 relative group"
+            >
+              {/* Liquid glow effect */}
+              <div className="absolute -inset-0.5 bg-gradient-to-br from-orange-500/30 via-red-500/20 to-transparent rounded-3xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity" />
+              <div className="relative bg-white/[0.08] backdrop-blur-xl rounded-3xl p-4 border border-white/[0.12] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_8px_32px_rgba(0,0,0,0.3)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-3xl font-bold text-white drop-shadow-lg">4</span>
+                    <p className="text-[10px] text-white/60 uppercase tracking-wider mt-1">DAYS STREAK</p>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.5)]">
+                    <Flame className="w-5 h-5 text-white drop-shadow-md" />
+                  </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
             
             {/* Weekly Activity */}
-            <div className="flex-1 bg-gradient-to-br from-[#1a1a2e] to-[#16161a] rounded-2xl p-4 border border-white/5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-3xl font-bold text-white">5<span className="text-white/40">/3</span></span>
-                  <p className="text-[10px] text-white/50 uppercase tracking-wider mt-1">WEEKLY ACTIVITY</p>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
-                  <Footprints className="w-4 h-4 text-white" />
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="flex-1 relative group"
+            >
+              {/* Liquid glow effect */}
+              <div className="absolute -inset-0.5 bg-gradient-to-br from-cyan-500/30 via-blue-500/20 to-transparent rounded-3xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity" />
+              <div className="relative bg-white/[0.08] backdrop-blur-xl rounded-3xl p-4 border border-white/[0.12] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_8px_32px_rgba(0,0,0,0.3)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-3xl font-bold text-white drop-shadow-lg">5<span className="text-white/40">/3</span></span>
+                    <p className="text-[10px] text-white/60 uppercase tracking-wider mt-1">WEEKLY ACTIVITY</p>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.5)]">
+                    <Footprints className="w-5 h-5 text-white drop-shadow-md" />
+                  </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
 
-        {/* Mascot Section with Circular Progress */}
+        {/* Mascot Section with Circular Progress - Glassmorphic Container */}
         <div className="relative px-4 mt-6">
-          <div className="relative flex flex-col items-center">
-            {/* Pixel-perfect Circular Progress Ring */}
-            <CircularProgressRing 
-              currentDay={1} 
-              currentWeek={1}
-            />
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="relative"
+          >
+            {/* Outer liquid glass container */}
+            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-white/[0.02] rounded-[2.5rem] blur-sm" />
+            <div className="relative bg-white/[0.04] backdrop-blur-2xl rounded-[2.5rem] border border-white/[0.08] shadow-[inset_0_2px_4px_rgba(255,255,255,0.05),0_16px_64px_rgba(0,0,0,0.4)] p-6">
+              {/* Inner glow ring */}
+              <div className="absolute inset-4 rounded-[2rem] bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none" />
+              
+              <div className="relative flex flex-col items-center">
+                {/* Pixel-perfect Circular Progress Ring */}
+                <CircularProgressRing 
+                  currentDay={1} 
+                  currentWeek={1}
+                />
 
-            {/* Chat Bubble */}
-            <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-3 text-center">
-              <p className="text-sm text-white/80">
-                Hey, I'm Curo.<br />
-                Let's build a workout together!
-              </p>
+                {/* Chat Bubble - Enhanced glassmorphic */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  className="mt-4 relative"
+                >
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-cyan-500/20 rounded-2xl blur-lg opacity-60" />
+                  <div className="relative bg-white/[0.1] backdrop-blur-xl rounded-2xl px-6 py-3 text-center border border-white/[0.15] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+                    <p className="text-sm text-white/90">
+                      Hey, I'm Curo.<br />
+                      Let's build a workout together!
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Photo Slots Section */}
+        {/* Photo Slots Section - Glassmorphic */}
         <div className="px-4 mt-6">
-          <div className="flex items-center justify-center gap-2">
-            {/* Photo slots */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="flex items-center justify-center gap-2"
+          >
+            {/* Photo slots with glass effect */}
             <div className="flex items-center">
               {[1, 2, 3, 4].map((_, idx) => (
-                <div
+                <motion.div
                   key={idx}
-                  className={`w-12 h-12 rounded-lg bg-gradient-to-br from-[#2a2a3e] to-[#1a1a2e] border border-white/10 ${idx > 0 ? '-ml-2' : ''} flex items-center justify-center overflow-hidden`}
-                  style={{ transform: `rotate(${(idx - 1.5) * 5}deg)` }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.4 + idx * 0.05 }}
+                  className={`w-12 h-12 rounded-xl bg-white/[0.08] backdrop-blur-xl border border-white/[0.15] ${idx > 0 ? '-ml-2' : ''} flex items-center justify-center overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_4px_16px_rgba(0,0,0,0.2)]`}
+                  style={{ transform: `rotate(${(idx - 1.5) * 5}deg)`, zIndex: 4 - idx }}
                 >
-                  <Plus className="w-4 h-4 text-white/30" />
-                </div>
+                  <Plus className="w-4 h-4 text-white/40" />
+                </motion.div>
               ))}
             </div>
             
-            {/* Play Button */}
+            {/* Play Button - Liquid glass */}
             <motion.button
               whileTap={{ scale: 0.95 }}
-              className="ml-4 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center"
+              whileHover={{ scale: 1.05 }}
+              className="ml-4 w-12 h-12 rounded-full bg-white/[0.12] backdrop-blur-xl border border-white/[0.2] flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.15),0_8px_24px_rgba(0,0,0,0.3)] relative overflow-hidden"
               onClick={() => navigate("/")}
             >
-              <Play className="w-5 h-5 text-white fill-white" />
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+              <Play className="w-5 h-5 text-white fill-white relative z-10 drop-shadow-md" />
             </motion.button>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Activities Section */}
+        {/* Activities Section - Glassmorphic */}
         <div className="px-4 mt-8">
-          <p className="text-center text-white/70 text-sm mb-4">
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
+            className="text-center text-white/70 text-sm mb-4"
+          >
             Do any of the following<br />
             activities today
-          </p>
+          </motion.p>
           
           <div className="grid grid-cols-4 gap-3">
-            {activities.map((activity) => (
+            {activities.map((activity, idx) => (
               <motion.button
                 key={activity.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.4 + idx * 0.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex flex-col items-center"
+                whileHover={{ scale: 1.02 }}
+                className="flex flex-col items-center group"
               >
-                <div className="w-16 h-16 rounded-2xl bg-[#1a1a2e] border border-white/10 flex items-center justify-center mb-2 overflow-hidden">
-                  <img 
-                    src={activity.icon} 
-                    alt={activity.label}
-                    className="w-12 h-12 object-contain"
-                  />
+                <div className="relative">
+                  {/* Glow on hover */}
+                  <div className="absolute -inset-1 bg-gradient-to-br from-purple-500/20 to-cyan-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="relative w-16 h-16 rounded-2xl bg-white/[0.08] backdrop-blur-xl border border-white/[0.12] flex items-center justify-center mb-2 overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_4px_16px_rgba(0,0,0,0.2)]">
+                    {/* Inner gradient shine */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] via-transparent to-transparent" />
+                    <img 
+                      src={activity.icon} 
+                      alt={activity.label}
+                      className="w-12 h-12 object-contain relative z-10"
+                    />
+                  </div>
                 </div>
-                <span className="text-[10px] text-white/60 text-center whitespace-pre-line leading-tight">
+                <span className="text-[10px] text-white/60 text-center whitespace-pre-line leading-tight group-hover:text-white/80 transition-colors">
                   {activity.label}
                 </span>
               </motion.button>
