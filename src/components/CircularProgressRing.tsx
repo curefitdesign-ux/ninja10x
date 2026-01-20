@@ -49,62 +49,94 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
     // Determine which week is active (1-indexed)
     const activeWeekIndex = currentWeek - 1;
     
-    // Draw 12 bars in 4 groups of 3
+    // Draw 12 bars in 4 groups of 3 with liquid glass styling
     for (let week = 0; week < 4; week++) {
       // Calculate the start and end angles for this week's group background
       const weekStartAngle = currentAngle;
       const weekEndAngle = currentAngle + (barAngle * 3) + (barGap * 2);
       const isActiveWeek = week === activeWeekIndex;
+      const midAngleWeek = toRad((weekStartAngle + weekEndAngle) / 2);
       
-      // Draw glassmorphic background behind each group of 3 bars
-      // Layer 1: Outer soft blur glow
+      // LIQUID GLASS PILL BACKGROUND - Layer 1: Outer blur/glow
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, ringRadius, toRad(weekStartAngle - 4), toRad(weekEndAngle + 4));
+      ctx.lineCap = "round";
+      ctx.lineWidth = strokeWidth + 20;
+      const outerGlowColor = isActiveWeek 
+        ? "rgba(57, 255, 133, 0.12)" 
+        : "rgba(255, 255, 255, 0.06)";
+      ctx.strokeStyle = outerGlowColor;
+      ctx.filter = "blur(8px)";
+      ctx.stroke();
+      ctx.restore();
+      
+      // LIQUID GLASS PILL BACKGROUND - Layer 2: Glass body with gradient
       ctx.save();
       ctx.beginPath();
       ctx.arc(centerX, centerY, ringRadius, toRad(weekStartAngle - 3), toRad(weekEndAngle + 3));
       ctx.lineCap = "round";
-      ctx.lineWidth = strokeWidth + 14;
-      ctx.strokeStyle = isActiveWeek ? "rgba(57, 255, 133, 0.08)" : "rgba(255, 255, 255, 0.04)";
-      ctx.filter = "blur(4px)";
-      ctx.stroke();
-      ctx.restore();
+      ctx.lineWidth = strokeWidth + 16;
       
-      // Layer 2: Mid glass layer with gradient
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, ringRadius, toRad(weekStartAngle - 2), toRad(weekEndAngle + 2));
-      ctx.lineCap = "round";
-      ctx.lineWidth = strokeWidth + 10;
-      
-      // Create gradient for glass effect
-      const midAngleWeek = toRad((weekStartAngle + weekEndAngle) / 2);
+      // Create gradient for liquid glass effect
       const glassGradient = ctx.createLinearGradient(
-        centerX + Math.cos(midAngleWeek) * (ringRadius - 20),
-        centerY + Math.sin(midAngleWeek) * (ringRadius - 20),
-        centerX + Math.cos(midAngleWeek) * (ringRadius + 20),
-        centerY + Math.sin(midAngleWeek) * (ringRadius + 20)
+        centerX + Math.cos(midAngleWeek - 0.5) * (ringRadius - 30),
+        centerY + Math.sin(midAngleWeek - 0.5) * (ringRadius - 30),
+        centerX + Math.cos(midAngleWeek + 0.5) * (ringRadius + 30),
+        centerY + Math.sin(midAngleWeek + 0.5) * (ringRadius + 30)
       );
       
       if (isActiveWeek) {
-        glassGradient.addColorStop(0, "rgba(57, 255, 133, 0.15)");
-        glassGradient.addColorStop(0.5, "rgba(57, 255, 133, 0.08)");
-        glassGradient.addColorStop(1, "rgba(57, 255, 133, 0.12)");
+        glassGradient.addColorStop(0, "rgba(57, 255, 133, 0.18)");
+        glassGradient.addColorStop(0.3, "rgba(57, 255, 133, 0.08)");
+        glassGradient.addColorStop(0.7, "rgba(57, 255, 133, 0.12)");
+        glassGradient.addColorStop(1, "rgba(100, 255, 160, 0.15)");
       } else {
-        glassGradient.addColorStop(0, "rgba(255, 255, 255, 0.12)");
-        glassGradient.addColorStop(0.5, "rgba(255, 255, 255, 0.06)");
-        glassGradient.addColorStop(1, "rgba(255, 255, 255, 0.1)");
+        glassGradient.addColorStop(0, "rgba(255, 255, 255, 0.14)");
+        glassGradient.addColorStop(0.3, "rgba(255, 255, 255, 0.06)");
+        glassGradient.addColorStop(0.7, "rgba(255, 255, 255, 0.08)");
+        glassGradient.addColorStop(1, "rgba(255, 255, 255, 0.12)");
       }
       
       ctx.strokeStyle = glassGradient;
       ctx.stroke();
-      
-      // Add green glow for active week
-      if (isActiveWeek) {
-        ctx.shadowColor = "rgba(57, 255, 133, 0.5)";
-        ctx.shadowBlur = 12;
-        ctx.stroke();
-      }
       ctx.restore();
       
+      // LIQUID GLASS PILL BACKGROUND - Layer 3: Inner highlight (top edge shine)
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, ringRadius - 6, toRad(weekStartAngle - 2), toRad(weekEndAngle + 2));
+      ctx.lineCap = "round";
+      ctx.lineWidth = 3;
+      
+      const innerShineGradient = ctx.createLinearGradient(
+        centerX + Math.cos(toRad(weekStartAngle)) * ringRadius,
+        centerY + Math.sin(toRad(weekStartAngle)) * ringRadius,
+        centerX + Math.cos(toRad(weekEndAngle)) * ringRadius,
+        centerY + Math.sin(toRad(weekEndAngle)) * ringRadius
+      );
+      innerShineGradient.addColorStop(0, "rgba(255, 255, 255, 0.25)");
+      innerShineGradient.addColorStop(0.5, "rgba(255, 255, 255, 0.08)");
+      innerShineGradient.addColorStop(1, "rgba(255, 255, 255, 0.2)");
+      
+      ctx.strokeStyle = innerShineGradient;
+      ctx.stroke();
+      ctx.restore();
+      
+      // LIQUID GLASS PILL BACKGROUND - Layer 4: Border/edge definition
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, ringRadius, toRad(weekStartAngle - 3), toRad(weekEndAngle + 3));
+      ctx.lineCap = "round";
+      ctx.lineWidth = strokeWidth + 16;
+      ctx.strokeStyle = isActiveWeek 
+        ? "rgba(57, 255, 133, 0.25)" 
+        : "rgba(255, 255, 255, 0.1)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+      
+      // Draw the 3 individual bars within this pill
       for (let bar = 0; bar < 3; bar++) {
         const barIndex = week * 3 + bar + 1; // 1-indexed
         const isActiveBar = barIndex <= activeBarCount;
@@ -115,56 +147,63 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
         const midAngle = toRad((barStart + barEnd) / 2);
         
         if (isActiveBar) {
-          // Draw outer glow layer first (bleeds outside the ring)
+          // Active bar outer glow
           ctx.save();
           ctx.beginPath();
           ctx.arc(centerX, centerY, ringRadius, toRad(barStart), toRad(barEnd));
           ctx.lineCap = "round";
           ctx.lineWidth = strokeWidth;
-          ctx.strokeStyle = "rgba(57, 255, 133, 0.4)";
-          ctx.shadowColor = "rgba(57, 255, 133, 0.7)";
-          ctx.shadowBlur = 18;
+          ctx.strokeStyle = "rgba(57, 255, 133, 0.5)";
+          ctx.shadowColor = "rgba(57, 255, 133, 0.8)";
+          ctx.shadowBlur = 20;
           ctx.shadowOffsetX = Math.cos(midAngle) * 2;
           ctx.shadowOffsetY = Math.sin(midAngle) * 2;
           ctx.stroke();
           ctx.restore();
           
-          // Draw main active bar with radial gradient (inner brighter)
+          // Active bar with liquid gradient
           ctx.save();
           ctx.beginPath();
           ctx.arc(centerX, centerY, ringRadius, toRad(barStart), toRad(barEnd));
           ctx.lineCap = "round";
           ctx.lineWidth = strokeWidth;
           
-          // Create radial gradient from inner to outer edge
+          const perpAngle = midAngle;
           const innerRadius = ringRadius - strokeWidth / 2;
           const outerRadius = ringRadius + strokeWidth / 2;
-          const gradientCenterX = centerX + Math.cos(midAngle) * ringRadius;
-          const gradientCenterY = centerY + Math.sin(midAngle) * ringRadius;
           
-          // Linear gradient perpendicular to the arc (inner to outer)
-          const perpAngle = midAngle; // Points outward from center
-          const gradient = ctx.createLinearGradient(
+          const barGradient = ctx.createLinearGradient(
             centerX + Math.cos(perpAngle) * innerRadius,
             centerY + Math.sin(perpAngle) * innerRadius,
             centerX + Math.cos(perpAngle) * outerRadius,
             centerY + Math.sin(perpAngle) * outerRadius
           );
-          gradient.addColorStop(0, "rgba(160, 255, 200, 1)"); // Inner edge - brighter
-          gradient.addColorStop(0.3, "rgba(57, 255, 133, 1)"); // Neon green
-          gradient.addColorStop(1, "rgba(40, 220, 100, 0.9)"); // Outer edge - slightly dimmer
+          barGradient.addColorStop(0, "rgba(180, 255, 220, 1)");
+          barGradient.addColorStop(0.4, "rgba(57, 255, 133, 1)");
+          barGradient.addColorStop(1, "rgba(30, 200, 90, 0.95)");
           
-          ctx.strokeStyle = gradient;
+          ctx.strokeStyle = barGradient;
           ctx.stroke();
           ctx.restore();
         } else {
-          // Inactive bar - grey
+          // Inactive bar - subtle grey with liquid glass feel
           ctx.save();
           ctx.beginPath();
           ctx.arc(centerX, centerY, ringRadius, toRad(barStart), toRad(barEnd));
           ctx.lineCap = "round";
           ctx.lineWidth = strokeWidth;
-          ctx.strokeStyle = "rgba(180, 180, 190, 0.45)";
+          
+          const inactiveGradient = ctx.createLinearGradient(
+            centerX + Math.cos(midAngle) * (ringRadius - strokeWidth),
+            centerY + Math.sin(midAngle) * (ringRadius - strokeWidth),
+            centerX + Math.cos(midAngle) * (ringRadius + strokeWidth),
+            centerY + Math.sin(midAngle) * (ringRadius + strokeWidth)
+          );
+          inactiveGradient.addColorStop(0, "rgba(200, 200, 210, 0.5)");
+          inactiveGradient.addColorStop(0.5, "rgba(160, 160, 175, 0.4)");
+          inactiveGradient.addColorStop(1, "rgba(180, 180, 195, 0.45)");
+          
+          ctx.strokeStyle = inactiveGradient;
           ctx.stroke();
           ctx.restore();
         }
