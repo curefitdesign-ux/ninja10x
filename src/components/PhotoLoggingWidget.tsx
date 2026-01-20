@@ -55,24 +55,39 @@ interface CardClusterProps {
   onCardTap: (dayIndex: number, photo: LoggedPhoto | null) => void;
 }
 
+// Shared spring config for ultra-smooth, coordinated animations
+const smoothSpring = {
+  type: "spring" as const,
+  stiffness: 120,
+  damping: 20,
+  mass: 0.8,
+};
+
+const fastSpring = {
+  type: "spring" as const,
+  stiffness: 200,
+  damping: 25,
+  mass: 0.6,
+};
+
 const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCardTap }: CardClusterProps) => {
   const baseCardWidth = 52;
   const baseCardHeight = 70;
   const borderRadius = 12;
   
-  // Scale based on state - larger for expanded
-  const scale = isExpanded ? 1.55 : 0.75;
+  // Scale based on state - larger for expanded, smaller when other week is expanded
+  const scale = isExpanded ? 1.55 : 0.8;
   const cardWidth = baseCardWidth * scale;
   const cardHeight = baseCardHeight * scale;
   
   // Check if any photo is logged in this week
   const hasAnyPhoto = photos.some(p => p !== null);
   
-  // Card positions for stacked state - tighter stack
+  // Card positions for stacked state - tighter stack with subtle rotation
   const getStackedPositions = (index: number) => {
-    const rotations = [-8, 5, -3];
-    const xOffsets = [-4, 8, 1];
-    const yOffsets = [2, 5, 8];
+    const rotations = [-6, 4, -2];
+    const xOffsets = [-3, 6, 0];
+    const yOffsets = [1, 4, 7];
     return {
       rotate: rotations[index],
       x: xOffsets[index],
@@ -97,15 +112,18 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
     const isActiveDay = isActiveWeek && !hasPhoto && index === photos.findIndex(p => p === null);
     const dayNumber = weekIndex * 3 + index + 1;
     
-    // Expanded position - fan out from center
-    const expandedX = (index - 1) * (cardWidth + 16);
+    // Expanded position - fan out from center with more spacing
+    const expandedX = (index - 1) * (cardWidth + 20);
     
     const stackedPos = getStackedPositions(index);
+    
+    // Stagger delay for fan-out effect
+    const staggerDelay = isExpanded ? index * 0.04 : (2 - index) * 0.03;
     
     return (
       <motion.button
         key={index}
-        className={`absolute rounded-xl overflow-hidden border shadow-lg ${
+        className={`absolute rounded-xl overflow-hidden border shadow-lg will-change-transform ${
           hasPhoto 
             ? 'border-emerald-400/40' 
             : isActiveDay 
@@ -116,7 +134,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           width: cardWidth,
           height: cardHeight,
           borderRadius: borderRadius * scale,
-          background: hasPhoto ? 'transparent' : isActiveDay ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.05)',
+          background: hasPhoto ? 'transparent' : isActiveDay ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.06)',
           backdropFilter: hasPhoto ? 'none' : 'blur(16px)',
           zIndex,
         }}
@@ -143,13 +161,12 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
               }
         }
         transition={{
-          type: "spring",
-          stiffness: 180,
-          damping: 24,
-          mass: 1.2,
+          ...smoothSpring,
+          delay: staggerDelay,
+          opacity: { duration: 0.25, delay: staggerDelay },
         }}
         onClick={(e) => handleCardClick(e, index, photo)}
-        whileTap={{ scale: 0.95 }}
+        whileTap={{ scale: 0.96 }}
       >
         {/* Photo or empty state */}
         {hasPhoto ? (
@@ -167,9 +184,13 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
             {isActiveDay && isExpanded && (
               <motion.div 
                 className="p-3 rounded-full bg-emerald-500/20 backdrop-blur-sm"
-                initial={{ scale: 0, opacity: 0 }}
+                initial={{ scale: 0.5, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.25, type: "spring", stiffness: 400 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                transition={{ 
+                  delay: 0.15, 
+                  ...fastSpring,
+                }}
               >
                 <Upload className="w-6 h-6 text-emerald-400" strokeWidth={2.5} />
               </motion.div>
@@ -178,30 +199,33 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
         )}
         
         {/* Day number indicator */}
-        {isExpanded && (
-          <motion.div 
-            className="absolute bottom-2 left-1/2 transform -translate-x-1/2"
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <span className={`text-xs font-medium ${isActiveDay ? 'text-emerald-400' : 'text-white/50'}`}>
-              D{dayNumber}
-            </span>
-          </motion.div>
-        )}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div 
+              className="absolute bottom-2 left-1/2"
+              initial={{ opacity: 0, y: 6, x: "-50%" }}
+              animate={{ opacity: 1, y: 0, x: "-50%" }}
+              exit={{ opacity: 0, y: 4, x: "-50%" }}
+              transition={{ delay: 0.1 + index * 0.03, duration: 0.2 }}
+            >
+              <span className={`text-xs font-medium ${isActiveDay ? 'text-emerald-400' : 'text-white/50'}`}>
+                D{dayNumber}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.button>
     );
   };
 
   // Calculate container width based on expanded state
-  const containerWidth = isExpanded ? (cardWidth * 3 + 52) : (baseCardWidth * 0.75 + 20);
+  const containerWidth = isExpanded ? (cardWidth * 3 + 60) : (baseCardWidth * 0.8 + 16);
   const containerHeight = cardHeight + 24;
 
   return (
     <motion.div
       onClick={onTap}
-      className="relative flex-shrink-0 cursor-pointer"
+      className="relative flex-shrink-0 cursor-pointer will-change-transform"
       style={{ 
         height: containerHeight,
       }}
@@ -209,49 +233,50 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
       animate={{
         width: containerWidth,
         zIndex: isExpanded ? 10 : 1,
+        scale: isExpanded ? 1 : 0.95,
       }}
-      transition={{
-        type: "spring",
-        stiffness: 180,
-        damping: 24,
-        mass: 1.2,
-      }}
+      transition={smoothSpring}
     >
       {/* Glow effect for active/expanded week */}
-      {isExpanded && (
-        <motion.div 
-          className="absolute rounded-3xl blur-2xl pointer-events-none"
-          style={{
-            width: containerWidth * 0.9,
-            height: cardHeight * 0.7,
-            top: "50%",
-            left: "50%",
-            zIndex: 0,
-            background: hasAnyPhoto 
-              ? "rgba(52, 211, 153, 0.12)" 
-              : isActiveWeek 
-                ? "rgba(52, 211, 153, 0.08)"
-                : "rgba(255,255,255,0.04)",
-          }}
-          initial={{ opacity: 0, x: "-50%", y: "-50%" }}
-          animate={{
-            opacity: [0.5, 0.8, 0.5],
-            x: "-50%",
-            y: "-50%",
-          }}
-          transition={{
-            opacity: {
-              duration: 2.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            },
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div 
+            className="absolute rounded-3xl blur-2xl pointer-events-none"
+            style={{
+              width: containerWidth * 0.9,
+              height: cardHeight * 0.7,
+              top: "50%",
+              left: "50%",
+              zIndex: 0,
+              background: hasAnyPhoto 
+                ? "rgba(52, 211, 153, 0.12)" 
+                : isActiveWeek 
+                  ? "rgba(52, 211, 153, 0.08)"
+                  : "rgba(255,255,255,0.04)",
+            }}
+            initial={{ opacity: 0, scale: 0.8, x: "-50%", y: "-50%" }}
+            animate={{
+              opacity: [0.5, 0.7, 0.5],
+              scale: 1,
+              x: "-50%",
+              y: "-50%",
+            }}
+            exit={{ opacity: 0, scale: 0.8, x: "-50%", y: "-50%" }}
+            transition={{
+              opacity: {
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              },
+              scale: { ...smoothSpring },
+            }}
+          />
+        )}
+      </AnimatePresence>
       
       {/* Render 3 cards */}
       {[0, 1, 2].map((index) => 
-        renderCard(index, index + 1, [0.4, 0.6, 0.85][index])
+        renderCard(index, index + 1, [0.5, 0.7, 0.9][index])
       )}
     </motion.div>
   );
@@ -390,6 +415,10 @@ const PhotoLoggingWidget = ({
               const weekPhotos = getWeekPhotos(weekIndex);
               const isFirstWeek = weekIndex === 0;
               
+              // Context-aware: other weeks scale down when one expands
+              const anyOtherExpanded = Array.from(expandedWeeks).some(w => w !== weekIndex);
+              const contextScale = isExpanded ? 1 : (anyOtherExpanded ? 0.92 : 1);
+              
               return (
                 <motion.div
                   key={weekIndex}
@@ -397,15 +426,9 @@ const PhotoLoggingWidget = ({
                   animate={{ 
                     opacity: 1, 
                     y: 0,
-                    scale: 1,
+                    scale: contextScale,
                   }}
-                  transition={{ 
-                    duration: 0.5, 
-                    delay: 0.1 * displayIdx,
-                    type: "spring",
-                    stiffness: 200,
-                    damping: 20,
-                  }}
+                  transition={smoothSpring}
                   layout
                   layoutId={`week-${weekIndex}`}
                   style={{
