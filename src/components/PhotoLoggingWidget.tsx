@@ -144,9 +144,9 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
         }
         transition={{
           type: "spring",
-          stiffness: 320,
-          damping: 28,
-          mass: 0.8,
+          stiffness: 180,
+          damping: 24,
+          mass: 1.2,
         }}
         onClick={(e) => handleCardClick(e, index, photo)}
         whileTap={{ scale: 0.95 }}
@@ -212,8 +212,9 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
       }}
       transition={{
         type: "spring",
-        stiffness: 300,
-        damping: 26,
+        stiffness: 180,
+        damping: 24,
+        mass: 1.2,
       }}
     >
       {/* Glow effect for active/expanded week */}
@@ -408,7 +409,7 @@ const PhotoLoggingWidget = ({
                   layout
                   layoutId={`week-${weekIndex}`}
                   style={{
-                    marginLeft: isFirstWeek ? 32 : 0,
+                    marginLeft: isFirstWeek ? 100 : 0,
                   }}
                 >
                   <CardCluster 
