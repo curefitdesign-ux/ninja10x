@@ -206,18 +206,12 @@ const Activity = () => {
                 whileHover={{ scale: 1.02 }}
                 className="flex flex-col items-center group"
               >
-                <div className="relative">
-                  {/* Glow on hover */}
-                  <div className="absolute -inset-1 bg-gradient-to-br from-purple-500/20 to-cyan-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="relative w-20 h-20 rounded-2xl bg-white/[0.06] backdrop-blur-xl border border-white/[0.1] flex items-center justify-center mb-2 overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_4px_16px_rgba(0,0,0,0.2)]">
-                    {/* Inner gradient shine */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-transparent" />
-                    <img 
-                      src={activity.icon} 
-                      alt={activity.label}
-                      className="w-14 h-14 object-contain relative z-10"
-                    />
-                  </div>
+                <div className="relative w-20 h-20 flex items-center justify-center mb-2">
+                  <img 
+                    src={activity.icon} 
+                    alt={activity.label}
+                    className="w-16 h-16 object-contain"
+                  />
                 </div>
                 <span className="text-[10px] text-white/60 text-center whitespace-pre-line leading-tight group-hover:text-white/80 transition-colors">
                   {activity.label}
