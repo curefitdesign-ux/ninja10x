@@ -104,44 +104,35 @@ const Activity = () => {
           </div>
         </div>
 
-        {/* Mascot Section with Circular Progress - Glassmorphic Container */}
+        {/* Mascot Section with Circular Progress - No Container */}
         <div className="relative px-4 mt-6">
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative"
+            className="relative flex flex-col items-center"
           >
-            {/* Outer liquid glass container */}
-            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-white/[0.02] rounded-[2.5rem] blur-sm" />
-            <div className="relative bg-white/[0.04] backdrop-blur-2xl rounded-[2.5rem] border border-white/[0.08] shadow-[inset_0_2px_4px_rgba(255,255,255,0.05),0_16px_64px_rgba(0,0,0,0.4)] p-6">
-              {/* Inner glow ring */}
-              <div className="absolute inset-4 rounded-[2rem] bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none" />
-              
-              <div className="relative flex flex-col items-center">
-                {/* Pixel-perfect Circular Progress Ring */}
-                <CircularProgressRing 
-                  currentDay={1} 
-                  currentWeek={1}
-                />
+            {/* Pixel-perfect Circular Progress Ring */}
+            <CircularProgressRing 
+              currentDay={1} 
+              currentWeek={1}
+            />
 
-                {/* Chat Bubble - Enhanced glassmorphic */}
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  className="mt-4 relative"
-                >
-                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-cyan-500/20 rounded-2xl blur-lg opacity-60" />
-                  <div className="relative bg-white/[0.1] backdrop-blur-xl rounded-2xl px-6 py-3 text-center border border-white/[0.15] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
-                    <p className="text-sm text-white/90">
-                      Hey, I'm Curo.<br />
-                      Let's build a workout together!
-                    </p>
-                  </div>
-                </motion.div>
+            {/* Chat Bubble - Enhanced glassmorphic */}
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="mt-4 relative"
+            >
+              <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-cyan-500/20 rounded-2xl blur-lg opacity-60" />
+              <div className="relative bg-white/[0.1] backdrop-blur-xl rounded-2xl px-6 py-3 text-center border border-white/[0.15] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+                <p className="text-sm text-white/90">
+                  Hey, I'm Curo.<br />
+                  Let's build a workout together!
+                </p>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
 
