@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Plus, X, Play } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 // Sample logged photos for demo
@@ -20,6 +20,15 @@ const CardCluster = ({ type, yOffset = 0 }: CardClusterProps) => {
   const cardHeight = 68;
   const borderRadius = 12;
   
+  // Shared translucent blurred card style
+  const baseCardStyle = {
+    width: cardWidth,
+    height: cardHeight,
+    borderRadius,
+    background: "rgba(255,255,255,0.08)",
+    backdropFilter: "blur(12px)",
+  };
+  
   if (type === "logged") {
     return (
       <motion.button
@@ -36,9 +45,7 @@ const CardCluster = ({ type, yOffset = 0 }: CardClusterProps) => {
         <div 
           className="absolute rounded-xl overflow-hidden border-2 border-white/30 shadow-lg"
           style={{
-            width: cardWidth,
-            height: cardHeight,
-            borderRadius,
+            ...baseCardStyle,
             transform: "rotate(-8deg) translateX(-4px)",
             top: 0,
             left: 4,
@@ -48,7 +55,7 @@ const CardCluster = ({ type, yOffset = 0 }: CardClusterProps) => {
           <img 
             src={loggedPhotos[2]} 
             alt="Photo 3"
-            className="w-full h-full object-cover brightness-75"
+            className="w-full h-full object-cover opacity-60"
           />
         </div>
         
@@ -56,9 +63,7 @@ const CardCluster = ({ type, yOffset = 0 }: CardClusterProps) => {
         <div 
           className="absolute rounded-xl overflow-hidden border-2 border-white/40 shadow-lg"
           style={{
-            width: cardWidth,
-            height: cardHeight,
-            borderRadius,
+            ...baseCardStyle,
             transform: "rotate(6deg) translateX(8px)",
             top: 4,
             left: 12,
@@ -68,17 +73,15 @@ const CardCluster = ({ type, yOffset = 0 }: CardClusterProps) => {
           <img 
             src={loggedPhotos[1]} 
             alt="Photo 2"
-            className="w-full h-full object-cover brightness-90"
+            className="w-full h-full object-cover opacity-70"
           />
         </div>
         
         {/* Front card */}
         <div 
-          className="absolute rounded-xl overflow-hidden border-2 border-white/60 shadow-xl"
+          className="absolute rounded-xl overflow-hidden border-2 border-white/50 shadow-xl"
           style={{
-            width: cardWidth,
-            height: cardHeight,
-            borderRadius,
+            ...baseCardStyle,
             transform: "rotate(-3deg)",
             top: 8,
             left: 0,
@@ -88,7 +91,7 @@ const CardCluster = ({ type, yOffset = 0 }: CardClusterProps) => {
           <img 
             src={loggedPhotos[0]} 
             alt="Photo 1"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover opacity-80"
           />
         </div>
       </motion.button>
@@ -107,7 +110,7 @@ const CardCluster = ({ type, yOffset = 0 }: CardClusterProps) => {
           marginTop: yOffset,
         }}
       >
-        {/* Glow effect behind */}
+        {/* Subtle glow effect behind */}
         <div 
           className="absolute rounded-2xl blur-xl"
           style={{
@@ -117,57 +120,51 @@ const CardCluster = ({ type, yOffset = 0 }: CardClusterProps) => {
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 0,
-            background: "linear-gradient(180deg, rgba(94,234,212,0.35) 0%, rgba(45,212,191,0.2) 50%, transparent 100%)",
+            background: "rgba(255,255,255,0.15)",
           }}
         />
         
-        {/* Back card with blurred photo */}
+        {/* Third card (back) */}
         <div 
           className="absolute rounded-xl overflow-hidden border border-white/20 shadow-lg"
           style={{
-            width: cardWidth,
-            height: cardHeight,
-            borderRadius,
+            ...baseCardStyle,
+            transform: "rotate(-6deg)",
+            top: 0,
+            left: 4,
+            zIndex: 1,
+          }}
+        />
+        
+        {/* Second card (middle) - with X icon */}
+        <div 
+          className="absolute rounded-xl overflow-hidden border border-white/25 shadow-lg"
+          style={{
+            ...baseCardStyle,
             transform: "rotate(8deg) translateX(10px)",
             top: 4,
             left: 16,
-            zIndex: 1,
-            background: "linear-gradient(135deg, rgba(120,119,198,0.4) 0%, rgba(80,80,120,0.5) 100%)",
-            backdropFilter: "blur(4px)",
+            zIndex: 2,
           }}
         >
-          <img 
-            src={loggedPhotos[0]} 
-            alt="Preview"
-            className="w-full h-full object-cover opacity-40 blur-[1px]"
-          />
           {/* X icon */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <X className="w-5 h-5 text-white/80" strokeWidth={2.5} />
+            <X className="w-5 h-5 text-white/60" strokeWidth={2.5} />
           </div>
         </div>
         
-        {/* Front card - translucent with plus */}
+        {/* Front card - with plus icon */}
         <div 
           className="absolute rounded-xl overflow-hidden border border-white/30 shadow-xl"
           style={{
-            width: cardWidth,
-            height: cardHeight,
-            borderRadius,
+            ...baseCardStyle,
             transform: "rotate(-5deg)",
             top: 8,
             left: 0,
-            zIndex: 2,
-            background: "linear-gradient(145deg, rgba(100,100,150,0.6) 0%, rgba(70,70,100,0.7) 100%)",
-            backdropFilter: "blur(8px)",
+            zIndex: 3,
           }}
         >
-          <img 
-            src={loggedPhotos[0]} 
-            alt="Preview"
-            className="w-full h-full object-cover opacity-30 blur-[2px]"
-          />
-          {/* Plus icon - teal color */}
+          {/* Plus icon */}
           <div className="absolute inset-0 flex items-center justify-center">
             <Plus className="w-6 h-6 text-teal-400" strokeWidth={2.5} />
           </div>
@@ -176,7 +173,7 @@ const CardCluster = ({ type, yOffset = 0 }: CardClusterProps) => {
     );
   }
   
-  // Future placeholder cards
+  // Future placeholder cards - same 3-card layout
   return (
     <div 
       className="relative flex-shrink-0"
@@ -190,14 +187,12 @@ const CardCluster = ({ type, yOffset = 0 }: CardClusterProps) => {
       <div 
         className="absolute rounded-xl border border-white/10"
         style={{
-          width: cardWidth,
-          height: cardHeight,
-          borderRadius,
+          ...baseCardStyle,
+          opacity: 0.6,
           transform: "rotate(-6deg)",
           top: 0,
           left: 4,
           zIndex: 1,
-          background: "rgba(100,95,130,0.35)",
         }}
       />
       
@@ -205,14 +200,12 @@ const CardCluster = ({ type, yOffset = 0 }: CardClusterProps) => {
       <div 
         className="absolute rounded-xl border border-white/[0.12]"
         style={{
-          width: cardWidth,
-          height: cardHeight,
-          borderRadius,
+          ...baseCardStyle,
+          opacity: 0.7,
           transform: "rotate(5deg) translateX(6px)",
           top: 4,
           left: 10,
           zIndex: 2,
-          background: "rgba(110,105,140,0.4)",
         }}
       />
       
@@ -220,14 +213,12 @@ const CardCluster = ({ type, yOffset = 0 }: CardClusterProps) => {
       <div 
         className="absolute rounded-xl border border-white/[0.15]"
         style={{
-          width: cardWidth,
-          height: cardHeight,
-          borderRadius,
+          ...baseCardStyle,
+          opacity: 0.8,
           transform: "rotate(-2deg)",
           top: 8,
           left: 0,
           zIndex: 3,
-          background: "rgba(120,115,150,0.45)",
         }}
       />
     </div>
@@ -235,8 +226,6 @@ const CardCluster = ({ type, yOffset = 0 }: CardClusterProps) => {
 };
 
 const PhotoLoggingWidget = () => {
-  const navigate = useNavigate();
-  
   // 4 clusters: logged, add, future, future
   const clusters = [
     { type: "logged" as const, yOffset: 8 },
@@ -277,16 +266,6 @@ const PhotoLoggingWidget = () => {
           </motion.div>
         ))}
       </div>
-      
-      {/* Play Button - positioned below the logged cards */}
-      <motion.button
-        whileTap={{ scale: 0.95 }}
-        whileHover={{ scale: 1.05 }}
-        onClick={() => navigate("/")}
-        className="absolute left-5 bottom-2 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-lg z-20"
-      >
-        <Play className="w-4 h-4 text-foreground fill-foreground ml-0.5" />
-      </motion.button>
     </div>
   );
 };
