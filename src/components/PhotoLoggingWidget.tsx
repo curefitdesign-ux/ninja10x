@@ -1,6 +1,7 @@
-import { motion } from "framer-motion";
-import { Plus, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 // Sample logged photos for demo
 const loggedPhotos = [
@@ -11,231 +12,198 @@ const loggedPhotos = [
 
 interface CardClusterProps {
   type: "logged" | "add" | "future";
-  yOffset?: number;
+  isCurrentWeek?: boolean;
+  isExpanded?: boolean;
+  weekIndex: number;
+  onTap?: () => void;
 }
 
-const CardCluster = ({ type, yOffset = 0 }: CardClusterProps) => {
+const CardCluster = ({ type, isCurrentWeek = false, isExpanded = false, weekIndex, onTap }: CardClusterProps) => {
   const navigate = useNavigate();
-  const cardWidth = 52;
-  const cardHeight = 68;
+  const baseCardWidth = 52;
+  const baseCardHeight = 68;
   const borderRadius = 12;
+  
+  // Scale up for current week
+  const scale = isCurrentWeek ? 1.3 : 1;
+  const cardWidth = baseCardWidth * scale;
+  const cardHeight = baseCardHeight * scale;
   
   // Shared translucent blurred card style
   const baseCardStyle = {
     width: cardWidth,
     height: cardHeight,
-    borderRadius,
+    borderRadius: borderRadius * scale,
     background: "rgba(255,255,255,0.08)",
     backdropFilter: "blur(12px)",
   };
-  
-  if (type === "logged") {
+
+  // Card positions for expanded state (3 cards spread out)
+  const getExpandedPositions = (index: number) => {
+    if (!isExpanded) return {};
+    const offsets = [-65, 0, 65];
+    return {
+      left: `calc(50% + ${offsets[index]}px)`,
+      transform: `translateX(-50%) rotate(0deg)`,
+    };
+  };
+
+  // Card positions for stacked state
+  const getStackedPositions = (index: number) => {
+    const rotations = [-8, 6, -3];
+    const xOffsets = [-4, 8, 0];
+    const yOffsets = [0, 4, 8];
+    const leftOffsets = [4, 12, 0];
+    return {
+      transform: `rotate(${rotations[index]}deg) translateX(${xOffsets[index]}px)`,
+      top: yOffsets[index],
+      left: leftOffsets[index],
+    };
+  };
+
+  const renderCard = (index: number, zIndex: number, opacity: number) => {
+    const stackedPos = getStackedPositions(index);
+    const isActiveDay = isCurrentWeek && index === 2; // Front card of current week is active
+    
     return (
-      <motion.button
-        whileTap={{ scale: 0.95 }}
-        onClick={() => navigate("/")}
-        className="relative flex-shrink-0"
-        style={{ 
-          width: cardWidth * 1.5,
-          height: cardHeight * 1.3,
-          marginTop: yOffset,
+      <motion.div
+        key={index}
+        className={`absolute rounded-xl overflow-hidden border shadow-lg ${
+          isCurrentWeek ? 'border-white/40' : 'border-white/20'
+        }`}
+        style={{
+          ...baseCardStyle,
+          zIndex,
+        }}
+        initial={false}
+        animate={
+          isExpanded
+            ? {
+                left: `calc(50% + ${[-65, 0, 65][index]}px)`,
+                top: 10,
+                rotate: 0,
+                x: "-50%",
+                opacity: 1,
+                scale: 1.1,
+              }
+            : {
+                left: stackedPos.left,
+                top: stackedPos.top,
+                rotate: [-8, 6, -3][index],
+                x: [-4, 8, 0][index],
+                opacity: opacity,
+                scale: 1,
+              }
+        }
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 25,
         }}
       >
-        {/* Third card (back) */}
-        <div 
-          className="absolute rounded-xl overflow-hidden border-2 border-white/30 shadow-lg"
-          style={{
-            ...baseCardStyle,
-            transform: "rotate(-8deg) translateX(-4px)",
-            top: 0,
-            left: 4,
-            zIndex: 1,
-          }}
-        >
+        {type === "logged" ? (
           <img 
-            src={loggedPhotos[2]} 
-            alt="Photo 3"
-            className="w-full h-full object-cover opacity-60"
+            src={loggedPhotos[index]} 
+            alt={`Photo ${index + 1}`}
+            className="w-full h-full object-cover"
+            style={{ opacity: opacity }}
           />
-        </div>
+        ) : null}
         
-        {/* Second card (middle) */}
-        <div 
-          className="absolute rounded-xl overflow-hidden border-2 border-white/40 shadow-lg"
-          style={{
-            ...baseCardStyle,
-            transform: "rotate(6deg) translateX(8px)",
-            top: 4,
-            left: 12,
-            zIndex: 2,
-          }}
-        >
-          <img 
-            src={loggedPhotos[1]} 
-            alt="Photo 2"
-            className="w-full h-full object-cover opacity-70"
-          />
-        </div>
-        
-        {/* Front card */}
-        <div 
-          className="absolute rounded-xl overflow-hidden border-2 border-white/50 shadow-xl"
-          style={{
-            ...baseCardStyle,
-            transform: "rotate(-3deg)",
-            top: 8,
-            left: 0,
-            zIndex: 3,
-          }}
-        >
-          <img 
-            src={loggedPhotos[0]} 
-            alt="Photo 1"
-            className="w-full h-full object-cover opacity-80"
-          />
-        </div>
-      </motion.button>
+        {/* Upload icon for active day card */}
+        {isActiveDay && type === "add" && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="p-2 rounded-full bg-white/10 backdrop-blur-sm">
+              <Upload className="w-5 h-5 text-white/80" strokeWidth={2} />
+            </div>
+          </div>
+        )}
+      </motion.div>
     );
-  }
-  
-  if (type === "add") {
-    return (
-      <motion.button
-        whileTap={{ scale: 0.95 }}
-        onClick={() => navigate("/")}
-        className="relative flex-shrink-0"
-        style={{ 
-          width: cardWidth * 1.6,
-          height: cardHeight * 1.3,
-          marginTop: yOffset,
-        }}
-      >
-        {/* Subtle glow effect behind */}
-        <div 
+  };
+
+  return (
+    <motion.button
+      whileTap={{ scale: 0.95 }}
+      onClick={onTap}
+      className="relative flex-shrink-0"
+      style={{ 
+        width: isExpanded ? 200 : cardWidth * 1.5,
+        height: cardHeight * 1.3,
+      }}
+      animate={{
+        scale: isCurrentWeek && !isExpanded ? 1 : 1,
+        zIndex: isCurrentWeek ? 10 : 1,
+      }}
+    >
+      {/* Glow effect for current week */}
+      {isCurrentWeek && (
+        <motion.div 
           className="absolute rounded-2xl blur-xl"
           style={{
-            width: cardWidth * 1.4,
-            height: cardHeight * 0.8,
-            top: -12,
+            width: cardWidth * 1.8,
+            height: cardHeight * 0.9,
+            top: -16,
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 0,
-            background: "rgba(255,255,255,0.15)",
+            background: "rgba(255,255,255,0.12)",
+          }}
+          animate={{
+            opacity: [0.8, 1, 0.8],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
           }}
         />
-        
-        {/* Third card (back) */}
-        <div 
-          className="absolute rounded-xl overflow-hidden border border-white/20 shadow-lg"
-          style={{
-            ...baseCardStyle,
-            transform: "rotate(-6deg)",
-            top: 0,
-            left: 4,
-            zIndex: 1,
-          }}
-        />
-        
-        {/* Second card (middle) - with X icon */}
-        <div 
-          className="absolute rounded-xl overflow-hidden border border-white/25 shadow-lg"
-          style={{
-            ...baseCardStyle,
-            transform: "rotate(8deg) translateX(10px)",
-            top: 4,
-            left: 16,
-            zIndex: 2,
-          }}
-        >
-          {/* X icon */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <X className="w-5 h-5 text-white/60" strokeWidth={2.5} />
-          </div>
-        </div>
-        
-        {/* Front card - with plus icon */}
-        <div 
-          className="absolute rounded-xl overflow-hidden border border-white/30 shadow-xl"
-          style={{
-            ...baseCardStyle,
-            transform: "rotate(-5deg)",
-            top: 8,
-            left: 0,
-            zIndex: 3,
-          }}
-        >
-          {/* Plus icon */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Plus className="w-6 h-6 text-teal-400" strokeWidth={2.5} />
-          </div>
-        </div>
-      </motion.button>
-    );
-  }
-  
-  // Future placeholder cards - same 3-card layout
-  return (
-    <div 
-      className="relative flex-shrink-0"
-      style={{ 
-        width: cardWidth * 1.5,
-        height: cardHeight * 1.3,
-        marginTop: yOffset,
-      }}
-    >
-      {/* Third card (back) */}
-      <div 
-        className="absolute rounded-xl border border-white/10"
-        style={{
-          ...baseCardStyle,
-          opacity: 0.6,
-          transform: "rotate(-6deg)",
-          top: 0,
-          left: 4,
-          zIndex: 1,
-        }}
-      />
+      )}
       
-      {/* Second card (middle) */}
-      <div 
-        className="absolute rounded-xl border border-white/[0.12]"
-        style={{
-          ...baseCardStyle,
-          opacity: 0.7,
-          transform: "rotate(5deg) translateX(6px)",
-          top: 4,
-          left: 10,
-          zIndex: 2,
-        }}
-      />
-      
-      {/* Front card */}
-      <div 
-        className="absolute rounded-xl border border-white/[0.15]"
-        style={{
-          ...baseCardStyle,
-          opacity: 0.8,
-          transform: "rotate(-2deg)",
-          top: 8,
-          left: 0,
-          zIndex: 3,
-        }}
-      />
-    </div>
+      {/* Render 3 cards */}
+      {[0, 1, 2].map((index) => 
+        renderCard(index, index + 1, [0.6, 0.7, 0.9][index])
+      )}
+    </motion.button>
   );
 };
 
 const PhotoLoggingWidget = () => {
-  // 4 clusters: logged, add, future, future
+  const [hasAnimatedInitial, setHasAnimatedInitial] = useState(false);
+  const [currentWeekHighlighted, setCurrentWeekHighlighted] = useState(false);
+  const [expandedWeek, setExpandedWeek] = useState<number | null>(null);
+  
+  // Current week index (1 = second week, the "add" week)
+  const currentWeekIndex = 1;
+  
+  // 4 clusters representing 4 weeks
   const clusters = [
-    { type: "logged" as const, yOffset: 8 },
-    { type: "add" as const, yOffset: 0 },
-    { type: "future" as const, yOffset: 8 },
-    { type: "future" as const, yOffset: 0 },
+    { type: "logged" as const, weekIndex: 0 },
+    { type: "add" as const, weekIndex: 1 },
+    { type: "future" as const, weekIndex: 2 },
+    { type: "future" as const, weekIndex: 3 },
   ];
   
+  // Animation sequence: show all cards, then highlight current week after delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setHasAnimatedInitial(true);
+      setCurrentWeekHighlighted(true);
+    }, 1500);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  const handleClusterTap = (weekIndex: number) => {
+    if (expandedWeek === weekIndex) {
+      setExpandedWeek(null);
+    } else {
+      setExpandedWeek(weekIndex);
+    }
+  };
+  
   return (
-    <div className="relative w-full" style={{ height: 140 }}>
+    <div className="relative w-full" style={{ height: 160 }}>
       {/* Timeline Path - SVG curved dashed line */}
       <svg 
         className="absolute inset-0 w-full h-full pointer-events-none"
@@ -254,18 +222,48 @@ const PhotoLoggingWidget = () => {
       </svg>
       
       {/* Cards Container - horizontal scroll */}
-      <div className="relative flex items-center justify-start gap-4 px-4 py-4 overflow-x-auto scrollbar-hide h-full">
-        {clusters.map((cluster, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 * idx }}
-          >
-            <CardCluster type={cluster.type} yOffset={cluster.yOffset} />
-          </motion.div>
-        ))}
-      </div>
+      <motion.div 
+        className="relative flex items-center justify-center gap-3 px-4 py-4 overflow-x-auto scrollbar-hide h-full"
+        animate={{
+          gap: expandedWeek !== null ? 8 : 12,
+        }}
+      >
+        <AnimatePresence>
+          {clusters.map((cluster, idx) => {
+            const isCurrentWeek = currentWeekHighlighted && idx === currentWeekIndex;
+            const isExpanded = expandedWeek === idx;
+            
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0,
+                  scale: isCurrentWeek && !isExpanded ? 1.05 : 1,
+                  x: isExpanded ? 0 : 0,
+                }}
+                transition={{ 
+                  duration: 0.5, 
+                  delay: hasAnimatedInitial ? 0 : 0.1 * idx,
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 20,
+                }}
+                layout
+              >
+                <CardCluster 
+                  type={cluster.type} 
+                  weekIndex={cluster.weekIndex}
+                  isCurrentWeek={isCurrentWeek}
+                  isExpanded={isExpanded}
+                  onTap={() => handleClusterTap(idx)}
+                />
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 };
