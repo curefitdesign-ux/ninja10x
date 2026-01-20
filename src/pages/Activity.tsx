@@ -137,7 +137,7 @@ const Activity = () => {
         </div>
 
         {/* Photo Slots Section - Glassmorphic */}
-        <div className="px-4 mt-6">
+        <div className="px-4 mt-8">
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -174,7 +174,7 @@ const Activity = () => {
         </div>
 
         {/* Activities Section - Glassmorphic */}
-        <div className="px-4 mt-8">
+        <div className="px-4 mt-10">
           <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -218,7 +218,7 @@ const Activity = () => {
         </div>
 
         {/* Feature Cards Row */}
-        <div className="px-4 mt-6">
+        <div className="px-4 mt-10">
           <div className="grid grid-cols-2 gap-3">
             {/* Connect Fitness Device */}
             <motion.button
@@ -247,7 +247,7 @@ const Activity = () => {
         </div>
 
         {/* Smart Workout Plan */}
-        <div className="px-4 mt-3">
+        <div className="px-4 mt-4">
           <motion.button
             whileTap={{ scale: 0.98 }}
             className="relative w-full h-28 rounded-3xl overflow-hidden"
@@ -261,7 +261,7 @@ const Activity = () => {
         </div>
 
         {/* Fitness Programs Section */}
-        <div className="px-4 mt-8">
+        <div className="px-4 mt-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-white">Fitness Programs</h2>
             <ArrowRight className="w-5 h-5 text-white/60" />
