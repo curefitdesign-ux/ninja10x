@@ -1,11 +1,13 @@
-import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useCallback, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Home, Dumbbell, Activity as ActivityIcon, ShoppingBag, Users, Flame, Footprints } from "lucide-react";
 import CircularProgressRing from "@/components/CircularProgressRing";
 import GradientMeshBackground from "@/components/GradientMeshBackground";
 import PullToRefresh from "@/components/PullToRefresh";
-import PhotoLoggingWidget from "@/components/PhotoLoggingWidget";
+import PhotoLoggingWidget, { LoggedPhoto } from "@/components/PhotoLoggingWidget";
+import { uploadToStorage } from "@/services/storage-service";
+import { toast } from "sonner";
 // Import new activity icons
 import bookClassIcon from "@/assets/activity-icons/book-class.png";
 import checkinGymIcon from "@/assets/activity-icons/checkin-gym.png";
@@ -23,9 +25,120 @@ import walkFitness from "@/assets/programs/walk-fitness.png";
 import cultJunior from "@/assets/programs/cult-junior.png";
 import prenatalYoga from "@/assets/programs/prenatal-yoga.png";
 
+const STORAGE_KEY = 'activity_photos_v1';
+
 const Activity = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("activity");
+  
+  // Load photos from localStorage
+  const [photos, setPhotos] = useState<LoggedPhoto[]>(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.filter((p: LoggedPhoto) => p.storageUrl) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Persist photos to localStorage
+  useEffect(() => {
+    try {
+      const validPhotos = photos.filter(p => p.storageUrl);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(validPhotos));
+    } catch (e) {
+      console.error('Failed to save photos:', e);
+    }
+  }, [photos]);
+
+  // Calculate current week and day based on photos
+  const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
+  const currentDay = photos.length + 1; // Next day to fill
+
+  // Handle save from preview page
+  useEffect(() => {
+    if (location.state?.savePhoto && location.state?.activity) {
+      const originalUrl = location.state.originalUrl || location.state.imageUrl;
+      const isVideo = location.state.isVideo || false;
+      const dayNumber = location.state.dayNumber || photos.length + 1;
+
+      if (!originalUrl) {
+        toast.error('No media to save');
+        navigate('/', { replace: true, state: null });
+        return;
+      }
+
+      const uploadAndSave = async () => {
+        let storageUrl: string | null = null;
+        
+        if (originalUrl.startsWith('data:') || originalUrl.startsWith('blob:')) {
+          storageUrl = await uploadToStorage(originalUrl, `activity-${Date.now()}`, isVideo);
+          
+          if (!storageUrl) {
+            toast.error('Upload failed. Please try again.');
+            navigate('/', { replace: true, state: null });
+            return;
+          }
+        } else if (originalUrl.startsWith('http')) {
+          storageUrl = originalUrl;
+        } else {
+          toast.error('Invalid media format');
+          navigate('/', { replace: true, state: null });
+          return;
+        }
+
+        const existingPhoto = photos.find(p => p.dayNumber === dayNumber);
+        
+        if (existingPhoto) {
+          // Update existing
+          setPhotos(prev => prev.map(p => 
+            p.dayNumber === dayNumber
+              ? { ...p, storageUrl: storageUrl!, activity: location.state.activity, frame: location.state.frame }
+              : p
+          ));
+          toast.success(`Day ${dayNumber} updated!`);
+        } else {
+          // Add new
+          const newPhoto: LoggedPhoto = {
+            id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            storageUrl: storageUrl!,
+            isVideo,
+            activity: location.state.activity,
+            frame: location.state.frame || 'shaky',
+            duration: location.state.duration,
+            pr: location.state.pr,
+            dayNumber,
+          };
+          setPhotos(prev => [...prev, newPhoto]);
+          toast.success(`Day ${dayNumber} added!`);
+        }
+      };
+
+      uploadAndSave();
+      navigate('/', { replace: true, state: null });
+    }
+  }, [location.state?.savePhoto]);
+
+  // Handle photo tap - open preview to edit
+  const handlePhotoTap = (photo: LoggedPhoto) => {
+    navigate('/preview', {
+      state: {
+        imageUrl: photo.storageUrl,
+        originalUrl: photo.storageUrl,
+        isVideo: photo.isVideo,
+        activity: photo.activity,
+        frame: photo.frame,
+        duration: photo.duration,
+        pr: photo.pr,
+        isReview: true,
+        photoId: photo.id,
+        dayNumber: photo.dayNumber,
+      },
+    });
+  };
 
   const activities = [
     { id: "book", label: "book a cult\nclass", icon: bookClassIcon },
@@ -123,12 +236,11 @@ const Activity = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="flex flex-col items-center"
           >
-            {/* Pixel-perfect Circular Progress Ring */}
+            {/* Pixel-perfect Circular Progress Ring - synced with photos */}
             <CircularProgressRing 
-              currentDay={1} 
-              currentWeek={1}
+              currentDay={photos.length > 0 ? photos.length : 1} 
+              currentWeek={currentWeek}
             />
-
             {/* Chat Bubble - Enhanced glassmorphic */}
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
@@ -154,7 +266,12 @@ const Activity = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <PhotoLoggingWidget />
+            <PhotoLoggingWidget 
+              photos={photos}
+              currentWeek={currentWeek}
+              currentDay={currentDay}
+              onPhotoTap={handlePhotoTap}
+            />
           </motion.div>
         </div>
 
