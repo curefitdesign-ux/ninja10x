@@ -1,10 +1,11 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Play, Plus, ArrowRight, Home, Dumbbell, Activity as ActivityIcon, ShoppingBag, Users, Flame, Footprints } from "lucide-react";
+import { ArrowRight, Home, Dumbbell, Activity as ActivityIcon, ShoppingBag, Users, Flame, Footprints } from "lucide-react";
 import CircularProgressRing from "@/components/CircularProgressRing";
 import GradientMeshBackground from "@/components/GradientMeshBackground";
 import PullToRefresh from "@/components/PullToRefresh";
+import PhotoLoggingWidget from "@/components/PhotoLoggingWidget";
 // Import new activity icons
 import bookClassIcon from "@/assets/activity-icons/book-class.png";
 import checkinGymIcon from "@/assets/activity-icons/checkin-gym.png";
@@ -146,40 +147,14 @@ const Activity = () => {
           </motion.div>
         </div>
 
-        {/* Photo Slots Section - Glassmorphic */}
-        <div className="px-4 mt-8">
+        {/* Photo Logging Widget - 12 cards in 4 clusters */}
+        <div className="mt-8">
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex items-center justify-center gap-2"
           >
-            {/* Photo slots with glass effect */}
-            <div className="flex items-center">
-              {[1, 2, 3, 4].map((_, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: 0.4 + idx * 0.05 }}
-                  className={`w-12 h-12 rounded-xl bg-white/[0.08] backdrop-blur-xl border border-white/[0.15] ${idx > 0 ? '-ml-2' : ''} flex items-center justify-center overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_4px_16px_rgba(0,0,0,0.2)]`}
-                  style={{ transform: `rotate(${(idx - 1.5) * 5}deg)`, zIndex: 4 - idx }}
-                >
-                  <Plus className="w-4 h-4 text-white/40" />
-                </motion.div>
-              ))}
-            </div>
-            
-            {/* Play Button - Liquid glass */}
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              whileHover={{ scale: 1.05 }}
-              className="ml-4 w-12 h-12 rounded-full bg-white/[0.12] backdrop-blur-xl border border-white/[0.2] flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.15),0_8px_24px_rgba(0,0,0,0.3)] relative overflow-hidden"
-              onClick={() => navigate("/")}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
-              <Play className="w-5 h-5 text-white fill-white relative z-10 drop-shadow-md" />
-            </motion.button>
+            <PhotoLoggingWidget />
           </motion.div>
         </div>
 
