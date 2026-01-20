@@ -216,19 +216,13 @@ const Activity = () => {
               <motion.button
                 key={program.id}
                 whileTap={{ scale: 0.98 }}
-                className={`relative aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br ${program.gradient}`}
+                className="relative aspect-[4/5] rounded-2xl overflow-hidden"
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                <div className="absolute bottom-4 left-4 text-left">
-                  <h3 className="text-xl font-bold text-white whitespace-pre-line leading-tight">
-                    {program.title}
-                  </h3>
-                  {program.subtitle && (
-                    <p className="text-[10px] text-white/60 uppercase tracking-wider mt-1">
-                      {program.subtitle}
-                    </p>
-                  )}
-                </div>
+                <img 
+                  src={program.image} 
+                  alt={`Fitness program ${program.id}`}
+                  className="w-full h-full object-cover"
+                />
               </motion.button>
             ))}
           </div>
