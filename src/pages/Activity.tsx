@@ -32,12 +32,12 @@ const Activity = () => {
   ];
 
   const fitnessPrograms = [
-    { id: 1, title: "YOGA", subtitle: "FOR BEGINNERS", gradient: "from-purple-900/80 to-purple-600/60" },
-    { id: 2, title: "WORKOUT", subtitle: "FOR BEGINNERS", gradient: "from-slate-700/80 to-slate-500/60" },
-    { id: 3, title: "Belly\nBurn", subtitle: "", gradient: "from-rose-800/80 to-rose-500/60" },
-    { id: 4, title: "walk\nfitness", subtitle: "", gradient: "from-amber-700/80 to-amber-400/60" },
-    { id: 5, title: "CULT\nJUNIOR", subtitle: "", gradient: "from-indigo-900/80 to-indigo-600/60" },
-    { id: 6, title: "Prenatal\nYoga", subtitle: "", gradient: "from-cyan-700/80 to-cyan-400/60" },
+    { id: 1, image: yogaBeginners },
+    { id: 2, image: workoutBeginners },
+    { id: 3, image: bellyBurn },
+    { id: 4, image: walkFitness },
+    { id: 5, image: cultJunior },
+    { id: 6, image: prenatalYoga },
   ];
 
   const navItems = [
