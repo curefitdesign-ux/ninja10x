@@ -227,24 +227,24 @@ const Activity = () => {
             {/* Connect Fitness Device */}
             <motion.button
               whileTap={{ scale: 0.98 }}
-              className="relative aspect-square rounded-3xl overflow-hidden"
+              className="relative rounded-3xl overflow-hidden"
             >
               <img 
                 src={connectFitnessDevice}
                 alt="Connect Fitness device"
-                className="w-full h-full object-cover"
+                className="w-full h-auto object-contain"
               />
             </motion.button>
 
             {/* Workout With Friends */}
             <motion.button
               whileTap={{ scale: 0.98 }}
-              className="relative aspect-square rounded-3xl overflow-hidden"
+              className="relative rounded-3xl overflow-hidden"
             >
               <img 
                 src={workoutWithFriends}
                 alt="Workout With Friends"
-                className="w-full h-full object-cover"
+                className="w-full h-auto object-contain"
               />
             </motion.button>
           </div>
@@ -254,12 +254,12 @@ const Activity = () => {
         <div className="px-4 mt-4">
           <motion.button
             whileTap={{ scale: 0.98 }}
-            className="relative w-full h-28 rounded-3xl overflow-hidden"
+            className="relative w-full rounded-3xl overflow-hidden"
           >
             <img 
               src={smartWorkoutPlan}
               alt="Smart workout plan"
-              className="w-full h-full object-cover"
+              className="w-full h-auto object-contain"
             />
           </motion.button>
         </div>
