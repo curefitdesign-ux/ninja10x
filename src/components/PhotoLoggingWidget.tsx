@@ -306,15 +306,12 @@ const PhotoLoggingWidget = ({
 
   const handleClusterTap = (weekIndex: number) => {
     setExpandedWeeks(prev => {
-      const next = new Set(prev);
-      if (next.has(weekIndex)) {
-        // Don't collapse current week
-        if (weekIndex === currentWeek - 1) return prev;
-        next.delete(weekIndex);
-      } else {
-        next.add(weekIndex);
+      // If tapping the already expanded week that's also current, don't collapse
+      if (prev.has(weekIndex) && weekIndex === currentWeek - 1) {
+        return prev;
       }
-      return next;
+      // Expand only the tapped week, collapse all others
+      return new Set([weekIndex]);
     });
   };
 
