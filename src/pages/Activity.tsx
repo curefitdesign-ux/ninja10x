@@ -12,6 +12,13 @@ import workoutAtHomeIcon from "@/assets/activity-page/workout-at-home-icon.png";
 import connectFitnessDevice from "@/assets/activity-page/connect-fitness-device.png";
 import workoutWithFriends from "@/assets/activity-page/workout-with-friends.png";
 import smartWorkoutPlan from "@/assets/activity-page/smart-workout-plan.png";
+// Fitness program images
+import yogaBeginners from "@/assets/programs/yoga-beginners.png";
+import workoutBeginners from "@/assets/programs/workout-beginners.png";
+import bellyBurn from "@/assets/programs/belly-burn.png";
+import walkFitness from "@/assets/programs/walk-fitness.png";
+import cultJunior from "@/assets/programs/cult-junior.png";
+import prenatalYoga from "@/assets/programs/prenatal-yoga.png";
 
 const Activity = () => {
   const navigate = useNavigate();
