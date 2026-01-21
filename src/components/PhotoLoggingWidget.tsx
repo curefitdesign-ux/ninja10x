@@ -55,25 +55,25 @@ interface CardClusterProps {
   onCardTap: (dayIndex: number, photo: LoggedPhoto | null) => void;
 }
 
-// Ultra-smooth spring configs for buttery animations
+// Ultra-smooth spring configs - iOS-like physics
 const smoothSpring = {
   type: "spring" as const,
-  stiffness: 80,
-  damping: 18,
-  mass: 0.6,
-  restDelta: 0.001,
+  stiffness: 200,
+  damping: 28,
+  mass: 0.8,
+  restDelta: 0.0001,
 };
 
 const fastSpring = {
   type: "spring" as const,
-  stiffness: 150,
-  damping: 22,
-  mass: 0.5,
-  restDelta: 0.001,
+  stiffness: 350,
+  damping: 35,
+  mass: 0.6,
+  restDelta: 0.0001,
 };
 
-// Easing for opacity/scale transitions
-const smoothEase = "easeOut" as const;
+// Cubic bezier for silky opacity/scale
+const smoothEase = [0.32, 0.72, 0, 1] as const;
 
 const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCardTap }: CardClusterProps) => {
   const baseCardWidth = 52;
@@ -122,13 +122,13 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
     
     const stackedPos = getStackedPositions(index);
     
-    // Stagger delay for seamless fan-out/collapse effect
-    const staggerDelay = isExpanded ? index * 0.035 : (2 - index) * 0.025;
+    // Minimal stagger for snappy fan-out/collapse
+    const staggerDelay = isExpanded ? index * 0.02 : (2 - index) * 0.015;
     
     return (
       <motion.button
         key={index}
-        className={`absolute rounded-xl overflow-hidden border shadow-lg will-change-transform ${
+        className={`absolute rounded-xl overflow-hidden border shadow-lg ${
           hasPhoto 
             ? 'border-emerald-400/40' 
             : isActiveDay 
@@ -142,6 +142,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           background: hasPhoto ? 'transparent' : isActiveDay ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.06)',
           backdropFilter: hasPhoto ? 'none' : 'blur(16px)',
           zIndex,
+          willChange: 'transform, opacity',
         }}
         initial={false}
         animate={
@@ -166,13 +167,14 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
               }
         }
         transition={{
-          ...smoothSpring,
+          type: "spring",
+          stiffness: 280,
+          damping: 32,
+          mass: 0.7,
           delay: staggerDelay,
-          opacity: { duration: 0.3, ease: smoothEase, delay: staggerDelay },
-          rotate: { ...smoothSpring, delay: staggerDelay * 0.5 },
         }}
         onClick={(e) => handleCardClick(e, index, photo)}
-        whileTap={{ scale: 0.94, transition: { duration: 0.1, ease: "easeOut" } }}
+        whileTap={{ scale: 0.96 }}
       >
         {/* Photo or empty state */}
         {hasPhoto ? (
@@ -231,19 +233,22 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
   return (
     <motion.div
       onClick={onTap}
-      className="relative flex-shrink-0 cursor-pointer will-change-transform"
+      className="relative flex-shrink-0 cursor-pointer"
       style={{ 
         height: containerHeight,
+        willChange: 'transform, width',
       }}
       initial={false}
       animate={{
         width: containerWidth,
         zIndex: isExpanded ? 10 : 1,
-        scale: isExpanded ? 1 : 0.92,
+        scale: isExpanded ? 1 : 0.94,
       }}
       transition={{
-        ...smoothSpring,
-        width: { ...smoothSpring, stiffness: 100 },
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+        mass: 0.8,
       }}
     >
       {/* Glow effect for active/expanded week */}

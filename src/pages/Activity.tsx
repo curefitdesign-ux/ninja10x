@@ -564,10 +564,14 @@ const Activity = () => {
       <AnimatePresence>
         {showCamera && (
           <motion.div
-            initial={{ opacity: cameraEntering ? 0 : 1 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ 
+              duration: 0.35, 
+              ease: [0.32, 0.72, 0, 1],
+              scale: { type: "spring", stiffness: 300, damping: 30 }
+            }}
           >
             <CameraUI
               activity={selectedActivity || 'Activity'}
