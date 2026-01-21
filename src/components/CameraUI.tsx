@@ -444,7 +444,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
   const hasCapturedMedia = capturedImage || capturedVideo;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black">
+    <div className="fixed inset-x-0 top-0 z-50 bg-black" style={{ height: '100dvh', maxHeight: '844px' }}>
       {/* Hidden elements */}
       <canvas ref={canvasRef} className="hidden" />
       <input
