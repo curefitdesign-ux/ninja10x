@@ -181,8 +181,12 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           <>
             <img 
               src={photo.storageUrl} 
-              alt={`Day ${dayNumber}`}
+              alt=""
               className="w-full h-full object-cover"
+              onError={(e) => {
+                // Hide broken images
+                e.currentTarget.style.display = 'none';
+              }}
             />
             {/* Green glow overlay for logged photos */}
             <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/25 to-transparent pointer-events-none" />
