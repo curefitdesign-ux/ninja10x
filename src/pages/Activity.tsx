@@ -56,6 +56,9 @@ const Activity = () => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("activity");
   
+  // Success animation state
+  const [showSuccessBar, setShowSuccessBar] = useState(false);
+  
   // Camera and activity selection state
   const [showCamera, setShowCamera] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
@@ -135,6 +138,9 @@ const Activity = () => {
               : p
           ));
           toast.success(`Day ${dayNumber} updated!`);
+          // Trigger success bar animation
+          setShowSuccessBar(true);
+          setTimeout(() => setShowSuccessBar(false), 2500);
         } else {
           // Add new
           const newPhoto: LoggedPhoto = {
@@ -149,6 +155,9 @@ const Activity = () => {
           };
           setPhotos(prev => [...prev, newPhoto]);
           toast.success(`Day ${dayNumber} added!`);
+          // Trigger success bar animation
+          setShowSuccessBar(true);
+          setTimeout(() => setShowSuccessBar(false), 2500);
         }
       };
 
@@ -319,7 +328,79 @@ const Activity = () => {
         {/* Scrollable Content */}
         <div className="relative z-10 pb-28 pt-2">
           {/* Stats Header - Glassmorphic */}
-          <div className="px-4 pt-4">
+          <div className="px-4 pt-4 relative">
+            {/* Success Bar Overlay */}
+            <AnimatePresence>
+              {showSuccessBar && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 300, 
+                    damping: 25,
+                  }}
+                  className="absolute inset-x-4 top-4 z-20"
+                >
+                  <div className="relative">
+                    {/* Animated glow */}
+                    <motion.div 
+                      className="absolute -inset-1 bg-gradient-to-r from-emerald-500/50 via-green-400/40 to-emerald-500/50 rounded-3xl blur-xl"
+                      animate={{ 
+                        opacity: [0.6, 0.9, 0.6],
+                        scale: [1, 1.02, 1],
+                      }}
+                      transition={{ 
+                        duration: 1.5, 
+                        repeat: Infinity, 
+                        ease: "easeInOut" 
+                      }}
+                    />
+                    {/* Success bar content */}
+                    <div className="relative bg-gradient-to-r from-emerald-500/90 via-green-500/90 to-emerald-500/90 backdrop-blur-xl rounded-3xl p-4 border border-emerald-400/40 shadow-[0_0_30px_rgba(16,185,129,0.4)]">
+                      <div className="flex items-center justify-center gap-3">
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
+                          className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"
+                        >
+                          <motion.svg 
+                            className="w-5 h-5 text-white" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor"
+                            initial={{ pathLength: 0 }}
+                            animate={{ pathLength: 1 }}
+                            transition={{ duration: 0.4, delay: 0.2 }}
+                          >
+                            <motion.path 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              strokeWidth={3} 
+                              d="M5 13l4 4L19 7"
+                              initial={{ pathLength: 0 }}
+                              animate={{ pathLength: 1 }}
+                              transition={{ duration: 0.4, delay: 0.2 }}
+                            />
+                          </motion.svg>
+                        </motion.div>
+                        <motion.span 
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.15 }}
+                          className="text-white font-semibold text-lg drop-shadow-md"
+                        >
+                          Activity Logged!
+                        </motion.span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
           <div className="flex gap-3">
             {/* Days Streak */}
             <motion.div 
