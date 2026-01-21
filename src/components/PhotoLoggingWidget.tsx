@@ -344,9 +344,18 @@ const PhotoLoggingWidget = ({
   };
 
   const handleCardTap = (weekIndex: number, dayIndex: number, photo: LoggedPhoto | null) => {
+    const dayNumber = weekIndex * 3 + dayIndex + 1;
+    const isActiveDay = dayNumber === currentDay;
+    
     if (photo) {
-      // Tap on existing photo - open preview/edit
+      // Tap on existing photo (including active day with photo) - open preview/edit
       onPhotoTap?.(photo);
+    } else if (isActiveDay && photos.find(p => p.dayNumber === dayNumber)) {
+      // Active day already has a photo - open it for editing instead of creating new
+      const existingPhoto = photos.find(p => p.dayNumber === dayNumber);
+      if (existingPhoto) {
+        onPhotoTap?.(existingPhoto);
+      }
     } else {
       // Tap on empty card - use parent's camera flow if callback provided
       if (onPhotoAdd) {
