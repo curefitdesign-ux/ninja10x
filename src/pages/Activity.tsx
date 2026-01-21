@@ -6,7 +6,6 @@ import CircularProgressRing from "@/components/CircularProgressRing";
 import GradientMeshBackground from "@/components/GradientMeshBackground";
 import PullToRefresh from "@/components/PullToRefresh";
 import PhotoLoggingWidget, { LoggedPhoto } from "@/components/PhotoLoggingWidget";
-import CameraUI from "@/components/CameraUI";
 import { uploadToStorage } from "@/services/storage-service";
 import { toast } from "sonner";
 // Import new activity icons
@@ -59,16 +58,6 @@ const Activity = () => {
   // Success animation state
   const [showSuccessBar, setShowSuccessBar] = useState(false);
   
-  // Camera and activity selection state
-  const [showCamera, setShowCamera] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
-  const [showActivitySheet, setShowActivitySheet] = useState(false);
-  const [pendingMedia, setPendingMedia] = useState<{ url: string; isVideo: boolean } | null>(null);
-  const [pendingDayNumber, setPendingDayNumber] = useState<number | null>(null);
-  const [initialCaptureMode, setInitialCaptureMode] = useState<'photo' | 'video'>('photo');
-  const [cameraEntering, setCameraEntering] = useState(false);
-  const [sheetPhase, setSheetPhase] = useState<'select' | 'acknowledge' | 'exit'>('select');
-  const [acknowledgedActivity, setAcknowledgedActivity] = useState<{ name: string; icon: string } | null>(null);
   
   // Load photos from localStorage
   const [photos, setPhotos] = useState<LoggedPhoto[]>(() => {
@@ -197,109 +186,17 @@ const Activity = () => {
     // Could refetch data here
   }, []);
 
-  // Handle camera trigger from location state (retake flow)
-  useEffect(() => {
-    if (location.state?.openCameraWithActivity) {
-      const activityName = location.state.openCameraWithActivity;
-      const captureMode = location.state.captureMode || 'photo';
-      const dayNum = location.state.dayNumber || photos.length + 1;
-      
-      setSelectedActivity(activityName);
-      setInitialCaptureMode(captureMode);
-      setPendingDayNumber(dayNum);
-      setShowCamera(true);
-      
-      if (!location.state.instantCamera) {
-        setCameraEntering(true);
-        setTimeout(() => setCameraEntering(false), 500);
-      }
-      
-      navigate('/', { replace: true, state: null });
-    }
-  }, [location.state?.openCameraWithActivity, navigate, photos.length]);
 
-  // Handle camera capture - show activity sheet
-  const handleCapture = useCallback((mediaDataUrl: string, isVideo?: boolean) => {
-    setShowCamera(false);
-    setPendingMedia({ url: mediaDataUrl, isVideo: isVideo || false });
-    // If activity was already selected (from widget), go directly to preview
-    if (selectedActivity && pendingDayNumber) {
-      navigate('/preview', {
-        state: {
-          imageUrl: mediaDataUrl,
-          isVideo: isVideo || false,
-          activity: selectedActivity,
-          dayNumber: pendingDayNumber,
-        },
-      });
-      setSelectedActivity(null);
-      setPendingMedia(null);
-      setPendingDayNumber(null);
-    } else {
-      // Show activity selection
-      setShowActivitySheet(true);
-    }
-  }, [selectedActivity, pendingDayNumber, navigate]);
-
-  // Handle camera close
-  const handleCameraClose = useCallback(() => {
-    setShowCamera(false);
-    setSelectedActivity(null);
-    setPendingMedia(null);
-    setPendingDayNumber(null);
-  }, []);
-
-  // Handle activity selection from sheet
-  const handleActivitySelect = useCallback((activity: string) => {
-    const activityData = activityOptions.find(a => a.name === activity);
-    if (!activityData) return;
-    
-    setSelectedActivity(activity);
-    setAcknowledgedActivity(activityData);
-    setSheetPhase('acknowledge');
-    
-    setTimeout(() => {
-      setSheetPhase('exit');
-    }, 1200);
-    
-    setTimeout(() => {
-      setShowActivitySheet(false);
-      setSheetPhase('select');
-      setAcknowledgedActivity(null);
-      
-      if (pendingMedia) {
-        const dayNum = pendingDayNumber || photos.length + 1;
-        navigate('/preview', {
-          state: {
-            imageUrl: pendingMedia.url,
-            isVideo: pendingMedia.isVideo,
-            activity,
-            dayNumber: dayNum,
-          },
-        });
-        setPendingMedia(null);
-        setPendingDayNumber(null);
-      }
-      setSelectedActivity(null);
-    }, 1600);
-  }, [pendingMedia, pendingDayNumber, navigate, photos.length]);
-
-  // Handle overlay click to close sheet
-  const handleOverlayClick = useCallback(() => {
-    setShowActivitySheet(false);
-    setSelectedActivity(null);
-    setPendingMedia(null);
-    setPendingDayNumber(null);
-  }, []);
-
-  // Handle card tap from PhotoLoggingWidget to start camera flow
+  // Handle card tap from PhotoLoggingWidget - navigate to preview page with camera
   const handlePhotoAdd = useCallback((weekIndex: number, dayIndex: number) => {
     const dayNum = weekIndex * 3 + dayIndex + 1;
-    setPendingDayNumber(dayNum);
-    setShowCamera(true);
-    setCameraEntering(true);
-    setTimeout(() => setCameraEntering(false), 500);
-  }, []);
+    navigate('/preview', {
+      state: {
+        dayNumber: dayNum,
+        startWithCamera: true,
+      },
+    });
+  }, [navigate]);
 
   const fitnessPrograms = [
     { id: 1, image: yogaBeginners },
@@ -641,116 +538,6 @@ const Activity = () => {
         </div>
       </div>
 
-      {/* Camera UI */}
-      <AnimatePresence>
-        {showCamera && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ 
-              duration: 0.35, 
-              ease: [0.32, 0.72, 0, 1],
-              scale: { type: "spring", stiffness: 300, damping: 30 }
-            }}
-          >
-            <CameraUI
-              activity={selectedActivity || 'Activity'}
-              week={currentWeek}
-              day={pendingDayNumber || currentDay}
-              onCapture={handleCapture}
-              onClose={handleCameraClose}
-              initialCaptureMode={initialCaptureMode}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Activity Selection Bottom Sheet */}
-      <AnimatePresence>
-        {showActivitySheet && (
-          <>
-            {/* Overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-              onClick={handleOverlayClick}
-            />
-            
-            {/* Sheet */}
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: sheetPhase === 'exit' ? '100%' : 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-xl rounded-t-3xl border-t border-white/10"
-              style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 20px)' }}
-            >
-              {sheetPhase === 'acknowledge' && acknowledgedActivity ? (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center py-12"
-                >
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: 'spring', damping: 15, stiffness: 300 }}
-                  >
-                    <img 
-                      src={acknowledgedActivity.icon} 
-                      alt={acknowledgedActivity.name}
-                      className="w-20 h-20 object-contain mb-4"
-                    />
-                  </motion.div>
-                  <motion.p 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-xl font-semibold text-white"
-                  >
-                    {acknowledgedActivity.name}
-                  </motion.p>
-                  <motion.p 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                    className="text-sm text-white/60 mt-1"
-                  >
-                    Let's log it!
-                  </motion.p>
-                </motion.div>
-              ) : (
-                <div className="py-6 px-4">
-                  <h3 className="text-lg font-semibold text-white text-center mb-6">
-                    Select Activity
-                  </h3>
-                  <div className="grid grid-cols-3 gap-4">
-                    {activityOptions.map((activity) => (
-                      <motion.button
-                        key={activity.name}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handleActivitySelect(activity.name)}
-                        className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-                      >
-                        <img 
-                          src={activity.icon} 
-                          alt={activity.name}
-                          className="w-12 h-12 object-contain"
-                        />
-                        <span className="text-xs text-white/70">{activity.name}</span>
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
