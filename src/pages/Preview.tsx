@@ -2,20 +2,44 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { X, Check, Pencil, Share2 } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import html2canvas from 'html2canvas';
+import { motion, AnimatePresence } from 'framer-motion';
 import ShakyFrame from '@/components/frames/ShakyFrame';
 import JournalFrame from '@/components/frames/JournalFrame';
 import VogueFrame from '@/components/frames/VogueFrame';
 import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
 import WheelPicker from '@/components/WheelPicker';
+import CameraUI from '@/components/CameraUI';
 import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ActivityBackgroundEffect from '@/components/ActivityBackgroundEffect';
 import SyncHealthPopup from '@/components/SyncHealthPopup';
 
+// Activity icons for selection
+import footballIcon from '@/assets/activities/football.png';
+import cricketIcon from '@/assets/activities/cricket.png';
+import racquetIcon from '@/assets/activities/racquet.png';
+import basketballIcon from '@/assets/activities/basketball.png';
+import cyclingIcon from '@/assets/activities/cycling.png';
+import runningIcon from '@/assets/activities/running.png';
+import trekkingIcon from '@/assets/activities/trekking.png';
+import boxingIcon from '@/assets/activities/boxing.png';
+import yogaIcon from '@/assets/activities/yoga.png';
 
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
+
+const activityOptions = [
+  { name: 'Running', icon: runningIcon },
+  { name: 'Cycling', icon: cyclingIcon },
+  { name: 'Trekking', icon: trekkingIcon },
+  { name: 'Basketball', icon: basketballIcon },
+  { name: 'Yoga', icon: yogaIcon },
+  { name: 'Football', icon: footballIcon },
+  { name: 'Cricket', icon: cricketIcon },
+  { name: 'Badminton', icon: racquetIcon },
+  { name: 'Boxing', icon: boxingIcon },
+];
 
 const isVideoUrl = (url: string) => {
   return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
@@ -46,6 +70,7 @@ const FRAME_COLORS: Record<FrameType, { bg: string; gradient: string }> = {
 };
 
 type EditingField = 'duration' | 'pr' | null;
+type FlowStep = 'camera' | 'activity' | 'template';
 
 // Generate hour options from 0 to 24
 const HOUR_OPTIONS = Array.from({ length: 25 }, (_, i) => i);
@@ -53,6 +78,14 @@ const HOUR_OPTIONS = Array.from({ length: 25 }, (_, i) => i);
 const Preview = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  
+  // Flow control
+  const [flowStep, setFlowStep] = useState<FlowStep>('camera');
+  const [capturedMedia, setCapturedMedia] = useState<{ url: string; isVideo: boolean } | null>(null);
+  const [sheetPhase, setSheetPhase] = useState<'select' | 'acknowledge' | 'exit'>('select');
+  const [acknowledgedActivity, setAcknowledgedActivity] = useState<{ name: string; icon: string } | null>(null);
+  
+  // Template state
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isVideo, setIsVideo] = useState(false);
   const [activity, setActivity] = useState<string | null>(null);
@@ -99,8 +132,7 @@ const Preview = () => {
     setTimeout(() => setTappedElement(null), 400);
   };
 
-  // Single set of frames - no duplicates
-
+  // Check if we're coming with existing data (review mode)
   useEffect(() => {
     const state = location.state as {
       imageUrl?: string;
@@ -113,11 +145,13 @@ const Preview = () => {
       isReview?: boolean;
       photoId?: string;
       dayNumber?: number;
+      startWithCamera?: boolean;
     } | null;
 
     const mediaUrl = state?.originalUrl || state?.imageUrl;
 
     if (mediaUrl && state?.activity) {
+      // Existing photo/video - go directly to template selection
       setImageUrl(mediaUrl);
       setIsVideo(state.isVideo ?? isVideoUrl(mediaUrl));
       setActivity(state.activity);
@@ -130,11 +164,15 @@ const Preview = () => {
         setCurrentFrame(state.frame);
         setOriginalFrame(state.frame);
       }
-
-      // Trigger entrance animation after a brief delay
+      setFlowStep('template');
       setTimeout(() => setIsLoaded(true), 100);
     } else {
-      navigate('/');
+      // No existing data - start with camera
+      setFlowStep('camera');
+      // Get dayNumber from state if provided
+      if (state?.dayNumber) {
+        setDayNumber(state.dayNumber);
+      }
     }
   }, []);
 
@@ -145,9 +183,53 @@ const Preview = () => {
     }
   }, [editingField]);
 
+  // Handle camera capture
+  const handleCameraCapture = useCallback((mediaDataUrl: string, isVideoMedia?: boolean) => {
+    setCapturedMedia({ url: mediaDataUrl, isVideo: isVideoMedia || false });
+    setFlowStep('activity');
+  }, []);
+
+  // Handle camera close
+  const handleCameraClose = useCallback(() => {
+    navigate('/');
+  }, [navigate]);
+
+  // Handle activity selection
+  const handleActivitySelect = useCallback((activityName: string) => {
+    const activityData = activityOptions.find(a => a.name === activityName);
+    if (!activityData) return;
+    
+    setActivity(activityName);
+    setAcknowledgedActivity(activityData);
+    setSheetPhase('acknowledge');
+    
+    setTimeout(() => {
+      setSheetPhase('exit');
+    }, 1200);
+    
+    setTimeout(() => {
+      setSheetPhase('select');
+      setAcknowledgedActivity(null);
+      
+      if (capturedMedia) {
+        setImageUrl(capturedMedia.url);
+        setIsVideo(capturedMedia.isVideo);
+        setFlowStep('template');
+        setTimeout(() => setIsLoaded(true), 100);
+      }
+    }, 1600);
+  }, [capturedMedia]);
+
+  // Handle activity sheet close
+  const handleActivitySheetClose = useCallback(() => {
+    // Go back to camera
+    setFlowStep('camera');
+    setCapturedMedia(null);
+  }, []);
+
   // Capture framed image for sharing
   const captureFramedImage = async (): Promise<string | null> => {
-    if (isVideo) return imageUrl; // For videos, use original
+    if (isVideo) return imageUrl;
 
     if (!captureRef.current) return null;
 
@@ -176,17 +258,14 @@ const Preview = () => {
     const capturedUrl = await captureFramedImage();
     setFramedImageUrl(capturedUrl);
     
-    // Start hiding animations
     setElementsHidden(true);
     
-    // After animation, trigger native share
     setTimeout(async () => {
       setIsSaving(false);
       
       try {
         const urlToShare = capturedUrl || imageUrl;
         
-        // Convert data URL to blob for native share
         const response = await fetch(urlToShare);
         const blob = await response.blob();
         const file = new File([blob], isVideo ? 'cult-ninja.mp4' : 'cult-ninja.png', { 
@@ -199,10 +278,8 @@ const Preview = () => {
             title: 'Cult Ninja',
             text: `My ${activity} moment 💪`,
           });
-          // After successful share, save and go back
           handleSaveWithTemplate();
         } else {
-          // Fallback: download the file
           const link = document.createElement('a');
           link.href = urlToShare;
           link.download = isVideo ? 'cult-ninja.mp4' : 'cult-ninja.png';
@@ -210,14 +287,13 @@ const Preview = () => {
           handleSaveWithTemplate();
         }
       } catch (error) {
-        // User cancelled share or error occurred
         console.log('Share cancelled or failed:', error);
         setElementsHidden(false);
       }
     }, 500);
   };
 
-  // Save with template (from share sheet or directly)
+  // Save with template
   const handleSaveWithTemplate = async () => {
     if (!imageUrl || !activity) return;
 
@@ -231,8 +307,8 @@ const Preview = () => {
       navigate('/', {
         state: {
           savePhoto: true,
-          imageUrl: finalUrl || imageUrl, // framed/template image
-          originalUrl: imageUrl, // original media for filmstrip + edits
+          imageUrl: finalUrl || imageUrl,
+          originalUrl: imageUrl,
           isVideo,
           activity,
           frame: currentFrame,
@@ -240,6 +316,7 @@ const Preview = () => {
           pr,
           isReview,
           photoId,
+          dayNumber,
         },
       });
     }, 400);
@@ -257,37 +334,33 @@ const Preview = () => {
       navigate('/', {
         state: {
           savePhoto: true,
-          imageUrl, // original image without template
+          imageUrl,
           originalUrl: imageUrl,
           isVideo,
           activity,
-          frame: undefined, // no frame
+          frame: undefined,
           duration,
           pr,
           isReview,
           photoId,
+          dayNumber,
         },
       });
     }, 400);
   };
 
-  // Retake - go back to camera with same activity and capture mode
+  // Retake - go back to camera step
   const handleRetake = () => {
     triggerHaptic('light');
     handleTap('retake-btn');
-    // Navigate back to home which will trigger camera with the activity
-    setTimeout(() => {
-      navigate('/', {
-        state: {
-          openCameraWithActivity: activity,
-          captureMode: isVideo ? 'video' : 'photo',
-          instantCamera: true,
-        },
-      });
-    }, 200);
+    setFlowStep('camera');
+    setCapturedMedia(null);
+    setImageUrl(null);
+    setActivity(null);
+    setIsLoaded(false);
   };
 
-  // Handle scroll to update current frame and calculate scale
+  // Handle scroll to update current frame
   const handleScroll = useCallback(() => {
     if (!containerRef.current) return;
 
@@ -326,7 +399,6 @@ const Preview = () => {
   useEffect(() => {
     if (!containerRef.current || !isLoaded) return;
 
-    // Wait a tick so refs/measurements are available
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const container = containerRef.current;
@@ -369,7 +441,6 @@ const Preview = () => {
 
   const openEditSheet = (field: EditingField) => {
     if (field === 'duration') {
-      // Extract just the number from duration (remove 'hrs')
       const numValue = parseInt(duration.replace(/[^0-9]/g, '')) || 0;
       setTempValue(String(numValue));
     } else if (field === 'pr') {
@@ -397,15 +468,11 @@ const Preview = () => {
     setEditingField(null);
   };
 
-  if (!imageUrl) {
-    return null;
-  }
-
-  // Calculate week from dayNumber (1-3 = week 1, 4-6 = week 2, etc.)
+  // Calculate week from dayNumber
   const calculatedWeek = Math.ceil(dayNumber / 3);
 
   const frameProps = {
-    imageUrl,
+    imageUrl: imageUrl || '',
     isVideo,
     activity: activity || '',
     week: calculatedWeek,
@@ -433,10 +500,142 @@ const Preview = () => {
     }
   };
 
-  const currentIndex = FRAMES.indexOf(currentFrame);
+  // Camera Step
+  if (flowStep === 'camera') {
+    return (
+      <div className="fixed inset-0 z-50 bg-black" style={{ height: '100dvh' }}>
+        <CameraUI
+          activity=""
+          week={calculatedWeek}
+          day={dayNumber}
+          onCapture={handleCameraCapture}
+          onClose={handleCameraClose}
+          initialCaptureMode="photo"
+        />
+      </div>
+    );
+  }
 
+  // Activity Selection Step
+  if (flowStep === 'activity') {
+    return (
+      <div className="fixed inset-0 z-50 bg-black" style={{ height: '100dvh' }}>
+        {/* Background with captured media */}
+        {capturedMedia && (
+          <div className="absolute inset-0">
+            {capturedMedia.isVideo ? (
+              <video
+                src={capturedMedia.url}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <img
+                src={capturedMedia.url}
+                alt="Captured"
+                className="w-full h-full object-cover"
+              />
+            )}
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          </div>
+        )}
+
+        {/* Activity Selection Sheet */}
+        <AnimatePresence mode="wait">
+          {sheetPhase === 'select' && (
+            <motion.div
+              key="activity-sheet"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="absolute bottom-0 left-0 right-0 z-50"
+            >
+              <div className="bg-black/80 backdrop-blur-2xl rounded-t-3xl border-t border-white/10">
+                <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mt-3 mb-4" />
+                <div className="px-5 pb-10">
+                  <h3 className="text-white text-lg font-semibold mb-5 text-center">
+                    Select Activity
+                  </h3>
+                  <div className="grid grid-cols-3 gap-3">
+                    {activityOptions.map((act) => (
+                      <motion.button
+                        key={act.name}
+                        onClick={() => handleActivitySelect(act.name)}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 active:bg-white/20"
+                      >
+                        <img src={act.icon} alt={act.name} className="w-10 h-10 object-contain" />
+                        <span className="text-white/90 text-xs font-medium">{act.name}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {(sheetPhase === 'acknowledge' || sheetPhase === 'exit') && acknowledgedActivity && (
+            <motion.div
+              key="acknowledge-card"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ 
+                opacity: sheetPhase === 'exit' ? 0 : 1, 
+                scale: sheetPhase === 'exit' ? 0.8 : 1,
+                y: sheetPhase === 'exit' ? -50 : 0
+              }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              className="absolute inset-0 flex items-center justify-center"
+            >
+              <div className="bg-white/15 backdrop-blur-2xl rounded-3xl p-8 border border-white/20 shadow-2xl">
+                <div className="flex flex-col items-center gap-4">
+                  <motion.img 
+                    src={acknowledgedActivity.icon} 
+                    alt={acknowledgedActivity.name} 
+                    className="w-20 h-20 object-contain"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 15, delay: 0.1 }}
+                  />
+                  <motion.span 
+                    className="text-white text-2xl font-bold"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    {acknowledgedActivity.name}
+                  </motion.span>
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 15, delay: 0.3 }}
+                    className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center"
+                  >
+                    <Check className="w-6 h-6 text-white" />
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Close button */}
+        <button
+          onClick={handleActivitySheetClose}
+          className="absolute top-6 left-5 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm"
+        >
+          <X className="w-5 h-5 text-white" />
+        </button>
+      </div>
+    );
+  }
+
+  // Template Selection Step
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
+    <div className="fixed inset-0 w-full overflow-hidden bg-black" style={{ height: '100dvh' }}>
       {/* Blurred background image with dynamic color overlay */}
       <div 
         className="absolute inset-0 scale-150 transition-all duration-500 animate-bg-drift"
@@ -450,7 +649,6 @@ const Preview = () => {
       
       {/* Subtle particle/dust animation */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Floating dust particles */}
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
@@ -465,7 +663,6 @@ const Preview = () => {
             }}
           />
         ))}
-        {/* Floating orbs for depth */}
         <div 
           className="absolute w-64 h-64 rounded-full animate-orb-float-1"
           style={{ 
@@ -506,7 +703,7 @@ const Preview = () => {
       {activity && <ActivityBackgroundEffect activity={activity} />}
 
       {/* Content - with extra bottom padding for floating buttons */}
-      <div className="relative z-10 flex flex-col min-h-screen pb-32">
+      <div className="relative z-10 flex flex-col h-full pb-32">
         {/* Offscreen capture target (unscaled) for image saves */}
         <div
           ref={captureRef}
@@ -516,7 +713,7 @@ const Preview = () => {
           {renderFrame()}
         </div>
 
-        {/* Header - minimal, hide when elements are hidden */}
+        {/* Header - minimal */}
         <div className={`flex items-center justify-between py-4 px-5 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 -translate-y-8 pointer-events-none' : ''}`}>
           <button 
             onClick={handleSaveWithoutTemplate}
@@ -533,10 +730,9 @@ const Preview = () => {
           </button>
         </div>
         
-        {/* Frame carousel - horizontal scroll with smooth liquid transitions */}
+        {/* Frame carousel */}
         <div className={`flex-1 flex items-center overflow-hidden transition-all duration-700 ease-out ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''}`}>
           {elementsHidden ? (
-            /* When elements are hidden, show only the current frame centered */
             <div className="flex items-center justify-center w-full px-6 animate-scale-in">
               <div className="w-[70vw] max-w-[320px]">
                 {currentFrame === 'shaky' && <ShakyFrame {...frameProps} />}
@@ -547,7 +743,6 @@ const Preview = () => {
               </div>
             </div>
           ) : (
-            /* Normal carousel view with smooth transitions */
             <div 
               ref={containerRef}
               onScroll={handleScroll}
@@ -598,14 +793,13 @@ const Preview = () => {
           )}
         </div>
 
-        {/* Content section - hide when elements are hidden */}
+        {/* Content section */}
         <div 
           className={`space-y-4 px-5 mt-4 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
           style={{ animationDelay: '0.3s' }}
         >
-          {/* Editable data points - now tappable */}
+          {/* Editable data points */}
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 relative overflow-hidden animate-input-focus-pulse">
-            {/* Subtle animated border glow */}
             <div className="absolute inset-0 rounded-2xl pointer-events-none animate-border-glow" />
             
             <button 
@@ -647,13 +841,10 @@ const Preview = () => {
               <span className="text-white font-semibold text-sm">CONNECT</span>
             </button>
           </div>
-
-          {/* Bottom spacer for floating buttons */}
-          <div className="h-24" />
         </div>
       </div>
 
-      {/* Floating CTA - Always visible with DONE and Share */}
+      {/* Floating CTA */}
       <div 
         className={`fixed bottom-0 left-0 right-0 z-[100] px-5 pt-4 transition-all duration-500 ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : 'opacity-100 translate-y-0'}`}
         style={{ 
@@ -662,7 +853,6 @@ const Preview = () => {
         }}
       >
         <div className="flex items-center gap-3">
-          {/* DONE Button */}
           <button 
             onClick={handleSaveWithTemplate}
             disabled={isSaving}
@@ -674,7 +864,6 @@ const Preview = () => {
             </span>
           </button>
           
-          {/* Share Icon Button */}
           <button 
             onClick={handleSaveClick}
             disabled={isSaving}
@@ -686,29 +875,23 @@ const Preview = () => {
         </div>
       </div>
 
-
       {/* Bottom Sheet Keyboard Overlay */}
       {editingField && (
         <>
-          {/* Backdrop with blur */}
           <div 
             className="fixed inset-0 z-40 backdrop-blur-md bg-black/70"
             onClick={closeSheet}
           />
           
-          {/* Bottom Sheet */}
           <div className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom duration-300 focus:outline-none focus-visible:outline-none" tabIndex={-1}>
             <div className="bg-white/10 backdrop-blur-2xl border-t border-white/20 rounded-t-3xl p-6 pb-10 focus:outline-none focus-visible:outline-none" tabIndex={-1}>
-              {/* Handle bar */}
               <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-6" />
               
-              {/* Label */}
               <p className="text-white text-lg font-semibold text-center mb-4">
                 {editingField === 'duration' ? `Select ${label2}` : `Enter ${label1}`}
               </p>
               
               {editingField === 'duration' ? (
-                /* Wheel Picker for Duration */
                 <div className="flex items-center justify-center gap-4 mb-4">
                   <div className="flex-1 max-w-[200px]">
                     <WheelPicker
@@ -722,7 +905,6 @@ const Preview = () => {
                   <span className="text-white text-2xl font-semibold">hrs</span>
                 </div>
               ) : (
-                /* Text Input for PR */
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex-1 flex items-center bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 focus-within:border-white/40">
                     <input
@@ -742,7 +924,6 @@ const Preview = () => {
                 </div>
               )}
               
-              {/* Confirm button - small white pill */}
               <button
                 onClick={confirmEdit}
                 className="mx-auto px-8 py-2 flex items-center justify-center rounded-full bg-white"
