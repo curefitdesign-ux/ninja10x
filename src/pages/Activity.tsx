@@ -218,25 +218,35 @@ const Activity = () => {
     }
   }, [location.state?.openCameraWithActivity, navigate, photos.length]);
 
-  // Handle camera capture - go directly to preview since activity is already selected
+  // Handle camera capture - go directly to preview
   const handleCapture = useCallback((mediaDataUrl: string, isVideo?: boolean) => {
+    // Close camera first
     setShowCamera(false);
     
-    if (selectedActivity) {
-      // Activity was already selected, go directly to preview
-      const dayNum = pendingDayNumber || photos.length + 1;
+    // Use current state values before resetting
+    const activity = selectedActivity;
+    const dayNum = pendingDayNumber || photos.length + 1;
+    
+    // Reset state immediately to prevent stale closures
+    setSelectedActivity(null);
+    setPendingMedia(null);
+    setPendingDayNumber(null);
+    
+    // Navigate to preview with all required data
+    if (activity) {
       navigate('/preview', {
         state: {
           imageUrl: mediaDataUrl,
           isVideo: isVideo || false,
-          activity: selectedActivity,
+          activity: activity,
           dayNumber: dayNum,
         },
       });
-      // Reset all state
-      setSelectedActivity(null);
-      setPendingMedia(null);
-      setPendingDayNumber(null);
+    } else {
+      // Fallback: if somehow activity wasn't set, show activity sheet
+      setPendingMedia({ url: mediaDataUrl, isVideo: isVideo || false });
+      setPendingDayNumber(dayNum);
+      setShowActivitySheet(true);
     }
   }, [selectedActivity, pendingDayNumber, navigate, photos.length]);
 
@@ -248,7 +258,7 @@ const Activity = () => {
     setPendingDayNumber(null);
   }, []);
 
-  // Handle activity selection - show acknowledgment then open camera
+  // Handle activity selection - show acknowledgment then open camera OR navigate to preview
   const handleActivitySelect = useCallback((activity: string) => {
     const activityData = activityOptions.find(a => a.name === activity);
     if (!activityData) return;
@@ -258,7 +268,12 @@ const Activity = () => {
     setAcknowledgedActivity(activityData);
     setSheetPhase('acknowledge');
     
-    // After acknowledgment animation, open camera
+    // Check if we have pending media (from camera already taken)
+    const hasPendingMedia = pendingMedia !== null;
+    const currentPendingMedia = pendingMedia;
+    const currentDayNumber = pendingDayNumber;
+    
+    // After acknowledgment animation
     setTimeout(() => {
       setSheetPhase('exit');
     }, 800);
@@ -267,10 +282,27 @@ const Activity = () => {
       setShowActivitySheet(false);
       setSheetPhase('select');
       setAcknowledgedActivity(null);
-      // Open camera with activity pre-selected
-      setShowCamera(true);
+      
+      if (hasPendingMedia && currentPendingMedia) {
+        // Media was already captured, go to preview
+        const dayNum = currentDayNumber || photos.length + 1;
+        navigate('/preview', {
+          state: {
+            imageUrl: currentPendingMedia.url,
+            isVideo: currentPendingMedia.isVideo,
+            activity: activity,
+            dayNumber: dayNum,
+          },
+        });
+        setPendingMedia(null);
+        setPendingDayNumber(null);
+        setSelectedActivity(null);
+      } else {
+        // No media yet - open camera with activity pre-selected
+        setShowCamera(true);
+      }
     }, 1100);
-  }, []);
+  }, [pendingMedia, pendingDayNumber, navigate, photos.length]);
 
   // Handle overlay click to close sheet
   const handleOverlayClick = useCallback(() => {
