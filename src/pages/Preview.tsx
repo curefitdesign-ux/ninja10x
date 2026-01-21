@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { X, Check, Pencil, Share2 } from 'lucide-react';
+import ShareSheet from '@/components/ShareSheet';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -247,8 +248,8 @@ const Preview = () => {
     }
   };
 
-  // Open native share sheet
-  const handleSaveClick = async () => {
+  // Open share sheet directly
+  const handleShareClick = async () => {
     if (!imageUrl || !activity) return;
 
     setIsSaving(true);
@@ -257,57 +258,40 @@ const Preview = () => {
 
     const capturedUrl = await captureFramedImage();
     setFramedImageUrl(capturedUrl);
+    setIsSaving(false);
     
-    setElementsHidden(true);
-    
-    setTimeout(async () => {
-      setIsSaving(false);
-      
-      try {
-        const urlToShare = capturedUrl || imageUrl;
-        
-        const response = await fetch(urlToShare);
-        const blob = await response.blob();
-        const file = new File([blob], isVideo ? 'cult-ninja.mp4' : 'cult-ninja.png', { 
-          type: isVideo ? 'video/mp4' : 'image/png' 
-        });
-
-        if (navigator.share && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: 'Cult Ninja',
-            text: `My ${activity} moment 💪`,
-          });
-          handleSaveWithTemplate();
-        } else {
-          const link = document.createElement('a');
-          link.href = urlToShare;
-          link.download = isVideo ? 'cult-ninja.mp4' : 'cult-ninja.png';
-          link.click();
-          handleSaveWithTemplate();
-        }
-      } catch (error) {
-        console.log('Share cancelled or failed:', error);
-        setElementsHidden(false);
-      }
-    }, 500);
+    // Show share sheet
+    setShowShareSheet(true);
   };
 
-  // Save with template
+  // Save with template - show share screen first
   const handleSaveWithTemplate = async () => {
     if (!imageUrl || !activity) return;
 
+    triggerHaptic('light');
+    handleTap('done-btn');
+    setIsSaving(true);
+
+    // Capture the framed image
+    const finalUrl = await captureFramedImage();
+    setFramedImageUrl(finalUrl);
+    setIsSaving(false);
+    
+    // Show share sheet
+    setShowShareSheet(true);
+  };
+
+  // Actually navigate back and save (called from share sheet)
+  const handleFinalSave = () => {
     triggerHaptic('success');
     setIsExiting(true);
     setShowShareSheet(false);
-
-    const finalUrl = framedImageUrl || (await captureFramedImage());
 
     setTimeout(() => {
       navigate('/', {
         state: {
           savePhoto: true,
-          imageUrl: finalUrl || imageUrl,
+          imageUrl: framedImageUrl || imageUrl,
           originalUrl: imageUrl,
           isVideo,
           activity,
@@ -865,7 +849,7 @@ const Preview = () => {
           </button>
           
           <button 
-            onClick={handleSaveClick}
+            onClick={handleShareClick}
             disabled={isSaving}
             className={`w-14 h-14 flex items-center justify-center rounded-2xl bg-white/25 backdrop-blur-md border border-white/30 tap-bounce ${tappedElement === 'share-btn' ? 'animate-liquid-tap' : ''}`}
             style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}
@@ -943,6 +927,16 @@ const Preview = () => {
           setIsConnecting={setIsConnectingHealth}
           healthConnected={healthConnected}
           setHealthConnected={setHealthConnected}
+        />
+      )}
+
+      {/* Share Sheet */}
+      {showShareSheet && framedImageUrl && (
+        <ShareSheet
+          imageUrl={framedImageUrl}
+          isVideo={isVideo}
+          onClose={() => setShowShareSheet(false)}
+          onSaveWithTemplate={handleFinalSave}
         />
       )}
     </div>
