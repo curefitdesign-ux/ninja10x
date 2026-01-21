@@ -55,20 +55,25 @@ interface CardClusterProps {
   onCardTap: (dayIndex: number, photo: LoggedPhoto | null) => void;
 }
 
-// Shared spring config for ultra-smooth, coordinated animations
+// Ultra-smooth spring configs for buttery animations
 const smoothSpring = {
   type: "spring" as const,
-  stiffness: 120,
-  damping: 20,
-  mass: 0.8,
+  stiffness: 80,
+  damping: 18,
+  mass: 0.6,
+  restDelta: 0.001,
 };
 
 const fastSpring = {
   type: "spring" as const,
-  stiffness: 200,
-  damping: 25,
-  mass: 0.6,
+  stiffness: 150,
+  damping: 22,
+  mass: 0.5,
+  restDelta: 0.001,
 };
+
+// Easing for opacity/scale transitions
+const smoothEase = "easeOut" as const;
 
 const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCardTap }: CardClusterProps) => {
   const baseCardWidth = 52;
@@ -117,8 +122,8 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
     
     const stackedPos = getStackedPositions(index);
     
-    // Stagger delay for fan-out effect
-    const staggerDelay = isExpanded ? index * 0.04 : (2 - index) * 0.03;
+    // Stagger delay for seamless fan-out/collapse effect
+    const staggerDelay = isExpanded ? index * 0.035 : (2 - index) * 0.025;
     
     return (
       <motion.button
@@ -163,10 +168,11 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
         transition={{
           ...smoothSpring,
           delay: staggerDelay,
-          opacity: { duration: 0.25, delay: staggerDelay },
+          opacity: { duration: 0.3, ease: smoothEase, delay: staggerDelay },
+          rotate: { ...smoothSpring, delay: staggerDelay * 0.5 },
         }}
         onClick={(e) => handleCardClick(e, index, photo)}
-        whileTap={{ scale: 0.96 }}
+        whileTap={{ scale: 0.94, transition: { duration: 0.1, ease: "easeOut" } }}
       >
         {/* Photo or empty state */}
         {hasPhoto ? (
@@ -233,9 +239,12 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
       animate={{
         width: containerWidth,
         zIndex: isExpanded ? 10 : 1,
-        scale: isExpanded ? 1 : 0.95,
+        scale: isExpanded ? 1 : 0.92,
       }}
-      transition={smoothSpring}
+      transition={{
+        ...smoothSpring,
+        width: { ...smoothSpring, stiffness: 100 },
+      }}
     >
       {/* Glow effect for active/expanded week */}
       <AnimatePresence>
@@ -425,13 +434,17 @@ const PhotoLoggingWidget = ({
               return (
                 <motion.div
                   key={weekIndex}
-                  initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                  initial={{ opacity: 0, y: 16, scale: 0.92 }}
                   animate={{ 
                     opacity: 1, 
                     y: 0,
                     scale: contextScale,
                   }}
-                  transition={smoothSpring}
+                  transition={{
+                    ...smoothSpring,
+                    opacity: { duration: 0.35, ease: smoothEase },
+                    scale: { ...smoothSpring, stiffness: 100 },
+                  }}
                   layout
                   layoutId={`week-${weekIndex}`}
                   style={{
