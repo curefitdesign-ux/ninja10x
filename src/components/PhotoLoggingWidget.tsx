@@ -407,15 +407,15 @@ const PhotoLoggingWidget = ({
           />
         </svg>
         
-        {/* Cards Container - centered layout with offset for balance */}
-        <motion.div 
-          className="relative flex items-center justify-start gap-3 px-6 py-4 h-full"
+        {/* Cards Container - free horizontal scroll */}
+        <div 
+          className="relative flex items-center gap-3 px-4 py-4 h-full overflow-x-auto scrollbar-hide"
+          style={{ WebkitOverflowScrolling: 'touch' }}
         >
           {weeks.map((weekIndex) => {
             const { isCurrentWeek } = getWeekStatus(weekIndex);
             const isExpanded = expandedWeeks.has(weekIndex);
             const weekPhotos = getWeekPhotos(weekIndex);
-            const isFirstWeek = weekIndex === 0;
             
             // Context-aware: other weeks scale down when one expands
             const anyOtherExpanded = Array.from(expandedWeeks).some(w => w !== weekIndex);
@@ -434,9 +434,7 @@ const PhotoLoggingWidget = ({
                   stiffness: 300,
                   damping: 30,
                 }}
-                style={{
-                  marginLeft: isFirstWeek ? 100 : 0,
-                }}
+                className="flex-shrink-0"
               >
                   <CardCluster 
                     weekIndex={weekIndex}
@@ -449,7 +447,7 @@ const PhotoLoggingWidget = ({
                 </motion.div>
               );
             })}
-        </motion.div>
+        </div>
       </div>
 
       {/* Upload Options Sheet */}
