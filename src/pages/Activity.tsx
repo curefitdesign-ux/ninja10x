@@ -53,13 +53,10 @@ const activityOptions = [
 const Activity = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState("activity");
+const [activeTab, setActiveTab] = useState("activity");
   
-  // Success animation state
-  const [showSuccessBar, setShowSuccessBar] = useState(false);
-  
-  // Progress ring highlight animation
-  const [highlightRing, setHighlightRing] = useState(false);
+  // Success animation states - for pills and ring
+  const [celebrateSuccess, setCelebrateSuccess] = useState(false);
   
   // Load photos from localStorage
   const [photos, setPhotos] = useState<LoggedPhoto[]>(() => {
@@ -128,14 +125,10 @@ const Activity = () => {
               ? { ...p, storageUrl: storageUrl!, activity: location.state.activity, frame: location.state.frame }
               : p
           ));
-          toast.success(`Day ${dayNumber} updated!`);
-          // Trigger success bar and ring highlight animation
-          setShowSuccessBar(true);
-          setHighlightRing(true);
-          setTimeout(() => {
-            setShowSuccessBar(false);
-            setHighlightRing(false);
-          }, 2500);
+toast.success(`Day ${dayNumber} updated!`);
+          // Trigger celebration animation on pills and ring
+          setCelebrateSuccess(true);
+          setTimeout(() => setCelebrateSuccess(false), 2500);
         } else {
           // Add new
           const newPhoto: LoggedPhoto = {
@@ -149,14 +142,10 @@ const Activity = () => {
             dayNumber,
           };
           setPhotos(prev => [...prev, newPhoto]);
-          toast.success(`Day ${dayNumber} added!`);
-          // Trigger success bar and ring highlight animation
-          setShowSuccessBar(true);
-          setHighlightRing(true);
-          setTimeout(() => {
-            setShowSuccessBar(false);
-            setHighlightRing(false);
-          }, 2500);
+toast.success(`Day ${dayNumber} added!`);
+          // Trigger celebration animation on pills and ring
+          setCelebrateSuccess(true);
+          setTimeout(() => setCelebrateSuccess(false), 2500);
         }
       };
 
@@ -234,121 +223,111 @@ const Activity = () => {
       <PullToRefresh onRefresh={handleRefresh}>
         {/* Scrollable Content */}
         <div className="relative z-10 pb-28 pt-2">
-          {/* Stats Header - Glassmorphic */}
+{/* Stats Header - Glassmorphic */}
           <div className="px-4 pt-4 relative">
-            {/* Success Bar Overlay */}
-            <AnimatePresence>
-              {showSuccessBar && (
-                <motion.div
-                  initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.98 }}
-                  transition={{ 
-                    type: "spring", 
-                    stiffness: 300, 
-                    damping: 25,
-                  }}
-                  className="absolute inset-x-4 top-4 z-20"
-                >
-                  <div className="relative">
-                    {/* Animated glow */}
-                    <motion.div 
-                      className="absolute -inset-1 bg-gradient-to-r from-emerald-500/50 via-green-400/40 to-emerald-500/50 rounded-3xl blur-xl"
-                      animate={{ 
-                        opacity: [0.6, 0.9, 0.6],
-                        scale: [1, 1.02, 1],
-                      }}
-                      transition={{ 
-                        duration: 1.5, 
-                        repeat: Infinity, 
-                        ease: "easeInOut" 
-                      }}
-                    />
-                    {/* Success bar content */}
-                    <div className="relative bg-gradient-to-r from-emerald-500/90 via-green-500/90 to-emerald-500/90 backdrop-blur-xl rounded-3xl p-4 border border-emerald-400/40 shadow-[0_0_30px_rgba(16,185,129,0.4)]">
-                      <div className="flex items-center justify-center gap-3">
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
-                          className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"
-                        >
-                          <motion.svg 
-                            className="w-5 h-5 text-white" 
-                            fill="none" 
-                            viewBox="0 0 24 24" 
-                            stroke="currentColor"
-                            initial={{ pathLength: 0 }}
-                            animate={{ pathLength: 1 }}
-                            transition={{ duration: 0.4, delay: 0.2 }}
-                          >
-                            <motion.path 
-                              strokeLinecap="round" 
-                              strokeLinejoin="round" 
-                              strokeWidth={3} 
-                              d="M5 13l4 4L19 7"
-                              initial={{ pathLength: 0 }}
-                              animate={{ pathLength: 1 }}
-                              transition={{ duration: 0.4, delay: 0.2 }}
-                            />
-                          </motion.svg>
-                        </motion.div>
-                        <motion.span 
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.15 }}
-                          className="text-white font-semibold text-lg drop-shadow-md"
-                        >
-                          Activity Logged!
-                        </motion.span>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
           <div className="flex gap-3">
-            {/* Days Streak */}
+            {/* Days Streak - with celebration animation */}
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              animate={{ 
+                opacity: 1, 
+                y: 0,
+                scale: celebrateSuccess ? [1, 1.08, 1] : 1,
+              }}
+              transition={{ 
+                duration: 0.5,
+                scale: { duration: 0.6, ease: "easeOut" }
+              }}
               className="flex-1 relative group"
             >
-              {/* Liquid glow effect */}
-              <div className="absolute -inset-0.5 bg-gradient-to-br from-orange-500/30 via-red-500/20 to-transparent rounded-3xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity" />
+              {/* Liquid glow effect - intensified on celebration */}
+              <motion.div 
+                className="absolute -inset-0.5 bg-gradient-to-br from-orange-500/30 via-red-500/20 to-transparent rounded-3xl blur-xl transition-opacity"
+                animate={{
+                  opacity: celebrateSuccess ? [0.6, 1, 0.6] : 0.6,
+                  scale: celebrateSuccess ? [1, 1.15, 1] : 1,
+                }}
+                transition={{ duration: 1.2, ease: "easeInOut" }}
+              />
               <div className="relative bg-white/[0.08] backdrop-blur-xl rounded-3xl p-4 border border-white/[0.12] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_8px_32px_rgba(0,0,0,0.3)]">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-3xl font-bold text-white drop-shadow-lg">4</span>
+                    <motion.span 
+                      className="text-3xl font-bold text-white drop-shadow-lg inline-block"
+                      animate={celebrateSuccess ? { 
+                        scale: [1, 1.2, 1],
+                        textShadow: ["0 0 0px rgba(249,115,22,0)", "0 0 20px rgba(249,115,22,0.8)", "0 0 0px rgba(249,115,22,0)"]
+                      } : {}}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
+                    >
+                      4
+                    </motion.span>
                     <p className="text-[10px] text-white/60 uppercase tracking-wider mt-1">DAYS STREAK</p>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.5)]">
+                  <motion.div 
+                    className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.5)]"
+                    animate={celebrateSuccess ? { 
+                      rotate: [0, -15, 15, -10, 10, 0],
+                      scale: [1, 1.15, 1]
+                    } : {}}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                  >
                     <Flame className="w-5 h-5 text-white drop-shadow-md" />
-                  </div>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
             
-            {/* Weekly Activity */}
+            {/* Weekly Activity - with celebration animation */}
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
+              animate={{ 
+                opacity: 1, 
+                y: 0,
+                scale: celebrateSuccess ? [1, 1.08, 1] : 1,
+              }}
+              transition={{ 
+                duration: 0.5, 
+                delay: 0.1,
+                scale: { duration: 0.6, delay: 0.1, ease: "easeOut" }
+              }}
               className="flex-1 relative group"
             >
-              {/* Liquid glow effect */}
-              <div className="absolute -inset-0.5 bg-gradient-to-br from-cyan-500/30 via-blue-500/20 to-transparent rounded-3xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity" />
+              {/* Liquid glow effect - intensified on celebration */}
+              <motion.div 
+                className="absolute -inset-0.5 bg-gradient-to-br from-cyan-500/30 via-blue-500/20 to-transparent rounded-3xl blur-xl transition-opacity"
+                animate={{
+                  opacity: celebrateSuccess ? [0.6, 1, 0.6] : 0.6,
+                  scale: celebrateSuccess ? [1, 1.15, 1] : 1,
+                }}
+                transition={{ duration: 1.2, delay: 0.1, ease: "easeInOut" }}
+              />
               <div className="relative bg-white/[0.08] backdrop-blur-xl rounded-3xl p-4 border border-white/[0.12] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_8px_32px_rgba(0,0,0,0.3)]">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-3xl font-bold text-white drop-shadow-lg">5<span className="text-white/40">/3</span></span>
+                    <motion.span 
+                      className="text-3xl font-bold text-white drop-shadow-lg inline-block"
+                      animate={celebrateSuccess ? { 
+                        scale: [1, 1.2, 1],
+                        textShadow: ["0 0 0px rgba(34,211,238,0)", "0 0 20px rgba(34,211,238,0.8)", "0 0 0px rgba(34,211,238,0)"]
+                      } : {}}
+                      transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
+                    >
+                      5<span className="text-white/40">/3</span>
+                    </motion.span>
                     <p className="text-[10px] text-white/60 uppercase tracking-wider mt-1">WEEKLY ACTIVITY</p>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.5)]">
+                  <motion.div 
+                    className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.5)]"
+                    animate={celebrateSuccess ? { 
+                      rotate: [0, 360],
+                      scale: [1, 1.15, 1]
+                    } : {}}
+                    transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
+                  >
                     <Footprints className="w-5 h-5 text-white drop-shadow-md" />
-                  </div>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
@@ -367,7 +346,7 @@ const Activity = () => {
             <CircularProgressRing 
               currentDay={photos.length > 0 ? photos.length : 1} 
               currentWeek={currentWeek}
-              highlight={highlightRing}
+              highlight={celebrateSuccess}
             />
             {/* Chat Bubble - Enhanced glassmorphic */}
             <motion.div 
