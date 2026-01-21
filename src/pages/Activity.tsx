@@ -58,6 +58,8 @@ const Activity = () => {
   // Success animation state
   const [showSuccessBar, setShowSuccessBar] = useState(false);
   
+  // Progress ring highlight animation
+  const [highlightRing, setHighlightRing] = useState(false);
   
   // Load photos from localStorage
   const [photos, setPhotos] = useState<LoggedPhoto[]>(() => {
@@ -127,9 +129,13 @@ const Activity = () => {
               : p
           ));
           toast.success(`Day ${dayNumber} updated!`);
-          // Trigger success bar animation
+          // Trigger success bar and ring highlight animation
           setShowSuccessBar(true);
-          setTimeout(() => setShowSuccessBar(false), 2500);
+          setHighlightRing(true);
+          setTimeout(() => {
+            setShowSuccessBar(false);
+            setHighlightRing(false);
+          }, 2500);
         } else {
           // Add new
           const newPhoto: LoggedPhoto = {
@@ -144,9 +150,13 @@ const Activity = () => {
           };
           setPhotos(prev => [...prev, newPhoto]);
           toast.success(`Day ${dayNumber} added!`);
-          // Trigger success bar animation
+          // Trigger success bar and ring highlight animation
           setShowSuccessBar(true);
-          setTimeout(() => setShowSuccessBar(false), 2500);
+          setHighlightRing(true);
+          setTimeout(() => {
+            setShowSuccessBar(false);
+            setHighlightRing(false);
+          }, 2500);
         }
       };
 
@@ -357,6 +367,7 @@ const Activity = () => {
             <CircularProgressRing 
               currentDay={photos.length > 0 ? photos.length : 1} 
               currentWeek={currentWeek}
+              highlight={highlightRing}
             />
             {/* Chat Bubble - Enhanced glassmorphic */}
             <motion.div 
