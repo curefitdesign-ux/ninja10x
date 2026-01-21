@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Camera, Image as ImageIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 // Activity icons
@@ -387,9 +387,27 @@ const PhotoLoggingWidget = ({
   const weeks = [0, 1, 2, 3];
   const activeWeekIndex = currentWeek - 1;
   
+  // Calculate drag constraints based on content width
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dragConstraints, setDragConstraints] = useState({ left: 0, right: 0 });
+  
+  useEffect(() => {
+    const updateConstraints = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const scrollWidth = containerRef.current.scrollWidth;
+        const maxDrag = Math.max(0, scrollWidth - containerWidth + 32);
+        setDragConstraints({ left: -maxDrag, right: 0 });
+      }
+    };
+    updateConstraints();
+    window.addEventListener('resize', updateConstraints);
+    return () => window.removeEventListener('resize', updateConstraints);
+  }, [expandedWeeks]);
+
   return (
     <>
-      <div className="relative w-full" style={{ height: 160 }}>
+      <div className="relative w-full overflow-hidden" style={{ height: 160 }} ref={containerRef}>
         {/* Timeline Path - SVG curved dashed line */}
         <svg 
           className="absolute inset-0 w-full h-full pointer-events-none"
@@ -407,10 +425,14 @@ const PhotoLoggingWidget = ({
           />
         </svg>
         
-        {/* Cards Container - free horizontal scroll */}
-        <div 
-          className="relative flex items-center gap-3 px-4 py-4 h-full overflow-x-auto scrollbar-hide"
-          style={{ WebkitOverflowScrolling: 'touch' }}
+        {/* Cards Container - drag to scroll */}
+        <motion.div 
+          className="relative flex items-center gap-3 px-4 py-4 h-full cursor-grab active:cursor-grabbing"
+          drag="x"
+          dragConstraints={dragConstraints}
+          dragElastic={0.1}
+          dragMomentum={true}
+          dragTransition={{ bounceStiffness: 300, bounceDamping: 30 }}
         >
           {weeks.map((weekIndex) => {
             const { isCurrentWeek } = getWeekStatus(weekIndex);
@@ -447,7 +469,7 @@ const PhotoLoggingWidget = ({
                 </motion.div>
               );
             })}
-        </div>
+        </motion.div>
       </div>
 
       {/* Upload Options Sheet */}
