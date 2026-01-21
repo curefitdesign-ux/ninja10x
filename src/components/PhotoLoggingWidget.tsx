@@ -383,22 +383,9 @@ const PhotoLoggingWidget = ({
     setPendingUpload(null);
   };
   
-  // 4 clusters representing 4 weeks
+  // 4 clusters representing 4 weeks (fixed order, no shuffling)
   const weeks = [0, 1, 2, 3];
   const activeWeekIndex = currentWeek - 1;
-  
-  // Reorder weeks to put active week in center position
-  const getOrderedWeeks = () => {
-    // Create an array with active week in position 1 (second position = center of 4)
-    const ordered = [...weeks];
-    const activeIdx = ordered.indexOf(activeWeekIndex);
-    if (activeIdx !== -1 && activeIdx !== 1) {
-      // Move active week to center-ish position (index 1 for better visual centering)
-      ordered.splice(activeIdx, 1);
-      ordered.splice(1, 0, activeWeekIndex);
-    }
-    return ordered;
-  };
   
   return (
     <>
@@ -422,40 +409,35 @@ const PhotoLoggingWidget = ({
         
         {/* Cards Container - centered layout with offset for balance */}
         <motion.div 
-          className="relative flex items-center justify-center gap-3 px-6 py-4 h-full"
-          layout
+          className="relative flex items-center justify-start gap-3 px-6 py-4 h-full"
         >
-          <AnimatePresence mode="sync">
-            {weeks.map((weekIndex, displayIdx) => {
-              const { isCurrentWeek } = getWeekStatus(weekIndex);
-              const isExpanded = expandedWeeks.has(weekIndex);
-              const weekPhotos = getWeekPhotos(weekIndex);
-              const isFirstWeek = weekIndex === 0;
-              
-              // Context-aware: other weeks scale down when one expands
-              const anyOtherExpanded = Array.from(expandedWeeks).some(w => w !== weekIndex);
-              const contextScale = isExpanded ? 1 : (anyOtherExpanded ? 0.92 : 1);
-              
-              return (
-                <motion.div
-                  key={weekIndex}
-                  initial={{ opacity: 0, y: 16, scale: 0.92 }}
-                  animate={{ 
-                    opacity: 1, 
-                    y: 0,
-                    scale: contextScale,
-                  }}
-                  transition={{
-                    ...smoothSpring,
-                    opacity: { duration: 0.35, ease: smoothEase },
-                    scale: { ...smoothSpring, stiffness: 100 },
-                  }}
-                  layout
-                  layoutId={`week-${weekIndex}`}
-                  style={{
-                    marginLeft: isFirstWeek ? 100 : 0,
-                  }}
-                >
+          {weeks.map((weekIndex) => {
+            const { isCurrentWeek } = getWeekStatus(weekIndex);
+            const isExpanded = expandedWeeks.has(weekIndex);
+            const weekPhotos = getWeekPhotos(weekIndex);
+            const isFirstWeek = weekIndex === 0;
+            
+            // Context-aware: other weeks scale down when one expands
+            const anyOtherExpanded = Array.from(expandedWeeks).some(w => w !== weekIndex);
+            const contextScale = isExpanded ? 1 : (anyOtherExpanded ? 0.92 : 1);
+            
+            return (
+              <motion.div
+                key={weekIndex}
+                initial={false}
+                animate={{ 
+                  opacity: 1, 
+                  scale: contextScale,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30,
+                }}
+                style={{
+                  marginLeft: isFirstWeek ? 100 : 0,
+                }}
+              >
                   <CardCluster 
                     weekIndex={weekIndex}
                     photos={weekPhotos}
@@ -467,7 +449,6 @@ const PhotoLoggingWidget = ({
                 </motion.div>
               );
             })}
-          </AnimatePresence>
         </motion.div>
       </div>
 
