@@ -1,13 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import curoMascot from "@/assets/activity-page/curo-mascot.png";
 
 interface CircularProgressRingProps {
   currentDay: number; // 1-12
   currentWeek: number; // 1-4
   className?: string;
+  highlight?: boolean; // Trigger focus animation
 }
 
-const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" }: CircularProgressRingProps) => {
+const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "", highlight = false }: CircularProgressRingProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const size = 240;
   const centerX = size / 2;
@@ -168,7 +170,31 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
   const dayInWeek = ((currentDay - 1) % 3) + 1;
   
   return (
-    <div className={`relative ${className}`} style={{ width: size, height: size }}>
+    <motion.div 
+      className={`relative ${className}`} 
+      style={{ width: size, height: size }}
+      animate={highlight ? {
+        scale: [1, 1.05, 1],
+        filter: ['brightness(1)', 'brightness(1.2)', 'brightness(1)'],
+      } : {}}
+      transition={{ duration: 0.6, ease: "easeInOut" }}
+    >
+      {/* Highlight glow effect */}
+      <AnimatePresence>
+        {highlight && (
+          <motion.div
+            className="absolute inset-[-20px] rounded-full pointer-events-none"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            transition={{ duration: 0.4 }}
+            style={{
+              background: 'radial-gradient(circle, rgba(57, 255, 133, 0.3) 0%, rgba(57, 255, 133, 0.1) 40%, transparent 70%)',
+            }}
+          />
+        )}
+      </AnimatePresence>
+      
       <canvas
         ref={canvasRef} 
         className="absolute inset-0"
@@ -230,7 +256,7 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "" 
           }}
         />
       </div>
-    </div>
+    </motion.div>
   );
 };
 
