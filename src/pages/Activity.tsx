@@ -218,28 +218,27 @@ const Activity = () => {
     }
   }, [location.state?.openCameraWithActivity, navigate, photos.length]);
 
-  // Handle camera capture - show activity sheet
+  // Handle camera capture - go directly to preview since activity is already selected
   const handleCapture = useCallback((mediaDataUrl: string, isVideo?: boolean) => {
     setShowCamera(false);
-    setPendingMedia({ url: mediaDataUrl, isVideo: isVideo || false });
-    // If activity was already selected (from widget), go directly to preview
-    if (selectedActivity && pendingDayNumber) {
+    
+    if (selectedActivity) {
+      // Activity was already selected, go directly to preview
+      const dayNum = pendingDayNumber || photos.length + 1;
       navigate('/preview', {
         state: {
           imageUrl: mediaDataUrl,
           isVideo: isVideo || false,
           activity: selectedActivity,
-          dayNumber: pendingDayNumber,
+          dayNumber: dayNum,
         },
       });
+      // Reset all state
       setSelectedActivity(null);
       setPendingMedia(null);
       setPendingDayNumber(null);
-    } else {
-      // Show activity selection
-      setShowActivitySheet(true);
     }
-  }, [selectedActivity, pendingDayNumber, navigate]);
+  }, [selectedActivity, pendingDayNumber, navigate, photos.length]);
 
   // Handle camera close
   const handleCameraClose = useCallback(() => {
@@ -249,51 +248,36 @@ const Activity = () => {
     setPendingDayNumber(null);
   }, []);
 
-  // Handle activity selection from sheet - then open camera
+  // Handle activity selection - show acknowledgment then open camera
   const handleActivitySelect = useCallback((activity: string) => {
     const activityData = activityOptions.find(a => a.name === activity);
     if (!activityData) return;
     
+    // Set the activity immediately
     setSelectedActivity(activity);
     setAcknowledgedActivity(activityData);
     setSheetPhase('acknowledge');
     
+    // After acknowledgment animation, open camera
     setTimeout(() => {
       setSheetPhase('exit');
-    }, 1200);
+    }, 800);
     
     setTimeout(() => {
       setShowActivitySheet(false);
       setSheetPhase('select');
       setAcknowledgedActivity(null);
-      
-      // If we have pending media (from camera), go to preview
-      if (pendingMedia) {
-        const dayNum = pendingDayNumber || photos.length + 1;
-        navigate('/preview', {
-          state: {
-            imageUrl: pendingMedia.url,
-            isVideo: pendingMedia.isVideo,
-            activity,
-            dayNumber: dayNum,
-          },
-        });
-        setPendingMedia(null);
-        setPendingDayNumber(null);
-        setSelectedActivity(null);
-      } else {
-        // No media yet - open camera with activity pre-selected
-        setShowCamera(true);
-        setCameraEntering(true);
-        setTimeout(() => setCameraEntering(false), 500);
-      }
-    }, 1600);
-  }, [pendingMedia, pendingDayNumber, navigate, photos.length]);
+      // Open camera with activity pre-selected
+      setShowCamera(true);
+    }, 1100);
+  }, []);
 
   // Handle overlay click to close sheet
   const handleOverlayClick = useCallback(() => {
     setShowActivitySheet(false);
+    setSheetPhase('select');
     setSelectedActivity(null);
+    setAcknowledgedActivity(null);
     setPendingMedia(null);
     setPendingDayNumber(null);
   }, []);
@@ -302,7 +286,6 @@ const Activity = () => {
   const handlePhotoAdd = useCallback((weekIndex: number, dayIndex: number) => {
     const dayNum = weekIndex * 3 + dayIndex + 1;
     setPendingDayNumber(dayNum);
-    // Show activity selection first, then camera
     setShowActivitySheet(true);
   }, []);
 
