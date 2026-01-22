@@ -544,7 +544,7 @@ const Preview = () => {
                         key={act.name}
                         onClick={() => handleActivitySelect(act.name)}
                         whileTap={{ scale: 0.95 }}
-                        className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 active:bg-white/20"
+                        className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-black active:bg-white/10"
                       >
                         <img src={act.icon} alt={act.name} className="w-10 h-10 object-contain" />
                         <span className="text-white/90 text-xs font-medium">{act.name}</span>
