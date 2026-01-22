@@ -106,6 +106,8 @@ const Index = () => {
   const [showReelPreview, setShowReelPreview] = useState(false);
   const [lastGeneratedPhotos, setLastGeneratedPhotos] = useState<typeof photos>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [weekTransitionAnimation, setWeekTransitionAnimation] = useState(false);
+  const [previousPhotoCount, setPreviousPhotoCount] = useState(photos.length);
   
   // Show preview when reel is ready
   useEffect(() => {
@@ -167,6 +169,20 @@ const Index = () => {
       console.error('Failed to save photos to localStorage:', e);
     }
   }, [photos]);
+
+  // Detect week completion and trigger animation
+  useEffect(() => {
+    const previousWeek = Math.ceil(previousPhotoCount / 3);
+    const newWeek = Math.ceil(photos.length / 3);
+    
+    // If we just completed a week (photo count crossed a multiple of 3)
+    if (photos.length > previousPhotoCount && photos.length % 3 === 0 && photos.length > 0) {
+      setWeekTransitionAnimation(true);
+      setTimeout(() => setWeekTransitionAnimation(false), 2000);
+    }
+    
+    setPreviousPhotoCount(photos.length);
+  }, [photos.length, previousPhotoCount]);
 
   // Get current date (or simulated date for testing)
   const getCurrentDate = () => {
@@ -563,6 +579,7 @@ const Index = () => {
                   onEditPhoto={handleEditPhoto}
                   isGenerating={isGenerating}
                   isUploading={isUploading}
+                  weekTransitionAnimation={weekTransitionAnimation}
                 />
               )}
             </main>
