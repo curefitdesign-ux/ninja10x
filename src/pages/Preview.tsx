@@ -268,11 +268,10 @@ const Preview = () => {
 
     // Capture the framed image
     const finalUrl = await captureFramedImage();
-    const shareAssetUrl = finalUrl || imageUrl;
-    setFramedImageUrl(shareAssetUrl);
+    setFramedImageUrl(finalUrl);
     setIsSaving(false);
-
-    // Show share sheet (always open even if capture fails and we fall back)
+    
+    // Show share sheet
     setShowShareSheet(true);
   };
 
