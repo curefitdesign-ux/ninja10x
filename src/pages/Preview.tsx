@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil, Share2 } from 'lucide-react';
+import { X, Check, Pencil, Trash2 } from 'lucide-react';
 import ShareSheet from '@/components/ShareSheet';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import html2canvas from 'html2canvas';
@@ -248,20 +248,14 @@ const Preview = () => {
     }
   };
 
-  // Open share sheet directly
-  const handleShareClick = async () => {
-    if (!imageUrl || !activity) return;
-
-    setIsSaving(true);
-    triggerHaptic('light');
-    handleTap('share-btn');
-
-    const capturedUrl = await captureFramedImage();
-    setFramedImageUrl(capturedUrl);
-    setIsSaving(false);
-    
-    // Show share sheet
-    setShowShareSheet(true);
+  // Handle removing the current image
+  const handleRemoveImage = () => {
+    triggerHaptic('medium');
+    setImageUrl(null);
+    setActivity(null);
+    setCapturedMedia(null);
+    setFlowStep('camera');
+    setIsLoaded(false);
   };
 
   // Save with template - show share screen first
@@ -706,12 +700,20 @@ const Preview = () => {
             <X className="w-5 h-5 text-white" />
           </button>
           <h2 className="text-white/80 text-lg font-semibold">Select your frame</h2>
-          <button 
-            onClick={handleRetake}
-            className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'retake-btn' ? 'animate-liquid-tap' : ''}`}
-          >
-            <Pencil className="w-5 h-5 text-white" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={handleRemoveImage}
+              className={`w-10 h-10 flex items-center justify-center rounded-full bg-red-500/20 backdrop-blur-sm tap-bounce ${tappedElement === 'remove-btn' ? 'animate-liquid-tap' : ''}`}
+            >
+              <Trash2 className="w-5 h-5 text-red-400" />
+            </button>
+            <button 
+              onClick={handleRetake}
+              className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'retake-btn' ? 'animate-liquid-tap' : ''}`}
+            >
+              <Pencil className="w-5 h-5 text-white" />
+            </button>
+          </div>
         </div>
         
         {/* Frame carousel */}
@@ -848,14 +850,6 @@ const Preview = () => {
             </span>
           </button>
           
-          <button 
-            onClick={handleShareClick}
-            disabled={isSaving}
-            className={`w-14 h-14 flex items-center justify-center rounded-2xl bg-white/25 backdrop-blur-md border border-white/30 tap-bounce ${tappedElement === 'share-btn' ? 'animate-liquid-tap' : ''}`}
-            style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}
-          >
-            <Share2 className="w-6 h-6 text-white" />
-          </button>
         </div>
       </div>
 

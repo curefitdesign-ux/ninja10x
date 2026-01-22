@@ -129,67 +129,59 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate }: ShareShe
 
   return (
     <>
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm animate-fade-in"
-        onClick={onClose}
-      />
-      
-      {/* Share Sheet - 80% height */}
-      <div 
-        className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom duration-300"
-        style={{ height: '80vh' }}
-      >
-        <div 
-          className="bg-background/95 backdrop-blur-2xl border-t border-white/10 rounded-t-3xl overflow-hidden h-full flex flex-col"
-          style={{ boxShadow: '0 -10px 40px rgba(0,0,0,0.5)' }}
-        >
-          {/* Header with Handle and Done */}
-          <div className="flex items-center justify-between px-6 pt-4 pb-2">
-            <div className="w-16" /> {/* Spacer for balance */}
-            <div className="w-10 h-1 bg-white/20 rounded-full" />
-            <button 
-              onClick={onSaveWithTemplate}
-              className="text-white font-semibold text-base tap-bounce"
-            >
-              Done
-            </button>
+      {/* Full Screen Overlay */}
+      <div className="fixed inset-0 z-50 bg-black animate-fade-in flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pt-6 pb-4">
+          <button 
+            onClick={onClose}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce"
+          >
+            <X className="w-5 h-5 text-white" />
+          </button>
+          <h2 className="text-white/80 text-lg font-semibold">Share</h2>
+          <button 
+            onClick={onSaveWithTemplate}
+            className="px-4 py-2 rounded-full bg-white tap-bounce"
+          >
+            <span className="text-black font-semibold text-sm">Done</span>
+          </button>
+        </div>
+        
+        {/* Main Content - Full screen image preview */}
+        <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8">
+          {/* Large Preview */}
+          <div 
+            className="w-full max-w-[280px] aspect-[3/4] rounded-3xl overflow-hidden bg-white/5 mb-8"
+            style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}
+          >
+            {isVideo ? (
+              <video 
+                src={imageUrl} 
+                className="w-full h-full object-contain bg-black"
+                muted
+                playsInline
+                autoPlay
+                loop
+              />
+            ) : (
+              <img 
+                src={imageUrl} 
+                alt="Preview" 
+                className="w-full h-full object-contain bg-black"
+              />
+            )}
           </div>
           
-          {/* Preview - Larger for 80% sheet */}
-          <div className="px-6 pb-6 pt-2">
-            <div className="flex flex-col items-center gap-4">
-              <div 
-                className="w-40 h-56 rounded-2xl overflow-hidden bg-white/5 flex-shrink-0"
-                style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
-              >
-                {isVideo ? (
-                  <video 
-                    src={imageUrl} 
-                    className="w-full h-full object-contain bg-black"
-                    muted
-                    playsInline
-                    autoPlay
-                    loop
-                  />
-                ) : (
-                  <img 
-                    src={imageUrl} 
-                    alt="Preview" 
-                    className="w-full h-full object-contain bg-black"
-                  />
-                )}
-              </div>
-              <div className="text-center">
-                <h3 className="text-white font-semibold text-xl">Share your activity</h3>
-                <p className="text-white/50 text-sm mt-1">Choose where to share</p>
-              </div>
-            </div>
+          {/* Share Title */}
+          <div className="text-center mb-6">
+            <h3 className="text-white font-semibold text-xl">Share your activity</h3>
+            <p className="text-white/50 text-sm mt-1">Choose where to share</p>
           </div>
           
           {/* Social Apps Grid */}
-          <div className="px-6 pb-6 flex-1">
-            <div className="grid grid-cols-6 gap-4">
+          <div className="w-full">
+            <div className="grid grid-cols-6 gap-4 mb-8">
               {socialApps.map((app) => (
                 <button
                   key={app.name}
@@ -206,24 +198,22 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate }: ShareShe
                 </button>
               ))}
             </div>
-          </div>
-          
-          {/* Action Buttons */}
-          <div className="px-6 pb-8 mt-auto">
-            <div className="flex gap-3 mb-4">
+            
+            {/* Action Buttons */}
+            <div className="flex gap-3">
               <button
                 onClick={handleCopyLink}
-                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white/10 tap-bounce"
+                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/10 tap-bounce"
               >
                 <Link className="w-5 h-5 text-white/70" />
-                <span className="text-white/80 font-medium text-sm">Copy Link</span>
+                <span className="text-white/80 font-medium">Copy Link</span>
               </button>
               <button
                 onClick={handleDownload}
-                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white/10 tap-bounce"
+                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/10 tap-bounce"
               >
                 <Download className="w-5 h-5 text-white/70" />
-                <span className="text-white/80 font-medium text-sm">Save {isVideo ? 'Video' : 'Image'}</span>
+                <span className="text-white/80 font-medium">Save {isVideo ? 'Video' : 'Image'}</span>
               </button>
             </div>
           </div>

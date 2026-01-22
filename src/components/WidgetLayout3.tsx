@@ -1,4 +1,4 @@
-import { Plus, ScanFace, X, Camera, Play } from 'lucide-react';
+import { Plus, ScanFace, X, Camera, Play, Sparkles } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import cardBackground from '@/assets/card-background.png';
@@ -97,6 +97,7 @@ interface WidgetLayout3Props {
   onEditPhoto?: (photo: Photo) => void;
   isGenerating?: boolean;
   isUploading?: boolean;
+  weekTransitionAnimation?: boolean;
 }
 
 const WidgetLayout3 = ({ 
@@ -107,7 +108,8 @@ const WidgetLayout3 = ({
   onRemovePhoto, 
   onEditPhoto,
   isGenerating = false, 
-  isUploading = false 
+  isUploading = false,
+  weekTransitionAnimation = false,
 }: WidgetLayout3Props) => {
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
@@ -182,11 +184,65 @@ const WidgetLayout3 = ({
     }
   };
 
+  // Calculate completed week for transition animation
+  const completedWeek = Math.floor(photos.length / 3);
+  const nextWeek = completedWeek + 1;
+
   return (
-    <div className="px-5 pt-4">
+    <div className="px-5 pt-4 relative">
+      {/* Week Transition Celebration Overlay */}
+      {weekTransitionAnimation && (
+        <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+          {/* Bouncy liquid glass background */}
+          <div 
+            className="absolute inset-0 animate-week-transition-bg"
+            style={{
+              background: 'radial-gradient(circle at 50% 50%, rgba(52, 211, 153, 0.15) 0%, transparent 60%)',
+            }}
+          />
+          
+          {/* Central celebration card */}
+          <div 
+            className="animate-week-celebration-bounce"
+            style={{
+              background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.25) 0%, rgba(34, 197, 94, 0.15) 100%)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1.5px solid rgba(52, 211, 153, 0.4)',
+              borderRadius: '24px',
+              padding: '32px 48px',
+              boxShadow: '0 20px 60px rgba(52, 211, 153, 0.3), inset 0 1px 1px rgba(255,255,255,0.3)',
+            }}
+          >
+            <div className="flex flex-col items-center gap-4">
+              <div className="animate-sparkle-float">
+                <Sparkles className="w-10 h-10 text-emerald-400" />
+              </div>
+              <div className="text-center">
+                <h3 className="text-white font-bold text-2xl mb-1">
+                  Week {completedWeek} Complete!
+                </h3>
+                <p className="text-emerald-300/80 text-sm font-medium">
+                  Moving to Week {nextWeek}
+                </p>
+              </div>
+              <div className="flex gap-2 mt-2">
+                {[0, 1, 2].map((i) => (
+                  <div 
+                    key={i}
+                    className="w-3 h-3 rounded-full bg-emerald-400 animate-bounce"
+                    style={{ animationDelay: `${i * 100}ms` }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Ninja Widget */}
       <div 
-        className={`glass-card p-5 pt-10 relative overflow-visible w-full transition-all duration-500 ${isLoaded ? 'animate-liquid-enter' : 'opacity-0'}`}
+        className={`glass-card p-5 pt-10 relative overflow-visible w-full transition-all duration-500 ${isLoaded ? 'animate-liquid-enter' : 'opacity-0'} ${weekTransitionAnimation ? 'animate-widget-pulse' : ''}`}
         style={{ backgroundImage: `url(${cardBackground})`, backgroundSize: 'cover', backgroundPosition: 'center', minHeight: '420px' }}
       >
         {/* Cult Ninja Tag */}
