@@ -88,11 +88,12 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
   // Check if any photo is logged in this week
   const hasAnyPhoto = photos.some(p => p !== null);
   
-  // Card positions for stacked state - tighter stack with subtle rotation
+  // Card positions for stacked state - proper separation to avoid overlap
   const getStackedPositions = (index: number) => {
-    const rotations = [-6, 4, -2];
-    const xOffsets = [-3, 6, 0];
-    const yOffsets = [1, 4, 7];
+    // When stacked, cards should be positioned with clear separation
+    const rotations = [-8, 0, 8];
+    const xOffsets = [-14, 0, 14]; // Clear horizontal separation
+    const yOffsets = [4, 0, 4];
     return {
       rotate: rotations[index],
       x: xOffsets[index],
@@ -292,9 +293,9 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
         )}
       </AnimatePresence>
       
-      {/* Render 3 cards */}
-      {[0, 1, 2].map((index) => 
-        renderCard(index, index + 1, [0.5, 0.7, 0.9][index])
+      {/* Render 3 cards - reversed order so first card (index 0) is on top when stacked */}
+      {[2, 1, 0].map((index) => 
+        renderCard(index, isExpanded ? index + 1 : 3 - index, isExpanded ? 1 : [0.6, 0.8, 1][index])
       )}
     </motion.div>
   );
