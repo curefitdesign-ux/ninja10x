@@ -1,6 +1,6 @@
-import { X, Download, Link, MessageCircle, Check, Copy } from 'lucide-react';
+import { X, Download, Copy, Check } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface ShareSheetProps {
   imageUrl: string;
@@ -29,7 +29,7 @@ const socialApps = [
       </svg>
     ),
     color: '#E4405F',
-    share: () => `instagram://` // Opens Instagram app
+    share: () => `instagram://`
   },
   { 
     name: 'X', 
@@ -62,12 +62,6 @@ const socialApps = [
     share: (text: string) => `tg://msg?text=${encodeURIComponent(text)}`
   },
   { 
-    name: 'Messages', 
-    icon: <MessageCircle className="w-7 h-7" />,
-    color: '#34C759',
-    share: (text: string) => `sms:?body=${encodeURIComponent(text)}`
-  },
-  { 
     name: 'Snapchat', 
     icon: (
       <svg viewBox="0 0 24 24" className="w-7 h-7" fill="currentColor">
@@ -87,19 +81,73 @@ const socialApps = [
     color: '#0A66C2',
     share: (text: string) => `linkedin://shareArticle?mini=true&summary=${encodeURIComponent(text)}`
   },
+  { 
+    name: 'Messages', 
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-7 h-7" fill="currentColor">
+        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
+        <path d="M7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/>
+      </svg>
+    ),
+    color: '#34C759',
+    share: (text: string) => `sms:?body=${encodeURIComponent(text)}`
+  },
 ];
 
-const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate }: ShareSheetProps) => {
+const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
   const [copied, setCopied] = useState(false);
+  const [dominantColor, setDominantColor] = useState('rgba(0,0,0,0.95)');
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   
   const shareText = '🏃 Check out my fitness activity! #FitnessJourney #HealthyLifestyle';
   const shareUrl = window.location.href;
   const fullShareText = `${shareText}\n\n${shareUrl}`;
+
+  // Extract dominant color from image
+  useEffect(() => {
+    if (isVideo || !imageUrl) return;
+    
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      canvas.width = 50;
+      canvas.height = 50;
+      ctx.drawImage(img, 0, 0, 50, 50);
+      
+      const imageData = ctx.getImageData(0, 0, 50, 50).data;
+      let r = 0, g = 0, b = 0, count = 0;
+      
+      for (let i = 0; i < imageData.length; i += 4) {
+        r += imageData[i];
+        g += imageData[i + 1];
+        b += imageData[i + 2];
+        count++;
+      }
+      
+      r = Math.floor(r / count);
+      g = Math.floor(g / count);
+      b = Math.floor(b / count);
+      
+      // Darken the color for better contrast
+      const darkenFactor = 0.3;
+      r = Math.floor(r * darkenFactor);
+      g = Math.floor(g * darkenFactor);
+      b = Math.floor(b * darkenFactor);
+      
+      setDominantColor(`rgb(${r},${g},${b})`);
+    };
+    img.src = imageUrl;
+  }, [imageUrl, isVideo]);
   
   const handleShare = async (app: typeof socialApps[0]) => {
     triggerHaptic('medium');
     
-    // Try native share first (works best on mobile)
     if (navigator.share) {
       try {
         const response = await fetch(imageUrl);
@@ -118,22 +166,17 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate }: ShareShe
       }
     }
     
-    // Try deep link to open the app
     const deepLink = app.share(fullShareText);
     if (deepLink) {
-      // Create a hidden iframe to try deep link first
       const iframe = document.createElement('iframe');
       iframe.style.display = 'none';
       document.body.appendChild(iframe);
       
-      // Try deep link
       const start = Date.now();
       window.location.href = deepLink;
       
-      // Fallback to web URL if app doesn't open
       setTimeout(() => {
         if (Date.now() - start < 2000) {
-          // App didn't open, fallback to web
           const webFallbacks: Record<string, string> = {
             'WhatsApp': `https://wa.me/?text=${encodeURIComponent(fullShareText)}`,
             'X': `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
@@ -180,51 +223,58 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate }: ShareShe
 
   return (
     <>
-      {/* Full Screen Glassmorphic Overlay */}
+      {/* Hidden canvas for color extraction */}
+      <canvas ref={canvasRef} className="hidden" />
+      
+      {/* Full Screen with Image-Based Background */}
       <div className="fixed inset-0 z-50 animate-fade-in flex flex-col overflow-hidden">
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/80 via-black to-blue-900/80" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(120,80,200,0.3),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(60,120,220,0.3),transparent_50%)]" />
+        {/* Background with extracted color + blur effect */}
+        <div 
+          className="absolute inset-0 transition-colors duration-500"
+          style={{ backgroundColor: dominantColor }}
+        />
         
-        {/* Floating orbs for liquid effect */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl animate-float-slow" />
-        <div className="absolute bottom-40 right-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl animate-float-slower" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-pink-500/10 rounded-full blur-3xl animate-pulse-slow" />
+        {/* Blurred image as background */}
+        {!isVideo && (
+          <div 
+            className="absolute inset-0 opacity-40"
+            style={{
+              backgroundImage: `url(${imageUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: 'blur(60px) saturate(1.2)',
+            }}
+          />
+        )}
         
-        {/* Glassmorphic content container */}
+        {/* Dark overlay for contrast */}
+        <div className="absolute inset-0 bg-black/40" />
+        
+        {/* Content container */}
         <div className="relative z-10 flex-1 flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-6 pb-4">
+          {/* Header - Close button on right */}
+          <div className="flex items-center justify-end px-5 pt-6 pb-4">
             <button 
               onClick={onClose}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-xl border border-white/20 tap-bounce shadow-lg"
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-xl tap-bounce"
             >
               <X className="w-5 h-5 text-white" />
-            </button>
-            <h2 className="text-white/90 text-lg font-semibold drop-shadow-lg">Share</h2>
-            <button 
-              onClick={onSaveWithTemplate}
-              className="px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm tap-bounce shadow-lg"
-            >
-              <span className="text-black font-semibold text-sm">Done</span>
             </button>
           </div>
           
           {/* Main Content */}
           <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8 overflow-hidden">
-            {/* Glassmorphic Preview Card */}
+            {/* Preview Card */}
             <div 
-              className="w-full max-w-[260px] aspect-[3/4] rounded-3xl overflow-hidden mb-6 backdrop-blur-sm"
+              className="w-full max-w-[280px] aspect-[3/4] rounded-3xl overflow-hidden mb-8"
               style={{ 
-                boxShadow: '0 25px 80px rgba(0,0,0,0.5), 0 0 40px rgba(120,80,200,0.2)',
-                border: '1px solid rgba(255,255,255,0.15)'
+                boxShadow: '0 25px 80px rgba(0,0,0,0.6)',
               }}
             >
               {isVideo ? (
                 <video 
                   src={imageUrl} 
-                  className="w-full h-full object-contain bg-black/50"
+                  className="w-full h-full object-contain bg-black"
                   muted
                   playsInline
                   autoPlay
@@ -234,61 +284,39 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate }: ShareShe
                 <img 
                   src={imageUrl} 
                   alt="Preview" 
-                  className="w-full h-full object-contain bg-black/50"
+                  className="w-full h-full object-contain bg-black"
                 />
               )}
             </div>
             
-            {/* Share Title - Glassmorphic */}
-            <div className="text-center mb-5">
-              <h3 className="text-white font-semibold text-xl drop-shadow-lg">Share your activity</h3>
-              <p className="text-white/60 text-sm mt-1">Choose where to share</p>
-            </div>
-            
-            {/* Glassmorphic Social Apps Container */}
-            <div 
-              className="w-full rounded-3xl p-5 mb-5 backdrop-blur-2xl"
-              style={{
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 100%)',
-                border: '1px solid rgba(255,255,255,0.15)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
-              }}
-            >
-              {/* Scrollable Social Apps Row */}
-              <div className="overflow-x-auto scrollbar-hide -mx-2 px-2">
-                <div className="flex gap-5 pb-2 min-w-max">
-                  {socialApps.map((app) => (
-                    <button
-                      key={app.name}
-                      onClick={() => handleShare(app)}
-                      className="flex flex-col items-center gap-2 tap-bounce flex-shrink-0"
+            {/* Scrollable Social Apps Row - No boxes */}
+            <div className="w-full overflow-x-auto scrollbar-hide mb-8">
+              <div className="flex gap-6 px-4 min-w-max justify-start">
+                {socialApps.map((app) => (
+                  <button
+                    key={app.name}
+                    onClick={() => handleShare(app)}
+                    className="flex flex-col items-center gap-2 tap-bounce flex-shrink-0"
+                  >
+                    <div 
+                      className="w-14 h-14 rounded-full flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95"
+                      style={{ 
+                        backgroundColor: app.color,
+                      }}
                     >
-                      <div 
-                        className="w-14 h-14 rounded-2xl flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95 shadow-lg"
-                        style={{ 
-                          backgroundColor: app.color,
-                          boxShadow: `0 4px 20px ${app.color}40`
-                        }}
-                      >
-                        {app.icon}
-                      </div>
-                      <span className="text-white/80 text-[11px] font-medium">{app.name}</span>
-                    </button>
-                  ))}
-                </div>
+                      {app.icon}
+                    </div>
+                    <span className="text-white/70 text-[11px] font-medium">{app.name}</span>
+                  </button>
+                ))}
               </div>
             </div>
             
-            {/* Glassmorphic Action Buttons */}
-            <div className="w-full flex gap-3">
+            {/* Action Buttons */}
+            <div className="w-full flex gap-3 max-w-sm">
               <button
                 onClick={handleCopyLink}
-                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl backdrop-blur-xl tap-bounce transition-all active:scale-95"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
-                }}
+                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
               >
                 {copied ? (
                   <Check className="w-5 h-5 text-green-400" />
@@ -299,12 +327,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate }: ShareShe
               </button>
               <button
                 onClick={handleDownload}
-                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl backdrop-blur-xl tap-bounce transition-all active:scale-95"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
-                }}
+                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/15 backdrop-blur-sm tap-bounce transition-all active:scale-95"
               >
                 <Download className="w-5 h-5 text-white/80" />
                 <span className="text-white/90 font-medium">Save</span>
