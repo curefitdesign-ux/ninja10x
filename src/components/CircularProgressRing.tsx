@@ -7,9 +7,18 @@ interface CircularProgressRingProps {
   currentWeek: number; // 1-4
   className?: string;
   highlight?: boolean; // Trigger focus animation
+  mascotSrc?: string;
+  mascotAlt?: string;
 }
 
-const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "", highlight = false }: CircularProgressRingProps) => {
+const CircularProgressRing = ({
+  currentDay = 1,
+  currentWeek = 1,
+  className = "",
+  highlight = false,
+  mascotSrc,
+  mascotAlt,
+}: CircularProgressRingProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const size = 240;
   const centerX = size / 2;
@@ -247,8 +256,8 @@ const CircularProgressRing = ({ currentDay = 1, currentWeek = 1, className = "",
       {/* Mascot */}
       <div className="absolute inset-0 flex items-center justify-center">
         <img 
-          src={curoMascot} 
-          alt="Curo mascot" 
+          src={mascotSrc || curoMascot} 
+          alt={mascotAlt || "Curo mascot"} 
           className="w-36 h-36 object-contain"
           style={{ 
             marginTop: '-6px',

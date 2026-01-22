@@ -25,6 +25,11 @@ import walkFitness from "@/assets/programs/walk-fitness.png";
 import cultJunior from "@/assets/programs/cult-junior.png";
 import prenatalYoga from "@/assets/programs/prenatal-yoga.png";
 
+// Mascot states (changes with day + celebrations)
+import curoHappy from "@/assets/mascot/curo-happy.png";
+import curoThumbs from "@/assets/mascot/curo-thumbs.png";
+import curoParty from "@/assets/mascot/curo-party.png";
+
 // Activity icons for selection
 import footballIcon from '@/assets/activities/football.png';
 import cricketIcon from '@/assets/activities/cricket.png';
@@ -86,6 +91,23 @@ const [activeTab, setActiveTab] = useState("activity");
   // Calculate current week and day based on photos
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
   const currentDay = photos.length + 1; // Next day to fill
+
+  const dayInWeek = ((currentDay - 1) % 3) + 1;
+  const mascot = (() => {
+    if (showWeekCelebration) {
+      return { src: curoParty, alt: "Celebration mascot" };
+    }
+    if (celebrateSuccess) {
+      return { src: curoThumbs, alt: "Great job mascot" };
+    }
+    if (dayInWeek === 2) {
+      return { src: curoThumbs, alt: "Ready to go mascot" };
+    }
+    if (dayInWeek === 3) {
+      return { src: curoParty, alt: "Let's finish strong mascot" };
+    }
+    return { src: curoHappy, alt: "Hello mascot" };
+  })();
 
   // Handle save from preview page
   useEffect(() => {
@@ -470,6 +492,8 @@ toast.success(`Day ${dayNumber} added!`);
               currentDay={photos.length > 0 ? photos.length : 1} 
               currentWeek={currentWeek}
               highlight={celebrateSuccess}
+              mascotSrc={mascot.src}
+              mascotAlt={mascot.alt}
             />
             {/* Chat Bubble - Enhanced glassmorphic */}
             <motion.div 
