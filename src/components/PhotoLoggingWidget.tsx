@@ -440,7 +440,8 @@ const PhotoLoggingWidget = ({
         
         {/* Cards Container - drag to scroll */}
         <motion.div 
-          className="relative flex items-center gap-3 px-4 py-4 h-full cursor-grab active:cursor-grabbing"
+          className="relative flex items-center gap-3 py-4 h-full cursor-grab active:cursor-grabbing"
+          style={{ paddingLeft: 100, paddingRight: 40 }}
           drag="x"
           dragConstraints={dragConstraints}
           dragElastic={0.1}
