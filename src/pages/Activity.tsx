@@ -57,6 +57,9 @@ const [activeTab, setActiveTab] = useState("activity");
   
   // Success animation states - for pills and ring
   const [celebrateSuccess, setCelebrateSuccess] = useState(false);
+  // Week completion celebration
+  const [showWeekCelebration, setShowWeekCelebration] = useState(false);
+  const [completedWeekNumber, setCompletedWeekNumber] = useState(0);
   
   // Load photos from localStorage
   const [photos, setPhotos] = useState<LoggedPhoto[]>(() => {
@@ -141,11 +144,25 @@ toast.success(`Day ${dayNumber} updated!`);
             pr: location.state.pr,
             dayNumber,
           };
-          setPhotos(prev => [...prev, newPhoto]);
+          const updatedPhotos = [...photos, newPhoto];
+          setPhotos(updatedPhotos);
 toast.success(`Day ${dayNumber} added!`);
           // Trigger celebration animation on pills and ring
           setCelebrateSuccess(true);
           setTimeout(() => setCelebrateSuccess(false), 2500);
+          
+          // Check if week is completed (3 photos in the week)
+          const weekIndex = Math.floor((dayNumber - 1) / 3);
+          const weekStartDay = weekIndex * 3 + 1;
+          const weekPhotos = updatedPhotos.filter(p => p.dayNumber >= weekStartDay && p.dayNumber <= weekStartDay + 2);
+          if (weekPhotos.length === 3) {
+            // Week completed! Show celebration
+            setTimeout(() => {
+              setCompletedWeekNumber(weekIndex + 1);
+              setShowWeekCelebration(true);
+              setTimeout(() => setShowWeekCelebration(false), 3500);
+            }, 500);
+          }
         }
       };
 
@@ -218,6 +235,112 @@ toast.success(`Day ${dayNumber} added!`);
     <div className="min-h-screen bg-[#0a0a12] text-white overflow-x-hidden relative">
       {/* Gradient Mesh Background */}
       <GradientMeshBackground />
+      
+      {/* Week Completion Celebration Overlay */}
+      <AnimatePresence>
+        {showWeekCelebration && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            {/* Radial gradient background */}
+            <motion.div 
+              className="absolute inset-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              style={{
+                background: 'radial-gradient(circle at center, rgba(52, 211, 153, 0.25) 0%, rgba(16, 185, 129, 0.15) 30%, rgba(0,0,0,0.9) 70%)',
+              }}
+            />
+            
+            {/* Animated glow rings */}
+            <motion.div
+              className="absolute w-80 h-80 rounded-full"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: [0.5, 1.5, 2], opacity: [0.8, 0.4, 0] }}
+              transition={{ duration: 1.5, ease: "easeOut" }}
+              style={{
+                background: 'radial-gradient(circle, rgba(52, 211, 153, 0.5) 0%, transparent 70%)',
+              }}
+            />
+            <motion.div
+              className="absolute w-60 h-60 rounded-full"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: [0.5, 1.3, 1.8], opacity: [0.6, 0.3, 0] }}
+              transition={{ duration: 1.5, delay: 0.2, ease: "easeOut" }}
+              style={{
+                background: 'radial-gradient(circle, rgba(16, 185, 129, 0.6) 0%, transparent 70%)',
+              }}
+            />
+            
+            {/* Celebration Card */}
+            <motion.div
+              className="relative z-10 bg-white/[0.1] backdrop-blur-2xl rounded-3xl px-10 py-8 border border-emerald-400/30 shadow-[0_0_60px_rgba(52,211,153,0.3)]"
+              initial={{ scale: 0.5, y: 50, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.8, y: -30, opacity: 0 }}
+              transition={{ 
+                type: "spring",
+                stiffness: 300,
+                damping: 25,
+                delay: 0.1
+              }}
+            >
+              {/* Sparkle effects */}
+              <motion.div
+                className="absolute -top-4 -left-4 w-8 h-8 text-yellow-400"
+                animate={{ rotate: [0, 360], scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                ✨
+              </motion.div>
+              <motion.div
+                className="absolute -top-2 -right-6 w-6 h-6 text-emerald-400"
+                animate={{ rotate: [360, 0], scale: [1, 1.3, 1] }}
+                transition={{ duration: 2.5, repeat: Infinity, delay: 0.3 }}
+              >
+                ⭐
+              </motion.div>
+              <motion.div
+                className="absolute -bottom-3 -right-4 w-7 h-7 text-cyan-400"
+                animate={{ rotate: [0, -360], scale: [1, 1.2, 1] }}
+                transition={{ duration: 2.2, repeat: Infinity, delay: 0.5 }}
+              >
+                🎉
+              </motion.div>
+              
+              <div className="text-center">
+                <motion.div
+                  className="text-5xl mb-3"
+                  animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 0.8, delay: 0.3 }}
+                >
+                  🏆
+                </motion.div>
+                <motion.h2 
+                  className="text-2xl font-bold text-white mb-2"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  Week {completedWeekNumber} Complete!
+                </motion.h2>
+                <motion.p 
+                  className="text-emerald-400/90 text-sm"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  Amazing progress! Keep it up! 💪
+                </motion.p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Pull to Refresh Wrapper */}
       <PullToRefresh onRefresh={handleRefresh}>
