@@ -259,32 +259,46 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
             </button>
           </div>
           
-          {/* Main Content - Scrollable */}
-          <div className="flex-1 flex flex-col items-center justify-center px-6 overflow-hidden">
-            {/* Preview Card - No black background */}
-            <div 
-              className="w-full max-w-[280px] aspect-[3/4] rounded-3xl overflow-hidden mb-8"
-              style={{ 
-                boxShadow: '0 25px 80px rgba(0,0,0,0.4)',
-              }}
-            >
-              {isVideo ? (
-                <video 
-                  src={imageUrl} 
-                  className="w-full h-full object-contain"
-                  muted
-                  playsInline
-                  autoPlay
-                  loop
-                />
-              ) : (
-                <img 
-                  src={imageUrl} 
-                  alt="Preview" 
-                  className="w-full h-full object-contain"
-                />
-              )}
-            </div>
+           {/* Main Content - Scrollable */}
+           <div className="flex-1 flex flex-col items-center justify-center px-6 overflow-hidden">
+             {/* Preview Card - locked to 9:16 like the original framed output */}
+             <div className="relative w-full max-w-[296px] aspect-[9/16] rounded-[28px] overflow-hidden mb-8">
+               {/* Glass border + glow */}
+               <div className="absolute inset-0 rounded-[28px] ring-1 ring-white/15" />
+               <div
+                 className="absolute -inset-10 opacity-60"
+                 style={{
+                   background:
+                     'radial-gradient(closest-side, rgba(255,255,255,0.16), transparent 65%)',
+                   filter: 'blur(16px)',
+                 }}
+               />
+
+               <div
+                 className="absolute inset-0"
+                 style={{
+                   boxShadow: '0 25px 80px rgba(0,0,0,0.4)',
+                 }}
+               />
+
+               {isVideo ? (
+                 <video
+                   src={imageUrl}
+                   className="relative z-10 w-full h-full object-cover"
+                   muted
+                   playsInline
+                   autoPlay
+                   loop
+                 />
+               ) : (
+                 <img
+                   src={imageUrl}
+                   alt="Preview"
+                   className="relative z-10 w-full h-full object-cover"
+                   loading="eager"
+                 />
+               )}
+             </div>
             
             {/* Scrollable Social Apps Row - Show 50% of next icon */}
             <div className="w-full overflow-x-auto scrollbar-hide">
@@ -310,7 +324,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
             </div>
           </div>
           
-          {/* Sticky Bottom Action Buttons - No gradient */}
+           {/* Sticky Bottom Action Buttons - No gradient */}
           <div className="sticky bottom-0 w-full px-6 pb-6 pt-4" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
             <div className="w-full flex gap-3 max-w-sm mx-auto">
               <button
