@@ -237,7 +237,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
         {/* Blurred image as background */}
         {!isVideo && (
           <div 
-            className="absolute inset-0 opacity-40"
+            className="absolute inset-0 opacity-60"
             style={{
               backgroundImage: `url(${imageUrl})`,
               backgroundSize: 'cover',
@@ -246,9 +246,6 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
             }}
           />
         )}
-        
-        {/* Dark overlay for contrast */}
-        <div className="absolute inset-0 bg-black/40" />
         
         {/* Content container */}
         <div className="relative z-10 flex-1 flex flex-col h-full">
@@ -264,17 +261,17 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
           
           {/* Main Content - Scrollable */}
           <div className="flex-1 flex flex-col items-center justify-center px-6 overflow-hidden">
-            {/* Preview Card */}
+            {/* Preview Card - No black background */}
             <div 
               className="w-full max-w-[280px] aspect-[3/4] rounded-3xl overflow-hidden mb-8"
               style={{ 
-                boxShadow: '0 25px 80px rgba(0,0,0,0.6)',
+                boxShadow: '0 25px 80px rgba(0,0,0,0.4)',
               }}
             >
               {isVideo ? (
                 <video 
                   src={imageUrl} 
-                  className="w-full h-full object-contain bg-black"
+                  className="w-full h-full object-contain"
                   muted
                   playsInline
                   autoPlay
@@ -284,14 +281,14 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
                 <img 
                   src={imageUrl} 
                   alt="Preview" 
-                  className="w-full h-full object-contain bg-black"
+                  className="w-full h-full object-contain"
                 />
               )}
             </div>
             
-            {/* Scrollable Social Apps Row - No boxes */}
+            {/* Scrollable Social Apps Row - Show 50% of next icon */}
             <div className="w-full overflow-x-auto scrollbar-hide">
-              <div className="flex gap-6 px-4 min-w-max justify-start">
+              <div className="flex gap-5 pl-4 pr-[calc(50%-28px)] min-w-max">
                 {socialApps.map((app) => (
                   <button
                     key={app.name}
@@ -313,9 +310,16 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
             </div>
           </div>
           
-          {/* Sticky Bottom Action Buttons */}
-          <div className="sticky bottom-0 w-full px-6 pb-6 pt-4 bg-gradient-to-t from-black/60 to-transparent" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
+          {/* Sticky Bottom Action Buttons - No gradient */}
+          <div className="sticky bottom-0 w-full px-6 pb-6 pt-4" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
             <div className="w-full flex gap-3 max-w-sm mx-auto">
+              <button
+                onClick={handleDownload}
+                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+              >
+                <Download className="w-5 h-5 text-white/80" />
+                <span className="text-white/90 font-medium">Download</span>
+              </button>
               <button
                 onClick={handleCopyLink}
                 className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
@@ -326,13 +330,6 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
                   <Copy className="w-5 h-5 text-white/80" />
                 )}
                 <span className="text-white/90 font-medium">{copied ? 'Copied!' : 'Copy'}</span>
-              </button>
-              <button
-                onClick={handleDownload}
-                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/15 backdrop-blur-sm tap-bounce transition-all active:scale-95"
-              >
-                <Download className="w-5 h-5 text-white/80" />
-                <span className="text-white/90 font-medium">Save</span>
               </button>
             </div>
           </div>
