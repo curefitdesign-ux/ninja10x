@@ -251,7 +251,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
         <div className="absolute inset-0 bg-black/40" />
         
         {/* Content container */}
-        <div className="relative z-10 flex-1 flex flex-col">
+        <div className="relative z-10 flex-1 flex flex-col h-full">
           {/* Header - Close button on right */}
           <div className="flex items-center justify-end px-5 pt-6 pb-4">
             <button 
@@ -262,8 +262,8 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
             </button>
           </div>
           
-          {/* Main Content */}
-          <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8 overflow-hidden">
+          {/* Main Content - Scrollable */}
+          <div className="flex-1 flex flex-col items-center justify-center px-6 overflow-hidden">
             {/* Preview Card */}
             <div 
               className="w-full max-w-[280px] aspect-[3/4] rounded-3xl overflow-hidden mb-8"
@@ -290,7 +290,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
             </div>
             
             {/* Scrollable Social Apps Row - No boxes */}
-            <div className="w-full overflow-x-auto scrollbar-hide mb-8">
+            <div className="w-full overflow-x-auto scrollbar-hide">
               <div className="flex gap-6 px-4 min-w-max justify-start">
                 {socialApps.map((app) => (
                   <button
@@ -311,9 +311,11 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
                 ))}
               </div>
             </div>
-            
-            {/* Action Buttons */}
-            <div className="w-full flex gap-3 max-w-sm">
+          </div>
+          
+          {/* Sticky Bottom Action Buttons */}
+          <div className="sticky bottom-0 w-full px-6 pb-6 pt-4 bg-gradient-to-t from-black/60 to-transparent" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
+            <div className="w-full flex gap-3 max-w-sm mx-auto">
               <button
                 onClick={handleCopyLink}
                 className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
