@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil, Trash2 } from 'lucide-react';
+import { X, Check, Pencil } from 'lucide-react';
 import ShareSheet from '@/components/ShareSheet';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import html2canvas from 'html2canvas';
@@ -109,6 +109,9 @@ const Preview = () => {
   const [framedImageUrl, setFramedImageUrl] = useState<string | null>(null);
   const [isConnectingHealth, setIsConnectingHealth] = useState(false);
   const [healthConnected, setHealthConnected] = useState<string | null>(null);
+  
+  // Micro celebration after save
+  const [showMicroCelebration, setShowMicroCelebration] = useState(false);
   
   const [elementsHidden, setElementsHidden] = useState(false);
   const [isReview, setIsReview] = useState(false);
@@ -258,7 +261,7 @@ const Preview = () => {
     setIsLoaded(false);
   };
 
-  // Save with template - show share screen first
+  // Save with template - show micro celebration then share screen
   const handleSaveWithTemplate = async () => {
     if (!imageUrl || !activity) return;
 
@@ -272,8 +275,14 @@ const Preview = () => {
     setFramedImageUrl(shareAssetUrl);
     setIsSaving(false);
 
-    // Show share sheet (always open even if capture fails and we fall back)
-    setShowShareSheet(true);
+    // Show micro celebration first
+    setShowMicroCelebration(true);
+    
+    setTimeout(() => {
+      setShowMicroCelebration(false);
+      // Then show share sheet
+      setShowShareSheet(true);
+    }, 1200);
   };
 
   // Actually navigate back and save (called from share sheet)
@@ -692,7 +701,7 @@ const Preview = () => {
           {renderFrame()}
         </div>
 
-        {/* Header - minimal */}
+        {/* Header - minimal (no delete icon - moved to tertiary CTA below) */}
         <div className={`flex items-center justify-between py-4 px-5 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 -translate-y-8 pointer-events-none' : ''}`}>
           <button 
             onClick={handleSaveWithoutTemplate}
@@ -701,20 +710,12 @@ const Preview = () => {
             <X className="w-5 h-5 text-white" />
           </button>
           <h2 className="text-white/80 text-lg font-semibold">Select your frame</h2>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={handleRemoveImage}
-              className={`w-10 h-10 flex items-center justify-center rounded-full bg-red-500/20 backdrop-blur-sm tap-bounce ${tappedElement === 'remove-btn' ? 'animate-liquid-tap' : ''}`}
-            >
-              <Trash2 className="w-5 h-5 text-red-400" />
-            </button>
-            <button 
-              onClick={handleRetake}
-              className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'retake-btn' ? 'animate-liquid-tap' : ''}`}
-            >
-              <Pencil className="w-5 h-5 text-white" />
-            </button>
-          </div>
+          <button 
+            onClick={handleRetake}
+            className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'retake-btn' ? 'animate-liquid-tap' : ''}`}
+          >
+            <Pencil className="w-5 h-5 text-white" />
+          </button>
         </div>
         
         {/* Frame carousel */}
@@ -831,18 +832,18 @@ const Preview = () => {
         </div>
       </div>
 
-      {/* Floating CTA */}
+      {/* Floating CTA with tertiary Remove below */}
       <div 
         className={`fixed bottom-0 left-0 right-0 z-[100] px-5 pt-4 transition-all duration-500 ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : 'opacity-100 translate-y-0'}`}
         style={{ 
           paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 24px)',
         }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col items-center gap-3">
           <button 
             onClick={handleSaveWithTemplate}
             disabled={isSaving}
-            className={`flex-1 bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce ${tappedElement === 'done-btn' ? 'animate-liquid-tap' : ''}`}
+            className={`w-full bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce ${tappedElement === 'done-btn' ? 'animate-liquid-tap' : ''}`}
             style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
           >
             <span className="text-black font-bold text-lg">
@@ -850,6 +851,13 @@ const Preview = () => {
             </span>
           </button>
           
+          {/* Tertiary Remove CTA */}
+          <button 
+            onClick={handleRemoveImage}
+            className={`text-white/50 text-sm font-medium tap-bounce hover:text-white/70 transition-colors ${tappedElement === 'remove-btn' ? 'animate-liquid-tap' : ''}`}
+          >
+            Remove Photo
+          </button>
         </div>
       </div>
 
@@ -924,6 +932,56 @@ const Preview = () => {
         />
       )}
 
+      {/* Micro Celebration Overlay */}
+      <AnimatePresence>
+        {showMicroCelebration && (
+          <motion.div
+            className="fixed inset-0 z-[200] flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Background */}
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+            
+            {/* Celebration card */}
+            <motion.div
+              className="relative z-10 flex flex-col items-center gap-4"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            >
+              <motion.div
+                className="w-20 h-20 rounded-full bg-emerald-500 flex items-center justify-center"
+                initial={{ scale: 0 }}
+                animate={{ scale: [0, 1.2, 1] }}
+                transition={{ delay: 0.1, duration: 0.5 }}
+              >
+                <Check className="w-10 h-10 text-white" />
+              </motion.div>
+              <motion.p
+                className="text-white text-xl font-bold"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                Activity Logged!
+              </motion.p>
+              <motion.p
+                className="text-white/60 text-sm"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                Day {dayNumber} complete
+              </motion.p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Share Sheet */}
       {showShareSheet && framedImageUrl && (
         <ShareSheet
@@ -931,6 +989,7 @@ const Preview = () => {
           isVideo={isVideo}
           onClose={() => setShowShareSheet(false)}
           onSaveWithTemplate={handleFinalSave}
+          dayNumber={dayNumber}
         />
       )}
     </div>

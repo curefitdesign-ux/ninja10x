@@ -8,6 +8,7 @@ import PullToRefresh from "@/components/PullToRefresh";
 import PhotoLoggingWidget, { LoggedPhoto } from "@/components/PhotoLoggingWidget";
 import { uploadToStorage } from "@/services/storage-service";
 import { toast } from "sonner";
+import confetti from "canvas-confetti";
 // Import new activity icons
 import bookClassIcon from "@/assets/activity-icons/book-class.png";
 import checkinGymIcon from "@/assets/activity-icons/checkin-gym.png";
@@ -182,6 +183,35 @@ toast.success(`Day ${dayNumber} added!`);
             setTimeout(() => {
               setCompletedWeekNumber(weekIndex + 1);
               setShowWeekCelebration(true);
+              
+              // Fire confetti for Week 1 completion
+              if (weekIndex === 0) {
+                const duration = 3000;
+                const end = Date.now() + duration;
+                
+                const frame = () => {
+                  confetti({
+                    particleCount: 3,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0'],
+                  });
+                  confetti({
+                    particleCount: 3,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0'],
+                  });
+                  
+                  if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                  }
+                };
+                frame();
+              }
+              
               setTimeout(() => setShowWeekCelebration(false), 3500);
             }, 500);
           }

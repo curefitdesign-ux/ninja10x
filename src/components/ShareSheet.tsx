@@ -1,12 +1,15 @@
 import { X, Download, Copy, Check } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 interface ShareSheetProps {
   imageUrl: string;
   isVideo?: boolean;
   onClose: () => void;
   onSaveWithTemplate?: () => void;
+  dayNumber?: number;
 }
 
 // Social platform icons with brand colors and deep linking
@@ -94,9 +97,11 @@ const socialApps = [
   },
 ];
 
-const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
+const ShareSheet = ({ imageUrl, isVideo, onClose, dayNumber }: ShareSheetProps) => {
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [dominantColor, setDominantColor] = useState('rgba(0,0,0,0.95)');
+  const [isExiting, setIsExiting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   const shareText = '🏃 Check out my fitness activity! #FitnessJourney #HealthyLifestyle';
@@ -144,6 +149,23 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
     };
     img.src = imageUrl;
   }, [imageUrl, isVideo]);
+
+  // Close with shared-element transition to home
+  const handleCloseWithTransition = () => {
+    triggerHaptic('light');
+    setIsExiting(true);
+    
+    // Wait for animation, then navigate
+    setTimeout(() => {
+      navigate('/', {
+        state: {
+          fromShare: true,
+          transitionImage: imageUrl,
+          dayNumber,
+        },
+      });
+    }, 500);
+  };
   
   const handleShare = async (app: typeof socialApps[0]) => {
     triggerHaptic('medium');
@@ -159,7 +181,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
           text: shareText,
           files: [file],
         });
-        onClose();
+        handleCloseWithTransition();
         return;
       } catch (err) {
         console.log('Native share failed, trying deep link');
@@ -198,12 +220,26 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
     triggerHaptic('success');
     
     try {
-      const link = document.createElement('a');
-      link.href = imageUrl;
-      link.download = `activity-${Date.now()}.${isVideo ? 'mp4' : 'png'}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // For base64 or blob URLs, we need to properly handle download
+      if (imageUrl.startsWith('data:') || imageUrl.startsWith('blob:')) {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `activity-${Date.now()}.${isVideo ? 'mp4' : 'png'}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } else {
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = `activity-${Date.now()}.${isVideo ? 'mp4' : 'png'}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     } catch (err) {
       console.error('Download failed:', err);
     }
@@ -227,128 +263,162 @@ const ShareSheet = ({ imageUrl, isVideo, onClose }: ShareSheetProps) => {
       <canvas ref={canvasRef} className="hidden" />
       
       {/* Full Screen with Image-Based Background */}
-      <div className="fixed inset-0 z-50 animate-fade-in flex flex-col overflow-hidden">
-        {/* Background with extracted color + blur effect */}
-        <div 
-          className="absolute inset-0 transition-colors duration-500"
-          style={{ backgroundColor: dominantColor }}
-        />
-        
-        {/* Blurred image as background */}
-        {!isVideo && (
+      <AnimatePresence>
+        <motion.div 
+          className="fixed inset-0 z-50 flex flex-col overflow-hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {/* Background with extracted color + blur effect */}
           <div 
-            className="absolute inset-0 opacity-60"
-            style={{
-              backgroundImage: `url(${imageUrl})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              filter: 'blur(60px) saturate(1.2)',
-            }}
+            className="absolute inset-0 transition-colors duration-500"
+            style={{ backgroundColor: dominantColor }}
           />
-        )}
-        
-        {/* Content container */}
-        <div className="relative z-10 flex-1 flex flex-col h-full">
-          {/* Header - Close button on right */}
-          <div className="flex items-center justify-end px-5 pt-6 pb-4">
-            <button 
-              onClick={onClose}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-xl tap-bounce"
-            >
-              <X className="w-5 h-5 text-white" />
-            </button>
-          </div>
           
-           {/* Main Content - Scrollable */}
-           <div className="flex-1 flex flex-col items-center justify-center px-6 overflow-hidden">
-             {/* Preview Card - locked to 9:16 like the original framed output */}
-             <div className="relative w-full max-w-[296px] aspect-[9/16] rounded-[28px] overflow-hidden mb-8">
-               {/* Glass border + glow */}
-               <div className="absolute inset-0 rounded-[28px] ring-1 ring-white/15" />
-               <div
-                 className="absolute -inset-10 opacity-60"
-                 style={{
-                   background:
-                     'radial-gradient(closest-side, rgba(255,255,255,0.16), transparent 65%)',
-                   filter: 'blur(16px)',
-                 }}
-               />
-
-               <div
-                 className="absolute inset-0"
-                 style={{
-                   boxShadow: '0 25px 80px rgba(0,0,0,0.4)',
-                 }}
-               />
-
-               {isVideo ? (
-                 <video
-                   src={imageUrl}
-                   className="relative z-10 w-full h-full object-cover"
-                   muted
-                   playsInline
-                   autoPlay
-                   loop
-                 />
-               ) : (
-                 <img
-                   src={imageUrl}
-                   alt="Preview"
-                   className="relative z-10 w-full h-full object-cover"
-                   loading="eager"
-                 />
-               )}
-             </div>
+          {/* Blurred image as background */}
+          {!isVideo && (
+            <div 
+              className="absolute inset-0 opacity-60"
+              style={{
+                backgroundImage: `url(${imageUrl})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                filter: 'blur(60px) saturate(1.2)',
+              }}
+            />
+          )}
+          
+          {/* Content container */}
+          <div className="relative z-10 flex-1 flex flex-col h-full">
+            {/* Header - Close button on right */}
+            <div className="flex items-center justify-end px-5 pt-6 pb-4">
+              <button 
+                onClick={handleCloseWithTransition}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-xl tap-bounce"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
+            </div>
             
-            {/* Scrollable Social Apps Row - Show 50% of next icon */}
-            <div className="w-full overflow-x-auto scrollbar-hide">
-              <div className="flex gap-5 pl-4 pr-[calc(50%-28px)] min-w-max">
-                {socialApps.map((app) => (
-                  <button
-                    key={app.name}
-                    onClick={() => handleShare(app)}
-                    className="flex flex-col items-center gap-2 tap-bounce flex-shrink-0"
-                  >
-                    <div 
-                      className="w-14 h-14 rounded-full flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95"
-                      style={{ 
-                        backgroundColor: app.color,
-                      }}
+             {/* Main Content - Scrollable */}
+             <div className="flex-1 flex flex-col items-center justify-center px-6 overflow-hidden">
+               {/* Preview Card - locked to 9:16 with shared-element exit animation */}
+               <motion.div 
+                 className="relative w-full max-w-[296px] aspect-[9/16] rounded-[28px] overflow-hidden mb-8"
+                 animate={isExiting ? {
+                   scale: 0.2,
+                   opacity: 0,
+                   y: 200,
+                 } : {
+                   scale: 1,
+                   opacity: 1,
+                   y: 0,
+                 }}
+                 transition={{
+                   type: 'spring',
+                   stiffness: 300,
+                   damping: 30,
+                 }}
+               >
+                 {/* Glass border + glow */}
+                 <div className="absolute inset-0 rounded-[28px] ring-1 ring-white/15" />
+                 <div
+                   className="absolute -inset-10 opacity-60"
+                   style={{
+                     background:
+                       'radial-gradient(closest-side, rgba(255,255,255,0.16), transparent 65%)',
+                     filter: 'blur(16px)',
+                   }}
+                 />
+
+                 <div
+                   className="absolute inset-0"
+                   style={{
+                     boxShadow: '0 25px 80px rgba(0,0,0,0.4)',
+                   }}
+                 />
+
+                 {isVideo ? (
+                   <video
+                     src={imageUrl}
+                     className="relative z-10 w-full h-full object-cover"
+                     muted
+                     playsInline
+                     autoPlay
+                     loop
+                   />
+                 ) : (
+                   <img
+                     src={imageUrl}
+                     alt="Preview"
+                     className="relative z-10 w-full h-full object-cover"
+                     loading="eager"
+                   />
+                 )}
+               </motion.div>
+              
+              {/* Scrollable Social Apps Row - Show 50% of next icon */}
+              <motion.div 
+                className="w-full overflow-x-auto scrollbar-hide"
+                animate={isExiting ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex gap-5 pl-4 pr-[calc(50%-28px)] min-w-max">
+                  {socialApps.map((app) => (
+                    <button
+                      key={app.name}
+                      onClick={() => handleShare(app)}
+                      className="flex flex-col items-center gap-2 tap-bounce flex-shrink-0"
                     >
-                      {app.icon}
-                    </div>
-                    <span className="text-white/70 text-[11px] font-medium">{app.name}</span>
-                  </button>
-                ))}
+                      <div 
+                        className="w-14 h-14 rounded-full flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95"
+                        style={{ 
+                          backgroundColor: app.color,
+                        }}
+                      >
+                        {app.icon}
+                      </div>
+                      <span className="text-white/70 text-[11px] font-medium">{app.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+            
+             {/* Sticky Bottom Action Buttons - Always visible */}
+            <motion.div 
+              className="sticky bottom-0 w-full px-6 pb-6 pt-4"
+              style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
+              animate={isExiting ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="w-full flex gap-3 max-w-sm mx-auto">
+                <button
+                  onClick={handleDownload}
+                  className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-white text-black tap-bounce transition-all active:scale-95"
+                  style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}
+                >
+                  <Download className="w-5 h-5" />
+                  <span className="font-semibold">Download</span>
+                </button>
+                <button
+                  onClick={handleCopyLink}
+                  className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/15 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                >
+                  {copied ? (
+                    <Check className="w-5 h-5 text-green-400" />
+                  ) : (
+                    <Copy className="w-5 h-5 text-white/80" />
+                  )}
+                  <span className="text-white/90 font-medium">{copied ? 'Copied!' : 'Copy'}</span>
+                </button>
               </div>
-            </div>
+            </motion.div>
           </div>
-          
-           {/* Sticky Bottom Action Buttons - No gradient */}
-          <div className="sticky bottom-0 w-full px-6 pb-6 pt-4" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
-            <div className="w-full flex gap-3 max-w-sm mx-auto">
-              <button
-                onClick={handleDownload}
-                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
-              >
-                <Download className="w-5 h-5 text-white/80" />
-                <span className="text-white/90 font-medium">Download</span>
-              </button>
-              <button
-                onClick={handleCopyLink}
-                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
-              >
-                {copied ? (
-                  <Check className="w-5 h-5 text-green-400" />
-                ) : (
-                  <Copy className="w-5 h-5 text-white/80" />
-                )}
-                <span className="text-white/90 font-medium">{copied ? 'Copied!' : 'Copy'}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+        </motion.div>
+      </AnimatePresence>
     </>
   );
 };
