@@ -48,36 +48,35 @@ const TILE_POSITIONS = [
   { left: 32, top: 118 },   // Tile 12 - active final milestone
 ];
 
-// Labels anchored to specific tile groups - matching reference image
-// Labels shifted: left labels -13vw, right labels +13vw (50px offset)
+// Labels anchored to specific tile groups - positioned within viewport
 const LABELS = [
   { 
     tileIndex: 2, 
     text: ["BUILD", "STRENGTH"], 
     side: "right" as const,
-    top: 38, // Near tile 3 (shifted down)
-    left: 85, // Shifted right by ~13vw
+    top: 38,
+    left: 68, // Moved inside viewport
   },
   { 
     tileIndex: 5, 
     text: ["INCREASE", "STAMINA"], 
     side: "left" as const,
-    top: 63, // Near tile 6 (shifted down)
-    left: -9, // Shifted left by ~13vw
+    top: 63,
+    left: 4, // Moved inside viewport
   },
   { 
     tileIndex: 8, 
     text: ["BUILD", "ENERGY"], 
     side: "right" as const,
-    top: 88, // Near tile 9 (shifted down)
-    left: 85, // Shifted right by ~13vw
+    top: 88,
+    left: 68, // Moved inside viewport
   },
   { 
     tileIndex: 11, 
     text: ["CONQUER", "WILL POWER"], 
     side: "left" as const,
-    top: 113, // Near tile 12 (shifted down)
-    left: -9, // Shifted left by ~13vw
+    top: 113,
+    left: 4, // Moved inside viewport
   },
 ];
 
@@ -403,6 +402,7 @@ const Progress = () => {
           const day = index + 1;
           const state = getTileState(day);
           const isActive = state === "active";
+          const isLogged = state === "logged";
           const hasMilestone = isMilestone(index);
 
           return (
@@ -424,7 +424,18 @@ const Progress = () => {
                 delay: index * 0.04
               }}
             >
-              {/* Active tile glow */}
+              {/* Logged tile glow - green/emerald for completed */}
+              {isLogged && (
+                <div 
+                  className="absolute inset-[-30%] rounded-2xl"
+                  style={{
+                    background: "radial-gradient(circle, rgba(16, 185, 129, 0.6) 0%, transparent 70%)",
+                    filter: "blur(10px)",
+                  }}
+                />
+              )}
+
+              {/* Active tile glow - cyan for current */}
               {isActive && (
                 <div 
                   className="absolute inset-[-50%] rounded-2xl animate-pulse"
@@ -436,7 +447,7 @@ const Progress = () => {
               )}
               
               {/* Milestone ring indicator */}
-              {hasMilestone && !isActive && (
+              {hasMilestone && !isActive && !isLogged && (
                 <div 
                   className="absolute inset-[-10%] rounded-xl"
                   style={{
@@ -445,18 +456,31 @@ const Progress = () => {
                   }}
                 />
               )}
+
+              {/* Logged milestone ring - green */}
+              {hasMilestone && isLogged && (
+                <div 
+                  className="absolute inset-[-10%] rounded-xl"
+                  style={{
+                    border: "2px solid rgba(16, 185, 129, 0.5)",
+                    boxShadow: "0 0 16px rgba(16, 185, 129, 0.5)",
+                  }}
+                />
+              )}
               
-              {/* Tile image */}
+              {/* Tile image - use active image for logged days too */}
               <img
-                src={isActive ? tileActiveImg : tileLockedImg}
+                src={isActive || isLogged ? tileActiveImg : tileLockedImg}
                 alt={`Day ${day}`}
                 className="w-full h-full object-contain relative z-10"
                 style={{
                   filter: isActive 
                     ? "drop-shadow(0 0 16px rgba(0, 229, 255, 0.7))" 
-                    : hasMilestone 
-                      ? "drop-shadow(0 0 10px rgba(123, 92, 255, 0.5))"
-                      : "none",
+                    : isLogged
+                      ? "drop-shadow(0 0 12px rgba(16, 185, 129, 0.7)) hue-rotate(140deg) saturate(1.2)"
+                      : hasMilestone 
+                        ? "drop-shadow(0 0 10px rgba(123, 92, 255, 0.5))"
+                        : "none",
                 }}
               />
 
