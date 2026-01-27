@@ -124,7 +124,17 @@ const [activeTab, setActiveTab] = useState("activity");
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return [];
       const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed.filter((p: LoggedPhoto) => p.storageUrl) : [];
+      if (!Array.isArray(parsed)) return [];
+
+      // Normalize legacy/buggy payloads where dayNumber could be a string (e.g. "2")
+      // which would break strict equality checks and make Day 2 appear "missing".
+      return parsed
+        .filter((p: LoggedPhoto) => (p as LoggedPhoto)?.storageUrl)
+        .map((p: LoggedPhoto) => ({
+          ...p,
+          dayNumber: Number((p as LoggedPhoto).dayNumber),
+        }))
+        .filter((p: LoggedPhoto) => Number.isFinite(p.dayNumber));
     } catch {
       return [];
     }
@@ -180,13 +190,14 @@ const [activeTab, setActiveTab] = useState("activity");
       frame?: string;
       duration?: string;
       pr?: string;
-      dayNumber?: number;
+      // Can be legacy string in some cases; we normalize below.
+      dayNumber?: number | string;
     };
 
     const displaySourceUrl: string | undefined = navState.imageUrl;
     const originalSourceUrl: string | undefined = navState.originalUrl || navState.imageUrl;
     const isVideo = navState.isVideo || false;
-    const dayNumber = navState.dayNumber || photos.length + 1;
+    const dayNumber = Number((navState.dayNumber ?? (photos.length + 1)) as number | string);
 
     const activityName = navState.activity;
     const frame = navState.frame;
@@ -201,7 +212,7 @@ const [activeTab, setActiveTab] = useState("activity");
       hasOriginalSource: !!originalSourceUrl,
     });
 
-    if (!displaySourceUrl || !originalSourceUrl) {
+    if (!displaySourceUrl || !originalSourceUrl || !Number.isFinite(dayNumber)) {
       toast.error('No media to save');
       navigate('/', { replace: true, state: null });
       return;

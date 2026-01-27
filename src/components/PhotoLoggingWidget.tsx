@@ -373,7 +373,7 @@ const PhotoLoggingWidget = ({
     const startDay = weekIndex * 3 + 1;
     return [0, 1, 2].map(dayOffset => {
       const dayNumber = startDay + dayOffset;
-      return photos.find(p => p.dayNumber === dayNumber) || null;
+      return photos.find(p => Number(p.dayNumber) === dayNumber) || null;
     });
   }, [photos]);
 
