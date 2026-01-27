@@ -14,7 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activity_reactions: {
+        Row: {
+          activity_id: string
+          created_at: string
+          id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_reactions_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "journey_activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journey_activities: {
+        Row: {
+          activity: string | null
+          created_at: string
+          day_number: number
+          duration: string | null
+          frame: string | null
+          id: string
+          is_video: boolean | null
+          original_url: string | null
+          pr: string | null
+          storage_url: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activity?: string | null
+          created_at?: string
+          day_number: number
+          duration?: string | null
+          frame?: string | null
+          id?: string
+          is_video?: boolean | null
+          original_url?: string | null
+          pr?: string | null
+          storage_url: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activity?: string | null
+          created_at?: string
+          day_number?: number
+          duration?: string | null
+          frame?: string | null
+          id?: string
+          is_video?: boolean | null
+          original_url?: string | null
+          pr?: string | null
+          storage_url?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

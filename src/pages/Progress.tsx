@@ -10,7 +10,9 @@ import tileInactiveImg from "@/assets/progress/tile-inactive.png";
 import basePlatformImg from "@/assets/progress/base-platform.png";
 import engineBadgeImg from "@/assets/progress/engine-badge.png";
 import SharedImageTransition from "@/components/SharedImageTransition";
+import FullScreenReel from "@/components/FullScreenReel";
 import { isVideoUrl } from "@/lib/media";
+import { JourneyActivity } from "@/services/journey-service";
 
 const STORAGE_KEY = getPhotosStorageKey();
 
@@ -80,16 +82,6 @@ const LABELS = [
   },
 ];
 
-// Story cards for top activity strip
-const STORY_CARDS = [
-  { id: "vogue", label: "the Player", sublabel: "2hrs • 10", bg: "#8B6914" },
-  { id: "journal", label: "Lawn Tennis", sublabel: "02hrs • 10 • 400", bg: "#E8E4DC" },
-  { id: "fitness", label: "CULT NINJA", sublabel: "1/3 Activity", bg: "#9CB526" },
-  { id: "instagram", label: "NINJA JOURNEY", sublabel: "WEEK 1 / DAY 4", bg: "#1B5E3D" },
-  { id: "tennis", label: "TENNIS", sublabel: "20 • 2HRS", bg: "#2D4A3E" },
-  { id: "cult", label: "CULT NINJA", sublabel: "Duration 2HRS", bg: "#F5F5F5" },
-];
-
 const Progress = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -98,12 +90,16 @@ const Progress = () => {
   const [showStories, setShowStories] = useState(false);
   const [showTransitionIn, setShowTransitionIn] = useState(false);
 
+  // Reel viewer state
+  const [reelOpen, setReelOpen] = useState(false);
+  const [reelIndex, setReelIndex] = useState(0);
+
   // Get transition data from navigation state
   const transitionImage = location.state?.transitionImage;
   const transitionDayNumber = location.state?.dayNumber || 1;
   const transitionToProgress = location.state?.transitionToProgress;
 
-  // Load photos from localStorage
+  // Load photos from localStorage (user's own activities)
   const [photos] = useState<LoggedPhoto[]>(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -114,6 +110,30 @@ const Progress = () => {
       return [];
     }
   });
+
+  // Convert photos to JourneyActivity shape for FullScreenReel
+  const photosAsActivities: JourneyActivity[] = photos.map((p, i) => ({
+    id: p.id,
+    user_id: '',
+    storage_url: p.storageUrl,
+    original_url: p.originalUrl || null,
+    is_video: p.isVideo || false,
+    activity: p.activity || null,
+    frame: p.frame || null,
+    duration: p.duration || null,
+    pr: p.pr || null,
+    day_number: p.dayNumber,
+    created_at: '',
+    updated_at: '',
+    reaction_count: 0,
+    user_reacted: false,
+  }));
+
+  // Open reel viewer on card tap
+  const handlePhotoCardTap = (index: number) => {
+    setReelIndex(index);
+    setReelOpen(true);
+  };
 
   // Animation sequence
   useEffect(() => {
@@ -234,10 +254,10 @@ const Progress = () => {
               {/* User's logged photos - render actual photos from localStorage */}
               {photos.length > 0 ? (
                 photos.map((photo, index) => (
-                  <motion.div
+                  <motion.button
                     key={photo.id}
                     data-shared-element={index === photos.length - 1 ? "progress-hero-card" : undefined}
-                    className="relative flex-shrink-0 overflow-hidden"
+                    className="relative flex-shrink-0 overflow-hidden cursor-pointer"
                     style={{
                       width: "clamp(80px, 22vw, 100px)",
                       height: "clamp(120px, 33vw, 150px)",
@@ -246,11 +266,12 @@ const Progress = () => {
                         ? "0 12px 40px rgba(100, 70, 180, 0.5)" 
                         : "0 4px 16px rgba(0,0,0,0.25)",
                       border: index === 0 ? "2px solid rgba(160, 120, 220, 0.35)" : "none",
-                      transform: index === 0 ? "rotate(-3deg)" : "none",
                     }}
+                    onClick={() => handlePhotoCardTap(index)}
                     initial={{ opacity: 0, x: 40 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 + index * 0.06 }}
+                    whileTap={{ scale: 0.95 }}
                   >
                     {photo.isVideo || isVideoUrl(photo.storageUrl) ? (
                       <video
@@ -262,7 +283,6 @@ const Progress = () => {
                         autoPlay
                         preload="metadata"
                         onError={() => {
-                          // Keep silent UI-wise; the widget/card already exists.
                           console.error("Failed to load video:", photo.storageUrl);
                         }}
                       />
@@ -291,7 +311,7 @@ const Progress = () => {
                     >
                       D{photo.dayNumber}
                     </div>
-                  </motion.div>
+                  </motion.button>
                 ))
               ) : transitionImage ? (
                 // Fallback to transition image if no photos yet
@@ -318,44 +338,26 @@ const Progress = () => {
                 </motion.div>
               ) : null}
 
-              {/* Placeholder story cards for visual balance */}
-              {STORY_CARDS.slice(0, Math.max(0, 6 - photos.length)).map((card, index) => (
+              {/* Empty state when no photos */}
+              {photos.length === 0 && !transitionImage && (
                 <motion.div
-                  key={card.id}
-                  className="relative overflow-hidden flex-shrink-0"
+                  className="relative flex-shrink-0 flex items-center justify-center"
                   style={{
                     width: "clamp(80px, 22vw, 100px)",
                     height: "clamp(120px, 33vw, 150px)",
                     borderRadius: "clamp(10px, 2.5vw, 14px)",
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.25)",
-                    background: card.bg,
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px dashed rgba(255,255,255,0.2)",
                   }}
-                  initial={{ opacity: 0, x: 40 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.35 + (photos.length + index) * 0.06 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
                 >
-                  <div className="absolute inset-0 flex flex-col justify-end p-2">
-                    <span 
-                      className="font-semibold leading-tight"
-                      style={{ 
-                        fontSize: "clamp(9px, 2.2vw, 11px)",
-                        color: card.id === "journal" || card.id === "cult" ? "#333" : "#fff" 
-                      }}
-                    >
-                      {card.label}
-                    </span>
-                    <span 
-                      className="opacity-70"
-                      style={{ 
-                        fontSize: "clamp(7px, 1.7vw, 9px)",
-                        color: card.id === "journal" || card.id === "cult" ? "#333" : "#fff" 
-                      }}
-                    >
-                      {card.sublabel}
-                    </span>
-                  </div>
+                  <span className="text-white/40 text-xs text-center px-2">
+                    Your activities will appear here
+                  </span>
                 </motion.div>
-              ))}
+              )}
             </div>
           </motion.div>
         )}
@@ -502,6 +504,17 @@ const Progress = () => {
 
       {/* Bottom margin for scroll */}
       <div style={{ height: "6vh" }} />
+
+      {/* Full-screen reel viewer */}
+      <AnimatePresence>
+        {reelOpen && photosAsActivities.length > 0 && (
+          <FullScreenReel
+            activities={photosAsActivities}
+            initialIndex={reelIndex}
+            onClose={() => setReelOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
