@@ -83,8 +83,6 @@ const Preview = () => {
   // Flow control
   const [flowStep, setFlowStep] = useState<FlowStep>('camera');
   const [capturedMedia, setCapturedMedia] = useState<{ url: string; isVideo: boolean } | null>(null);
-  const [sheetPhase, setSheetPhase] = useState<'select' | 'acknowledge' | 'exit'>('select');
-  const [acknowledgedActivity, setAcknowledgedActivity] = useState<{ name: string; icon: string } | null>(null);
   
   // Template state
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -187,10 +185,14 @@ const Preview = () => {
     }
   }, [editingField]);
 
-  // Handle camera capture
+  // Handle camera capture - go directly to template (skip activity selection)
   const handleCameraCapture = useCallback((mediaDataUrl: string, isVideoMedia?: boolean) => {
     setCapturedMedia({ url: mediaDataUrl, isVideo: isVideoMedia || false });
-    setFlowStep('activity');
+    setImageUrl(mediaDataUrl);
+    setIsVideo(isVideoMedia || false);
+    setActivity('Running'); // Default activity
+    setFlowStep('template');
+    setTimeout(() => setIsLoaded(true), 100);
   }, []);
 
   // Handle camera close
@@ -198,38 +200,6 @@ const Preview = () => {
     navigate('/');
   }, [navigate]);
 
-  // Handle activity selection
-  const handleActivitySelect = useCallback((activityName: string) => {
-    const activityData = activityOptions.find(a => a.name === activityName);
-    if (!activityData) return;
-    
-    setActivity(activityName);
-    setAcknowledgedActivity(activityData);
-    setSheetPhase('acknowledge');
-    
-    setTimeout(() => {
-      setSheetPhase('exit');
-    }, 1200);
-    
-    setTimeout(() => {
-      setSheetPhase('select');
-      setAcknowledgedActivity(null);
-      
-      if (capturedMedia) {
-        setImageUrl(capturedMedia.url);
-        setIsVideo(capturedMedia.isVideo);
-        setFlowStep('template');
-        setTimeout(() => setIsLoaded(true), 100);
-      }
-    }, 1600);
-  }, [capturedMedia]);
-
-  // Handle activity sheet close
-  const handleActivitySheetClose = useCallback(() => {
-    // Go back to camera
-    setFlowStep('camera');
-    setCapturedMedia(null);
-  }, []);
 
   // Capture framed image for sharing
   const captureFramedImage = async (): Promise<string | null> => {
@@ -504,123 +474,6 @@ const Preview = () => {
     );
   }
 
-  // Activity Selection Step
-  if (flowStep === 'activity') {
-    return (
-      <div className="fixed inset-0 z-50 bg-black" style={{ height: '100dvh' }}>
-        {/* Background with captured media */}
-        {capturedMedia && (
-          <div className="absolute inset-0">
-            {capturedMedia.isVideo ? (
-              <video
-                src={capturedMedia.url}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <img
-                src={capturedMedia.url}
-                alt="Captured"
-                className="w-full h-full object-cover"
-              />
-            )}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-          </div>
-        )}
-
-        {/* Activity Selection Sheet */}
-        <AnimatePresence mode="wait">
-          {sheetPhase === 'select' && (
-            <motion.div
-              key="activity-sheet"
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="absolute bottom-0 left-0 right-0 z-50"
-            >
-              <div className="bg-black/80 backdrop-blur-2xl rounded-t-3xl border-t border-white/10">
-                <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mt-3 mb-4" />
-                <div className="px-5 pb-10">
-                  <h3 className="text-white text-lg font-semibold mb-5 text-center">
-                    Select Activity
-                  </h3>
-                  <div className="grid grid-cols-3 gap-3">
-                    {activityOptions.map((act) => (
-                      <motion.button
-                        key={act.name}
-                        onClick={() => handleActivitySelect(act.name)}
-                        whileTap={{ scale: 0.95 }}
-                        className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-black active:bg-white/10"
-                      >
-                        <img src={act.icon} alt={act.name} className="w-10 h-10 object-contain" />
-                        <span className="text-white/90 text-xs font-medium">{act.name}</span>
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {(sheetPhase === 'acknowledge' || sheetPhase === 'exit') && acknowledgedActivity && (
-            <motion.div
-              key="acknowledge-card"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ 
-                opacity: sheetPhase === 'exit' ? 0 : 1, 
-                scale: sheetPhase === 'exit' ? 0.8 : 1,
-                y: sheetPhase === 'exit' ? -50 : 0
-              }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              className="absolute inset-0 flex items-center justify-center"
-            >
-              <div className="bg-white/15 backdrop-blur-2xl rounded-3xl p-8 border border-white/20 shadow-2xl">
-                <div className="flex flex-col items-center gap-4">
-                  <motion.img 
-                    src={acknowledgedActivity.icon} 
-                    alt={acknowledgedActivity.name} 
-                    className="w-20 h-20 object-contain"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 15, delay: 0.1 }}
-                  />
-                  <motion.span 
-                    className="text-white text-2xl font-bold"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    {acknowledgedActivity.name}
-                  </motion.span>
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 15, delay: 0.3 }}
-                    className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center"
-                  >
-                    <Check className="w-6 h-6 text-white" />
-                  </motion.div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Close button */}
-        <button
-          onClick={handleActivitySheetClose}
-          className="absolute top-6 left-5 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm"
-        >
-          <X className="w-5 h-5 text-white" />
-        </button>
-      </div>
-    );
-  }
-
   // Template Selection Step
   return (
     <div className="fixed inset-0 w-full overflow-hidden bg-black" style={{ height: '100dvh' }}>
@@ -851,13 +704,6 @@ const Preview = () => {
             </span>
           </button>
           
-          {/* Tertiary Remove CTA */}
-          <button 
-            onClick={handleRemoveImage}
-            className={`text-white/50 text-sm font-medium tap-bounce hover:text-white/70 transition-colors ${tappedElement === 'remove-btn' ? 'animate-liquid-tap' : ''}`}
-          >
-            Remove Photo
-          </button>
         </div>
       </div>
 
@@ -990,6 +836,8 @@ const Preview = () => {
           onClose={() => setShowShareSheet(false)}
           onSaveWithTemplate={handleFinalSave}
           dayNumber={dayNumber}
+          frameType={currentFrame}
+          frameProps={frameProps}
         />
       )}
     </div>
