@@ -385,7 +385,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
             {/* Header - Title center, Close button on right */}
             <div className="flex items-center justify-between px-5 pt-6 pb-4">
               <div className="w-10" /> {/* Spacer for centering */}
-              <span className="text-white/80 text-base font-medium">Select your frame</span>
+              <span className="text-white/80 text-base font-medium">Share</span>
               <button 
                 onClick={handleCloseWithTransition}
                 className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-xl tap-bounce"
@@ -465,44 +465,32 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
               </motion.div>
             </div>
             
-             {/* Sticky Bottom Action Buttons - DONE on top, Download/Copy below */}
+             {/* Sticky Bottom Action Buttons - Download/Copy */}
             <motion.div 
               className="sticky bottom-0 w-full px-6 pb-6 pt-4"
               style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
               animate={isExiting ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <div className="w-full flex flex-col gap-3 max-w-sm mx-auto">
-                {/* DONE - Primary full-width white button */}
+              <div className="w-full flex gap-3 max-w-sm mx-auto">
                 <button
-                  onClick={handleDone}
-                  className="w-full flex items-center justify-center py-4 rounded-2xl bg-white text-black tap-bounce transition-all active:scale-95"
-                  style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}
+                  onClick={handleDownload}
+                  className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
                 >
-                  <span className="font-bold text-base">DONE</span>
+                  <Download className="w-4 h-4 text-white/80" />
+                  <span className="text-white/80 font-medium text-sm">Download</span>
                 </button>
-                
-                {/* Download & Copy - Secondary row */}
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleDownload}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
-                  >
-                    <Download className="w-4 h-4 text-white/80" />
-                    <span className="text-white/80 font-medium text-sm">Download</span>
-                  </button>
-                  <button
-                    onClick={handleCopyLink}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
-                  >
-                    {copied ? (
-                      <Check className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <Copy className="w-4 h-4 text-white/80" />
-                    )}
-                    <span className="text-white/80 font-medium text-sm">{copied ? 'Copied!' : 'Copy'}</span>
-                  </button>
-                </div>
+                <button
+                  onClick={handleCopyLink}
+                  className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                >
+                  {copied ? (
+                    <Check className="w-4 h-4 text-emerald-400" />
+                  ) : (
+                    <Copy className="w-4 h-4 text-white/80" />
+                  )}
+                  <span className="text-white/80 font-medium text-sm">{copied ? 'Copied!' : 'Copy'}</span>
+                </button>
               </div>
             </motion.div>
           </div>
