@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Camera, Image as ImageIcon, Lock } from "lucide-react";
+import { Upload, Camera, Image as ImageIcon, Lock, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -220,6 +220,27 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
             )}
             {/* Green glow overlay for logged photos */}
             <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/25 to-transparent pointer-events-none" style={{ zIndex: 2 }} />
+            
+            {/* Play icon for completed cards - liquid glass style */}
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center"
+              style={{ zIndex: 3 }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div 
+                className="w-7 h-7 rounded-full flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 8px rgba(0,0,0,0.2)',
+                }}
+              >
+                <Play className="w-3 h-3 text-white/90 ml-0.5" fill="currentColor" />
+              </div>
+            </motion.div>
           </>
         )}
         

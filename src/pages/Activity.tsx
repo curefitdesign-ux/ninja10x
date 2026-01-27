@@ -429,6 +429,7 @@ const Activity = () => {
                 highlight={celebrateSuccess}
                 mascotSrc={mascot.src}
                 mascotAlt={mascot.alt}
+                onMascotTap={() => navigate('/progress')}
               />
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
