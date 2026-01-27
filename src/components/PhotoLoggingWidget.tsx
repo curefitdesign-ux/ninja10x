@@ -46,6 +46,7 @@ interface PhotoLoggingWidgetProps {
   photos?: LoggedPhoto[];
   onPhotoAdd?: (weekIndex: number, dayIndex: number) => void;
   onPhotoTap?: (photo: LoggedPhoto) => void;
+  onPlayReel?: (weekPhotos: LoggedPhoto[]) => void;
   currentWeek?: number;
   currentDay?: number;
 }
@@ -57,6 +58,7 @@ interface CardClusterProps {
   isExpanded: boolean;
   onTap: () => void;
   onCardTap: (dayIndex: number, photo: LoggedPhoto | null) => void;
+  onPlayReel?: (weekPhotos: LoggedPhoto[]) => void;
 }
 
 // Ultra-smooth spring configs - iOS-like physics
@@ -79,7 +81,7 @@ const fastSpring = {
 // Cubic bezier for silky opacity/scale
 const smoothEase = [0.32, 0.72, 0, 1] as const;
 
-const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCardTap }: CardClusterProps) => {
+const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCardTap, onPlayReel }: CardClusterProps) => {
   const baseCardWidth = 52;
   const baseCardHeight = 70;
   const borderRadius = 12;
@@ -222,12 +224,20 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
             <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/25 to-transparent pointer-events-none" style={{ zIndex: 2 }} />
             
             {/* Play icon for completed cards - liquid glass style */}
-            <motion.div
+            <motion.button
               className="absolute inset-0 flex items-center justify-center"
               style={{ zIndex: 3 }}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                // Trigger reel with all completed photos from this week
+                const completedPhotos = photos.filter((p): p is LoggedPhoto => p !== null);
+                if (completedPhotos.length >= 3 && onPlayReel) {
+                  onPlayReel(completedPhotos);
+                }
+              }}
             >
               <div 
                 className="w-7 h-7 rounded-full flex items-center justify-center"
@@ -240,7 +250,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
               >
                 <Play className="w-3 h-3 text-white/90 ml-0.5" fill="currentColor" />
               </div>
-            </motion.div>
+            </motion.button>
           </>
         )}
         
@@ -374,6 +384,7 @@ const PhotoLoggingWidget = ({
   photos = [], 
   onPhotoAdd,
   onPhotoTap,
+  onPlayReel,
   currentWeek = 1,
   currentDay = 1,
 }: PhotoLoggingWidgetProps) => {
@@ -558,6 +569,7 @@ const PhotoLoggingWidget = ({
                     isExpanded={isExpanded}
                     onTap={() => handleClusterTap(weekIndex)}
                     onCardTap={(dayIndex, photo) => handleCardTap(weekIndex, dayIndex, photo)}
+                    onPlayReel={onPlayReel}
                   />
                 </motion.div>
               );

@@ -6,6 +6,7 @@ import CircularProgressRing from "@/components/CircularProgressRing";
 import GradientMeshBackground from "@/components/GradientMeshBackground";
 import PullToRefresh from "@/components/PullToRefresh";
 import PhotoLoggingWidget, { LoggedPhoto } from "@/components/PhotoLoggingWidget";
+import AIReelViewer from "@/components/AIReelViewer";
 import { useJourneyActivities } from "@/hooks/use-journey-activities";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
@@ -60,6 +61,10 @@ const Activity = () => {
   const [celebrateSuccess, setCelebrateSuccess] = useState(false);
   const [showWeekCelebration, setShowWeekCelebration] = useState(false);
   const [completedWeekNumber, setCompletedWeekNumber] = useState(0);
+  
+  // Reel viewer state
+  const [showReelViewer, setShowReelViewer] = useState(false);
+  const [reelPhotos, setReelPhotos] = useState<LoggedPhoto[]>([]);
   
   // Transition states
   const [transitionFromProgress, setTransitionFromProgress] = useState(false);
@@ -198,6 +203,25 @@ const Activity = () => {
       state: { dayNumber: dayNum },
     });
   }, [navigate]);
+
+  const handlePlayReel = useCallback((weekPhotos: LoggedPhoto[]) => {
+    if (weekPhotos.length >= 3) {
+      setReelPhotos(weekPhotos);
+      setShowReelViewer(true);
+    } else {
+      toast.info('Complete 3 days to create an AI reel!');
+    }
+  }, []);
+
+  const handleMascotTap = useCallback(() => {
+    // If we have 3+ photos, show reel - otherwise navigate to progress
+    if (photos.length >= 3) {
+      setReelPhotos(photos.slice(0, 3));
+      setShowReelViewer(true);
+    } else {
+      navigate('/progress');
+    }
+  }, [photos, navigate]);
 
   const handleRefresh = useCallback(async () => {
     await refresh();
@@ -429,7 +453,7 @@ const Activity = () => {
                 highlight={celebrateSuccess}
                 mascotSrc={mascot.src}
                 mascotAlt={mascot.alt}
-                onMascotTap={() => navigate('/progress')}
+                onMascotTap={handleMascotTap}
               />
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
@@ -462,6 +486,7 @@ const Activity = () => {
                   currentDay={currentDay}
                   onPhotoTap={handlePhotoTap}
                   onPhotoAdd={handlePhotoAdd}
+                  onPlayReel={handlePlayReel}
                 />
               )}
             </motion.div>
@@ -560,6 +585,21 @@ const Activity = () => {
           </div>
         </div>
       </div>
+      
+      {/* AI Reel Viewer */}
+      <AIReelViewer
+        isOpen={showReelViewer}
+        onClose={() => setShowReelViewer(false)}
+        photos={reelPhotos.map(p => ({
+          id: p.id,
+          storageUrl: p.storageUrl,
+          originalUrl: p.originalUrl,
+          activity: p.activity,
+          dayNumber: p.dayNumber,
+          duration: p.duration,
+          pr: p.pr,
+        }))}
+      />
     </div>
   );
 };
