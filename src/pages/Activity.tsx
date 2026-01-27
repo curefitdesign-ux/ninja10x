@@ -74,6 +74,30 @@ const [activeTab, setActiveTab] = useState("activity");
   const [showWeekCelebration, setShowWeekCelebration] = useState(false);
   const [completedWeekNumber, setCompletedWeekNumber] = useState(0);
   
+  // Transition from Progress page
+  const [transitionFromProgress, setTransitionFromProgress] = useState(false);
+  const [transitionImage, setTransitionImage] = useState<string | null>(null);
+  const [transitionDayNumber, setTransitionDayNumber] = useState<number | null>(null);
+
+  // Handle transition from Progress page
+  useEffect(() => {
+    if (location.state?.fromProgress) {
+      setTransitionFromProgress(true);
+      setTransitionImage(location.state.transitionImage || null);
+      setTransitionDayNumber(location.state.dayNumber || null);
+      
+      // Clear transition after animation
+      setTimeout(() => {
+        setTransitionFromProgress(false);
+        setTransitionImage(null);
+        setTransitionDayNumber(null);
+      }, 800);
+      
+      // Clear navigation state
+      navigate('/', { replace: true, state: null });
+    }
+  }, [location.state?.fromProgress]);
+  
   // Load photos from localStorage
   const [photos, setPhotos] = useState<LoggedPhoto[]>(() => {
     try {
@@ -320,6 +344,48 @@ toast.success(`Day ${dayNumber} added!`);
     <div className="min-h-screen bg-[#0a0a12] text-white overflow-x-hidden relative">
       {/* Gradient Mesh Background */}
       <GradientMeshBackground />
+
+      {/* Transition from Progress Page - Shared Element Animation */}
+      <AnimatePresence>
+        {transitionFromProgress && transitionImage && (
+          <motion.div
+            className="fixed inset-0 z-[60] pointer-events-none flex items-start justify-center pt-40"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <motion.div
+              className="relative w-28 h-40 rounded-xl overflow-hidden"
+              initial={{ 
+                scale: 1.2, 
+                y: -100,
+                x: 0,
+              }}
+              animate={{ 
+                scale: 0.3, 
+                y: 180,
+                x: -60,
+                opacity: 0,
+              }}
+              transition={{ 
+                type: 'spring',
+                stiffness: 150,
+                damping: 20,
+              }}
+              style={{
+                boxShadow: '0 8px 32px rgba(138, 43, 226, 0.4)',
+                border: '2px solid rgba(138, 43, 226, 0.5)',
+              }}
+            >
+              <img 
+                src={transitionImage} 
+                alt="Transitioning" 
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Week Completion Celebration Overlay */}
       <AnimatePresence>

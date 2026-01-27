@@ -101,7 +101,15 @@ const Progress = () => {
   }, []);
 
   const handleClose = () => {
-    navigate('/', { replace: true });
+    // Navigate to home with transition data for shared-element animation
+    navigate('/', { 
+      replace: true,
+      state: {
+        fromProgress: true,
+        transitionImage,
+        dayNumber: transitionDayNumber,
+      }
+    });
   };
 
   // Get photo for a specific day

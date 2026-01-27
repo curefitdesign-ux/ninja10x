@@ -231,7 +231,7 @@ const Preview = () => {
     setIsLoaded(false);
   };
 
-  // Save with template - show micro celebration then share screen
+  // Save with template - go directly to share screen
   const handleSaveWithTemplate = async () => {
     if (!imageUrl || !activity) return;
 
@@ -245,14 +245,8 @@ const Preview = () => {
     setFramedImageUrl(shareAssetUrl);
     setIsSaving(false);
 
-    // Show micro celebration first
-    setShowMicroCelebration(true);
-    
-    setTimeout(() => {
-      setShowMicroCelebration(false);
-      // Then show share sheet
-      setShowShareSheet(true);
-    }, 1200);
+    // Open share sheet directly (no celebration)
+    setShowShareSheet(true);
   };
 
   // Actually navigate back and save (called from share sheet)
