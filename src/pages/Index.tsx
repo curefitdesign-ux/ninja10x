@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { ChevronDown, Film } from 'lucide-react';
 import { toast } from 'sonner';
 import AuroraBackground from '@/components/AuroraBackground';
@@ -13,6 +14,8 @@ import ReelHistoryGallery from '@/components/ReelHistoryGallery';
 import PullToRefresh from '@/components/PullToRefresh';
 import { useFitnessReel } from '@/hooks/use-fitness-reel';
 import { uploadToStorage } from '@/services/storage-service';
+import { getPhotosStorageKey } from '@/hooks/use-device-id';
+import SharedImageTransition from '@/components/SharedImageTransition';
 
 import CameraUI from '@/components/CameraUI';
 import {
@@ -46,7 +49,8 @@ export interface Photo {
 }
 
 const MAX_DAYS = 12;
-const STORAGE_KEY = 'cn_photos_v2';
+const STORAGE_KEY = getPhotosStorageKey();
+const LEGACY_STORAGE_KEY = 'cn_photos_v2';
 
 const activities = [
   { name: 'Running', icon: runningIcon },
@@ -69,15 +73,29 @@ const Index = () => {
   // Load photos from localStorage - storage-first (only metadata + storageUrl)
   const [photos, setPhotos] = useState<Photo[]>(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw =
+        localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
       if (!raw) return [];
       const parsed = JSON.parse(raw);
-      // Filter out any photos without storageUrl (invalid)
       return Array.isArray(parsed) ? parsed.filter((p: Photo) => p.storageUrl) : [];
     } catch {
       return [];
     }
   });
+
+  // Shared-element transition from ShareSheet (X) to Cult Ninja widget (this page)
+  const [shareTransitionImage, setShareTransitionImage] = useState<string | null>(null);
+  useEffect(() => {
+    if (location.state?.fromShare && location.state?.transitionToWidget) {
+      setShareTransitionImage(location.state.transitionImage || null);
+
+      // Clear navigation state without leaving the page
+      navigate('/create', { replace: true, state: null });
+
+      const t = setTimeout(() => setShareTransitionImage(null), 900);
+      return () => clearTimeout(t);
+    }
+  }, [location.state?.fromShare, location.state?.transitionToWidget, navigate]);
   
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
@@ -467,6 +485,16 @@ const Index = () => {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
+      <AnimatePresence>
+        {shareTransitionImage && (
+          <SharedImageTransition
+            imageUrl={shareTransitionImage}
+            targetSelector='[data-shared-element="cult-ninja-widget"]'
+            onComplete={() => setShareTransitionImage(null)}
+          />
+        )}
+      </AnimatePresence>
+
       {!instantCamera && <AuroraBackground />}
       
       {!instantCamera && (

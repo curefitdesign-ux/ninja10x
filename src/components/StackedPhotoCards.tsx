@@ -108,7 +108,11 @@ const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
   };
 
   return (
-    <div className="relative w-full flex justify-center items-center" style={{ height: '280px' }}>
+    <div
+      className="relative w-full flex justify-center items-center"
+      style={{ height: '280px' }}
+      data-shared-element="cult-ninja-widget"
+    >
       <div className="relative w-full" style={{ height: '240px' }}>
         {displayPhotos.length === 0 ? (
           <CardComponent photo={null} position={0} />
@@ -121,3 +125,4 @@ const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
 };
 
 export default StackedPhotoCards;
+
