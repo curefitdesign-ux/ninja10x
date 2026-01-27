@@ -497,7 +497,13 @@ const Preview = () => {
   // Camera Step
   if (flowStep === 'camera') {
     return (
-      <div className="fixed inset-0 z-50 bg-black" style={{ height: '100dvh' }}>
+      <div 
+        className="fixed inset-0 z-50 bg-black overflow-hidden touch-none" 
+        style={{ 
+          height: '100dvh',
+          minHeight: '-webkit-fill-available',
+        }}
+      >
         <CameraUI
           activity=""
           week={calculatedWeek}
@@ -512,7 +518,13 @@ const Preview = () => {
 
   // Template Selection Step
   return (
-    <div className="fixed inset-0 w-full overflow-hidden bg-black" style={{ height: '100dvh' }}>
+    <div 
+      className="fixed inset-0 w-full overflow-hidden bg-black touch-manipulation" 
+      style={{ 
+        height: '100dvh',
+        minHeight: '-webkit-fill-available',
+      }}
+    >
       {/* Blurred background image with dynamic color overlay */}
       <div 
         className="absolute inset-0 scale-150 transition-all duration-500 animate-bg-drift"
@@ -580,7 +592,7 @@ const Preview = () => {
       {activity && <ActivityBackgroundEffect activity={activity} />}
 
       {/* Content - with extra bottom padding for floating buttons */}
-      <div className="relative z-10 flex flex-col h-full pb-32">
+      <div className="relative z-10 flex flex-col h-full" style={{ paddingBottom: 'calc(160px + env(safe-area-inset-bottom, 0px))' }}>
         {/* Offscreen capture target (unscaled) for image saves */}
         <div
           ref={captureRef}
@@ -591,7 +603,10 @@ const Preview = () => {
         </div>
 
         {/* Header - minimal (no delete icon - moved to tertiary CTA below) */}
-        <div className={`flex items-center justify-between py-4 px-5 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 -translate-y-8 pointer-events-none' : ''}`}>
+        <div 
+          className={`flex items-center justify-between py-4 px-5 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 -translate-y-8 pointer-events-none' : ''}`}
+          style={{ paddingTop: 'max(env(safe-area-inset-top, 16px), 16px)' }}
+        >
           <button 
             onClick={handleSaveWithoutTemplate}
             className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'close-btn' ? 'animate-liquid-tap' : ''}`}

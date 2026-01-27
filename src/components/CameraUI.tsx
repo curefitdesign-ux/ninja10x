@@ -444,7 +444,15 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
   const hasCapturedMedia = capturedImage || capturedVideo;
 
   return (
-    <div className="fixed inset-x-0 top-0 z-50 bg-black" style={{ height: '100dvh', maxHeight: '844px' }}>
+    <div 
+      className="fixed inset-0 z-50 bg-black overflow-hidden touch-none"
+      style={{ 
+        height: '100dvh',
+        minHeight: '-webkit-fill-available',
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}
+    >
       {/* Hidden elements */}
       <canvas ref={canvasRef} className="hidden" />
       <input
@@ -646,7 +654,10 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
       )}
 
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 p-6 pt-6 flex justify-between items-start z-10">
+      <div 
+        className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-10"
+        style={{ paddingTop: 'max(env(safe-area-inset-top, 24px), 24px)' }}
+      >
         <div>
           <h2 className="text-2xl font-bold text-white">{activity}</h2>
           <p className="text-white/80 text-sm">Week {week} • Day {day}</p>
@@ -661,7 +672,10 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
       </div>
 
       {/* Bottom Controls */}
-      <div className="absolute bottom-0 left-0 right-0 pb-12 px-6 z-10">
+      <div 
+        className="absolute bottom-0 left-0 right-0 px-6 z-10"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 24px)' }}
+      >
         {/* Photo/Video Mode Toggle - Compact liquid glass design */}
         {!hasCapturedMedia && !countdownActive && (
           <div className="flex justify-center mb-4">

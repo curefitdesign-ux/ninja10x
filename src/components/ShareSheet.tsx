@@ -359,7 +359,11 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
       {/* Full Screen with Image-Based Background */}
       <AnimatePresence>
         <motion.div 
-          className="fixed inset-0 z-50 flex flex-col overflow-hidden"
+          className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-manipulation"
+          style={{
+            height: '100dvh',
+            minHeight: '-webkit-fill-available',
+          }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -386,12 +390,15 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
           {/* Content container */}
           <div className="relative z-10 flex-1 flex flex-col h-full">
             {/* Header - Title center, Close button on right */}
-            <div className="flex items-center justify-between px-5 pt-6 pb-4">
+            <div 
+              className="flex items-center justify-between px-5 pb-4"
+              style={{ paddingTop: 'max(env(safe-area-inset-top, 24px), 24px)' }}
+            >
               <div className="w-10" /> {/* Spacer for centering */}
               <span className="text-white/80 text-base font-medium">Share</span>
               <button 
                 onClick={handleCloseToHome}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-xl tap-bounce"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-xl tap-bounce active:scale-95"
               >
                 <X className="w-5 h-5 text-white" />
               </button>
@@ -470,8 +477,8 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
             
              {/* Sticky Bottom Action Buttons - Download/Copy + Done */}
             <motion.div 
-              className="sticky bottom-0 w-full px-6 pb-6 pt-4"
-              style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
+              className="sticky bottom-0 w-full px-6 pt-4"
+              style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)' }}
               animate={isExiting ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
             >
