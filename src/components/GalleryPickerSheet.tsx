@@ -246,26 +246,36 @@ const GalleryPickerSheet = ({
 
           {/* Gallery Grid */}
           <div className="px-3 pb-32 overflow-y-auto" style={{ maxHeight: 'calc(100dvh - 180px)' }}>
-            <div className="grid grid-cols-3 gap-1">
-              {/* Camera Button - First Item */}
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={handleCameraCapture}
-                className="aspect-square rounded-xl flex items-center justify-center"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                }}
-              >
-                <div 
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center"
+            {/* Background blur container */}
+            <div 
+              className="relative rounded-3xl p-2"
+              style={{
+                background: 'rgba(255, 255, 255, 0.06)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+              }}
+            >
+              <div className="grid grid-cols-3 gap-1">
+                {/* Camera Button - First Item */}
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleCameraCapture}
+                  className="aspect-square rounded-xl flex items-center justify-center"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '2px solid rgba(255, 255, 255, 0.2)',
+                    background: 'rgba(255, 255, 255, 0.08)',
                   }}
                 >
-                  <Camera className="w-7 h-7 text-white/80" />
-                </div>
-              </motion.button>
+                  <div 
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      border: '2px solid rgba(255, 255, 255, 0.2)',
+                    }}
+                  >
+                    <Camera className="w-7 h-7 text-white/80" />
+                  </div>
+                </motion.button>
 
               {/* Gallery Items */}
               {galleryItems.map((item) => (
@@ -312,6 +322,7 @@ const GalleryPickerSheet = ({
                   <span className="text-white/30 text-2xl">+</span>
                 </motion.button>
               )}
+              </div>
             </div>
           </div>
 
