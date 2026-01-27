@@ -70,9 +70,10 @@ interface WidgetLayout2Props {
   currentDate: string;
 }
 
-const WidgetLayout2 = ({ photos, onCardClick }: WidgetLayout2Props) => {
+const WidgetLayout2 = ({ photos }: WidgetLayout2Props) => {
   const navigate = useNavigate();
   const displayPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
+  const nextDayNumber = photos.length > 0 ? Math.max(...photos.map((p) => p.dayNumber)) + 1 : 1;
 
   const handlePhotoTap = (photo: Photo) => {
     navigate('/preview', { 
@@ -117,7 +118,14 @@ const WidgetLayout2 = ({ photos, onCardClick }: WidgetLayout2Props) => {
               </div>
             </div>
           ) : (
-            <div className="relative cursor-pointer" onClick={onCardClick}>
+            <div
+              className="relative cursor-pointer"
+              onClick={() =>
+                navigate('/gallery', {
+                  state: { dayNumber: nextDayNumber },
+                })
+              }
+            >
               <div className="flex flex-col items-center justify-center rounded-2xl" style={{ width: '160px', height: '210px', background: 'linear-gradient(180deg, #5a5872 0%, #4a4860 100%)', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' }}>
                 <div className="relative w-12 h-12">
                   <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-white/40 rounded-tl" />

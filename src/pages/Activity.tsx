@@ -6,7 +6,6 @@ import CircularProgressRing from "@/components/CircularProgressRing";
 import GradientMeshBackground from "@/components/GradientMeshBackground";
 import PullToRefresh from "@/components/PullToRefresh";
 import PhotoLoggingWidget, { LoggedPhoto } from "@/components/PhotoLoggingWidget";
-import GalleryPickerSheet from "@/components/GalleryPickerSheet";
 import { useJourneyActivities } from "@/hooks/use-journey-activities";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
@@ -55,8 +54,7 @@ const Activity = () => {
   }));
   
   // Gallery picker state
-  const [showGalleryPicker, setShowGalleryPicker] = useState(false);
-  const [pendingDayNumber, setPendingDayNumber] = useState<number | null>(null);
+  // (migrated to /gallery route)
   
   // Success animation states
   const [celebrateSuccess, setCelebrateSuccess] = useState(false);
@@ -195,37 +193,11 @@ const Activity = () => {
 
   const handlePhotoAdd = useCallback((weekIndex: number, dayIndex: number) => {
     const dayNum = weekIndex * 3 + dayIndex + 1;
-    setPendingDayNumber(dayNum);
-    setShowGalleryPicker(true);
-  }, []);
-
-  const handleCameraCapture = useCallback(() => {
-    setShowGalleryPicker(false);
-    if (pendingDayNumber !== null) {
-      navigate('/preview', {
-        state: {
-          dayNumber: pendingDayNumber,
-          startWithCamera: true,
-        },
-      });
-    }
-  }, [navigate, pendingDayNumber]);
-
-  const handleGalleryPhotoSelect = useCallback((photoDataUrl: string, isVideo?: boolean) => {
-    setShowGalleryPicker(false);
-    if (pendingDayNumber !== null) {
-      navigate('/preview', {
-        state: {
-          imageUrl: photoDataUrl,
-          originalUrl: photoDataUrl,
-          isVideo: isVideo || false,
-          dayNumber: pendingDayNumber,
-          startWithCamera: false,
-        },
-      });
-    }
-    setPendingDayNumber(null);
-  }, [navigate, pendingDayNumber]);
+    // Open dedicated Gallery page (no overlay)
+    navigate('/gallery', {
+      state: { dayNumber: dayNum },
+    });
+  }, [navigate]);
 
   const handleRefresh = useCallback(async () => {
     await refresh();
@@ -587,17 +559,6 @@ const Activity = () => {
           </div>
         </div>
       </div>
-
-      {/* Gallery Picker Sheet */}
-      <GalleryPickerSheet
-        isOpen={showGalleryPicker}
-        onClose={() => {
-          setShowGalleryPicker(false);
-          setPendingDayNumber(null);
-        }}
-        onSelectPhoto={handleGalleryPhotoSelect}
-        onCameraCapture={handleCameraCapture}
-      />
     </div>
   );
 };
