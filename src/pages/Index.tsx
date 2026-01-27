@@ -7,7 +7,6 @@ import AuroraBackground from '@/components/AuroraBackground';
 import PhotoUploadCard from '@/components/PhotoUploadCard';
 import WidgetLayout2 from '@/components/WidgetLayout2';
 import WidgetLayout3 from '@/components/WidgetLayout3';
-import GalleryPickerSheet from '@/components/GalleryPickerSheet';
 import ReelGenerationOverlay from '@/components/ReelGenerationOverlay';
 import ReelPreviewScreen from '@/components/ReelPreviewScreen';
 import ReelHistoryGallery from '@/components/ReelHistoryGallery';
@@ -106,7 +105,6 @@ const Index = () => {
   const [simulatedDate, setSimulatedDate] = useState<string | null>(null);
   const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout3');
   const [initialCaptureMode, setInitialCaptureMode] = useState<'photo' | 'video'>('photo');
-  const [showRecentGallery, setShowRecentGallery] = useState(false);
   const [showReelHistoryGallery, setShowReelHistoryGallery] = useState(false);
   const [pendingMedia, setPendingMedia] = useState<{ url: string; isVideo: boolean } | null>(null);
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
@@ -243,7 +241,10 @@ const Index = () => {
 
   const handleAddPhoto = () => {
     setEditingPhotoId(null);
-    setShowRecentGallery(true);
+    // Open dedicated Gallery page (no overlay)
+    navigate('/gallery', {
+      state: { dayNumber: getNextDayNumber() },
+    });
   };
 
   const handleOpenCamera = () => {
@@ -251,12 +252,6 @@ const Index = () => {
     setCameraEntering(true);
     setShowCamera(true);
     setTimeout(() => setCameraEntering(false), 500);
-  };
-
-  const handleGalleryPhotoSelect = (photoDataUrl: string, isVideo?: boolean) => {
-    setShowRecentGallery(false);
-    setPendingMedia({ url: photoDataUrl, isVideo: isVideo || false });
-    setShowActivitySheet(true);
   };
 
   const handleActivitySelect = useCallback((activityName: string) => {
@@ -626,7 +621,7 @@ const Index = () => {
         </>
       )}
 
-      {/* GalleryPickerSheet removed - now using /gallery page route */}
+      {/* Gallery selection uses /gallery route (no overlay) */}
 
       {showCamera && (
         <div className={`transition-all duration-500 ease-out ${
