@@ -6,6 +6,7 @@ import CircularProgressRing from "@/components/CircularProgressRing";
 import GradientMeshBackground from "@/components/GradientMeshBackground";
 import PullToRefresh from "@/components/PullToRefresh";
 import PhotoLoggingWidget, { LoggedPhoto } from "@/components/PhotoLoggingWidget";
+import GalleryPickerSheet from "@/components/GalleryPickerSheet";
 import { uploadToStorage } from "@/services/storage-service";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
@@ -60,6 +61,10 @@ const Activity = () => {
   const navigate = useNavigate();
   const location = useLocation();
 const [activeTab, setActiveTab] = useState("activity");
+  
+  // Gallery picker state
+  const [showGalleryPicker, setShowGalleryPicker] = useState(false);
+  const [pendingDayNumber, setPendingDayNumber] = useState<number | null>(null);
   
   // Success animation states - for pills and ring
   const [celebrateSuccess, setCelebrateSuccess] = useState(false);
@@ -255,16 +260,29 @@ toast.success(`Day ${dayNumber} added!`);
   }, []);
 
 
-  // Handle card tap from PhotoLoggingWidget - navigate to preview page with camera
+  // Handle card tap from PhotoLoggingWidget - open gallery picker
   const handlePhotoAdd = useCallback((weekIndex: number, dayIndex: number) => {
     const dayNum = weekIndex * 3 + dayIndex + 1;
-    navigate('/preview', {
-      state: {
-        dayNumber: dayNum,
-        startWithCamera: true,
-      },
-    });
-  }, [navigate]);
+    setPendingDayNumber(dayNum);
+    setShowGalleryPicker(true);
+  }, []);
+
+  // Handle photo selection from gallery picker
+  const handleGalleryPhotoSelect = useCallback((photoDataUrl: string, isVideo?: boolean) => {
+    setShowGalleryPicker(false);
+    if (pendingDayNumber !== null) {
+      navigate('/preview', {
+        state: {
+          imageUrl: photoDataUrl,
+          originalUrl: photoDataUrl,
+          isVideo: isVideo || false,
+          dayNumber: pendingDayNumber,
+          startWithCamera: false,
+        },
+      });
+    }
+    setPendingDayNumber(null);
+  }, [navigate, pendingDayNumber]);
 
   const fitnessPrograms = [
     { id: 1, image: yogaBeginners },
@@ -705,6 +723,15 @@ toast.success(`Day ${dayNumber} added!`);
         </div>
       </div>
 
+      {/* Gallery Picker Sheet */}
+      <GalleryPickerSheet
+        isOpen={showGalleryPicker}
+        onClose={() => {
+          setShowGalleryPicker(false);
+          setPendingDayNumber(null);
+        }}
+        onSelectPhoto={handleGalleryPhotoSelect}
+      />
     </div>
   );
 };
