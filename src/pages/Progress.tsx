@@ -28,55 +28,56 @@ interface LoggedPhoto {
 
 // Tile positions - stair-step diagonal pattern matching reference
 // Pattern: 2 tiles per "step" going down-right, then down-left
-// Using vw-based values for proper scaling
+// Using vw-based values for proper scaling - shifted down by ~13vw (50px)
 const TILE_POSITIONS = [
   // Group 1: Start center → diagonal right-down (BUILD STRENGTH)
-  { left: 40, top: 15 },    // Tile 1 - first, center-left
-  { left: 48, top: 23 },    // Tile 2 - step down-right
-  { left: 56, top: 31 },    // Tile 3 - milestone, furthest right
+  { left: 40, top: 28 },    // Tile 1 - first, center-left
+  { left: 48, top: 36 },    // Tile 2 - step down-right
+  { left: 56, top: 44 },    // Tile 3 - milestone, furthest right
   // Group 2: Zigzag left-down (INCREASE STAMINA)
-  { left: 48, top: 40 },    // Tile 4 - step back left
-  { left: 40, top: 48 },    // Tile 5 - continue left
-  { left: 32, top: 56 },    // Tile 6 - milestone, furthest left
+  { left: 48, top: 53 },    // Tile 4 - step back left
+  { left: 40, top: 61 },    // Tile 5 - continue left
+  { left: 32, top: 69 },    // Tile 6 - milestone, furthest left
   // Group 3: Zigzag right-down (BUILD ENERGY)
-  { left: 40, top: 64 },    // Tile 7 - step right
-  { left: 48, top: 72 },    // Tile 8 - continue right
-  { left: 56, top: 80 },    // Tile 9 - milestone, furthest right
+  { left: 40, top: 77 },    // Tile 7 - step right
+  { left: 48, top: 85 },    // Tile 8 - continue right
+  { left: 56, top: 93 },    // Tile 9 - milestone, furthest right
   // Group 4: Final stretch left-down (CONQUER WILL POWER)
-  { left: 48, top: 89 },    // Tile 10 - step back left
-  { left: 40, top: 97 },    // Tile 11 - continue left
-  { left: 32, top: 105 },   // Tile 12 - active final milestone
+  { left: 48, top: 102 },   // Tile 10 - step back left
+  { left: 40, top: 110 },   // Tile 11 - continue left
+  { left: 32, top: 118 },   // Tile 12 - active final milestone
 ];
 
 // Labels anchored to specific tile groups - matching reference image
+// Labels shifted: left labels -13vw, right labels +13vw (50px offset)
 const LABELS = [
   { 
     tileIndex: 2, 
     text: ["BUILD", "STRENGTH"], 
     side: "right" as const,
-    top: 25, // Near tile 3
-    left: 72,
+    top: 38, // Near tile 3 (shifted down)
+    left: 85, // Shifted right by ~13vw
   },
   { 
     tileIndex: 5, 
     text: ["INCREASE", "STAMINA"], 
     side: "left" as const,
-    top: 50, // Near tile 6
-    left: 4,
+    top: 63, // Near tile 6 (shifted down)
+    left: -9, // Shifted left by ~13vw
   },
   { 
     tileIndex: 8, 
     text: ["BUILD", "ENERGY"], 
     side: "right" as const,
-    top: 75, // Near tile 9
-    left: 72,
+    top: 88, // Near tile 9 (shifted down)
+    left: 85, // Shifted right by ~13vw
   },
   { 
     tileIndex: 11, 
     text: ["CONQUER", "WILL POWER"], 
     side: "left" as const,
-    top: 100, // Near tile 12
-    left: 4,
+    top: 113, // Near tile 12 (shifted down)
+    left: -9, // Shifted left by ~13vw
   },
 ];
 
@@ -392,34 +393,6 @@ const Progress = () => {
                 alt="Engine Badge" 
                 className="w-full h-full object-contain"
                 style={{ opacity: 0.7 }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* === BADGE PLATFORM === */}
-        <AnimatePresence>
-          {showContent && (
-            <motion.div
-              className="absolute"
-              style={{
-                left: vw(24),
-                top: vw(28),
-                width: vw(28),
-                height: vw(24),
-              }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 0.5, y: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              {/* Platform lines SVG would go here - using CSS approximation */}
-              <div 
-                className="w-full h-full"
-                style={{
-                  background: "linear-gradient(180deg, rgba(100,100,100,0.3) 0%, rgba(20,20,20,0.5) 100%)",
-                  borderRadius: "8px",
-                  transform: "perspective(100px) rotateX(20deg)",
-                }}
               />
             </motion.div>
           )}
