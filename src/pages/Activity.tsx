@@ -74,8 +74,9 @@ const [activeTab, setActiveTab] = useState("activity");
   const [showWeekCelebration, setShowWeekCelebration] = useState(false);
   const [completedWeekNumber, setCompletedWeekNumber] = useState(0);
   
-  // Transition from Progress page
+  // Transition from Progress page or Share page
   const [transitionFromProgress, setTransitionFromProgress] = useState(false);
+  const [transitionFromShare, setTransitionFromShare] = useState(false);
   const [transitionImage, setTransitionImage] = useState<string | null>(null);
   const [transitionDayNumber, setTransitionDayNumber] = useState<number | null>(null);
 
@@ -97,6 +98,25 @@ const [activeTab, setActiveTab] = useState("activity");
       navigate('/', { replace: true, state: null });
     }
   }, [location.state?.fromProgress]);
+
+  // Handle transition from Share page (X button)
+  useEffect(() => {
+    if (location.state?.fromShare && location.state?.transitionToWidget) {
+      setTransitionFromShare(true);
+      setTransitionImage(location.state.transitionImage || null);
+      setTransitionDayNumber(location.state.dayNumber || null);
+      
+      // Clear transition after animation
+      setTimeout(() => {
+        setTransitionFromShare(false);
+        setTransitionImage(null);
+        setTransitionDayNumber(null);
+      }, 800);
+      
+      // Clear navigation state
+      navigate('/', { replace: true, state: null });
+    }
+  }, [location.state?.fromShare, location.state?.transitionToWidget]);
   
   // Load photos from localStorage
   const [photos, setPhotos] = useState<LoggedPhoto[]>(() => {
@@ -380,6 +400,51 @@ toast.success(`Day ${dayNumber} added!`);
               <img 
                 src={transitionImage} 
                 alt="Transitioning" 
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Transition from Share Page (X button) - Image moves to Widget */}
+      <AnimatePresence>
+        {transitionFromShare && transitionImage && (
+          <motion.div
+            className="fixed inset-0 z-[60] pointer-events-none flex items-center justify-center"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+          >
+            <motion.div
+              className="relative aspect-[9/16] rounded-2xl overflow-hidden"
+              initial={{ 
+                width: '70vw',
+                scale: 1, 
+                y: 0,
+                x: 0,
+              }}
+              animate={{ 
+                width: '18vw',
+                scale: 0.4, 
+                y: 200,
+                x: ((transitionDayNumber || 1) - 1) % 3 === 0 ? -100 : 
+                   ((transitionDayNumber || 1) - 1) % 3 === 1 ? 0 : 100,
+                opacity: 0,
+              }}
+              transition={{ 
+                type: 'spring',
+                stiffness: 120,
+                damping: 18,
+              }}
+              style={{
+                boxShadow: '0 12px 48px rgba(138, 43, 226, 0.5)',
+                border: '2px solid rgba(138, 43, 226, 0.6)',
+              }}
+            >
+              <img 
+                src={transitionImage} 
+                alt="Transitioning to widget" 
                 className="w-full h-full object-cover"
               />
             </motion.div>

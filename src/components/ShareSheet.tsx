@@ -173,8 +173,8 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
     img.src = imageUrl;
   }, [imageUrl, isVideo]);
 
-  // Handle Done - navigate to progress page with transition data
-  const handleDone = () => {
+  // Handle VIEW PROGRESS - navigate to progress page with transition data
+  const handleViewProgress = () => {
     triggerHaptic('success');
     setIsExiting(true);
     
@@ -184,6 +184,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
         state: {
           fromShare: true,
           transitionImage: imageUrl,
+          transitionToProgress: true, // Animation goes to progress top strip
           dayNumber,
           frameType,
           frameProps,
@@ -192,17 +193,19 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
     }, 400);
   };
 
-  // Close with shared-element transition to progress page
-  const handleCloseWithTransition = () => {
+  // Close with X - shared-element transition back to Activity page (PhotoLoggingWidget)
+  const handleCloseToHome = () => {
     triggerHaptic('light');
     setIsExiting(true);
     
-    // Wait for animation, then navigate to progress
+    // Wait for animation, then navigate to Activity page
     setTimeout(() => {
-      navigate('/progress', {
+      navigate('/', {
+        replace: true,
         state: {
           fromShare: true,
           transitionImage: imageUrl,
+          transitionToWidget: true, // Animation goes to photo widget
           dayNumber,
           frameType,
           frameProps,
@@ -225,7 +228,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
           text: shareText,
           files: [file],
         });
-        handleCloseWithTransition();
+        handleCloseToHome();
         return;
       } catch (err) {
         console.log('Native share failed, trying deep link');
@@ -387,7 +390,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
               <div className="w-10" /> {/* Spacer for centering */}
               <span className="text-white/80 text-base font-medium">Share</span>
               <button 
-                onClick={handleCloseWithTransition}
+                onClick={handleCloseToHome}
                 className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-xl tap-bounce"
               >
                 <X className="w-5 h-5 text-white" />
@@ -473,9 +476,9 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
               transition={{ duration: 0.2 }}
             >
               <div className="w-full flex flex-col gap-3 max-w-sm mx-auto">
-                {/* View Progress button */}
+               {/* View Progress button */}
                 <button
-                  onClick={handleDone}
+                  onClick={handleViewProgress}
                   className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-white text-black font-semibold tap-bounce transition-all active:scale-95"
                 >
                   <span>VIEW PROGRESS</span>
