@@ -244,10 +244,20 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
   const selectionWidth = duration > 0 ? (maxDuration / duration) * 100 : 0;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col">
+    <div 
+      className="fixed inset-0 z-50 bg-black flex flex-col overflow-hidden"
+      style={{
+        height: '100dvh',
+        maxHeight: '100dvh',
+        minHeight: '-webkit-fill-available',
+      }}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 pt-12">
-        <button onClick={onCancel} className="p-2">
+      <div 
+        className="flex-shrink-0 flex items-center justify-between px-4"
+        style={{ paddingTop: 'max(env(safe-area-inset-top), 48px)' }}
+      >
+        <button onClick={onCancel} className="p-2 -ml-2 active:scale-95 transition-transform">
           <X className="w-6 h-6 text-white" />
         </button>
         <span className="text-white font-medium">Select {maxDuration}s clip</span>
@@ -291,7 +301,10 @@ const VideoTrimmer = ({ videoSrc, onConfirm, onCancel, maxDuration = 3 }: VideoT
       </div>
       
       {/* Bottom Section - Timeline + Button - always visible with safe area */}
-      <div className="flex-shrink-0 px-4 pb-10 pt-2 bg-gradient-to-t from-black via-black/95 to-transparent">
+      <div 
+        className="flex-shrink-0 px-4 pt-2"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 24px)' }}
+      >
         <div className="mb-3 text-center">
           <span className="text-white/60 text-sm">
             Drag to select {maxDuration} seconds
