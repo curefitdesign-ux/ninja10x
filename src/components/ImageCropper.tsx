@@ -34,16 +34,31 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
   const [showZoomIndicator, setShowZoomIndicator] = useState(false);
   const zoomIndicatorTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Calculate crop area dimensions
+  // Calculate crop area dimensions - constrained to viewport
   useEffect(() => {
     const updateCropDimensions = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.clientWidth;
         const containerHeight = containerRef.current.clientHeight;
         
-        // Calculate crop area to fit 9:16 aspect ratio within container
-        const cropWidth = containerWidth - 48; // 24px padding each side
-        const cropHeight = cropWidth / CROP_ASPECT_RATIO;
+        // Reserve space for header and bottom controls
+        const headerSpace = 100; // Top padding + instruction text
+        const bottomSpace = 140; // Bottom controls + safe area
+        const availableHeight = containerHeight - headerSpace - bottomSpace;
+        
+        // Calculate crop area to fit 9:16 aspect ratio within available space
+        const maxCropWidth = containerWidth - 48; // 24px padding each side
+        const maxCropHeight = availableHeight;
+        
+        // Fit 9:16 crop area within available bounds
+        let cropWidth = maxCropWidth;
+        let cropHeight = cropWidth / CROP_ASPECT_RATIO;
+        
+        // If calculated height exceeds available, scale down by height
+        if (cropHeight > maxCropHeight) {
+          cropHeight = maxCropHeight;
+          cropWidth = cropHeight * CROP_ASPECT_RATIO;
+        }
         
         setCropDimensions({ width: cropWidth, height: cropHeight });
       }
@@ -298,7 +313,10 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black">
+    <div 
+      className="fixed inset-0 z-50 bg-black flex flex-col"
+      style={{ height: '100dvh', minHeight: '-webkit-fill-available' }}
+    >
       <canvas ref={canvasRef} className="hidden" />
       
       {/* Blur Background */}
@@ -422,21 +440,27 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
       </div>
       
       {/* Header with instructions */}
-      <div className="absolute top-0 left-0 right-0 p-6 pt-12 z-10">
-        <div className="flex items-center justify-between">
+      <div 
+        className="absolute top-0 left-0 right-0 z-10"
+        style={{ paddingTop: 'max(env(safe-area-inset-top), 12px)', padding: '0 20px' }}
+      >
+        <div className="flex items-center justify-between pt-3">
           <div className="flex-1" />
-          <button onClick={onCancel} className="p-2">
+          <button onClick={onCancel} className="p-2 -mr-2 active:scale-95 transition-transform">
             <X className="w-6 h-6 text-white" />
           </button>
         </div>
         {/* Centered hint text */}
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center mt-2">
           <span className="text-white/50 text-sm font-medium">Pinch to zoom • Drag to adjust</span>
         </div>
       </div>
       
       {/* Bottom controls */}
-      <div className="absolute bottom-0 left-0 right-0 pb-12 px-8 z-10">
+      <div 
+        className="absolute bottom-0 left-0 right-0 px-6 z-10"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 20px)' }}
+      >
         {/* Zoom and rotation controls - only for images */}
         {!isVideo && (
           <div className="flex justify-center gap-4 mb-6">
