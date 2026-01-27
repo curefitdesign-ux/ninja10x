@@ -398,45 +398,25 @@ const PhotoLoggingWidget = ({
 
   const handleCardTap = (weekIndex: number, dayIndex: number, photo: LoggedPhoto | null) => {
     const dayNumber = weekIndex * 3 + dayIndex + 1;
-    const isActiveDay = dayNumber === currentDay;
-    const isFutureDay = dayNumber > currentDay;
-    const isPastEmptyDay = dayNumber < currentDay && !photo;
 
     console.info('[journey-debug] Widget: card tap', {
       weekIndex,
       dayIndex,
       dayNumber,
       hasPhoto: !!photo,
-      isActiveDay,
-      isFutureDay,
-      isPastEmptyDay,
     });
-    
+
     if (photo) {
-      // Tap on existing photo - open preview/edit mode (no new photo creation)
+      // Tap on existing photo - open preview/edit mode
       onPhotoTap?.(photo);
-    } else if (isActiveDay) {
-      // Only allow adding new photo on the current active day (next unfilled slot)
+    } else {
+      // DEV/TEST MODE: Allow uploading on any day (1-12) regardless of locks
       if (onPhotoAdd) {
         onPhotoAdd(weekIndex, dayIndex);
       } else {
-        // Fallback to internal flow
         setPendingUpload({ weekIndex, dayIndex });
         setShowUploadOptions(true);
       }
-    } else if (isFutureDay) {
-      // Show hint for future locked days
-      toast("Complete today's activity first", {
-        description: `Day ${dayNumber} will unlock after you log Day ${currentDay}`,
-        duration: 2500,
-        icon: <Lock className="w-4 h-4 text-white/60" />,
-      });
-    } else if (isPastEmptyDay) {
-      // Show hint for past missed days
-      toast("This day has passed", {
-        description: "You can only log activities for the current day",
-        duration: 2500,
-      });
     }
   };
 
