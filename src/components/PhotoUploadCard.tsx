@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import StackedPhotoCards from './StackedPhotoCards';
 import WeekProgress from './WeekProgress';
 import cardBackground from '@/assets/card-background.png';
@@ -16,17 +17,26 @@ interface Photo {
 
 interface PhotoUploadCardProps {
   photos: Photo[];
-  onCardClick: () => void;
-  hasUploadedToday: boolean;
-  hoursUntilNextUpload: number;
+  onCardClick?: () => void; // Optional - now navigates to gallery page
+  hasUploadedToday?: boolean;
+  hoursUntilNextUpload?: number;
   currentDate: string;
 }
 
 const PhotoUploadCard = ({ 
   photos, 
-  onCardClick, 
   currentDate
 }: PhotoUploadCardProps) => {
+  const navigate = useNavigate();
+  
+  // Calculate next day number for new uploads
+  const nextDayNumber = photos.length > 0 ? Math.max(...photos.map(p => p.dayNumber)) + 1 : 1;
+  
+  const handleAddPhoto = () => {
+    navigate('/gallery', {
+      state: { dayNumber: nextDayNumber },
+    });
+  };
   // Determine current week based on photos (3 photos per week = 12 total for 4 weeks)
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
 
@@ -70,7 +80,6 @@ const PhotoUploadCard = ({
         <div className="relative z-10 mb-4">
           <StackedPhotoCards 
             photos={photos} 
-            onCardClick={onCardClick}
             currentDate={currentDate}
           />
         </div>
@@ -84,7 +93,7 @@ const PhotoUploadCard = ({
       {/* Upload Button Below Widget */}
       <div className="flex justify-center mt-4">
         <button
-          onClick={onCardClick}
+          onClick={handleAddPhoto}
           className="flex items-center gap-2 px-5 py-2.5 rounded-full"
           style={{
             background: 'linear-gradient(135deg, #FF4D4D 0%, #FF3333 100%)',

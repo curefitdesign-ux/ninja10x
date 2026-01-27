@@ -31,13 +31,23 @@ const activityIcons: { [key: string]: string } = {
 
 interface StackedPhotoCardsProps {
   photos: Photo[];
-  onCardClick: () => void;
+  onCardClick?: () => void; // Optional, now navigates to gallery/camera pages
   currentDate: string;
 }
 
-const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
+const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
   const navigate = useNavigate();
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
+  
+  // Calculate next day number for new uploads
+  const nextDayNumber = photos.length > 0 ? Math.max(...photos.map(p => p.dayNumber)) + 1 : 1;
+  
+  const handleEmptyCardTap = () => {
+    // Navigate to gallery page (has camera option inside)
+    navigate('/gallery', {
+      state: { dayNumber: nextDayNumber },
+    });
+  };
 
   const handlePhotoTap = (photo: Photo) => {
     navigate('/preview', {
@@ -70,7 +80,7 @@ const StackedPhotoCards = ({ photos, onCardClick }: StackedPhotoCardsProps) => {
 
     if (!photo) {
       return (
-        <div className="absolute top-1/2 left-1/2 cursor-pointer" style={{ transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale}) rotate(${rotate}deg)`, zIndex }} onClick={onCardClick}>
+        <div className="absolute top-1/2 left-1/2 cursor-pointer" style={{ transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale}) rotate(${rotate}deg)`, zIndex }} onClick={handleEmptyCardTap}>
           <div className="rounded-2xl overflow-hidden" style={{ width: `${cardWidth}px`, height: `${cardHeight}px`, background: 'rgba(70, 70, 90, 0.9)', border: '3px solid rgba(0,0,0,0.8)' }}>
             <div className="w-full h-full flex flex-col items-center justify-center">
               <div className="relative w-14 h-14">
