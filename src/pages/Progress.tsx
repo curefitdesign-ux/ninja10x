@@ -10,12 +10,14 @@ import tileActiveImg from "@/assets/progress/tile-active.png";
 import basePlatformImg from "@/assets/progress/base-platform.png";
 import engineBadgeImg from "@/assets/progress/engine-badge.png";
 import SharedImageTransition from "@/components/SharedImageTransition";
+import { isVideoUrl } from "@/lib/media";
 
 const STORAGE_KEY = getPhotosStorageKey();
 
 interface LoggedPhoto {
   id: string;
   storageUrl: string;
+  originalUrl?: string;
   isVideo?: boolean;
   activity?: string;
   frame?: string;
@@ -250,18 +252,34 @@ const Progress = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 + index * 0.06 }}
                   >
-                    <img 
-                      src={photo.storageUrl} 
-                      alt={`Day ${photo.dayNumber}`} 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const img = e.currentTarget;
-                        if (!img.dataset.retried) {
-                          img.dataset.retried = 'true';
-                          img.src = photo.storageUrl + '?t=' + Date.now();
-                        }
-                      }}
-                    />
+                    {photo.isVideo || isVideoUrl(photo.storageUrl) ? (
+                      <video
+                        src={photo.storageUrl}
+                        className="w-full h-full object-cover"
+                        muted
+                        playsInline
+                        loop
+                        autoPlay
+                        preload="metadata"
+                        onError={() => {
+                          // Keep silent UI-wise; the widget/card already exists.
+                          console.error("Failed to load video:", photo.storageUrl);
+                        }}
+                      />
+                    ) : (
+                      <img
+                        src={photo.storageUrl}
+                        alt={`Day ${photo.dayNumber}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const img = e.currentTarget;
+                          if (!img.dataset.retried) {
+                            img.dataset.retried = "true";
+                            img.src = photo.storageUrl + "?t=" + Date.now();
+                          }
+                        }}
+                      />
+                    )}
                     {/* Day indicator */}
                     <div 
                       className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-white font-semibold"
