@@ -422,23 +422,29 @@ const PhotoLoggingWidget = ({
 
   const handleUploadOptionSelect = (option: 'camera' | 'gallery') => {
     setShowUploadOptions(false);
-    if (option === 'camera') {
-      setShowActivitySheet(true);
-    } else {
-      setShowActivitySheet(true);
+    if (pendingUpload) {
+      const dayNumber = pendingUpload.weekIndex * 3 + pendingUpload.dayIndex + 1;
+      if (option === 'camera') {
+        // Navigate to dedicated camera page
+        navigate('/camera', {
+          state: { dayNumber },
+        });
+      } else {
+        // Navigate to dedicated gallery page
+        navigate('/gallery', {
+          state: { dayNumber },
+        });
+      }
     }
+    setPendingUpload(null);
   };
 
   const handleActivitySelect = (activity: string) => {
     setShowActivitySheet(false);
     if (pendingUpload) {
       const dayNumber = pendingUpload.weekIndex * 3 + pendingUpload.dayIndex + 1;
-      navigate('/preview', {
-        state: {
-          openCameraWithActivity: activity,
-          dayNumber,
-          instantCamera: true,
-        }
+      navigate('/camera', {
+        state: { dayNumber },
       });
     }
     setPendingUpload(null);
