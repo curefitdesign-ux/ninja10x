@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
+import { Play } from 'lucide-react';
+import { isVideoUrl } from '@/lib/media';
 import type { GenerationStep } from './ReelGenerationOverlay';
 
 interface ReelProgressWidgetProps {
@@ -16,62 +18,18 @@ interface ReelProgressWidgetProps {
   reelReady?: boolean;
 }
 
-// Helper to detect video URLs
-const isVideoUrl = (url: string): boolean => {
-  return /\.(mp4|webm|mov|avi|mkv|m4v)($|\?)/i.test(url);
-};
-
-// Horizontal Gradient Progress Bar with Glow
-const GradientProgressBar = ({ progress }: { progress: number }) => {
-  return (
-    <div className="relative w-full h-3 mb-4">
-      {/* Glow effect behind the bar */}
-      <div 
-        className="absolute inset-0 rounded-full"
-        style={{
-          background: 'linear-gradient(90deg, #fbbf24 0%, #f97316 50%, #ec4899 100%)',
-          filter: 'blur(12px)',
-          opacity: 0.6,
-          transform: 'scaleY(2)',
-        }}
-      />
-      
-      {/* Background track */}
-      <div 
-        className="absolute inset-0 rounded-full"
-        style={{
-          background: 'rgba(255, 255, 255, 0.1)',
-        }}
-      />
-      
-      {/* Progress fill */}
-      <motion.div 
-        className="absolute inset-y-0 left-0 rounded-full"
-        style={{
-          background: 'linear-gradient(90deg, #fbbf24 0%, #f97316 50%, #ec4899 100%)',
-          boxShadow: '0 0 20px rgba(249, 115, 22, 0.5)',
-        }}
-        initial={{ width: '0%' }}
-        animate={{ width: `${progress}%` }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-      />
-    </div>
-  );
-};
-
-// Video thumbnail component that extracts first frame
+// Media thumbnail component that extracts first frame from videos
 const MediaThumbnail = ({ 
   url, 
-  activity, 
+  activity,
   isVideo 
 }: { 
   url: string; 
-  activity: string; 
+  activity: string;
   isVideo?: boolean;
 }) => {
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [error, setError] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
   
   const shouldUseVideoThumbnail = isVideo || isVideoUrl(url);
 
@@ -81,7 +39,6 @@ const MediaThumbnail = ({
       return;
     }
 
-    // For videos, extract first frame
     const video = document.createElement('video');
     video.crossOrigin = 'anonymous';
     video.muted = true;
@@ -89,7 +46,7 @@ const MediaThumbnail = ({
     video.preload = 'metadata';
     
     video.onloadeddata = () => {
-      video.currentTime = 0.1; // Seek to 0.1s for first frame
+      video.currentTime = 0.1;
     };
     
     video.onseeked = () => {
@@ -108,23 +65,16 @@ const MediaThumbnail = ({
       }
     };
     
-    video.onerror = () => {
-      setError(true);
-    };
-    
+    video.onerror = () => setError(true);
     video.src = url;
     
-    return () => {
-      video.src = '';
-    };
+    return () => { video.src = ''; };
   }, [url, shouldUseVideoThumbnail]);
 
   if (error || !thumbnail) {
-    // Fallback: show video element directly for videos, or placeholder
     if (shouldUseVideoThumbnail) {
       return (
         <video
-          ref={videoRef}
           src={url}
           className="w-full h-full object-cover"
           muted
@@ -150,29 +100,44 @@ const MediaThumbnail = ({
   );
 };
 
-// Single Photo Card Component
-const PhotoCard = ({ 
+// Stacked Photo Card
+const StackedPhotoCard = ({ 
   photo, 
-  index 
+  index,
+  total
 }: { 
   photo: { imageUrl: string; activity: string; dayNumber: number; isVideo?: boolean }; 
   index: number;
+  total: number;
 }) => {
+  // Fan out effect - cards spread from left
+  const rotation = (index - 1) * 8; // -8, 0, 8 degrees
+  const xOffset = index * 18; // Horizontal spread
+  const zIndex = total - index;
+  
   return (
     <motion.div
-      className="relative w-[72px] h-[96px] rounded-xl overflow-hidden flex-shrink-0"
+      className="absolute rounded-lg overflow-hidden"
       style={{
-        boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+        width: '52px',
+        height: '72px',
+        left: xOffset,
+        zIndex,
+        transformOrigin: 'bottom center',
       }}
-      initial={{ opacity: 0, y: 20, scale: 0.9 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+      initial={{ opacity: 0, scale: 0.8, rotate: rotation }}
+      animate={{ 
+        opacity: 1, 
+        scale: 1, 
+        rotate: rotation,
+      }}
       transition={{ delay: index * 0.1, type: 'spring', stiffness: 300, damping: 25 }}
     >
       {/* Gradient Border */}
       <div 
-        className="absolute inset-0 rounded-xl pointer-events-none z-10"
+        className="absolute inset-0 rounded-lg pointer-events-none z-10"
         style={{
-          background: 'linear-gradient(135deg, rgba(236,72,153,0.5) 0%, rgba(139,92,246,0.5) 50%, rgba(59,130,246,0.5) 100%)',
+          background: 'linear-gradient(135deg, rgba(236,72,153,0.6) 0%, rgba(139,92,246,0.6) 100%)',
           padding: '1.5px',
           mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
           maskComposite: 'xor',
@@ -180,42 +145,40 @@ const PhotoCard = ({
         }}
       />
       
-      {/* Media thumbnail */}
+      {/* Media */}
       <MediaThumbnail 
         url={photo.imageUrl} 
         activity={photo.activity}
         isVideo={photo.isVideo}
       />
       
-      {/* Video/Camera indicator icon */}
-      <div className="absolute top-1.5 right-1.5 z-20">
-        <div 
-          className="w-5 h-5 rounded-md flex items-center justify-center"
-          style={{
-            background: 'rgba(0, 0, 0, 0.4)',
-            backdropFilter: 'blur(4px)',
-          }}
-        >
-          {photo.isVideo || isVideoUrl(photo.imageUrl) ? (
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-              <polygon points="5 3 19 12 5 21 5 3" fill="white" />
-            </svg>
-          ) : (
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" fill="white" />
-              <path d="m21 15-5-5L5 21" />
-            </svg>
-          )}
-        </div>
-      </div>
-      
-      {/* Activity label at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-2 pt-4 z-20">
-        <p className="text-white text-[10px] font-semibold leading-tight truncate">{photo.activity}</p>
-        <p className="text-white/50 text-[8px]">Day {photo.dayNumber}</p>
+      {/* Activity label overlay */}
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5 pt-3 z-20">
+        <p className="text-white text-[8px] font-semibold leading-tight truncate">{photo.activity}</p>
+        <p className="text-white/50 text-[6px]">Day {photo.dayNumber}</p>
       </div>
     </motion.div>
+  );
+};
+
+// Progress Bar
+const GradientProgressBar = ({ progress }: { progress: number }) => {
+  return (
+    <div className="relative w-full h-2 rounded-full overflow-hidden">
+      {/* Background track */}
+      <div className="absolute inset-0 bg-white/10 rounded-full" />
+      
+      {/* Progress fill */}
+      <motion.div 
+        className="absolute inset-y-0 left-0 rounded-full"
+        style={{
+          background: 'linear-gradient(90deg, #fbbf24 0%, #f97316 50%, #ec4899 100%)',
+        }}
+        initial={{ width: '0%' }}
+        animate={{ width: `${progress}%` }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+      />
+    </div>
   );
 };
 
@@ -227,10 +190,24 @@ const ReelProgressWidget = ({
   onViewReel,
   reelReady,
 }: ReelProgressWidgetProps) => {
-  // Only show if we have 3+ photos or actively generating
   if (photos.length < 3 && !isGenerating) return null;
 
   const displayPhotos = photos.slice(0, 3);
+  
+  // Calculate week number from day numbers
+  const weekNumber = Math.ceil(Math.max(...displayPhotos.map(p => p.dayNumber)) / 3);
+  
+  // Status text based on current step
+  const getStatusText = () => {
+    if (reelReady) return 'Your reel is ready!';
+    switch (currentStep) {
+      case 'narration': return 'Creating narration...';
+      case 'voiceover': return 'Generating voiceover...';
+      case 'video': return 'Stitching your these week activity..';
+      case 'complete': return 'Your reel is ready!';
+      default: return 'Preparing your reel...';
+    }
+  };
 
   return (
     <motion.div
@@ -238,17 +215,56 @@ const ReelProgressWidget = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="w-full px-4 py-4"
-      onClick={onViewReel}
+      className="w-full px-4"
     >
-      {/* Gradient Progress Bar with Glow */}
-      <GradientProgressBar progress={progress} />
-      
-      {/* Horizontal Photo Cards Row */}
-      <div className="flex items-center gap-2">
-        {displayPhotos.map((photo, index) => (
-          <PhotoCard key={photo.dayNumber} photo={photo} index={index} />
-        ))}
+      <div 
+        className="relative w-full rounded-2xl p-4 flex items-center gap-4"
+        style={{
+          background: 'rgba(30, 35, 50, 0.85)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+        }}
+        onClick={onViewReel}
+      >
+        {/* Left: Stacked Photos */}
+        <div className="relative h-[76px] w-[90px] flex-shrink-0">
+          {displayPhotos.map((photo, index) => (
+            <StackedPhotoCard 
+              key={photo.dayNumber} 
+              photo={photo} 
+              index={index}
+              total={displayPhotos.length}
+            />
+          ))}
+        </div>
+        
+        {/* Center: Title & Progress */}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-white font-bold text-base mb-0.5">
+            Week {weekNumber} • Conquer will power
+          </h3>
+          <p className="text-white/50 text-xs mb-2 truncate">
+            {getStatusText()}
+          </p>
+          <GradientProgressBar progress={progress} />
+        </div>
+        
+        {/* Right: Play Button */}
+        <motion.button
+          className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center"
+          style={{
+            background: 'rgba(255, 255, 255, 0.12)',
+            backdropFilter: 'blur(8px)',
+          }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onViewReel?.();
+          }}
+        >
+          <Play className="w-5 h-5 text-white/70 ml-0.5" fill="currentColor" />
+        </motion.button>
       </div>
     </motion.div>
   );
