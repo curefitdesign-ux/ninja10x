@@ -276,7 +276,7 @@ const GalleryPickerSheet = ({
           </div>
 
           {/* Simple Clean Grid */}
-          <div className="flex-1 px-3 pb-28 overflow-y-auto">
+          <div className="flex-1 px-3 pb-28 overflow-y-auto relative">
             <div className="grid grid-cols-3 gap-1.5">
               {/* Camera Button - First Item */}
               <motion.button
@@ -349,13 +349,13 @@ const GalleryPickerSheet = ({
               </motion.button>
             </div>
             
-            {/* Empty state hint */}
+            {/* Empty state hint - centered in available space */}
             {galleryItems.length === 0 && (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-center mt-8 px-6"
+                className="absolute left-0 right-0 top-1/2 -translate-y-1/2 text-center px-6 pointer-events-none"
               >
                 <p className="text-white/40 text-sm">
                   Tap the camera or + button to add photos
