@@ -314,8 +314,13 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black flex flex-col"
-      style={{ height: '100dvh', minHeight: '-webkit-fill-available' }}
+      ref={containerRef}
+      className="fixed inset-0 z-50 bg-black flex flex-col overflow-hidden"
+      style={{ 
+        height: '100dvh', 
+        maxHeight: '100dvh',
+        minHeight: '-webkit-fill-available',
+      }}
     >
       <canvas ref={canvasRef} className="hidden" />
       
@@ -341,7 +346,6 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
       
       {/* Main editing area */}
       <div
-        ref={containerRef}
         className="absolute inset-0 overflow-hidden touch-none flex items-center justify-center"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
