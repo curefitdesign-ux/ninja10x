@@ -679,27 +679,6 @@ const Preview = () => {
         </div>
       </div>
 
-      {/* Floating CTA with tertiary Remove below */}
-      <div 
-        className={`fixed bottom-0 left-0 right-0 z-[100] px-5 pt-4 transition-all duration-500 ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : 'opacity-100 translate-y-0'}`}
-        style={{ 
-          paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 24px)',
-        }}
-      >
-        <div className="flex flex-col items-center gap-3">
-          <button 
-            onClick={handleSaveWithTemplate}
-            disabled={isSaving}
-            className={`w-full bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce ${tappedElement === 'done-btn' ? 'animate-liquid-tap' : ''}`}
-            style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
-          >
-            <span className="text-black font-bold text-lg">
-              {isSaving ? 'Saving...' : 'DONE'}
-            </span>
-          </button>
-          
-        </div>
-      </div>
 
       {/* Bottom Sheet Keyboard Overlay */}
       {editingField && (
