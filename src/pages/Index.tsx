@@ -626,11 +626,7 @@ const Index = () => {
         </>
       )}
 
-      <GalleryPickerSheet
-        isOpen={showRecentGallery}
-        onClose={() => setShowRecentGallery(false)}
-        onSelectPhoto={handleGalleryPhotoSelect}
-      />
+      {/* GalleryPickerSheet removed - now using /gallery page route */}
 
       {showCamera && (
         <div className={`transition-all duration-500 ease-out ${
