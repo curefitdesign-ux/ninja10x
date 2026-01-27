@@ -7,8 +7,8 @@ import { getPhotosStorageKey } from "@/hooks/use-device-id";
 // Import tile assets
 import tileLockedImg from "@/assets/progress/tile-locked.png";
 import tileActiveImg from "@/assets/progress/tile-active.png";
-import basePlatformImg from "@/assets/progress/base.png";
-import levelCompleteImg from "@/assets/progress/level-complete.png";
+import basePlatformImg from "@/assets/progress/base-platform.png";
+import engineBadgeImg from "@/assets/progress/engine-badge.png";
 
 const STORAGE_KEY = getPhotosStorageKey();
 
@@ -23,31 +23,58 @@ interface LoggedPhoto {
   dayNumber: number;
 }
 
-// Diagonal progress path - tiles flow top-left to bottom-right
-// Using percentage positions that match reference exactly
-// Engine at top → tiles flow diagonally down → final tile at bottom
+// Tile positions - exact pixel positions from reference, scaled proportionally
+// Reference is 375px wide, so these are percentages of that
+// Path flows: top-left → bottom-right with zigzag pattern
 const TILE_POSITIONS = [
-  // Start directly below engine, then zigzag down-right
-  { xPercent: 42, yPercent: 0 },     // Tile 1 - near engine
-  { xPercent: 48, yPercent: 6 },     // Tile 2
-  { xPercent: 54, yPercent: 12 },    // Tile 3 - milestone ring
-  { xPercent: 38, yPercent: 18 },    // Tile 4 - step left
-  { xPercent: 44, yPercent: 24 },    // Tile 5
-  { xPercent: 56, yPercent: 30 },    // Tile 6 - milestone ring
-  { xPercent: 36, yPercent: 36 },    // Tile 7 - step left
-  { xPercent: 42, yPercent: 42 },    // Tile 8
-  { xPercent: 50, yPercent: 48 },    // Tile 9 - milestone ring
-  { xPercent: 34, yPercent: 54 },    // Tile 10 - step left
-  { xPercent: 40, yPercent: 60 },    // Tile 11
-  { xPercent: 46, yPercent: 66 },    // Tile 12 - final active glow
+  // Row 1: near engine
+  { left: 172, top: 174 },  // Tile 1
+  { left: 220, top: 207 },  // Tile 2
+  { left: 268, top: 240 },  // Tile 3 - milestone
+  // Row 2: step back left
+  { left: 172, top: 306 },  // Tile 4 
+  { left: 220, top: 273 },  // Tile 5
+  { left: 124, top: 339 },  // Tile 6 - milestone
+  // Row 3: continue path
+  { left: 172, top: 372 },  // Tile 7
+  { left: 220, top: 405 },  // Tile 8
+  { left: 268, top: 372 },  // Tile 9 - milestone
+  // Row 4: final stretch
+  { left: 172, top: 438 },  // Tile 10
+  { left: 220, top: 471 },  // Tile 11
+  { left: 172, top: 504 },  // Tile 12 - active final
 ];
 
-// Labels anchored to specific tiles (not viewport edges)
+// Labels anchored to specific tiles
 const LABELS = [
-  { tileIndex: 2, text: ["BUILD", "STRENGTH"], side: "right" as const },
-  { tileIndex: 4, text: ["INCREASE", "STAMINA"], side: "left" as const },
-  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const },
-  { tileIndex: 10, text: ["CONQUER", "WILL POWER"], side: "left" as const },
+  { 
+    tileIndex: 2, 
+    text: ["BUILD", "STRENGTH"], 
+    side: "right" as const,
+    top: 217,
+    left: 290,
+  },
+  { 
+    tileIndex: 4, 
+    text: ["INCREASE", "STAMINA"], 
+    side: "left" as const,
+    top: 217,
+    left: 19,
+  },
+  { 
+    tileIndex: 8, 
+    text: ["BUILD", "ENERGY"], 
+    side: "right" as const,
+    top: 405,
+    left: 290,
+  },
+  { 
+    tileIndex: 10, 
+    text: ["CONQUER", "WILL POWER"], 
+    side: "left" as const,
+    top: 471,
+    left: 19,
+  },
 ];
 
 // Story cards for top activity strip
@@ -109,32 +136,44 @@ const Progress = () => {
     });
   };
 
-  // Get photo for a specific day
-  const getPhotoForDay = (day: number) => {
-    return photos.find(p => p.dayNumber === day);
-  };
-
   // Determine tile state
   const getTileState = (day: number): "logged" | "active" | "locked" => {
-    if (getPhotoForDay(day)) return "logged";
-    if (day === currentDay) return "active";
     if (day < currentDay) return "logged";
+    if (day === currentDay || day === 12) return "active";
     return "locked";
   };
 
   // Check if tile is a milestone (with ring)
   const isMilestone = (index: number) => [2, 5, 8, 11].includes(index);
 
+  // Scale factor for responsive sizing (375px reference)
+  const scale = (px: number) => `calc(${px} / 375 * 100vw)`;
+
   return (
     <div 
       className="fixed inset-0 z-50 overflow-x-hidden overflow-y-auto"
       style={{
-        paddingTop: "env(safe-area-inset-top, 2vh)",
-        paddingBottom: "env(safe-area-inset-bottom, 4vh)",
-        paddingInline: "4vw",
         background: "linear-gradient(180deg, #3A2A63 0%, #1A1530 45%, #060608 100%)",
       }}
     >
+      {/* Background aurora effects */}
+      <div 
+        className="absolute pointer-events-none"
+        style={{
+          left: "-53px",
+          top: "-40px",
+          width: "131vw",
+          height: "auto",
+        }}
+      >
+        <div 
+          className="w-full h-[525px] opacity-40 mix-blend-screen"
+          style={{
+            background: "radial-gradient(ellipse at center, rgba(138, 100, 200, 0.4) 0%, transparent 70%)",
+          }}
+        />
+      </div>
+
       {/* Close button - fixed top right */}
       <motion.button
         onClick={handleClose}
@@ -153,14 +192,16 @@ const Progress = () => {
       </motion.button>
 
       {/* === TOP ACTIVITY STRIP === */}
-      {/* Height = 16% viewport, tight to top, horizontal scroll with overlap */}
+      {/* Height = 16vh, tight to top, horizontal scroll with overlap */}
       <AnimatePresence>
         {showStories && (
           <motion.div
             className="w-full overflow-x-auto scrollbar-hide"
             style={{
+              paddingTop: "env(safe-area-inset-top, 2vh)",
+              paddingInline: "4vw",
               marginTop: "2vh",
-              height: "16vh",
+              height: "18vw",
               minHeight: "110px",
               maxHeight: "140px",
             }}
@@ -168,7 +209,7 @@ const Progress = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 200, damping: 25 }}
           >
-            <div className="flex items-end h-full" style={{ gap: 0 }}>
+            <div className="flex items-end h-full" style={{ gap: "-2.5vw" }}>
               {/* User's hero card - first, slightly tilted */}
               <motion.div
                 className="relative flex-shrink-0 overflow-hidden"
@@ -254,84 +295,86 @@ const Progress = () => {
         )}
       </AnimatePresence>
 
-      {/* === CORE ENGINE NODE === */}
-      {/* Directly below activity strip, stays in top third */}
-      <AnimatePresence>
-        {showContent && (
-          <motion.div
-            className="relative mx-auto"
-            style={{ 
-              marginTop: "4vh",
-              width: "clamp(80px, 22vw, 104px)",
-              aspectRatio: "1/1",
-            }}
-            initial={{ opacity: 0, scale: 0.6, y: 30 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.5 }}
-          >
-            {/* Base platform with glow lines */}
-            <img 
-              src={basePlatformImg} 
-              alt="Base" 
-              className="absolute w-[130%] left-1/2 -translate-x-1/2"
-              style={{ bottom: "-20%", opacity: 0.8 }}
-            />
-            
-            {/* Engine icon */}
-            <img 
-              src={levelCompleteImg} 
-              alt="Engine" 
-              className="absolute left-1/2 -translate-x-1/2"
-              style={{
-                width: "clamp(60px, 16vw, 76px)",
-                top: "-4vw",
-                opacity: 0.6,
-              }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* === DIAGONAL PROGRESS PATH === */}
-      {/* Fixed diagonal slope: flows from engine down-right */}
+      {/* === MAIN PROGRESS AREA === */}
+      {/* This is the canvas for tiles, engine, labels - all positioned absolutely */}
       <div 
         className="relative w-full"
-        style={{ 
-          marginTop: "6vh",
-          height: "80vh",
-          minHeight: "500px",
+        style={{
+          marginTop: "4vh",
+          height: scale(800),
+          maxWidth: "430px",
+          marginInline: "auto",
         }}
       >
-        {/* Horizontal divider lines */}
-        {[0.25, 0.5, 0.75].map((ratio, i) => (
-          <div 
-            key={i}
-            className="absolute left-0 right-0 h-px pointer-events-none"
-            style={{ 
-              top: `${ratio * 100}%`,
-              background: "linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.05) 50%, transparent 95%)",
-            }}
-          />
-        ))}
+        {/* === ENGINE BADGE === */}
+        <AnimatePresence>
+          {showContent && (
+            <motion.div
+              className="absolute"
+              style={{ 
+                left: scale(68),
+                top: 0,
+                width: scale(153),
+                height: scale(156),
+              }}
+              initial={{ opacity: 0, scale: 0.6, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.5 }}
+            >
+              <img 
+                src={engineBadgeImg} 
+                alt="Engine Badge" 
+                className="w-full h-full object-contain"
+                style={{ opacity: 0.7 }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Tiles positioned along diagonal path */}
+        {/* === BADGE PLATFORM === */}
+        <AnimatePresence>
+          {showContent && (
+            <motion.div
+              className="absolute"
+              style={{
+                left: scale(93),
+                top: scale(102),
+                width: scale(104),
+                height: scale(88),
+              }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 0.5, y: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              {/* Platform lines SVG would go here - using CSS approximation */}
+              <div 
+                className="w-full h-full"
+                style={{
+                  background: "linear-gradient(180deg, rgba(100,100,100,0.3) 0%, rgba(20,20,20,0.5) 100%)",
+                  borderRadius: "8px",
+                  transform: "perspective(100px) rotateX(20deg)",
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* === DIAGONAL PROGRESS TILES === */}
         {TILE_POSITIONS.map((pos, index) => {
           const day = index + 1;
           const state = getTileState(day);
-          const isActive = day === currentDay || day === 12;
+          const isActive = state === "active";
           const hasMilestone = isMilestone(index);
-          const label = LABELS.find(l => l.tileIndex === index);
 
           return (
             <motion.div
               key={day}
               className="absolute"
               style={{ 
-                left: `${pos.xPercent}%`,
-                top: `${pos.yPercent}%`,
-                transform: "translateX(-50%)",
-                width: "clamp(36px, 9vw, 46px)",
-                aspectRatio: "1/1",
+                left: scale(pos.left),
+                top: scale(pos.top),
+                width: scale(60),
+                height: scale(60),
               }}
               initial={{ opacity: 0, y: 40, scale: 0.7 }}
               animate={showTiles ? { opacity: 1, y: 0, scale: 1 } : {}}
@@ -347,8 +390,8 @@ const Progress = () => {
                 <div 
                   className="absolute inset-[-50%] rounded-2xl animate-pulse"
                   style={{
-                    background: "radial-gradient(circle, rgba(0, 229, 255, 0.4) 0%, transparent 70%)",
-                    filter: "blur(8px)",
+                    background: "radial-gradient(circle, rgba(0, 229, 255, 0.5) 0%, transparent 70%)",
+                    filter: "blur(12px)",
                   }}
                 />
               )}
@@ -356,10 +399,10 @@ const Progress = () => {
               {/* Milestone ring indicator */}
               {hasMilestone && !isActive && (
                 <div 
-                  className="absolute inset-[-15%] rounded-xl"
+                  className="absolute inset-[-10%] rounded-xl"
                   style={{
                     border: "2px solid rgba(123, 92, 255, 0.3)",
-                    boxShadow: "0 0 12px rgba(123, 92, 255, 0.3)",
+                    boxShadow: "0 0 16px rgba(123, 92, 255, 0.4)",
                   }}
                 />
               )}
@@ -371,15 +414,15 @@ const Progress = () => {
                 className="w-full h-full object-contain relative z-10"
                 style={{
                   filter: isActive 
-                    ? "drop-shadow(0 0 12px rgba(0, 229, 255, 0.6))" 
+                    ? "drop-shadow(0 0 16px rgba(0, 229, 255, 0.7))" 
                     : hasMilestone 
-                      ? "drop-shadow(0 0 8px rgba(123, 92, 255, 0.4))"
+                      ? "drop-shadow(0 0 10px rgba(123, 92, 255, 0.5))"
                       : "none",
                 }}
               />
 
-              {/* Social indicator on current day */}
-              {day === currentDay && (
+              {/* Social indicator on current active day */}
+              {isActive && day === currentDay && (
                 <motion.div
                   className="absolute flex items-center z-20"
                   style={{ 
@@ -431,46 +474,81 @@ const Progress = () => {
                   </span>
                 </motion.div>
               )}
-
-              {/* Milestone label anchored to tile */}
-              {label && (
-                <motion.div
-                  className={`absolute whitespace-nowrap ${label.side === "left" ? "text-right" : "text-left"}`}
-                  style={{
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    ...(label.side === "left" 
-                      ? { right: "calc(100% + 4vw)" }
-                      : { left: "calc(100% + 4vw)" }
-                    ),
-                  }}
-                  initial={{ opacity: 0, x: label.side === "left" ? 12 : -12 }}
-                  animate={showTiles ? { opacity: 1, x: 0 } : {}}
-                  transition={{ delay: index * 0.04 + 0.15 }}
-                >
-                  {label.text.map((line, i) => (
-                    <div 
-                      key={i}
-                      className="font-bold uppercase"
-                      style={{ 
-                        fontSize: "clamp(12px, 3.2vw, 14px)",
-                        letterSpacing: "0.18em",
-                        color: "#B8B8C5",
-                        lineHeight: 1.3,
-                      }}
-                    >
-                      {line}
-                    </div>
-                  ))}
-                </motion.div>
-              )}
             </motion.div>
           );
         })}
+
+        {/* === MILESTONE LABELS === */}
+        {LABELS.map((label, idx) => (
+          <motion.div
+            key={idx}
+            className={`absolute ${label.side === "left" ? "text-left" : "text-right"}`}
+            style={{
+              top: scale(label.top),
+              left: scale(label.left),
+              width: label.side === "left" ? scale(120) : scale(90),
+            }}
+            initial={{ opacity: 0, x: label.side === "left" ? -20 : 20 }}
+            animate={showTiles ? { opacity: 1, x: 0 } : {}}
+            transition={{ delay: 0.6 + idx * 0.1 }}
+          >
+            {label.text.map((line, i) => (
+              <div 
+                key={i}
+                className="font-bold uppercase"
+                style={{ 
+                  fontSize: "clamp(12px, 3.2vw, 14px)",
+                  letterSpacing: "0.08em",
+                  color: "rgba(255, 255, 255, 0.6)",
+                  lineHeight: 1.3,
+                }}
+              >
+                {line}
+              </div>
+            ))}
+            
+            {/* Horizontal divider line */}
+            <div 
+              className="absolute h-px"
+              style={{
+                top: scale(36),
+                ...(label.side === "left" 
+                  ? { left: 0, right: "-150%", background: "linear-gradient(90deg, #FFF 0%, rgba(255,255,255,0) 100%)" }
+                  : { right: 0, left: "-150%", background: "linear-gradient(270deg, #FFF 0%, rgba(255,255,255,0) 100%)" }
+                ),
+                opacity: 0.2,
+              }}
+            />
+          </motion.div>
+        ))}
+
+        {/* === BOTTOM BASE PLATFORM === */}
+        <AnimatePresence>
+          {showContent && (
+            <motion.div
+              className="absolute"
+              style={{
+                left: 0,
+                top: scale(556),
+                width: scale(192),
+                height: scale(244),
+              }}
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              <img 
+                src={basePlatformImg} 
+                alt="Base Platform" 
+                className="w-full h-full object-contain"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Bottom margin for scroll */}
-      <div style={{ marginBottom: "6vh" }} />
+      <div style={{ height: "6vh" }} />
     </div>
   );
 };
