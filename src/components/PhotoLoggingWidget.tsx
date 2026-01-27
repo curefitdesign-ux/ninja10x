@@ -353,16 +353,11 @@ const PhotoLoggingWidget = ({
     const isActiveDay = dayNumber === currentDay;
     
     if (photo) {
-      // Tap on existing photo (including active day with photo) - open preview/edit
+      // Tap on existing photo - open preview/edit mode (no new photo creation)
       onPhotoTap?.(photo);
-    } else if (isActiveDay && photos.find(p => p.dayNumber === dayNumber)) {
-      // Active day already has a photo - open it for editing instead of creating new
-      const existingPhoto = photos.find(p => p.dayNumber === dayNumber);
-      if (existingPhoto) {
-        onPhotoTap?.(existingPhoto);
-      }
-    } else {
-      // Tap on empty card - use parent's camera flow if callback provided
+    } else if (isActiveDay) {
+      // Only allow adding new photo on the current active day (next unfilled slot)
+      // This prevents tapping old empty slots or future slots from adding photos
       if (onPhotoAdd) {
         onPhotoAdd(weekIndex, dayIndex);
       } else {
@@ -371,6 +366,7 @@ const PhotoLoggingWidget = ({
         setShowUploadOptions(true);
       }
     }
+    // If tapping on an empty card that's not the active day, do nothing
   };
 
   const handleUploadOptionSelect = (option: 'camera' | 'gallery') => {
