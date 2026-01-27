@@ -3,6 +3,27 @@ import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import ShakyFrame from '@/components/frames/ShakyFrame';
+import JournalFrame from '@/components/frames/JournalFrame';
+import VogueFrame from '@/components/frames/VogueFrame';
+import FitnessFrame from '@/components/frames/FitnessFrame';
+import TicketFrame from '@/components/frames/TicketFrame';
+
+type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
+
+interface FrameProps {
+  imageUrl: string;
+  isVideo: boolean;
+  activity: string;
+  week: number;
+  day: number;
+  duration: string;
+  pr: string;
+  imagePosition: { x: number; y: number };
+  imageScale: number;
+  label1: string;
+  label2: string;
+}
 
 interface ShareSheetProps {
   imageUrl: string;
@@ -10,6 +31,8 @@ interface ShareSheetProps {
   onClose: () => void;
   onSaveWithTemplate?: () => void;
   dayNumber?: number;
+  frameType?: FrameType;
+  frameProps?: FrameProps;
 }
 
 // Social platform icons with brand colors and deep linking
@@ -97,7 +120,7 @@ const socialApps = [
   },
 ];
 
-const ShareSheet = ({ imageUrl, isVideo, onClose, dayNumber }: ShareSheetProps) => {
+const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber, frameType, frameProps }: ShareSheetProps) => {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [dominantColor, setDominantColor] = useState('rgba(0,0,0,0.95)');
@@ -149,6 +172,27 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, dayNumber }: ShareSheetProps) 
     };
     img.src = imageUrl;
   }, [imageUrl, isVideo]);
+
+  // Handle Done - navigate back to home
+  const handleDone = () => {
+    triggerHaptic('success');
+    setIsExiting(true);
+    
+    // Wait for animation, then navigate
+    setTimeout(() => {
+      if (onSaveWithTemplate) {
+        onSaveWithTemplate();
+      } else {
+        navigate('/', {
+          state: {
+            fromShare: true,
+            transitionImage: imageUrl,
+            dayNumber,
+          },
+        });
+      }
+    }, 400);
+  };
 
   // Close with shared-element transition to home
   const handleCloseWithTransition = () => {
@@ -257,6 +301,53 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, dayNumber }: ShareSheetProps) 
     }
   };
 
+  // Render the selected frame template
+  const renderFramePreview = () => {
+    if (!frameType || !frameProps) {
+      // Fallback to plain image
+      return isVideo ? (
+        <video
+          src={imageUrl}
+          className="relative z-10 w-full h-full object-cover"
+          muted
+          playsInline
+          autoPlay
+          loop
+        />
+      ) : (
+        <img
+          src={imageUrl}
+          alt="Preview"
+          className="relative z-10 w-full h-full object-cover"
+          loading="eager"
+        />
+      );
+    }
+
+    // Render the actual frame template
+    switch (frameType) {
+      case 'shaky':
+        return <ShakyFrame {...frameProps} />;
+      case 'journal':
+        return <JournalFrame {...frameProps} />;
+      case 'vogue':
+        return <VogueFrame {...frameProps} />;
+      case 'fitness':
+        return <FitnessFrame {...frameProps} />;
+      case 'ticket':
+        return <TicketFrame {...frameProps} />;
+      default:
+        return (
+          <img
+            src={imageUrl}
+            alt="Preview"
+            className="relative z-10 w-full h-full object-cover"
+            loading="eager"
+          />
+        );
+    }
+  };
+
   return (
     <>
       {/* Hidden canvas for color extraction */}
@@ -271,16 +362,15 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, dayNumber }: ShareSheetProps) 
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {/* Background with extracted color + blur effect */}
+          {/* Translucent blur background */}
           <div 
-            className="absolute inset-0 transition-colors duration-500"
-            style={{ backgroundColor: dominantColor }}
+            className="absolute inset-0 bg-black/80 backdrop-blur-2xl"
           />
           
           {/* Blurred image as background */}
           {!isVideo && (
             <div 
-              className="absolute inset-0 opacity-60"
+              className="absolute inset-0 opacity-40"
               style={{
                 backgroundImage: `url(${imageUrl})`,
                 backgroundSize: 'cover',
@@ -292,8 +382,10 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, dayNumber }: ShareSheetProps) 
           
           {/* Content container */}
           <div className="relative z-10 flex-1 flex flex-col h-full">
-            {/* Header - Close button on right */}
-            <div className="flex items-center justify-end px-5 pt-6 pb-4">
+            {/* Header - Title center, Close button on right */}
+            <div className="flex items-center justify-between px-5 pt-6 pb-4">
+              <div className="w-10" /> {/* Spacer for centering */}
+              <span className="text-white/80 text-base font-medium">Select your frame</span>
               <button 
                 onClick={handleCloseWithTransition}
                 className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-xl tap-bounce"
@@ -306,7 +398,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, dayNumber }: ShareSheetProps) 
              <div className="flex-1 flex flex-col items-center justify-center px-6 overflow-hidden">
                {/* Preview Card - locked to 9:16 with shared-element exit animation */}
                <motion.div 
-                 className="relative w-full max-w-[296px] aspect-[9/16] rounded-[28px] overflow-hidden mb-8"
+                 className="relative w-full max-w-[280px] aspect-[9/16] rounded-[20px] overflow-hidden mb-6"
                  animate={isExiting ? {
                    scale: 0.2,
                    opacity: 0,
@@ -323,7 +415,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, dayNumber }: ShareSheetProps) 
                  }}
                >
                  {/* Glass border + glow */}
-                 <div className="absolute inset-0 rounded-[28px] ring-1 ring-white/15" />
+                 <div className="absolute inset-0 rounded-[20px] ring-1 ring-white/15" />
                  <div
                    className="absolute -inset-10 opacity-60"
                    style={{
@@ -340,23 +432,9 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, dayNumber }: ShareSheetProps) 
                    }}
                  />
 
-                 {isVideo ? (
-                   <video
-                     src={imageUrl}
-                     className="relative z-10 w-full h-full object-cover"
-                     muted
-                     playsInline
-                     autoPlay
-                     loop
-                   />
-                 ) : (
-                   <img
-                     src={imageUrl}
-                     alt="Preview"
-                     className="relative z-10 w-full h-full object-cover"
-                     loading="eager"
-                   />
-                 )}
+                 <div className="relative z-10 w-full h-full">
+                   {renderFramePreview()}
+                 </div>
                </motion.div>
               
               {/* Scrollable Social Apps Row - Show 50% of next icon */}
@@ -387,33 +465,44 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, dayNumber }: ShareSheetProps) 
               </motion.div>
             </div>
             
-             {/* Sticky Bottom Action Buttons - Always visible */}
+             {/* Sticky Bottom Action Buttons - DONE on top, Download/Copy below */}
             <motion.div 
               className="sticky bottom-0 w-full px-6 pb-6 pt-4"
               style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
               animate={isExiting ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <div className="w-full flex gap-3 max-w-sm mx-auto">
+              <div className="w-full flex flex-col gap-3 max-w-sm mx-auto">
+                {/* DONE - Primary full-width white button */}
                 <button
-                  onClick={handleDownload}
-                  className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-white text-black tap-bounce transition-all active:scale-95"
+                  onClick={handleDone}
+                  className="w-full flex items-center justify-center py-4 rounded-2xl bg-white text-black tap-bounce transition-all active:scale-95"
                   style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}
                 >
-                  <Download className="w-5 h-5" />
-                  <span className="font-semibold">Download</span>
+                  <span className="font-bold text-base">DONE</span>
                 </button>
-                <button
-                  onClick={handleCopyLink}
-                  className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/15 backdrop-blur-sm tap-bounce transition-all active:scale-95"
-                >
-                  {copied ? (
-                    <Check className="w-5 h-5 text-green-400" />
-                  ) : (
-                    <Copy className="w-5 h-5 text-white/80" />
-                  )}
-                  <span className="text-white/90 font-medium">{copied ? 'Copied!' : 'Copy'}</span>
-                </button>
+                
+                {/* Download & Copy - Secondary row */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleDownload}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                  >
+                    <Download className="w-4 h-4 text-white/80" />
+                    <span className="text-white/80 font-medium text-sm">Download</span>
+                  </button>
+                  <button
+                    onClick={handleCopyLink}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                  >
+                    {copied ? (
+                      <Check className="w-4 h-4 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-white/80" />
+                    )}
+                    <span className="text-white/80 font-medium text-sm">{copied ? 'Copied!' : 'Copy'}</span>
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>
