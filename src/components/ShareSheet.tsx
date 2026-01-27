@@ -173,39 +173,43 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
     img.src = imageUrl;
   }, [imageUrl, isVideo]);
 
-  // Handle Done - navigate back to home
+  // Handle Done - navigate to progress page with transition data
   const handleDone = () => {
     triggerHaptic('success');
     setIsExiting(true);
     
-    // Wait for animation, then navigate
+    // Wait for animation, then navigate to progress page
     setTimeout(() => {
       if (onSaveWithTemplate) {
         onSaveWithTemplate();
       } else {
-        navigate('/', {
+        navigate('/progress', {
           state: {
             fromShare: true,
             transitionImage: imageUrl,
             dayNumber,
+            frameType,
+            frameProps,
           },
         });
       }
     }, 400);
   };
 
-  // Close with shared-element transition to home
+  // Close with shared-element transition to progress page
   const handleCloseWithTransition = () => {
     triggerHaptic('light');
     setIsExiting(true);
     
-    // Wait for animation, then navigate
+    // Wait for animation, then navigate to progress
     setTimeout(() => {
-      navigate('/', {
+      navigate('/progress', {
         state: {
           fromShare: true,
           transitionImage: imageUrl,
           dayNumber,
+          frameType,
+          frameProps,
         },
       });
     }, 500);
