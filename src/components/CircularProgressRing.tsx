@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Play } from "lucide-react";
 import curoMascot from "@/assets/activity-page/curo-mascot.png";
 
 interface CircularProgressRingProps {
@@ -9,6 +10,7 @@ interface CircularProgressRingProps {
   highlight?: boolean; // Trigger focus animation
   mascotSrc?: string;
   mascotAlt?: string;
+  onMascotTap?: () => void;
 }
 
 const CircularProgressRing = ({
@@ -18,6 +20,7 @@ const CircularProgressRing = ({
   highlight = false,
   mascotSrc,
   mascotAlt,
+  onMascotTap,
 }: CircularProgressRingProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const size = 240;
@@ -255,18 +258,43 @@ const CircularProgressRing = ({
         <div className="absolute w-1.5 h-1 rounded-sm bg-teal-400/65" style={{ top: '54%', right: '35%', transform: 'rotate(-45deg)' }} />
       </div>
       
-      {/* Mascot */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <img 
-          src={mascotSrc || curoMascot} 
-          alt={mascotAlt || "Curo mascot"} 
-          className="w-36 h-36 object-contain"
-          style={{ 
-            marginTop: '-6px',
-            filter: 'drop-shadow(0 6px 16px rgba(139, 92, 246, 0.25))'
-          }}
-        />
-      </div>
+      {/* Mascot - tappable */}
+      <motion.button
+        className="absolute inset-0 flex items-center justify-center cursor-pointer"
+        onClick={onMascotTap}
+        whileTap={{ scale: 0.95 }}
+      >
+        <div className="relative">
+          <img 
+            src={mascotSrc || curoMascot} 
+            alt={mascotAlt || "Curo mascot"} 
+            className="w-36 h-36 object-contain"
+            style={{ 
+              marginTop: '-6px',
+              filter: 'drop-shadow(0 6px 16px rgba(139, 92, 246, 0.25))'
+            }}
+          />
+          {/* Play icon overlay */}
+          <motion.div
+            className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center justify-center"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <div 
+              className="w-8 h-8 rounded-full flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.2)',
+              }}
+            >
+              <Play className="w-3.5 h-3.5 text-white/80 ml-0.5" fill="currentColor" />
+            </div>
+          </motion.div>
+        </div>
+      </motion.button>
     </motion.div>
   );
 };
