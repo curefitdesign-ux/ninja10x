@@ -223,34 +223,28 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
             {/* Green glow overlay for logged photos */}
             <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/25 to-transparent pointer-events-none" style={{ zIndex: 2 }} />
             
-            {/* Play icon for completed cards - liquid glass style */}
-            <motion.button
-              className="absolute inset-0 flex items-center justify-center"
-              style={{ zIndex: 3 }}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                // Trigger reel with all completed photos from this week
-                const completedPhotos = photos.filter((p): p is LoggedPhoto => p !== null);
-                if (completedPhotos.length >= 3 && onPlayReel) {
-                  onPlayReel(completedPhotos);
-                }
-              }}
-            >
-              <div 
-                className="w-7 h-7 rounded-full flex items-center justify-center"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 8px rgba(0,0,0,0.2)',
-                }}
+            {/* Play icon - ONLY visible in collapsed (stacked) state */}
+            {!isExpanded && (
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center"
+                style={{ zIndex: 3 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.15 }}
               >
-                <Play className="w-3 h-3 text-white/90 ml-0.5" fill="currentColor" />
-              </div>
-            </motion.button>
+                <div 
+                  className="w-6 h-6 rounded-full flex items-center justify-center"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(255,255,255,0.25)',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 8px rgba(0,0,0,0.25)',
+                  }}
+                >
+                  <Play className="w-2.5 h-2.5 text-white/90 ml-0.5" fill="currentColor" />
+                </div>
+              </motion.div>
+            )}
           </>
         )}
         

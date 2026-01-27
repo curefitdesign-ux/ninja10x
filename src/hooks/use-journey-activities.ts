@@ -229,16 +229,30 @@ export function useJourneyActivities() {
  * For the Progress page top strip.
  */
 export async function fetchPublicFeed(): Promise<LocalActivity[]> {
+  // Fetch latest activity per user using a distinct query
+  // This gets the most recent photo from each user for the public feed
   const { data, error } = await supabase
     .from('journey_activities')
     .select('*')
     .order('created_at', { ascending: false })
-    .limit(50);
+    .limit(100); // Fetch more to filter by user
 
   if (error) {
     console.error('Error fetching public feed:', error);
     return [];
   }
 
-  return (data || []).map(toLocal);
+  // Keep only the latest activity per user
+  const latestByUser = new Map<string, typeof data[0]>();
+  for (const row of data || []) {
+    if (!latestByUser.has(row.user_id)) {
+      latestByUser.set(row.user_id, row);
+    }
+  }
+
+  // Convert to local shape and sort by created_at desc
+  return Array.from(latestByUser.values())
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 20) // Limit to 20 users
+    .map(toLocal);
 }
