@@ -24,26 +24,26 @@ interface LoggedPhoto {
   dayNumber: number;
 }
 
-// Tile positions - exact pixel positions from reference image
-// Reference is 375px wide - perfect zigzag pattern going down-right then down-left
-// Pattern: right-diagonal for 3 tiles, then left-diagonal for 3 tiles, repeat
+// Tile positions - stair-step diagonal pattern matching reference
+// Pattern: 2 tiles per "step" going down-right, then down-left
+// Using vw-based values for proper scaling
 const TILE_POSITIONS = [
-  // Group 1: Engine → diagonal right-down (BUILD STRENGTH area)
-  { left: 182, top: 200 },   // Tile 1 - first after engine
-  { left: 230, top: 250 },   // Tile 2 - down-right
-  { left: 278, top: 300 },   // Tile 3 - milestone, furthest right
-  // Group 2: Zigzag back left-down (INCREASE STAMINA area)
-  { left: 230, top: 360 },   // Tile 4 - step back left
-  { left: 182, top: 420 },   // Tile 5 - continue left
-  { left: 134, top: 480 },   // Tile 6 - milestone, furthest left
-  // Group 3: Zigzag right-down again (BUILD ENERGY area)
-  { left: 182, top: 540 },   // Tile 7 - step right
-  { left: 230, top: 600 },   // Tile 8 - continue right
-  { left: 278, top: 660 },   // Tile 9 - milestone, furthest right
-  // Group 4: Final stretch left-down (CONQUER WILL POWER area)
-  { left: 230, top: 720 },   // Tile 10 - step back left
-  { left: 182, top: 780 },   // Tile 11 - continue left
-  { left: 134, top: 840 },   // Tile 12 - active final milestone
+  // Group 1: Start center → diagonal right-down (BUILD STRENGTH)
+  { left: 40, top: 15 },    // Tile 1 - first, center-left
+  { left: 48, top: 23 },    // Tile 2 - step down-right
+  { left: 56, top: 31 },    // Tile 3 - milestone, furthest right
+  // Group 2: Zigzag left-down (INCREASE STAMINA)
+  { left: 48, top: 40 },    // Tile 4 - step back left
+  { left: 40, top: 48 },    // Tile 5 - continue left
+  { left: 32, top: 56 },    // Tile 6 - milestone, furthest left
+  // Group 3: Zigzag right-down (BUILD ENERGY)
+  { left: 40, top: 64 },    // Tile 7 - step right
+  { left: 48, top: 72 },    // Tile 8 - continue right
+  { left: 56, top: 80 },    // Tile 9 - milestone, furthest right
+  // Group 4: Final stretch left-down (CONQUER WILL POWER)
+  { left: 48, top: 89 },    // Tile 10 - step back left
+  { left: 40, top: 97 },    // Tile 11 - continue left
+  { left: 32, top: 105 },   // Tile 12 - active final milestone
 ];
 
 // Labels anchored to specific tile groups - matching reference image
@@ -52,29 +52,29 @@ const LABELS = [
     tileIndex: 2, 
     text: ["BUILD", "STRENGTH"], 
     side: "right" as const,
-    top: 280, // Near tile 3
-    left: 290,
+    top: 25, // Near tile 3
+    left: 72,
   },
   { 
     tileIndex: 5, 
     text: ["INCREASE", "STAMINA"], 
     side: "left" as const,
-    top: 440, // Near tile 6
-    left: 16,
+    top: 50, // Near tile 6
+    left: 4,
   },
   { 
     tileIndex: 8, 
     text: ["BUILD", "ENERGY"], 
     side: "right" as const,
-    top: 620, // Near tile 9
-    left: 290,
+    top: 75, // Near tile 9
+    left: 72,
   },
   { 
     tileIndex: 11, 
     text: ["CONQUER", "WILL POWER"], 
     side: "left" as const,
-    top: 800, // Near tile 12
-    left: 16,
+    top: 100, // Near tile 12
+    left: 4,
   },
 ];
 
@@ -155,8 +155,8 @@ const Progress = () => {
   // Check if tile is a milestone (with ring)
   const isMilestone = (index: number) => [2, 5, 8, 11].includes(index);
 
-  // Scale factor for responsive sizing (375px reference)
-  const scale = (px: number) => `calc(${px} / 375 * 100vw)`;
+  // Convert vw values to CSS
+  const vw = (val: number) => `${val}vw`;
 
   return (
     <div 
@@ -211,7 +211,7 @@ const Progress = () => {
       </motion.button>
 
       {/* === TOP ACTIVITY STRIP === */}
-      {/* Height = 16vh, tight to top, horizontal scroll with overlap */}
+      {/* Horizontal scroll with user's logged photos + placeholder cards */}
       <AnimatePresence>
         {showStories && (
           <motion.div
@@ -220,79 +220,107 @@ const Progress = () => {
               paddingTop: "env(safe-area-inset-top, 2vh)",
               paddingInline: "4vw",
               marginTop: "2vh",
-              height: "18vw",
-              minHeight: "110px",
-              maxHeight: "140px",
+              height: "24vh",
+              minHeight: "140px",
+              maxHeight: "180px",
             }}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 200, damping: 25 }}
           >
-            <div className="flex items-end h-full" style={{ gap: "-2.5vw" }}>
-              {/* User's hero card - first, slightly tilted */}
-              <motion.div
-                data-shared-element="progress-hero-card"
-                className="relative flex-shrink-0 overflow-hidden"
-                style={{
-                  width: "clamp(72px, 11vw, 92px)",
-                  height: "clamp(108px, 16vw, 128px)",
-                  borderRadius: "clamp(8px, 1.8vw, 12px)",
-                  marginRight: "-2.5vw",
-                  boxShadow: "0 12px 40px rgba(100, 70, 180, 0.5)",
-                  background: "linear-gradient(145deg, rgba(100,80,150,0.4), rgba(60,40,100,0.6))",
-                  border: "2px solid rgba(160, 120, 220, 0.35)",
-                  transform: "rotate(-6deg)",
-                }}
-                initial={{ scale: 1.3, x: 80 }}
-                animate={{ scale: 1, x: 0 }}
-                transition={{ type: "spring", stiffness: 180, damping: 22 }}
-              >
-                {transitionImage ? (
+            <div className="flex items-end h-full gap-3">
+              {/* User's logged photos - render actual photos from localStorage */}
+              {photos.length > 0 ? (
+                photos.map((photo, index) => (
+                  <motion.div
+                    key={photo.id}
+                    data-shared-element={index === photos.length - 1 ? "progress-hero-card" : undefined}
+                    className="relative flex-shrink-0 overflow-hidden"
+                    style={{
+                      width: "clamp(80px, 22vw, 100px)",
+                      height: "clamp(120px, 33vw, 150px)",
+                      borderRadius: "clamp(10px, 2.5vw, 14px)",
+                      boxShadow: index === 0 
+                        ? "0 12px 40px rgba(100, 70, 180, 0.5)" 
+                        : "0 4px 16px rgba(0,0,0,0.25)",
+                      border: index === 0 ? "2px solid rgba(160, 120, 220, 0.35)" : "none",
+                      transform: index === 0 ? "rotate(-3deg)" : "none",
+                    }}
+                    initial={{ opacity: 0, x: 40 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 + index * 0.06 }}
+                  >
+                    <img 
+                      src={photo.storageUrl} 
+                      alt={`Day ${photo.dayNumber}`} 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        if (!img.dataset.retried) {
+                          img.dataset.retried = 'true';
+                          img.src = photo.storageUrl + '?t=' + Date.now();
+                        }
+                      }}
+                    />
+                    {/* Day indicator */}
+                    <div 
+                      className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-white font-semibold"
+                      style={{
+                        fontSize: "clamp(8px, 2vw, 10px)",
+                        background: "rgba(0,0,0,0.5)",
+                        backdropFilter: "blur(4px)",
+                      }}
+                    >
+                      D{photo.dayNumber}
+                    </div>
+                  </motion.div>
+                ))
+              ) : transitionImage ? (
+                // Fallback to transition image if no photos yet
+                <motion.div
+                  data-shared-element="progress-hero-card"
+                  className="relative flex-shrink-0 overflow-hidden"
+                  style={{
+                    width: "clamp(80px, 22vw, 100px)",
+                    height: "clamp(120px, 33vw, 150px)",
+                    borderRadius: "clamp(10px, 2.5vw, 14px)",
+                    boxShadow: "0 12px 40px rgba(100, 70, 180, 0.5)",
+                    border: "2px solid rgba(160, 120, 220, 0.35)",
+                    transform: "rotate(-3deg)",
+                  }}
+                  initial={{ scale: 1.3, x: 80 }}
+                  animate={{ scale: 1, x: 0 }}
+                  transition={{ type: "spring", stiffness: 180, damping: 22 }}
+                >
                   <img 
                     src={transitionImage} 
                     alt="Your activity" 
                     className="w-full h-full object-cover"
                   />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-purple-600/40 to-blue-600/40 flex items-center justify-center">
-                    <span className="text-white/40 text-[8px]">Your Photo</span>
-                  </div>
-                )}
-                {/* Interaction sticker */}
-                <div 
-                  className="absolute text-lg drop-shadow-lg"
-                  style={{
-                    width: "clamp(18px, 2.8vw, 24px)",
-                    top: "-0.8vw",
-                    left: "-0.8vw",
-                  }}
-                >
-                  🏸
-                </div>
-              </motion.div>
+                </motion.div>
+              ) : null}
 
-              {/* Other story cards - overlapping */}
-              {STORY_CARDS.map((card, index) => (
+              {/* Placeholder story cards for visual balance */}
+              {STORY_CARDS.slice(0, Math.max(0, 6 - photos.length)).map((card, index) => (
                 <motion.div
                   key={card.id}
                   className="relative overflow-hidden flex-shrink-0"
                   style={{
-                    width: "clamp(72px, 11vw, 92px)",
-                    height: "clamp(108px, 16vw, 128px)",
-                    borderRadius: "clamp(8px, 1.8vw, 12px)",
+                    width: "clamp(80px, 22vw, 100px)",
+                    height: "clamp(120px, 33vw, 150px)",
+                    borderRadius: "clamp(10px, 2.5vw, 14px)",
                     boxShadow: "0 4px 16px rgba(0,0,0,0.25)",
                     background: card.bg,
-                    marginLeft: "-2.5vw",
                   }}
                   initial={{ opacity: 0, x: 40 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.35 + index * 0.06 }}
+                  transition={{ delay: 0.35 + (photos.length + index) * 0.06 }}
                 >
                   <div className="absolute inset-0 flex flex-col justify-end p-2">
                     <span 
                       className="font-semibold leading-tight"
                       style={{ 
-                        fontSize: "clamp(8px, 2vw, 10px)",
+                        fontSize: "clamp(9px, 2.2vw, 11px)",
                         color: card.id === "journal" || card.id === "cult" ? "#333" : "#fff" 
                       }}
                     >
@@ -301,7 +329,7 @@ const Progress = () => {
                     <span 
                       className="opacity-70"
                       style={{ 
-                        fontSize: "clamp(6px, 1.5vw, 8px)",
+                        fontSize: "clamp(7px, 1.7vw, 9px)",
                         color: card.id === "journal" || card.id === "cult" ? "#333" : "#fff" 
                       }}
                     >
@@ -320,8 +348,8 @@ const Progress = () => {
       <div 
         className="relative w-full"
         style={{
-          marginTop: "4vh",
-          height: scale(800),
+          marginTop: "2vh",
+          height: vw(130),
           maxWidth: "430px",
           marginInline: "auto",
         }}
@@ -332,10 +360,10 @@ const Progress = () => {
             <motion.div
               className="absolute"
               style={{ 
-                left: scale(68),
+                left: vw(18),
                 top: 0,
-                width: scale(153),
-                height: scale(156),
+                width: vw(40),
+                height: vw(40),
               }}
               initial={{ opacity: 0, scale: 0.6, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -357,10 +385,10 @@ const Progress = () => {
             <motion.div
               className="absolute"
               style={{
-                left: scale(93),
-                top: scale(102),
-                width: scale(104),
-                height: scale(88),
+                left: vw(24),
+                top: vw(28),
+                width: vw(28),
+                height: vw(24),
               }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 0.5, y: 0 }}
@@ -391,10 +419,10 @@ const Progress = () => {
               key={day}
               className="absolute"
               style={{ 
-                left: scale(pos.left),
-                top: scale(pos.top),
-                width: scale(60),
-                height: scale(60),
+                left: vw(pos.left),
+                top: vw(pos.top),
+                width: vw(12),
+                height: vw(12),
               }}
               initial={{ opacity: 0, y: 40, scale: 0.7 }}
               animate={showTiles ? { opacity: 1, y: 0, scale: 1 } : {}}
@@ -504,9 +532,9 @@ const Progress = () => {
             key={idx}
             className={`absolute ${label.side === "left" ? "text-left" : "text-right"}`}
             style={{
-              top: scale(label.top),
-              left: scale(label.left),
-              width: label.side === "left" ? scale(120) : scale(90),
+              top: vw(label.top),
+              left: vw(label.left),
+              width: label.side === "left" ? vw(28) : vw(24),
             }}
             initial={{ opacity: 0, x: label.side === "left" ? -20 : 20 }}
             animate={showTiles ? { opacity: 1, x: 0 } : {}}
@@ -531,7 +559,7 @@ const Progress = () => {
             <div 
               className="absolute h-px"
               style={{
-                top: scale(36),
+                top: "40px",
                 ...(label.side === "left" 
                   ? { left: 0, right: "-150%", background: "linear-gradient(90deg, #FFF 0%, rgba(255,255,255,0) 100%)" }
                   : { right: 0, left: "-150%", background: "linear-gradient(270deg, #FFF 0%, rgba(255,255,255,0) 100%)" }
@@ -549,9 +577,9 @@ const Progress = () => {
               className="absolute"
               style={{
                 left: 0,
-                top: scale(556),
-                width: scale(192),
-                height: scale(244),
+                top: vw(105),
+                width: vw(50),
+                height: vw(60),
               }}
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
