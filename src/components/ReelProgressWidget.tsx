@@ -27,6 +27,18 @@ const ReelProgressWidget = ({
   if (photos.length < 3 && !isGenerating) return null;
 
   const displayPhotos = photos.slice(0, 3);
+  const weekNumber = Math.ceil((displayPhotos[0]?.dayNumber || 1) / 3);
+
+  const getStatusText = () => {
+    if (reelReady) return 'Your reel is ready!';
+    switch (currentStep) {
+      case 'narration': return 'Creating narration...';
+      case 'voiceover': return 'Generating voiceover...';
+      case 'video': return 'Stitching your these week activity..';
+      case 'complete': return 'Your reel is ready!';
+      default: return 'Preparing your reel...';
+    }
+  };
 
   return (
     <motion.div
@@ -34,90 +46,106 @@ const ReelProgressWidget = ({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="w-full py-6"
+      className="w-full px-4 py-4"
       onClick={onViewReel}
     >
-      <div className="flex items-end gap-1">
-        {/* Stacked Photo Cards */}
-        <div className="relative flex-shrink-0 w-32 h-40">
-          {displayPhotos.map((photo, index) => {
-            // Cards fan out: first card tilted left, second slightly left, third straight
-            const rotations = [-12, -6, 0];
-            const xOffsets = [0, 16, 32];
-            const zIndexes = [1, 2, 3];
-            
-            return (
-              <motion.div
-                key={photo.dayNumber}
-                className="absolute bottom-0 left-0 w-[72px] rounded-2xl overflow-hidden"
-                style={{
-                  aspectRatio: '9/16',
-                  zIndex: zIndexes[index],
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                  border: '2px solid',
-                  borderImage: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%) 1',
-                  borderImageSlice: 1,
-                }}
-                initial={{ opacity: 0, rotate: rotations[index] - 10, x: xOffsets[index] - 20 }}
-                animate={{ 
-                  opacity: 1, 
-                  rotate: rotations[index], 
-                  x: xOffsets[index],
-                }}
-                transition={{ delay: index * 0.1, type: 'spring', stiffness: 200, damping: 20 }}
-              >
-                {/* Pink/Purple gradient border */}
-                <div 
-                  className="absolute inset-0 rounded-2xl pointer-events-none"
+      {/* Glassmorphic Container */}
+      <div 
+        className="relative rounded-3xl p-4 overflow-hidden"
+        style={{
+          background: 'rgba(30, 35, 50, 0.7)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+        }}
+      >
+        <div className="flex items-center gap-4">
+          {/* Stacked Photo Cards */}
+          <div className="relative flex-shrink-0 w-28 h-28">
+            {displayPhotos.map((photo, index) => {
+              const rotations = [-15, -8, 0];
+              const xOffsets = [-4, 8, 20];
+              const zIndexes = [1, 2, 3];
+              
+              return (
+                <motion.div
+                  key={photo.dayNumber}
+                  className="absolute top-0 left-0 w-20 h-24 rounded-xl overflow-hidden"
                   style={{
-                    background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%)',
-                    padding: '2px',
-                    mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                    maskComposite: 'xor',
-                    WebkitMaskComposite: 'xor',
+                    zIndex: zIndexes[index],
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
                   }}
-                />
-                
-                <img
-                  src={photo.imageUrl}
-                  alt={photo.activity}
-                  className="w-full h-full object-cover rounded-xl"
-                />
-                
-                {/* Play icon on top card */}
-                {index === 2 && (
-                  <motion.div 
-                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/90 flex items-center justify-center shadow-lg"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.4, type: 'spring', stiffness: 300 }}
-                  >
-                    <Play className="w-3 h-3 text-gray-800 fill-gray-800 ml-0.5" />
-                  </motion.div>
-                )}
-                
-                {/* Activity label at bottom */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-2 pt-6">
-                  <p className="text-white text-xs font-semibold leading-tight">{photo.activity}</p>
-                  <p className="text-white/70 text-[10px]">Day {photo.dayNumber}</p>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+                  initial={{ opacity: 0, rotate: rotations[index] - 10, x: xOffsets[index] - 10 }}
+                  animate={{ 
+                    opacity: 1, 
+                    rotate: rotations[index], 
+                    x: xOffsets[index],
+                  }}
+                  transition={{ delay: index * 0.08, type: 'spring', stiffness: 200, damping: 20 }}
+                >
+                  {/* Gradient Border */}
+                  <div 
+                    className="absolute inset-0 rounded-xl pointer-events-none z-10"
+                    style={{
+                      background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%)',
+                      padding: '2px',
+                      mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                      maskComposite: 'xor',
+                      WebkitMaskComposite: 'xor',
+                    }}
+                  />
+                  
+                  <img
+                    src={photo.imageUrl}
+                    alt={photo.activity}
+                    className="w-full h-full object-cover"
+                  />
+                  
+                  {/* Activity label at bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-1.5 pt-4">
+                    <p className="text-white text-[10px] font-medium leading-tight truncate">{photo.activity}</p>
+                    <p className="text-white/60 text-[8px]">Day {photo.dayNumber}</p>
+                  </div>
+                </motion.div>
+              );
+            })}
+            
+            {/* Play Button - positioned on top card */}
+            <motion.div 
+              className="absolute top-1 right-0 z-10 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center shadow-lg cursor-pointer"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, type: 'spring', stiffness: 300 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Play className="w-3.5 h-3.5 text-gray-800 fill-gray-800 ml-0.5" />
+            </motion.div>
+          </div>
 
-        {/* Gradient Timeline Bar */}
-        <div className="flex-1 pb-4">
-          <motion.div 
-            className="h-2 rounded-full overflow-hidden"
-            style={{
-              background: 'linear-gradient(90deg, #fbbf24 0%, #f97316 35%, #ef4444 70%, #ec4899 100%)',
-              boxShadow: '0 0 20px rgba(251, 146, 60, 0.4)',
-            }}
-            initial={{ scaleX: 0, originX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ delay: 0.3, duration: 0.6, ease: 'easeOut' }}
-          />
+          {/* Text Content */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-white font-bold text-lg leading-tight mb-1">
+              Week {weekNumber} • Conquer will power
+            </h3>
+            <p className="text-white/60 text-sm mb-3">
+              {getStatusText()}
+            </p>
+            
+            {/* Progress Bar */}
+            <div className="relative h-2 rounded-full overflow-hidden bg-white/10">
+              <motion.div 
+                className="absolute inset-y-0 left-0 rounded-full"
+                style={{
+                  background: 'linear-gradient(90deg, #22c55e 0%, #fbbf24 50%, #f97316 100%)',
+                  boxShadow: '0 0 12px rgba(251, 146, 60, 0.5)',
+                }}
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </motion.div>
