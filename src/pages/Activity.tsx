@@ -164,31 +164,43 @@ const [activeTab, setActiveTab] = useState("activity");
   // Handle save from preview page
   useEffect(() => {
     if (location.state?.savePhoto && location.state?.activity) {
-      const originalUrl = location.state.originalUrl || location.state.imageUrl;
+      const displaySourceUrl: string | undefined = location.state.imageUrl;
+      const originalSourceUrl: string | undefined = location.state.originalUrl || location.state.imageUrl;
       const isVideo = location.state.isVideo || false;
       const dayNumber = location.state.dayNumber || photos.length + 1;
 
-      if (!originalUrl) {
+      if (!displaySourceUrl || !originalSourceUrl) {
         toast.error('No media to save');
         navigate('/', { replace: true, state: null });
         return;
       }
 
       const uploadAndSave = async () => {
-        let storageUrl: string | null = null;
-        
-        if (originalUrl.startsWith('data:') || originalUrl.startsWith('blob:')) {
-          storageUrl = await uploadToStorage(originalUrl, `activity-${Date.now()}`, isVideo);
-          
-          if (!storageUrl) {
-            toast.error('Upload failed. Please try again.');
-            navigate('/', { replace: true, state: null });
-            return;
+        const uploadAsset = async (src: string, label: string): Promise<string | null> => {
+          if (src.startsWith('data:') || src.startsWith('blob:')) {
+            const url = await uploadToStorage(src, label, isVideo);
+            return url;
           }
-        } else if (originalUrl.startsWith('http')) {
-          storageUrl = originalUrl;
-        } else {
-          toast.error('Invalid media format');
+          if (src.startsWith('http')) return src;
+          return null;
+        };
+
+        // Display asset should reflect the selected template (imageUrl from Preview)
+        const displayUrl = await uploadAsset(displaySourceUrl, `activity-display-${Date.now()}`);
+        if (!displayUrl) {
+          toast.error('Upload failed. Please try again.');
+          navigate('/', { replace: true, state: null });
+          return;
+        }
+
+        // Keep a separate original asset for re-editing in Preview (avoid double-framing)
+        const originalUrlStored =
+          originalSourceUrl === displaySourceUrl
+            ? displayUrl
+            : await uploadAsset(originalSourceUrl, `activity-original-${Date.now()}`);
+
+        if (!originalUrlStored) {
+          toast.error('Upload failed. Please try again.');
           navigate('/', { replace: true, state: null });
           return;
         }
@@ -199,7 +211,16 @@ const [activeTab, setActiveTab] = useState("activity");
           // Update existing
           setPhotos(prev => prev.map(p => 
             p.dayNumber === dayNumber
-              ? { ...p, storageUrl: storageUrl!, activity: location.state.activity, frame: location.state.frame }
+              ? {
+                  ...p,
+                  storageUrl: displayUrl,
+                  originalUrl: originalUrlStored,
+                  isVideo,
+                  activity: location.state.activity,
+                  frame: location.state.frame,
+                  duration: location.state.duration,
+                  pr: location.state.pr,
+                }
               : p
           ));
 toast.success(`Day ${dayNumber} updated!`);
@@ -210,7 +231,8 @@ toast.success(`Day ${dayNumber} updated!`);
           // Add new
           const newPhoto: LoggedPhoto = {
             id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            storageUrl: storageUrl!,
+            storageUrl: displayUrl,
+            originalUrl: originalUrlStored,
             isVideo,
             activity: location.state.activity,
             frame: location.state.frame || 'shaky',
@@ -278,8 +300,8 @@ toast.success(`Day ${dayNumber} added!`);
   const handlePhotoTap = (photo: LoggedPhoto) => {
     navigate('/preview', {
       state: {
-        imageUrl: photo.storageUrl,
-        originalUrl: photo.storageUrl,
+        imageUrl: photo.originalUrl || photo.storageUrl,
+        originalUrl: photo.originalUrl || photo.storageUrl,
         isVideo: photo.isVideo,
         activity: photo.activity,
         frame: photo.frame,

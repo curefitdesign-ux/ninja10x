@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { toast } from "sonner";
+import { isVideoUrl } from "@/lib/media";
 
 // Activity icons
 import footballIcon from '@/assets/activities/football.png';
@@ -31,6 +32,8 @@ const activities = [
 export interface LoggedPhoto {
   id: string;
   storageUrl: string;
+  /** Raw asset used for re-editing in the template editor (optional). */
+  originalUrl?: string;
   isVideo?: boolean;
   activity?: string;
   frame?: string;
@@ -116,6 +119,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
   const renderCard = (index: number, zIndex: number, opacity: number) => {
     const photo = photos[index];
     const hasPhoto = photo !== null && photo.storageUrl;
+    const isVideo = !!photo && (photo.isVideo === true || isVideoUrl(photo.storageUrl));
     const isActiveDay = isActiveWeek && !hasPhoto && index === photos.findIndex(p => p === null || !p.storageUrl);
     const dayNumber = weekIndex * 3 + index + 1;
     const isFutureCard = !hasPhoto && !isActiveDay;
@@ -182,22 +186,38 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
         {/* Photo content - always render if exists */}
         {hasPhoto && (
           <>
-            <img 
-              src={photo.storageUrl} 
-              alt={`Day ${dayNumber}`}
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ zIndex: 1 }}
-              onError={(e) => {
-                // Try reloading once on error
-                const img = e.currentTarget;
-                if (!img.dataset.retried) {
-                  img.dataset.retried = 'true';
-                  img.src = photo.storageUrl + '?t=' + Date.now();
-                } else {
-                  console.error('Failed to load image:', photo.storageUrl);
-                }
-              }}
-            />
+            {isVideo ? (
+              <video
+                src={photo.storageUrl}
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ zIndex: 1 }}
+                muted
+                playsInline
+                loop
+                autoPlay
+                preload="metadata"
+                onError={() => {
+                  console.error("Failed to load video:", photo.storageUrl);
+                }}
+              />
+            ) : (
+              <img
+                src={photo.storageUrl}
+                alt={`Day ${dayNumber}`}
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ zIndex: 1 }}
+                onError={(e) => {
+                  // Try reloading once on error
+                  const img = e.currentTarget;
+                  if (!img.dataset.retried) {
+                    img.dataset.retried = "true";
+                    img.src = photo.storageUrl + "?t=" + Date.now();
+                  } else {
+                    console.error("Failed to load image:", photo.storageUrl);
+                  }
+                }}
+              />
+            )}
             {/* Green glow overlay for logged photos */}
             <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/25 to-transparent pointer-events-none" style={{ zIndex: 2 }} />
           </>
