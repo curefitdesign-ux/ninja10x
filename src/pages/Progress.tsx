@@ -115,8 +115,6 @@ const Progress = () => {
     }
   });
 
-  const currentDay = Math.max(photos.length, transitionDayNumber);
-
   // Animation sequence
   useEffect(() => {
     // Show transition-in animation if coming from share with transitionToProgress
@@ -187,10 +185,13 @@ const Progress = () => {
       {/* Transition-in animation - Image from Share screen animating to top strip */}
       <AnimatePresence>
         {showTransitionIn && transitionImage && (
-          <SharedImageTransition
-            imageUrl={transitionImage}
-            targetSelector='[data-shared-element="progress-hero-card"]'
-          />
+          // Wrap to give AnimatePresence a DOM/motion element for refs
+          <motion.div key="shared-image-transition">
+            <SharedImageTransition
+              imageUrl={transitionImage}
+              targetSelector='[data-shared-element="progress-hero-card"]'
+            />
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -426,60 +427,6 @@ const Progress = () => {
                 alt={`Day ${day}`}
                 className="w-full h-full object-contain relative z-10"
               />
-
-              {/* Social indicator on the next day to be logged */}
-              {!isActive && day === photos.length + 1 && day <= 12 && (
-                <motion.div
-                  className="absolute flex items-center z-20"
-                  style={{ 
-                    top: "-3vw",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                  }}
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={showTiles ? { opacity: 1, scale: 1 } : {}}
-                  transition={{ delay: index * 0.04 + 0.2 }}
-                >
-                  <div 
-                    className="rounded-full overflow-hidden"
-                    style={{
-                      width: "clamp(24px, 7vw, 30px)",
-                      height: "clamp(24px, 7vw, 30px)",
-                      border: "2px solid #7B5CFF",
-                    }}
-                  >
-                    <img 
-                      src="https://i.pravatar.cc/80?img=32" 
-                      alt="You" 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div 
-                    className="rounded-full overflow-hidden"
-                    style={{
-                      width: "clamp(20px, 5vw, 24px)",
-                      height: "clamp(20px, 5vw, 24px)",
-                      marginLeft: "-2vw",
-                      border: "2px solid #7B5CFF",
-                    }}
-                  >
-                    <img 
-                      src="https://i.pravatar.cc/80?img=15" 
-                      alt="Friend" 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <span 
-                    className="text-white font-medium"
-                    style={{
-                      fontSize: "clamp(10px, 2.8vw, 12px)",
-                      marginLeft: "1.2vw",
-                    }}
-                  >
-                    +2
-                  </span>
-                </motion.div>
-              )}
             </motion.div>
           );
         })}

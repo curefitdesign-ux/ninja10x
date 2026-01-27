@@ -152,6 +152,14 @@ const Preview = () => {
 
     const mediaUrl = state?.originalUrl || state?.imageUrl;
 
+    console.info('[journey-debug] Preview: init', {
+      hasState: !!state,
+      dayNumber: state?.dayNumber,
+      hasMediaUrl: !!mediaUrl,
+      hasActivity: !!state?.activity,
+      startWithCamera: state?.startWithCamera,
+    });
+
     if (mediaUrl && state?.activity) {
       // Existing photo/video - go directly to template selection
       setImageUrl(mediaUrl);
@@ -254,6 +262,15 @@ const Preview = () => {
     triggerHaptic('success');
     setIsExiting(true);
     setShowShareSheet(false);
+
+    console.info('[journey-debug] Preview: final save', {
+      dayNumber,
+      isVideo,
+      activity,
+      frame: currentFrame,
+      hasFramedImageUrl: !!framedImageUrl,
+      hasImageUrl: !!imageUrl,
+    });
 
     setTimeout(() => {
       navigate('/', {

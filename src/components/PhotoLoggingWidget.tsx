@@ -401,6 +401,16 @@ const PhotoLoggingWidget = ({
     const isActiveDay = dayNumber === currentDay;
     const isFutureDay = dayNumber > currentDay;
     const isPastEmptyDay = dayNumber < currentDay && !photo;
+
+    console.info('[journey-debug] Widget: card tap', {
+      weekIndex,
+      dayIndex,
+      dayNumber,
+      hasPhoto: !!photo,
+      isActiveDay,
+      isFutureDay,
+      isPastEmptyDay,
+    });
     
     if (photo) {
       // Tap on existing photo - open preview/edit mode (no new photo creation)

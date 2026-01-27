@@ -144,6 +144,11 @@ const [activeTab, setActiveTab] = useState("activity");
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
   const currentDay = photos.length + 1; // Next day to fill
 
+  // Stats derived from the same photo/video source of truth (photos[])
+  const daysStreak = photos.length;
+  // Shows 0/3 when nothing logged, then 1/3, 2/3, 3/3, then resets for next week.
+  const weeklyCompleted = photos.length === 0 ? 0 : ((photos.length - 1) % 3) + 1;
+
   const dayInWeek = ((currentDay - 1) % 3) + 1;
   const mascot = (() => {
     if (showWeekCelebration) {
@@ -163,138 +168,168 @@ const [activeTab, setActiveTab] = useState("activity");
 
   // Handle save from preview page
   useEffect(() => {
-    if (location.state?.savePhoto && location.state?.activity) {
-      const displaySourceUrl: string | undefined = location.state.imageUrl;
-      const originalSourceUrl: string | undefined = location.state.originalUrl || location.state.imageUrl;
-      const isVideo = location.state.isVideo || false;
-      const dayNumber = location.state.dayNumber || photos.length + 1;
+    if (!location.state?.savePhoto || !location.state?.activity) return;
 
-      if (!displaySourceUrl || !originalSourceUrl) {
-        toast.error('No media to save');
+    // IMPORTANT: capture navigation state immediately.
+    // We clear navigation state after save; reading location.state inside async can break.
+    const navState = location.state as {
+      imageUrl?: string;
+      originalUrl?: string;
+      isVideo?: boolean;
+      activity?: string;
+      frame?: string;
+      duration?: string;
+      pr?: string;
+      dayNumber?: number;
+    };
+
+    const displaySourceUrl: string | undefined = navState.imageUrl;
+    const originalSourceUrl: string | undefined = navState.originalUrl || navState.imageUrl;
+    const isVideo = navState.isVideo || false;
+    const dayNumber = navState.dayNumber || photos.length + 1;
+
+    const activityName = navState.activity;
+    const frame = navState.frame;
+    const duration = navState.duration;
+    const pr = navState.pr;
+
+    console.info('[journey-debug] Flow: Preview -> Activity(save) received', {
+      dayNumber,
+      isVideo,
+      activity: activityName,
+      hasDisplaySource: !!displaySourceUrl,
+      hasOriginalSource: !!originalSourceUrl,
+    });
+
+    if (!displaySourceUrl || !originalSourceUrl) {
+      toast.error('No media to save');
+      navigate('/', { replace: true, state: null });
+      return;
+    }
+
+    const run = async () => {
+      const uploadAsset = async (src: string, label: string): Promise<string | null> => {
+        if (src.startsWith('data:') || src.startsWith('blob:')) {
+          const url = await uploadToStorage(src, label, isVideo);
+          return url;
+        }
+        if (src.startsWith('http')) return src;
+        return null;
+      };
+
+      // Display asset should reflect the selected template (imageUrl from Preview)
+      const displayUrl = await uploadAsset(displaySourceUrl, `activity-display-${Date.now()}`);
+      if (!displayUrl) {
+        toast.error('Upload failed. Please try again.');
         navigate('/', { replace: true, state: null });
         return;
       }
 
-      const uploadAndSave = async () => {
-        const uploadAsset = async (src: string, label: string): Promise<string | null> => {
-          if (src.startsWith('data:') || src.startsWith('blob:')) {
-            const url = await uploadToStorage(src, label, isVideo);
-            return url;
-          }
-          if (src.startsWith('http')) return src;
-          return null;
-        };
+      // Keep a separate original asset for re-editing in Preview (avoid double-framing)
+      const originalUrlStored =
+        originalSourceUrl === displaySourceUrl
+          ? displayUrl
+          : await uploadAsset(originalSourceUrl, `activity-original-${Date.now()}`);
 
-        // Display asset should reflect the selected template (imageUrl from Preview)
-        const displayUrl = await uploadAsset(displaySourceUrl, `activity-display-${Date.now()}`);
-        if (!displayUrl) {
-          toast.error('Upload failed. Please try again.');
-          navigate('/', { replace: true, state: null });
-          return;
-        }
+      if (!originalUrlStored) {
+        toast.error('Upload failed. Please try again.');
+        navigate('/', { replace: true, state: null });
+        return;
+      }
 
-        // Keep a separate original asset for re-editing in Preview (avoid double-framing)
-        const originalUrlStored =
-          originalSourceUrl === displaySourceUrl
-            ? displayUrl
-            : await uploadAsset(originalSourceUrl, `activity-original-${Date.now()}`);
+      const wasExisting = photos.some(p => p.dayNumber === dayNumber);
+      const nextPhotos = (() => {
+        const existing = photos.find(p => p.dayNumber === dayNumber);
+        const upserted: LoggedPhoto = existing
+          ? {
+              ...existing,
+              storageUrl: displayUrl,
+              originalUrl: originalUrlStored,
+              isVideo,
+              activity: activityName,
+              frame,
+              duration,
+              pr,
+            }
+          : {
+              id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              storageUrl: displayUrl,
+              originalUrl: originalUrlStored,
+              isVideo,
+              activity: activityName,
+              frame: frame || 'shaky',
+              duration,
+              pr,
+              dayNumber,
+            };
 
-        if (!originalUrlStored) {
-          toast.error('Upload failed. Please try again.');
-          navigate('/', { replace: true, state: null });
-          return;
-        }
+        const without = photos.filter(p => p.dayNumber !== dayNumber);
+        return [...without, upserted].sort((a, b) => a.dayNumber - b.dayNumber);
+      })();
 
-        const existingPhoto = photos.find(p => p.dayNumber === dayNumber);
-        
-        if (existingPhoto) {
-          // Update existing
-          setPhotos(prev => prev.map(p => 
-            p.dayNumber === dayNumber
-              ? {
-                  ...p,
-                  storageUrl: displayUrl,
-                  originalUrl: originalUrlStored,
-                  isVideo,
-                  activity: location.state.activity,
-                  frame: location.state.frame,
-                  duration: location.state.duration,
-                  pr: location.state.pr,
-                }
-              : p
-          ));
-toast.success(`Day ${dayNumber} updated!`);
-          // Trigger celebration animation on pills and ring
-          setCelebrateSuccess(true);
-          setTimeout(() => setCelebrateSuccess(false), 2500);
-        } else {
-          // Add new
-          const newPhoto: LoggedPhoto = {
-            id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            storageUrl: displayUrl,
-            originalUrl: originalUrlStored,
-            isVideo,
-            activity: location.state.activity,
-            frame: location.state.frame || 'shaky',
-            duration: location.state.duration,
-            pr: location.state.pr,
-            dayNumber,
-          };
-          const updatedPhotos = [...photos, newPhoto];
-          setPhotos(updatedPhotos);
-toast.success(`Day ${dayNumber} added!`);
-          // Trigger celebration animation on pills and ring
-          setCelebrateSuccess(true);
-          setTimeout(() => setCelebrateSuccess(false), 2500);
-          
-          // Check if week is completed (3 photos in the week)
-          const weekIndex = Math.floor((dayNumber - 1) / 3);
-          const weekStartDay = weekIndex * 3 + 1;
-          const weekPhotos = updatedPhotos.filter(p => p.dayNumber >= weekStartDay && p.dayNumber <= weekStartDay + 2);
-          if (weekPhotos.length === 3) {
-            // Week completed! Show celebration
-            setTimeout(() => {
-              setCompletedWeekNumber(weekIndex + 1);
-              setShowWeekCelebration(true);
-              
-              // Fire confetti for Week 1 completion
-              if (weekIndex === 0) {
-                const duration = 3000;
-                const end = Date.now() + duration;
-                
-                const frame = () => {
-                  confetti({
-                    particleCount: 3,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 },
-                    colors: ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0'],
-                  });
-                  confetti({
-                    particleCount: 3,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 },
-                    colors: ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0'],
-                  });
-                  
-                  if (Date.now() < end) {
-                    requestAnimationFrame(frame);
-                  }
-                };
-                frame();
+      console.info('[journey-debug] Activity(save): saved', {
+        dayNumber,
+        wasExisting,
+        days: nextPhotos.map(p => p.dayNumber),
+      });
+
+      setPhotos(nextPhotos);
+      toast.success(wasExisting ? `Day ${dayNumber} updated!` : `Day ${dayNumber} added!`);
+
+      // Trigger celebration animation on pills and ring
+      setCelebrateSuccess(true);
+      setTimeout(() => setCelebrateSuccess(false), 2500);
+
+      // Check if week is completed (3 photos in the week)
+      const weekIndex = Math.floor((dayNumber - 1) / 3);
+      const weekStartDay = weekIndex * 3 + 1;
+      const weekPhotos = nextPhotos.filter(
+        p => p.dayNumber >= weekStartDay && p.dayNumber <= weekStartDay + 2
+      );
+
+      if (weekPhotos.length === 3) {
+        setTimeout(() => {
+          setCompletedWeekNumber(weekIndex + 1);
+          setShowWeekCelebration(true);
+
+          // Fire confetti for Week 1 completion
+          if (weekIndex === 0) {
+            const duration = 3000;
+            const end = Date.now() + duration;
+
+            const frame = () => {
+              confetti({
+                particleCount: 3,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0'],
+              });
+              confetti({
+                particleCount: 3,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0'],
+              });
+
+              if (Date.now() < end) {
+                requestAnimationFrame(frame);
               }
-              
-              setTimeout(() => setShowWeekCelebration(false), 3500);
-            }, 500);
+            };
+            frame();
           }
-        }
-      };
 
-      uploadAndSave();
+          setTimeout(() => setShowWeekCelebration(false), 3500);
+        }, 500);
+      }
+
+      // Clear navigation state only AFTER we finished saving.
       navigate('/', { replace: true, state: null });
-    }
-  }, [location.state?.savePhoto]);
+    };
+
+    void run();
+  }, [location.state]);
 
   // Handle photo tap - open preview to edit
   const handlePhotoTap = (photo: LoggedPhoto) => {
@@ -622,7 +657,7 @@ toast.success(`Day ${dayNumber} added!`);
                       } : {}}
                       transition={{ duration: 0.8, ease: "easeOut" }}
                     >
-                      4
+                      {daysStreak}
                     </motion.span>
                     <p className="text-[10px] text-white/60 uppercase tracking-wider mt-1">DAYS STREAK</p>
                   </div>
@@ -675,7 +710,8 @@ toast.success(`Day ${dayNumber} added!`);
                       } : {}}
                       transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
                     >
-                      5<span className="text-white/40">/3</span>
+                      {weeklyCompleted}
+                      <span className="text-white/40">/3</span>
                     </motion.span>
                     <p className="text-[10px] text-white/60 uppercase tracking-wider mt-1">WEEKLY ACTIVITY</p>
                   </div>
