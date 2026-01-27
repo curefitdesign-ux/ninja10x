@@ -4,9 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { getPhotosStorageKey } from "@/hooks/use-device-id";
 
-// Import tile assets
-import tileLockedImg from "@/assets/progress/tile-locked.png";
-import tileActiveImg from "@/assets/progress/tile-active.png";
+// Import tile assets - new active (purple) and inactive (gray) tiles
+import tileActiveImg from "@/assets/progress/tile-active-new.png";
+import tileInactiveImg from "@/assets/progress/tile-inactive.png";
 import basePlatformImg from "@/assets/progress/base-platform.png";
 import engineBadgeImg from "@/assets/progress/engine-badge.png";
 import SharedImageTransition from "@/components/SharedImageTransition";
@@ -26,57 +26,57 @@ interface LoggedPhoto {
   dayNumber: number;
 }
 
-// Tile positions - stair-step diagonal pattern matching reference
-// Pattern: 2 tiles per "step" going down-right, then down-left
-// Using vw-based values for proper scaling - shifted down by ~13vw (50px)
+// Tile positions - REVERSED order (Day 12 at top, Day 1 at bottom)
+// This creates a bottom-to-top progression where users fill from bottom
+// Array index 0 = visual top (Day 12), Array index 11 = visual bottom (Day 1)
 const TILE_POSITIONS = [
-  // Group 1: Start center → diagonal right-down (BUILD STRENGTH)
-  { left: 40, top: 28 },    // Tile 1 - first, center-left
-  { left: 48, top: 36 },    // Tile 2 - step down-right
-  { left: 56, top: 44 },    // Tile 3 - milestone, furthest right
-  // Group 2: Zigzag left-down (INCREASE STAMINA)
-  { left: 48, top: 53 },    // Tile 4 - step back left
-  { left: 40, top: 61 },    // Tile 5 - continue left
-  { left: 32, top: 69 },    // Tile 6 - milestone, furthest left
-  // Group 3: Zigzag right-down (BUILD ENERGY)
-  { left: 40, top: 77 },    // Tile 7 - step right
-  { left: 48, top: 85 },    // Tile 8 - continue right
-  { left: 56, top: 93 },    // Tile 9 - milestone, furthest right
-  // Group 4: Final stretch left-down (CONQUER WILL POWER)
-  { left: 48, top: 102 },   // Tile 10 - step back left
-  { left: 40, top: 110 },   // Tile 11 - continue left
-  { left: 32, top: 118 },   // Tile 12 - active final milestone
+  // Visual top section (Days 12, 11, 10) - LEFT side start
+  { left: 32, top: 28 },    // Index 0 = Day 12 (top-left)
+  { left: 40, top: 36 },    // Index 1 = Day 11
+  { left: 48, top: 44 },    // Index 2 = Day 10
+  // Second section (Days 9, 8, 7) - RIGHT side
+  { left: 56, top: 53 },    // Index 3 = Day 9 (right)
+  { left: 48, top: 61 },    // Index 4 = Day 8
+  { left: 40, top: 69 },    // Index 5 = Day 7
+  // Third section (Days 6, 5, 4) - LEFT side
+  { left: 32, top: 77 },    // Index 6 = Day 6 (left)
+  { left: 40, top: 85 },    // Index 7 = Day 5
+  { left: 48, top: 93 },    // Index 8 = Day 4
+  // Bottom section (Days 3, 2, 1) - RIGHT side start
+  { left: 56, top: 102 },   // Index 9 = Day 3 (right)
+  { left: 48, top: 110 },   // Index 10 = Day 2
+  { left: 40, top: 118 },   // Index 11 = Day 1 (bottom center - START)
 ];
 
-// Labels anchored to specific tile groups - positioned within viewport
+// Labels anchored to specific tile groups - reversed for bottom-to-top progression
 const LABELS = [
   { 
-    tileIndex: 2, 
-    text: ["BUILD", "STRENGTH"], 
-    side: "right" as const,
-    top: 38,
-    left: 68, // Moved inside viewport
-  },
-  { 
-    tileIndex: 5, 
-    text: ["INCREASE", "STAMINA"], 
-    side: "left" as const,
-    top: 63,
-    left: 4, // Moved inside viewport
-  },
-  { 
-    tileIndex: 8, 
-    text: ["BUILD", "ENERGY"], 
-    side: "right" as const,
-    top: 88,
-    left: 68, // Moved inside viewport
-  },
-  { 
-    tileIndex: 11, 
+    tileIndex: 0, // Near Day 12 (top)
     text: ["CONQUER", "WILL POWER"], 
     side: "left" as const,
-    top: 113,
-    left: 4, // Moved inside viewport
+    top: 28,
+    left: 4,
+  },
+  { 
+    tileIndex: 3, // Near Day 9
+    text: ["BUILD", "ENERGY"], 
+    side: "right" as const,
+    top: 53,
+    left: 68,
+  },
+  { 
+    tileIndex: 6, // Near Day 6
+    text: ["INCREASE", "STAMINA"], 
+    side: "left" as const,
+    top: 77,
+    left: 4,
+  },
+  { 
+    tileIndex: 11, // Near Day 1 (bottom - START)
+    text: ["BUILD", "STRENGTH"], 
+    side: "right" as const,
+    top: 110,
+    left: 68,
   },
 ];
 
@@ -147,15 +147,14 @@ const Progress = () => {
     });
   };
 
-  // Determine tile state
-  const getTileState = (day: number): "logged" | "active" | "locked" => {
-    if (day < currentDay) return "logged";
-    if (day === currentDay || day === 12) return "active";
-    return "locked";
+  // Determine tile state - reversed order (index 11 = Day 1, index 0 = Day 12)
+  // Day number = 12 - index (so bottom tile is Day 1, top is Day 12)
+  const getDayFromIndex = (index: number) => 12 - index;
+  
+  // A tile is "active" (purple) if that day has been logged
+  const isTileActive = (dayNumber: number) => {
+    return photos.some(p => p.dayNumber === dayNumber);
   };
-
-  // Check if tile is a milestone (with ring)
-  const isMilestone = (index: number) => [2, 5, 8, 11].includes(index);
 
   // Convert vw values to CSS
   const vw = (val: number) => `${val}vw`;
@@ -399,11 +398,8 @@ const Progress = () => {
 
         {/* === DIAGONAL PROGRESS TILES === */}
         {TILE_POSITIONS.map((pos, index) => {
-          const day = index + 1;
-          const state = getTileState(day);
-          const isActive = state === "active";
-          const isLogged = state === "logged";
-          const hasMilestone = isMilestone(index);
+          const day = getDayFromIndex(index);
+          const isActive = isTileActive(day);
 
           return (
             <motion.div
@@ -424,68 +420,15 @@ const Progress = () => {
                 delay: index * 0.04
               }}
             >
-              {/* Logged tile glow - green/emerald for completed */}
-              {isLogged && (
-                <div 
-                  className="absolute inset-[-30%] rounded-2xl"
-                  style={{
-                    background: "radial-gradient(circle, rgba(16, 185, 129, 0.6) 0%, transparent 70%)",
-                    filter: "blur(10px)",
-                  }}
-                />
-              )}
-
-              {/* Active tile glow - cyan for current */}
-              {isActive && (
-                <div 
-                  className="absolute inset-[-50%] rounded-2xl animate-pulse"
-                  style={{
-                    background: "radial-gradient(circle, rgba(0, 229, 255, 0.5) 0%, transparent 70%)",
-                    filter: "blur(12px)",
-                  }}
-                />
-              )}
-              
-              {/* Milestone ring indicator */}
-              {hasMilestone && !isActive && !isLogged && (
-                <div 
-                  className="absolute inset-[-10%] rounded-xl"
-                  style={{
-                    border: "2px solid rgba(123, 92, 255, 0.3)",
-                    boxShadow: "0 0 16px rgba(123, 92, 255, 0.4)",
-                  }}
-                />
-              )}
-
-              {/* Logged milestone ring - green */}
-              {hasMilestone && isLogged && (
-                <div 
-                  className="absolute inset-[-10%] rounded-xl"
-                  style={{
-                    border: "2px solid rgba(16, 185, 129, 0.5)",
-                    boxShadow: "0 0 16px rgba(16, 185, 129, 0.5)",
-                  }}
-                />
-              )}
-              
-              {/* Tile image - use active image for logged days too */}
+              {/* Tile image - active (purple) or inactive (gray) */}
               <img
-                src={isActive || isLogged ? tileActiveImg : tileLockedImg}
+                src={isActive ? tileActiveImg : tileInactiveImg}
                 alt={`Day ${day}`}
                 className="w-full h-full object-contain relative z-10"
-                style={{
-                  filter: isActive 
-                    ? "drop-shadow(0 0 16px rgba(0, 229, 255, 0.7))" 
-                    : isLogged
-                      ? "drop-shadow(0 0 12px rgba(16, 185, 129, 0.7)) hue-rotate(140deg) saturate(1.2)"
-                      : hasMilestone 
-                        ? "drop-shadow(0 0 10px rgba(123, 92, 255, 0.5))"
-                        : "none",
-                }}
               />
 
-              {/* Social indicator on current active day */}
-              {isActive && day === currentDay && (
+              {/* Social indicator on the next day to be logged */}
+              {!isActive && day === photos.length + 1 && day <= 12 && (
                 <motion.div
                   className="absolute flex items-center z-20"
                   style={{ 
