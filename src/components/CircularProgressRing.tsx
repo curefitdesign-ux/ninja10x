@@ -217,53 +217,29 @@ const CircularProgressRing = ({
         style={{ width: size, height: size }}
       >
         <defs>
-          {/* Upper curve for "cult ninja" */}
-          <path
-            id="curvedTextPathUpper"
-            d={`M ${centerX - 58} ${centerY + 52}
-                A ${ringRadius - 12} ${ringRadius - 12} 0 0 0 ${centerX + 58} ${centerY + 52}`}
-            fill="none"
-          />
-          {/* Lower curve for "Week • Day" */}
+          {/* Single curve for combined text */}
           <path
             id="curvedTextPath"
-            d={`M ${centerX - 68} ${centerY + 68}
-                A ${ringRadius + 4} ${ringRadius + 4} 0 0 0 ${centerX + 68} ${centerY + 68}`}
+            d={`M ${centerX - 68} ${centerY + 60}
+                A ${ringRadius} ${ringRadius} 0 0 0 ${centerX + 68} ${centerY + 60}`}
             fill="none"
           />
         </defs>
         
-        {/* "cult ninja" text on upper curve */}
+        {/* Combined "CULT NINJA • Week X • Day Y" text */}
         <text
-          fill="rgba(255, 255, 255, 0.7)"
-          fontSize="11"
-          fontFamily="Inter, sans-serif"
-          fontWeight="600"
-          letterSpacing="2px"
-        >
-          <textPath
-            href="#curvedTextPathUpper"
-            startOffset="50%"
-            textAnchor="middle"
-          >
-            CULT NINJA
-          </textPath>
-        </text>
-        
-        {/* "Week • Day" text on lower curve */}
-        <text
-          fill="rgba(255, 255, 255, 0.45)"
+          fill="rgba(255, 255, 255, 0.6)"
           fontSize="9"
           fontFamily="Inter, sans-serif"
           fontWeight="500"
-          letterSpacing="1px"
+          letterSpacing="1.5px"
         >
           <textPath
             href="#curvedTextPath"
             startOffset="50%"
             textAnchor="middle"
           >
-            Week {currentWeek}  •  Day {dayInWeek}
+            CULT NINJA  •  Week {currentWeek}  •  Day {dayInWeek}
           </textPath>
         </text>
       </svg>
