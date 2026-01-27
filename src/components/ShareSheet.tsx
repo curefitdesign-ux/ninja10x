@@ -198,10 +198,9 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
     triggerHaptic('light');
     setIsExiting(true);
     
-    // Wait for animation, then navigate to Activity page
+    // Wait for animation, then navigate to Activity page (/)
     setTimeout(() => {
-      // Cult Ninja widget lives on /create
-      navigate('/create', {
+      navigate('/', {
         replace: true,
         state: {
           fromShare: true,

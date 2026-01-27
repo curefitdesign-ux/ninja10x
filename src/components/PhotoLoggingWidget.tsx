@@ -115,8 +115,8 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
 
   const renderCard = (index: number, zIndex: number, opacity: number) => {
     const photo = photos[index];
-    const hasPhoto = photo !== null;
-    const isActiveDay = isActiveWeek && !hasPhoto && index === photos.findIndex(p => p === null);
+    const hasPhoto = photo !== null && photo.storageUrl;
+    const isActiveDay = isActiveWeek && !hasPhoto && index === photos.findIndex(p => p === null || !p.storageUrl);
     const dayNumber = weekIndex * 3 + index + 1;
     const isFutureCard = !hasPhoto && !isActiveDay;
     
@@ -143,7 +143,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           height: cardHeight,
           borderRadius: borderRadius * scale,
           background: hasPhoto ? 'transparent' : isActiveDay ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.06)',
-          backdropFilter: 'blur(16px)',
+          backdropFilter: hasPhoto ? 'none' : 'blur(16px)',
           zIndex,
           willChange: 'transform, opacity',
         }}
@@ -179,22 +179,32 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
         onClick={(e) => handleCardClick(e, index, photo)}
         whileTap={{ scale: 0.96 }}
       >
-        {/* Photo or empty state */}
-        {hasPhoto ? (
+        {/* Photo content - always render if exists */}
+        {hasPhoto && (
           <>
             <img 
               src={photo.storageUrl} 
-              alt=""
-              className="w-full h-full object-cover"
+              alt={`Day ${dayNumber}`}
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ zIndex: 1 }}
               onError={(e) => {
-                // Hide broken images
-                e.currentTarget.style.display = 'none';
+                // Try reloading once on error
+                const img = e.currentTarget;
+                if (!img.dataset.retried) {
+                  img.dataset.retried = 'true';
+                  img.src = photo.storageUrl + '?t=' + Date.now();
+                } else {
+                  console.error('Failed to load image:', photo.storageUrl);
+                }
               }}
             />
             {/* Green glow overlay for logged photos */}
-            <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/25 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/25 to-transparent pointer-events-none" style={{ zIndex: 2 }} />
           </>
-        ) : (
+        )}
+        
+        {/* Empty state - upload icon or lock */}
+        {!hasPhoto && (
           <div className="absolute inset-0 flex items-center justify-center">
             {isActiveDay && isExpanded ? (
               <motion.div 
@@ -209,6 +219,11 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
               >
                 <Upload className="w-6 h-6 text-emerald-400" strokeWidth={2.5} />
               </motion.div>
+            ) : isActiveDay && !isExpanded ? (
+              /* Show upload icon in stacked state for active day */
+              <div className="p-2 rounded-full bg-emerald-500/20">
+                <Upload className="w-4 h-4 text-emerald-400" strokeWidth={2.5} />
+              </div>
             ) : (isFutureCard && isExpanded) ? (
               /* Lock icon overlay for future locked days - only when expanded */
               <motion.div 
@@ -228,12 +243,13 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           {isExpanded && (
             <motion.div 
               className="absolute bottom-2 left-1/2"
+              style={{ zIndex: 10 }}
               initial={{ opacity: 0, y: 6, x: "-50%" }}
               animate={{ opacity: 1, y: 0, x: "-50%" }}
               exit={{ opacity: 0, y: 4, x: "-50%" }}
               transition={{ delay: 0.1 + index * 0.03, duration: 0.2 }}
             >
-              <span className={`text-xs font-medium ${isActiveDay ? 'text-emerald-400' : 'text-white/50'}`}>
+              <span className={`text-xs font-medium ${isActiveDay ? 'text-emerald-400' : hasPhoto ? 'text-white/80' : 'text-white/50'}`}>
                 D{dayNumber}
               </span>
             </motion.div>
@@ -442,7 +458,12 @@ const PhotoLoggingWidget = ({
 
   return (
     <>
-      <div className="relative w-full overflow-hidden" style={{ height: 160 }} ref={containerRef}>
+      <div 
+        className="relative w-full overflow-hidden" 
+        style={{ height: 160 }} 
+        ref={containerRef}
+        data-shared-element="cult-ninja-widget"
+      >
         {/* Timeline Path - SVG curved dashed line */}
         <svg 
           className="absolute inset-0 w-full h-full pointer-events-none"
