@@ -9,6 +9,7 @@ interface GalleryPickerSheetProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectPhoto: (photoDataUrl: string, isVideo?: boolean) => void;
+  onCameraCapture?: () => void;
 }
 
 interface GalleryItem {
@@ -23,7 +24,8 @@ const GALLERY_STORAGE_KEY = 'gallery_items_cache';
 const GalleryPickerSheet = ({
   isOpen,
   onClose,
-  onSelectPhoto
+  onSelectPhoto,
+  onCameraCapture
 }: GalleryPickerSheetProps) => {
   // Load cached gallery items from localStorage
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(() => {
@@ -150,7 +152,13 @@ const GalleryPickerSheet = ({
 
   const handleCameraCapture = () => {
     triggerHaptic('light');
-    cameraInputRef.current?.click();
+    // If onCameraCapture callback provided, use it for full camera flow
+    if (onCameraCapture) {
+      onCameraCapture();
+    } else {
+      // Fallback to input capture
+      cameraInputRef.current?.click();
+    }
   };
 
   const handleGallerySelect = () => {

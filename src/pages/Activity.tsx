@@ -269,6 +269,19 @@ toast.success(`Day ${dayNumber} added!`);
     setShowGalleryPicker(true);
   }, []);
 
+  // Handle camera capture from gallery picker - navigate to preview with camera mode
+  const handleCameraCapture = useCallback(() => {
+    setShowGalleryPicker(false);
+    if (pendingDayNumber !== null) {
+      navigate('/preview', {
+        state: {
+          dayNumber: pendingDayNumber,
+          startWithCamera: true,
+        },
+      });
+    }
+  }, [navigate, pendingDayNumber]);
+
   // Handle photo selection from gallery picker
   const handleGalleryPhotoSelect = useCallback((photoDataUrl: string, isVideo?: boolean) => {
     setShowGalleryPicker(false);
@@ -733,6 +746,7 @@ toast.success(`Day ${dayNumber} added!`);
           setPendingDayNumber(null);
         }}
         onSelectPhoto={handleGalleryPhotoSelect}
+        onCameraCapture={handleCameraCapture}
       />
     </div>
   );
