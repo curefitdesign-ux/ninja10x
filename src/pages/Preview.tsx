@@ -10,12 +10,14 @@ import VogueFrame from '@/components/frames/VogueFrame';
 import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
 import WheelPicker from '@/components/WheelPicker';
+import ReelProgressWidget from '@/components/ReelProgressWidget';
 // CameraUI is now in a separate page
 import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ActivityBackgroundEffect from '@/components/ActivityBackgroundEffect';
 import SyncHealthPopup from '@/components/SyncHealthPopup';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
+import { useFitnessReel } from '@/hooks/use-fitness-reel';
 import { toast } from 'sonner';
 
 // Activity icons for selection
@@ -121,7 +123,46 @@ const Preview = () => {
   const captureRef = useRef<HTMLDivElement>(null);
 
   // Get delete and upsert functions from hook
-  const { deleteActivity, upsertActivity, refresh } = useJourneyActivities();
+  const { deleteActivity, upsertActivity, refresh, activities } = useJourneyActivities();
+
+  // Reel generation hook
+  const { 
+    generateReel, 
+    isGenerating: isGeneratingReel, 
+    currentStep: reelStep,
+    currentReel,
+    reelHistory,
+  } = useFitnessReel();
+
+  // Track reel generation progress
+  const [reelProgress, setReelProgress] = useState(0);
+
+  // Calculate progress based on reel step
+  useEffect(() => {
+    if (!isGeneratingReel) {
+      if (currentReel?.videoUrl) {
+        setReelProgress(100);
+      }
+      return;
+    }
+    
+    switch (reelStep) {
+      case 'narration':
+        setReelProgress(25);
+        break;
+      case 'voiceover':
+        setReelProgress(50);
+        break;
+      case 'video':
+        setReelProgress(75);
+        break;
+      case 'complete':
+        setReelProgress(100);
+        break;
+      default:
+        setReelProgress(0);
+    }
+  }, [reelStep, isGeneratingReel, currentReel]);
 
   const frameItemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scrollRaf = useRef<number | null>(null);
