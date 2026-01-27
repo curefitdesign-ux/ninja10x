@@ -465,32 +465,43 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
               </motion.div>
             </div>
             
-             {/* Sticky Bottom Action Buttons - Download/Copy */}
+             {/* Sticky Bottom Action Buttons - Download/Copy + Done */}
             <motion.div 
               className="sticky bottom-0 w-full px-6 pb-6 pt-4"
               style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
               animate={isExiting ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <div className="w-full flex gap-3 max-w-sm mx-auto">
+              <div className="w-full flex flex-col gap-3 max-w-sm mx-auto">
+                {/* Done button */}
                 <button
-                  onClick={handleDownload}
-                  className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                  onClick={handleDone}
+                  className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-white text-black font-semibold tap-bounce transition-all active:scale-95"
                 >
-                  <Download className="w-4 h-4 text-white/80" />
-                  <span className="text-white/80 font-medium text-sm">Download</span>
+                  <span>DONE</span>
                 </button>
-                <button
-                  onClick={handleCopyLink}
-                  className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
-                >
-                  {copied ? (
-                    <Check className="w-4 h-4 text-emerald-400" />
-                  ) : (
-                    <Copy className="w-4 h-4 text-white/80" />
-                  )}
-                  <span className="text-white/80 font-medium text-sm">{copied ? 'Copied!' : 'Copy'}</span>
-                </button>
+                
+                {/* Download/Copy row */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleDownload}
+                    className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                  >
+                    <Download className="w-4 h-4 text-white/80" />
+                    <span className="text-white/80 font-medium text-sm">Download</span>
+                  </button>
+                  <button
+                    onClick={handleCopyLink}
+                    className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                  >
+                    {copied ? (
+                      <Check className="w-4 h-4 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-white/80" />
+                    )}
+                    <span className="text-white/80 font-medium text-sm">{copied ? 'Copied!' : 'Copy'}</span>
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>
