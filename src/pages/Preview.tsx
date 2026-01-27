@@ -120,8 +120,8 @@ const Preview = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
 
-  // Get delete function from hook
-  const { deleteActivity } = useJourneyActivities();
+  // Get delete and upsert functions from hook
+  const { deleteActivity, upsertActivity, refresh } = useJourneyActivities();
 
   const frameItemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scrollRaf = useRef<number | null>(null);
@@ -261,7 +261,7 @@ const Preview = () => {
     setIsDeleting(false);
   };
 
-  // Save with template - go directly to share screen
+  // Save with template - save to backend then show share screen
   const handleSaveWithTemplate = async () => {
     if (!imageUrl || !activity) return;
 
@@ -272,71 +272,98 @@ const Preview = () => {
     // Capture the framed image
     const finalUrl = await captureFramedImage();
     const shareAssetUrl = finalUrl || imageUrl;
-    setFramedImageUrl(shareAssetUrl);
+    
+    // Save to backend FIRST
+    console.info('[journey-debug] Preview: saving with template to backend', {
+      dayNumber,
+      isVideo,
+      activity,
+      frame: currentFrame,
+    });
+    
+    const saved = await upsertActivity({
+      displayUrl: shareAssetUrl,
+      originalUrl: imageUrl,
+      isVideo,
+      activity,
+      frame: currentFrame,
+      duration,
+      pr,
+      dayNumber,
+    });
+    
     setIsSaving(false);
-
-    // Open share sheet directly (no celebration)
+    
+    if (!saved) {
+      toast.error('Failed to save. Please try again.');
+      return;
+    }
+    
+    console.info('[journey-debug] Preview: saved successfully', { 
+      storageUrl: saved.storageUrl,
+      dayNumber: saved.dayNumber,
+    });
+    
+    // Update local state with the saved URL from storage
+    setFramedImageUrl(saved.storageUrl);
+    
+    toast.success(`Day ${dayNumber} saved!`);
+    
+    // Open share sheet
     setShowShareSheet(true);
   };
 
-  // Actually navigate back and save (called from share sheet)
+  // Navigate back after share sheet (no need to save again, already saved)
   const handleFinalSave = () => {
     triggerHaptic('success');
     setIsExiting(true);
     setShowShareSheet(false);
 
-    console.info('[journey-debug] Preview: final save', {
-      dayNumber,
-      isVideo,
-      activity,
-      frame: currentFrame,
-      hasFramedImageUrl: !!framedImageUrl,
-      hasImageUrl: !!imageUrl,
-    });
+    console.info('[journey-debug] Preview: navigating home after share');
 
     setTimeout(() => {
-      navigate('/', {
-        state: {
-          savePhoto: true,
-          imageUrl: framedImageUrl || imageUrl,
-          originalUrl: imageUrl,
-          isVideo,
-          activity,
-          frame: currentFrame,
-          duration,
-          pr,
-          isReview,
-          photoId,
-          dayNumber,
-        },
-      });
+      navigate('/', { replace: true, state: null });
     }, 400);
   };
 
-  // Save without template (cross button)
-  const handleSaveWithoutTemplate = () => {
+  // Save without template (cross button) - save to backend first
+  const handleSaveWithoutTemplate = async () => {
     if (!imageUrl || !activity) return;
 
     triggerHaptic('light');
     handleTap('close-btn');
+    setIsSaving(true);
+
+    // Save to backend
+    console.info('[journey-debug] Preview: saving without template to backend', {
+      dayNumber,
+      isVideo,
+      activity,
+    });
+    
+    const saved = await upsertActivity({
+      displayUrl: imageUrl,
+      originalUrl: imageUrl,
+      isVideo,
+      activity,
+      frame: undefined,
+      duration,
+      pr,
+      dayNumber,
+    });
+    
+    setIsSaving(false);
+    
+    if (!saved) {
+      toast.error('Failed to save. Please try again.');
+      return;
+    }
+    
+    toast.success(`Day ${dayNumber} saved!`);
     setIsExiting(true);
 
     setTimeout(() => {
-      navigate('/', {
-        state: {
-          savePhoto: true,
-          imageUrl,
-          originalUrl: imageUrl,
-          isVideo,
-          activity,
-          frame: undefined,
-          duration,
-          pr,
-          isReview,
-          photoId,
-          dayNumber,
-        },
-      });
+      navigate('/', { replace: true, state: null });
     }, 400);
   };
 
