@@ -496,7 +496,7 @@ const Preview = () => {
   // Template Selection Step
   return (
     <div 
-      className="fixed inset-0 w-full overflow-hidden bg-black touch-manipulation" 
+      className="fixed inset-0 w-full bg-black touch-manipulation overflow-y-auto" 
       style={{ 
         height: '100dvh',
         minHeight: '-webkit-fill-available',
@@ -504,7 +504,7 @@ const Preview = () => {
     >
       {/* Blurred background image with dynamic color overlay */}
       <div 
-        className="absolute inset-0 scale-150 transition-all duration-500 animate-bg-drift"
+        className="fixed inset-0 scale-150 transition-all duration-500 animate-bg-drift pointer-events-none"
         style={{
           backgroundImage: `url("${imageUrl}")`,
           backgroundSize: 'cover',
@@ -514,7 +514,7 @@ const Preview = () => {
       />
       
       {/* Subtle particle/dust animation */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
@@ -557,19 +557,19 @@ const Preview = () => {
       
       {/* Dynamic gradient overlay based on current frame */}
       <div 
-        className="absolute inset-0 transition-all duration-500 animate-color-pulse"
+        className="fixed inset-0 transition-all duration-500 animate-color-pulse pointer-events-none"
         style={{ 
           backgroundColor: FRAME_COLORS[currentFrame].bg,
           backgroundImage: FRAME_COLORS[currentFrame].gradient 
         }}
       />
-      <div className="absolute inset-0 bg-black/20 animate-subtle-pulse" />
+      <div className="fixed inset-0 bg-black/20 animate-subtle-pulse pointer-events-none" />
       
       {/* Activity-specific background effect */}
       {activity && <ActivityBackgroundEffect activity={activity} />}
 
-      {/* Content - with flexible layout */}
-      <div className="relative z-10 flex flex-col h-full overflow-hidden">
+      {/* Content - scrollable layout */}
+      <div className="relative z-10 flex flex-col min-h-full">
         {/* Offscreen capture target (unscaled) for image saves */}
         <div
           ref={captureRef}
@@ -579,9 +579,9 @@ const Preview = () => {
           {renderFrame()}
         </div>
 
-        {/* Header - minimal (no delete icon - moved to tertiary CTA below) */}
+        {/* Header - sticky */}
         <div 
-          className={`flex items-center justify-between py-4 px-5 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 -translate-y-8 pointer-events-none' : ''}`}
+          className={`sticky top-0 z-20 flex items-center justify-between py-4 px-5 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 -translate-y-8 pointer-events-none' : ''}`}
           style={{ paddingTop: 'max(env(safe-area-inset-top, 16px), 16px)' }}
         >
           <button 
@@ -599,11 +599,12 @@ const Preview = () => {
           </button>
         </div>
         
-        {/* Frame carousel - constrained height */}
+        {/* Frame carousel - responsive height */}
         <div 
-          className={`flex-1 min-h-0 flex items-center overflow-hidden transition-all duration-700 ease-out ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''}`}
+          className={`flex-shrink-0 flex items-center justify-center transition-all duration-700 ease-out ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''}`}
           style={{ 
-            maxHeight: 'calc(100dvh - 280px)',
+            minHeight: 'min(55vh, 420px)',
+            maxHeight: '55vh',
           }}
         >
           {elementsHidden ? (
@@ -623,13 +624,13 @@ const Preview = () => {
             <div 
               ref={containerRef}
               onScroll={handleScroll}
-              className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center"
+              className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center py-2"
               style={{ 
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
-                paddingLeft: 'calc((100vw - min(60vw, 240px)) / 2)',
-                paddingRight: 'calc((100vw - min(60vw, 240px)) / 2)',
+                paddingLeft: 'calc((100vw - min(55vw, 220px)) / 2)',
+                paddingRight: 'calc((100vw - min(55vw, 220px)) / 2)',
               }}
             >
               {FRAMES.map((frame, index) => {
@@ -652,9 +653,9 @@ const Preview = () => {
                       elementsHidden && isRightOfCurrent ? 'opacity-0 translate-x-full' : ''
                     }`}
                     style={{ 
-                      width: 'min(60vw, 240px)',
-                      height: '100%',
-                      maxHeight: 'calc(min(60vw, 240px) * 16 / 9)',
+                      width: 'min(55vw, 220px)',
+                      height: 'calc(min(55vw, 220px) * 16 / 9)',
+                      maxHeight: 'calc(55vh - 16px)',
                       transform: `scale(${scale})`,
                       opacity: elementsHidden && !isActiveFrame ? 0 : opacity,
                       transition: 'transform 0.15s ease-out, opacity 0.15s ease-out',
@@ -677,19 +678,19 @@ const Preview = () => {
           )}
         </div>
 
-        {/* Content section - compact for mobile */}
+        {/* Content section - scrollable */}
         <div 
-          className={`flex-shrink-0 space-y-3 px-5 py-3 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
+          className={`flex-1 space-y-3 px-5 py-4 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
           style={{ 
             animationDelay: '0.3s',
-            paddingBottom: 'calc(72px + env(safe-area-inset-bottom, 16px))',
+            paddingBottom: 'calc(100px + env(safe-area-inset-bottom, 16px))',
           }}
         >
           {/* Editable data points */}
           <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 relative overflow-hidden">
             <button 
               onClick={() => { handleTap('duration'); openEditSheet('duration'); }}
-              className={`w-full flex justify-between items-center py-1.5 border-b border-white/10 tap-bounce min-h-[40px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
+              className={`w-full flex justify-between items-center py-2 border-b border-white/10 tap-bounce min-h-[44px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
             >
               <span className="text-white/80 text-sm flex items-center gap-2">
                 {label2}
@@ -701,7 +702,7 @@ const Preview = () => {
             </button>
             <button 
               onClick={() => { handleTap('pr'); openEditSheet('pr'); }}
-              className={`w-full flex justify-between items-center py-1.5 tap-bounce min-h-[40px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
+              className={`w-full flex justify-between items-center py-2 tap-bounce min-h-[44px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
             >
               <span className="text-white/80 text-sm flex items-center gap-2">
                 {label1} <span className="text-white/40">(Optional)</span>
@@ -714,7 +715,7 @@ const Preview = () => {
 
           {/* Health sync widget */}
           <div 
-            className={`bg-white/10 backdrop-blur-xl rounded-xl p-3 flex items-center gap-3 tap-bounce min-h-[56px] ${tappedElement === 'connect' ? 'animate-liquid-tap' : ''}`}
+            className={`bg-white/10 backdrop-blur-xl rounded-xl p-3 flex items-center gap-3 tap-bounce min-h-[60px] ${tappedElement === 'connect' ? 'animate-liquid-tap' : ''}`}
             onClick={() => { handleTap('connect'); setShowSyncPopup(true); }}
           >
             <div className="flex-1">
