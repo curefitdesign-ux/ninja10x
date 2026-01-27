@@ -6,7 +6,7 @@ import AuroraBackground from '@/components/AuroraBackground';
 import PhotoUploadCard from '@/components/PhotoUploadCard';
 import WidgetLayout2 from '@/components/WidgetLayout2';
 import WidgetLayout3 from '@/components/WidgetLayout3';
-import RecentPhotosGallery from '@/components/RecentPhotosGallery';
+import GalleryPickerSheet from '@/components/GalleryPickerSheet';
 import ReelGenerationOverlay from '@/components/ReelGenerationOverlay';
 import ReelPreviewScreen from '@/components/ReelPreviewScreen';
 import ReelHistoryGallery from '@/components/ReelHistoryGallery';
@@ -706,7 +706,7 @@ const Index = () => {
         </>
       )}
 
-      <RecentPhotosGallery
+      <GalleryPickerSheet
         isOpen={showRecentGallery}
         onClose={() => setShowRecentGallery(false)}
         onSelectPhoto={handleGalleryPhotoSelect}
