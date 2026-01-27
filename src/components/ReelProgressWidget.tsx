@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Play } from 'lucide-react';
 import { isVideoUrl } from '@/lib/media';
 import type { GenerationStep } from './ReelGenerationOverlay';
@@ -7,7 +7,7 @@ import type { GenerationStep } from './ReelGenerationOverlay';
 interface ReelProgressWidgetProps {
   isGenerating: boolean;
   currentStep: GenerationStep;
-  progress: number; // 0-100
+  progress: number;
   photos: Array<{
     imageUrl: string;
     activity: string;
@@ -18,23 +18,14 @@ interface ReelProgressWidgetProps {
   reelReady?: boolean;
 }
 
-// Media thumbnail component that extracts first frame from videos
-const MediaThumbnail = ({ 
-  url, 
-  activity,
-  isVideo 
-}: { 
-  url: string; 
-  activity: string;
-  isVideo?: boolean;
-}) => {
+// Media thumbnail with video frame extraction
+const MediaThumbnail = ({ url, activity, isVideo }: { url: string; activity: string; isVideo?: boolean }) => {
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [error, setError] = useState(false);
-  
-  const shouldUseVideoThumbnail = isVideo || isVideoUrl(url);
+  const shouldExtractFrame = isVideo || isVideoUrl(url);
 
   useEffect(() => {
-    if (!shouldUseVideoThumbnail) {
+    if (!shouldExtractFrame) {
       setThumbnail(url);
       return;
     }
@@ -45,142 +36,79 @@ const MediaThumbnail = ({
     video.playsInline = true;
     video.preload = 'metadata';
     
-    video.onloadeddata = () => {
-      video.currentTime = 0.1;
-    };
-    
+    video.onloadeddata = () => { video.currentTime = 0.1; };
     video.onseeked = () => {
       try {
         const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth || 200;
-        canvas.height = video.videoHeight || 300;
+        canvas.width = video.videoWidth || 100;
+        canvas.height = video.videoHeight || 140;
         const ctx = canvas.getContext('2d');
         if (ctx) {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          setThumbnail(canvas.toDataURL('image/jpeg', 0.8));
+          setThumbnail(canvas.toDataURL('image/jpeg', 0.7));
         }
-      } catch (e) {
-        console.log('Could not extract video thumbnail');
-        setError(true);
-      }
+      } catch { setError(true); }
     };
-    
     video.onerror = () => setError(true);
     video.src = url;
-    
     return () => { video.src = ''; };
-  }, [url, shouldUseVideoThumbnail]);
+  }, [url, shouldExtractFrame]);
 
   if (error || !thumbnail) {
-    if (shouldUseVideoThumbnail) {
-      return (
-        <video
-          src={url}
-          className="w-full h-full object-cover"
-          muted
-          playsInline
-          preload="metadata"
-        />
-      );
-    }
-    return (
-      <div className="w-full h-full bg-gradient-to-br from-purple-500/30 to-pink-500/30 flex items-center justify-center">
-        <span className="text-white/60 text-[8px]">{activity}</span>
+    return shouldExtractFrame ? (
+      <video src={url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+    ) : (
+      <div className="w-full h-full bg-white/5 flex items-center justify-center">
+        <span className="text-white/40 text-[6px]">{activity}</span>
       </div>
     );
   }
 
-  return (
-    <img
-      src={thumbnail}
-      alt={activity}
-      className="w-full h-full object-cover"
-      onError={() => setError(true)}
-    />
-  );
+  return <img src={thumbnail} alt={activity} className="w-full h-full object-cover" onError={() => setError(true)} />;
 };
 
-// Stacked Photo Card
-const StackedPhotoCard = ({ 
-  photo, 
-  index,
-  total
-}: { 
+// Compact stacked photo
+const StackedPhoto = ({ photo, index, total }: { 
   photo: { imageUrl: string; activity: string; dayNumber: number; isVideo?: boolean }; 
-  index: number;
-  total: number;
+  index: number; total: number;
 }) => {
-  // Fan out effect - cards spread from left
-  const rotation = (index - 1) * 8; // -8, 0, 8 degrees
-  const xOffset = index * 18; // Horizontal spread
-  const zIndex = total - index;
+  const rotation = (index - 1) * 10;
+  const xOffset = index * 12;
   
   return (
     <motion.div
-      className="absolute rounded-lg overflow-hidden"
+      className="absolute rounded-md overflow-hidden shadow-lg"
       style={{
-        width: '52px',
-        height: '72px',
+        width: '36px',
+        height: '48px',
         left: xOffset,
-        zIndex,
-        transformOrigin: 'bottom center',
+        zIndex: total - index,
+        border: '1px solid rgba(255,255,255,0.15)',
       }}
       initial={{ opacity: 0, scale: 0.8, rotate: rotation }}
-      animate={{ 
-        opacity: 1, 
-        scale: 1, 
-        rotate: rotation,
-      }}
-      transition={{ delay: index * 0.1, type: 'spring', stiffness: 300, damping: 25 }}
+      animate={{ opacity: 1, scale: 1, rotate: rotation }}
+      transition={{ delay: index * 0.08, type: 'spring', stiffness: 350, damping: 28 }}
     >
-      {/* Gradient Border */}
-      <div 
-        className="absolute inset-0 rounded-lg pointer-events-none z-10"
-        style={{
-          background: 'linear-gradient(135deg, rgba(236,72,153,0.6) 0%, rgba(139,92,246,0.6) 100%)',
-          padding: '1.5px',
-          mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-          maskComposite: 'xor',
-          WebkitMaskComposite: 'xor',
-        }}
-      />
-      
-      {/* Media */}
-      <MediaThumbnail 
-        url={photo.imageUrl} 
-        activity={photo.activity}
-        isVideo={photo.isVideo}
-      />
-      
-      {/* Activity label overlay */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5 pt-3 z-20">
-        <p className="text-white text-[8px] font-semibold leading-tight truncate">{photo.activity}</p>
-        <p className="text-white/50 text-[6px]">Day {photo.dayNumber}</p>
+      <MediaThumbnail url={photo.imageUrl} activity={photo.activity} isVideo={photo.isVideo} />
+      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-0.5 pt-2">
+        <p className="text-white text-[5px] font-medium truncate">{photo.activity}</p>
       </div>
     </motion.div>
   );
 };
 
-// Progress Bar
-const GradientProgressBar = ({ progress }: { progress: number }) => {
-  return (
-    <div className="relative w-full h-2 rounded-full overflow-hidden">
-      {/* Background track */}
-      <div className="absolute inset-0 bg-white/10 rounded-full" />
-      
-      {/* Progress fill */}
-      <motion.div 
-        className="absolute inset-y-0 left-0 rounded-full"
-        style={{
-          background: 'linear-gradient(90deg, #fbbf24 0%, #f97316 50%, #ec4899 100%)',
-        }}
-        initial={{ width: '0%' }}
-        animate={{ width: `${progress}%` }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-      />
-    </div>
-  );
-};
+// Progress bar
+const ProgressBar = ({ progress }: { progress: number }) => (
+  <div className="relative w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+    <motion.div 
+      className="absolute inset-y-0 left-0 rounded-full"
+      style={{ background: 'linear-gradient(90deg, #fbbf24, #f97316, #ec4899)' }}
+      initial={{ width: '0%' }}
+      animate={{ width: `${progress}%` }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+    />
+  </div>
+);
 
 const ReelProgressWidget = ({
   isGenerating,
@@ -193,77 +121,80 @@ const ReelProgressWidget = ({
   if (photos.length < 3 && !isGenerating) return null;
 
   const displayPhotos = photos.slice(0, 3);
-  
-  // Calculate week number from day numbers
   const weekNumber = Math.ceil(Math.max(...displayPhotos.map(p => p.dayNumber)) / 3);
   
-  // Status text based on current step
-  const getStatusText = () => {
+  const statusText = (() => {
     if (reelReady) return 'Your reel is ready!';
     switch (currentStep) {
       case 'narration': return 'Creating narration...';
       case 'voiceover': return 'Generating voiceover...';
-      case 'video': return 'Stitching your these week activity..';
+      case 'video': return 'Stitching your week activity...';
       case 'complete': return 'Your reel is ready!';
       default: return 'Preparing your reel...';
     }
-  };
+  })();
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      initial={{ opacity: 0, y: 16, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 16, scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
       className="w-full px-4"
     >
+      {/* Apple Liquid Glass Container */}
       <div 
-        className="relative w-full rounded-2xl p-4 flex items-center gap-4"
+        className="relative w-full rounded-2xl p-3 flex items-center gap-3 overflow-hidden"
         style={{
-          background: 'rgba(30, 35, 50, 0.85)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
+          backdropFilter: 'blur(40px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+          border: '1px solid rgba(255,255,255,0.12)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
         }}
         onClick={onViewReel}
       >
-        {/* Left: Stacked Photos */}
-        <div className="relative h-[76px] w-[90px] flex-shrink-0">
+        {/* Subtle inner highlight */}
+        <div 
+          className="absolute inset-0 rounded-2xl pointer-events-none"
+          style={{
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 40%)',
+          }}
+        />
+        
+        {/* Stacked Photos */}
+        <div className="relative h-[52px] w-[68px] flex-shrink-0">
           {displayPhotos.map((photo, index) => (
-            <StackedPhotoCard 
-              key={photo.dayNumber} 
-              photo={photo} 
-              index={index}
-              total={displayPhotos.length}
-            />
+            <StackedPhoto key={photo.dayNumber} photo={photo} index={index} total={displayPhotos.length} />
           ))}
         </div>
         
-        {/* Center: Title & Progress */}
-        <div className="flex-1 min-w-0">
-          <h3 className="text-white font-bold text-base mb-0.5">
+        {/* Content */}
+        <div className="flex-1 min-w-0 relative z-10">
+          <h3 className="text-white/90 font-semibold text-sm leading-tight mb-0.5">
             Week {weekNumber} • Conquer will power
           </h3>
-          <p className="text-white/50 text-xs mb-2 truncate">
-            {getStatusText()}
+          <p className="text-white/40 text-[10px] mb-1.5 truncate">
+            {statusText}
           </p>
-          <GradientProgressBar progress={progress} />
+          <ProgressBar progress={progress} />
         </div>
         
-        {/* Right: Play Button */}
+        {/* Play Button - Liquid Glass */}
         <motion.button
-          className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center"
+          className="relative flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center overflow-hidden"
           style={{
-            background: 'rgba(255, 255, 255, 0.12)',
-            backdropFilter: 'blur(8px)',
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.18)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.2)',
           }}
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
-          onClick={(e) => {
-            e.stopPropagation();
-            onViewReel?.();
-          }}
+          onClick={(e) => { e.stopPropagation(); onViewReel?.(); }}
         >
-          <Play className="w-5 h-5 text-white/70 ml-0.5" fill="currentColor" />
+          <Play className="w-4 h-4 text-white/80 ml-0.5" fill="currentColor" />
         </motion.button>
       </div>
     </motion.div>
