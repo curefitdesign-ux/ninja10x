@@ -10,7 +10,6 @@ import tileInactiveImg from "@/assets/progress/tile-inactive.png";
 import basePlatformImg from "@/assets/progress/base-platform.png";
 import engineBadgeImg from "@/assets/progress/engine-badge.png";
 import SharedImageTransition from "@/components/SharedImageTransition";
-import FullScreenReel from "@/components/FullScreenReel";
 import { isVideoUrl } from "@/lib/media";
 import { JourneyActivity } from "@/services/journey-service";
 
@@ -45,10 +44,6 @@ const Progress = () => {
   const [showStories, setShowStories] = useState(false);
   const [showTransitionIn, setShowTransitionIn] = useState(false);
 
-  // Reel viewer state
-  const [reelOpen, setReelOpen] = useState(false);
-  const [reelIndex, setReelIndex] = useState(0);
-
   // Current user's activities (for tile state)
   const { activities: myActivities, loading } = useJourneyActivities();
 
@@ -72,7 +67,7 @@ const Progress = () => {
     loadFeed();
   }, []);
 
-  // Convert to JourneyActivity shape for FullScreenReel
+  // Convert to JourneyActivity shape for reel navigation
   const feedAsActivities: JourneyActivity[] = publicFeed.map(p => ({
     id: p.id,
     user_id: '',
@@ -91,8 +86,13 @@ const Progress = () => {
   }));
 
   const handlePhotoCardTap = (index: number) => {
-    setReelIndex(index);
-    setReelOpen(true);
+    // Navigate to dedicated reel page
+    navigate('/reel', {
+      state: {
+        activities: feedAsActivities,
+        initialIndex: index,
+      }
+    });
   };
 
   // Animation sequence
@@ -381,17 +381,6 @@ const Progress = () => {
       </div>
 
       <div style={{ height: "6vh" }} />
-
-      {/* Full-screen reel viewer */}
-      <AnimatePresence>
-        {reelOpen && feedAsActivities.length > 0 && (
-          <FullScreenReel
-            activities={feedAsActivities}
-            initialIndex={reelIndex}
-            onClose={() => setReelOpen(false)}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 };
