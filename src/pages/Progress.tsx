@@ -130,8 +130,12 @@ const Progress = () => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 overflow-x-hidden overflow-y-auto"
-      style={{ background: "linear-gradient(180deg, #3A2A63 0%, #1A1530 45%, #060608 100%)" }}
+      className="fixed inset-0 z-50 overflow-x-hidden overflow-y-auto touch-manipulation overscroll-contain"
+      style={{ 
+        background: "linear-gradient(180deg, #3A2A63 0%, #1A1530 45%, #060608 100%)",
+        height: '100dvh',
+        minHeight: '-webkit-fill-available',
+      }}
     >
       {/* Background aurora */}
       <div 
@@ -159,8 +163,13 @@ const Progress = () => {
       {/* Close button */}
       <motion.button
         onClick={handleClose}
-        className="fixed z-50 flex items-center justify-center text-white/80"
-        style={{ top: "2vh", right: "4vw", width: "clamp(24px, 6vw, 28px)", height: "clamp(24px, 6vw, 28px)" }}
+        className="fixed z-50 flex items-center justify-center text-white/80 active:scale-95 transition-transform"
+        style={{ 
+          top: 'max(env(safe-area-inset-top, 8px), 8px)', 
+          right: '4vw', 
+          width: 'clamp(32px, 8vw, 40px)', 
+          height: 'clamp(32px, 8vw, 40px)',
+        }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
@@ -172,9 +181,9 @@ const Progress = () => {
       <AnimatePresence>
         {showStories && (
           <motion.div
-            className="w-full overflow-x-auto scrollbar-hide"
+            className="w-full overflow-x-auto scrollbar-hide overscroll-x-contain"
             style={{
-              paddingTop: "env(safe-area-inset-top, 2vh)",
+              paddingTop: "max(env(safe-area-inset-top, 16px), 16px)",
               paddingInline: "4vw",
               marginTop: "2vh",
               height: "24vh",

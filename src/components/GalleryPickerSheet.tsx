@@ -260,19 +260,25 @@ const GalleryPickerSheet = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex flex-col"
+          className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-manipulation"
           style={{
             background: 'rgba(15, 15, 25, 0.85)',
             backdropFilter: 'blur(40px) saturate(150%)',
             WebkitBackdropFilter: 'blur(40px) saturate(150%)',
+            height: '100dvh',
+            minHeight: '-webkit-fill-available',
           }}
         >
           {/* Header */}
-          <div className="relative pt-14 pb-5 px-4 flex-shrink-0">
+          <div 
+            className="relative pb-5 px-4 flex-shrink-0"
+            style={{ paddingTop: 'max(env(safe-area-inset-top, 56px), 56px)' }}
+          >
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={onClose}
-              className="absolute left-4 top-14 p-2 -ml-2"
+              className="absolute left-4 p-2 -ml-2"
+              style={{ top: 'max(env(safe-area-inset-top, 56px), 56px)' }}
             >
               <ChevronLeft className="w-7 h-7 text-white/70" />
             </motion.button>
@@ -284,7 +290,7 @@ const GalleryPickerSheet = ({
           </div>
 
           {/* Simple Clean Grid */}
-          <div className="flex-1 px-3 pb-28 overflow-y-auto relative">
+          <div className="flex-1 px-3 overflow-y-auto overscroll-contain -webkit-overflow-scrolling-touch" style={{ paddingBottom: 'calc(100px + env(safe-area-inset-bottom, 20px))' }}>
             <div className="grid grid-cols-3 gap-1.5">
               {/* Camera Button - First Item */}
               <motion.button
@@ -377,8 +383,9 @@ const GalleryPickerSheet = ({
 
           {/* Bottom Select Button */}
           <div 
-            className="fixed bottom-0 left-0 right-0 p-5 pb-8"
+            className="fixed bottom-0 left-0 right-0 p-5"
             style={{
+              paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 20px)',
               background: 'linear-gradient(to top, rgba(15, 15, 25, 1) 0%, rgba(15, 15, 25, 0.9) 60%, transparent 100%)',
             }}
           >
