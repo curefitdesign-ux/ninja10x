@@ -118,6 +118,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
     const hasPhoto = photo !== null;
     const isActiveDay = isActiveWeek && !hasPhoto && index === photos.findIndex(p => p === null);
     const dayNumber = weekIndex * 3 + index + 1;
+    const isFutureCard = !hasPhoto && !isActiveDay;
     
     // Expanded position - fan out from center with more spacing
     const expandedX = (index - 1) * (cardWidth + 20);
@@ -195,7 +196,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           </>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            {isActiveDay && isExpanded && (
+            {isActiveDay && isExpanded ? (
               <motion.div 
                 className="p-3 rounded-full bg-emerald-500/20 backdrop-blur-sm"
                 initial={{ scale: 0.5, opacity: 0 }}
@@ -208,7 +209,17 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
               >
                 <Upload className="w-6 h-6 text-emerald-400" strokeWidth={2.5} />
               </motion.div>
-            )}
+            ) : isFutureCard ? (
+              /* Lock icon overlay for future locked days */
+              <motion.div 
+                className="p-2.5 rounded-full bg-white/5 backdrop-blur-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isExpanded ? 0.9 : 0.6 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Lock className="w-4 h-4 text-white/40" strokeWidth={2} />
+              </motion.div>
+            ) : null}
           </div>
         )}
         
