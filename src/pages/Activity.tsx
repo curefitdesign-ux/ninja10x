@@ -43,7 +43,9 @@ import trekkingIcon from '@/assets/activities/trekking.png';
 import boxingIcon from '@/assets/activities/boxing.png';
 import yogaIcon from '@/assets/activities/yoga.png';
 
-const STORAGE_KEY = 'activity_photos_v1';
+import { getPhotosStorageKey } from "@/hooks/use-device-id";
+
+const STORAGE_KEY = getPhotosStorageKey();
 
 const activityOptions = [
   { name: 'Running', icon: runningIcon },
