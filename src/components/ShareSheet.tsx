@@ -8,6 +8,9 @@ import JournalFrame from '@/components/frames/JournalFrame';
 import VogueFrame from '@/components/frames/VogueFrame';
 import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
+import ReelProgressWidget from '@/components/ReelProgressWidget';
+import { useJourneyActivities } from '@/hooks/use-journey-activities';
+import { useFitnessReel } from '@/hooks/use-fitness-reel';
 
 type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
 
@@ -127,6 +130,59 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
   const [isExiting, setIsExiting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
+  // Get activities and reel hooks
+  const { activities } = useJourneyActivities();
+  const { 
+    generateReel, 
+    isGenerating: isGeneratingReel, 
+    currentStep: reelStep,
+    currentReel,
+  } = useFitnessReel();
+
+  // Auto-trigger reel generation when 3rd photo is logged
+  const [reelTriggered, setReelTriggered] = useState(false);
+  
+  useEffect(() => {
+    // Trigger reel generation on 3rd upload (dayNumber === 3)
+    if (dayNumber === 3 && activities.length >= 3 && !reelTriggered && !isGeneratingReel && !currentReel) {
+      setReelTriggered(true);
+      
+      // Prepare photo data for reel generation
+      const photoData = activities.slice(0, 3).map(a => ({
+        id: a.id,
+        imageUrl: a.storageUrl,
+        activity: a.activity || 'Activity',
+        duration: a.duration || '',
+        pr: a.pr || '',
+        uploadDate: new Date().toISOString(),
+        dayNumber: a.dayNumber,
+      }));
+      
+      generateReel(photoData);
+    }
+  }, [dayNumber, activities, reelTriggered, isGeneratingReel, currentReel, generateReel]);
+
+  // Calculate reel progress
+  const reelProgress = (() => {
+    if (!isGeneratingReel) {
+      return currentReel?.videoUrl ? 100 : 0;
+    }
+    switch (reelStep) {
+      case 'narration': return 25;
+      case 'voiceover': return 50;
+      case 'video': return 75;
+      case 'complete': return 100;
+      default: return 0;
+    }
+  })();
+
+  // Prepare photos for widget display
+  const reelPhotos = activities.slice(0, 3).map(a => ({
+    imageUrl: a.storageUrl,
+    activity: a.activity || 'Activity',
+    dayNumber: a.dayNumber,
+  }));
+  
   const shareText = '🏃 Check out my fitness activity! #FitnessJourney #HealthyLifestyle';
   const shareUrl = window.location.href;
   const fullShareText = `${shareText}\n\n${shareUrl}`;
@@ -217,7 +273,20 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
   const handleShare = async (app: typeof socialApps[0]) => {
     triggerHaptic('medium');
     
-    if (navigator.share) {
+    // Web fallback URLs for each platform
+    const webFallbacks: Record<string, string> = {
+      'WhatsApp': `https://wa.me/?text=${encodeURIComponent(fullShareText)}`,
+      'X': `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+      'Facebook': `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`,
+      'Telegram': `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
+      'LinkedIn': `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
+      'Instagram': `https://instagram.com`,
+      'Snapchat': `https://snapchat.com`,
+      'Messages': `sms:?body=${encodeURIComponent(fullShareText)}`,
+    };
+    
+    // Try native share first for supported apps
+    if (navigator.share && ['WhatsApp', 'Messages'].includes(app.name)) {
       try {
         const response = await fetch(imageUrl);
         const blob = await response.blob();
@@ -228,38 +297,34 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
           text: shareText,
           files: [file],
         });
-        handleCloseToHome();
         return;
       } catch (err) {
-        console.log('Native share failed, trying deep link');
+        console.log('Native share failed, using deep link');
       }
     }
     
+    // Try deep link first, then fallback to web
     const deepLink = app.share(fullShareText);
+    
+    // For Instagram and Snapchat, go directly to web/app store since they don't support text sharing
+    if (['Instagram', 'Snapchat'].includes(app.name)) {
+      window.open(webFallbacks[app.name], '_blank', 'noopener,noreferrer');
+      return;
+    }
+    
     if (deepLink) {
-      const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      document.body.appendChild(iframe);
-      
+      // Attempt deep link
       const start = Date.now();
       window.location.href = deepLink;
       
+      // Fallback to web after timeout
       setTimeout(() => {
-        if (Date.now() - start < 2000) {
-          const webFallbacks: Record<string, string> = {
-            'WhatsApp': `https://wa.me/?text=${encodeURIComponent(fullShareText)}`,
-            'X': `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
-            'Facebook': `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`,
-            'Telegram': `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
-            'LinkedIn': `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
-          };
-          
-          if (webFallbacks[app.name]) {
-            window.open(webFallbacks[app.name], '_blank', 'noopener,noreferrer');
-          }
+        if (Date.now() - start < 2000 && webFallbacks[app.name]) {
+          window.open(webFallbacks[app.name], '_blank', 'noopener,noreferrer');
         }
-        document.body.removeChild(iframe);
       }, 1500);
+    } else if (webFallbacks[app.name]) {
+      window.open(webFallbacks[app.name], '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -445,9 +510,32 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
                  <div className="relative z-10 w-full h-full">
                    {renderFramePreview()}
                  </div>
-               </motion.div>
+                </motion.div>
               
-              {/* Scrollable Social Apps Row - Show 50% of next icon */}
+               {/* Reel Progress Widget - Show on 3rd upload */}
+               {(activities.length >= 3 || isGeneratingReel) && (
+                 <motion.div
+                   className="w-full mb-4"
+                   initial={{ opacity: 0, y: 20 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   transition={{ delay: 0.2 }}
+                 >
+                   <ReelProgressWidget
+                     isGenerating={isGeneratingReel}
+                     currentStep={reelStep}
+                     progress={reelProgress}
+                     photos={reelPhotos}
+                     reelReady={!!currentReel?.videoUrl}
+                     onViewReel={() => {
+                       if (currentReel?.videoUrl) {
+                         window.open(currentReel.videoUrl, '_blank');
+                       }
+                     }}
+                   />
+                 </motion.div>
+               )}
+              
+               {/* Scrollable Social Apps Row - Show 50% of next icon */}
               <motion.div 
                 className="w-full overflow-x-auto scrollbar-hide"
                 animate={isExiting ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
