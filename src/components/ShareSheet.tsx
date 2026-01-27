@@ -470,7 +470,8 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
             </div>
             
              {/* Main Content - Scrollable */}
-             <div className="flex-1 flex flex-col items-center justify-center px-6 overflow-hidden">
+             <div className="flex-1 overflow-y-auto scrollbar-hide px-6 pb-40">
+               <div className="flex flex-col items-center pt-4">
                {/* Preview Card - locked to 9:16 with shared-element exit animation */}
                <motion.div 
                  className="relative w-full max-w-[280px] aspect-[9/16] rounded-[20px] overflow-hidden mb-6"
@@ -561,11 +562,12 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
                   ))}
                 </div>
               </motion.div>
+              </div>
             </div>
             
-             {/* Sticky Bottom Action Buttons - Download/Copy + Done */}
+             {/* Floating Bottom Action Buttons */}
             <motion.div 
-              className="sticky bottom-0 w-full px-6 pt-4"
+              className="fixed bottom-0 left-0 right-0 z-20 px-6 pt-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent"
               style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)' }}
               animate={isExiting ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
