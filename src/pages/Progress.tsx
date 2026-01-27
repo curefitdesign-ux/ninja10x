@@ -9,6 +9,7 @@ import tileLockedImg from "@/assets/progress/tile-locked.png";
 import tileActiveImg from "@/assets/progress/tile-active.png";
 import basePlatformImg from "@/assets/progress/base-platform.png";
 import engineBadgeImg from "@/assets/progress/engine-badge.png";
+import SharedImageTransition from "@/components/SharedImageTransition";
 
 const STORAGE_KEY = getPhotosStorageKey();
 
@@ -185,44 +186,10 @@ const Progress = () => {
       {/* Transition-in animation - Image from Share screen animating to top strip */}
       <AnimatePresence>
         {showTransitionIn && transitionImage && (
-          <motion.div
-            className="fixed inset-0 z-[60] pointer-events-none flex items-center justify-center"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-          >
-            <motion.div
-              className="relative aspect-[9/16] rounded-2xl overflow-hidden"
-              initial={{ 
-                width: '70vw',
-                scale: 1, 
-                y: 0,
-                x: 0,
-              }}
-              animate={{ 
-                width: '11vw',
-                scale: 0.5, 
-                y: -280,
-                x: -120,
-                rotate: -6,
-              }}
-              transition={{ 
-                type: 'spring',
-                stiffness: 130,
-                damping: 18,
-              }}
-              style={{
-                boxShadow: '0 12px 40px rgba(100, 70, 180, 0.5)',
-                border: '2px solid rgba(160, 120, 220, 0.35)',
-              }}
-            >
-              <img 
-                src={transitionImage} 
-                alt="Transitioning to strip" 
-                className="w-full h-full object-cover"
-              />
-            </motion.div>
-          </motion.div>
+          <SharedImageTransition
+            imageUrl={transitionImage}
+            targetSelector='[data-shared-element="progress-hero-card"]'
+          />
         )}
       </AnimatePresence>
 
@@ -264,6 +231,7 @@ const Progress = () => {
             <div className="flex items-end h-full" style={{ gap: "-2.5vw" }}>
               {/* User's hero card - first, slightly tilted */}
               <motion.div
+                data-shared-element="progress-hero-card"
                 className="relative flex-shrink-0 overflow-hidden"
                 style={{
                   width: "clamp(72px, 11vw, 92px)",
