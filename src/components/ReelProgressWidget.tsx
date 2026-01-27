@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { Play } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import type { GenerationStep } from './ReelGenerationOverlay';
 
@@ -22,92 +21,40 @@ const isVideoUrl = (url: string): boolean => {
   return /\.(mp4|webm|mov|avi|mkv|m4v)($|\?)/i.test(url);
 };
 
-// Liquid Glass Circular Progress Ring with translucent play button
-const LiquidGlassProgressRing = ({ progress, size = 56 }: { progress: number; size?: number }) => {
-  const strokeWidth = 3;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (progress / 100) * circumference;
-
+// Horizontal Gradient Progress Bar with Glow
+const GradientProgressBar = ({ progress }: { progress: number }) => {
   return (
-    <div className="relative" style={{ width: size, height: size }}>
-      {/* Outer glow effect */}
+    <div className="relative w-full h-3 mb-4">
+      {/* Glow effect behind the bar */}
       <div 
         className="absolute inset-0 rounded-full"
         style={{
-          background: 'radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%)',
-          filter: 'blur(8px)',
-          transform: 'scale(1.3)',
+          background: 'linear-gradient(90deg, #fbbf24 0%, #f97316 50%, #ec4899 100%)',
+          filter: 'blur(12px)',
+          opacity: 0.6,
+          transform: 'scaleY(2)',
         }}
       />
       
-      {/* Glassmorphic background */}
+      {/* Background track */}
       <div 
         className="absolute inset-0 rounded-full"
         style={{
-          background: 'rgba(255, 255, 255, 0.08)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
+          background: 'rgba(255, 255, 255, 0.1)',
         }}
       />
       
-      {/* SVG Progress ring */}
-      <svg
-        width={size}
-        height={size}
-        className="absolute inset-0 -rotate-90"
-      >
-        {/* Background ring */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="rgba(255,255,255,0.1)"
-          strokeWidth={strokeWidth}
-        />
-        {/* Progress ring with gradient */}
-        <defs>
-          <linearGradient id="liquidProgressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#fbbf24" />
-            <stop offset="50%" stopColor="#f97316" />
-            <stop offset="100%" stopColor="#ec4899" />
-          </linearGradient>
-        </defs>
-        <motion.circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="url(#liquidProgressGradient)"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-          style={{
-            filter: 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.5))',
-          }}
-        />
-      </svg>
-      
-      {/* Translucent liquid glass play button */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div 
-          className="w-9 h-9 rounded-full flex items-center justify-center"
-          style={{
-            background: 'linear-gradient(135deg, rgba(255, 200, 100, 0.6) 0%, rgba(249, 115, 22, 0.5) 50%, rgba(236, 72, 153, 0.4) 100%)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            boxShadow: '0 4px 12px rgba(251, 191, 36, 0.3), inset 0 1px 0 rgba(255,255,255,0.3)',
-          }}
-        >
-          <Play className="w-4 h-4 text-white fill-white ml-0.5 drop-shadow-sm" />
-        </div>
-      </div>
+      {/* Progress fill */}
+      <motion.div 
+        className="absolute inset-y-0 left-0 rounded-full"
+        style={{
+          background: 'linear-gradient(90deg, #fbbf24 0%, #f97316 50%, #ec4899 100%)',
+          boxShadow: '0 0 20px rgba(249, 115, 22, 0.5)',
+        }}
+        initial={{ width: '0%' }}
+        animate={{ width: `${progress}%` }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+      />
     </div>
   );
 };
@@ -203,6 +150,75 @@ const MediaThumbnail = ({
   );
 };
 
+// Single Photo Card Component
+const PhotoCard = ({ 
+  photo, 
+  index 
+}: { 
+  photo: { imageUrl: string; activity: string; dayNumber: number; isVideo?: boolean }; 
+  index: number;
+}) => {
+  return (
+    <motion.div
+      className="relative w-[72px] h-[96px] rounded-xl overflow-hidden flex-shrink-0"
+      style={{
+        boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+      }}
+      initial={{ opacity: 0, y: 20, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: index * 0.1, type: 'spring', stiffness: 300, damping: 25 }}
+    >
+      {/* Gradient Border */}
+      <div 
+        className="absolute inset-0 rounded-xl pointer-events-none z-10"
+        style={{
+          background: 'linear-gradient(135deg, rgba(236,72,153,0.5) 0%, rgba(139,92,246,0.5) 50%, rgba(59,130,246,0.5) 100%)',
+          padding: '1.5px',
+          mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+          maskComposite: 'xor',
+          WebkitMaskComposite: 'xor',
+        }}
+      />
+      
+      {/* Media thumbnail */}
+      <MediaThumbnail 
+        url={photo.imageUrl} 
+        activity={photo.activity}
+        isVideo={photo.isVideo}
+      />
+      
+      {/* Video/Camera indicator icon */}
+      <div className="absolute top-1.5 right-1.5 z-20">
+        <div 
+          className="w-5 h-5 rounded-md flex items-center justify-center"
+          style={{
+            background: 'rgba(0, 0, 0, 0.4)',
+            backdropFilter: 'blur(4px)',
+          }}
+        >
+          {photo.isVideo || isVideoUrl(photo.imageUrl) ? (
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+              <polygon points="5 3 19 12 5 21 5 3" fill="white" />
+            </svg>
+          ) : (
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" fill="white" />
+              <path d="m21 15-5-5L5 21" />
+            </svg>
+          )}
+        </div>
+      </div>
+      
+      {/* Activity label at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-2 pt-4 z-20">
+        <p className="text-white text-[10px] font-semibold leading-tight truncate">{photo.activity}</p>
+        <p className="text-white/50 text-[8px]">Day {photo.dayNumber}</p>
+      </div>
+    </motion.div>
+  );
+};
+
 const ReelProgressWidget = ({
   isGenerating,
   currentStep,
@@ -215,113 +231,24 @@ const ReelProgressWidget = ({
   if (photos.length < 3 && !isGenerating) return null;
 
   const displayPhotos = photos.slice(0, 3);
-  const weekNumber = Math.ceil((displayPhotos[0]?.dayNumber || 1) / 3);
-
-  const getStatusText = () => {
-    if (reelReady) return 'Your reel is ready!';
-    switch (currentStep) {
-      case 'narration': return 'Creating narration...';
-      case 'voiceover': return 'Generating voiceover...';
-      case 'video': return 'Stitching your week activity...';
-      case 'complete': return 'Your reel is ready!';
-      default: return 'Preparing your reel...';
-    }
-  };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 20, scale: 0.95 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="w-full px-2 py-3"
+      className="w-full px-4 py-4"
       onClick={onViewReel}
     >
-      {/* Compact Glassmorphic Container */}
-      <div 
-        className="relative rounded-2xl p-3 overflow-hidden"
-        style={{
-          background: 'rgba(30, 35, 50, 0.6)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-        }}
-      >
-        <div className="flex items-center gap-3">
-          {/* Stacked Photo Cards - Compact */}
-          <div className="relative flex-shrink-0 w-20 h-20">
-            {displayPhotos.map((photo, index) => {
-              const rotations = [-12, -6, 0];
-              const xOffsets = [-2, 6, 14];
-              const zIndexes = [1, 2, 3];
-              
-              return (
-                <motion.div
-                  key={photo.dayNumber}
-                  className="absolute top-0 left-0 w-14 h-[72px] rounded-lg overflow-hidden"
-                  style={{
-                    zIndex: zIndexes[index],
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
-                  }}
-                  initial={{ opacity: 0, rotate: rotations[index] - 10, x: xOffsets[index] - 10 }}
-                  animate={{ 
-                    opacity: 1, 
-                    rotate: rotations[index], 
-                    x: xOffsets[index],
-                  }}
-                  transition={{ delay: index * 0.06, type: 'spring', stiffness: 200, damping: 20 }}
-                >
-                  {/* Gradient Border */}
-                  <div 
-                    className="absolute inset-0 rounded-lg pointer-events-none z-10"
-                    style={{
-                      background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%)',
-                      padding: '1.5px',
-                      mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                      maskComposite: 'xor',
-                      WebkitMaskComposite: 'xor',
-                    }}
-                  />
-                  
-                  {/* Media thumbnail - handles both images and videos */}
-                  <MediaThumbnail 
-                    url={photo.imageUrl} 
-                    activity={photo.activity}
-                    isVideo={photo.isVideo}
-                  />
-                  
-                  {/* Activity label at bottom */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-1 pt-3 z-20">
-                    <p className="text-white text-[8px] font-medium leading-tight truncate">{photo.activity}</p>
-                    <p className="text-white/60 text-[6px]">Day {photo.dayNumber}</p>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          {/* Text Content */}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-white font-bold text-sm leading-tight mb-0.5">
-              Week {weekNumber} • Conquer will power
-            </h3>
-            <p className="text-white/60 text-xs">
-              {getStatusText()}
-            </p>
-          </div>
-
-          {/* Liquid Glass Circular Progress Play Button */}
-          <motion.div 
-            className="flex-shrink-0 cursor-pointer"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.3, type: 'spring', stiffness: 300 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <LiquidGlassProgressRing progress={progress} size={56} />
-          </motion.div>
-        </div>
+      {/* Gradient Progress Bar with Glow */}
+      <GradientProgressBar progress={progress} />
+      
+      {/* Horizontal Photo Cards Row */}
+      <div className="flex items-center gap-2">
+        {displayPhotos.map((photo, index) => (
+          <PhotoCard key={photo.dayNumber} photo={photo} index={index} />
+        ))}
       </div>
     </motion.div>
   );
