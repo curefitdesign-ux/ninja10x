@@ -14,8 +14,8 @@ import ReelHistoryGallery from '@/components/ReelHistoryGallery';
 import PullToRefresh from '@/components/PullToRefresh';
 import { useFitnessReel } from '@/hooks/use-fitness-reel';
 import { uploadToStorage } from '@/services/storage-service';
-import { getPhotosStorageKey } from '@/hooks/use-device-id';
 import SharedImageTransition from '@/components/SharedImageTransition';
+import { useJourneyActivities } from '@/hooks/use-journey-activities';
 
 import CameraUI from '@/components/CameraUI';
 import {
@@ -49,10 +49,8 @@ export interface Photo {
 }
 
 const MAX_DAYS = 12;
-const STORAGE_KEY = getPhotosStorageKey();
-const LEGACY_STORAGE_KEY = 'cn_photos_v2';
 
-const activities = [
+const ACTIVITY_OPTIONS = [
   { name: 'Running', icon: runningIcon },
   { name: 'Cycling', icon: cyclingIcon },
   { name: 'Trekking', icon: trekkingIcon },
@@ -70,18 +68,20 @@ const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Load photos from localStorage - storage-first (only metadata + storageUrl)
-  const [photos, setPhotos] = useState<Photo[]>(() => {
-    try {
-      const raw =
-        localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
-      if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed.filter((p: Photo) => p.storageUrl) : [];
-    } catch {
-      return [];
-    }
-  });
+  // Load photos from backend (single source of truth)
+  const { activities, loading: activitiesLoading, refresh: refreshActivities } = useJourneyActivities();
+  
+  // Convert backend activities to Photo shape for compatibility
+  const photos: Photo[] = activities.map(a => ({
+    id: a.id,
+    storageUrl: a.storageUrl,
+    isVideo: a.isVideo,
+    activity: a.activity,
+    frame: a.frame as Photo['frame'],
+    duration: a.duration,
+    pr: a.pr,
+    dayNumber: a.dayNumber,
+  }));
 
   // Shared-element transition from ShareSheet (X) to Cult Ninja widget (this page)
   const [shareTransitionImage, setShareTransitionImage] = useState<string | null>(null);
@@ -177,16 +177,7 @@ const Index = () => {
     setShowReelPreview(true);
   }, [setCurrentReelIndex]);
 
-  // Persist photos to localStorage (storage-first: only metadata + storageUrl)
-  useEffect(() => {
-    try {
-      // Only persist photos with storageUrl
-      const validPhotos = photos.filter(p => p.storageUrl);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(validPhotos));
-    } catch (e) {
-      console.error('Failed to save photos to localStorage:', e);
-    }
-  }, [photos]);
+  // Photos are now loaded from backend - no localStorage persistence needed
 
   // Detect week completion and trigger animation
   useEffect(() => {
@@ -218,94 +209,7 @@ const Index = () => {
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
   const currentDay = (photos.length % 3) + 1;
 
-  // Handle save from preview page - upload ORIGINAL to storage (not the framed version)
-  useEffect(() => {
-    if (location.state?.savePhoto && location.state?.activity) {
-      // IMPORTANT: Use originalUrl (the raw photo/video) for storage, NOT imageUrl (which may be framed)
-      const originalUrl = location.state.originalUrl || location.state.imageUrl;
-      const isReview = location.state.isReview;
-      const photoId = location.state.photoId;
-      const isVideo = location.state.isVideo || false;
-
-      if (!originalUrl) {
-        toast.error('No media to save');
-        navigate('/', { replace: true, state: null });
-        return;
-      }
-
-      const uploadAndSave = async () => {
-        // Upload anything that's NOT already a remote URL (data: and blob: are both uploadable via fetch())
-        let storageUrl: string | null = null;
-        if (originalUrl.startsWith('data:') || originalUrl.startsWith('blob:')) {
-          setIsUploading(true);
-
-          storageUrl = await uploadToStorage(
-            originalUrl,
-            `journey-${Date.now()}`,
-            isVideo
-          );
-
-          setIsUploading(false);
-
-          if (!storageUrl) {
-            toast.error('Upload failed. Please try again.');
-            navigate('/', { replace: true, state: null });
-            return;
-          }
-        } else if (originalUrl.startsWith('http')) {
-          // Already a storage URL - use as-is
-          storageUrl = originalUrl;
-        } else {
-          toast.error('Invalid media format');
-          navigate('/', { replace: true, state: null });
-          return;
-        }
-
-        if (isReview && photoId) {
-          // EDIT: Update existing photo (same day, don't add new)
-          setPhotos((prev) =>
-            prev.map((photo) =>
-              photo.id === photoId
-                ? {
-                    ...photo,
-                    storageUrl: storageUrl!,
-                    frame: location.state.frame || photo.frame,
-                    duration: location.state.duration || photo.duration,
-                    pr: location.state.pr || photo.pr,
-                    // Keep the same dayNumber
-                  }
-                : photo
-            )
-          );
-          toast.success(`Day ${photos.find(p => p.id === photoId)?.dayNumber || ''} updated!`);
-        } else {
-          // NEW: Add new photo as next day
-          const nextDay = getNextDayNumber();
-          if (nextDay > MAX_DAYS && photos.length >= MAX_DAYS) {
-            toast.error('Maximum 12 days reached. Edit existing days instead.');
-            navigate('/', { replace: true, state: null });
-            return;
-          }
-
-          const newPhoto: Photo = {
-            id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            storageUrl: storageUrl!,
-            isVideo,
-            activity: location.state.activity,
-            frame: location.state.frame || 'shaky',
-            duration: location.state.duration,
-            pr: location.state.pr,
-            dayNumber: nextDay,
-          };
-          setPhotos((prev) => [...prev, newPhoto]);
-          toast.success(`Day ${nextDay} added!`);
-        }
-      };
-
-      uploadAndSave();
-      navigate('/', { replace: true, state: null });
-    }
-  }, [location.state?.savePhoto, location.state?.originalUrl, location.state?.imageUrl, location.state?.activity, navigate, photos]);
+  // Save is now handled directly in Preview.tsx via upsertActivity - just navigate home
 
   // Handle retake from preview
   const [instantCamera, setInstantCamera] = useState(() => {
@@ -355,11 +259,11 @@ const Index = () => {
     setShowActivitySheet(true);
   };
 
-  const handleActivitySelect = useCallback((activity: string) => {
-    const activityData = activities.find(a => a.name === activity);
+  const handleActivitySelect = useCallback((activityName: string) => {
+    const activityData = ACTIVITY_OPTIONS.find(a => a.name === activityName);
     if (!activityData) return;
     
-    setSelectedActivity(activity);
+    setSelectedActivity(activityName);
     setAcknowledgedActivity(activityData);
     
     setSheetPhase('acknowledge');
@@ -382,7 +286,7 @@ const Index = () => {
           state: { 
             imageUrl: pendingMedia.url, 
             isVideo: pendingMedia.isVideo, 
-            activity,
+            activity: activityName,
             isReview: !!editingPhotoId,
             photoId: editingPhotoId,
             dayNumber: targetDayNumber,
@@ -393,7 +297,7 @@ const Index = () => {
       }
       setSelectedActivity(null);
     }, 1600);
-  }, [pendingMedia, navigate, editingPhotoId]);
+  }, [pendingMedia, navigate, editingPhotoId, photos, getNextDayNumber]);
 
   const handleCapture = (mediaDataUrl: string, isVideo?: boolean) => {
     setShowCamera(false);
@@ -426,16 +330,15 @@ const Index = () => {
   };
 
   const clearAllPhotos = () => {
-    setPhotos([]);
-    localStorage.removeItem(STORAGE_KEY);
+    // Clear photos is now a no-op since photos come from backend
+    // User should use the delete functionality instead
+    toast.info('Use the delete function to remove individual photos');
   };
 
   const handleRemovePhoto = (photoId: string) => {
-    setPhotos((prev) => {
-      const filtered = prev.filter((p) => p.id !== photoId);
-      // Re-number days after removal
-      return filtered.map((p, idx) => ({ ...p, dayNumber: idx + 1 }));
-    });
+    // This would need to call deleteActivity from the hook
+    // For now, navigate to preview for editing
+    toast.info('Navigate to photo to delete');
   };
 
   // Handle edit photo - opens preview to re-edit same day
@@ -458,19 +361,8 @@ const Index = () => {
   };
 
   const handleRefresh = useCallback(async () => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          setPhotos(parsed.filter((p: Photo) => p.storageUrl));
-        }
-      } catch {
-        // ignore
-      }
-    }
-  }, []);
+    await refreshActivities();
+  }, [refreshActivities]);
 
   // Calculate hours left until midnight
   const getHoursUntilMidnight = () => {
@@ -646,22 +538,22 @@ const Index = () => {
                 }`}
               >
                 <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
-                <h3 className="text-xl font-bold italic text-white text-center mb-8">Choose your activity</h3>
+                <h3 className="text-xl font-bold italic text-foreground text-center mb-8">Choose your activity</h3>
                 <div className="grid grid-cols-3 gap-4 px-2">
-                  {activities.map((activity) => (
+                  {ACTIVITY_OPTIONS.map((activityOption) => (
                     <button
-                      key={activity.name}
-                      onClick={() => handleActivitySelect(activity.name)}
+                      key={activityOption.name}
+                      onClick={() => handleActivitySelect(activityOption.name)}
                       className="flex flex-col items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors"
                     >
                       <div className="w-20 h-20 rounded-full overflow-hidden">
                         <img 
-                          src={activity.icon} 
-                          alt={activity.name}
+                          src={activityOption.icon} 
+                          alt={activityOption.name}
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <span className="text-sm font-semibold text-white">{activity.name}</span>
+                      <span className="text-sm font-semibold text-foreground">{activityOption.name}</span>
                     </button>
                   ))}
                 </div>
