@@ -10,7 +10,7 @@ import VogueFrame from '@/components/frames/VogueFrame';
 import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
 import WheelPicker from '@/components/WheelPicker';
-import CameraUI from '@/components/CameraUI';
+// CameraUI is now in a separate page
 import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ActivityBackgroundEffect from '@/components/ActivityBackgroundEffect';
@@ -82,9 +82,8 @@ const Preview = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Flow control
-  const [flowStep, setFlowStep] = useState<FlowStep>('camera');
-  const [capturedMedia, setCapturedMedia] = useState<{ url: string; isVideo: boolean } | null>(null);
+  // Flow control (camera step moved to separate page)
+  const [flowStep, setFlowStep] = useState<FlowStep>('template');
   
   // Template state
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -140,7 +139,7 @@ const Preview = () => {
     setTimeout(() => setTappedElement(null), 400);
   };
 
-  // Check if we're coming with existing data (review mode)
+  // Check if we're coming with existing data (review mode or from camera/gallery pages)
   useEffect(() => {
     const state = location.state as {
       imageUrl?: string;
@@ -154,6 +153,8 @@ const Preview = () => {
       photoId?: string;
       dayNumber?: number | string;
       startWithCamera?: boolean;
+      fromCamera?: boolean;
+      fromGallery?: boolean;
     } | null;
 
     const mediaUrl = state?.originalUrl || state?.imageUrl;
@@ -164,10 +165,27 @@ const Preview = () => {
       hasMediaUrl: !!mediaUrl,
       hasActivity: !!state?.activity,
       startWithCamera: state?.startWithCamera,
+      fromCamera: state?.fromCamera,
+      fromGallery: state?.fromGallery,
     });
 
+    // Coming from camera or gallery with media - go directly to template
+    if (mediaUrl && (state?.fromCamera || state?.fromGallery)) {
+      setImageUrl(mediaUrl);
+      setIsVideo(state.isVideo ?? isVideoUrl(mediaUrl));
+      setActivity(state.activity || 'Running');
+      setDuration(state.duration || '2hrs');
+      setPr(state.pr || '');
+      setIsReview(false);
+      setPhotoId(null);
+      setDayNumber(Number((state.dayNumber ?? 1) as number | string));
+      setFlowStep('template');
+      setTimeout(() => setIsLoaded(true), 100);
+      return;
+    }
+
     if (mediaUrl && state?.activity) {
-      // Existing photo/video - go directly to template selection
+      // Existing photo/video - go directly to template selection (review mode)
       setImageUrl(mediaUrl);
       setIsVideo(state.isVideo ?? isVideoUrl(mediaUrl));
       setActivity(state.activity);
@@ -183,12 +201,10 @@ const Preview = () => {
       setFlowStep('template');
       setTimeout(() => setIsLoaded(true), 100);
     } else {
-      // No existing data - start with camera
-      setFlowStep('camera');
-      // Get dayNumber from state if provided
-      if (state?.dayNumber != null) {
-        setDayNumber(Number(state.dayNumber as number | string));
-      }
+      // No existing data - redirect to gallery page (camera is now separate)
+      const dayNum = state?.dayNumber != null ? Number(state.dayNumber as number | string) : 1;
+      setDayNumber(dayNum);
+      navigate('/gallery', { state: { dayNumber: dayNum }, replace: true });
     }
   }, []);
 
@@ -198,21 +214,6 @@ const Preview = () => {
       inputRef.current.focus();
     }
   }, [editingField]);
-
-  // Handle camera capture - go directly to template (skip activity selection)
-  const handleCameraCapture = useCallback((mediaDataUrl: string, isVideoMedia?: boolean) => {
-    setCapturedMedia({ url: mediaDataUrl, isVideo: isVideoMedia || false });
-    setImageUrl(mediaDataUrl);
-    setIsVideo(isVideoMedia || false);
-    setActivity('Running'); // Default activity
-    setFlowStep('template');
-    setTimeout(() => setIsLoaded(true), 100);
-  }, []);
-
-  // Handle camera close
-  const handleCameraClose = useCallback(() => {
-    navigate('/');
-  }, [navigate]);
 
 
   // Capture framed image for sharing
@@ -235,14 +236,10 @@ const Preview = () => {
     }
   };
 
-  // Handle removing the current image (just go back to camera, don't delete from DB)
+  // Handle removing the current image - redirect to gallery
   const handleRemoveImage = () => {
     triggerHaptic('medium');
-    setImageUrl(null);
-    setActivity(null);
-    setCapturedMedia(null);
-    setFlowStep('camera');
-    setIsLoaded(false);
+    navigate('/gallery', { state: { dayNumber }, replace: true });
   };
 
   // Handle deleting the activity from DB (only for review mode)
@@ -343,15 +340,11 @@ const Preview = () => {
     }, 400);
   };
 
-  // Retake - go back to camera step
+  // Retake - navigate to gallery page
   const handleRetake = () => {
     triggerHaptic('light');
     handleTap('retake-btn');
-    setFlowStep('camera');
-    setCapturedMedia(null);
-    setImageUrl(null);
-    setActivity(null);
-    setIsLoaded(false);
+    navigate('/gallery', { state: { dayNumber }, replace: true });
   };
 
   // Handle scroll to update current frame
@@ -494,26 +487,10 @@ const Preview = () => {
     }
   };
 
-  // Camera Step
+  // Camera step is now a separate page - redirect if somehow reached
   if (flowStep === 'camera') {
-    return (
-      <div 
-        className="fixed inset-0 z-50 bg-black overflow-hidden touch-none" 
-        style={{ 
-          height: '100dvh',
-          minHeight: '-webkit-fill-available',
-        }}
-      >
-        <CameraUI
-          activity=""
-          week={calculatedWeek}
-          day={dayNumber}
-          onCapture={handleCameraCapture}
-          onClose={handleCameraClose}
-          initialCaptureMode="photo"
-        />
-      </div>
-    );
+    navigate('/gallery', { state: { dayNumber }, replace: true });
+    return null;
   }
 
   // Template Selection Step
