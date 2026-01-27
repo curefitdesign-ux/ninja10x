@@ -39,7 +39,7 @@ const Activity = () => {
   const [activeTab, setActiveTab] = useState("activity");
   
   // Journey activities from DB (single source of truth)
-  const { activities, loading, refresh, upsertActivity } = useJourneyActivities();
+  const { activities, loading, refresh } = useJourneyActivities();
   
   // Convert to LoggedPhoto shape for PhotoLoggingWidget
   const photos: LoggedPhoto[] = activities.map(a => ({
@@ -99,71 +99,37 @@ const Activity = () => {
     }
   }, [location.state?.fromShare, location.state?.transitionToWidget, navigate]);
 
-  // Handle save from preview page
+  // Handle return from preview page (save already done in Preview)
+  // Just refresh data and show celebration
   useEffect(() => {
-    if (!location.state?.savePhoto || !location.state?.activity) return;
-
-    const navState = location.state as {
-      imageUrl?: string;
-      originalUrl?: string;
-      isVideo?: boolean;
-      activity?: string;
-      frame?: string;
-      duration?: string;
-      pr?: string;
-      dayNumber?: number | string;
-    };
-
-    const displayUrl = navState.imageUrl;
-    const originalUrl = navState.originalUrl || navState.imageUrl;
-    const isVideo = navState.isVideo || false;
-    const dayNumber = Number(navState.dayNumber ?? (photos.length + 1));
-
-    console.info('[journey-debug] Activity: saving from preview', {
-      dayNumber,
-      isVideo,
-      activity: navState.activity,
-    });
-
-    if (!displayUrl || !originalUrl || !Number.isFinite(dayNumber)) {
-      toast.error('No media to save');
-      navigate('/', { replace: true, state: null });
-      return;
-    }
-
-    const run = async () => {
-      const result = await upsertActivity({
-        displayUrl,
-        originalUrl,
-        isVideo,
-        activity: navState.activity,
-        frame: navState.frame,
-        duration: navState.duration,
-        pr: navState.pr,
-        dayNumber,
-      });
-
-      if (!result) {
-        toast.error('Failed to save. Please try again.');
-        navigate('/', { replace: true, state: null });
-        return;
-      }
-
-      toast.success(`Day ${dayNumber} saved!`);
-      setCelebrateSuccess(true);
-      setTimeout(() => setCelebrateSuccess(false), 2500);
-
-      // Check if week is completed
-      const weekIndex = Math.floor((dayNumber - 1) / 3);
-      const weekStartDay = weekIndex * 3 + 1;
-      const updatedPhotos = [...photos.filter(p => p.dayNumber !== dayNumber), result];
-      const weekPhotos = updatedPhotos.filter(
-        p => p.dayNumber >= weekStartDay && p.dayNumber <= weekStartDay + 2
-      );
-
-      if (weekPhotos.length === 3) {
+    // No longer handle savePhoto - Preview now saves directly to backend
+    // Just refresh activities on mount to get latest data
+  }, []);
+  
+  // Trigger celebration when new activities are detected
+  useEffect(() => {
+    if (photos.length === 0) return;
+    
+    const latestDay = Math.max(...photos.map(p => p.dayNumber));
+    const weekIndex = Math.floor((latestDay - 1) / 3);
+    const weekStartDay = weekIndex * 3 + 1;
+    const weekPhotos = photos.filter(
+      p => p.dayNumber >= weekStartDay && p.dayNumber <= weekStartDay + 2
+    );
+    
+    // Check if week just completed (3 photos in current week)
+    if (weekPhotos.length === 3 && !showWeekCelebration) {
+      // Only celebrate if we haven't already
+      const celebratedWeeksKey = 'celebrated_weeks';
+      const celebratedWeeks = JSON.parse(localStorage.getItem(celebratedWeeksKey) || '[]');
+      const weekNum = weekIndex + 1;
+      
+      if (!celebratedWeeks.includes(weekNum)) {
+        // Mark as celebrated
+        localStorage.setItem(celebratedWeeksKey, JSON.stringify([...celebratedWeeks, weekNum]));
+        
         setTimeout(() => {
-          setCompletedWeekNumber(weekIndex + 1);
+          setCompletedWeekNumber(weekNum);
           setShowWeekCelebration(true);
           if (weekIndex === 0) {
             const duration = 3000;
@@ -192,12 +158,8 @@ const Activity = () => {
           setTimeout(() => setShowWeekCelebration(false), 3500);
         }, 500);
       }
-
-      navigate('/', { replace: true, state: null });
-    };
-
-    void run();
-  }, [location.state, navigate, photos, upsertActivity]);
+    }
+  }, [photos, showWeekCelebration]);
 
   // Derived stats
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
