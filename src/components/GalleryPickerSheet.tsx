@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, ChevronLeft, AlertTriangle } from 'lucide-react';
+import { Camera, ChevronLeft, AlertTriangle, Plus } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ImageCropper from './ImageCropper';
 import VideoTrimmer from './VideoTrimmer';
@@ -18,12 +18,29 @@ interface GalleryItem {
   timestamp: number;
 }
 
+const GALLERY_STORAGE_KEY = 'gallery_items_cache';
+
 const GalleryPickerSheet = ({
   isOpen,
   onClose,
   onSelectPhoto
 }: GalleryPickerSheetProps) => {
-  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  // Load cached gallery items from localStorage
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(() => {
+    try {
+      const cached = localStorage.getItem(GALLERY_STORAGE_KEY);
+      if (cached) {
+        const items = JSON.parse(cached);
+        // Filter to only show items from last 24 hours
+        const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+        return items.filter((item: GalleryItem) => item.timestamp >= twentyFourHoursAgo);
+      }
+    } catch (e) {
+      console.error('Failed to load cached gallery:', e);
+    }
+    return [];
+  });
+  
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
   const [showWarning, setShowWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
@@ -36,6 +53,15 @@ const GalleryPickerSheet = ({
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  // Persist gallery items to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(galleryItems));
+    } catch (e) {
+      console.error('Failed to cache gallery:', e);
+    }
+  }, [galleryItems]);
 
   // Reset state when closed
   useEffect(() => {
@@ -91,15 +117,19 @@ const GalleryPickerSheet = ({
         triggerHaptic('medium');
         const mediaDataUrl = event.target.result as string;
         
-        // Add to gallery items for display
+        // Add to gallery items for display (cache for future)
         const newItem: GalleryItem = {
           id: Date.now().toString(),
           dataUrl: mediaDataUrl,
           isVideo,
-          timestamp: file.lastModified,
+          timestamp: isFromCamera ? Date.now() : file.lastModified,
         };
         
-        setGalleryItems(prev => [newItem, ...prev]);
+        setGalleryItems(prev => {
+          // Prevent duplicates and limit cache size
+          const filtered = prev.filter(p => p.dataUrl !== mediaDataUrl);
+          return [newItem, ...filtered].slice(0, 20);
+        });
         
         // Auto-select and proceed to edit
         setMediaToEdit(mediaDataUrl);
@@ -167,7 +197,6 @@ const GalleryPickerSheet = ({
     setShowCropper(false);
     setShowTrimmer(false);
     setMediaToEdit(null);
-    // Open file picker again
     fileInputRef.current?.click();
   };
 
@@ -217,7 +246,7 @@ const GalleryPickerSheet = ({
         onChange={(e) => handleFileSelect(e, true)}
       />
 
-      {/* Full screen overlay */}
+      {/* Full screen overlay with translucent blur */}
       <AnimatePresence>
         <motion.div
           initial={{ opacity: 0 }}
@@ -225,7 +254,9 @@ const GalleryPickerSheet = ({
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex flex-col"
           style={{
-            background: 'linear-gradient(180deg, rgba(45, 35, 60, 0.98) 0%, rgba(25, 25, 45, 0.99) 30%, rgba(15, 15, 30, 1) 100%)',
+            background: 'rgba(15, 15, 25, 0.85)',
+            backdropFilter: 'blur(40px) saturate(150%)',
+            WebkitBackdropFilter: 'blur(40px) saturate(150%)',
           }}
         >
           {/* Header */}
@@ -244,120 +275,109 @@ const GalleryPickerSheet = ({
             </div>
           </div>
 
-          {/* Gallery Grid Container */}
-          <div className="flex-1 px-4 pb-28 overflow-y-auto">
-            {/* Frosted glass container */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.4 }}
-              className="rounded-[28px] p-2.5 overflow-hidden"
-              style={{
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%)',
-                backdropFilter: 'blur(24px) saturate(150%)',
-                WebkitBackdropFilter: 'blur(24px) saturate(150%)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-              }}
-            >
-              <div className="grid grid-cols-3 gap-2">
-                {/* Camera Button - First Item */}
-                <motion.button
-                  whileTap={{ scale: 0.92 }}
-                  whileHover={{ scale: 1.02 }}
-                  onClick={handleCameraCapture}
-                  className="aspect-square rounded-2xl flex items-center justify-center relative overflow-hidden"
+          {/* Simple Clean Grid */}
+          <div className="flex-1 px-3 pb-28 overflow-y-auto">
+            <div className="grid grid-cols-3 gap-1.5">
+              {/* Camera Button - First Item */}
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCameraCapture}
+                className="aspect-square rounded-xl flex items-center justify-center"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                }}
+              >
+                <div 
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
                   style={{
-                    background: 'linear-gradient(145deg, rgba(60, 55, 75, 0.9) 0%, rgba(45, 40, 60, 0.95) 100%)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.25)',
                   }}
                 >
-                  {/* Inner camera icon container */}
-                  <div 
-                    className="w-14 h-14 rounded-[18px] flex items-center justify-center"
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.08)',
-                      border: '1.5px solid rgba(255, 255, 255, 0.18)',
-                      boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-                    }}
-                  >
-                    <Camera className="w-7 h-7 text-white/75" strokeWidth={1.5} />
-                  </div>
+                  <Camera className="w-6 h-6 text-white/70" strokeWidth={1.5} />
+                </div>
+              </motion.button>
+
+              {/* Cached Gallery Items */}
+              {galleryItems.map((item, index) => (
+                <motion.button
+                  key={item.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.03 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleItemTap(item)}
+                  className="aspect-square rounded-xl overflow-hidden relative"
+                >
+                  {item.isVideo ? (
+                    <video
+                      src={item.dataUrl}
+                      className="w-full h-full object-cover"
+                      muted
+                      playsInline
+                    />
+                  ) : (
+                    <img
+                      src={item.dataUrl}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                  {item.isVideo && (
+                    <div 
+                      className="absolute bottom-1 right-1 rounded px-1.5 py-0.5 text-[10px] font-medium text-white"
+                      style={{
+                        background: 'rgba(0, 0, 0, 0.6)',
+                      }}
+                    >
+                      Video
+                    </div>
+                  )}
                 </motion.button>
+              ))}
 
-                {/* Gallery Items */}
-                {galleryItems.map((item, index) => (
-                  <motion.button
-                    key={item.id}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: index * 0.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleItemTap(item)}
-                    className={`aspect-square rounded-2xl overflow-hidden relative ${
-                      selectedItem?.id === item.id ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-transparent' : ''
-                    }`}
-                    style={{
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-                    }}
-                  >
-                    {item.isVideo ? (
-                      <video
-                        src={item.dataUrl}
-                        className="w-full h-full object-cover"
-                        muted
-                        playsInline
-                      />
-                    ) : (
-                      <img
-                        src={item.dataUrl}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                    {item.isVideo && (
-                      <div 
-                        className="absolute bottom-1.5 right-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-white"
-                        style={{
-                          background: 'rgba(0, 0, 0, 0.6)',
-                          backdropFilter: 'blur(4px)',
-                        }}
-                      >
-                        Video
-                      </div>
-                    )}
-                  </motion.button>
-                ))}
-
-                {/* Empty State / Add More Placeholder */}
-                {galleryItems.length < 11 && (
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    whileHover={{ scale: 1.02 }}
-                    onClick={handleGallerySelect}
-                    className="aspect-square rounded-2xl flex items-center justify-center"
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.03)',
-                      border: '2px dashed rgba(255, 255, 255, 0.15)',
-                    }}
-                  >
-                    <span className="text-white/25 text-3xl font-light">+</span>
-                  </motion.button>
-                )}
-              </div>
-            </motion.div>
+              {/* Add More Button */}
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={handleGallerySelect}
+                className="aspect-square rounded-xl flex items-center justify-center"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  border: '1.5px dashed rgba(255, 255, 255, 0.15)',
+                }}
+              >
+                <Plus className="w-7 h-7 text-white/25" strokeWidth={1.5} />
+              </motion.button>
+            </div>
+            
+            {/* Empty state hint */}
+            {galleryItems.length === 0 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-center mt-8 px-6"
+              >
+                <p className="text-white/40 text-sm">
+                  Tap the camera or + button to add photos
+                </p>
+                <p className="text-white/25 text-xs mt-2">
+                  Previously selected photos will appear here
+                </p>
+              </motion.div>
+            )}
           </div>
 
           {/* Bottom Select Button */}
           <div 
             className="fixed bottom-0 left-0 right-0 p-5 pb-8"
             style={{
-              background: 'linear-gradient(to top, rgba(15, 15, 30, 1) 0%, rgba(15, 15, 30, 0.95) 60%, transparent 100%)',
+              background: 'linear-gradient(to top, rgba(15, 15, 25, 1) 0%, rgba(15, 15, 25, 0.9) 60%, transparent 100%)',
             }}
           >
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={handleGallerySelect}
-              className="w-full py-4 rounded-2xl font-semibold text-base tracking-wide transition-all"
+              className="w-full py-4 rounded-2xl font-semibold text-base tracking-wide"
               style={{
                 background: 'rgba(255, 255, 255, 0.06)',
                 color: 'rgba(255, 255, 255, 0.35)',
@@ -393,11 +413,11 @@ const GalleryPickerSheet = ({
                   <div
                     className="rounded-3xl p-6 max-w-sm w-full"
                     style={{
-                      background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.08) 100%)',
-                      backdropFilter: 'blur(40px) saturate(180%)',
-                      WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                      background: 'rgba(30, 30, 45, 0.95)',
+                      backdropFilter: 'blur(40px)',
+                      WebkitBackdropFilter: 'blur(40px)',
                       border: '1px solid rgba(239, 68, 68, 0.25)',
-                      boxShadow: '0 16px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 60px rgba(239, 68, 68, 0.08)',
+                      boxShadow: '0 16px 48px rgba(0, 0, 0, 0.4)',
                     }}
                   >
                     <div className="flex flex-col items-center text-center gap-4">
@@ -423,9 +443,8 @@ const GalleryPickerSheet = ({
                         }}
                         className="w-full py-3.5 px-4 rounded-2xl font-medium text-sm text-white mt-2 transition-all active:scale-95"
                         style={{
-                          background: 'rgba(255, 255, 255, 0.15)',
-                          border: '1px solid rgba(255, 255, 255, 0.2)',
-                          boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                          background: 'rgba(255, 255, 255, 0.12)',
+                          border: '1px solid rgba(255, 255, 255, 0.15)',
                         }}
                       >
                         Try Another Photo
