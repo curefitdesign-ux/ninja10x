@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { Play } from 'lucide-react';
 import type { GenerationStep } from './ReelGenerationOverlay';
 
 interface ReelProgressWidgetProps {
@@ -14,13 +14,6 @@ interface ReelProgressWidgetProps {
   onViewReel?: () => void;
   reelReady?: boolean;
 }
-
-const stepLabels: Record<GenerationStep, string> = {
-  narration: 'Creating narration...',
-  voiceover: 'Generating voiceover...',
-  video: 'Stitching your reel...',
-  complete: 'Reel ready!',
-};
 
 const ReelProgressWidget = ({
   isGenerating,
@@ -41,132 +34,91 @@ const ReelProgressWidget = ({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="w-full max-w-sm mx-auto"
+      className="w-full py-6"
+      onClick={onViewReel}
     >
-      {/* Main Card */}
-      <div className="relative bg-black/80 backdrop-blur-2xl rounded-3xl p-5 border border-white/10 overflow-hidden">
-        {/* Glow effect at progress position */}
-        <div
-          className="absolute top-0 h-full w-32 pointer-events-none opacity-60"
-          style={{
-            left: `${progress}%`,
-            transform: 'translateX(-50%)',
-            background: 'radial-gradient(ellipse at center, rgba(134, 239, 172, 0.4) 0%, transparent 70%)',
-            filter: 'blur(20px)',
-          }}
-        />
-
-        {/* Header Row */}
-        <div className="relative flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            {isGenerating ? (
-              <Loader2 className="w-5 h-5 text-white/70 animate-spin" />
-            ) : (
-              <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
-                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-            )}
-            <span className="text-white/80 text-sm font-medium">
-              {isGenerating ? stepLabels[currentStep] : 'Your Journey Reel'}
-            </span>
-          </div>
-          <span className="text-white font-bold text-2xl">{Math.round(progress)}%</span>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="relative h-3 bg-white/10 rounded-full overflow-hidden mb-5">
-          {/* Gradient progress fill */}
-          <motion.div
-            className="absolute inset-y-0 left-0 rounded-full"
-            style={{
-              background: 'linear-gradient(90deg, #22c55e 0%, #4ade80 50%, #86efac 100%)',
-            }}
-            initial={{ width: '0%' }}
-            animate={{ width: `${progress}%` }}
-            transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-          />
-          
-          {/* Glowing orb at progress edge */}
-          <motion.div
-            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full"
-            style={{
-              background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(134,239,172,0.8) 50%, transparent 70%)',
-              boxShadow: '0 0 12px rgba(134, 239, 172, 0.8)',
-            }}
-            initial={{ left: '0%' }}
-            animate={{ left: `${progress}%` }}
-            transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-          />
-        </div>
-
+      <div className="flex items-end gap-1">
         {/* Stacked Photo Cards */}
-        <div className="flex items-center gap-4">
-          {/* Photos Stack */}
-          <div className="relative flex-shrink-0 w-28 h-36">
-            {displayPhotos.map((photo, index) => {
-              const rotation = (index - 1) * 8; // -8, 0, 8 degrees
-              const xOffset = (index - 1) * -8; // Stack offset
-              
-              return (
-                <motion.div
-                  key={photo.dayNumber}
-                  className="absolute top-0 left-0 w-20 rounded-xl overflow-hidden border-2 border-white/20"
+        <div className="relative flex-shrink-0 w-32 h-40">
+          {displayPhotos.map((photo, index) => {
+            // Cards fan out: first card tilted left, second slightly left, third straight
+            const rotations = [-12, -6, 0];
+            const xOffsets = [0, 16, 32];
+            const zIndexes = [1, 2, 3];
+            
+            return (
+              <motion.div
+                key={photo.dayNumber}
+                className="absolute bottom-0 left-0 w-[72px] rounded-2xl overflow-hidden"
+                style={{
+                  aspectRatio: '9/16',
+                  zIndex: zIndexes[index],
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                  border: '2px solid',
+                  borderImage: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%) 1',
+                  borderImageSlice: 1,
+                }}
+                initial={{ opacity: 0, rotate: rotations[index] - 10, x: xOffsets[index] - 20 }}
+                animate={{ 
+                  opacity: 1, 
+                  rotate: rotations[index], 
+                  x: xOffsets[index],
+                }}
+                transition={{ delay: index * 0.1, type: 'spring', stiffness: 200, damping: 20 }}
+              >
+                {/* Pink/Purple gradient border */}
+                <div 
+                  className="absolute inset-0 rounded-2xl pointer-events-none"
                   style={{
-                    aspectRatio: '9/16',
-                    zIndex: index,
+                    background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%)',
+                    padding: '2px',
+                    mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                    maskComposite: 'xor',
+                    WebkitMaskComposite: 'xor',
                   }}
-                  initial={{ opacity: 0, rotate: rotation - 10, x: xOffset - 20 }}
-                  animate={{ 
-                    opacity: 1, 
-                    rotate: rotation, 
-                    x: xOffset,
-                  }}
-                  transition={{ delay: index * 0.1, type: 'spring', stiffness: 200 }}
-                >
-                  <img
-                    src={photo.imageUrl}
-                    alt={photo.activity}
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Day label */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-                    <p className="text-white text-[10px] font-bold">{photo.activity}</p>
-                    <p className="text-white/70 text-[8px]">Day {photo.dayNumber}</p>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          {/* Gradient Timeline */}
-          <div className="flex-1 flex flex-col items-center justify-center">
-            <div 
-              className="w-full h-2 rounded-full"
-              style={{
-                background: 'linear-gradient(90deg, #fcd34d 0%, #fb923c 50%, #f87171 100%)',
-              }}
-            />
-            <p className="text-white/50 text-[10px] mt-2 text-center">
-              {photos.length} activities logged
-            </p>
-          </div>
+                />
+                
+                <img
+                  src={photo.imageUrl}
+                  alt={photo.activity}
+                  className="w-full h-full object-cover rounded-xl"
+                />
+                
+                {/* Play icon on top card */}
+                {index === 2 && (
+                  <motion.div 
+                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/90 flex items-center justify-center shadow-lg"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.4, type: 'spring', stiffness: 300 }}
+                  >
+                    <Play className="w-3 h-3 text-gray-800 fill-gray-800 ml-0.5" />
+                  </motion.div>
+                )}
+                
+                {/* Activity label at bottom */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-2 pt-6">
+                  <p className="text-white text-xs font-semibold leading-tight">{photo.activity}</p>
+                  <p className="text-white/70 text-[10px]">Day {photo.dayNumber}</p>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
 
-        {/* More Details Button */}
-        {(reelReady || !isGenerating) && onViewReel && (
-          <motion.button
-            onClick={onViewReel}
-            className="mt-4 ml-auto flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <span className="text-white/90 text-sm font-medium">More details</span>
-            <span className="text-white/70">→</span>
-          </motion.button>
-        )}
+        {/* Gradient Timeline Bar */}
+        <div className="flex-1 pb-4">
+          <motion.div 
+            className="h-2 rounded-full overflow-hidden"
+            style={{
+              background: 'linear-gradient(90deg, #fbbf24 0%, #f97316 35%, #ef4444 70%, #ec4899 100%)',
+              boxShadow: '0 0 20px rgba(251, 146, 60, 0.4)',
+            }}
+            initial={{ scaleX: 0, originX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: 0.3, duration: 0.6, ease: 'easeOut' }}
+          />
+        </div>
       </div>
     </motion.div>
   );
