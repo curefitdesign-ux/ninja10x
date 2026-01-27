@@ -180,19 +180,15 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
     
     // Wait for animation, then navigate to progress page
     setTimeout(() => {
-      if (onSaveWithTemplate) {
-        onSaveWithTemplate();
-      } else {
-        navigate('/progress', {
-          state: {
-            fromShare: true,
-            transitionImage: imageUrl,
-            dayNumber,
-            frameType,
-            frameProps,
-          },
-        });
-      }
+      navigate('/progress', {
+        state: {
+          fromShare: true,
+          transitionImage: imageUrl,
+          dayNumber,
+          frameType,
+          frameProps,
+        },
+      });
     }, 400);
   };
 
