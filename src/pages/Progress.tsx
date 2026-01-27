@@ -23,57 +23,57 @@ interface LoggedPhoto {
   dayNumber: number;
 }
 
-// Tile positions - exact pixel positions from reference, scaled proportionally
-// Reference is 375px wide, so these are percentages of that
-// Path flows: top-left → bottom-right with zigzag pattern
+// Tile positions - exact pixel positions from reference image
+// Reference is 375px wide - perfect zigzag pattern going down-right then down-left
+// Pattern: right-diagonal for 3 tiles, then left-diagonal for 3 tiles, repeat
 const TILE_POSITIONS = [
-  // Row 1: near engine
-  { left: 172, top: 174 },  // Tile 1
-  { left: 220, top: 207 },  // Tile 2
-  { left: 268, top: 240 },  // Tile 3 - milestone
-  // Row 2: step back left
-  { left: 172, top: 306 },  // Tile 4 
-  { left: 220, top: 273 },  // Tile 5
-  { left: 124, top: 339 },  // Tile 6 - milestone
-  // Row 3: continue path
-  { left: 172, top: 372 },  // Tile 7
-  { left: 220, top: 405 },  // Tile 8
-  { left: 268, top: 372 },  // Tile 9 - milestone
-  // Row 4: final stretch
-  { left: 172, top: 438 },  // Tile 10
-  { left: 220, top: 471 },  // Tile 11
-  { left: 172, top: 504 },  // Tile 12 - active final
+  // Group 1: Engine → diagonal right-down (BUILD STRENGTH area)
+  { left: 182, top: 200 },   // Tile 1 - first after engine
+  { left: 230, top: 250 },   // Tile 2 - down-right
+  { left: 278, top: 300 },   // Tile 3 - milestone, furthest right
+  // Group 2: Zigzag back left-down (INCREASE STAMINA area)
+  { left: 230, top: 360 },   // Tile 4 - step back left
+  { left: 182, top: 420 },   // Tile 5 - continue left
+  { left: 134, top: 480 },   // Tile 6 - milestone, furthest left
+  // Group 3: Zigzag right-down again (BUILD ENERGY area)
+  { left: 182, top: 540 },   // Tile 7 - step right
+  { left: 230, top: 600 },   // Tile 8 - continue right
+  { left: 278, top: 660 },   // Tile 9 - milestone, furthest right
+  // Group 4: Final stretch left-down (CONQUER WILL POWER area)
+  { left: 230, top: 720 },   // Tile 10 - step back left
+  { left: 182, top: 780 },   // Tile 11 - continue left
+  { left: 134, top: 840 },   // Tile 12 - active final milestone
 ];
 
-// Labels anchored to specific tiles
+// Labels anchored to specific tile groups - matching reference image
 const LABELS = [
   { 
     tileIndex: 2, 
     text: ["BUILD", "STRENGTH"], 
     side: "right" as const,
-    top: 217,
+    top: 280, // Near tile 3
     left: 290,
   },
   { 
-    tileIndex: 4, 
+    tileIndex: 5, 
     text: ["INCREASE", "STAMINA"], 
     side: "left" as const,
-    top: 217,
-    left: 19,
+    top: 440, // Near tile 6
+    left: 16,
   },
   { 
     tileIndex: 8, 
     text: ["BUILD", "ENERGY"], 
     side: "right" as const,
-    top: 405,
+    top: 620, // Near tile 9
     left: 290,
   },
   { 
-    tileIndex: 10, 
+    tileIndex: 11, 
     text: ["CONQUER", "WILL POWER"], 
     side: "left" as const,
-    top: 471,
-    left: 19,
+    top: 800, // Near tile 12
+    left: 16,
   },
 ];
 
@@ -93,10 +93,12 @@ const Progress = () => {
   const [showContent, setShowContent] = useState(false);
   const [showTiles, setShowTiles] = useState(false);
   const [showStories, setShowStories] = useState(false);
+  const [showTransitionIn, setShowTransitionIn] = useState(false);
 
   // Get transition data from navigation state
   const transitionImage = location.state?.transitionImage;
   const transitionDayNumber = location.state?.dayNumber || 1;
+  const transitionToProgress = location.state?.transitionToProgress;
 
   // Load photos from localStorage
   const [photos] = useState<LoggedPhoto[]>(() => {
@@ -114,6 +116,12 @@ const Progress = () => {
 
   // Animation sequence
   useEffect(() => {
+    // Show transition-in animation if coming from share with transitionToProgress
+    if (transitionToProgress && transitionImage) {
+      setShowTransitionIn(true);
+      setTimeout(() => setShowTransitionIn(false), 800);
+    }
+    
     const contentTimer = setTimeout(() => setShowContent(true), 300);
     const storiesTimer = setTimeout(() => setShowStories(true), 400);
     const tilesTimer = setTimeout(() => setShowTiles(true), 600);
@@ -123,7 +131,7 @@ const Progress = () => {
       clearTimeout(storiesTimer);
       clearTimeout(tilesTimer);
     };
-  }, []);
+  }, [transitionToProgress, transitionImage]);
 
   const handleClose = () => {
     navigate("/", { 
@@ -173,6 +181,50 @@ const Progress = () => {
           }}
         />
       </div>
+
+      {/* Transition-in animation - Image from Share screen animating to top strip */}
+      <AnimatePresence>
+        {showTransitionIn && transitionImage && (
+          <motion.div
+            className="fixed inset-0 z-[60] pointer-events-none flex items-center justify-center"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+          >
+            <motion.div
+              className="relative aspect-[9/16] rounded-2xl overflow-hidden"
+              initial={{ 
+                width: '70vw',
+                scale: 1, 
+                y: 0,
+                x: 0,
+              }}
+              animate={{ 
+                width: '11vw',
+                scale: 0.5, 
+                y: -280,
+                x: -120,
+                rotate: -6,
+              }}
+              transition={{ 
+                type: 'spring',
+                stiffness: 130,
+                damping: 18,
+              }}
+              style={{
+                boxShadow: '0 12px 40px rgba(100, 70, 180, 0.5)',
+                border: '2px solid rgba(160, 120, 220, 0.35)',
+              }}
+            >
+              <img 
+                src={transitionImage} 
+                alt="Transitioning to strip" 
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Close button - fixed top right */}
       <motion.button
