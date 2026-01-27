@@ -302,11 +302,16 @@ const WidgetLayout3 = ({
                   </button>
                 )}
               </div>
-            </div>
+          </div>
           ) : (
             <div 
               className={`relative cursor-pointer tap-bounce group ${tappedElement === 'empty' ? 'animate-liquid-tap' : ''}`}
-              onClick={() => { handleTap('empty'); onAddPhoto(); }}
+              onClick={() => { 
+                handleTap('empty'); 
+                // Navigate to gallery page instead of popup
+                const nextDayNumber = photos.length + 1;
+                navigate('/gallery', { state: { dayNumber: nextDayNumber } });
+              }}
               style={{ 
                 width: '160px',
                 aspectRatio: '3/4',
@@ -448,7 +453,12 @@ const WidgetLayout3 = ({
           <span className="text-white/90 font-medium text-sm tracking-wide">Camera</span>
         </button>
         <button
-          onClick={() => { handleTap('add-btn'); onAddPhoto(); }}
+          onClick={() => { 
+            handleTap('add-btn'); 
+            // Navigate to gallery page instead of popup
+            const nextDayNumber = photos.length + 1;
+            navigate('/gallery', { state: { dayNumber: nextDayNumber } });
+          }}
           className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl transition-all duration-150 ${tappedElement === 'add-btn' ? 'scale-[0.92] brightness-110' : 'hover:scale-[1.02] active:scale-[0.96]'}`}
           style={{
             background: 'linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.12) 100%)',
