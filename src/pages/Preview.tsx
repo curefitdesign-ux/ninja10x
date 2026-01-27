@@ -146,7 +146,7 @@ const Preview = () => {
       pr?: string;
       isReview?: boolean;
       photoId?: string;
-      dayNumber?: number;
+      dayNumber?: number | string;
       startWithCamera?: boolean;
     } | null;
 
@@ -169,7 +169,7 @@ const Preview = () => {
       setPr(state.pr || '');
       setIsReview(state.isReview || false);
       setPhotoId(state.photoId || null);
-      setDayNumber(state.dayNumber || 1);
+      setDayNumber(Number((state.dayNumber ?? 1) as number | string));
       if (state.frame && FRAMES.includes(state.frame)) {
         setCurrentFrame(state.frame);
         setOriginalFrame(state.frame);
@@ -180,8 +180,8 @@ const Preview = () => {
       // No existing data - start with camera
       setFlowStep('camera');
       // Get dayNumber from state if provided
-      if (state?.dayNumber) {
-        setDayNumber(state.dayNumber);
+      if (state?.dayNumber != null) {
+        setDayNumber(Number(state.dayNumber as number | string));
       }
     }
   }, []);
