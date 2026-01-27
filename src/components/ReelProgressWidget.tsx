@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Play } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 import type { GenerationStep } from './ReelGenerationOverlay';
 
 interface ReelProgressWidgetProps {
@@ -10,37 +11,65 @@ interface ReelProgressWidgetProps {
     imageUrl: string;
     activity: string;
     dayNumber: number;
+    isVideo?: boolean;
   }>;
   onViewReel?: () => void;
   reelReady?: boolean;
 }
 
-// Circular Progress Ring component
-const CircularProgressRing = ({ progress, size = 56 }: { progress: number; size?: number }) => {
-  const strokeWidth = 4;
+// Helper to detect video URLs
+const isVideoUrl = (url: string): boolean => {
+  return /\.(mp4|webm|mov|avi|mkv|m4v)($|\?)/i.test(url);
+};
+
+// Liquid Glass Circular Progress Ring with translucent play button
+const LiquidGlassProgressRing = ({ progress, size = 56 }: { progress: number; size?: number }) => {
+  const strokeWidth = 3;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
-      {/* Background ring */}
+      {/* Outer glow effect */}
+      <div 
+        className="absolute inset-0 rounded-full"
+        style={{
+          background: 'radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%)',
+          filter: 'blur(8px)',
+          transform: 'scale(1.3)',
+        }}
+      />
+      
+      {/* Glassmorphic background */}
+      <div 
+        className="absolute inset-0 rounded-full"
+        style={{
+          background: 'rgba(255, 255, 255, 0.08)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
+        }}
+      />
+      
+      {/* SVG Progress ring */}
       <svg
         width={size}
         height={size}
         className="absolute inset-0 -rotate-90"
       >
+        {/* Background ring */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="rgba(255,255,255,0.15)"
+          stroke="rgba(255,255,255,0.1)"
           strokeWidth={strokeWidth}
         />
         {/* Progress ring with gradient */}
         <defs>
-          <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="liquidProgressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#fbbf24" />
             <stop offset="50%" stopColor="#f97316" />
             <stop offset="100%" stopColor="#ec4899" />
@@ -51,7 +80,7 @@ const CircularProgressRing = ({ progress, size = 56 }: { progress: number; size?
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="url(#progressGradient)"
+          stroke="url(#liquidProgressGradient)"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
@@ -59,18 +88,118 @@ const CircularProgressRing = ({ progress, size = 56 }: { progress: number; size?
           animate={{ strokeDashoffset }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
           style={{
-            filter: 'drop-shadow(0 0 6px rgba(251, 146, 60, 0.6))',
+            filter: 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.5))',
           }}
         />
       </svg>
       
-      {/* Play button in center */}
+      {/* Translucent liquid glass play button */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 via-orange-400 to-pink-500 flex items-center justify-center shadow-lg">
-          <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+        <div 
+          className="w-9 h-9 rounded-full flex items-center justify-center"
+          style={{
+            background: 'linear-gradient(135deg, rgba(255, 200, 100, 0.6) 0%, rgba(249, 115, 22, 0.5) 50%, rgba(236, 72, 153, 0.4) 100%)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            boxShadow: '0 4px 12px rgba(251, 191, 36, 0.3), inset 0 1px 0 rgba(255,255,255,0.3)',
+          }}
+        >
+          <Play className="w-4 h-4 text-white fill-white ml-0.5 drop-shadow-sm" />
         </div>
       </div>
     </div>
+  );
+};
+
+// Video thumbnail component that extracts first frame
+const MediaThumbnail = ({ 
+  url, 
+  activity, 
+  isVideo 
+}: { 
+  url: string; 
+  activity: string; 
+  isVideo?: boolean;
+}) => {
+  const [thumbnail, setThumbnail] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  
+  const shouldUseVideoThumbnail = isVideo || isVideoUrl(url);
+
+  useEffect(() => {
+    if (!shouldUseVideoThumbnail) {
+      setThumbnail(url);
+      return;
+    }
+
+    // For videos, extract first frame
+    const video = document.createElement('video');
+    video.crossOrigin = 'anonymous';
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = 'metadata';
+    
+    video.onloadeddata = () => {
+      video.currentTime = 0.1; // Seek to 0.1s for first frame
+    };
+    
+    video.onseeked = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth || 200;
+        canvas.height = video.videoHeight || 300;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          setThumbnail(canvas.toDataURL('image/jpeg', 0.8));
+        }
+      } catch (e) {
+        console.log('Could not extract video thumbnail');
+        setError(true);
+      }
+    };
+    
+    video.onerror = () => {
+      setError(true);
+    };
+    
+    video.src = url;
+    
+    return () => {
+      video.src = '';
+    };
+  }, [url, shouldUseVideoThumbnail]);
+
+  if (error || !thumbnail) {
+    // Fallback: show video element directly for videos, or placeholder
+    if (shouldUseVideoThumbnail) {
+      return (
+        <video
+          ref={videoRef}
+          src={url}
+          className="w-full h-full object-cover"
+          muted
+          playsInline
+          preload="metadata"
+        />
+      );
+    }
+    return (
+      <div className="w-full h-full bg-gradient-to-br from-purple-500/30 to-pink-500/30 flex items-center justify-center">
+        <span className="text-white/60 text-[8px]">{activity}</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={thumbnail}
+      alt={activity}
+      className="w-full h-full object-cover"
+      onError={() => setError(true)}
+    />
   );
 };
 
@@ -154,14 +283,15 @@ const ReelProgressWidget = ({
                     }}
                   />
                   
-                  <img
-                    src={photo.imageUrl}
-                    alt={photo.activity}
-                    className="w-full h-full object-cover"
+                  {/* Media thumbnail - handles both images and videos */}
+                  <MediaThumbnail 
+                    url={photo.imageUrl} 
+                    activity={photo.activity}
+                    isVideo={photo.isVideo}
                   />
                   
                   {/* Activity label at bottom */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-1 pt-3">
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-1 pt-3 z-20">
                     <p className="text-white text-[8px] font-medium leading-tight truncate">{photo.activity}</p>
                     <p className="text-white/60 text-[6px]">Day {photo.dayNumber}</p>
                   </div>
@@ -180,7 +310,7 @@ const ReelProgressWidget = ({
             </p>
           </div>
 
-          {/* Circular Progress Play Button */}
+          {/* Liquid Glass Circular Progress Play Button */}
           <motion.div 
             className="flex-shrink-0 cursor-pointer"
             initial={{ scale: 0 }}
@@ -189,7 +319,7 @@ const ReelProgressWidget = ({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <CircularProgressRing progress={progress} size={56} />
+            <LiquidGlassProgressRing progress={progress} size={56} />
           </motion.div>
         </div>
       </div>
