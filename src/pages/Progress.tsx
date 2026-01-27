@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-import { getPhotosStorageKey } from "@/hooks/use-device-id";
+import { useJourneyActivities, fetchPublicFeed, LocalActivity } from "@/hooks/use-journey-activities";
 
-// Import tile assets - new active (purple) and inactive (gray) tiles
+// Import tile assets
 import tileActiveImg from "@/assets/progress/tile-active-new.png";
 import tileInactiveImg from "@/assets/progress/tile-inactive.png";
 import basePlatformImg from "@/assets/progress/base-platform.png";
@@ -14,72 +14,27 @@ import FullScreenReel from "@/components/FullScreenReel";
 import { isVideoUrl } from "@/lib/media";
 import { JourneyActivity } from "@/services/journey-service";
 
-const STORAGE_KEY = getPhotosStorageKey();
-
-interface LoggedPhoto {
-  id: string;
-  storageUrl: string;
-  originalUrl?: string;
-  isVideo?: boolean;
-  activity?: string;
-  frame?: string;
-  duration?: string;
-  pr?: string;
-  dayNumber: number;
-}
-
 // Tile positions - REVERSED order (Day 12 at top, Day 1 at bottom)
-// This creates a bottom-to-top progression where users fill from bottom
-// Array index 0 = visual top (Day 12), Array index 11 = visual bottom (Day 1)
 const TILE_POSITIONS = [
-  // Visual top section (Days 12, 11, 10) - LEFT side start
-  { left: 32, top: 28 },    // Index 0 = Day 12 (top-left)
-  { left: 40, top: 36 },    // Index 1 = Day 11
-  { left: 48, top: 44 },    // Index 2 = Day 10
-  // Second section (Days 9, 8, 7) - RIGHT side
-  { left: 56, top: 53 },    // Index 3 = Day 9 (right)
-  { left: 48, top: 61 },    // Index 4 = Day 8
-  { left: 40, top: 69 },    // Index 5 = Day 7
-  // Third section (Days 6, 5, 4) - LEFT side
-  { left: 32, top: 77 },    // Index 6 = Day 6 (left)
-  { left: 40, top: 85 },    // Index 7 = Day 5
-  { left: 48, top: 93 },    // Index 8 = Day 4
-  // Bottom section (Days 3, 2, 1) - RIGHT side start
-  { left: 56, top: 102 },   // Index 9 = Day 3 (right)
-  { left: 48, top: 110 },   // Index 10 = Day 2
-  { left: 40, top: 118 },   // Index 11 = Day 1 (bottom center - START)
+  { left: 32, top: 28 },
+  { left: 40, top: 36 },
+  { left: 48, top: 44 },
+  { left: 56, top: 53 },
+  { left: 48, top: 61 },
+  { left: 40, top: 69 },
+  { left: 32, top: 77 },
+  { left: 40, top: 85 },
+  { left: 48, top: 93 },
+  { left: 56, top: 102 },
+  { left: 48, top: 110 },
+  { left: 40, top: 118 },
 ];
 
-// Labels anchored to specific tile groups - reversed for bottom-to-top progression
 const LABELS = [
-  { 
-    tileIndex: 0, // Near Day 12 (top)
-    text: ["CONQUER", "WILL POWER"], 
-    side: "left" as const,
-    top: 28,
-    left: 4,
-  },
-  { 
-    tileIndex: 3, // Near Day 9
-    text: ["BUILD", "ENERGY"], 
-    side: "right" as const,
-    top: 53,
-    left: 68,
-  },
-  { 
-    tileIndex: 6, // Near Day 6
-    text: ["INCREASE", "STAMINA"], 
-    side: "left" as const,
-    top: 77,
-    left: 4,
-  },
-  { 
-    tileIndex: 11, // Near Day 1 (bottom - START)
-    text: ["BUILD", "STRENGTH"], 
-    side: "right" as const,
-    top: 110,
-    left: 68,
-  },
+  { tileIndex: 0, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 28, left: 4 },
+  { tileIndex: 3, text: ["BUILD", "ENERGY"], side: "right" as const, top: 53, left: 68 },
+  { tileIndex: 6, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 77, left: 4 },
+  { tileIndex: 11, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 110, left: 68 },
 ];
 
 const Progress = () => {
@@ -94,25 +49,31 @@ const Progress = () => {
   const [reelOpen, setReelOpen] = useState(false);
   const [reelIndex, setReelIndex] = useState(0);
 
+  // Current user's activities (for tile state)
+  const { activities: myActivities, loading } = useJourneyActivities();
+
+  // Public feed for top strip (all users)
+  const [publicFeed, setPublicFeed] = useState<LocalActivity[]>([]);
+  const [feedLoading, setFeedLoading] = useState(true);
+
   // Get transition data from navigation state
   const transitionImage = location.state?.transitionImage;
   const transitionDayNumber = location.state?.dayNumber || 1;
   const transitionToProgress = location.state?.transitionToProgress;
 
-  // Load photos from localStorage (user's own activities)
-  const [photos] = useState<LoggedPhoto[]>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed.filter((p: LoggedPhoto) => p.storageUrl) : [];
-    } catch {
-      return [];
-    }
-  });
+  // Load public feed on mount
+  useEffect(() => {
+    const loadFeed = async () => {
+      setFeedLoading(true);
+      const feed = await fetchPublicFeed();
+      setPublicFeed(feed);
+      setFeedLoading(false);
+    };
+    loadFeed();
+  }, []);
 
-  // Convert photos to JourneyActivity shape for FullScreenReel
-  const photosAsActivities: JourneyActivity[] = photos.map((p, i) => ({
+  // Convert to JourneyActivity shape for FullScreenReel
+  const feedAsActivities: JourneyActivity[] = publicFeed.map(p => ({
     id: p.id,
     user_id: '',
     storage_url: p.storageUrl,
@@ -129,7 +90,6 @@ const Progress = () => {
     user_reacted: false,
   }));
 
-  // Open reel viewer on card tap
   const handlePhotoCardTap = (index: number) => {
     setReelIndex(index);
     setReelOpen(true);
@@ -137,16 +97,13 @@ const Progress = () => {
 
   // Animation sequence
   useEffect(() => {
-    // Show transition-in animation if coming from share with transitionToProgress
     if (transitionToProgress && transitionImage) {
       setShowTransitionIn(true);
       setTimeout(() => setShowTransitionIn(false), 800);
     }
-    
     const contentTimer = setTimeout(() => setShowContent(true), 300);
     const storiesTimer = setTimeout(() => setShowStories(true), 400);
     const tilesTimer = setTimeout(() => setShowTiles(true), 600);
-    
     return () => {
       clearTimeout(contentTimer);
       clearTimeout(storiesTimer);
@@ -165,47 +122,31 @@ const Progress = () => {
     });
   };
 
-  // Determine tile state - reversed order (index 11 = Day 1, index 0 = Day 12)
-  // Day number = 12 - index (so bottom tile is Day 1, top is Day 12)
+  // Tile state - based on user's own activities
   const getDayFromIndex = (index: number) => 12 - index;
-  
-  // A tile is "active" (purple) if that day has been logged
-  const isTileActive = (dayNumber: number) => {
-    return photos.some(p => p.dayNumber === dayNumber);
-  };
+  const isTileActive = (dayNumber: number) => myActivities.some(a => a.dayNumber === dayNumber);
 
-  // Convert vw values to CSS
   const vw = (val: number) => `${val}vw`;
 
   return (
     <div 
       className="fixed inset-0 z-50 overflow-x-hidden overflow-y-auto"
-      style={{
-        background: "linear-gradient(180deg, #3A2A63 0%, #1A1530 45%, #060608 100%)",
-      }}
+      style={{ background: "linear-gradient(180deg, #3A2A63 0%, #1A1530 45%, #060608 100%)" }}
     >
-      {/* Background aurora effects */}
+      {/* Background aurora */}
       <div 
         className="absolute pointer-events-none"
-        style={{
-          left: "-53px",
-          top: "-40px",
-          width: "131vw",
-          height: "auto",
-        }}
+        style={{ left: "-53px", top: "-40px", width: "131vw", height: "auto" }}
       >
         <div 
           className="w-full h-[525px] opacity-40 mix-blend-screen"
-          style={{
-            background: "radial-gradient(ellipse at center, rgba(138, 100, 200, 0.4) 0%, transparent 70%)",
-          }}
+          style={{ background: "radial-gradient(ellipse at center, rgba(138, 100, 200, 0.4) 0%, transparent 70%)" }}
         />
       </div>
 
-      {/* Transition-in animation - Image from Share screen animating to top strip */}
+      {/* Transition-in animation */}
       <AnimatePresence>
         {showTransitionIn && transitionImage && (
-          // Wrap to give AnimatePresence a DOM/motion element for refs
           <motion.div key="shared-image-transition">
             <SharedImageTransition
               imageUrl={transitionImage}
@@ -215,16 +156,11 @@ const Progress = () => {
         )}
       </AnimatePresence>
 
-      {/* Close button - fixed top right */}
+      {/* Close button */}
       <motion.button
         onClick={handleClose}
         className="fixed z-50 flex items-center justify-center text-white/80"
-        style={{
-          top: "2vh",
-          right: "4vw",
-          width: "clamp(24px, 6vw, 28px)",
-          height: "clamp(24px, 6vw, 28px)",
-        }}
+        style={{ top: "2vh", right: "4vw", width: "clamp(24px, 6vw, 28px)", height: "clamp(24px, 6vw, 28px)" }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
@@ -232,8 +168,7 @@ const Progress = () => {
         <X className="w-full h-full" strokeWidth={1.5} />
       </motion.button>
 
-      {/* === TOP ACTIVITY STRIP === */}
-      {/* Horizontal scroll with user's logged photos + placeholder cards */}
+      {/* === TOP ACTIVITY STRIP (PUBLIC FEED) === */}
       <AnimatePresence>
         {showStories && (
           <motion.div
@@ -251,20 +186,21 @@ const Progress = () => {
             transition={{ type: "spring", stiffness: 200, damping: 25 }}
           >
             <div className="flex items-end h-full gap-3">
-              {/* User's logged photos - render actual photos from localStorage */}
-              {photos.length > 0 ? (
-                photos.map((photo, index) => (
+              {feedLoading ? (
+                <div className="flex items-center justify-center w-full">
+                  <div className="w-6 h-6 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
+                </div>
+              ) : publicFeed.length > 0 ? (
+                publicFeed.map((photo, index) => (
                   <motion.button
                     key={photo.id}
-                    data-shared-element={index === photos.length - 1 ? "progress-hero-card" : undefined}
+                    data-shared-element={index === 0 ? "progress-hero-card" : undefined}
                     className="relative flex-shrink-0 overflow-hidden cursor-pointer"
                     style={{
                       width: "clamp(80px, 22vw, 100px)",
                       height: "clamp(120px, 33vw, 150px)",
                       borderRadius: "clamp(10px, 2.5vw, 14px)",
-                      boxShadow: index === 0 
-                        ? "0 12px 40px rgba(100, 70, 180, 0.5)" 
-                        : "0 4px 16px rgba(0,0,0,0.25)",
+                      boxShadow: index === 0 ? "0 12px 40px rgba(100, 70, 180, 0.5)" : "0 4px 16px rgba(0,0,0,0.25)",
                       border: index === 0 ? "2px solid rgba(160, 120, 220, 0.35)" : "none",
                     }}
                     onClick={() => handlePhotoCardTap(index)}
@@ -282,9 +218,6 @@ const Progress = () => {
                         loop
                         autoPlay
                         preload="metadata"
-                        onError={() => {
-                          console.error("Failed to load video:", photo.storageUrl);
-                        }}
                       />
                     ) : (
                       <img
@@ -300,21 +233,15 @@ const Progress = () => {
                         }}
                       />
                     )}
-                    {/* Day indicator */}
                     <div 
                       className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-white font-semibold"
-                      style={{
-                        fontSize: "clamp(8px, 2vw, 10px)",
-                        background: "rgba(0,0,0,0.5)",
-                        backdropFilter: "blur(4px)",
-                      }}
+                      style={{ fontSize: "clamp(8px, 2vw, 10px)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
                     >
                       D{photo.dayNumber}
                     </div>
                   </motion.button>
                 ))
               ) : transitionImage ? (
-                // Fallback to transition image if no photos yet
                 <motion.div
                   data-shared-element="progress-hero-card"
                   className="relative flex-shrink-0 overflow-hidden"
@@ -330,16 +257,9 @@ const Progress = () => {
                   animate={{ scale: 1, x: 0 }}
                   transition={{ type: "spring", stiffness: 180, damping: 22 }}
                 >
-                  <img 
-                    src={transitionImage} 
-                    alt="Your activity" 
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={transitionImage} alt="Your activity" className="w-full h-full object-cover" />
                 </motion.div>
-              ) : null}
-
-              {/* Empty state when no photos */}
-              {photos.length === 0 && !transitionImage && (
+              ) : (
                 <motion.div
                   className="relative flex-shrink-0 flex items-center justify-center"
                   style={{
@@ -354,7 +274,7 @@ const Progress = () => {
                   transition={{ delay: 0.3 }}
                 >
                   <span className="text-white/40 text-xs text-center px-2">
-                    Your activities will appear here
+                    Activities will appear here
                   </span>
                 </motion.div>
               )}
@@ -364,42 +284,26 @@ const Progress = () => {
       </AnimatePresence>
 
       {/* === MAIN PROGRESS AREA === */}
-      {/* This is the canvas for tiles, engine, labels - all positioned absolutely */}
       <div 
         className="relative w-full"
-        style={{
-          marginTop: "2vh",
-          height: vw(130),
-          maxWidth: "430px",
-          marginInline: "auto",
-        }}
+        style={{ marginTop: "2vh", height: vw(130), maxWidth: "430px", marginInline: "auto" }}
       >
-        {/* === ENGINE BADGE === */}
+        {/* Engine Badge */}
         <AnimatePresence>
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ 
-                left: vw(18),
-                top: 0,
-                width: vw(40),
-                height: vw(40),
-              }}
+              style={{ left: vw(18), top: 0, width: vw(40), height: vw(40) }}
               initial={{ opacity: 0, scale: 0.6, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.5 }}
             >
-              <img 
-                src={engineBadgeImg} 
-                alt="Engine Badge" 
-                className="w-full h-full object-contain"
-                style={{ opacity: 0.7 }}
-              />
+              <img src={engineBadgeImg} alt="Engine Badge" className="w-full h-full object-contain" style={{ opacity: 0.7 }} />
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* === DIAGONAL PROGRESS TILES === */}
+        {/* Diagonal Progress Tiles */}
         {TILE_POSITIONS.map((pos, index) => {
           const day = getDayFromIndex(index);
           const isActive = isTileActive(day);
@@ -408,41 +312,22 @@ const Progress = () => {
             <motion.div
               key={day}
               className="absolute"
-              style={{ 
-                left: vw(pos.left),
-                top: vw(pos.top),
-                width: vw(12),
-                height: vw(12),
-              }}
+              style={{ left: vw(pos.left), top: vw(pos.top), width: vw(12), height: vw(12) }}
               initial={{ opacity: 0, y: 40, scale: 0.7 }}
               animate={showTiles ? { opacity: 1, y: 0, scale: 1 } : {}}
-              transition={{ 
-                type: "spring",
-                stiffness: 200,
-                damping: 22,
-                delay: index * 0.04
-              }}
+              transition={{ type: "spring", stiffness: 200, damping: 22, delay: index * 0.04 }}
             >
-              {/* Tile image - active (purple) or inactive (gray) */}
-              <img
-                src={isActive ? tileActiveImg : tileInactiveImg}
-                alt={`Day ${day}`}
-                className="w-full h-full object-contain relative z-10"
-              />
+              <img src={isActive ? tileActiveImg : tileInactiveImg} alt={`Day ${day}`} className="w-full h-full object-contain relative z-10" />
             </motion.div>
           );
         })}
 
-        {/* === MILESTONE LABELS === */}
+        {/* Milestone Labels */}
         {LABELS.map((label, idx) => (
           <motion.div
             key={idx}
             className={`absolute ${label.side === "left" ? "text-left" : "text-right"}`}
-            style={{
-              top: vw(label.top),
-              left: vw(label.left),
-              width: label.side === "left" ? vw(28) : vw(24),
-            }}
+            style={{ top: vw(label.top), left: vw(label.left), width: label.side === "left" ? vw(28) : vw(24) }}
             initial={{ opacity: 0, x: label.side === "left" ? -20 : 20 }}
             animate={showTiles ? { opacity: 1, x: 0 } : {}}
             transition={{ delay: 0.6 + idx * 0.1 }}
@@ -451,18 +336,11 @@ const Progress = () => {
               <div 
                 key={i}
                 className="font-bold uppercase"
-                style={{ 
-                  fontSize: "clamp(12px, 3.2vw, 14px)",
-                  letterSpacing: "0.08em",
-                  color: "rgba(255, 255, 255, 0.6)",
-                  lineHeight: 1.3,
-                }}
+                style={{ fontSize: "clamp(12px, 3.2vw, 14px)", letterSpacing: "0.08em", color: "rgba(255, 255, 255, 0.6)", lineHeight: 1.3 }}
               >
                 {line}
               </div>
             ))}
-            
-            {/* Horizontal divider line */}
             <div 
               className="absolute h-px"
               style={{
@@ -477,39 +355,29 @@ const Progress = () => {
           </motion.div>
         ))}
 
-        {/* === BOTTOM BASE PLATFORM === */}
+        {/* Bottom Base Platform */}
         <AnimatePresence>
           {showContent && (
             <motion.div
               className="absolute"
-              style={{
-                left: 0,
-                top: vw(105),
-                width: vw(50),
-                height: vw(60),
-              }}
+              style={{ left: 0, top: vw(105), width: vw(50), height: vw(60) }}
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <img 
-                src={basePlatformImg} 
-                alt="Base Platform" 
-                className="w-full h-full object-contain"
-              />
+              <img src={basePlatformImg} alt="Base Platform" className="w-full h-full object-contain" />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Bottom margin for scroll */}
       <div style={{ height: "6vh" }} />
 
       {/* Full-screen reel viewer */}
       <AnimatePresence>
-        {reelOpen && photosAsActivities.length > 0 && (
+        {reelOpen && feedAsActivities.length > 0 && (
           <FullScreenReel
-            activities={photosAsActivities}
+            activities={feedAsActivities}
             initialIndex={reelIndex}
             onClose={() => setReelOpen(false)}
           />

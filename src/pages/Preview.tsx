@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil } from 'lucide-react';
+import { X, Check, Pencil, Trash2 } from 'lucide-react';
 import ShareSheet from '@/components/ShareSheet';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import html2canvas from 'html2canvas';
@@ -15,6 +15,8 @@ import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ActivityBackgroundEffect from '@/components/ActivityBackgroundEffect';
 import SyncHealthPopup from '@/components/SyncHealthPopup';
+import { useJourneyActivities } from '@/hooks/use-journey-activities';
+import { toast } from 'sonner';
 
 // Activity icons for selection
 import footballIcon from '@/assets/activities/football.png';
@@ -110,6 +112,7 @@ const Preview = () => {
   
   // Micro celebration after save
   const [showMicroCelebration, setShowMicroCelebration] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const [elementsHidden, setElementsHidden] = useState(false);
   const [isReview, setIsReview] = useState(false);
@@ -117,6 +120,9 @@ const Preview = () => {
   const [dayNumber, setDayNumber] = useState<number>(1);
   const inputRef = useRef<HTMLInputElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
+
+  // Get delete function from hook
+  const { deleteActivity } = useJourneyActivities();
 
   const frameItemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scrollRaf = useRef<number | null>(null);
@@ -229,7 +235,7 @@ const Preview = () => {
     }
   };
 
-  // Handle removing the current image
+  // Handle removing the current image (just go back to camera, don't delete from DB)
   const handleRemoveImage = () => {
     triggerHaptic('medium');
     setImageUrl(null);
@@ -237,6 +243,25 @@ const Preview = () => {
     setCapturedMedia(null);
     setFlowStep('camera');
     setIsLoaded(false);
+  };
+
+  // Handle deleting the activity from DB (only for review mode)
+  const handleDeleteActivity = async () => {
+    if (!isReview || !dayNumber) return;
+    
+    triggerHaptic('medium');
+    setIsDeleting(true);
+    
+    const success = await deleteActivity(dayNumber);
+    
+    if (success) {
+      toast.success(`Day ${dayNumber} removed`);
+      navigate('/', { replace: true, state: null });
+    } else {
+      toast.error('Failed to delete. Please try again.');
+    }
+    
+    setIsDeleting(false);
   };
 
   // Save with template - go directly to share screen
@@ -707,7 +732,7 @@ const Preview = () => {
           <div className="flex flex-col items-center gap-3">
             <button 
               onClick={handleSaveWithTemplate}
-              disabled={isSaving}
+              disabled={isSaving || isDeleting}
               className={`w-full bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce ${tappedElement === 'done-btn' ? 'animate-liquid-tap' : ''}`}
               style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
             >
@@ -715,6 +740,20 @@ const Preview = () => {
                 {isSaving ? 'Saving...' : 'DONE'}
               </span>
             </button>
+            
+            {/* Delete button - only show in review mode (existing activity) */}
+            {isReview && (
+              <button
+                onClick={handleDeleteActivity}
+                disabled={isDeleting || isSaving}
+                className="flex items-center gap-2 px-4 py-2 text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span className="text-sm font-medium">
+                  {isDeleting ? 'Deleting...' : 'Remove Photo'}
+                </span>
+              </button>
+            )}
           </div>
         </div>
       )}
