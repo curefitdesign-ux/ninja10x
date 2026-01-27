@@ -473,12 +473,12 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
               transition={{ duration: 0.2 }}
             >
               <div className="w-full flex flex-col gap-3 max-w-sm mx-auto">
-                {/* Done button */}
+                {/* View Progress button */}
                 <button
                   onClick={handleDone}
                   className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-white text-black font-semibold tap-bounce transition-all active:scale-95"
                 >
-                  <span>DONE</span>
+                  <span>VIEW PROGRESS</span>
                 </button>
                 
                 {/* Download/Copy row */}
