@@ -143,7 +143,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           height: cardHeight,
           borderRadius: borderRadius * scale,
           background: hasPhoto ? 'transparent' : isActiveDay ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.06)',
-          backdropFilter: hasPhoto ? 'none' : 'blur(16px)',
+          backdropFilter: 'blur(16px)',
           zIndex,
           willChange: 'transform, opacity',
         }}
@@ -209,13 +209,13 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
               >
                 <Upload className="w-6 h-6 text-emerald-400" strokeWidth={2.5} />
               </motion.div>
-            ) : isFutureCard ? (
-              /* Lock icon overlay for future locked days */
+            ) : (isFutureCard && isExpanded) ? (
+              /* Lock icon overlay for future locked days - only when expanded */
               <motion.div 
                 className="p-2.5 rounded-full bg-white/5 backdrop-blur-sm"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: isExpanded ? 0.9 : 0.6 }}
-                transition={{ duration: 0.2 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 0.9, scale: 1 }}
+                transition={{ duration: 0.2, delay: 0.1 }}
               >
                 <Lock className="w-4 h-4 text-white/40" strokeWidth={2} />
               </motion.div>
