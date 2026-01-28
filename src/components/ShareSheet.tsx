@@ -139,28 +139,46 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
     currentReel,
   } = useFitnessReel();
 
-  // Auto-trigger reel generation when 3rd photo is logged
+  // Week-specific configuration
+  const weekConfig: Record<number, { week: number; title: string; startDay: number; endDay: number }> = {
+    3: { week: 1, title: 'Conquer Will Power', startDay: 1, endDay: 3 },
+    6: { week: 2, title: 'Build Energy', startDay: 4, endDay: 6 },
+    9: { week: 3, title: 'Increase Stamina', startDay: 7, endDay: 9 },
+    12: { week: 4, title: 'Build Strength', startDay: 10, endDay: 12 },
+  };
+
+  // Check if current day is a week-end day (3, 6, 9, 12)
+  const isWeekEnd = dayNumber ? [3, 6, 9, 12].includes(dayNumber) : false;
+  const currentWeekConfig = dayNumber ? weekConfig[dayNumber] : null;
+
+  // Auto-trigger reel generation at week ends
   const [reelTriggered, setReelTriggered] = useState(false);
   
   useEffect(() => {
-    // Trigger reel generation on 3rd upload (dayNumber === 3)
-    if (dayNumber === 3 && activities.length >= 3 && !reelTriggered && !isGeneratingReel && !currentReel) {
-      setReelTriggered(true);
+    // Trigger reel generation on week-end uploads (3, 6, 9, 12)
+    if (isWeekEnd && currentWeekConfig && !reelTriggered && !isGeneratingReel && !currentReel) {
+      const weekActivities = activities.filter(
+        a => a.dayNumber >= currentWeekConfig.startDay && a.dayNumber <= currentWeekConfig.endDay
+      );
       
-      // Prepare photo data for reel generation
-      const photoData = activities.slice(0, 3).map(a => ({
-        id: a.id,
-        imageUrl: a.storageUrl,
-        activity: a.activity || 'Activity',
-        duration: a.duration || '',
-        pr: a.pr || '',
-        uploadDate: new Date().toISOString(),
-        dayNumber: a.dayNumber,
-      }));
-      
-      generateReel(photoData);
+      if (weekActivities.length >= 3) {
+        setReelTriggered(true);
+        
+        // Prepare photo data for reel generation
+        const photoData = weekActivities.map(a => ({
+          id: a.id,
+          imageUrl: a.storageUrl,
+          activity: a.activity || 'Activity',
+          duration: a.duration || '',
+          pr: a.pr || '',
+          uploadDate: new Date().toISOString(),
+          dayNumber: a.dayNumber,
+        }));
+        
+        generateReel(photoData);
+      }
     }
-  }, [dayNumber, activities, reelTriggered, isGeneratingReel, currentReel, generateReel]);
+  }, [dayNumber, activities, reelTriggered, isGeneratingReel, currentReel, generateReel, isWeekEnd, currentWeekConfig]);
 
   // Calculate reel progress
   const reelProgress = (() => {
@@ -176,12 +194,16 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
     }
   })();
 
-  // Prepare photos for widget display
-  const reelPhotos = activities.slice(0, 3).map(a => ({
-    imageUrl: a.storageUrl,
-    activity: a.activity || 'Activity',
-    dayNumber: a.dayNumber,
-  }));
+  // Prepare photos for widget display - show current week's photos only
+  const reelPhotos = currentWeekConfig 
+    ? activities
+        .filter(a => a.dayNumber >= currentWeekConfig.startDay && a.dayNumber <= currentWeekConfig.endDay)
+        .map(a => ({
+          imageUrl: a.storageUrl,
+          activity: a.activity || 'Activity',
+          dayNumber: a.dayNumber,
+        }))
+    : [];
   
   const shareText = '🏃 Check out my fitness activity! #FitnessJourney #HealthyLifestyle';
   const shareUrl = window.location.href;
@@ -474,7 +496,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
                <div className="flex flex-col items-center pt-4">
                {/* Preview Card - locked to 9:16 with shared-element exit animation */}
                <motion.div 
-                 className="relative w-full max-w-[280px] aspect-[9/16] rounded-[20px] overflow-hidden mb-6"
+                 className="relative w-full max-w-[280px] aspect-[9/16] rounded-[20px] overflow-hidden"
                  animate={isExiting ? {
                    scale: 0.2,
                    opacity: 0,
@@ -512,11 +534,38 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
                    {renderFramePreview()}
                  </div>
                 </motion.div>
+                
+                {/* Download/Copy tertiary buttons - below template */}
+                <motion.div 
+                  className="flex gap-3 mt-4 mb-4"
+                  animate={isExiting ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <button
+                    onClick={handleDownload}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                  >
+                    <Download className="w-4 h-4 text-white/70" />
+                    <span className="text-white/70 font-medium text-sm">Download</span>
+                  </button>
+                  <button
+                    onClick={handleCopyLink}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                  >
+                    {copied ? (
+                      <Check className="w-4 h-4 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-white/70" />
+                    )}
+                    <span className="text-white/70 font-medium text-sm">{copied ? 'Copied!' : 'Copy'}</span>
+                  </button>
+                </motion.div>
               
-               {/* Reel Progress Widget - Show on 3rd upload */}
-               {(activities.length >= 3 || isGeneratingReel) && (
+               {/* Reel Progress Widget - Show only at week ends (day 3, 6, 9, 12) with contextual content */}
+               {isWeekEnd && currentWeekConfig && (reelPhotos.length >= 3 || isGeneratingReel) && (
                  <motion.div
                    className="w-full mb-4"
+                   style={{ marginTop: '-30px' }}
                    initial={{ opacity: 0, y: 20 }}
                    animate={{ opacity: 1, y: 0 }}
                    transition={{ delay: 0.2 }}
@@ -527,6 +576,8 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
                      progress={reelProgress}
                      photos={reelPhotos}
                      reelReady={!!currentReel?.videoUrl}
+                     weekNumber={currentWeekConfig.week}
+                     weekTitle={currentWeekConfig.title}
                      onViewReel={() => {
                        if (currentReel?.videoUrl) {
                          window.open(currentReel.videoUrl, '_blank');
@@ -565,14 +616,14 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
               </div>
             </div>
             
-             {/* Floating Bottom Action Buttons */}
+             {/* Floating Bottom Action Button - VIEW PROGRESS only */}
             <motion.div 
               className="fixed bottom-0 left-0 right-0 z-20 px-6 pt-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent"
               style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)' }}
               animate={isExiting ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <div className="w-full flex flex-col gap-3 max-w-sm mx-auto">
+              <div className="w-full max-w-sm mx-auto">
                {/* View Progress button */}
                 <button
                   onClick={handleViewProgress}
@@ -580,28 +631,6 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
                 >
                   <span>VIEW PROGRESS</span>
                 </button>
-                
-                {/* Download/Copy row */}
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleDownload}
-                    className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
-                  >
-                    <Download className="w-4 h-4 text-white/80" />
-                    <span className="text-white/80 font-medium text-sm">Download</span>
-                  </button>
-                  <button
-                    onClick={handleCopyLink}
-                    className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
-                  >
-                    {copied ? (
-                      <Check className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <Copy className="w-4 h-4 text-white/80" />
-                    )}
-                    <span className="text-white/80 font-medium text-sm">{copied ? 'Copied!' : 'Copy'}</span>
-                  </button>
-                </div>
               </div>
             </motion.div>
           </div>
