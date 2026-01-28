@@ -71,7 +71,6 @@ const Gallery = () => {
         imageUrl: photoDataUrl,
         originalUrl: photoDataUrl,
         isVideo: isVideo || false,
-        activity: 'Running', // Default activity
         dayNumber,
         fromGallery: true,
       },

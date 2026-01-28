@@ -75,7 +75,7 @@ const FRAME_COLORS: Record<FrameType, { bg: string; gradient: string }> = {
 };
 
 type EditingField = 'duration' | 'pr' | null;
-type FlowStep = 'camera' | 'activity' | 'template';
+type FlowStep = 'camera' | 'activity' | 'template' | 'confirmation';
 
 // Generate hour options from 0 to 24
 const HOUR_OPTIONS = Array.from({ length: 25 }, (_, i) => i);
@@ -85,7 +85,7 @@ const Preview = () => {
   const navigate = useNavigate();
   
   // Flow control (camera step moved to separate page)
-  const [flowStep, setFlowStep] = useState<FlowStep>('template');
+  const [flowStep, setFlowStep] = useState<FlowStep>('activity');
   
   // Template state
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -210,17 +210,17 @@ const Preview = () => {
       fromGallery: state?.fromGallery,
     });
 
-    // Coming from camera or gallery with media - go directly to template
+    // Coming from camera or gallery with media - go to activity selection first
     if (mediaUrl && (state?.fromCamera || state?.fromGallery)) {
       setImageUrl(mediaUrl);
       setIsVideo(state.isVideo ?? isVideoUrl(mediaUrl));
-      setActivity(state.activity || 'Running');
+      setActivity(null); // Don't set default - let user select
       setDuration(state.duration || '2hrs');
       setPr(state.pr || '');
       setIsReview(false);
       setPhotoId(null);
       setDayNumber(Number((state.dayNumber ?? 1) as number | string));
-      setFlowStep('template');
+      setFlowStep('activity'); // Start with activity selection
       setTimeout(() => setIsLoaded(true), 100);
       return;
     }
@@ -302,7 +302,7 @@ const Preview = () => {
     setIsDeleting(false);
   };
 
-  // Save with template - save to backend then show share screen
+  // Save with template - save to backend then show confirmation screen
   const handleSaveWithTemplate = async () => {
     if (!imageUrl || !activity) return;
 
@@ -350,7 +350,14 @@ const Preview = () => {
     
     toast.success(`Day ${dayNumber} saved!`);
     
-    // Open share sheet
+    // Show confirmation screen first
+    setFlowStep('confirmation');
+    setShowMicroCelebration(true);
+  };
+
+  // Handle confirmation screen action (proceed to share sheet)
+  const handleConfirmationDone = () => {
+    setShowMicroCelebration(false);
     setShowShareSheet(true);
   };
 
@@ -559,6 +566,215 @@ const Preview = () => {
   if (flowStep === 'camera') {
     navigate('/gallery', { state: { dayNumber }, replace: true });
     return null;
+  }
+
+  // Handle activity selection
+  const handleActivitySelection = (selectedActivity: string) => {
+    triggerHaptic('medium');
+    setActivity(selectedActivity);
+    setFlowStep('template');
+  };
+
+  // Activity Selection Step
+  if (flowStep === 'activity') {
+    return (
+      <div 
+        className="fixed inset-0 w-full bg-black touch-manipulation overflow-hidden" 
+        style={{ 
+          height: '100dvh',
+          minHeight: '-webkit-fill-available',
+        }}
+      >
+        {/* Blurred background image */}
+        <div 
+          className="fixed inset-0 scale-150 transition-all duration-500 pointer-events-none"
+          style={{
+            backgroundImage: `url("${imageUrl}")`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'blur(80px) brightness(0.5)',
+          }}
+        />
+        
+        {/* Dark gradient overlay */}
+        <div className="fixed inset-0 bg-gradient-to-b from-black/60 via-black/80 to-black/95 pointer-events-none" />
+        
+        {/* Content */}
+        <div className="relative z-10 flex flex-col h-full">
+          {/* Header */}
+          <div 
+            className="flex items-center justify-between px-5 py-4"
+            style={{ paddingTop: 'max(env(safe-area-inset-top, 16px), 16px)' }}
+          >
+            <button 
+              onClick={() => navigate('/gallery', { state: { dayNumber }, replace: true })}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+            <h2 className="text-white/80 text-lg font-semibold">What did you do?</h2>
+            <div className="w-10 h-10" /> {/* Spacer */}
+          </div>
+
+          {/* Media Preview (smaller) */}
+          <div className="flex-shrink-0 px-8 py-6">
+            <motion.div 
+              className="relative mx-auto overflow-hidden rounded-2xl"
+              style={{ 
+                maxWidth: '180px',
+                aspectRatio: '9/16',
+              }}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            >
+              {isVideo ? (
+                <video
+                  src={imageUrl || ''}
+                  className="w-full h-full object-cover"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                />
+              ) : (
+                <img
+                  src={imageUrl || ''}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </motion.div>
+          </div>
+          
+          {/* Activity Grid */}
+          <div className="flex-1 overflow-y-auto px-5 pb-20">
+            <div className="grid grid-cols-3 gap-3">
+              {activityOptions.map((activityOption, index) => (
+                <motion.button
+                  key={activityOption.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleActivitySelection(activityOption.name)}
+                  className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors border border-white/5"
+                >
+                  <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
+                    <img 
+                      src={activityOption.icon} 
+                      alt={activityOption.name} 
+                      className="w-8 h-8 object-contain"
+                    />
+                  </div>
+                  <span className="text-white text-xs font-medium text-center">
+                    {activityOption.name}
+                  </span>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Confirmation Screen Step
+  if (flowStep === 'confirmation') {
+    return (
+      <div 
+        className="fixed inset-0 w-full bg-black touch-manipulation overflow-hidden" 
+        style={{ 
+          height: '100dvh',
+          minHeight: '-webkit-fill-available',
+        }}
+      >
+        {/* Blurred background image */}
+        <div 
+          className="fixed inset-0 scale-150 transition-all duration-500 pointer-events-none"
+          style={{
+            backgroundImage: `url("${imageUrl}")`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'blur(80px) brightness(0.4)',
+          }}
+        />
+        
+        {/* Dark gradient overlay */}
+        <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-black/70 to-black/90 pointer-events-none" />
+        
+        {/* Content - Centered celebration */}
+        <div className="relative z-10 flex flex-col items-center justify-center h-full px-8">
+          <AnimatePresence>
+            {showMicroCelebration && (
+              <motion.div
+                className="flex flex-col items-center gap-6"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              >
+                {/* Success Icon */}
+                <motion.div
+                  className="w-24 h-24 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: [0, 1.2, 1] }}
+                  transition={{ delay: 0.1, duration: 0.5 }}
+                >
+                  <Check className="w-12 h-12 text-emerald-400" />
+                </motion.div>
+                
+                {/* Text */}
+                <motion.div
+                  className="text-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <h2 className="text-white text-2xl font-bold mb-2">Activity Logged!</h2>
+                  <p className="text-white/60 text-base">Day {dayNumber} complete</p>
+                </motion.div>
+                
+                {/* Mini frame preview */}
+                <motion.div
+                  className="mt-4 rounded-xl overflow-hidden"
+                  style={{ width: '140px', aspectRatio: '9/16' }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  {renderFrame()}
+                </motion.div>
+                
+                {/* Continue Button */}
+                <motion.button
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleConfirmationDone}
+                  className="mt-6 w-full max-w-[280px] bg-white py-4 rounded-2xl"
+                  style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
+                >
+                  <span className="text-black font-bold text-lg">SHARE</span>
+                </motion.button>
+
+                {/* Skip to home */}
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.8 }}
+                  onClick={handleFinalSave}
+                  className="text-white/50 text-sm font-medium py-2"
+                >
+                  Skip for now
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    );
   }
 
   // Template Selection Step
