@@ -134,6 +134,10 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
     // Minimal stagger for snappy fan-out/collapse
     const staggerDelay = isExpanded ? index * 0.02 : (2 - index) * 0.015;
     
+    // In collapsed state: no translucency/backdrop-blur for solid cards
+    const collapsedSolidBg = hasPhoto ? 'transparent' : '#1a1a1a';
+    const expandedBg = hasPhoto ? 'transparent' : isActiveDay ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.06)';
+    
     return (
       <motion.button
         key={index}
@@ -148,8 +152,8 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           width: cardWidth,
           height: cardHeight,
           borderRadius: borderRadius * scale,
-          background: hasPhoto ? 'transparent' : isActiveDay ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.06)',
-          backdropFilter: hasPhoto ? 'none' : 'blur(16px)',
+          background: isExpanded ? expandedBg : collapsedSolidBg,
+          backdropFilter: isExpanded && !hasPhoto ? 'blur(16px)' : 'none',
           zIndex,
           willChange: 'transform, opacity',
         }}
@@ -223,28 +227,6 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
             {/* Green glow overlay for logged photos */}
             <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/25 to-transparent pointer-events-none" style={{ zIndex: 2 }} />
             
-            {/* Play icon - ONLY visible in collapsed (stacked) state */}
-            {!isExpanded && (
-              <motion.div
-                className="absolute inset-0 flex items-center justify-center"
-                style={{ zIndex: 3 }}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.15 }}
-              >
-                <div 
-                  className="w-6 h-6 rounded-full flex items-center justify-center"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%)',
-                    backdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(255,255,255,0.25)',
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 8px rgba(0,0,0,0.25)',
-                  }}
-                >
-                  <Play className="w-2.5 h-2.5 text-white/90 ml-0.5" fill="currentColor" />
-                </div>
-              </motion.div>
-            )}
           </>
         )}
         
@@ -308,6 +290,18 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
   const containerWidth = isExpanded ? (cardWidth * 3 + 60) : (baseCardWidth * 0.8 + 16);
   const containerHeight = cardHeight + 24;
 
+  // Count photos in this week for play button
+  const weekPhotoCount = photos.filter(p => p !== null).length;
+  const canPlayReel = weekPhotoCount >= 3;
+  
+  const handlePlayClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (canPlayReel && onPlayReel) {
+      const validPhotos = photos.filter((p): p is LoggedPhoto => p !== null);
+      onPlayReel(validPhotos);
+    }
+  };
+
   return (
     <motion.div
       onClick={onTap}
@@ -329,6 +323,34 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
         mass: 0.8,
       }}
     >
+      {/* Play icon ABOVE stacked cards - only in collapsed state with 3 photos */}
+      <AnimatePresence>
+        {!isExpanded && canPlayReel && (
+          <motion.button
+            className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center z-20"
+            style={{ top: -8 }}
+            initial={{ opacity: 0, scale: 0.5, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.5, y: 10 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            onClick={handlePlayClick}
+            whileTap={{ scale: 0.9 }}
+          >
+            <div 
+              className="w-7 h-7 rounded-full flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(135deg, rgba(57,255,133,0.3) 0%, rgba(57,255,133,0.15) 100%)',
+                backdropFilter: 'blur(10px)',
+                border: '1.5px solid rgba(57,255,133,0.5)',
+                boxShadow: '0 0 12px rgba(57,255,133,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+              }}
+            >
+              <Play className="w-3 h-3 text-white ml-0.5" fill="currentColor" />
+            </div>
+          </motion.button>
+        )}
+      </AnimatePresence>
+      
       {/* Glow effect for active/expanded week */}
       <AnimatePresence>
         {isExpanded && (

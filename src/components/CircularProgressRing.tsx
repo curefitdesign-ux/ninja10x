@@ -213,18 +213,18 @@ const CircularProgressRing = ({
         style={{ width: size, height: size }}
       />
       
-      {/* Curved text */}
+      {/* Curved text - with overflow visible to prevent cropping */}
       <svg 
-        className="absolute inset-0 pointer-events-none"
-        viewBox={`0 0 ${size} ${size}`}
+        className="absolute inset-0 pointer-events-none overflow-visible"
+        viewBox={`-10 -10 ${size + 20} ${size + 20}`}
         style={{ width: size, height: size }}
       >
         <defs>
-          {/* Single curve for combined text */}
+          {/* Single curve for combined text - wider arc to fit all text */}
           <path
             id="curvedTextPath"
-            d={`M ${centerX - 68} ${centerY + 60}
-                A ${ringRadius} ${ringRadius} 0 0 0 ${centerX + 68} ${centerY + 60}`}
+            d={`M ${centerX - 85 + 10} ${centerY + 68 + 10}
+                A ${ringRadius + 8} ${ringRadius + 8} 0 0 0 ${centerX + 85 + 10} ${centerY + 68 + 10}`}
             fill="none"
           />
         </defs>
@@ -235,7 +235,7 @@ const CircularProgressRing = ({
           fontSize="9"
           fontFamily="Inter, sans-serif"
           fontWeight="500"
-          letterSpacing="1.5px"
+          letterSpacing="1.2px"
         >
           <textPath
             href="#curvedTextPath"
