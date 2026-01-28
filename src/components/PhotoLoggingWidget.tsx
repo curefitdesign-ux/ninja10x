@@ -330,11 +330,12 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
         mass: 0.8,
       }}
     >
-      {/* Play icon CENTERED on stacked cards - only in collapsed state with 3 photos */}
+      {/* Play icon ABOVE stacked cards, centered - only in collapsed state with 3 photos */}
       <AnimatePresence>
         {!isExpanded && canPlayReel && (
           <motion.button
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center z-20"
+            className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center z-20"
+            style={{ top: -20 }}
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
@@ -343,11 +344,13 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
             whileTap={{ scale: 0.9 }}
           >
             <div 
-              className="w-10 h-10 rounded-full flex items-center justify-center"
+              className="w-9 h-9 rounded-full flex items-center justify-center"
               style={{
-                background: 'linear-gradient(135deg, rgba(57,255,133,0.35) 0%, rgba(57,255,133,0.2) 100%)',
-                border: '2px solid rgba(57,255,133,0.6)',
-                boxShadow: '0 0 16px rgba(57,255,133,0.5), inset 0 1px 0 rgba(255,255,255,0.25)',
+                background: 'rgba(255,255,255,0.08)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1.5px solid rgba(255,255,255,0.2)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15)',
               }}
             >
               <Play className="w-4 h-4 text-white ml-0.5" fill="currentColor" />
