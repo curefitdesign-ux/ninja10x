@@ -94,6 +94,9 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
   // Check if any photo is logged in this week
   const hasAnyPhoto = photos.some(p => p !== null);
   
+  // Check if week is complete (all 3 photos logged)
+  const isWeekComplete = photos.every(p => p !== null);
+  
   // Card positions for stacked state - proper separation to avoid overlap
   const getStackedPositions = (index: number) => {
     // When stacked, cards should be positioned with clear separation
@@ -110,7 +113,11 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
   const handleCardClick = (e: React.MouseEvent, index: number, photo: LoggedPhoto | null) => {
     e.stopPropagation();
     if (!isExpanded) {
-      // If not expanded, expand the cluster
+      // Don't expand completed weeks - tap goes straight to reel
+      if (isWeekComplete) {
+        return; // Ignore - use play button instead
+      }
+      // Expand the cluster for incomplete weeks
       onTap();
     } else {
       // If expanded, handle individual card tap
@@ -134,9 +141,9 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
     // Minimal stagger for snappy fan-out/collapse
     const staggerDelay = isExpanded ? index * 0.02 : (2 - index) * 0.015;
     
-    // In collapsed state: no translucency/backdrop-blur for solid cards
-    const collapsedSolidBg = hasPhoto ? 'transparent' : '#1a1a1a';
-    const expandedBg = hasPhoto ? 'transparent' : isActiveDay ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.06)';
+    // Solid backgrounds - no translucency/opacity
+    const solidBg = hasPhoto ? 'transparent' : '#1a1a1a';
+    const expandedBg = hasPhoto ? 'transparent' : isActiveDay ? 'rgba(52,211,153,0.12)' : '#1a1a1a';
     
     return (
       <motion.button
@@ -152,8 +159,8 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           width: cardWidth,
           height: cardHeight,
           borderRadius: borderRadius * scale,
-          background: isExpanded ? expandedBg : collapsedSolidBg,
-          backdropFilter: isExpanded && !hasPhoto ? 'blur(16px)' : 'none',
+          background: isExpanded ? expandedBg : solidBg,
+          backdropFilter: 'none',
           zIndex,
           willChange: 'transform, opacity',
         }}
@@ -175,7 +182,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
                 rotate: stackedPos.rotate,
                 x: `calc(-50% + ${stackedPos.x}px)`,
                 y: stackedPos.y,
-                opacity: opacity,
+                opacity: 1, // Full opacity - no translucency
                 scale: 1,
               }
         }
@@ -323,29 +330,27 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
         mass: 0.8,
       }}
     >
-      {/* Play icon ABOVE stacked cards - only in collapsed state with 3 photos */}
+      {/* Play icon CENTERED on stacked cards - only in collapsed state with 3 photos */}
       <AnimatePresence>
         {!isExpanded && canPlayReel && (
           <motion.button
-            className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center z-20"
-            style={{ top: -8 }}
-            initial={{ opacity: 0, scale: 0.5, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.5, y: 10 }}
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center z-20"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             onClick={handlePlayClick}
             whileTap={{ scale: 0.9 }}
           >
             <div 
-              className="w-7 h-7 rounded-full flex items-center justify-center"
+              className="w-10 h-10 rounded-full flex items-center justify-center"
               style={{
-                background: 'linear-gradient(135deg, rgba(57,255,133,0.3) 0%, rgba(57,255,133,0.15) 100%)',
-                backdropFilter: 'blur(10px)',
-                border: '1.5px solid rgba(57,255,133,0.5)',
-                boxShadow: '0 0 12px rgba(57,255,133,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+                background: 'linear-gradient(135deg, rgba(57,255,133,0.35) 0%, rgba(57,255,133,0.2) 100%)',
+                border: '2px solid rgba(57,255,133,0.6)',
+                boxShadow: '0 0 16px rgba(57,255,133,0.5), inset 0 1px 0 rgba(255,255,255,0.25)',
               }}
             >
-              <Play className="w-3 h-3 text-white ml-0.5" fill="currentColor" />
+              <Play className="w-4 h-4 text-white ml-0.5" fill="currentColor" />
             </div>
           </motion.button>
         )}
@@ -390,7 +395,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
       
       {/* Render 3 cards - reversed order so first card (index 0) is on top when stacked */}
       {[2, 1, 0].map((index) => 
-        renderCard(index, isExpanded ? index + 1 : 3 - index, isExpanded ? 1 : [0.6, 0.8, 1][index])
+        renderCard(index, isExpanded ? index + 1 : 3 - index, 1) // Always full opacity
       )}
     </motion.div>
   );
