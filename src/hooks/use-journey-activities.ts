@@ -214,6 +214,44 @@ export function useJourneyActivities() {
     return true;
   }, [activities]);
 
+  /**
+   * Delete ALL activities for the current user.
+   * Also deletes all uploaded files from storage.
+   */
+  const clearAllActivities = useCallback(async (): Promise<boolean> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    // Delete all files from storage first
+    for (const activity of activities) {
+      if (activity.storageUrl) {
+        await deleteFromStorage(activity.storageUrl);
+      }
+      if (activity.originalUrl && activity.originalUrl !== activity.storageUrl) {
+        await deleteFromStorage(activity.originalUrl);
+      }
+    }
+
+    // Delete all from database
+    const { error } = await supabase
+      .from('journey_activities')
+      .delete()
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Clear all error:', error);
+      return false;
+    }
+
+    // Clear local state
+    setActivities([]);
+    
+    // Clear celebrated weeks from localStorage
+    localStorage.removeItem('celebrated_weeks');
+
+    return true;
+  }, [activities]);
+
   return {
     activities,
     loading,
@@ -221,6 +259,7 @@ export function useJourneyActivities() {
     refresh: loadActivities,
     upsertActivity,
     deleteActivity,
+    clearAllActivities,
   };
 }
 
