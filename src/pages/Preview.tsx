@@ -654,10 +654,11 @@ const Preview = () => {
           <div 
             className="rounded-t-3xl px-5 pt-4 pb-6"
             style={{
-              background: 'rgba(20, 20, 25, 0.98)',
+              background: 'rgba(20, 20, 25, 0.75)',
               backdropFilter: 'blur(40px)',
               WebkitBackdropFilter: 'blur(40px)',
-              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              borderTop: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.4)',
               paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
             }}
           >
