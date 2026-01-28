@@ -16,6 +16,8 @@ interface ReelProgressWidgetProps {
   }>;
   onViewReel?: () => void;
   reelReady?: boolean;
+  weekNumber?: number;
+  weekTitle?: string;
 }
 
 // Media thumbnail with video frame extraction
@@ -117,11 +119,13 @@ const ReelProgressWidget = ({
   photos,
   onViewReel,
   reelReady,
+  weekNumber: propWeekNumber,
+  weekTitle,
 }: ReelProgressWidgetProps) => {
   if (photos.length < 3 && !isGenerating) return null;
 
   const displayPhotos = photos.slice(0, 3);
-  const weekNumber = Math.ceil(Math.max(...displayPhotos.map(p => p.dayNumber)) / 3);
+  const weekNumber = propWeekNumber ?? Math.ceil(Math.max(...displayPhotos.map(p => p.dayNumber)) / 3);
   
   const statusText = (() => {
     if (reelReady) return 'Your reel is ready!';
@@ -172,7 +176,7 @@ const ReelProgressWidget = ({
         {/* Content */}
         <div className="flex-1 min-w-0 relative z-10">
           <h3 className="text-white/90 font-semibold text-sm leading-tight mb-0.5">
-            Week {weekNumber} • Conquer will power
+            Week {weekNumber} • {weekTitle || 'Conquer will power'}
           </h3>
           <p className="text-white/40 text-[10px] mb-1.5 truncate">
             {statusText}
