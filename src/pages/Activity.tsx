@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Home, Dumbbell, Activity as ActivityIcon, ShoppingBag, Users, Flame, Footprints } from "lucide-react";
+import { ArrowRight, Home, Dumbbell, Activity as ActivityIcon, ShoppingBag, Users, Flame, Footprints, Trash2 } from "lucide-react";
 import CircularProgressRing from "@/components/CircularProgressRing";
 import GradientMeshBackground from "@/components/GradientMeshBackground";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -39,7 +39,8 @@ const Activity = () => {
   const [activeTab, setActiveTab] = useState("activity");
   
   // Journey activities from DB (single source of truth)
-  const { activities, loading, refresh } = useJourneyActivities();
+  const { activities, loading, refresh, clearAllActivities } = useJourneyActivities();
+  const [isClearing, setIsClearing] = useState(false);
   
   // Convert to LoggedPhoto shape for PhotoLoggingWidget
   const photos: LoggedPhoto[] = activities.map(a => ({
@@ -552,6 +553,33 @@ const Activity = () => {
               ))}
             </div>
           </div>
+
+          {/* Clear All Activities Option */}
+          {photos.length > 0 && (
+            <div className="px-4 mt-10 mb-4">
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                onClick={async () => {
+                  if (isClearing) return;
+                  const confirm = window.confirm('Are you sure you want to clear all logged activities? This cannot be undone.');
+                  if (!confirm) return;
+                  setIsClearing(true);
+                  const success = await clearAllActivities();
+                  setIsClearing(false);
+                  if (success) {
+                    toast.success('All activities cleared');
+                  } else {
+                    toast.error('Failed to clear activities');
+                  }
+                }}
+                disabled={isClearing}
+                className="w-full py-3 px-4 rounded-2xl bg-white/[0.06] backdrop-blur-xl border border-white/[0.1] flex items-center justify-center gap-2 text-red-400/80 hover:bg-red-500/10 hover:border-red-500/20 transition-colors disabled:opacity-50"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span className="text-sm font-medium">{isClearing ? 'Clearing...' : 'Clear All Activities'}</span>
+              </motion.button>
+            </div>
+          )}
         </div>
       </PullToRefresh>
 
