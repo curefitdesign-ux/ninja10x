@@ -575,7 +575,7 @@ const Preview = () => {
     setFlowStep('template');
   };
 
-  // Activity Selection Step
+  // Activity Selection Step - Show as bottom sheet over media preview
   if (flowStep === 'activity') {
     return (
       <div 
@@ -597,84 +597,110 @@ const Preview = () => {
         />
         
         {/* Dark gradient overlay */}
-        <div className="fixed inset-0 bg-gradient-to-b from-black/60 via-black/80 to-black/95 pointer-events-none" />
+        <div className="fixed inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/80 pointer-events-none" />
         
-        {/* Content */}
-        <div className="relative z-10 flex flex-col h-full">
-          {/* Header */}
-          <div 
-            className="flex items-center justify-between px-5 py-4"
-            style={{ paddingTop: 'max(env(safe-area-inset-top, 16px), 16px)' }}
+        {/* Header */}
+        <div 
+          className="relative z-20 flex items-center justify-between px-5 py-4"
+          style={{ paddingTop: 'max(env(safe-area-inset-top, 16px), 16px)' }}
+        >
+          <button 
+            onClick={() => navigate('/gallery', { state: { dayNumber }, replace: true })}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm"
           >
-            <button 
-              onClick={() => navigate('/gallery', { state: { dayNumber }, replace: true })}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm"
-            >
-              <X className="w-5 h-5 text-white" />
-            </button>
-            <h2 className="text-white/80 text-lg font-semibold">What did you do?</h2>
-            <div className="w-10 h-10" /> {/* Spacer */}
-          </div>
+            <X className="w-5 h-5 text-white" />
+          </button>
+          <div className="w-10 h-10" /> {/* Spacer */}
+        </div>
 
-          {/* Media Preview (smaller) */}
-          <div className="flex-shrink-0 px-8 py-6">
-            <motion.div 
-              className="relative mx-auto overflow-hidden rounded-2xl"
-              style={{ 
-                maxWidth: '180px',
-                aspectRatio: '9/16',
-              }}
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            >
-              {isVideo ? (
-                <video
-                  src={imageUrl || ''}
-                  className="w-full h-full object-cover"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                />
-              ) : (
-                <img
-                  src={imageUrl || ''}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                />
-              )}
-            </motion.div>
-          </div>
-          
-          {/* Activity Grid */}
-          <div className="flex-1 overflow-y-auto px-5 pb-20">
-            <div className="grid grid-cols-3 gap-3">
+        {/* Media Preview - Centered, larger */}
+        <div className="relative z-10 flex-1 flex items-center justify-center px-6" style={{ height: 'calc(100dvh - 400px)' }}>
+          <motion.div 
+            className="relative overflow-hidden rounded-2xl"
+            style={{ 
+              width: 'min(70vw, 260px)',
+              aspectRatio: '9/16',
+            }}
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          >
+            {isVideo ? (
+              <video
+                src={imageUrl || ''}
+                className="w-full h-full object-cover"
+                autoPlay
+                muted
+                loop
+                playsInline
+              />
+            ) : (
+              <img
+                src={imageUrl || ''}
+                alt="Preview"
+                className="w-full h-full object-cover"
+              />
+            )}
+          </motion.div>
+        </div>
+        
+        {/* Bottom Sheet for Activity Selection */}
+        <motion.div
+          className="fixed bottom-0 left-0 right-0 z-30"
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        >
+          <div 
+            className="rounded-t-3xl px-5 pt-4 pb-6"
+            style={{
+              background: 'rgba(20, 20, 25, 0.98)',
+              backdropFilter: 'blur(40px)',
+              WebkitBackdropFilter: 'blur(40px)',
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
+            }}
+          >
+            {/* Handle */}
+            <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
+            
+            {/* Title */}
+            <h2 className="text-white text-lg font-semibold text-center mb-5">What did you do?</h2>
+            
+            {/* Activity Grid */}
+            <div className="grid grid-cols-3 gap-3 max-h-[280px] overflow-y-auto">
               {activityOptions.map((activityOption, index) => (
                 <motion.button
                   key={activityOption.name}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  transition={{ delay: index * 0.03 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleActivitySelection(activityOption.name)}
-                  className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors border border-white/5"
+                  className="flex flex-col items-center gap-2 p-3 rounded-2xl transition-colors"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.06)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                  }}
                 >
-                  <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
+                  <div 
+                    className="w-11 h-11 rounded-full flex items-center justify-center"
+                    style={{ background: 'rgba(255, 255, 255, 0.08)' }}
+                  >
                     <img 
                       src={activityOption.icon} 
                       alt={activityOption.name} 
-                      className="w-8 h-8 object-contain"
+                      className="w-7 h-7 object-contain"
                     />
                   </div>
-                  <span className="text-white text-xs font-medium text-center">
+                  <span className="text-white text-[11px] font-medium text-center leading-tight">
                     {activityOption.name}
                   </span>
                 </motion.button>
               ))}
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
