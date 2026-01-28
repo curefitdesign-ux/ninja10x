@@ -15,13 +15,12 @@ const Camera = () => {
   const week = Math.ceil(dayNumber / 3);
 
   const handleCapture = useCallback((mediaDataUrl: string, isVideo?: boolean) => {
-    // Navigate to preview with captured media
+    // Navigate to preview with captured media - activity selection happens in Preview
     navigate('/preview', {
       state: {
         imageUrl: mediaDataUrl,
         originalUrl: mediaDataUrl,
         isVideo: isVideo || false,
-        activity: 'Running', // Default activity
         dayNumber,
         fromCamera: true,
       },
