@@ -309,38 +309,73 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
     }
   };
 
+  // Determine week status for icon
+  const startDay = weekIndex * 3 + 1;
+  const photosLogged = photos.filter(p => p !== null).length;
+  const isCompletedWeek = photosLogged >= 3;
+  // Current week = active week (has at least one empty slot and is the active week)
+  const isCurrentWeekForIcon = isActiveWeek && !isCompletedWeek;
+  // Upcoming week = not active and not completed
+  const isUpcomingWeekForIcon = !isActiveWeek && !isCompletedWeek;
+
+  // Determine which icon to show in collapsed state
+  const getCollapsedIcon = () => {
+    if (isCompletedWeek) {
+      return { icon: Play, fill: true, color: 'text-white' };
+    } else if (isCurrentWeekForIcon) {
+      return { icon: Upload, fill: false, color: 'text-emerald-400' };
+    } else if (isUpcomingWeekForIcon) {
+      return { icon: Lock, fill: false, color: 'text-white/60' };
+    }
+    return null;
+  };
+
+  const collapsedIconConfig = getCollapsedIcon();
+
+  // Handle tap on collapsed week icon
+  const handleCollapsedIconTap = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isCompletedWeek) {
+      // Play reel - don't expand
+      if (onPlayReel) {
+        const validPhotos = photos.filter((p): p is LoggedPhoto => p !== null);
+        onPlayReel(validPhotos);
+      }
+    } else {
+      // Expand the cards (current or upcoming week)
+      onTap();
+    }
+  };
+
   return (
     <motion.div
-      onClick={onTap}
-      className="relative flex-shrink-0 cursor-pointer"
-      style={{ 
-        height: containerHeight,
-        willChange: 'transform, width',
-      }}
-      initial={false}
-      animate={{
+      key={weekIndex}
+      className="relative flex-shrink-0"
+      style={{
         width: containerWidth,
-        zIndex: isExpanded ? 10 : 1,
-        scale: isExpanded ? 1 : 0.94,
+        height: containerHeight,
+      }}
+      animate={{
+        scale: 1,
       }}
       transition={{
-        type: "spring",
+        type: 'spring',
         stiffness: 300,
         damping: 30,
         mass: 0.8,
       }}
     >
-      {/* Play icon ABOVE stacked cards, centered - only in collapsed state with 3 photos */}
+      {/* Contextual icon ABOVE stacked cards - only in collapsed state */}
       <AnimatePresence>
-        {!isExpanded && canPlayReel && (
+        {!isExpanded && collapsedIconConfig && (
           <motion.button
             className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center z-20"
             style={{ top: -20 }}
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            onClick={handlePlayClick}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            onClick={handleCollapsedIconTap}
             whileTap={{ scale: 0.9 }}
           >
             <div 
@@ -353,12 +388,15 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
                 boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15)',
               }}
             >
-              <Play className="w-4 h-4 text-white ml-0.5" fill="currentColor" />
+              <collapsedIconConfig.icon 
+                className={`w-4 h-4 ${collapsedIconConfig.color} ${collapsedIconConfig.icon === Play ? 'ml-0.5' : ''}`} 
+                fill={collapsedIconConfig.fill ? 'currentColor' : 'none'} 
+              />
             </div>
           </motion.button>
         )}
       </AnimatePresence>
-      
+
       {/* Glow effect for active/expanded week */}
       <AnimatePresence>
         {isExpanded && (
@@ -398,7 +436,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
       
       {/* Render 3 cards - reversed order so first card (index 0) is on top when stacked */}
       {[2, 1, 0].map((index) => 
-        renderCard(index, isExpanded ? index + 1 : 3 - index, 1) // Always full opacity
+        renderCard(index, isExpanded ? index + 1 : 3 - index, 1)
       )}
     </motion.div>
   );
