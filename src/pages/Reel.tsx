@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X } from 'lucide-react';
 import { JourneyActivity, ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
-import StoryReactionBar from '@/components/StoryReactionBar';
 import FloatingReactionsOverlay from '@/components/FloatingReactionsOverlay';
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
+import SendReactionSheet from '@/components/SendReactionSheet';
 
 const DEFAULT_REACTIONS: Record<ReactionType, ActivityReaction> = {
   heart: { type: 'heart', count: 0, userReacted: false },
@@ -17,7 +17,7 @@ const DEFAULT_REACTIONS: Record<ReactionType, ActivityReaction> = {
   fire: { type: 'fire', count: 0, userReacted: false },
 };
 
-// Mock user avatars for demo (in real app, fetch from profiles)
+// Mock user avatars for demo
 const MOCK_REACTORS = [
   { id: '1', name: 'Uttam', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face' },
   { id: '2', name: 'Abhipsha', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face' },
@@ -35,6 +35,7 @@ const Reel = () => {
   
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showReactsSheet, setShowReactsSheet] = useState(false);
+  const [showSendReactionSheet, setShowSendReactionSheet] = useState(false);
   const [floatingReaction, setFloatingReaction] = useState<ReactionType | null>(null);
   const [localReactions, setLocalReactions] = useState<Record<string, {
     total: number;
@@ -79,6 +80,7 @@ const Reel = () => {
 
     setFloatingReaction(type);
     setTimeout(() => setFloatingReaction(null), 1200);
+    setShowSendReactionSheet(false);
 
     setLocalReactions(prev => {
       const existing = prev[current.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS } };
@@ -129,10 +131,13 @@ const Reel = () => {
   const isVideo = current.is_video || isVideoUrl(current.storage_url);
   const currentReactions = localReactions[current.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS } };
   
-  // Get active reaction types for floating display
   const activeReactionTypes = Object.entries(currentReactions.reactions)
     .filter(([, r]) => r.count > 0)
     .map(([type]) => type as ReactionType);
+
+  // Calculate week and day
+  const week = Math.ceil(current.day_number / 3);
+  const dayInWeek = ((current.day_number - 1) % 3) + 1;
 
   return (
     <div 
@@ -158,148 +163,166 @@ const Reel = () => {
         ))}
       </div>
 
-      {/* Close button */}
-      <motion.button
-        onClick={handleClose}
-        className="absolute z-30 text-white/80 hover:text-white transition-colors"
-        style={{ 
-          top: 'max(env(safe-area-inset-top, 16px), 16px)', 
-          right: '16px',
-        }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
+      {/* Header */}
+      <motion.div
+        className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-5"
+        style={{ paddingTop: 'max(env(safe-area-inset-top, 16px), 16px)' }}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
       >
-        <X className="w-7 h-7" strokeWidth={1.5} />
-      </motion.button>
+        <div className="w-8" />
+        <span className="text-white font-semibold text-lg">
+          Total Reaction • {String(currentReactions.total).padStart(2, '0')}
+        </span>
+        <button
+          onClick={handleClose}
+          className="text-white/80 hover:text-white transition-colors"
+        >
+          <X className="w-7 h-7" strokeWidth={1.5} />
+        </button>
+      </motion.div>
+
+      {/* Progress dots */}
+      <div 
+        className="absolute z-30 flex justify-center gap-1 px-6"
+        style={{ top: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 44px)' }}
+      >
+        {activities.map((_, i) => (
+          <div
+            key={i}
+            className="h-1 rounded-full transition-all duration-300"
+            style={{
+              width: i === currentIndex ? 20 : 6,
+              background: i === currentIndex 
+                ? 'linear-gradient(90deg, #a78bfa, #ec4899)' 
+                : 'rgba(255, 255, 255, 0.3)',
+            }}
+          />
+        ))}
+      </div>
 
       {/* Main content area */}
       <div
         className="relative w-full flex-1 flex flex-col items-center justify-center"
         style={{ 
           maxWidth: '430px',
-          paddingTop: 'max(env(safe-area-inset-top, 16px), 16px)',
-          paddingBottom: isOwnStory ? '200px' : '140px',
+          paddingTop: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 60px)',
+          paddingBottom: isOwnStory ? '180px' : '200px',
           paddingInline: '20px',
         }}
       >
         {/* Card container with floating reactions */}
         <div className="relative w-full" onClick={handleTap}>
-          {/* Floating reactions around the card (for own story) */}
-          {isOwnStory && activeReactionTypes.length > 0 && (
+          {/* Floating reactions around the card */}
+          {activeReactionTypes.length > 0 && (
             <FloatingReactionsOverlay 
               reactions={activeReactionTypes}
               newReaction={floatingReaction}
             />
           )}
 
-          {/* The main card */}
+          {/* The main card - Magazine style like "the Player" */}
           <motion.div 
             className="relative w-full overflow-hidden"
             style={{ 
               borderRadius: 20,
               aspectRatio: '3 / 4',
-              background: 'linear-gradient(145deg, rgba(180, 190, 200, 0.95), rgba(140, 150, 160, 0.9))',
               boxShadow: '0 30px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)',
             }}
             initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 180, damping: 20 }}
           >
-            {/* Grid pattern overlay */}
+            {/* Full bleed image/video */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={current.id}
+                className="absolute inset-0"
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.25 }}
+              >
+                {isVideo ? (
+                  <video
+                    src={current.storage_url}
+                    className="w-full h-full object-cover"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                  />
+                ) : (
+                  <img
+                    src={current.storage_url}
+                    alt={`Day ${current.day_number}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const img = e.currentTarget;
+                      if (!img.dataset.retried) {
+                        img.dataset.retried = "true";
+                        img.src = current.storage_url + "?t=" + Date.now();
+                      }
+                    }}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Gradient overlay for text readability */}
             <div 
-              className="absolute inset-0 pointer-events-none opacity-20"
+              className="absolute inset-0 pointer-events-none"
               style={{
-                backgroundImage: `
-                  linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)
-                `,
-                backgroundSize: '20px 20px',
+                background: 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 60%, rgba(0,0,0,0.6) 100%)',
               }}
             />
 
-            {/* CULT NINJA branding */}
-            <div className="absolute top-4 left-4 z-10">
-              <div className="text-gray-500 font-bold text-2xl tracking-tight" style={{ opacity: 0.6 }}>CULT</div>
-              <div className="text-gray-700 font-black text-3xl tracking-tight -mt-2">NINJA</div>
-            </div>
-
-            {/* Inner photo frame */}
-            <div 
-              className="absolute overflow-hidden"
-              style={{
-                top: '15%',
-                left: '15%',
-                width: '70%',
-                height: '55%',
-                borderRadius: 16,
-                transform: 'rotate(-3deg)',
-                boxShadow: '0 20px 50px rgba(0, 0, 0, 0.3)',
-              }}
-            >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={current.id}
-                  className="w-full h-full"
-                  initial={{ opacity: 0, scale: 1.05 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  {isVideo ? (
-                    <video
-                      src={current.storage_url}
-                      className="w-full h-full object-cover"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                    />
-                  ) : (
-                    <img
-                      src={current.storage_url}
-                      alt={`Day ${current.day_number}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const img = e.currentTarget;
-                        if (!img.dataset.retried) {
-                          img.dataset.retried = "true";
-                          img.src = current.storage_url + "?t=" + Date.now();
-                        }
-                      }}
-                    />
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-
-            {/* Activity stats badges */}
-            <div className="absolute bottom-20 left-4 flex flex-col gap-2 z-10">
-              {current.duration && (
-                <div 
-                  className="px-3 py-1 text-white text-xs font-semibold rounded"
-                  style={{ background: '#EF6B54' }}
-                >
-                  Duration: {current.duration}
-                </div>
-              )}
-              {current.pr && (
-                <div 
-                  className="px-3 py-1 text-white text-xs font-semibold rounded"
-                  style={{ background: '#EF6B54' }}
-                >
-                  Laps: {current.pr}
-                </div>
-              )}
-            </div>
-
-            {/* Week/Activity info */}
-            <div className="absolute bottom-4 right-4 text-right z-10">
-              <div className="text-gray-500 text-sm">Week</div>
-              <div className="text-gray-600 font-bold text-4xl" style={{ opacity: 0.5 }}>
-                {Math.ceil(current.day_number / 3)}/3
+            {/* Magazine-style title overlay */}
+            <div className="absolute top-5 left-5 z-10">
+              <div className="text-white/70 text-sm font-medium italic">the</div>
+              <div 
+                className="text-white font-black text-5xl leading-none"
+                style={{ 
+                  textShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                }}
+              >
+                Player
               </div>
-              <div className="text-gray-500 text-sm">Activity</div>
+              <div className="text-white/80 text-sm mt-1">
+                Week {week} | Day {dayInWeek}
+              </div>
+            </div>
+
+            {/* Stats at bottom */}
+            <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between z-10">
+              <div className="flex gap-6">
+                {current.duration && (
+                  <div>
+                    <div className="text-white font-bold text-3xl">{current.duration.replace(/[^0-9]/g, '') || '2'}hrs</div>
+                    <div className="text-white/70 text-sm">Duration</div>
+                  </div>
+                )}
+                {current.pr && (
+                  <div>
+                    <div className="text-white font-bold text-3xl">{current.pr.replace(/[^0-9]/g, '') || '10'}</div>
+                    <div className="text-white/70 text-sm">Rounds</div>
+                  </div>
+                )}
+                {!current.duration && !current.pr && (
+                  <>
+                    <div>
+                      <div className="text-white font-bold text-3xl">2hrs</div>
+                      <div className="text-white/70 text-sm">Duration</div>
+                    </div>
+                    <div>
+                      <div className="text-white font-bold text-3xl">10</div>
+                      <div className="text-white/70 text-sm">Rounds</div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Navigation overlays */}
@@ -314,36 +337,37 @@ const Reel = () => {
               aria-label="Next"
             />
           </motion.div>
-        </div>
 
-        {/* User avatar below card */}
-        <motion.div 
-          className="mt-6 flex flex-col items-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <div 
-            className="w-16 h-16 rounded-full overflow-hidden"
-            style={{
-              border: '3px solid rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
-            }}
+          {/* User avatar overlapping card bottom */}
+          <motion.div 
+            className="absolute left-1/2 -translate-x-1/2 z-20"
+            style={{ bottom: -32 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
           >
-            <img 
-              src={current.storage_url} 
-              alt="User" 
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </motion.div>
+            <div 
+              className="w-16 h-16 rounded-full overflow-hidden"
+              style={{
+                border: '3px solid rgba(255, 255, 255, 0.9)',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
+              }}
+            >
+              <img 
+                src={current.storage_url} 
+                alt="User" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </motion.div>
+        </div>
       </div>
 
-      {/* Footer - different for own vs other stories */}
+      {/* Footer */}
       <motion.div 
-        className="absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center"
+        className="absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center gap-3"
         style={{ 
-          paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 20px)',
+          paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
           paddingInline: '16px',
         }}
         initial={{ opacity: 0, y: 20 }}
@@ -360,7 +384,6 @@ const Reel = () => {
               Reacts so far • {String(currentReactions.total).padStart(2, '0')}
             </span>
             
-            {/* Avatar stack pill */}
             {currentReactions.total > 0 && (
               <div 
                 className="flex items-center px-4 py-2 rounded-full"
@@ -389,32 +412,29 @@ const Reel = () => {
         ) : (
           // Other's story - show reaction bar to send reactions
           <div className="flex flex-col items-center gap-3">
-            <span className="text-white/50 text-xs uppercase tracking-wider">
-              Send a reaction
+            <span className="text-white font-semibold text-lg">
+              Reacts so far • {String(currentReactions.total).padStart(2, '0')}
             </span>
-            <StoryReactionBar onReact={handleReact} />
+            
+            {/* SEND YOUR button with emojis */}
+            <motion.button
+              onClick={() => setShowSendReactionSheet(true)}
+              className="flex items-center gap-3 px-5 py-3 rounded-full"
+              style={{
+                background: 'rgba(60, 55, 70, 0.9)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+              }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span className="text-2xl">👏</span>
+              <span className="text-white font-semibold tracking-wide">SEND YOUR</span>
+              <span className="text-2xl">🔥</span>
+            </motion.button>
           </div>
         )}
       </motion.div>
-
-      {/* Progress dots at very top */}
-      <div 
-        className="absolute z-30 flex justify-center gap-1 px-6"
-        style={{ top: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 50px)' }}
-      >
-        {activities.map((_, i) => (
-          <div
-            key={i}
-            className="h-1 rounded-full transition-all duration-300"
-            style={{
-              width: i === currentIndex ? 20 : 6,
-              background: i === currentIndex 
-                ? 'linear-gradient(90deg, #a78bfa, #ec4899)' 
-                : 'rgba(255, 255, 255, 0.3)',
-            }}
-          />
-        ))}
-      </div>
 
       {/* Reacts bottom sheet for own stories */}
       <AnimatePresence>
@@ -424,6 +444,16 @@ const Reel = () => {
             reactions={currentReactions.reactions}
             reactors={MOCK_REACTORS}
             onClose={() => setShowReactsSheet(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Send reaction sheet for other users' stories */}
+      <AnimatePresence>
+        {showSendReactionSheet && (
+          <SendReactionSheet
+            onReact={handleReact}
+            onClose={() => setShowSendReactionSheet(false)}
           />
         )}
       </AnimatePresence>
