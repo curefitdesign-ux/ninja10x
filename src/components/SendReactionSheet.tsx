@@ -1,16 +1,20 @@
 import { motion } from 'framer-motion';
 import { ReactionType } from '@/services/journey-service';
 
+import fireImg from '@/assets/reactions/fire-cool.png';
+import clapImg from '@/assets/reactions/clap.png';
+import fistbumpImg from '@/assets/reactions/fistbump.png';
+import wowImg from '@/assets/reactions/wow.png';
+
 interface SendReactionSheetProps {
   onReact: (type: ReactionType) => void;
   onClose: () => void;
 }
 
-const REACTIONS: { type: ReactionType; emoji: string; size: string }[] = [
-  { type: 'fire', emoji: '🔥', size: '70px' },
-  { type: 'fistbump', emoji: '🤜🤛', size: '60px' },
-  { type: 'clap', emoji: '👏', size: '70px' },
-  { type: 'wow', emoji: '🤩', size: '70px' },
+const REACTIONS: { type: ReactionType; image: string }[] = [
+  { type: 'fire', image: fireImg },
+  { type: 'fistbump', image: fistbumpImg },
+  { type: 'clap', image: clapImg },
 ];
 
 export default function SendReactionSheet({ onReact, onClose }: SendReactionSheetProps) {
@@ -53,7 +57,7 @@ export default function SendReactionSheet({ onReact, onClose }: SendReactionShee
 
         {/* Emoji grid */}
         <div className="px-6 pb-6">
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          <div className="flex items-center justify-center gap-4">
             {REACTIONS.map((reaction, i) => (
               <motion.button
                 key={reaction.type}
@@ -62,7 +66,6 @@ export default function SendReactionSheet({ onReact, onClose }: SendReactionShee
                 style={{
                   width: 100,
                   height: 100,
-                  fontSize: reaction.size,
                 }}
                 initial={{ opacity: 0, scale: 0, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -75,12 +78,16 @@ export default function SendReactionSheet({ onReact, onClose }: SendReactionShee
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.85 }}
               >
-                {reaction.emoji}
+                <img 
+                  src={reaction.image} 
+                  alt={reaction.type} 
+                  className="w-20 h-20 object-contain"
+                />
               </motion.button>
             ))}
           </div>
 
-          {/* WOW text reaction */}
+          {/* WOW image reaction */}
           <motion.button
             onClick={() => onReact('wow')}
             className="w-full flex justify-center mt-4"
@@ -89,19 +96,11 @@ export default function SendReactionSheet({ onReact, onClose }: SendReactionShee
             transition={{ delay: 0.3 }}
             whileTap={{ scale: 0.95 }}
           >
-            <span 
-              className="font-black text-5xl"
-              style={{
-                background: 'linear-gradient(180deg, #FF9F43 0%, #EE5A24 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow: '0 4px 12px rgba(238, 90, 36, 0.4)',
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-                letterSpacing: '0.05em',
-              }}
-            >
-              WOW!
-            </span>
+            <img 
+              src={wowImg} 
+              alt="WOW!" 
+              className="h-16 object-contain"
+            />
           </motion.button>
         </div>
       </motion.div>
