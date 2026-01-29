@@ -1,0 +1,75 @@
+import { motion } from 'framer-motion';
+import { ReactionType } from '@/services/journey-service';
+
+interface FloatingReactionsOverlayProps {
+  reactions: ReactionType[];
+  newReaction: ReactionType | null;
+}
+
+const REACTION_EMOJIS: Record<ReactionType, string> = {
+  heart: '❤️',
+  fire: '🔥',
+  clap: '👏',
+  fistbump: '🤜🤛',
+  wow: '🤩',
+};
+
+// Positions around the card for floating reactions
+const POSITIONS = [
+  { top: '5%', right: '-5%', rotate: 15 },
+  { top: '10%', right: '5%', rotate: -10 },
+  { bottom: '35%', left: '-8%', rotate: -20 },
+  { bottom: '15%', left: '-5%', rotate: 10 },
+  { bottom: '8%', right: '-3%', rotate: -5 },
+  { top: '50%', right: '-6%', rotate: 25 },
+];
+
+export default function FloatingReactionsOverlay({ reactions, newReaction }: FloatingReactionsOverlayProps) {
+  return (
+    <div className="absolute inset-0 pointer-events-none z-30">
+      {reactions.slice(0, 5).map((type, i) => {
+        const pos = POSITIONS[i % POSITIONS.length];
+        const isNew = newReaction === type;
+        
+        return (
+          <motion.div
+            key={`${type}-${i}`}
+            className="absolute text-4xl"
+            style={{
+              ...pos,
+              filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))',
+            }}
+            initial={isNew ? { scale: 0, opacity: 0 } : { scale: 1, opacity: 1 }}
+            animate={{ 
+              scale: isNew ? [0, 1.3, 1] : 1, 
+              opacity: 1,
+              rotate: pos.rotate,
+              y: isNew ? [20, -10, 0] : 0,
+            }}
+            transition={{ 
+              type: 'spring', 
+              stiffness: 400, 
+              damping: 15,
+              delay: isNew ? 0 : i * 0.1,
+            }}
+          >
+            {REACTION_EMOJIS[type]}
+          </motion.div>
+        );
+      })}
+
+      {/* Animated new reaction burst */}
+      {newReaction && (
+        <motion.div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-7xl"
+          initial={{ scale: 0, opacity: 1 }}
+          animate={{ scale: [0, 1.8, 0], opacity: [1, 1, 0] }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          style={{ filter: 'drop-shadow(0 8px 24px rgba(0, 0, 0, 0.4))' }}
+        >
+          {REACTION_EMOJIS[newReaction]}
+        </motion.div>
+      )}
+    </div>
+  );
+}
