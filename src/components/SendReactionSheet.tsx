@@ -33,12 +33,13 @@ export default function SendReactionSheet({ onReact, onClose }: SendReactionShee
       <motion.div
         className="fixed bottom-0 left-0 right-0 z-50"
         style={{
+          height: 280,
           borderTopLeftRadius: 28,
           borderTopRightRadius: 28,
           background: 'linear-gradient(180deg, rgba(80, 75, 85, 0.98) 0%, rgba(50, 45, 55, 0.98) 100%)',
           backdropFilter: 'blur(40px)',
           WebkitBackdropFilter: 'blur(40px)',
-          paddingBottom: 'max(env(safe-area-inset-bottom, 32px), 32px)',
+          paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
         }}
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
