@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { uploadToStorage, deleteFromStorage } from '@/services/storage-service';
+import { ReactionType, ActivityReaction } from '@/services/journey-service';
 
 export interface JourneyActivity {
   id: string;
@@ -27,10 +28,16 @@ export interface LocalActivity {
   duration?: string;
   pr?: string;
   dayNumber: number;
+  userId?: string;
+  reactionCount?: number;
+  reactions?: Record<ReactionType, ActivityReaction>;
 }
 
 // Convert DB row to local shape
-function toLocal(row: JourneyActivity): LocalActivity {
+function toLocal(row: JourneyActivity & { 
+  reaction_count?: number; 
+  reactions?: Record<ReactionType, ActivityReaction>;
+}): LocalActivity {
   return {
     id: row.id,
     storageUrl: row.storage_url,
@@ -41,6 +48,9 @@ function toLocal(row: JourneyActivity): LocalActivity {
     duration: row.duration || undefined,
     pr: row.pr || undefined,
     dayNumber: row.day_number,
+    userId: row.user_id,
+    reactionCount: row.reaction_count,
+    reactions: row.reactions,
   };
 }
 
@@ -263,35 +273,75 @@ export function useJourneyActivities() {
   };
 }
 
+const DEFAULT_REACTIONS: Record<ReactionType, ActivityReaction> = {
+  heart: { type: 'heart', count: 0, userReacted: false },
+  clap: { type: 'clap', count: 0, userReacted: false },
+  fistbump: { type: 'fistbump', count: 0, userReacted: false },
+  wow: { type: 'wow', count: 0, userReacted: false },
+  fire: { type: 'fire', count: 0, userReacted: false },
+};
+
 /**
- * Fetch all activities from all users (public feed).
+ * Fetch all activities from all users (public feed) with reactions.
  * For the Progress page top strip.
  */
 export async function fetchPublicFeed(): Promise<LocalActivity[]> {
-  // Fetch latest activity per user using a distinct query
-  // This gets the most recent photo from each user for the public feed
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Fetch latest activity per user
   const { data, error } = await supabase
     .from('journey_activities')
     .select('*')
     .order('created_at', { ascending: false })
-    .limit(100); // Fetch more to filter by user
+    .limit(100);
 
   if (error) {
     console.error('Error fetching public feed:', error);
     return [];
   }
 
+  if (!data || data.length === 0) return [];
+
   // Keep only the latest activity per user
   const latestByUser = new Map<string, typeof data[0]>();
-  for (const row of data || []) {
+  for (const row of data) {
     if (!latestByUser.has(row.user_id)) {
       latestByUser.set(row.user_id, row);
     }
   }
 
-  // Convert to local shape and sort by created_at desc
-  return Array.from(latestByUser.values())
+  const activities = Array.from(latestByUser.values())
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 20) // Limit to 20 users
-    .map(toLocal);
+    .slice(0, 20);
+
+  // Fetch reactions for these activities
+  const activityIds = activities.map(a => a.id);
+  const { data: reactions } = await supabase
+    .from('activity_reactions')
+    .select('activity_id, user_id, reaction_type')
+    .in('activity_id', activityIds);
+
+  // Build reaction map
+  const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
+  const totalMap: Record<string, number> = {};
+
+  for (const r of reactions || []) {
+    const type = (r.reaction_type || 'heart') as ReactionType;
+    if (!reactionMap[r.activity_id]) {
+      reactionMap[r.activity_id] = { ...DEFAULT_REACTIONS };
+      totalMap[r.activity_id] = 0;
+    }
+    reactionMap[r.activity_id][type] = {
+      ...reactionMap[r.activity_id][type],
+      count: reactionMap[r.activity_id][type].count + 1,
+      userReacted: user && r.user_id === user.id ? true : reactionMap[r.activity_id][type].userReacted,
+    };
+    totalMap[r.activity_id]++;
+  }
+
+  return activities.map(row => ({
+    ...toLocal(row),
+    reactionCount: totalMap[row.id] || 0,
+    reactions: reactionMap[row.id] || { ...DEFAULT_REACTIONS },
+  }));
 }
