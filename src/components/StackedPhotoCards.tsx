@@ -39,8 +39,14 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
   const navigate = useNavigate();
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
   
-  // Calculate next day number for new uploads
-  const nextDayNumber = photos.length > 0 ? Math.max(...photos.map(p => p.dayNumber)) + 1 : 1;
+  // Calculate next day number - find first missing day in sequence (1-12)
+  const existingDays = new Set(photos.map(p => p.dayNumber));
+  const nextDayNumber = (() => {
+    for (let day = 1; day <= 12; day++) {
+      if (!existingDays.has(day)) return day;
+    }
+    return 13; // All days complete
+  })();
   
   const handleEmptyCardTap = () => {
     // Navigate to gallery page (has camera option inside)
