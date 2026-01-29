@@ -1,5 +1,13 @@
 import { supabase } from '@/integrations/supabase/client';
 
+export type ReactionType = 'heart' | 'clap' | 'fistbump' | 'wow' | 'fire';
+
+export interface ActivityReaction {
+  type: ReactionType;
+  count: number;
+  userReacted: boolean;
+}
+
 export interface JourneyActivity {
   id: string;
   user_id: string;
@@ -16,6 +24,8 @@ export interface JourneyActivity {
   // Joined fields
   reaction_count?: number;
   user_reacted?: boolean;
+  reactions?: Record<ReactionType, ActivityReaction>;
+  is_own?: boolean;
 }
 
 /**
@@ -40,7 +50,7 @@ export async function fetchMyActivities(): Promise<JourneyActivity[]> {
 }
 
 /**
- * Fetch all activities (public feed) with reaction counts
+ * Fetch all activities (public feed) with reaction counts by type
  */
 export async function fetchAllActivities(): Promise<JourneyActivity[]> {
   const { data: { user } } = await supabase.auth.getUser();
@@ -62,25 +72,50 @@ export async function fetchAllActivities(): Promise<JourneyActivity[]> {
   const activityIds = data.map(a => a.id);
   const { data: reactions } = await supabase
     .from('activity_reactions')
-    .select('activity_id, user_id')
+    .select('activity_id, user_id, reaction_type')
     .in('activity_id', activityIds);
 
-  // Build reaction map
-  const reactionMap: Record<string, { count: number; userReacted: boolean }> = {};
+  // Build reaction map with types
+  const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
+  const totalReactionMap: Record<string, { count: number; userReacted: boolean }> = {};
+  
   for (const r of reactions || []) {
+    const type = (r.reaction_type || 'heart') as ReactionType;
+    
     if (!reactionMap[r.activity_id]) {
-      reactionMap[r.activity_id] = { count: 0, userReacted: false };
+      reactionMap[r.activity_id] = {
+        heart: { type: 'heart', count: 0, userReacted: false },
+        clap: { type: 'clap', count: 0, userReacted: false },
+        fistbump: { type: 'fistbump', count: 0, userReacted: false },
+        wow: { type: 'wow', count: 0, userReacted: false },
+        fire: { type: 'fire', count: 0, userReacted: false },
+      };
     }
-    reactionMap[r.activity_id].count++;
+    if (!totalReactionMap[r.activity_id]) {
+      totalReactionMap[r.activity_id] = { count: 0, userReacted: false };
+    }
+    
+    reactionMap[r.activity_id][type].count++;
+    totalReactionMap[r.activity_id].count++;
+    
     if (user && r.user_id === user.id) {
-      reactionMap[r.activity_id].userReacted = true;
+      reactionMap[r.activity_id][type].userReacted = true;
+      totalReactionMap[r.activity_id].userReacted = true;
     }
   }
 
   return data.map(a => ({
     ...a,
-    reaction_count: reactionMap[a.id]?.count || 0,
-    user_reacted: reactionMap[a.id]?.userReacted || false,
+    reaction_count: totalReactionMap[a.id]?.count || 0,
+    user_reacted: totalReactionMap[a.id]?.userReacted || false,
+    reactions: reactionMap[a.id] || {
+      heart: { type: 'heart', count: 0, userReacted: false },
+      clap: { type: 'clap', count: 0, userReacted: false },
+      fistbump: { type: 'fistbump', count: 0, userReacted: false },
+      wow: { type: 'wow', count: 0, userReacted: false },
+      fire: { type: 'fire', count: 0, userReacted: false },
+    },
+    is_own: user ? a.user_id === user.id : false,
   }));
 }
 
@@ -131,18 +166,19 @@ export async function upsertActivity(activity: {
 }
 
 /**
- * Toggle reaction (heart) on an activity
+ * Toggle reaction (any type) on an activity
  */
-export async function toggleReaction(activityId: string): Promise<boolean> {
+export async function toggleReaction(activityId: string, reactionType: ReactionType = 'heart'): Promise<boolean> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
 
-  // Check if user already reacted
+  // Check if user already reacted with this type
   const { data: existing } = await supabase
     .from('activity_reactions')
     .select('id')
     .eq('activity_id', activityId)
     .eq('user_id', user.id)
+    .eq('reaction_type', reactionType)
     .maybeSingle();
 
   if (existing) {
@@ -159,8 +195,26 @@ export async function toggleReaction(activityId: string): Promise<boolean> {
       .insert({
         activity_id: activityId,
         user_id: user.id,
-        reaction_type: 'heart',
+        reaction_type: reactionType,
       });
     return true;
   }
+}
+
+/**
+ * Send a reaction (always adds, doesn't toggle)
+ */
+export async function sendReaction(activityId: string, reactionType: ReactionType): Promise<boolean> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { error } = await supabase
+    .from('activity_reactions')
+    .insert({
+      activity_id: activityId,
+      user_id: user.id,
+      reaction_type: reactionType,
+    });
+
+  return !error;
 }

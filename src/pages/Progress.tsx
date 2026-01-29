@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { useJourneyActivities, fetchPublicFeed, LocalActivity } from "@/hooks/use-journey-activities";
+import { useAuth } from "@/hooks/use-auth";
+import { JourneyActivity, ReactionType, ActivityReaction } from "@/services/journey-service";
 
 // Import tile assets
 import tileActiveImg from "@/assets/progress/tile-active-new.png";
@@ -11,7 +13,6 @@ import basePlatformImg from "@/assets/progress/base-platform.png";
 import engineBadgeImg from "@/assets/progress/engine-badge.png";
 import SharedImageTransition from "@/components/SharedImageTransition";
 import { isVideoUrl } from "@/lib/media";
-import { JourneyActivity } from "@/services/journey-service";
 
 // Tile positions - REVERSED order (Day 12 at top, Day 1 at bottom)
 const TILE_POSITIONS = [
@@ -39,6 +40,7 @@ const LABELS = [
 const Progress = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const [showContent, setShowContent] = useState(false);
   const [showTiles, setShowTiles] = useState(false);
   const [showStories, setShowStories] = useState(false);
@@ -67,10 +69,19 @@ const Progress = () => {
     loadFeed();
   }, []);
 
-  // Convert to JourneyActivity shape for reel navigation
+  // Default reactions shape
+  const defaultReactions: Record<ReactionType, ActivityReaction> = {
+    heart: { type: 'heart', count: 0, userReacted: false },
+    clap: { type: 'clap', count: 0, userReacted: false },
+    fistbump: { type: 'fistbump', count: 0, userReacted: false },
+    wow: { type: 'wow', count: 0, userReacted: false },
+    fire: { type: 'fire', count: 0, userReacted: false },
+  };
+
+  // Convert to JourneyActivity shape for reel navigation with reactions
   const feedAsActivities: JourneyActivity[] = publicFeed.map(p => ({
     id: p.id,
-    user_id: '',
+    user_id: p.userId || '',
     storage_url: p.storageUrl,
     original_url: p.originalUrl || null,
     is_video: p.isVideo || false,
@@ -81,8 +92,10 @@ const Progress = () => {
     day_number: p.dayNumber,
     created_at: '',
     updated_at: '',
-    reaction_count: 0,
+    reaction_count: p.reactionCount || 0,
     user_reacted: false,
+    reactions: p.reactions || defaultReactions,
+    is_own: user ? p.userId === user.id : false,
   }));
 
   const handlePhotoCardTap = (index: number) => {

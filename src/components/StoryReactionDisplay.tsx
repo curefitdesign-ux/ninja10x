@@ -1,0 +1,90 @@
+import { motion } from 'framer-motion';
+import { ReactionType, ActivityReaction } from '@/services/journey-service';
+
+interface StoryReactionDisplayProps {
+  reactions: Record<ReactionType, ActivityReaction>;
+  totalCount: number;
+}
+
+const REACTION_EMOJIS: Record<ReactionType, string> = {
+  heart: '❤️',
+  fire: '🔥',
+  clap: '👏',
+  fistbump: '🤜🤛',
+  wow: '🤩',
+};
+
+export default function StoryReactionDisplay({ reactions, totalCount }: StoryReactionDisplayProps) {
+  // Get non-zero reactions sorted by count
+  const activeReactions = Object.entries(reactions)
+    .filter(([, r]) => r.count > 0)
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, 5);
+
+  if (totalCount === 0) {
+    return (
+      <motion.div
+        className="flex items-center gap-2 px-4 py-2 rounded-full"
+        style={{
+          background: 'rgba(255, 255, 255, 0.06)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
+        <span className="text-white/50 text-sm">No reactions yet</span>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      className="flex items-center gap-3 px-4 py-2.5 rounded-full"
+      style={{
+        background: 'rgba(255, 255, 255, 0.08)',
+        backdropFilter: 'blur(40px)',
+        WebkitBackdropFilter: 'blur(40px)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+      }}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: 'spring', stiffness: 300 }}
+    >
+      {/* Stacked emoji display */}
+      <div className="flex items-center -space-x-1">
+        {activeReactions.map(([type], index) => (
+          <motion.span
+            key={type}
+            className="relative flex items-center justify-center w-8 h-8 rounded-full"
+            style={{
+              background: 'rgba(0, 0, 0, 0.3)',
+              fontSize: type === 'fistbump' ? '14px' : '18px',
+              zIndex: 10 - index,
+              border: '2px solid rgba(255, 255, 255, 0.1)',
+            }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.05 }}
+          >
+            {REACTION_EMOJIS[type as ReactionType]}
+          </motion.span>
+        ))}
+      </div>
+
+      {/* Total count */}
+      <motion.span
+        className="font-semibold text-white text-lg ml-1"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        {totalCount}
+      </motion.span>
+      <span className="text-white/60 text-sm">
+        {totalCount === 1 ? 'reaction' : 'reactions'}
+      </span>
+    </motion.div>
+  );
+}
