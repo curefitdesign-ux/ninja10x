@@ -192,32 +192,34 @@ const ReelProgressPill = ({
     <motion.div
       ref={pillRef}
       className={`relative overflow-hidden ${className}`}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 10 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+      initial={{ opacity: 0, y: 20, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
     >
       <motion.div
-        className="relative flex items-center gap-2.5 px-3 py-1.5 rounded-full cursor-pointer overflow-hidden"
+        className="relative flex flex-col px-4 py-3 rounded-2xl cursor-pointer overflow-hidden"
         style={{
           background: isCelebrating 
-            ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%)'
-            : 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
+            ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%)'
+            : 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
           backdropFilter: 'blur(40px) saturate(180%)',
           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
           border: isCelebrating 
-            ? '1px solid rgba(52, 211, 153, 0.5)'
+            ? '1px solid rgba(52, 211, 153, 0.4)'
             : '1px solid rgba(255,255,255,0.15)',
           boxShadow: isCelebrating 
-            ? '0 0 20px rgba(52, 211, 153, 0.3), 0 0 40px rgba(52, 211, 153, 0.15)'
-            : 'none',
+            ? '0 0 24px rgba(52, 211, 153, 0.25), inset 0 1px 0 rgba(255,255,255,0.1)'
+            : 'inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.1)',
         }}
         onClick={onPlay}
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.98 }}
         animate={isCelebrating ? {
-          scale: [1, 1.02, 1],
+          scale: [1, 1.01, 1],
         } : {}}
         transition={{
-          duration: 0.6,
+          duration: 0.8,
           repeat: isCelebrating ? Infinity : 0,
           ease: 'easeInOut',
         }}
@@ -226,114 +228,156 @@ const ReelProgressPill = ({
         <AnimatePresence>
           {isCelebrating && (
             <motion.div
-              className="absolute inset-0 rounded-full pointer-events-none"
+              className="absolute inset-0 rounded-2xl pointer-events-none"
               initial={{ opacity: 0 }}
-              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              animate={{ opacity: [0.2, 0.4, 0.2] }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.5, repeat: Infinity }}
               style={{
-                background: 'radial-gradient(circle at center, rgba(52, 211, 153, 0.4) 0%, transparent 70%)',
+                background: 'radial-gradient(circle at center, rgba(52, 211, 153, 0.3) 0%, transparent 70%)',
               }}
             />
           )}
         </AnimatePresence>
         
-        {/* Subtle gradient overlay during completion */}
+        {/* Shimmer effect */}
         <AnimatePresence>
-          {(state === 'completing' || isCelebrating) && (
+          {(state === 'completing' || state === 'creating') && (
             <motion.div
-              className="absolute inset-0 rounded-full pointer-events-none"
+              className="absolute inset-0 rounded-2xl pointer-events-none"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              style={{
-                background: 'linear-gradient(90deg, transparent 0%, rgba(52, 211, 153, 0.2) 50%, transparent 100%)',
-                backgroundSize: '200% 100%',
-                animation: 'shimmer 1.5s ease-in-out infinite',
-              }}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* Left icon: Stacked cards OR Reaction avatar */}
-        <AnimatePresence mode="wait">
-          {showReactionAvatar && topReaction ? (
-            <motion.div
-              key="reaction"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             >
-              <ReactionAvatar reaction={topReaction} />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="cards"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            >
-              <StackedCardsIcon />
+              <motion.div
+                className="absolute inset-0"
+                style={{
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
+                }}
+                animate={{ x: ['-100%', '200%'] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+              />
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Text content */}
-        <div className="flex-1 min-w-0">
-          <motion.span
-            className="text-white/85 font-medium text-xs tracking-wide"
-            key={state}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
+        {/* Top row: Icon + Text + Play button */}
+        <div className="flex items-center gap-3 relative z-10">
+          {/* Left icon: Stacked cards OR Reaction avatar */}
+          <AnimatePresence mode="wait">
+            {showReactionAvatar && topReaction ? (
+              <motion.div
+                key="reaction"
+                initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+                animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                exit={{ scale: 0.5, opacity: 0, rotate: 10 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              >
+                <ReactionAvatar reaction={topReaction} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="cards"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              >
+                <StackedCardsIcon />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Text content */}
+          <div className="flex-1 min-w-0">
+            <AnimatePresence mode="wait">
+              <motion.span
+                className="text-white font-semibold text-sm tracking-wide block"
+                key={state}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+              >
+                <span className={isCelebrating ? 'text-emerald-300' : ''}>{getText()}</span>
+              </motion.span>
+            </AnimatePresence>
+          </div>
+
+          {/* Liquid glass play button */}
+          <motion.div
+            className="relative flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center overflow-hidden"
+            style={{
+              background: state === 'complete' || state === 'completing' || isCelebrating
+                ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.4) 0%, rgba(16, 185, 129, 0.25) 100%)'
+                : 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: state === 'complete' || state === 'completing' || isCelebrating
+                ? '1px solid rgba(52, 211, 153, 0.5)'
+                : '1px solid rgba(255,255,255,0.15)',
+              boxShadow: state === 'complete' || state === 'completing' || isCelebrating
+                ? '0 0 16px rgba(52, 211, 153, 0.3), inset 0 1px 0 rgba(255,255,255,0.2)'
+                : 'inset 0 1px 0 rgba(255,255,255,0.1)',
+            }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            animate={isCelebrating ? {
+              scale: [1, 1.15, 1],
+              boxShadow: [
+                '0 0 16px rgba(52, 211, 153, 0.3)',
+                '0 0 28px rgba(52, 211, 153, 0.5)',
+                '0 0 16px rgba(52, 211, 153, 0.3)',
+              ],
+            } : {}}
+            transition={{
+              duration: 0.8,
+              repeat: isCelebrating ? Infinity : 0,
+              ease: 'easeInOut',
+            }}
           >
-            <span className={isCelebrating ? 'text-emerald-300' : ''}>{getText()}</span>
-          </motion.span>
+            <Play 
+              className={`w-3.5 h-3.5 ml-0.5 ${
+                state === 'complete' || state === 'completing' || isCelebrating
+                  ? 'text-emerald-400' 
+                  : 'text-white/70'
+              }`} 
+              fill="currentColor" 
+            />
+          </motion.div>
         </div>
 
-        {/* Liquid glass play button */}
-        <motion.div
-          className="relative flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center overflow-hidden"
-          style={{
-            background: state === 'complete' || state === 'completing' || isCelebrating
-              ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.35) 0%, rgba(16, 185, 129, 0.2) 100%)'
-              : 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.04) 100%)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            border: state === 'complete' || state === 'completing' || isCelebrating
-              ? '1px solid rgba(52, 211, 153, 0.5)'
-              : '1px solid rgba(255,255,255,0.12)',
-            boxShadow: state === 'complete' || state === 'completing' || isCelebrating
-              ? '0 0 16px rgba(52, 211, 153, 0.35), inset 0 1px 0 rgba(255,255,255,0.15)'
-              : 'inset 0 1px 0 rgba(255,255,255,0.08)',
-          }}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.95 }}
-          animate={isCelebrating ? {
-            scale: [1, 1.15, 1],
-            boxShadow: [
-              '0 0 16px rgba(52, 211, 153, 0.35)',
-              '0 0 24px rgba(52, 211, 153, 0.5)',
-              '0 0 16px rgba(52, 211, 153, 0.35)',
-            ],
-          } : {}}
-          transition={{
-            duration: 0.8,
-            repeat: isCelebrating ? Infinity : 0,
-            ease: 'easeInOut',
-          }}
-        >
-          <Play 
-            className={`w-3 h-3 ml-0.5 ${
-              state === 'complete' || state === 'completing' || isCelebrating
-                ? 'text-emerald-400' 
-                : 'text-white/60'
-            }`} 
-            fill="currentColor" 
-          />
-        </motion.div>
+        {/* Progress bar row */}
+        <div className="mt-2.5 relative z-10">
+          <div 
+            className="h-1.5 rounded-full overflow-hidden"
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+            }}
+          >
+            <motion.div
+              className="h-full rounded-full"
+              style={{
+                background: state === 'complete' || state === 'completing' || isCelebrating
+                  ? 'linear-gradient(90deg, #34d399 0%, #10b981 50%, #6ee7b7 100%)'
+                  : 'linear-gradient(90deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.6) 100%)',
+                boxShadow: state === 'complete' || state === 'completing' || isCelebrating
+                  ? '0 0 8px rgba(52, 211, 153, 0.5)'
+                  : 'none',
+              }}
+              initial={{ width: '0%' }}
+              animate={{ 
+                width: state === 'complete' || state === 'completing' 
+                  ? '100%' 
+                  : `${Math.max(progress, 10)}%` 
+              }}
+              transition={{ 
+                duration: state === 'complete' ? 0.5 : 0.8, 
+                ease: 'easeOut' 
+              }}
+            />
+          </div>
+        </div>
       </motion.div>
 
       {/* CSS for shimmer animation */}
