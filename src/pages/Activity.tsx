@@ -8,7 +8,6 @@ import PullToRefresh from "@/components/PullToRefresh";
 import PhotoLoggingWidget, { LoggedPhoto } from "@/components/PhotoLoggingWidget";
 import AIReelViewer from "@/components/AIReelViewer";
 import CuroSpeechBubble from "@/components/CuroSpeechBubble";
-import FullScreenReel from "@/components/FullScreenReel";
 import { useJourneyActivities } from "@/hooks/use-journey-activities";
 import { JourneyActivity } from "@/services/journey-service";
 import { toast } from "sonner";
@@ -70,9 +69,6 @@ const Activity = () => {
   const [showReelViewer, setShowReelViewer] = useState(false);
   const [reelPhotos, setReelPhotos] = useState<LoggedPhoto[]>([]);
   
-  // Full screen reel viewer state (for tapping on images)
-  const [showFullScreenReel, setShowFullScreenReel] = useState(false);
-  const [fullScreenReelIndex, setFullScreenReelIndex] = useState(0);
   
   // Transition states
   const [transitionFromProgress, setTransitionFromProgress] = useState(false);
@@ -206,12 +202,14 @@ const Activity = () => {
   }));
 
   const handlePhotoTap = (photo: LoggedPhoto) => {
-    // Open full screen reel viewer at the tapped photo
+    // Navigate to /reel page at the tapped photo
     const index = photos.findIndex(p => p.id === photo.id);
-    if (index >= 0) {
-      setFullScreenReelIndex(index);
-      setShowFullScreenReel(true);
-    }
+    navigate('/reel', {
+      state: {
+        activities: photosAsJourneyActivities,
+        initialIndex: index >= 0 ? index : 0,
+      },
+    });
   };
 
   const handlePhotoAdd = useCallback((weekIndex: number, dayIndex: number) => {
@@ -232,14 +230,18 @@ const Activity = () => {
   }, []);
 
   const handleMascotTap = useCallback(() => {
-    // If we have any photos, show full screen reel - otherwise navigate to progress
+    // If we have any photos, navigate to /reel - otherwise navigate to progress
     if (photos.length >= 1) {
-      setFullScreenReelIndex(0);
-      setShowFullScreenReel(true);
+      navigate('/reel', {
+        state: {
+          activities: photosAsJourneyActivities,
+          initialIndex: 0,
+        },
+      });
     } else {
       navigate('/progress');
     }
-  }, [photos.length, navigate]);
+  }, [photos.length, navigate, photosAsJourneyActivities]);
 
   const handleRefresh = useCallback(async () => {
     await refresh();
@@ -633,16 +635,6 @@ const Activity = () => {
         }))}
       />
       
-      {/* Full Screen Reel Viewer - for viewing user's own photos */}
-      <AnimatePresence>
-        {showFullScreenReel && photosAsJourneyActivities.length > 0 && (
-          <FullScreenReel
-            activities={photosAsJourneyActivities}
-            initialIndex={fullScreenReelIndex}
-            onClose={() => setShowFullScreenReel(false)}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 };
