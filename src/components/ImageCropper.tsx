@@ -429,10 +429,11 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
       {/* Crop frame indicator */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div 
-          className="relative rounded-[24px] border-2 border-white/40 overflow-hidden"
+          className="relative rounded-[24px] overflow-hidden"
           style={{ 
             width: cropDimensions.width, 
             height: cropDimensions.height,
+            boxShadow: '0 0 0 4000px rgba(0, 0, 0, 0.5)',
           }}
         >
           {/* Corner brackets */}
