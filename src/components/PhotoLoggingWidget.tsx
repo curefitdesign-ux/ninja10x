@@ -122,17 +122,15 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
 
   const handleCardClick = (e: React.MouseEvent, index: number, photo: LoggedPhoto | null) => {
     e.stopPropagation();
-    if (isWeekComplete) {
-      // For completed weeks, clicking anywhere triggers reel
+    
+    // If not expanded, always expand first
+    if (!isExpanded) {
+      onTap();
       return;
     }
-    if (!isExpanded) {
-      // Expand the cluster for incomplete weeks
-      onTap();
-    } else {
-      // If expanded, handle individual card tap
-      onCardTap(index, photo);
-    }
+    
+    // If expanded, handle individual card tap
+    onCardTap(index, photo);
   };
   const renderCard = (index: number, zIndex: number, opacity: number) => {
     const photo = photos[index];
