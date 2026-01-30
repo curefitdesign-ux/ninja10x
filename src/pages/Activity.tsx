@@ -8,6 +8,7 @@ import PullToRefresh from "@/components/PullToRefresh";
 import PhotoLoggingWidget, { LoggedPhoto } from "@/components/PhotoLoggingWidget";
 import AIReelViewer from "@/components/AIReelViewer";
 import CuroSpeechBubble from "@/components/CuroSpeechBubble";
+import ProfileMenu from "@/components/ProfileMenu";
 import { useJourneyActivities } from "@/hooks/use-journey-activities";
 import { JourneyActivity } from "@/services/journey-service";
 import { toast } from "sonner";
@@ -383,8 +384,13 @@ const Activity = () => {
       
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="relative z-10 pb-28 pt-2">
+          {/* Profile Menu - Top Right */}
+          <div className="px-4 pt-3 flex justify-end">
+            <ProfileMenu />
+          </div>
+          
           {/* Stats Header */}
-          <div className="px-4 pt-4 relative">
+          <div className="px-4 pt-2 relative">
             <div className="flex gap-3">
               {/* Days Streak */}
               <motion.div 
