@@ -1,11 +1,12 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Upload, User } from 'lucide-react';
+import { Check, Upload, User, Mail } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
+import { useProfile, Profile } from '@/hooks/use-profile';
 import { z } from 'zod';
 
 // Import Netflix-style preset avatars
@@ -33,10 +34,13 @@ const nameSchema = z.string().trim().min(2, 'Name must be at least 2 characters'
 
 interface ProfileSetupProps {
   onComplete: () => void;
+  editMode?: boolean;
+  existingProfile?: Profile | null;
 }
 
-const ProfileSetup = ({ onComplete }: ProfileSetupProps) => {
+const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: ProfileSetupProps) => {
   const { user } = useAuth();
+  const { updateProfile } = useProfile();
   const [displayName, setDisplayName] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [customAvatarFile, setCustomAvatarFile] = useState<File | null>(null);
@@ -44,6 +48,20 @@ const ProfileSetup = ({ onComplete }: ProfileSetupProps) => {
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Pre-fill data in edit mode
+  useEffect(() => {
+    if (editMode && existingProfile) {
+      setDisplayName(existingProfile.display_name);
+      // Check if avatar is a preset or custom
+      const presetMatch = PRESET_AVATARS.find(a => existingProfile.avatar_url.includes(a.id) || existingProfile.avatar_url === a.src);
+      if (presetMatch) {
+        setSelectedAvatar(presetMatch.id);
+      } else if (existingProfile.avatar_url) {
+        setCustomAvatarPreview(existingProfile.avatar_url);
+      }
+    }
+  }, [editMode, existingProfile]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -75,7 +93,7 @@ const ProfileSetup = ({ onComplete }: ProfileSetupProps) => {
     setCustomAvatarPreview(null);
   };
 
-  const hasAvatarSelected = selectedAvatar !== null || customAvatarFile !== null;
+  const hasAvatarSelected = selectedAvatar !== null || customAvatarFile !== null || customAvatarPreview !== null;
 
   const handleSubmit = async () => {
     const nameResult = nameSchema.safeParse(displayName);
@@ -115,28 +133,40 @@ const ProfileSetup = ({ onComplete }: ProfileSetupProps) => {
           .getPublicUrl(fileName);
 
         avatarUrl = urlData.publicUrl;
-      } else {
-        // Use preset avatar - store the preset ID as a marker
+      } else if (selectedAvatar) {
+        // Use preset avatar
         const preset = PRESET_AVATARS.find(a => a.id === selectedAvatar);
         avatarUrl = preset?.src || '';
+      } else {
+        // Keep existing custom avatar
+        avatarUrl = customAvatarPreview || '';
       }
 
-      // Create profile in database
-      const { error: insertError } = await supabase
-        .from('profiles')
-        .insert({
-          user_id: user.id,
+      if (editMode) {
+        // Update existing profile
+        await updateProfile({
           display_name: displayName.trim(),
           avatar_url: avatarUrl,
         });
+        toast.success('Profile updated!');
+      } else {
+        // Create profile in database
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user.id,
+            display_name: displayName.trim(),
+            avatar_url: avatarUrl,
+          });
 
-      if (insertError) throw insertError;
+        if (insertError) throw insertError;
+        toast.success('Profile created!');
+      }
 
-      toast.success('Profile created!');
       onComplete();
     } catch (error: any) {
-      console.error('Error creating profile:', error);
-      toast.error(error.message || 'Failed to create profile');
+      console.error('Error saving profile:', error);
+      toast.error(error.message || 'Failed to save profile');
     } finally {
       setLoading(false);
     }
@@ -147,26 +177,92 @@ const ProfileSetup = ({ onComplete }: ProfileSetupProps) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen flex flex-col bg-gradient-to-br from-black via-gray-900 to-black p-4"
+      className="min-h-screen flex flex-col p-4 relative overflow-hidden"
+      style={{ background: '#0a0a12' }}
     >
-      <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
+      {/* Animated gradient orbs background */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <motion.div
+          className="absolute w-[300px] h-[300px] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, hsl(160, 84%, 39%) 0%, transparent 70%)',
+            filter: 'blur(80px)',
+            top: '-10%',
+            left: '-15%',
+            opacity: 0.35,
+          }}
+          animate={{ x: [0, 30, 0], y: [0, 20, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute w-[250px] h-[250px] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, hsl(280, 60%, 50%) 0%, transparent 70%)',
+            filter: 'blur(70px)',
+            bottom: '10%',
+            right: '-10%',
+            opacity: 0.25,
+          }}
+          animate={{ x: [0, -20, 0], y: [0, -30, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
+      <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', delay: 0.1 }}
-            className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center"
+            className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
+            style={{
+              background: 'linear-gradient(135deg, hsl(160, 84%, 39%) 0%, hsl(172, 66%, 50%) 100%)',
+              boxShadow: '0 8px 24px rgba(52, 211, 153, 0.3)',
+            }}
           >
             <User className="w-8 h-8 text-white" />
           </motion.div>
-          <h1 className="text-2xl font-bold text-white mb-2">Complete Your Profile</h1>
-          <p className="text-white/60 text-sm">Add your name and choose an avatar</p>
+          <h1 className="text-2xl font-bold text-white mb-2">
+            {editMode ? 'Edit Your Profile' : 'Complete Your Profile'}
+          </h1>
+          <p className="text-white/50 text-sm">
+            {editMode ? 'Update your name and avatar' : 'Add your name and choose an avatar'}
+          </p>
         </div>
 
-        {/* Name Input */}
+        {/* Email Display (Edit Mode) */}
+        {editMode && user?.email && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-6 rounded-2xl p-4"
+            style={{
+              background: 'rgba(255, 255, 255, 0.04)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+            }}
+          >
+            <Label className="text-white/50 text-xs mb-1.5 block">Email Address</Label>
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-9 h-9 rounded-lg flex items-center justify-center"
+                style={{
+                  background: 'rgba(52, 211, 153, 0.15)',
+                  border: '1px solid rgba(52, 211, 153, 0.2)',
+                }}
+              >
+                <Mail className="w-4 h-4 text-emerald-400" />
+              </div>
+              <span className="text-white/80 text-sm">{user.email}</span>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Name Input - Liquid Glass */}
         <div className="mb-6">
-          <Label htmlFor="displayName" className="text-white/80 mb-2 block">
+          <Label htmlFor="displayName" className="text-white/70 mb-2 block text-sm">
             Your Name *
           </Label>
           <Input
@@ -178,7 +274,8 @@ const ProfileSetup = ({ onComplete }: ProfileSetupProps) => {
               if (nameError) setNameError(null);
             }}
             placeholder="Enter your name"
-            className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
+            className="h-12 bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-xl focus:border-emerald-400/50 focus:ring-emerald-400/20"
+            style={{ backdropFilter: 'blur(10px)' }}
             disabled={loading}
             maxLength={50}
           />
@@ -265,22 +362,35 @@ const ProfileSetup = ({ onComplete }: ProfileSetupProps) => {
           </div>
         </div>
 
-        {/* Submit Button */}
+        {/* Submit Button - Liquid Glass */}
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={handleSubmit}
           disabled={loading || !displayName.trim() || !hasAvatarSelected}
-          className="w-full py-4 rounded-xl font-semibold text-white transition-all duration-200 disabled:opacity-50"
+          className="w-full py-4 rounded-2xl font-semibold text-white transition-all duration-200 disabled:opacity-50 relative overflow-hidden"
           style={{
             background: hasAvatarSelected && displayName.trim()
-              ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-              : 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%)',
+              ? 'linear-gradient(135deg, hsl(160, 84%, 39%) 0%, hsl(172, 66%, 50%) 100%)'
+              : 'rgba(255, 255, 255, 0.08)',
             backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.25)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            boxShadow: hasAvatarSelected && displayName.trim()
+              ? '0 8px 24px rgba(52, 211, 153, 0.25), inset 0 1px 0 rgba(255,255,255,0.2)'
+              : 'inset 0 1px 1px rgba(255,255,255,0.1)',
           }}
         >
-          {loading ? 'Creating Profile...' : 'Continue'}
+          {/* Shimmer effect */}
+          <motion.div
+            className="absolute inset-0 opacity-30"
+            style={{
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+            }}
+            animate={{ x: ['-100%', '200%'] }}
+            transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }}
+          />
+          <span className="relative z-10">
+            {loading ? (editMode ? 'Saving...' : 'Creating Profile...') : (editMode ? 'Save Changes' : 'Continue')}
+          </span>
         </motion.button>
       </div>
     </motion.div>
