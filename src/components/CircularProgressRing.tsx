@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play } from "lucide-react";
 import curoMascot from "@/assets/activity-page/curo-mascot.png";
 
 interface CircularProgressRingProps {
@@ -156,13 +155,13 @@ const CircularProgressRing = ({
           ctx.stroke();
           ctx.restore();
         } else {
-          // Inactive bar - grey
+          // Inactive bar - white
           ctx.save();
           ctx.beginPath();
           ctx.arc(centerX, centerY, ringRadius, toRad(barStart), toRad(barEnd));
           ctx.lineCap = "round";
           ctx.lineWidth = strokeWidth;
-          ctx.strokeStyle = "rgba(180, 180, 190, 0.45)";
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
           ctx.stroke();
           ctx.restore();
         }
@@ -264,36 +263,15 @@ const CircularProgressRing = ({
         onClick={onMascotTap}
         whileTap={{ scale: 0.95 }}
       >
-        <div className="relative">
-          <img 
-            src={mascotSrc || curoMascot} 
-            alt={mascotAlt || "Curo mascot"} 
-            className="w-36 h-36 object-contain"
-            style={{ 
-              marginTop: '-6px',
-              filter: 'drop-shadow(0 6px 16px rgba(139, 92, 246, 0.25))'
-            }}
-          />
-          {/* Play icon overlay */}
-          <motion.div
-            className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center justify-center"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <div 
-              className="w-8 h-8 rounded-full flex items-center justify-center"
-              style={{
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.2)',
-              }}
-            >
-              <Play className="w-3.5 h-3.5 text-white/80 ml-0.5" fill="currentColor" />
-            </div>
-          </motion.div>
-        </div>
+        <img 
+          src={mascotSrc || curoMascot} 
+          alt={mascotAlt || "Curo mascot"} 
+          className="w-36 h-36 object-contain"
+          style={{ 
+            marginTop: '-6px',
+            filter: 'drop-shadow(0 6px 16px rgba(139, 92, 246, 0.25))'
+          }}
+        />
       </motion.button>
     </motion.div>
   );
