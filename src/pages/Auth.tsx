@@ -159,21 +159,21 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-black">
       {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-black">
+      <div className="absolute inset-0 pointer-events-none">
         {/* Floating gradient orbs */}
         <motion.div
-          className="absolute w-[500px] h-[500px] rounded-full opacity-40"
+          className="absolute w-[300px] h-[300px] rounded-full opacity-40 pointer-events-none"
           style={{
             background: 'radial-gradient(circle, hsl(160, 84%, 39%) 0%, transparent 70%)',
             filter: 'blur(80px)',
-            top: '-20%',
-            left: '-10%',
+            top: '-10%',
+            left: '-5%',
           }}
           animate={{
-            x: [0, 50, 0],
-            y: [0, 30, 0],
+            x: [0, 30, 0],
+            y: [0, 20, 0],
           }}
           transition={{
             duration: 8,
@@ -182,16 +182,16 @@ const Auth = () => {
           }}
         />
         <motion.div
-          className="absolute w-[400px] h-[400px] rounded-full opacity-30"
+          className="absolute w-[250px] h-[250px] rounded-full opacity-30 pointer-events-none"
           style={{
             background: 'radial-gradient(circle, hsl(172, 66%, 50%) 0%, transparent 70%)',
             filter: 'blur(60px)',
-            bottom: '-10%',
-            right: '-10%',
+            bottom: '5%',
+            right: '-5%',
           }}
           animate={{
-            x: [0, -40, 0],
-            y: [0, -50, 0],
+            x: [0, -20, 0],
+            y: [0, -30, 0],
           }}
           transition={{
             duration: 10,
@@ -200,16 +200,16 @@ const Auth = () => {
           }}
         />
         <motion.div
-          className="absolute w-[300px] h-[300px] rounded-full opacity-20"
+          className="absolute w-[200px] h-[200px] rounded-full opacity-20 pointer-events-none"
           style={{
             background: 'radial-gradient(circle, hsl(280, 60%, 50%) 0%, transparent 70%)',
             filter: 'blur(50px)',
-            top: '40%',
-            right: '20%',
+            top: '30%',
+            right: '10%',
           }}
           animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.35, 0.2],
+            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.3, 0.2],
           }}
           transition={{
             duration: 6,
