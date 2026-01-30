@@ -245,20 +245,75 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
           </>
         )}
         
-        {/* Empty state - upload icon ONLY when expanded */}
+        {/* Empty state - animated upload icon ONLY when expanded */}
         {!hasPhoto && shouldShowExpanded && isActiveDay && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <motion.div 
-              className="p-3 rounded-full bg-emerald-500/20 backdrop-blur-sm"
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.5, opacity: 0 }}
-              transition={{ 
-                delay: 0.15, 
-                ...fastSpring,
+            {/* Breathing outer glow */}
+            <motion.div
+              className="absolute w-16 h-16 rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(52, 211, 153, 0.4) 0%, transparent 70%)',
               }}
+              animate={{
+                scale: [1, 1.4, 1],
+                opacity: [0.6, 0.3, 0.6],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+            
+            {/* Expanding ripple ring */}
+            <motion.div
+              className="absolute w-12 h-12 rounded-full border-2 border-emerald-400/50"
+              animate={{
+                scale: [1, 1.8],
+                opacity: [0.8, 0],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeOut",
+              }}
+            />
+            
+            {/* Main upload button with pulse */}
+            <motion.div 
+              className="relative p-3 rounded-full"
+              style={{
+                background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.3) 0%, rgba(16, 185, 129, 0.2) 100%)',
+                backdropFilter: 'blur(8px)',
+                border: '1.5px solid rgba(52, 211, 153, 0.5)',
+                boxShadow: '0 0 20px rgba(52, 211, 153, 0.3), inset 0 1px 1px rgba(255,255,255,0.2)',
+              }}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ 
+                scale: [1, 1.08, 1],
+                opacity: 1,
+              }}
+              transition={{ 
+                scale: {
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                },
+                opacity: { duration: 0.3 },
+              }}
+              whileTap={{ scale: 0.9 }}
             >
-              <Upload className="w-6 h-6 text-emerald-400" strokeWidth={2.5} />
+              {/* Rotating Plus icon */}
+              <motion.div
+                animate={{ rotate: [0, 90, 0] }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <Upload className="w-6 h-6 text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]" strokeWidth={2.5} />
+              </motion.div>
             </motion.div>
           </div>
         )}
