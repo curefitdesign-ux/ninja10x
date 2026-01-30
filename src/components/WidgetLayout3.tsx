@@ -1,6 +1,7 @@
 import { Plus, ScanFace, X, Camera, Play, Sparkles } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import cardBackground from '@/assets/card-background.png';
 import filmstripBg from '@/assets/frames/filmstrip-bg.png';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
@@ -9,6 +10,8 @@ import JournalFrame from '@/components/frames/JournalFrame';
 import VogueFrame from '@/components/frames/VogueFrame';
 import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
+import ReelProgressPill from '@/components/ReelProgressPill';
+import { useFitnessReel } from '@/hooks/use-fitness-reel';
 
 interface Photo {
   id: string;
@@ -117,11 +120,36 @@ const WidgetLayout3 = ({
   const prevPhotosLength = useRef(photos.length);
   const [newPhotoIndex, setNewPhotoIndex] = useState<number | null>(null);
   
+  // Get reel state from hook
+  const { 
+    currentReel,
+    currentStep: reelStep,
+    isGenerating: isGeneratingReel,
+  } = useFitnessReel();
+  
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
   const hasThreePhotos = photos.length >= 3;
   const allPhotosUploaded = photos.every(p => p.storageUrl);
   const showPlayButton = hasThreePhotos;
   const canCreateReel = hasThreePhotos && allPhotosUploaded && !isGenerating && !isUploading;
+  
+  // Calculate reel progress based on step
+  const reelProgress = (() => {
+    if (!isGeneratingReel && !isGenerating) {
+      return currentReel?.videoUrl ? 100 : 0;
+    }
+    switch (reelStep) {
+      case 'narration': return 25;
+      case 'voiceover': return 50;
+      case 'video': return 75;
+      case 'complete': return 100;
+      default: return 0;
+    }
+  })();
+  
+  // Determine which week just completed (for showing pill)
+  const completedWeeks = Math.floor(photos.length / 3);
+  const showReelPill = completedWeeks > 0 && (isGeneratingReel || isGenerating || currentReel?.videoUrl);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 100);
@@ -475,6 +503,30 @@ const WidgetLayout3 = ({
           <span className="text-white/90 font-medium text-sm tracking-wide">Gallery</span>
         </button>
       </div>
+      
+      {/* Reel Progress Pill - Show below widget when a week is complete */}
+      <AnimatePresence>
+        {showReelPill && (
+          <div className="mt-4 px-2">
+            <ReelProgressPill
+              weekNumber={completedWeeks}
+              state={
+                currentReel?.videoUrl 
+                  ? 'complete' 
+                  : reelProgress >= 90 
+                    ? 'completing' 
+                    : 'creating'
+              }
+              progress={reelProgress}
+              onPlay={() => {
+                if (currentReel?.videoUrl) {
+                  navigate('/reel');
+                }
+              }}
+            />
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

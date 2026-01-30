@@ -8,7 +8,7 @@ import JournalFrame from '@/components/frames/JournalFrame';
 import VogueFrame from '@/components/frames/VogueFrame';
 import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
-import ReelProgressWidget from '@/components/ReelProgressWidget';
+import ReelProgressPill from '@/components/ReelProgressPill';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 import { useFitnessReel } from '@/hooks/use-fitness-reel';
 
@@ -561,24 +561,25 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
                   </button>
                 </motion.div>
               
-               {/* Reel Progress Widget - Show only at week ends (day 3, 6, 9, 12) with contextual content */}
+               {/* Reel Progress Pill - Show only at week ends (day 3, 6, 9, 12) */}
                {isWeekEnd && currentWeekConfig && (reelPhotos.length >= 3 || isGeneratingReel) && (
                  <motion.div
-                   className="w-full mb-4"
-                   style={{ marginTop: '-30px' }}
+                   className="w-full mb-4 px-4"
                    initial={{ opacity: 0, y: 20 }}
                    animate={{ opacity: 1, y: 0 }}
                    transition={{ delay: 0.2 }}
                  >
-                   <ReelProgressWidget
-                     isGenerating={isGeneratingReel}
-                     currentStep={reelStep}
-                     progress={reelProgress}
-                     photos={reelPhotos}
-                     reelReady={!!currentReel?.videoUrl}
+                   <ReelProgressPill
                      weekNumber={currentWeekConfig.week}
-                     weekTitle={currentWeekConfig.title}
-                     onViewReel={() => {
+                     state={
+                       currentReel?.videoUrl 
+                         ? 'complete' 
+                         : reelProgress >= 90 
+                           ? 'completing' 
+                           : 'creating'
+                     }
+                     progress={reelProgress}
+                     onPlay={() => {
                        if (currentReel?.videoUrl) {
                          window.open(currentReel.videoUrl, '_blank');
                        }
