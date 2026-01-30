@@ -556,12 +556,6 @@ const PhotoLoggingWidget = ({
   const [recapWeekPhotos, setRecapWeekPhotos] = useState<LoggedPhoto[]>([]);
   const [recapWeekNumber, setRecapWeekNumber] = useState(1);
   
-  // Auto-expand active week on mount and when it changes
-  useEffect(() => {
-    const activeWeekIndex = currentWeek - 1;
-    setExpandedWeeks(new Set([activeWeekIndex]));
-  }, [currentWeek]);
-
   // Get photos for each week (3 photos per week)
   const getWeekPhotos = useCallback((weekIndex: number): (LoggedPhoto | null)[] => {
     const startDay = weekIndex * 3 + 1;
@@ -575,18 +569,49 @@ const PhotoLoggingWidget = ({
   const getWeekStatus = useCallback((weekIndex: number) => {
     const weekPhotos = getWeekPhotos(weekIndex);
     const hasPhotos = weekPhotos.some(p => p !== null);
+    const isComplete = weekPhotos.every(p => p !== null);
     const isCurrentWeek = weekIndex === currentWeek - 1;
-    return { hasPhotos, isCurrentWeek, isActive: hasPhotos || isCurrentWeek };
+    return { hasPhotos, isComplete, isCurrentWeek, isActive: hasPhotos || isCurrentWeek };
   }, [getWeekPhotos, currentWeek]);
+
+  // Find the last week with any photos (the "active" week to keep expanded)
+  const getLastActiveWeekIndex = useCallback(() => {
+    for (let i = 3; i >= 0; i--) {
+      const weekPhotos = getWeekPhotos(i);
+      const hasPhotos = weekPhotos.some(p => p !== null);
+      const isComplete = weekPhotos.every(p => p !== null);
+      // Return this week if it has photos but isn't complete (still active)
+      // OR if it's complete and it's the current week
+      if (hasPhotos && !isComplete) return i;
+      // If week is complete, check if next week has started
+      if (isComplete) {
+        const nextWeekPhotos = i < 3 ? getWeekPhotos(i + 1) : null;
+        const nextHasPhotos = nextWeekPhotos?.some(p => p !== null);
+        if (!nextHasPhotos) return i; // Last active is this completed week
+      }
+    }
+    return 0; // Default to first week
+  }, [getWeekPhotos]);
+
+  // Auto-expand the last active week on mount and when photos change
+  useEffect(() => {
+    const lastActiveWeek = getLastActiveWeekIndex();
+    setExpandedWeeks(new Set([lastActiveWeek]));
+  }, [photos, getLastActiveWeekIndex]);
 
   const handleClusterTap = (weekIndex: number) => {
     setExpandedWeeks(prev => {
-      // If tapping the already expanded week that's also current, don't collapse
-      if (prev.has(weekIndex) && weekIndex === currentWeek - 1) {
+      const lastActiveWeek = getLastActiveWeekIndex();
+      // If tapping a collapsed week, expand ALL weeks (past and future)
+      if (!prev.has(weekIndex)) {
+        return new Set([0, 1, 2, 3]);
+      }
+      // If tapping an already expanded week that's the last active, don't collapse
+      if (prev.has(weekIndex) && weekIndex === lastActiveWeek) {
         return prev;
       }
-      // Expand only the tapped week, collapse all others
-      return new Set([weekIndex]);
+      // Collapse back to just the last active week
+      return new Set([lastActiveWeek]);
     });
   };
 
