@@ -26,37 +26,43 @@ interface ReelProgressPillProps {
   className?: string;
 }
 
-// Stacked card icon on the left during "creating" state
+// Compact stacked card icon with liquid glass feel
 const StackedCardsIcon = () => (
-  <div className="relative w-8 h-8 flex-shrink-0">
+  <div className="relative w-6 h-6 flex-shrink-0">
     {/* Back card */}
     <div 
-      className="absolute w-5 h-7 rounded-sm bg-white/20"
+      className="absolute w-4 h-5 rounded-sm"
       style={{ 
         left: 0, 
         top: 2,
         transform: 'rotate(-8deg)',
-        border: '1px solid rgba(255,255,255,0.3)',
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        backdropFilter: 'blur(8px)',
       }} 
     />
     {/* Middle card */}
     <div 
-      className="absolute w-5 h-7 rounded-sm bg-white/30"
+      className="absolute w-4 h-5 rounded-sm"
       style={{ 
-        left: 5, 
+        left: 4, 
         top: 1,
         transform: 'rotate(-3deg)',
-        border: '1px solid rgba(255,255,255,0.35)',
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)',
+        border: '1px solid rgba(255,255,255,0.25)',
+        backdropFilter: 'blur(8px)',
       }} 
     />
     {/* Front card */}
     <div 
-      className="absolute w-5 h-7 rounded-sm bg-white/40"
+      className="absolute w-4 h-5 rounded-sm"
       style={{ 
-        left: 10, 
+        left: 8, 
         top: 0,
         transform: 'rotate(2deg)',
-        border: '1px solid rgba(255,255,255,0.4)',
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.12) 100%)',
+        border: '1px solid rgba(255,255,255,0.3)',
+        backdropFilter: 'blur(8px)',
       }} 
     />
   </div>
@@ -172,11 +178,13 @@ const ReelProgressPill = ({
       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
     >
       <div
-        className="relative flex items-center gap-2.5 px-2.5 py-2 rounded-full cursor-pointer"
+        className="relative flex items-center gap-2.5 px-3 py-1.5 rounded-full cursor-pointer"
         style={{
-          background: 'linear-gradient(135deg, rgba(30,35,40,0.95) 0%, rgba(20,25,30,0.98) 100%)',
-          border: '1px solid rgba(255,255,255,0.12)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)',
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
+          backdropFilter: 'blur(40px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+          border: '1px solid rgba(255,255,255,0.15)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(0,0,0,0.1)',
         }}
         onClick={onPlay}
       >
@@ -225,7 +233,7 @@ const ReelProgressPill = ({
         {/* Text content */}
         <div className="flex-1 min-w-0">
           <motion.span
-            className="text-white/90 font-medium text-sm tracking-wide"
+            className="text-white/85 font-medium text-xs tracking-wide"
             key={state}
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
@@ -235,28 +243,30 @@ const ReelProgressPill = ({
           </motion.span>
         </div>
 
-        {/* Play button */}
+        {/* Liquid glass play button */}
         <motion.div
-          className="relative flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center overflow-hidden"
+          className="relative flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center overflow-hidden"
           style={{
             background: state === 'complete' || state === 'completing'
-              ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.3) 0%, rgba(16, 185, 129, 0.2) 100%)'
-              : 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 100%)',
+              ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%)'
+              : 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.04) 100%)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
             border: state === 'complete' || state === 'completing'
-              ? '1.5px solid rgba(52, 211, 153, 0.5)'
-              : '1px solid rgba(255,255,255,0.15)',
+              ? '1px solid rgba(52, 211, 153, 0.4)'
+              : '1px solid rgba(255,255,255,0.12)',
             boxShadow: state === 'complete' || state === 'completing'
-              ? '0 0 20px rgba(52, 211, 153, 0.3), inset 0 1px 0 rgba(255,255,255,0.15)'
-              : 'inset 0 1px 0 rgba(255,255,255,0.1)',
+              ? '0 0 16px rgba(52, 211, 153, 0.25), inset 0 1px 0 rgba(255,255,255,0.12)'
+              : 'inset 0 1px 0 rgba(255,255,255,0.08)',
           }}
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
         >
           <Play 
-            className={`w-3.5 h-3.5 ml-0.5 ${
+            className={`w-3 h-3 ml-0.5 ${
               state === 'complete' || state === 'completing' 
                 ? 'text-emerald-400' 
-                : 'text-white/70'
+                : 'text-white/60'
             }`} 
             fill="currentColor" 
           />

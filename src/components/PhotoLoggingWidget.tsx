@@ -335,15 +335,8 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
   // Current week = active week (has at least one empty slot and is the active week)
   const isCurrentWeekForIcon = isActiveWeek && !isCompletedWeek;
 
-  // Determine which icon to show in collapsed state - only upload for current week (no play, no lock)
-  const getCollapsedIcon = () => {
-    if (isCurrentWeekForIcon) {
-      return { icon: Upload, fill: false, color: 'text-emerald-400' };
-    }
-    return null;
-  };
-
-  const collapsedIconConfig = getCollapsedIcon();
+  // No icons in collapsed state - clean stacked cards only
+  const collapsedIconConfig = null;
 
   // Handle tap on collapsed week icon
   const handleCollapsedIconTap = (e: React.MouseEvent) => {
@@ -410,30 +403,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
         )}
       </AnimatePresence>
 
-      {/* Play button overlay for completed weeks when collapsed */}
-      <AnimatePresence>
-        {isWeekComplete && !shouldShowExpanded && (
-          <motion.button
-            className="absolute left-1/2 -translate-x-1/2 z-30 w-8 h-8 rounded-full flex items-center justify-center"
-            style={{
-              bottom: 8,
-              background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
-              boxShadow: '0 2px 8px rgba(74, 222, 128, 0.4)',
-            }}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onTap(); // Expand on tap
-            }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <Play className="w-3.5 h-3.5 text-white ml-0.5" fill="currentColor" />
-          </motion.button>
-        )}
-      </AnimatePresence>
+      {/* Collapsed stacked cards - tap to expand (no play icon overlay) */}
 
       {/* Glow effect for active/expanded week */}
       <AnimatePresence>
