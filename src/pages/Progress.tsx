@@ -196,12 +196,11 @@ const Progress = () => {
           <motion.div
             className="w-full overflow-x-auto scrollbar-hide overscroll-x-contain"
             style={{
-              paddingTop: "max(env(safe-area-inset-top, 16px), 16px)",
+              paddingTop: "calc(max(env(safe-area-inset-top, 16px), 16px) + 48px)",
               paddingInline: "4vw",
-              marginTop: "2vh",
-              height: "24vh",
-              minHeight: "140px",
-              maxHeight: "180px",
+              height: "22vh",
+              minHeight: "160px",
+              maxHeight: "200px",
             }}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
