@@ -141,9 +141,11 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
     // Minimal stagger for snappy fan-out/collapse
     const staggerDelay = isExpanded ? index * 0.02 : (2 - index) * 0.015;
     
-    // Solid backgrounds - no translucency/opacity
-    const solidBg = hasPhoto ? 'transparent' : '#1a1a1a';
-    const expandedBg = hasPhoto ? 'transparent' : isActiveDay ? 'rgba(52,211,153,0.12)' : '#1a1a1a';
+    // 10% white translucent backgrounds with blur
+    const glassBg = 'rgba(255, 255, 255, 0.10)';
+    const activeGlassBg = 'rgba(52, 211, 153, 0.15)';
+    const solidBg = hasPhoto ? 'transparent' : glassBg;
+    const expandedBg = hasPhoto ? 'transparent' : isActiveDay ? activeGlassBg : glassBg;
     
     return (
       <motion.button
@@ -160,7 +162,8 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           height: cardHeight,
           borderRadius: borderRadius * scale,
           background: isExpanded ? expandedBg : solidBg,
-          backdropFilter: 'none',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
           zIndex,
           willChange: 'transform, opacity',
         }}
@@ -258,16 +261,6 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
               <div className="p-2 rounded-full bg-emerald-500/20">
                 <Upload className="w-4 h-4 text-emerald-400" strokeWidth={2.5} />
               </div>
-            ) : (isFutureCard && isExpanded) ? (
-              /* Lock icon overlay for future locked days - only when expanded */
-              <motion.div 
-                className="p-2.5 rounded-full bg-white/5 backdrop-blur-sm"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 0.9, scale: 1 }}
-                transition={{ duration: 0.2, delay: 0.1 }}
-              >
-                <Lock className="w-4 h-4 text-white/40" strokeWidth={2} />
-              </motion.div>
             ) : null}
           </div>
         )}
@@ -318,14 +311,10 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
   // Upcoming week = not active and not completed
   const isUpcomingWeekForIcon = !isActiveWeek && !isCompletedWeek;
 
-  // Determine which icon to show in collapsed state
+  // Determine which icon to show in collapsed state - only upload for current week (no play, no lock)
   const getCollapsedIcon = () => {
-    if (isCompletedWeek) {
-      return { icon: Play, fill: true, color: 'text-white' };
-    } else if (isCurrentWeekForIcon) {
+    if (isCurrentWeekForIcon) {
       return { icon: Upload, fill: false, color: 'text-emerald-400' };
-    } else if (isUpcomingWeekForIcon) {
-      return { icon: Lock, fill: false, color: 'text-white/60' };
     }
     return null;
   };
