@@ -355,52 +355,18 @@ const ActivityLoggedCelebration = ({
               {/* Center content - Lottie tick animation */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <AnimatePresence mode="wait">
-                  {showTick ? (
+                  {showTick && lottieData && (
                     <motion.div
                       key="tick"
-                      className="w-28 h-28 flex items-center justify-center"
+                      className="flex items-center justify-center"
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                     >
-                      {lottieData && (
-                        <Lottie
-                          animationData={lottieData}
-                          loop={false}
-                          style={{ width: 140, height: 140 }}
-                        />
-                      )}
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="progress-ring"
-                      className="w-24 h-24 rounded-full flex items-center justify-center"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(57, 255, 133, 0.85) 0%, rgba(40, 200, 100, 0.85) 100%)',
-                        boxShadow: '0 0 40px rgba(57, 255, 133, 0.5), 0 0 80px rgba(57, 255, 133, 0.3)',
-                      }}
-                      initial={{ scale: 0.5, opacity: 0 }}
-                      animate={{ 
-                        scale: [1, 1.05, 1],
-                        opacity: 1,
-                      }}
-                      exit={{ scale: 0.8, opacity: 0 }}
-                      transition={{ 
-                        scale: { duration: 0.8, repeat: Infinity, repeatType: 'reverse' },
-                        opacity: { duration: 0.3 },
-                      }}
-                    >
-                      {/* Pulsing inner glow */}
-                      <motion.div
-                        className="absolute w-20 h-20 rounded-full"
-                        style={{
-                          background: 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%)',
-                        }}
-                        animate={{
-                          scale: [0.8, 1.2, 0.8],
-                          opacity: [0.5, 0.8, 0.5],
-                        }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
+                      <Lottie
+                        animationData={lottieData}
+                        loop={false}
+                        style={{ width: 160, height: 160 }}
                       />
                     </motion.div>
                   )}
