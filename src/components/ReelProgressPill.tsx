@@ -121,6 +121,7 @@ const ReelProgressPill = ({
   const [hasPlayedConfetti, setHasPlayedConfetti] = useState(false);
   const prevStateRef = useRef<PillState>(state);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [justCompleted, setJustCompleted] = useState(false);
   
   // Trigger celebration animation when isAnimating becomes true
   useEffect(() => {
@@ -130,6 +131,16 @@ const ReelProgressPill = ({
       return () => clearTimeout(timeout);
     }
   }, [isAnimating]);
+
+  // Trigger attention animation when reel completes
+  useEffect(() => {
+    if ((state === 'complete' || state === 'completing') && prevStateRef.current === 'creating') {
+      setJustCompleted(true);
+      // Keep attention animation running for 5 seconds
+      const timeout = setTimeout(() => setJustCompleted(false), 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, [state]);
   
   // Fire confetti when transitioning to "completing" state or celebrating
   useEffect(() => {
@@ -183,6 +194,7 @@ const ReelProgressPill = ({
   
   // Celebration or complete state styling
   const isCelebrating = state === 'celebrate' || showCelebration;
+  const needsAttention = justCompleted || state === 'completing';
 
   // Show reaction avatar or stacked cards based on state
   const showReactionAvatar = state === 'complete' && reactions.length > 0;
@@ -200,15 +212,15 @@ const ReelProgressPill = ({
       <motion.div
         className="relative flex flex-col px-4 py-3 rounded-2xl cursor-pointer overflow-hidden"
         style={{
-          background: isCelebrating 
+          background: isCelebrating || needsAttention
             ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%)'
             : 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
           backdropFilter: 'blur(40px) saturate(180%)',
           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-          border: isCelebrating 
+          border: isCelebrating || needsAttention
             ? '1px solid rgba(52, 211, 153, 0.4)'
             : '1px solid rgba(255,255,255,0.15)',
-          boxShadow: isCelebrating 
+          boxShadow: isCelebrating || needsAttention
             ? '0 0 24px rgba(52, 211, 153, 0.25), inset 0 1px 0 rgba(255,255,255,0.1)'
             : 'inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.1)',
         }}
@@ -218,15 +230,38 @@ const ReelProgressPill = ({
         }}
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.98 }}
-        animate={isCelebrating ? {
+        animate={needsAttention ? {
+          scale: [1, 1.03, 1],
+          y: [0, -2, 0],
+        } : isCelebrating ? {
           scale: [1, 1.01, 1],
         } : {}}
         transition={{
-          duration: 0.8,
-          repeat: isCelebrating ? Infinity : 0,
+          duration: 1.2,
+          repeat: needsAttention || isCelebrating ? Infinity : 0,
           ease: 'easeInOut',
         }}
       >
+        {/* Pulsing glow ring when needs attention */}
+        <AnimatePresence>
+          {needsAttention && (
+            <motion.div
+              className="absolute -inset-1 rounded-3xl pointer-events-none"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ 
+                opacity: [0, 0.6, 0],
+                scale: [0.98, 1.02, 0.98],
+              }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+              style={{
+                background: 'transparent',
+                border: '2px solid rgba(52, 211, 153, 0.5)',
+                boxShadow: '0 0 20px rgba(52, 211, 153, 0.4)',
+              }}
+            />
+          )}
+        </AnimatePresence>
         {/* Glow effect during celebration */}
         <AnimatePresence>
           {isCelebrating && (
@@ -311,21 +346,28 @@ const ReelProgressPill = ({
           <motion.div
             className="relative flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center overflow-hidden"
             style={{
-              background: state === 'complete' || state === 'completing' || isCelebrating
+              background: state === 'complete' || state === 'completing' || isCelebrating || needsAttention
                 ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.4) 0%, rgba(16, 185, 129, 0.25) 100%)'
                 : 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
-              border: state === 'complete' || state === 'completing' || isCelebrating
+              border: state === 'complete' || state === 'completing' || isCelebrating || needsAttention
                 ? '1px solid rgba(52, 211, 153, 0.5)'
                 : '1px solid rgba(255,255,255,0.15)',
-              boxShadow: state === 'complete' || state === 'completing' || isCelebrating
+              boxShadow: state === 'complete' || state === 'completing' || isCelebrating || needsAttention
                 ? '0 0 16px rgba(52, 211, 153, 0.3), inset 0 1px 0 rgba(255,255,255,0.2)'
                 : 'inset 0 1px 0 rgba(255,255,255,0.1)',
             }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            animate={isCelebrating ? {
+            animate={needsAttention ? {
+              scale: [1, 1.2, 1],
+              boxShadow: [
+                '0 0 16px rgba(52, 211, 153, 0.3)',
+                '0 0 32px rgba(52, 211, 153, 0.6)',
+                '0 0 16px rgba(52, 211, 153, 0.3)',
+              ],
+            } : isCelebrating ? {
               scale: [1, 1.15, 1],
               boxShadow: [
                 '0 0 16px rgba(52, 211, 153, 0.3)',
@@ -334,14 +376,14 @@ const ReelProgressPill = ({
               ],
             } : {}}
             transition={{
-              duration: 0.8,
-              repeat: isCelebrating ? Infinity : 0,
+              duration: 1,
+              repeat: needsAttention || isCelebrating ? Infinity : 0,
               ease: 'easeInOut',
             }}
           >
             <Play 
               className={`w-3.5 h-3.5 ml-0.5 ${
-                state === 'complete' || state === 'completing' || isCelebrating
+                state === 'complete' || state === 'completing' || isCelebrating || needsAttention
                   ? 'text-emerald-400' 
                   : 'text-white/70'
               }`} 
