@@ -507,19 +507,13 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
           }}
         />
         
-        {/* CULT NINJA branding and Week/Day info */}
+        {/* CULT NINJA branding */}
         <div className="absolute top-0 left-0 right-0 flex flex-col items-center pt-14 z-10">
           <span 
             className="text-white/80 text-xs font-semibold tracking-[3px]"
             style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}
           >
             CULT NINJA
-          </span>
-          <span 
-            className="text-white/50 text-[10px] font-medium tracking-[1.5px] mt-1"
-            style={{ textShadow: '0 2px 6px rgba(0,0,0,0.4)' }}
-          >
-            Week {week}  •  Day {day}
           </span>
         </div>
         {/* Bottom blur section - smooth & translucent */}
