@@ -1,9 +1,9 @@
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import StackedPhotoCards from './StackedPhotoCards';
 import WeekProgress from './WeekProgress';
 import cardBackground from '@/assets/card-background.png';
-
 interface Photo {
   id: string;
   storageUrl: string;
@@ -90,19 +90,91 @@ const PhotoUploadCard = ({
         </div>
       </div>
 
-      {/* Upload Button Below Widget */}
+      {/* Animated Upload Button Below Widget */}
       <div className="flex justify-center mt-4">
-        <button
+        <motion.button
           onClick={handleAddPhoto}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-full"
+          className="relative flex items-center gap-2 px-6 py-3 rounded-full overflow-visible"
           style={{
             background: 'linear-gradient(135deg, #FF4D4D 0%, #FF3333 100%)',
-            boxShadow: '0 4px 15px rgba(255,77,77,0.4)'
+          }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          animate={{
+            boxShadow: [
+              '0 0 20px rgba(255, 77, 77, 0.4), 0 0 40px rgba(255, 77, 77, 0.2)',
+              '0 0 30px rgba(255, 77, 77, 0.6), 0 0 60px rgba(255, 77, 77, 0.3)',
+              '0 0 20px rgba(255, 77, 77, 0.4), 0 0 40px rgba(255, 77, 77, 0.2)',
+            ],
+          }}
+          transition={{
+            boxShadow: {
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            },
           }}
         >
-          <Plus className="w-5 h-5 text-white" />
-          <span className="text-white font-semibold text-sm">Add Photo</span>
-        </button>
+          {/* Outer glow ring */}
+          <motion.div
+            className="absolute inset-0 rounded-full"
+            style={{
+              background: 'linear-gradient(135deg, #FF4D4D 0%, #FF3333 100%)',
+              filter: 'blur(12px)',
+              opacity: 0.5,
+            }}
+            animate={{
+              scale: [1, 1.15, 1],
+              opacity: [0.4, 0.7, 0.4],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+          
+          {/* Inner pulse ring */}
+          <motion.div
+            className="absolute inset-0 rounded-full border-2 border-white/30"
+            animate={{
+              scale: [1, 1.3, 1.5],
+              opacity: [0.6, 0.3, 0],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: 'easeOut',
+            }}
+          />
+          
+          {/* Button content */}
+          <motion.div 
+            className="relative z-10 flex items-center gap-2"
+            animate={{
+              y: [0, -2, 0],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          >
+            <motion.div
+              animate={{
+                rotate: [0, 90, 0],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+            >
+              <Plus className="w-5 h-5 text-white" />
+            </motion.div>
+            <span className="text-white font-semibold text-sm">Add Photo</span>
+          </motion.div>
+        </motion.button>
       </div>
     </div>
   );
