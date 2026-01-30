@@ -87,9 +87,9 @@ const fastSpring = {
 const smoothEase = [0.32, 0.72, 0, 1] as const;
 
 const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWithPhotos, onTap, onCardTap, onPlayReel }: CardClusterProps) => {
-  const baseCardWidth = 52;
-  const baseCardHeight = 70;
-  const borderRadius = 12;
+  const baseCardWidth = 58;
+  const baseCardHeight = 78;
+  const borderRadius = 14;
   
   // Check if week is complete (all 3 photos logged)
   const isWeekComplete = photos.every(p => p !== null);
@@ -99,7 +99,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
   const shouldShowExpanded = isExpanded;
   
   // Scale based on state - expanded weeks are larger
-  const scale = shouldShowExpanded ? 1.4 : 0.8;
+  const scale = shouldShowExpanded ? 1.5 : 0.75;
   const cardWidth = baseCardWidth * scale;
   const cardHeight = baseCardHeight * scale;
   
