@@ -86,16 +86,17 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
   const baseCardHeight = 70;
   const borderRadius = 12;
   
+  // Check if week is complete (all 3 photos logged)
+  const isWeekComplete = photos.every(p => p !== null);
+  
   // Scale based on state - larger for expanded, smaller when other week is expanded
-  const scale = isExpanded ? 1.55 : 0.8;
+  // Completed weeks get a special larger scale for the stacked view
+  const scale = isWeekComplete ? 1.4 : isExpanded ? 1.55 : 0.8;
   const cardWidth = baseCardWidth * scale;
   const cardHeight = baseCardHeight * scale;
   
   // Check if any photo is logged in this week
   const hasAnyPhoto = photos.some(p => p !== null);
-  
-  // Check if week is complete (all 3 photos logged)
-  const isWeekComplete = photos.every(p => p !== null);
   
   // Card positions for stacked state - proper separation to avoid overlap
   const getStackedPositions = (index: number) => {
@@ -110,13 +111,25 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
     };
   };
 
+  // Vertical attachment stack positions for completed weeks
+  const getAttachmentStackPositions = (index: number) => {
+    const rotations = [-12, 5, -3]; // Varied rotations for paper-like feel
+    const yOffsets = [0, -18, -36]; // Stack upward
+    const xOffsets = [8, -5, 3]; // Slight horizontal variance
+    return {
+      rotate: rotations[index],
+      x: xOffsets[index],
+      y: yOffsets[index],
+    };
+  };
+
   const handleCardClick = (e: React.MouseEvent, index: number, photo: LoggedPhoto | null) => {
     e.stopPropagation();
+    if (isWeekComplete) {
+      // For completed weeks, clicking anywhere triggers reel
+      return;
+    }
     if (!isExpanded) {
-      // Don't expand completed weeks - tap goes straight to reel
-      if (isWeekComplete) {
-        return; // Ignore - use play button instead
-      }
       // Expand the cluster for incomplete weeks
       onTap();
     } else {
@@ -131,12 +144,12 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
     const isVideo = !!photo && (photo.isVideo === true || isVideoUrl(photo.storageUrl));
     const isActiveDay = isActiveWeek && !hasPhoto && index === photos.findIndex(p => p === null || !p.storageUrl);
     const dayNumber = weekIndex * 3 + index + 1;
-    const isFutureCard = !hasPhoto && !isActiveDay;
     
     // Expanded position - fan out from center with more spacing
     const expandedX = (index - 1) * (cardWidth + 20);
     
     const stackedPos = getStackedPositions(index);
+    const attachmentPos = getAttachmentStackPositions(index);
     
     // Minimal stagger for snappy fan-out/collapse
     const staggerDelay = isExpanded ? index * 0.02 : (2 - index) * 0.015;
@@ -146,6 +159,61 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
     const activeGlassBg = 'rgba(52, 211, 153, 0.15)';
     const solidBg = hasPhoto ? 'transparent' : glassBg;
     const expandedBg = hasPhoto ? 'transparent' : isActiveDay ? activeGlassBg : glassBg;
+    
+    // For completed weeks, use attachment stack layout
+    if (isWeekComplete) {
+      return (
+        <motion.div
+          key={index}
+          className="absolute rounded-xl overflow-hidden border border-white/20 shadow-xl"
+          style={{
+            width: cardWidth,
+            height: cardHeight,
+            borderRadius: borderRadius * scale,
+            zIndex: index + 1,
+            willChange: 'transform',
+          }}
+          initial={false}
+          animate={{
+            left: "50%",
+            top: "50%",
+            rotate: attachmentPos.rotate,
+            x: `calc(-50% + ${attachmentPos.x}px)`,
+            y: `calc(-50% + ${attachmentPos.y}px)`,
+            scale: 1,
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 280,
+            damping: 32,
+            mass: 0.7,
+            delay: index * 0.03,
+          }}
+        >
+          {hasPhoto && (
+            <>
+              {isVideo ? (
+                <video
+                  src={photo.storageUrl}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  muted
+                  playsInline
+                  loop
+                  autoPlay
+                  preload="metadata"
+                />
+              ) : (
+                <img
+                  src={photo.storageUrl}
+                  alt={`Day ${dayNumber}`}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              )}
+            </>
+          )}
+        </motion.div>
+      );
+    }
     
     return (
       <motion.button
@@ -185,7 +253,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
                 rotate: stackedPos.rotate,
                 x: `calc(-50% + ${stackedPos.x}px)`,
                 y: stackedPos.y,
-                opacity: 1, // Full opacity - no translucency
+                opacity: 1,
                 scale: 1,
               }
         }
@@ -240,7 +308,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           </>
         )}
         
-        {/* Empty state - upload icon or lock */}
+        {/* Empty state - upload icon */}
         {!hasPhoto && (
           <div className="absolute inset-0 flex items-center justify-center">
             {isActiveDay && isExpanded ? (
@@ -286,9 +354,13 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
     );
   };
 
-  // Calculate container width based on expanded state
-  const containerWidth = isExpanded ? (cardWidth * 3 + 60) : (baseCardWidth * 0.8 + 16);
-  const containerHeight = cardHeight + 24;
+  // Calculate container dimensions based on state
+  const containerWidth = isWeekComplete 
+    ? cardWidth + 40 
+    : isExpanded 
+      ? (cardWidth * 3 + 60) 
+      : (baseCardWidth * 0.8 + 16);
+  const containerHeight = isWeekComplete ? cardHeight + 60 : cardHeight + 24;
 
   // Count photos in this week for play button
   const weekPhotoCount = photos.filter(p => p !== null).length;
@@ -308,8 +380,6 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
   const isCompletedWeek = photosLogged >= 3;
   // Current week = active week (has at least one empty slot and is the active week)
   const isCurrentWeekForIcon = isActiveWeek && !isCompletedWeek;
-  // Upcoming week = not active and not completed
-  const isUpcomingWeekForIcon = !isActiveWeek && !isCompletedWeek;
 
   // Determine which icon to show in collapsed state - only upload for current week (no play, no lock)
   const getCollapsedIcon = () => {
@@ -354,9 +424,9 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
         mass: 0.8,
       }}
     >
-      {/* Contextual icon ABOVE stacked cards - only in collapsed state */}
+      {/* Contextual icon ABOVE stacked cards - only for current incomplete week */}
       <AnimatePresence>
-        {!isExpanded && collapsedIconConfig && (
+        {!isExpanded && !isWeekComplete && collapsedIconConfig && (
           <motion.button
             className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center z-20"
             style={{ top: -20 }}
@@ -378,9 +448,46 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
               }}
             >
               <collapsedIconConfig.icon 
-                className={`w-4 h-4 ${collapsedIconConfig.color} ${collapsedIconConfig.icon === Play ? 'ml-0.5' : ''}`} 
-                fill={collapsedIconConfig.fill ? 'currentColor' : 'none'} 
+                className={`w-4 h-4 ${collapsedIconConfig.color}`} 
+                fill="none"
               />
+            </div>
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Floating CTA for completed weeks */}
+      <AnimatePresence>
+        {isWeekComplete && (
+          <motion.button
+            className="absolute left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-5 py-2.5 rounded-full"
+            style={{
+              bottom: -8,
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: '1.5px solid rgba(255,255,255,0.2)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)',
+            }}
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.9 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 28, delay: 0.1 }}
+            onClick={handlePlayClick}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <span className="text-white/90 text-xs font-semibold tracking-wide whitespace-nowrap">
+              PLAY WEEK {weekIndex + 1} RECAP
+            </span>
+            <div 
+              className="w-6 h-6 rounded-full flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
+                boxShadow: '0 2px 8px rgba(74, 222, 128, 0.4)',
+              }}
+            >
+              <Play className="w-3 h-3 text-white ml-0.5" fill="currentColor" />
             </div>
           </motion.button>
         )}
@@ -388,7 +495,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
 
       {/* Glow effect for active/expanded week */}
       <AnimatePresence>
-        {isExpanded && (
+        {isExpanded && !isWeekComplete && (
           <motion.div 
             className="absolute rounded-3xl blur-2xl pointer-events-none"
             style={{
@@ -425,7 +532,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
       
       {/* Render 3 cards - reversed order so first card (index 0) is on top when stacked */}
       {[2, 1, 0].map((index) => 
-        renderCard(index, isExpanded ? index + 1 : 3 - index, 1)
+        renderCard(index, isWeekComplete ? index + 1 : (isExpanded ? index + 1 : 3 - index), 1)
       )}
     </motion.div>
   );
