@@ -502,7 +502,7 @@ const PhotoLoggingWidget = ({
   currentDay = 1,
 }: PhotoLoggingWidgetProps) => {
   const navigate = useNavigate();
-  const [expandedWeeks, setExpandedWeeks] = useState<Set<number>>(new Set());
+  const [focusedWeekIndex, setFocusedWeekIndex] = useState<number>(0);
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [pendingUpload, setPendingUpload] = useState<{ weekIndex: number; dayIndex: number } | null>(null);
   const [showUploadOptions, setShowUploadOptions] = useState(false);
@@ -528,45 +528,38 @@ const PhotoLoggingWidget = ({
     return { hasPhotos, isComplete, isCurrentWeek, isActive: hasPhotos || isCurrentWeek };
   }, [getWeekPhotos, currentWeek]);
 
-  // Find the last week with any photos (the "active" week to keep expanded)
-  const getLastActiveWeekIndex = useCallback(() => {
-    for (let i = 3; i >= 0; i--) {
+  // Find the current active week (last week with any photos that isn't complete, or first week with photos in next week)
+  const getCurrentActiveWeekIndex = useCallback(() => {
+    for (let i = 0; i <= 3; i++) {
       const weekPhotos = getWeekPhotos(i);
       const hasPhotos = weekPhotos.some(p => p !== null);
       const isComplete = weekPhotos.every(p => p !== null);
-      // Return this week if it has photos but isn't complete (still active)
-      // OR if it's complete and it's the current week
+      
+      // If week has photos but isn't complete, this is the active week
       if (hasPhotos && !isComplete) return i;
+      
       // If week is complete, check if next week has started
-      if (isComplete) {
-        const nextWeekPhotos = i < 3 ? getWeekPhotos(i + 1) : null;
-        const nextHasPhotos = nextWeekPhotos?.some(p => p !== null);
-        if (!nextHasPhotos) return i; // Last active is this completed week
+      if (isComplete && i < 3) {
+        const nextWeekPhotos = getWeekPhotos(i + 1);
+        const nextHasPhotos = nextWeekPhotos.some(p => p !== null);
+        if (!nextHasPhotos) return i; // Stay on completed week until next starts
       }
     }
     return 0; // Default to first week
   }, [getWeekPhotos]);
 
-  // Auto-expand the last active week on mount and when photos change
+  // Auto-focus on current active week on mount and when photos change
   useEffect(() => {
-    const lastActiveWeek = getLastActiveWeekIndex();
-    setExpandedWeeks(new Set([lastActiveWeek]));
-  }, [photos, getLastActiveWeekIndex]);
+    const activeWeek = getCurrentActiveWeekIndex();
+    setFocusedWeekIndex(activeWeek);
+  }, [photos, getCurrentActiveWeekIndex]);
 
+  // Handle tapping on a week cluster
   const handleClusterTap = (weekIndex: number) => {
-    setExpandedWeeks(prev => {
-      const lastActiveWeek = getLastActiveWeekIndex();
-      // If tapping a collapsed week, expand ALL weeks (past and future)
-      if (!prev.has(weekIndex)) {
-        return new Set([0, 1, 2, 3]);
-      }
-      // If tapping an already expanded week that's the last active, don't collapse
-      if (prev.has(weekIndex) && weekIndex === lastActiveWeek) {
-        return prev;
-      }
-      // Collapse back to just the last active week
-      return new Set([lastActiveWeek]);
-    });
+    // Only switch focus if tapping a different week
+    if (weekIndex !== focusedWeekIndex) {
+      setFocusedWeekIndex(weekIndex);
+    }
   };
 
   const handleCardTap = (weekIndex: number, dayIndex: number, photo: LoggedPhoto | null) => {
@@ -634,30 +627,43 @@ const PhotoLoggingWidget = ({
   const weeks = [0, 1, 2, 3];
   const activeWeekIndex = currentWeek - 1;
   
-  // Calculate drag constraints based on content width
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [dragConstraints, setDragConstraints] = useState({ left: 0, right: 0 });
-  
-  useEffect(() => {
-    const updateConstraints = () => {
-      if (containerRef.current) {
-        const containerWidth = containerRef.current.offsetWidth;
-        const scrollWidth = containerRef.current.scrollWidth;
-        const maxDrag = Math.max(0, scrollWidth - containerWidth + 32);
-        setDragConstraints({ left: -maxDrag, right: 0 });
+  // Calculate positions for centered layout
+  // The focused week is always centered, others are positioned relative to it
+  const getWeekPosition = (weekIndex: number): number => {
+    const diff = weekIndex - focusedWeekIndex;
+    
+    // Get dimensions for focused and collapsed states
+    const focusedWidth = 280; // Width of expanded week with 3 cards
+    const collapsedWidth = 65; // Width of collapsed stack
+    const gap = 16; // Gap between clusters
+    
+    if (diff === 0) {
+      // Focused week is centered
+      return 0;
+    } else if (diff < 0) {
+      // Weeks to the left
+      let offset = -(focusedWidth / 2 + gap);
+      for (let i = focusedWeekIndex - 1; i > weekIndex; i--) {
+        offset -= (collapsedWidth + gap);
       }
-    };
-    updateConstraints();
-    window.addEventListener('resize', updateConstraints);
-    return () => window.removeEventListener('resize', updateConstraints);
-  }, [expandedWeeks]);
+      offset -= collapsedWidth / 2;
+      return offset;
+    } else {
+      // Weeks to the right
+      let offset = focusedWidth / 2 + gap;
+      for (let i = focusedWeekIndex + 1; i < weekIndex; i++) {
+        offset += (collapsedWidth + gap);
+      }
+      offset += collapsedWidth / 2;
+      return offset;
+    }
+  };
 
   return (
     <>
       <div 
         className="relative w-full overflow-hidden" 
-        style={{ height: 160 }} 
-        ref={containerRef}
+        style={{ height: 180 }} 
         data-shared-element="cult-ninja-widget"
       >
         {/* Timeline Path - SVG curved dashed line */}
@@ -677,57 +683,47 @@ const PhotoLoggingWidget = ({
           />
         </svg>
         
-        {/* Cards Container - drag to scroll */}
-        <motion.div 
-          className="relative flex items-center gap-3 px-4 py-4 h-full cursor-grab active:cursor-grabbing"
-          drag="x"
-          dragConstraints={dragConstraints}
-          dragElastic={0.1}
-          dragMomentum={true}
-          dragTransition={{ bounceStiffness: 300, bounceDamping: 30 }}
-        >
+        {/* Cards Container - centered layout */}
+        <div className="absolute inset-0 flex items-center justify-center">
           {weeks.map((weekIndex) => {
             const { isCurrentWeek, hasPhotos, isComplete } = getWeekStatus(weekIndex);
-            const isExpanded = expandedWeeks.has(weekIndex);
             const weekPhotos = getWeekPhotos(weekIndex);
+            const isFocused = weekIndex === focusedWeekIndex;
             
-            // Check if this is a past week with photos (should stay expanded)
-            const lastActiveWeek = getLastActiveWeekIndex();
-            const isPastWeekWithPhotos = weekIndex < lastActiveWeek && hasPhotos && !isComplete;
-            
-            // Context-aware: other weeks scale down when one expands
-            const anyOtherExpanded = Array.from(expandedWeeks).some(w => w !== weekIndex);
-            const contextScale = isExpanded || isPastWeekWithPhotos ? 1 : (anyOtherExpanded ? 0.92 : 1);
+            // Calculate horizontal position from center
+            const xPosition = getWeekPosition(weekIndex);
             
             return (
               <motion.div
                 key={weekIndex}
+                className="absolute"
                 initial={false}
                 animate={{ 
+                  x: xPosition,
                   opacity: 1, 
-                  scale: contextScale,
+                  scale: isFocused ? 1 : 0.85,
+                  zIndex: isFocused ? 10 : 5 - Math.abs(weekIndex - focusedWeekIndex),
                 }}
                 transition={{
                   type: "spring",
                   stiffness: 300,
                   damping: 30,
                 }}
-                className="flex-shrink-0"
               >
-                  <CardCluster 
-                    weekIndex={weekIndex}
-                    photos={weekPhotos}
-                    isActiveWeek={isCurrentWeek}
-                    isExpanded={isExpanded}
-                    isPastWeekWithPhotos={isPastWeekWithPhotos}
-                    onTap={() => handleClusterTap(weekIndex)}
-                    onCardTap={(dayIndex, photo) => handleCardTap(weekIndex, dayIndex, photo)}
-                    onPlayReel={(weekPhotos) => handlePlayWeekRecap(weekPhotos, weekIndex)}
-                  />
-                </motion.div>
-              );
-            })}
-        </motion.div>
+                <CardCluster 
+                  weekIndex={weekIndex}
+                  photos={weekPhotos}
+                  isActiveWeek={isCurrentWeek}
+                  isExpanded={isFocused}
+                  isPastWeekWithPhotos={false}
+                  onTap={() => handleClusterTap(weekIndex)}
+                  onCardTap={(dayIndex, photo) => handleCardTap(weekIndex, dayIndex, photo)}
+                  onPlayReel={(weekPhotos) => handlePlayWeekRecap(weekPhotos, weekIndex)}
+                />
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Upload Options Sheet */}
