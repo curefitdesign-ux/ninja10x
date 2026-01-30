@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check } from "lucide-react";
-import curoParty from "@/assets/mascot/curo-party.png";
+import Lottie from "lottie-react";
 
 interface ActivityLoggedCelebrationProps {
   isVisible: boolean;
@@ -21,6 +20,7 @@ const ActivityLoggedCelebration = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [animationProgress, setAnimationProgress] = useState(0);
   const [showTick, setShowTick] = useState(false);
+  const [lottieData, setLottieData] = useState<object | null>(null);
   
   const size = 280;
   const centerX = size / 2;
@@ -38,6 +38,14 @@ const ActivityLoggedCelebration = ({
   const activeBarCount = dayNumber;
   const activeWeekIndex = currentWeek - 1;
   const dayInWeek = ((dayNumber - 1) % 3) + 1;
+
+  // Load Lottie animation
+  useEffect(() => {
+    fetch('/lottie/confirmation-tick.json')
+      .then(res => res.json())
+      .then(data => setLottieData(data))
+      .catch(err => console.error('Failed to load Lottie:', err));
+  }, []);
 
   // Animation sequence
   useEffect(() => {
@@ -69,6 +77,16 @@ const ActivityLoggedCelebration = ({
     
     requestAnimationFrame(animate);
   }, [isVisible]);
+
+  // Auto-close after tick animation completes
+  useEffect(() => {
+    if (showTick) {
+      const timeout = setTimeout(() => {
+        onClose();
+      }, 1800); // Wait for Lottie to play, then close
+      return () => clearTimeout(timeout);
+    }
+  }, [showTick, onClose]);
 
   // Draw the progress ring with animation
   useEffect(() => {
@@ -207,28 +225,15 @@ const ActivityLoggedCelebration = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {/* Background with blur */}
+          {/* Background with blur - translucent */}
           <motion.div 
             className="absolute inset-0"
             style={{
-              background: 'linear-gradient(180deg, rgba(20, 15, 25, 0.95) 0%, rgba(30, 25, 35, 0.98) 50%, rgba(20, 15, 25, 0.95) 100%)',
-              backdropFilter: 'blur(40px)',
-              WebkitBackdropFilter: 'blur(40px)',
+              background: 'linear-gradient(180deg, rgba(15, 12, 20, 0.85) 0%, rgba(20, 18, 28, 0.9) 50%, rgba(15, 12, 20, 0.85) 100%)',
+              backdropFilter: 'blur(32px)',
+              WebkitBackdropFilter: 'blur(32px)',
             }}
           />
-          
-          {/* Close button */}
-          <motion.button
-            className="absolute right-5 z-20"
-            style={{ top: 'max(env(safe-area-inset-top, 20px), 20px)' }}
-            onClick={onClose}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <X className="w-6 h-6 text-white/60" />
-          </motion.button>
           
           {/* Main content */}
           <motion.div
@@ -347,49 +352,57 @@ const ActivityLoggedCelebration = ({
                 />
               </div>
               
-              {/* Center content - Mascot or Tick */}
+              {/* Center content - Lottie tick animation */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <AnimatePresence mode="wait">
                   {showTick ? (
                     <motion.div
                       key="tick"
-                      className="w-24 h-24 rounded-full flex items-center justify-center"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(57, 255, 133, 0.9) 0%, rgba(40, 200, 100, 0.9) 100%)',
-                        boxShadow: '0 0 40px rgba(57, 255, 133, 0.5), 0 0 80px rgba(57, 255, 133, 0.3)',
-                      }}
-                      initial={{ scale: 0, rotate: -180 }}
-                      animate={{ scale: 1, rotate: 0 }}
+                      className="w-28 h-28 flex items-center justify-center"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
                       transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                     >
-                      <motion.div
-                        initial={{ pathLength: 0 }}
-                        animate={{ pathLength: 1 }}
-                        transition={{ delay: 0.2, duration: 0.4 }}
-                      >
-                        <Check className="w-12 h-12 text-white" strokeWidth={3} />
-                      </motion.div>
+                      {lottieData && (
+                        <Lottie
+                          animationData={lottieData}
+                          loop={false}
+                          style={{ width: 140, height: 140 }}
+                        />
+                      )}
                     </motion.div>
                   ) : (
-                    <motion.img
-                      key="mascot"
-                      src={curoParty}
-                      alt="Celebration mascot"
-                      className="w-40 h-40 object-contain"
+                    <motion.div
+                      key="progress-ring"
+                      className="w-24 h-24 rounded-full flex items-center justify-center"
                       style={{
-                        marginTop: '-8px',
-                        filter: 'drop-shadow(0 8px 24px rgba(139, 92, 246, 0.3))',
+                        background: 'linear-gradient(135deg, rgba(57, 255, 133, 0.85) 0%, rgba(40, 200, 100, 0.85) 100%)',
+                        boxShadow: '0 0 40px rgba(57, 255, 133, 0.5), 0 0 80px rgba(57, 255, 133, 0.3)',
                       }}
                       initial={{ scale: 0.5, opacity: 0 }}
                       animate={{ 
                         scale: [1, 1.05, 1],
                         opacity: 1,
                       }}
+                      exit={{ scale: 0.8, opacity: 0 }}
                       transition={{ 
                         scale: { duration: 0.8, repeat: Infinity, repeatType: 'reverse' },
                         opacity: { duration: 0.3 },
                       }}
-                    />
+                    >
+                      {/* Pulsing inner glow */}
+                      <motion.div
+                        className="absolute w-20 h-20 rounded-full"
+                        style={{
+                          background: 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%)',
+                        }}
+                        animate={{
+                          scale: [0.8, 1.2, 0.8],
+                          opacity: [0.5, 0.8, 0.5],
+                        }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      />
+                    </motion.div>
                   )}
                 </AnimatePresence>
               </div>
