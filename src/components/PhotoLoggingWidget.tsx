@@ -284,22 +284,26 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
           )}
         </AnimatePresence>
         
-        {/* Reaction pill badge for photos with reactions - positioned at bottom */}
-        {hasPhoto && shouldShowExpanded && photo.reactionCount && photo.reactionCount > 0 && (
+        {/* Reaction pill badge for photos with reactions - always visible */}
+        {hasPhoto && photo.reactionCount && photo.reactionCount > 0 && (
           <motion.div
-            className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 px-2 py-1 rounded-full"
+            className={`absolute z-20 flex items-center gap-1 rounded-full ${
+              shouldShowExpanded 
+                ? '-bottom-3 left-1/2 -translate-x-1/2 px-2 py-1'
+                : 'bottom-1 right-1 px-1.5 py-0.5'
+            }`}
             style={{
               background: 'rgba(0,0,0,0.7)',
               backdropFilter: 'blur(12px)',
               border: '1px solid rgba(255,255,255,0.15)',
               boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
             }}
-            initial={{ scale: 0, y: -10 }}
-            animate={{ scale: 1, y: 0 }}
-            transition={{ delay: 0.15, type: 'spring', stiffness: 400 }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.1, type: 'spring', stiffness: 400 }}
           >
-            <span className="text-sm">{photo.topReaction || '💖'}</span>
-            <span className="text-xs text-white/90 font-semibold">+{photo.reactionCount}</span>
+            <span className={shouldShowExpanded ? "text-sm" : "text-xs"}>{photo.topReaction || '💖'}</span>
+            <span className={`text-white/90 font-semibold ${shouldShowExpanded ? 'text-xs' : 'text-[10px]'}`}>+{photo.reactionCount}</span>
           </motion.div>
         )}
       </motion.button>
@@ -647,50 +651,33 @@ const PhotoLoggingWidget = ({
   // 4 clusters representing 4 weeks (fixed order, no shuffling)
   const weeks = [0, 1, 2, 3];
   const activeWeekIndex = currentWeek - 1;
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  // Calculate positions for centered layout
-  // The focused week is always centered, others are positioned relative to it
-  // Completed weeks that are collapsed should be pushed more to the left
-  const getWeekPosition = (weekIndex: number): number => {
-    const diff = weekIndex - focusedWeekIndex;
-    
-    // Get dimensions for focused and collapsed states
-    const focusedWidth = 280; // Width of expanded week with 3 cards
-    const collapsedWidth = 50; // Smaller collapsed width to stack more tightly
-    const gap = 12; // Smaller gap between collapsed clusters
-    
-    if (diff === 0) {
-      // Focused week is centered
-      return 0;
-    } else if (diff < 0) {
-      // Weeks to the left - completed weeks stack more tightly
-      let offset = -(focusedWidth / 2 + gap);
-      for (let i = focusedWeekIndex - 1; i > weekIndex; i--) {
-        offset -= (collapsedWidth + gap);
+  // Scroll to center the focused week
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const focusedElement = container.querySelector(`[data-week="${focusedWeekIndex}"]`) as HTMLElement;
+      if (focusedElement) {
+        const containerWidth = container.offsetWidth;
+        const elementLeft = focusedElement.offsetLeft;
+        const elementWidth = focusedElement.offsetWidth;
+        const scrollLeft = elementLeft - (containerWidth / 2) + (elementWidth / 2);
+        container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
       }
-      offset -= collapsedWidth / 2;
-      return offset;
-    } else {
-      // Weeks to the right
-      let offset = focusedWidth / 2 + gap;
-      for (let i = focusedWeekIndex + 1; i < weekIndex; i++) {
-        offset += (collapsedWidth + gap);
-      }
-      offset += collapsedWidth / 2;
-      return offset;
     }
-  };
+  }, [focusedWeekIndex]);
 
   return (
     <>
       <div 
-        className="relative w-full overflow-hidden" 
-        style={{ height: 140 }} 
+        className="relative w-full" 
+        style={{ height: 130 }} 
         data-shared-element="cult-ninja-widget"
       >
         {/* Timeline Path - SVG curved dashed line */}
         <svg 
-          className="absolute inset-0 w-full h-full pointer-events-none"
+          className="absolute inset-0 w-full h-full pointer-events-none z-0"
           viewBox="0 0 400 100"
           preserveAspectRatio="xMidYMid meet"
           style={{ overflow: "visible" }}
@@ -705,26 +692,30 @@ const PhotoLoggingWidget = ({
           />
         </svg>
         
-        {/* Cards Container - centered layout */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        {/* Scrollable Cards Container */}
+        <div 
+          ref={scrollContainerRef}
+          className="absolute inset-0 flex items-center overflow-x-auto scrollbar-hide gap-4 px-4"
+          style={{ 
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
           {weeks.map((weekIndex) => {
             const { isCurrentWeek, hasPhotos, isComplete } = getWeekStatus(weekIndex);
             const weekPhotos = getWeekPhotos(weekIndex);
             const isFocused = weekIndex === focusedWeekIndex;
             
-            // Calculate horizontal position from center
-            const xPosition = getWeekPosition(weekIndex);
-            
             return (
               <motion.div
                 key={weekIndex}
-                className="absolute"
+                data-week={weekIndex}
+                className="flex-shrink-0"
+                style={{ scrollSnapAlign: 'center' }}
                 initial={false}
                 animate={{ 
-                  x: xPosition,
                   opacity: 1, 
-                  scale: isFocused ? 1 : 0.85,
-                  zIndex: isFocused ? 10 : 5 - Math.abs(weekIndex - focusedWeekIndex),
+                  scale: isFocused ? 1 : 0.9,
                 }}
                 transition={{
                   type: "spring",
@@ -748,10 +739,10 @@ const PhotoLoggingWidget = ({
         </div>
       </div>
       
-      {/* Fixed Reel Progress Pill - positioned below cards, always stable */}
+      {/* Fixed Reel Progress Pill - positioned below cards, reduced spacing */}
       <AnimatePresence>
         {showReelPill && (
-          <div className="w-full flex justify-center mt-3 px-6">
+          <div className="w-full flex justify-center -mt-1 px-6">
             <ReelProgressPill
               weekNumber={completedWeeks}
               state={
@@ -779,6 +770,7 @@ const PhotoLoggingWidget = ({
                   }
                 }
               }}
+              className="py-1.5"
             />
           </div>
         )}
