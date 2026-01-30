@@ -7,7 +7,9 @@ import GradientMeshBackground from "@/components/GradientMeshBackground";
 import PullToRefresh from "@/components/PullToRefresh";
 import PhotoLoggingWidget, { LoggedPhoto } from "@/components/PhotoLoggingWidget";
 import AIReelViewer from "@/components/AIReelViewer";
-import { useJourneyActivities } from "@/hooks/use-journey-activities";
+import CuroSpeechBubble from "@/components/CuroSpeechBubble";
+import FullScreenReel from "@/components/FullScreenReel";
+import { useJourneyActivities, JourneyActivity } from "@/hooks/use-journey-activities";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 
@@ -66,6 +68,10 @@ const Activity = () => {
   // Reel viewer state
   const [showReelViewer, setShowReelViewer] = useState(false);
   const [reelPhotos, setReelPhotos] = useState<LoggedPhoto[]>([]);
+  
+  // Full screen reel viewer state (for tapping on images)
+  const [showFullScreenReel, setShowFullScreenReel] = useState(false);
+  const [fullScreenReelIndex, setFullScreenReelIndex] = useState(0);
   
   // Transition states
   const [transitionFromProgress, setTransitionFromProgress] = useState(false);
@@ -180,21 +186,31 @@ const Activity = () => {
     return { src: curoHappy, alt: "Hello mascot" };
   })();
 
+  // Convert LoggedPhoto to JourneyActivity format for FullScreenReel
+  const photosAsJourneyActivities = photos.map(p => ({
+    id: p.id,
+    user_id: '',
+    storage_url: p.storageUrl,
+    original_url: p.originalUrl || null,
+    is_video: p.isVideo || false,
+    activity: p.activity || null,
+    frame: p.frame || null,
+    duration: p.duration || null,
+    pr: p.pr || null,
+    day_number: p.dayNumber,
+    created_at: '',
+    updated_at: '',
+    reaction_count: p.reactionCount || 0,
+    user_reacted: false,
+  }));
+
   const handlePhotoTap = (photo: LoggedPhoto) => {
-    navigate('/preview', {
-      state: {
-        imageUrl: photo.originalUrl || photo.storageUrl,
-        originalUrl: photo.originalUrl || photo.storageUrl,
-        isVideo: photo.isVideo,
-        activity: photo.activity,
-        frame: photo.frame,
-        duration: photo.duration,
-        pr: photo.pr,
-        isReview: true,
-        photoId: photo.id,
-        dayNumber: photo.dayNumber,
-      },
-    });
+    // Open full screen reel viewer at the tapped photo
+    const index = photos.findIndex(p => p.id === photo.id);
+    if (index >= 0) {
+      setFullScreenReelIndex(index);
+      setShowFullScreenReel(true);
+    }
   };
 
   const handlePhotoAdd = useCallback((weekIndex: number, dayIndex: number) => {
@@ -215,14 +231,14 @@ const Activity = () => {
   }, []);
 
   const handleMascotTap = useCallback(() => {
-    // If we have 3+ photos, show reel - otherwise navigate to progress
-    if (photos.length >= 3) {
-      setReelPhotos(photos.slice(0, 3));
-      setShowReelViewer(true);
+    // If we have any photos, show full screen reel - otherwise navigate to progress
+    if (photos.length >= 1) {
+      setFullScreenReelIndex(0);
+      setShowFullScreenReel(true);
     } else {
       navigate('/progress');
     }
-  }, [photos, navigate]);
+  }, [photos.length, navigate]);
 
   const handleRefresh = useCallback(async () => {
     await refresh();
@@ -456,20 +472,7 @@ const Activity = () => {
                 mascotAlt={mascot.alt}
                 onMascotTap={handleMascotTap}
               />
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="mt-4 relative"
-              >
-                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-cyan-500/20 rounded-2xl blur-lg opacity-60" />
-                <div className="relative bg-white/[0.1] backdrop-blur-xl rounded-2xl px-6 py-3 text-center border border-white/[0.15] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
-                  <p className="text-sm text-white/90">
-                    Hey, I'm Curo.<br />
-                    Let's build a workout together!
-                  </p>
-                </div>
-              </motion.div>
+              <CuroSpeechBubble photosCount={photos.length} currentWeek={currentWeek} />
             </motion.div>
           </div>
 
@@ -628,6 +631,17 @@ const Activity = () => {
           pr: p.pr,
         }))}
       />
+      
+      {/* Full Screen Reel Viewer - for viewing user's own photos */}
+      <AnimatePresence>
+        {showFullScreenReel && photosAsJourneyActivities.length > 0 && (
+          <FullScreenReel
+            activities={photosAsJourneyActivities}
+            initialIndex={fullScreenReelIndex}
+            onClose={() => setShowFullScreenReel(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
