@@ -198,17 +198,15 @@ const Progress = () => {
             style={{
               paddingTop: "calc(max(env(safe-area-inset-top, 16px), 16px) + 48px)",
               paddingInline: "4vw",
-              height: "22vh",
-              minHeight: "160px",
-              maxHeight: "200px",
+              minHeight: "180px",
             }}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 200, damping: 25 }}
           >
-            <div className="flex items-end h-full gap-3">
+            <div className="flex items-end gap-3 pb-4">
               {feedLoading ? (
-                <div className="flex items-center justify-center w-full">
+                <div className="flex items-center justify-center w-full py-8">
                   <div className="w-6 h-6 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
                 </div>
               ) : publicFeed.length > 0 ? (
@@ -218,11 +216,11 @@ const Progress = () => {
                     data-shared-element={index === 0 ? "progress-hero-card" : undefined}
                     className="relative flex-shrink-0 overflow-hidden cursor-pointer"
                     style={{
-                      width: "clamp(80px, 22vw, 100px)",
-                      height: "clamp(120px, 33vw, 150px)",
-                      borderRadius: "clamp(10px, 2.5vw, 14px)",
+                      width: "80px",
+                      height: "120px",
+                      borderRadius: "12px",
                       boxShadow: index === 0 ? "0 12px 40px rgba(100, 70, 180, 0.5)" : "0 4px 16px rgba(0,0,0,0.25)",
-                      border: index === 0 ? "2px solid rgba(160, 120, 220, 0.35)" : "none",
+                      border: index === 0 ? "2px solid rgba(160, 120, 220, 0.35)" : "1px solid rgba(255,255,255,0.1)",
                     }}
                     onClick={() => handlePhotoCardTap(index)}
                     initial={{ opacity: 0, x: 40 }}
@@ -255,8 +253,8 @@ const Progress = () => {
                       />
                     )}
                     <div 
-                      className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-white font-semibold"
-                      style={{ fontSize: "clamp(8px, 2vw, 10px)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+                      className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-white font-semibold text-[10px]"
+                      style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
                     >
                       D{photo.dayNumber}
                     </div>
@@ -267,9 +265,9 @@ const Progress = () => {
                   data-shared-element="progress-hero-card"
                   className="relative flex-shrink-0 overflow-hidden"
                   style={{
-                    width: "clamp(80px, 22vw, 100px)",
-                    height: "clamp(120px, 33vw, 150px)",
-                    borderRadius: "clamp(10px, 2.5vw, 14px)",
+                    width: "80px",
+                    height: "120px",
+                    borderRadius: "12px",
                     boxShadow: "0 12px 40px rgba(100, 70, 180, 0.5)",
                     border: "2px solid rgba(160, 120, 220, 0.35)",
                     transform: "rotate(-3deg)",
@@ -284,9 +282,9 @@ const Progress = () => {
                 <motion.div
                   className="relative flex-shrink-0 flex items-center justify-center"
                   style={{
-                    width: "clamp(80px, 22vw, 100px)",
-                    height: "clamp(120px, 33vw, 150px)",
-                    borderRadius: "clamp(10px, 2.5vw, 14px)",
+                    width: "80px",
+                    height: "120px",
+                    borderRadius: "12px",
                     background: "rgba(255,255,255,0.06)",
                     border: "1px dashed rgba(255,255,255,0.2)",
                   }}

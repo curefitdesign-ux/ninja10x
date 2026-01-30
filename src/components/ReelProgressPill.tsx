@@ -9,7 +9,7 @@ import fireReaction from '@/assets/reactions/fire-cool.png';
 import fistbumpReaction from '@/assets/reactions/fistbump.png';
 import wowReaction from '@/assets/reactions/wow.png';
 
-type PillState = 'creating' | 'completing' | 'complete';
+type PillState = 'creating' | 'completing' | 'complete' | 'celebrate';
 
 interface Reaction {
   type: string;
@@ -24,6 +24,7 @@ interface ReelProgressPillProps {
   reactions?: Reaction[];
   onPlay?: () => void;
   className?: string;
+  isAnimating?: boolean; // Trigger celebration animation
 }
 
 // Compact stacked card icon with liquid glass feel
@@ -114,14 +115,28 @@ const ReelProgressPill = ({
   reactions = [],
   onPlay,
   className = '',
+  isAnimating = false,
 }: ReelProgressPillProps) => {
   const pillRef = useRef<HTMLDivElement>(null);
   const [hasPlayedConfetti, setHasPlayedConfetti] = useState(false);
   const prevStateRef = useRef<PillState>(state);
+  const [showCelebration, setShowCelebration] = useState(false);
   
-  // Fire confetti when transitioning to "completing" state
+  // Trigger celebration animation when isAnimating becomes true
   useEffect(() => {
-    if (state === 'completing' && prevStateRef.current === 'creating' && !hasPlayedConfetti && pillRef.current) {
+    if (isAnimating) {
+      setShowCelebration(true);
+      const timeout = setTimeout(() => setShowCelebration(false), 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isAnimating]);
+  
+  // Fire confetti when transitioning to "completing" state or celebrating
+  useEffect(() => {
+    const shouldFireConfetti = (state === 'completing' && prevStateRef.current === 'creating') || 
+                               (state === 'celebrate');
+    
+    if (shouldFireConfetti && !hasPlayedConfetti && pillRef.current) {
       setHasPlayedConfetti(true);
       
       // Get pill position for confetti origin
@@ -158,11 +173,16 @@ const ReelProgressPill = ({
     switch (state) {
       case 'creating':
         return `Week ${weekNumber} • Reel in progress`;
+      case 'celebrate':
+        return `Week ${weekNumber} • Activity Logged! 🎉`;
       case 'completing':
       case 'complete':
         return `Week ${weekNumber} • PLAY NOW`;
     }
   };
+  
+  // Celebration or complete state styling
+  const isCelebrating = state === 'celebrate' || showCelebration;
 
   // Show reaction avatar or stacked cards based on state
   const showReactionAvatar = state === 'complete' && reactions.length > 0;
@@ -177,26 +197,57 @@ const ReelProgressPill = ({
       exit={{ opacity: 0, y: 10 }}
       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
     >
-      <div
-        className="relative flex items-center gap-2.5 px-3 py-1.5 rounded-full cursor-pointer"
+      <motion.div
+        className="relative flex items-center gap-2.5 px-3 py-1.5 rounded-full cursor-pointer overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
+          background: isCelebrating 
+            ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%)'
+            : 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
           backdropFilter: 'blur(40px) saturate(180%)',
           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-          border: '1px solid rgba(255,255,255,0.15)',
+          border: isCelebrating 
+            ? '1px solid rgba(52, 211, 153, 0.5)'
+            : '1px solid rgba(255,255,255,0.15)',
+          boxShadow: isCelebrating 
+            ? '0 0 20px rgba(52, 211, 153, 0.3), 0 0 40px rgba(52, 211, 153, 0.15)'
+            : 'none',
         }}
         onClick={onPlay}
+        animate={isCelebrating ? {
+          scale: [1, 1.02, 1],
+        } : {}}
+        transition={{
+          duration: 0.6,
+          repeat: isCelebrating ? Infinity : 0,
+          ease: 'easeInOut',
+        }}
       >
+        {/* Glow effect during celebration */}
+        <AnimatePresence>
+          {isCelebrating && (
+            <motion.div
+              className="absolute inset-0 rounded-full pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              style={{
+                background: 'radial-gradient(circle at center, rgba(52, 211, 153, 0.4) 0%, transparent 70%)',
+              }}
+            />
+          )}
+        </AnimatePresence>
+        
         {/* Subtle gradient overlay during completion */}
         <AnimatePresence>
-          {state === 'completing' && (
+          {(state === 'completing' || isCelebrating) && (
             <motion.div
               className="absolute inset-0 rounded-full pointer-events-none"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               style={{
-                background: 'linear-gradient(90deg, transparent 0%, rgba(52, 211, 153, 0.15) 50%, transparent 100%)',
+                background: 'linear-gradient(90deg, transparent 0%, rgba(52, 211, 153, 0.2) 50%, transparent 100%)',
                 backgroundSize: '200% 100%',
                 animation: 'shimmer 1.5s ease-in-out infinite',
               }}
@@ -238,7 +289,7 @@ const ReelProgressPill = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {getText()}
+            <span className={isCelebrating ? 'text-emerald-300' : ''}>{getText()}</span>
           </motion.span>
         </div>
 
@@ -246,31 +297,44 @@ const ReelProgressPill = ({
         <motion.div
           className="relative flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center overflow-hidden"
           style={{
-            background: state === 'complete' || state === 'completing'
-              ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%)'
+            background: state === 'complete' || state === 'completing' || isCelebrating
+              ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.35) 0%, rgba(16, 185, 129, 0.2) 100%)'
               : 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.04) 100%)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
-            border: state === 'complete' || state === 'completing'
-              ? '1px solid rgba(52, 211, 153, 0.4)'
+            border: state === 'complete' || state === 'completing' || isCelebrating
+              ? '1px solid rgba(52, 211, 153, 0.5)'
               : '1px solid rgba(255,255,255,0.12)',
-            boxShadow: state === 'complete' || state === 'completing'
-              ? '0 0 16px rgba(52, 211, 153, 0.25), inset 0 1px 0 rgba(255,255,255,0.12)'
+            boxShadow: state === 'complete' || state === 'completing' || isCelebrating
+              ? '0 0 16px rgba(52, 211, 153, 0.35), inset 0 1px 0 rgba(255,255,255,0.15)'
               : 'inset 0 1px 0 rgba(255,255,255,0.08)',
           }}
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
+          animate={isCelebrating ? {
+            scale: [1, 1.15, 1],
+            boxShadow: [
+              '0 0 16px rgba(52, 211, 153, 0.35)',
+              '0 0 24px rgba(52, 211, 153, 0.5)',
+              '0 0 16px rgba(52, 211, 153, 0.35)',
+            ],
+          } : {}}
+          transition={{
+            duration: 0.8,
+            repeat: isCelebrating ? Infinity : 0,
+            ease: 'easeInOut',
+          }}
         >
           <Play 
             className={`w-3 h-3 ml-0.5 ${
-              state === 'complete' || state === 'completing' 
+              state === 'complete' || state === 'completing' || isCelebrating
                 ? 'text-emerald-400' 
                 : 'text-white/60'
             }`} 
             fill="currentColor" 
           />
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* CSS for shimmer animation */}
       <style>{`
