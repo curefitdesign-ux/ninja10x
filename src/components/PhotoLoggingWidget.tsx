@@ -6,6 +6,8 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { isVideoUrl } from "@/lib/media";
 import WeekRecapViewer from "./WeekRecapViewer";
+import ReelProgressPill from "./ReelProgressPill";
+import { useFitnessReel } from "@/hooks/use-fitness-reel";
 
 // Activity icons
 import footballIcon from '@/assets/activities/football.png';
@@ -93,10 +95,11 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
   // Check if week is complete (all 3 photos logged)
   const isWeekComplete = photos.every(p => p !== null);
   
-  // Past weeks with photos OR completed weeks should always show expanded (fanned out)
-  const shouldShowExpanded = isExpanded || isPastWeekWithPhotos || isWeekComplete;
+  // Completed weeks should collapse UNLESS they are explicitly expanded (via tap)
+  // Only incomplete weeks that are expanded OR active stay fanned out
+  const shouldShowExpanded = isExpanded;
   
-  // Scale based on state - completed/expanded weeks are larger
+  // Scale based on state - expanded weeks are larger
   const scale = shouldShowExpanded ? 1.4 : 0.8;
   const cardWidth = baseCardWidth * scale;
   const cardHeight = baseCardHeight * scale;
@@ -303,11 +306,11 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
     );
   };
 
-  // Calculate container dimensions based on state - ensure enough space for CTA
+  // Calculate container dimensions based on state
   const containerWidth = shouldShowExpanded 
     ? (cardWidth * 3 + 50) 
     : (baseCardWidth * 0.8 + 16);
-  const containerHeight = isWeekComplete ? cardHeight + 56 : cardHeight + 24;
+  const containerHeight = cardHeight + 24;
 
   // Count photos in this week for play button
   const weekPhotoCount = photos.filter(p => p !== null).length;
@@ -403,47 +406,27 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
         )}
       </AnimatePresence>
 
-      {/* Floating CTA for completed weeks - styled like reference */}
+      {/* Play button overlay for completed weeks when collapsed */}
       <AnimatePresence>
-        {isWeekComplete && (
+        {isWeekComplete && !shouldShowExpanded && (
           <motion.button
-            className="absolute left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 px-4 py-2 rounded-full"
+            className="absolute left-1/2 -translate-x-1/2 z-30 w-8 h-8 rounded-full flex items-center justify-center"
             style={{
-              bottom: 0,
-              background: 'rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-              border: '1px solid rgba(255,255,255,0.15)',
+              bottom: 8,
+              background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
+              boxShadow: '0 2px 8px rgba(74, 222, 128, 0.4)',
             }}
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 350, damping: 28, delay: 0.1 }}
-            onClick={handlePlayClick}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onTap(); // Expand on tap
+            }}
+            whileTap={{ scale: 0.9 }}
           >
-            {/* Cards icon */}
-            <div className="flex items-center">
-              <div className="w-4 h-5 bg-white/80 rounded-sm transform -rotate-6 -mr-1" />
-              <div className="w-4 h-5 bg-white/90 rounded-sm z-10" />
-              <div className="w-4 h-5 bg-white rounded-sm transform rotate-6 -ml-1" />
-            </div>
-            
-            <span className="text-white/90 text-sm font-medium whitespace-nowrap">
-              Week {weekIndex + 1} • Reel in progress
-            </span>
-            
-            {/* Play button */}
-            <div 
-              className="w-7 h-7 rounded-full flex items-center justify-center"
-              style={{
-                background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
-                boxShadow: '0 2px 8px rgba(74, 222, 128, 0.4)',
-              }}
-            >
-              <Play className="w-3.5 h-3.5 text-white ml-0.5" fill="currentColor" />
-            </div>
+            <Play className="w-3.5 h-3.5 text-white ml-0.5" fill="currentColor" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -509,6 +492,44 @@ const PhotoLoggingWidget = ({
   const [recapViewerOpen, setRecapViewerOpen] = useState(false);
   const [recapWeekPhotos, setRecapWeekPhotos] = useState<LoggedPhoto[]>([]);
   const [recapWeekNumber, setRecapWeekNumber] = useState(1);
+  
+  // Reel generation state
+  const { 
+    currentReel,
+    currentStep: reelStep,
+    isGenerating: isGeneratingReel,
+  } = useFitnessReel();
+  
+  // Calculate reel progress based on step
+  const reelProgress = (() => {
+    if (!isGeneratingReel) {
+      return currentReel?.videoUrl ? 100 : 0;
+    }
+    switch (reelStep) {
+      case 'narration': return 25;
+      case 'voiceover': return 50;
+      case 'video': return 75;
+      case 'complete': return 100;
+      default: return 0;
+    }
+  })();
+  
+  // Calculate completed weeks and current active week for pill display
+  const getCompletedWeekCount = () => {
+    let count = 0;
+    for (let i = 0; i < 4; i++) {
+      const startDay = i * 3 + 1;
+      const weekPhotos = [0, 1, 2].map(dayOffset => {
+        const dayNumber = startDay + dayOffset;
+        return photos.find(p => Number(p.dayNumber) === dayNumber);
+      });
+      if (weekPhotos.every(p => p != null)) count++;
+    }
+    return count;
+  };
+  
+  const completedWeeks = getCompletedWeekCount();
+  const showReelPill = completedWeeks > 0;
   
   // Get photos for each week (3 photos per week)
   const getWeekPhotos = useCallback((weekIndex: number): (LoggedPhoto | null)[] => {
@@ -629,19 +650,20 @@ const PhotoLoggingWidget = ({
   
   // Calculate positions for centered layout
   // The focused week is always centered, others are positioned relative to it
+  // Completed weeks that are collapsed should be pushed more to the left
   const getWeekPosition = (weekIndex: number): number => {
     const diff = weekIndex - focusedWeekIndex;
     
     // Get dimensions for focused and collapsed states
     const focusedWidth = 280; // Width of expanded week with 3 cards
-    const collapsedWidth = 65; // Width of collapsed stack
-    const gap = 16; // Gap between clusters
+    const collapsedWidth = 50; // Smaller collapsed width to stack more tightly
+    const gap = 12; // Smaller gap between collapsed clusters
     
     if (diff === 0) {
       // Focused week is centered
       return 0;
     } else if (diff < 0) {
-      // Weeks to the left
+      // Weeks to the left - completed weeks stack more tightly
       let offset = -(focusedWidth / 2 + gap);
       for (let i = focusedWeekIndex - 1; i > weekIndex; i--) {
         offset -= (collapsedWidth + gap);
@@ -663,7 +685,7 @@ const PhotoLoggingWidget = ({
     <>
       <div 
         className="relative w-full overflow-hidden" 
-        style={{ height: 180 }} 
+        style={{ height: 140 }} 
         data-shared-element="cult-ninja-widget"
       >
         {/* Timeline Path - SVG curved dashed line */}
@@ -725,6 +747,42 @@ const PhotoLoggingWidget = ({
           })}
         </div>
       </div>
+      
+      {/* Fixed Reel Progress Pill - positioned below cards, always stable */}
+      <AnimatePresence>
+        {showReelPill && (
+          <div className="w-full flex justify-center mt-3 px-6">
+            <ReelProgressPill
+              weekNumber={completedWeeks}
+              state={
+                currentReel?.videoUrl 
+                  ? 'complete' 
+                  : reelProgress >= 90 
+                    ? 'completing' 
+                    : 'creating'
+              }
+              progress={reelProgress}
+              onPlay={() => {
+                if (currentReel?.videoUrl) {
+                  navigate('/reel');
+                } else {
+                  // Open recap for the latest completed week
+                  const weekIndex = completedWeeks - 1;
+                  const startDay = weekIndex * 3 + 1;
+                  const weekPhotos = photos.filter(p => 
+                    Number(p.dayNumber) >= startDay && Number(p.dayNumber) <= startDay + 2
+                  );
+                  if (weekPhotos.length >= 3) {
+                    setRecapWeekPhotos(weekPhotos);
+                    setRecapWeekNumber(completedWeeks);
+                    setRecapViewerOpen(true);
+                  }
+                }
+              }}
+            />
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Upload Options Sheet */}
       <Sheet open={showUploadOptions} onOpenChange={setShowUploadOptions}>
