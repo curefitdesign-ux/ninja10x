@@ -342,7 +342,7 @@ const Preview = () => {
     // Update local state with the saved URL from storage
     setFramedImageUrl(saved.storageUrl);
     
-    toast.success(`Day ${dayNumber} saved!`);
+    // Toast removed - celebration overlay handles success feedback
     
     // Show the celebration overlay first, then share sheet
     setShowMicroCelebration(true);
@@ -394,7 +394,7 @@ const Preview = () => {
       return;
     }
     
-    toast.success(`Day ${dayNumber} saved!`);
+    // Toast removed - exit animation handles success feedback
     setIsExiting(true);
 
     setTimeout(() => {
