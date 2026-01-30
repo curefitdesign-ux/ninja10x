@@ -259,8 +259,8 @@ const ProfileSetupPage = () => {
           </p>
         </div>
 
-        {/* Large Avatar Upload - Liquid Glass Hero */}
-        <div className="flex flex-col items-center mb-8">
+        {/* Avatar Display + Upload Button - Liquid Glass */}
+        <div className="flex flex-col items-center mb-6">
           <input
             ref={fileInputRef}
             type="file"
@@ -269,113 +269,67 @@ const ProfileSetupPage = () => {
             className="hidden"
           />
           
-          {/* Outer glow container */}
+          {/* Avatar Display Circle */}
           <motion.div
-            className="relative"
-            animate={!avatarPreview ? {
-              boxShadow: [
-                '0 0 40px 10px rgba(99, 102, 241, 0.15)',
-                '0 0 60px 20px rgba(99, 102, 241, 0.25)',
-                '0 0 40px 10px rgba(99, 102, 241, 0.15)',
-              ],
-            } : {}}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-            style={{ borderRadius: '50%' }}
+            className="relative w-36 h-36 rounded-full overflow-hidden mb-5"
+            style={{
+              background: avatarPreview 
+                ? 'transparent' 
+                : 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+              border: avatarPreview 
+                ? '3px solid rgba(255, 255, 255, 0.2)' 
+                : '2px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: avatarPreview 
+                ? '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)' 
+                : 'inset 0 2px 4px rgba(255,255,255,0.05)',
+            }}
           >
-            <motion.button
-              onClick={() => fileInputRef.current?.click()}
-              className="relative w-44 h-44 rounded-full overflow-hidden"
-              style={{
-                background: avatarPreview 
-                  ? 'transparent' 
-                  : 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 100%)',
-                backdropFilter: avatarPreview ? 'none' : 'blur(20px)',
-                WebkitBackdropFilter: avatarPreview ? 'none' : 'blur(20px)',
-                border: avatarPreview 
-                  ? '3px solid rgba(255, 255, 255, 0.15)' 
-                  : '2px solid rgba(255, 255, 255, 0.2)',
-                boxShadow: avatarPreview 
-                  ? '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)' 
-                  : 'inset 0 2px 4px rgba(255,255,255,0.1), inset 0 -2px 4px rgba(0,0,0,0.2)',
-              }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              disabled={loading}
-            >
-              {avatarPreview ? (
-                <img 
-                  src={avatarPreview} 
-                  alt="Avatar preview" 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-                  {/* Animated camera icon */}
-                  <motion.div
-                    animate={{ y: [0, -4, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <Camera className="w-12 h-12 text-white/50" strokeWidth={1.5} />
-                  </motion.div>
-                  <span className="text-white/40 text-xs font-medium">Tap to upload</span>
-                </div>
-              )}
-              
-              {/* Plus button overlay - Liquid glass style */}
-              <motion.div 
-                className="absolute bottom-2 right-2 w-11 h-11 rounded-full flex items-center justify-center"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(139, 92, 246, 0.9) 100%)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  border: '2px solid rgba(255, 255, 255, 0.25)',
-                  boxShadow: '0 6px 20px rgba(99, 102, 241, 0.5), inset 0 1px 0 rgba(255,255,255,0.3)',
-                }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <Plus className="w-6 h-6 text-white" strokeWidth={2.5} />
-              </motion.div>
-              
-              {/* Shimmer effect on empty state */}
-              {!avatarPreview && (
-                <motion.div
-                  className="absolute inset-0 rounded-full pointer-events-none"
-                  style={{
-                    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
-                  }}
-                  animate={{ x: ['-100%', '200%'] }}
-                  transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
-                />
-              )}
-            </motion.button>
+            {avatarPreview ? (
+              <img 
+                src={avatarPreview} 
+                alt="Avatar preview" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <Camera className="w-10 h-10 text-white/25" strokeWidth={1.5} />
+              </div>
+            )}
           </motion.div>
 
-          {/* Selected indicator */}
-          <AnimatePresence>
-            {hasAvatarSelected && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.9 }}
-                className="mt-4 flex items-center gap-2 px-4 py-2 rounded-full"
-                style={{
-                  background: 'rgba(52, 211, 153, 0.15)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(52, 211, 153, 0.3)',
-                }}
-              >
-                <Check className="w-4 h-4 text-emerald-400" />
-                <span className="text-emerald-400 text-sm font-medium">Photo selected</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Upload Photo Button - Liquid Glass Style */}
+          <motion.button
+            onClick={() => fileInputRef.current?.click()}
+            className="relative flex items-center gap-3 px-6 py-3 rounded-2xl overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.2) 100%)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(99, 102, 241, 0.2), inset 0 1px 0 rgba(255,255,255,0.15)',
+            }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            disabled={loading}
+          >
+            {/* Shimmer effect */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+              }}
+              animate={{ x: ['-100%', '200%'] }}
+              transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }}
+            />
+            <Camera className="w-5 h-5 text-white/90" strokeWidth={2} />
+            <span className="text-white font-medium text-sm relative z-10">Upload Photo</span>
+          </motion.button>
         </div>
 
         {/* Divider */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 mb-5">
           <div className="flex-1 h-px bg-white/10" />
-          <span className="text-white/40 text-sm">or choose a preset avatar</span>
+          <span className="text-white/40 text-xs">or choose a preset</span>
           <div className="flex-1 h-px bg-white/10" />
         </div>
 
