@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, UserPen, ChevronDown, X, Mail, User } from 'lucide-react';
+import { LogOut, UserPen, ChevronDown, Mail, User } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
 import { toast } from 'sonner';
-import ProfileSetup from './ProfileSetup';
 
 interface ProfileMenuProps {
   onEditProfile?: () => void;
@@ -16,7 +15,6 @@ const ProfileMenu = ({ onEditProfile }: ProfileMenuProps) => {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
   const [isOpen, setIsOpen] = useState(false);
-  const [showEditSheet, setShowEditSheet] = useState(false);
 
   const handleLogout = async () => {
     setIsOpen(false);
@@ -31,12 +29,7 @@ const ProfileMenu = ({ onEditProfile }: ProfileMenuProps) => {
 
   const handleEditProfile = () => {
     setIsOpen(false);
-    setShowEditSheet(true);
-  };
-
-  const handleEditComplete = () => {
-    setShowEditSheet(false);
-    toast.success('Profile updated!');
+    navigate('/profile-setup?edit=true');
   };
 
   return (
@@ -178,56 +171,6 @@ const ProfileMenu = ({ onEditProfile }: ProfileMenuProps) => {
         </AnimatePresence>
       </div>
 
-      {/* Edit Profile Sheet */}
-      <AnimatePresence>
-        {showEditSheet && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              className="fixed inset-0 z-[100]"
-              style={{
-                background: 'rgba(0, 0, 0, 0.6)',
-                backdropFilter: 'blur(10px)',
-              }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowEditSheet(false)}
-            />
-            
-            {/* Sheet */}
-            <motion.div
-              className="fixed inset-0 z-[101] flex flex-col"
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            >
-              {/* Close Button */}
-              <div className="absolute top-4 right-4 z-10" style={{ paddingTop: 'env(safe-area-inset-top, 0)' }}>
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setShowEditSheet(false)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                  }}
-                >
-                  <X className="w-5 h-5 text-white/70" />
-                </motion.button>
-              </div>
-
-              <ProfileSetup
-                onComplete={handleEditComplete}
-                editMode={true}
-                existingProfile={profile}
-              />
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </>
   );
 };

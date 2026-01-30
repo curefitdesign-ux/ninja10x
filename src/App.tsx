@@ -15,8 +15,8 @@ import Progress from "./pages/Progress";
 import Camera from "./pages/Camera";
 import Gallery from "./pages/Gallery";
 import Reel from "./pages/Reel";
+import ProfileSetupPage from "./pages/ProfileSetupPage";
 import PageTransition from "./components/PageTransition";
-import ProfileSetup from "./components/ProfileSetup";
 
 const queryClient = new QueryClient();
 
@@ -38,7 +38,34 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (needsSetup) {
+    return <Navigate to="/profile-setup" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// Route for profile setup (handles both new setup and edit mode)
+const ProfileSetupRouteWrapper = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading: authLoading } = useAuth();
+  const { needsSetup, loading: profileLoading } = useProfile();
+  const location = useLocation();
+  const isEditMode = new URLSearchParams(location.search).get('edit') === 'true';
+  
+  if (authLoading || profileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-white/60">Loading...</div>
+      </div>
+    );
+  }
+  
+  if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  // If profile exists and not in edit mode, redirect to home
+  if (!needsSetup && !isEditMode) {
+    return <Navigate to="/" replace />;
   }
   
   return <>{children}</>;
@@ -51,6 +78,7 @@ const AnimatedRoutes = () => {
     <PageTransition key={location.pathname}>
       <Routes location={location}>
         <Route path="/auth" element={<Auth />} />
+        <Route path="/profile-setup" element={<ProfileSetupRouteWrapper><ProfileSetupPage /></ProfileSetupRouteWrapper>} />
         <Route path="/" element={<ProtectedRoute><Activity /></ProtectedRoute>} />
         <Route path="/create" element={<ProtectedRoute><Index /></ProtectedRoute>} />
         <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
