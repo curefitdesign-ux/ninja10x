@@ -41,6 +41,8 @@ export interface LoggedPhoto {
   duration?: string;
   pr?: string;
   dayNumber: number;
+  reactionCount?: number;
+  topReaction?: string;
 }
 
 interface PhotoLoggingWidgetProps {
@@ -57,6 +59,7 @@ interface CardClusterProps {
   photos: (LoggedPhoto | null)[];
   isActiveWeek: boolean;
   isExpanded: boolean;
+  isPastWeekWithPhotos: boolean;
   onTap: () => void;
   onCardTap: (dayIndex: number, photo: LoggedPhoto | null) => void;
   onPlayReel?: (weekPhotos: LoggedPhoto[]) => void;
@@ -82,7 +85,7 @@ const fastSpring = {
 // Cubic bezier for silky opacity/scale
 const smoothEase = [0.32, 0.72, 0, 1] as const;
 
-const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCardTap, onPlayReel }: CardClusterProps) => {
+const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWithPhotos, onTap, onCardTap, onPlayReel }: CardClusterProps) => {
   const baseCardWidth = 52;
   const baseCardHeight = 70;
   const borderRadius = 12;
@@ -90,9 +93,12 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
   // Check if week is complete (all 3 photos logged)
   const isWeekComplete = photos.every(p => p !== null);
   
+  // Past weeks with photos should always show expanded (fanned out)
+  const shouldShowExpanded = isExpanded || isPastWeekWithPhotos;
+  
   // Scale based on state - larger for expanded, smaller when other week is expanded
   // Completed weeks get a special larger scale for the stacked view
-  const scale = isWeekComplete ? 1.4 : isExpanded ? 1.55 : 0.8;
+  const scale = isWeekComplete ? 1.4 : shouldShowExpanded ? 1.55 : 0.8;
   const cardWidth = baseCardWidth * scale;
   const cardHeight = baseCardHeight * scale;
   
@@ -238,7 +244,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
         }}
         initial={false}
         animate={
-          isExpanded
+          shouldShowExpanded
             ? {
                 left: `calc(50% + ${expandedX}px)`,
                 top: 0,
@@ -309,34 +315,27 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
           </>
         )}
         
-        {/* Empty state - upload icon */}
-        {!hasPhoto && (
+        {/* Empty state - upload icon ONLY when expanded */}
+        {!hasPhoto && shouldShowExpanded && isActiveDay && (
           <div className="absolute inset-0 flex items-center justify-center">
-            {isActiveDay && isExpanded ? (
-              <motion.div 
-                className="p-3 rounded-full bg-emerald-500/20 backdrop-blur-sm"
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.5, opacity: 0 }}
-                transition={{ 
-                  delay: 0.15, 
-                  ...fastSpring,
-                }}
-              >
-                <Upload className="w-6 h-6 text-emerald-400" strokeWidth={2.5} />
-              </motion.div>
-            ) : isActiveDay && !isExpanded ? (
-              /* Show upload icon in stacked state for active day */
-              <div className="p-2 rounded-full bg-emerald-500/20">
-                <Upload className="w-4 h-4 text-emerald-400" strokeWidth={2.5} />
-              </div>
-            ) : null}
+            <motion.div 
+              className="p-3 rounded-full bg-emerald-500/20 backdrop-blur-sm"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              transition={{ 
+                delay: 0.15, 
+                ...fastSpring,
+              }}
+            >
+              <Upload className="w-6 h-6 text-emerald-400" strokeWidth={2.5} />
+            </motion.div>
           </div>
         )}
         
         {/* Day number indicator */}
         <AnimatePresence>
-          {isExpanded && (
+          {shouldShowExpanded && (
             <motion.div 
               className="absolute bottom-2 left-1/2"
               style={{ zIndex: 10 }}
@@ -351,6 +350,24 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
             </motion.div>
           )}
         </AnimatePresence>
+        
+        {/* Reaction badge for photos with reactions */}
+        {hasPhoto && photo.reactionCount && photo.reactionCount > 0 && (
+          <motion.div
+            className="absolute -top-2 -right-2 z-20 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
+            style={{
+              background: 'rgba(0,0,0,0.6)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255,255,255,0.2)',
+            }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 400 }}
+          >
+            <span className="text-xs">{photo.topReaction || '🔥'}</span>
+            <span className="text-[10px] text-white/80 font-medium">{photo.reactionCount}</span>
+          </motion.div>
+        )}
       </motion.button>
     );
   };
@@ -358,10 +375,10 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
   // Calculate container dimensions based on state
   const containerWidth = isWeekComplete 
     ? cardWidth + 40 
-    : isExpanded 
+    : shouldShowExpanded 
       ? (cardWidth * 3 + 60) 
       : (baseCardWidth * 0.8 + 16);
-  const containerHeight = isWeekComplete ? cardHeight + 60 : cardHeight + 24;
+  const containerHeight = isWeekComplete ? cardHeight + 80 : cardHeight + 24;
 
   // Count photos in this week for play button
   const weekPhotoCount = photos.filter(p => p !== null).length;
@@ -496,7 +513,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
 
       {/* Glow effect for active/expanded week */}
       <AnimatePresence>
-        {isExpanded && !isWeekComplete && (
+        {shouldShowExpanded && !isWeekComplete && (
           <motion.div 
             className="absolute rounded-3xl blur-2xl pointer-events-none"
             style={{
@@ -533,7 +550,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, onTap, onCar
       
       {/* Render 3 cards - reversed order so first card (index 0) is on top when stacked */}
       {[2, 1, 0].map((index) => 
-        renderCard(index, isWeekComplete ? index + 1 : (isExpanded ? index + 1 : 3 - index), 1)
+        renderCard(index, isWeekComplete ? index + 1 : (shouldShowExpanded ? index + 1 : 3 - index), 1)
       )}
     </motion.div>
   );
@@ -733,13 +750,17 @@ const PhotoLoggingWidget = ({
           dragTransition={{ bounceStiffness: 300, bounceDamping: 30 }}
         >
           {weeks.map((weekIndex) => {
-            const { isCurrentWeek } = getWeekStatus(weekIndex);
+            const { isCurrentWeek, hasPhotos, isComplete } = getWeekStatus(weekIndex);
             const isExpanded = expandedWeeks.has(weekIndex);
             const weekPhotos = getWeekPhotos(weekIndex);
             
+            // Check if this is a past week with photos (should stay expanded)
+            const lastActiveWeek = getLastActiveWeekIndex();
+            const isPastWeekWithPhotos = weekIndex < lastActiveWeek && hasPhotos && !isComplete;
+            
             // Context-aware: other weeks scale down when one expands
             const anyOtherExpanded = Array.from(expandedWeeks).some(w => w !== weekIndex);
-            const contextScale = isExpanded ? 1 : (anyOtherExpanded ? 0.92 : 1);
+            const contextScale = isExpanded || isPastWeekWithPhotos ? 1 : (anyOtherExpanded ? 0.92 : 1);
             
             return (
               <motion.div
@@ -761,6 +782,7 @@ const PhotoLoggingWidget = ({
                     photos={weekPhotos}
                     isActiveWeek={isCurrentWeek}
                     isExpanded={isExpanded}
+                    isPastWeekWithPhotos={isPastWeekWithPhotos}
                     onTap={() => handleClusterTap(weekIndex)}
                     onCardTap={(dayIndex, photo) => handleCardTap(weekIndex, dayIndex, photo)}
                     onPlayReel={(weekPhotos) => handlePlayWeekRecap(weekPhotos, weekIndex)}
