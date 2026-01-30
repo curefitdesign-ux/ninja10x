@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Plus, Camera, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
+
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
@@ -72,12 +72,10 @@ const ProfileSetupPage = () => {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB');
       return;
     }
 
@@ -116,12 +114,10 @@ const ProfileSetupPage = () => {
     }
 
     if (!hasAvatarSelected) {
-      toast.error('Please select an avatar');
       return;
     }
 
     if (!user) {
-      toast.error('No user logged in');
       return;
     }
 
@@ -157,7 +153,6 @@ const ProfileSetupPage = () => {
           display_name: displayName.trim(),
           avatar_url: avatarUrl,
         });
-        toast.success('Profile updated!');
         navigate(-1);
       } else {
         const { error: insertError } = await supabase
@@ -169,12 +164,10 @@ const ProfileSetupPage = () => {
           });
 
         if (insertError) throw insertError;
-        toast.success('Profile created!');
         navigate('/', { replace: true });
       }
     } catch (error: any) {
       console.error('Error saving profile:', error);
-      toast.error(error.message || 'Failed to save profile');
     } finally {
       setLoading(false);
     }
