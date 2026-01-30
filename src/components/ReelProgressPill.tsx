@@ -379,10 +379,33 @@ const ReelProgressPill = ({
                 }}
                 style={{
                   filter: state === 'complete' || state === 'completing' || isCelebrating || needsAttention
-                    ? 'drop-shadow(0 0 4px rgba(52, 211, 153, 0.6))'
+                    ? 'drop-shadow(0 0 6px rgba(52, 211, 153, 0.8))'
                     : 'none',
                 }}
               />
+              {/* Animated glow overlay for "creating" state - simulates filling motion */}
+              {state === 'creating' && (
+                <motion.circle
+                  cx="20"
+                  cy="20"
+                  r="17"
+                  fill="none"
+                  stroke="rgba(52, 211, 153, 0.6)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 17 * 0.15}
+                  initial={{ strokeDashoffset: 0 }}
+                  animate={{ strokeDashoffset: -2 * Math.PI * 17 }}
+                  transition={{ 
+                    duration: 1.5, 
+                    ease: 'linear',
+                    repeat: Infinity,
+                  }}
+                  style={{
+                    filter: 'drop-shadow(0 0 4px rgba(52, 211, 153, 0.8))',
+                  }}
+                />
+              )}
             </svg>
             
             {/* Play button center */}

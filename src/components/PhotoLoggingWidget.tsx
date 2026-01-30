@@ -773,7 +773,7 @@ const PhotoLoggingWidget = ({
     <>
       <div 
         className="relative w-full" 
-        style={{ height: 130 }} 
+        style={{ height: 160 }} 
         data-shared-element="cult-ninja-widget"
       >
         {/* Timeline Path - SVG curved dashed line */}
