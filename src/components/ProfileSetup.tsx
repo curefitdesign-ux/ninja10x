@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Check, Upload, User } from 'lucide-react';
+import { Check, Upload, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -8,21 +8,25 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 import { z } from 'zod';
 
-// Import preset avatars
-import weightlifterAvatar from '@/assets/avatars/weightlifter.png';
-import runnerAvatar from '@/assets/avatars/runner.png';
-import yogiAvatar from '@/assets/avatars/yogi.png';
-import cyclistAvatar from '@/assets/avatars/cyclist.png';
-import boxerAvatar from '@/assets/avatars/boxer.png';
-import swimmerAvatar from '@/assets/avatars/swimmer.png';
+// Import Netflix-style preset avatars
+import avatarRed from '@/assets/avatars/avatar-red.png';
+import avatarBlue from '@/assets/avatars/avatar-blue.png';
+import avatarPurple from '@/assets/avatars/avatar-purple.png';
+import avatarGreen from '@/assets/avatars/avatar-green.png';
+import avatarOrange from '@/assets/avatars/avatar-orange.png';
+import avatarTeal from '@/assets/avatars/avatar-teal.png';
+import avatarPink from '@/assets/avatars/avatar-pink.png';
+import avatarYellow from '@/assets/avatars/avatar-yellow.png';
 
 const PRESET_AVATARS = [
-  { id: 'weightlifter', src: weightlifterAvatar, label: 'Weightlifter' },
-  { id: 'runner', src: runnerAvatar, label: 'Runner' },
-  { id: 'yogi', src: yogiAvatar, label: 'Yogi' },
-  { id: 'cyclist', src: cyclistAvatar, label: 'Cyclist' },
-  { id: 'boxer', src: boxerAvatar, label: 'Boxer' },
-  { id: 'swimmer', src: swimmerAvatar, label: 'Swimmer' },
+  { id: 'red', src: avatarRed },
+  { id: 'blue', src: avatarBlue },
+  { id: 'purple', src: avatarPurple },
+  { id: 'green', src: avatarGreen },
+  { id: 'orange', src: avatarOrange },
+  { id: 'teal', src: avatarTeal },
+  { id: 'pink', src: avatarPink },
+  { id: 'yellow', src: avatarYellow },
 ];
 
 const nameSchema = z.string().trim().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters');
@@ -241,7 +245,7 @@ const ProfileSetup = ({ onComplete }: ProfileSetupProps) => {
               >
                 <img
                   src={avatar.src}
-                  alt={avatar.label}
+                  alt={`Avatar ${avatar.id}`}
                   className="w-full h-full object-cover"
                 />
                 <AnimatePresence>
@@ -256,9 +260,6 @@ const ProfileSetup = ({ onComplete }: ProfileSetupProps) => {
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <div className="absolute bottom-0 left-0 right-0 bg-black/60 py-1">
-                  <span className="text-white/80 text-xs">{avatar.label}</span>
-                </div>
               </motion.button>
             ))}
           </div>
