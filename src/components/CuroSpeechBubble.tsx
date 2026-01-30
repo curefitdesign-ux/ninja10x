@@ -1,67 +1,53 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 interface CuroSpeechBubbleProps {
   photosCount: number;
   currentWeek: number;
 }
 
-// Different message categories based on progress
-const introMessages = [
-  "Hey, I'm Curo!\nLet's build a workout together!",
-  "Hello there! 👋\nReady to get moving today?",
-  "Hi! I'm Curo, your fitness buddy!\nLet's start this journey!",
-];
-
-const encourageMessages = [
-  "You're doing great!\nKeep logging those workouts! 💪",
-  "One step at a time!\nEvery photo counts! 📸",
-  "Consistency is key!\nYou've got this! 🔥",
-  "Amazing effort!\nLet's keep the momentum going!",
-];
-
-const celebrateMessages = [
-  "Woohoo! You're on fire! 🔥\nKeep crushing it!",
-  "Look at you go! 🎉\nYour dedication is inspiring!",
-  "Incredible progress! ⭐\nYou're unstoppable!",
-  "Week completed! 🏆\nYou're a fitness warrior!",
-];
-
-const motivateMessages = [
-  "Time to log today's activity!\nSnap a photo or video! 📷",
-  "Don't break the streak!\nCapture your workout today! 💪",
-  "Your future self will thank you!\nLog it now! 🙌",
-  "Every rep counts!\nShow me what you've got! 🏋️",
-];
-
 const CuroSpeechBubble = ({ photosCount, currentWeek }: CuroSpeechBubbleProps) => {
-  const [messageIndex, setMessageIndex] = useState(0);
-  const [currentMessages, setCurrentMessages] = useState<string[]>(introMessages);
-
-  // Select message category based on progress
-  useEffect(() => {
-    if (photosCount === 0) {
-      setCurrentMessages(introMessages);
-    } else if (photosCount % 3 === 0) {
-      // Completed a week
-      setCurrentMessages(celebrateMessages);
-    } else if (photosCount >= 6) {
-      // Advanced user
-      setCurrentMessages([...motivateMessages, ...encourageMessages]);
-    } else {
-      setCurrentMessages([...encourageMessages, ...motivateMessages]);
+  // Calculate contextual state
+  const dayInWeek = photosCount % 3; // 0 = start of week, 1 = day 2, 2 = day 3
+  const isWeekComplete = dayInWeek === 0 && photosCount > 0;
+  const isJourneyComplete = photosCount >= 12;
+  
+  // Get single contextual message based on exact state
+  const getMessage = (): string => {
+    // Journey complete
+    if (isJourneyComplete) {
+      return "🏆 12 days strong!\nYou've built an incredible habit!";
     }
-  }, [photosCount]);
+    
+    // Week just completed (3, 6, 9 photos)
+    if (isWeekComplete) {
+      const completedWeek = photosCount / 3;
+      const weekMessages: Record<number, string> = {
+        1: "Week 1 done! 🔥\nYour willpower is unlocked!",
+        2: "Week 2 crushed! ⚡\nEnergy levels rising!",
+        3: "Week 3 complete! 💪\nStamina mode activated!",
+      };
+      return weekMessages[completedWeek] || "Amazing week! Keep going!";
+    }
+    
+    // First time user
+    if (photosCount === 0) {
+      return "Hey, I'm Curo! 👋\nTap + to log your first workout!";
+    }
+    
+    // Day 2 of any week (1, 4, 7, 10 photos)
+    if (dayInWeek === 1) {
+      return "Great start! 📸\nOne more to complete the week!";
+    }
+    
+    // Day 3 of any week (2, 5, 8, 11 photos) - about to complete
+    if (dayInWeek === 2) {
+      return "Almost there! 🎯\nOne more unlocks your reel!";
+    }
+    
+    return "Keep the momentum! 💪";
+  };
 
-  // Rotate messages every 5 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setMessageIndex((prev) => (prev + 1) % currentMessages.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [currentMessages.length]);
-
-  const message = currentMessages[messageIndex];
+  const message = getMessage();
 
   return (
     <motion.div
@@ -92,18 +78,15 @@ const CuroSpeechBubble = ({ photosCount, currentWeek }: CuroSpeechBubbleProps) =
             boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1)',
           }}
         >
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={messageIndex}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              transition={{ duration: 0.3 }}
-              className="text-sm text-white/90 whitespace-pre-line"
-            >
-              {message}
-            </motion.p>
-          </AnimatePresence>
+          <motion.p
+            key={message}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="text-sm text-white/90 whitespace-pre-line"
+          >
+            {message}
+          </motion.p>
         </div>
       </div>
     </motion.div>
