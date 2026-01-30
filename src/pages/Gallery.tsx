@@ -241,152 +241,277 @@ const Gallery = () => {
         onChange={(e) => handleFileSelect(e, false)}
       />
 
-      {/* Full screen page */}
+      {/* Full screen page with liquid glass background */}
       <div
-        className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-manipulation bg-background"
+        className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-manipulation"
         style={{
-          background: 'linear-gradient(180deg, rgba(15, 15, 25, 1) 0%, rgba(20, 20, 35, 1) 50%, rgba(15, 15, 25, 1) 100%)',
+          background: '#0a0a12',
           height: '100dvh',
           minHeight: '-webkit-fill-available',
         }}
       >
-        {/* Header */}
+        {/* Animated gradient orbs background */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <motion.div
+            className="absolute w-[350px] h-[350px] rounded-full"
+            style={{
+              background: 'radial-gradient(circle, hsl(160, 84%, 39%) 0%, transparent 70%)',
+              filter: 'blur(80px)',
+              top: '-15%',
+              left: '-20%',
+              opacity: 0.35,
+            }}
+            animate={{
+              x: [0, 40, 0],
+              y: [0, 30, 0],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div
+            className="absolute w-[300px] h-[300px] rounded-full"
+            style={{
+              background: 'radial-gradient(circle, hsl(172, 66%, 50%) 0%, transparent 70%)',
+              filter: 'blur(70px)',
+              bottom: '10%',
+              right: '-15%',
+              opacity: 0.3,
+            }}
+            animate={{
+              x: [0, -30, 0],
+              y: [0, -40, 0],
+            }}
+            transition={{
+              duration: 12,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div
+            className="absolute w-[250px] h-[250px] rounded-full"
+            style={{
+              background: 'radial-gradient(circle, hsl(280, 60%, 50%) 0%, transparent 70%)',
+              filter: 'blur(60px)',
+              top: '35%',
+              right: '5%',
+              opacity: 0.2,
+            }}
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.3, 0.2],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        </div>
+
+        {/* Header - Glassmorphic */}
         <div 
-          className="relative pb-5 px-4 flex-shrink-0"
+          className="relative pb-5 px-4 flex-shrink-0 z-10"
           style={{ paddingTop: 'max(env(safe-area-inset-top, 56px), 56px)' }}
         >
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={handleClose}
-            className="absolute left-4 p-2 -ml-2"
-            style={{ top: 'max(env(safe-area-inset-top, 56px), 56px)' }}
+            className="absolute left-4 p-2.5 -ml-2 rounded-full"
+            style={{ 
+              top: 'max(env(safe-area-inset-top, 56px), 56px)',
+              background: 'rgba(255, 255, 255, 0.08)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+            }}
           >
-            <ChevronLeft className="w-7 h-7 text-white/70" />
+            <ChevronLeft className="w-5 h-5 text-white/80" />
           </motion.button>
           
           <div className="text-center">
-            <h1 className="text-xl font-semibold text-white tracking-tight">Camera roll</h1>
-            <p className="text-sm text-white/45 mt-1.5">Photo taken in last 24hours</p>
+            <h1 className="text-xl font-semibold text-white tracking-tight">Camera Roll</h1>
+            <p className="text-sm text-white/45 mt-1.5">Photos from last 24 hours</p>
           </div>
         </div>
 
-        {/* Simple Clean Grid */}
+        {/* Grid Container - Liquid Glass Card */}
         <div 
-          className="flex-1 px-3 overflow-y-auto overscroll-contain"
-          style={{ 
-            paddingBottom: 'calc(100px + env(safe-area-inset-bottom, 20px))',
-            WebkitOverflowScrolling: 'touch',
+          className="flex-1 mx-3 mb-3 rounded-3xl overflow-hidden relative z-10"
+          style={{
+            background: 'rgba(255, 255, 255, 0.04)',
+            backdropFilter: 'blur(40px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            boxShadow: `
+              inset 0 1px 1px rgba(255, 255, 255, 0.1),
+              0 8px 32px rgba(0, 0, 0, 0.3)
+            `,
           }}
         >
-          <div className="grid grid-cols-3 gap-1.5">
-            {/* Camera Button - First Item */}
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={handleCameraCapture}
-              className="aspect-square rounded-xl flex items-center justify-center"
-              style={{
-                background: 'rgba(255, 255, 255, 0.08)',
-              }}
-            >
-              <div 
-                className="w-12 h-12 rounded-xl flex items-center justify-center"
+          <div 
+            className="h-full px-3 py-4 overflow-y-auto overscroll-contain"
+            style={{ 
+              paddingBottom: 'calc(90px + env(safe-area-inset-bottom, 20px))',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
+            <div className="grid grid-cols-3 gap-2">
+              {/* Camera Button - First Item with liquid glass */}
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCameraCapture}
+                className="aspect-square rounded-2xl flex items-center justify-center relative overflow-hidden"
                 style={{
-                  border: '1.5px solid rgba(255, 255, 255, 0.25)',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.1)',
                 }}
               >
-                <Camera className="w-6 h-6 text-white/70" strokeWidth={1.5} />
-              </div>
-            </motion.button>
-
-            {/* Cached Gallery Items */}
-            {galleryItems.map((item, index) => (
-              <motion.button
-                key={item.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.03 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleItemTap(item)}
-                className="aspect-square rounded-xl overflow-hidden relative"
-              >
-                {item.isVideo ? (
-                  <video
-                    src={item.dataUrl}
-                    className="w-full h-full object-cover"
-                    muted
-                    playsInline
-                  />
-                ) : (
-                  <img
-                    src={item.dataUrl}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                )}
-                {item.isVideo && (
-                  <div 
-                    className="absolute bottom-1 right-1 rounded px-1.5 py-0.5 text-[10px] font-medium text-white"
-                    style={{
-                      background: 'rgba(0, 0, 0, 0.6)',
-                    }}
-                  >
-                    Video
-                  </div>
-                )}
+                {/* Inner glow */}
+                <div 
+                  className="absolute inset-0 opacity-50"
+                  style={{
+                    background: 'radial-gradient(circle at 30% 30%, rgba(52, 211, 153, 0.15) 0%, transparent 60%)',
+                  }}
+                />
+                <div 
+                  className="w-12 h-12 rounded-xl flex items-center justify-center relative"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.2) 0%, rgba(52, 211, 153, 0.1) 100%)',
+                    border: '1.5px solid rgba(52, 211, 153, 0.3)',
+                    boxShadow: '0 4px 16px rgba(52, 211, 153, 0.2)',
+                  }}
+                >
+                  <Camera className="w-6 h-6 text-emerald-400" strokeWidth={1.5} />
+                </div>
               </motion.button>
-            ))}
 
-            {/* Add More Button */}
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={handleGallerySelect}
-              className="aspect-square rounded-xl flex items-center justify-center"
-              style={{
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1.5px dashed rgba(255, 255, 255, 0.15)',
-              }}
-            >
-              <Plus className="w-7 h-7 text-white/25" strokeWidth={1.5} />
-            </motion.button>
+              {/* Cached Gallery Items */}
+              {galleryItems.map((item, index) => (
+                <motion.button
+                  key={item.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.03 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleItemTap(item)}
+                  className="aspect-square rounded-2xl overflow-hidden relative"
+                  style={{
+                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                  }}
+                >
+                  {item.isVideo ? (
+                    <video
+                      src={item.dataUrl}
+                      className="w-full h-full object-cover"
+                      muted
+                      playsInline
+                    />
+                  ) : (
+                    <img
+                      src={item.dataUrl}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                  {/* Hover overlay */}
+                  <div 
+                    className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity"
+                    style={{
+                      background: 'linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.4) 100%)',
+                    }}
+                  />
+                  {item.isVideo && (
+                    <div 
+                      className="absolute bottom-1.5 right-1.5 rounded-lg px-2 py-0.5 text-[10px] font-medium text-white"
+                      style={{
+                        background: 'rgba(0, 0, 0, 0.5)',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                      }}
+                    >
+                      Video
+                    </div>
+                  )}
+                </motion.button>
+              ))}
+
+              {/* Add More Button - Liquid glass dashed */}
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={handleGallerySelect}
+                className="aspect-square rounded-2xl flex items-center justify-center"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1.5px dashed rgba(255, 255, 255, 0.12)',
+                }}
+              >
+                <Plus className="w-7 h-7 text-white/30" strokeWidth={1.5} />
+              </motion.button>
+            </div>
+            
+            {/* Empty state hint */}
+            {galleryItems.length === 0 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="absolute left-0 right-0 top-1/2 -translate-y-1/2 text-center px-6 pointer-events-none"
+              >
+                <p className="text-white/40 text-sm">
+                  Tap the camera or + button to add photos
+                </p>
+                <p className="text-white/25 text-xs mt-2">
+                  Previously selected photos will appear here
+                </p>
+              </motion.div>
+            )}
           </div>
-          
-          {/* Empty state hint - centered in available space */}
-          {galleryItems.length === 0 && (
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="absolute left-0 right-0 top-1/2 -translate-y-1/2 text-center px-6 pointer-events-none"
-            >
-              <p className="text-white/40 text-sm">
-                Tap the camera or + button to add photos
-              </p>
-              <p className="text-white/25 text-xs mt-2">
-                Previously selected photos will appear here
-              </p>
-            </motion.div>
-          )}
         </div>
 
-        {/* Bottom Select Button */}
+        {/* Bottom Select Button - Liquid glass */}
         <div 
-          className="fixed bottom-0 left-0 right-0 p-5"
+          className="fixed bottom-0 left-0 right-0 p-4 z-20"
           style={{
             paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 20px)',
-            background: 'linear-gradient(to top, rgba(15, 15, 25, 1) 0%, rgba(15, 15, 25, 0.9) 60%, transparent 100%)',
           }}
         >
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={handleGallerySelect}
-            className="w-full py-4 rounded-2xl font-semibold text-base tracking-wide"
+            className="w-full py-4 rounded-2xl font-semibold text-sm tracking-wider relative overflow-hidden"
             style={{
-              background: 'rgba(255, 255, 255, 0.06)',
-              color: 'rgba(255, 255, 255, 0.35)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              background: 'rgba(255, 255, 255, 0.08)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              color: 'rgba(255, 255, 255, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              boxShadow: `
+                inset 0 1px 1px rgba(255, 255, 255, 0.15),
+                0 8px 32px rgba(0, 0, 0, 0.3)
+              `,
             }}
           >
-            SELECT FROM GALLERY
+            {/* Shimmer effect */}
+            <motion.div
+              className="absolute inset-0 opacity-30"
+              style={{
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)',
+              }}
+              animate={{
+                x: ['-100%', '200%'],
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                repeatDelay: 4,
+              }}
+            />
+            <span className="relative z-10">SELECT FROM GALLERY</span>
           </motion.button>
         </div>
 
