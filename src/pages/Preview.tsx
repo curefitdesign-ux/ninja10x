@@ -636,7 +636,7 @@ const Preview = () => {
           </motion.div>
         </div>
         
-        {/* Bottom Sheet for Activity Selection - Full visible, no scroll */}
+        {/* Bottom Sheet for Activity Selection - Liquid Glass */}
         <motion.div
           className="fixed bottom-0 left-0 right-0 z-30"
           initial={{ y: '100%' }}
@@ -644,24 +644,24 @@ const Preview = () => {
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
           <div 
-            className="rounded-t-3xl px-4 pt-3"
+            className="rounded-t-3xl px-5 pt-4"
             style={{
-              background: 'rgba(20, 20, 25, 0.85)',
-              backdropFilter: 'blur(40px)',
-              WebkitBackdropFilter: 'blur(40px)',
-              borderTop: '1px solid rgba(255, 255, 255, 0.15)',
-              boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.4)',
-              paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 20px)',
+              background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 -10px 50px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.15)',
+              paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
             }}
           >
             {/* Handle */}
-            <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-3" />
+            <div className="w-12 h-1.5 bg-white/30 rounded-full mx-auto mb-4" />
             
             {/* Title */}
-            <h2 className="text-white text-lg font-semibold text-center mb-3">Choose your activity</h2>
+            <h2 className="text-white text-xl font-bold text-center mb-5">Choose your activity</h2>
             
-            {/* Activity Grid - 4 columns, compact, all visible */}
-            <div className="grid grid-cols-4 gap-x-2 gap-y-3">
+            {/* Activity Grid - 4 columns, larger icons */}
+            <div className="grid grid-cols-4 gap-x-3 gap-y-4">
               {activityOptions.map((activityOption, index) => {
                 const IconComponent = activityOption.icon;
                 return (
@@ -670,17 +670,22 @@ const Preview = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.02 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileTap={{ scale: 0.92 }}
                     onClick={() => handleActivitySelection(activityOption.name)}
-                    className="flex flex-col items-center gap-1.5"
+                    className="flex flex-col items-center gap-2"
                   >
                     <div 
-                      className="w-12 h-12 rounded-full flex items-center justify-center"
-                      style={{ background: 'rgba(255, 255, 255, 0.1)' }}
+                      className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                      style={{ 
+                        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1)',
+                      }}
                     >
-                      <IconComponent className="w-5 h-5 text-white/80" strokeWidth={1.5} />
+                      <IconComponent className="w-7 h-7 text-white" strokeWidth={1.8} />
                     </div>
-                    <span className="text-white text-[10px] font-semibold text-center leading-tight">
+                    <span className="text-white/90 text-[11px] font-semibold text-center leading-tight">
                       {activityOption.name}
                     </span>
                   </motion.button>
