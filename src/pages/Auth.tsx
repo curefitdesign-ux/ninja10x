@@ -151,11 +151,8 @@ const Auth = () => {
 
   return (
     <div 
-      className="flex flex-col items-center justify-center relative overflow-hidden px-6"
-      style={{ 
-        background: 'linear-gradient(180deg, #0a0a0a 0%, #0d2d2d 40%, #1a5555 70%, #3d9999 100%)',
-        minHeight: '100dvh',
-      }}
+      className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-6"
+      style={{ background: 'linear-gradient(180deg, #0a0a0a 0%, #0d2d2d 40%, #1a5555 70%, #3d9999 100%)' }}
     >
       {/* Content section */}
       <motion.div 
@@ -178,7 +175,7 @@ const Auth = () => {
 
         {/* Liquid glass card */}
         <div 
-          className="rounded-3xl p-6"
+          className="rounded-3xl p-6 mb-4"
           style={{
             background: 'rgba(255, 255, 255, 0.05)',
             backdropFilter: 'blur(24px)',
@@ -254,24 +251,19 @@ const Auth = () => {
             </motion.button>
           </form>
         </div>
-      </motion.div>
 
-      {/* Sticky bottom bar */}
-      <div 
-        className="fixed bottom-0 left-0 right-0 z-20"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}
-      >
+        {/* Secondary action */}
         <button
           onClick={() => {
             setIsLogin(!isLogin);
             setErrors({});
           }}
-          className="w-full text-center py-4 text-teal-300 text-sm font-medium"
+          className="w-full text-center py-3 text-teal-300 text-sm font-medium"
           disabled={loading}
         >
           {isLogin ? 'Sign up' : 'Sign in'} <span className="text-white/40">›</span>
         </button>
-      </div>
+      </motion.div>
     </div>
   );
 };
