@@ -5,7 +5,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { isVideoUrl } from "@/lib/media";
-import WeekRecapViewer from "./WeekRecapViewer";
 import ReelProgressPill from "./ReelProgressPill";
 import { useFitnessReel } from "@/hooks/use-fitness-reel";
 
@@ -461,9 +460,6 @@ const PhotoLoggingWidget = ({
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [pendingUpload, setPendingUpload] = useState<{ weekIndex: number; dayIndex: number } | null>(null);
   const [showUploadOptions, setShowUploadOptions] = useState(false);
-  const [recapViewerOpen, setRecapViewerOpen] = useState(false);
-  const [recapWeekPhotos, setRecapWeekPhotos] = useState<LoggedPhoto[]>([]);
-  const [recapWeekNumber, setRecapWeekNumber] = useState(1);
   
   // Reel generation state
   const { 
@@ -566,8 +562,34 @@ const PhotoLoggingWidget = ({
     });
 
     if (photo) {
-      // Tap on existing photo - open preview/edit mode
-      onPhotoTap?.(photo);
+      // Tap on existing photo - navigate to /reel page with all photos
+      const allPhotos = photos.filter(p => p.storageUrl);
+      const photoIndex = allPhotos.findIndex(p => p.id === photo.id);
+      
+      // Convert to JourneyActivity format for reel page
+      const activitiesForReel = allPhotos.map(p => ({
+        id: p.id,
+        user_id: '',
+        storage_url: p.storageUrl,
+        original_url: p.originalUrl || null,
+        is_video: p.isVideo || false,
+        activity: p.activity || null,
+        frame: p.frame || null,
+        duration: p.duration || null,
+        pr: p.pr || null,
+        day_number: p.dayNumber,
+        created_at: '',
+        updated_at: '',
+        reaction_count: p.reactionCount || 0,
+        user_reacted: false,
+      }));
+      
+      navigate('/reel', {
+        state: {
+          activities: activitiesForReel,
+          initialIndex: photoIndex >= 0 ? photoIndex : 0,
+        },
+      });
     } else {
       // DEV/TEST MODE: Allow uploading on any day (1-12) regardless of locks
       if (onPhotoAdd) {
@@ -609,11 +631,32 @@ const PhotoLoggingWidget = ({
     setPendingUpload(null);
   };
 
-  // Handle playing week recap
+  // Handle playing week recap - navigate to /reel page
   const handlePlayWeekRecap = (weekPhotos: LoggedPhoto[], weekIndex: number) => {
-    setRecapWeekPhotos(weekPhotos);
-    setRecapWeekNumber(weekIndex + 1);
-    setRecapViewerOpen(true);
+    // Convert to JourneyActivity format for reel page
+    const activitiesForReel = weekPhotos.map(p => ({
+      id: p.id,
+      user_id: '',
+      storage_url: p.storageUrl,
+      original_url: p.originalUrl || null,
+      is_video: p.isVideo || false,
+      activity: p.activity || null,
+      frame: p.frame || null,
+      duration: p.duration || null,
+      pr: p.pr || null,
+      day_number: p.dayNumber,
+      created_at: '',
+      updated_at: '',
+      reaction_count: p.reactionCount || 0,
+      user_reacted: false,
+    }));
+    
+    navigate('/reel', {
+      state: {
+        activities: activitiesForReel,
+        initialIndex: 0,
+      },
+    });
   };
   
   // 4 clusters representing 4 weeks (fixed order, no shuffling)
@@ -722,20 +765,37 @@ const PhotoLoggingWidget = ({
               }
               progress={reelProgress}
               onPlay={() => {
-                if (currentReel?.videoUrl) {
-                  navigate('/reel');
-                } else {
-                  // Open recap for the latest completed week
-                  const weekIndex = completedWeeks - 1;
-                  const startDay = weekIndex * 3 + 1;
-                  const weekPhotos = photos.filter(p => 
-                    Number(p.dayNumber) >= startDay && Number(p.dayNumber) <= startDay + 2
-                  );
-                  if (weekPhotos.length >= 3) {
-                    setRecapWeekPhotos(weekPhotos);
-                    setRecapWeekNumber(completedWeeks);
-                    setRecapViewerOpen(true);
-                  }
+                // Navigate to reel page with the completed week photos
+                const weekIndex = completedWeeks - 1;
+                const startDay = weekIndex * 3 + 1;
+                const weekPhotos = photos.filter(p => 
+                  Number(p.dayNumber) >= startDay && Number(p.dayNumber) <= startDay + 2
+                );
+                
+                if (weekPhotos.length >= 3) {
+                  const activitiesForReel = weekPhotos.map(p => ({
+                    id: p.id,
+                    user_id: '',
+                    storage_url: p.storageUrl,
+                    original_url: p.originalUrl || null,
+                    is_video: p.isVideo || false,
+                    activity: p.activity || null,
+                    frame: p.frame || null,
+                    duration: p.duration || null,
+                    pr: p.pr || null,
+                    day_number: p.dayNumber,
+                    created_at: '',
+                    updated_at: '',
+                    reaction_count: p.reactionCount || 0,
+                    user_reacted: false,
+                  }));
+                  
+                  navigate('/reel', {
+                    state: {
+                      activities: activitiesForReel,
+                      initialIndex: 0,
+                    },
+                  });
                 }
               }}
               className="py-1.5"
@@ -806,13 +866,6 @@ const PhotoLoggingWidget = ({
         </SheetContent>
       </Sheet>
 
-      {/* Week Recap Viewer */}
-      <WeekRecapViewer
-        isOpen={recapViewerOpen}
-        onClose={() => setRecapViewerOpen(false)}
-        photos={recapWeekPhotos}
-        weekNumber={recapWeekNumber}
-      />
     </>
   );
 };
