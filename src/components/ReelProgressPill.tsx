@@ -342,85 +342,97 @@ const ReelProgressPill = ({
             </AnimatePresence>
           </div>
 
-          {/* Liquid glass play button */}
-          <motion.div
-            className="relative flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center overflow-hidden"
-            style={{
-              background: state === 'complete' || state === 'completing' || isCelebrating || needsAttention
-                ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.4) 0%, rgba(16, 185, 129, 0.25) 100%)'
-                : 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              border: state === 'complete' || state === 'completing' || isCelebrating || needsAttention
-                ? '1px solid rgba(52, 211, 153, 0.5)'
-                : '1px solid rgba(255,255,255,0.15)',
-              boxShadow: state === 'complete' || state === 'completing' || isCelebrating || needsAttention
-                ? '0 0 16px rgba(52, 211, 153, 0.3), inset 0 1px 0 rgba(255,255,255,0.2)'
-                : 'inset 0 1px 0 rgba(255,255,255,0.1)',
-            }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            animate={needsAttention ? {
-              scale: [1, 1.2, 1],
-              boxShadow: [
-                '0 0 16px rgba(52, 211, 153, 0.3)',
-                '0 0 32px rgba(52, 211, 153, 0.6)',
-                '0 0 16px rgba(52, 211, 153, 0.3)',
-              ],
-            } : isCelebrating ? {
-              scale: [1, 1.15, 1],
-              boxShadow: [
-                '0 0 16px rgba(52, 211, 153, 0.3)',
-                '0 0 28px rgba(52, 211, 153, 0.5)',
-                '0 0 16px rgba(52, 211, 153, 0.3)',
-              ],
-            } : {}}
-            transition={{
-              duration: 1,
-              repeat: needsAttention || isCelebrating ? Infinity : 0,
-              ease: 'easeInOut',
-            }}
-          >
-            <Play 
-              className={`w-3.5 h-3.5 ml-0.5 ${
-                state === 'complete' || state === 'completing' || isCelebrating || needsAttention
-                  ? 'text-emerald-400' 
-                  : 'text-white/70'
-              }`} 
-              fill="currentColor" 
-            />
-          </motion.div>
-        </div>
-
-        {/* Progress bar row */}
-        <div className="mt-2.5 relative z-10">
-          <div 
-            className="h-1.5 rounded-full overflow-hidden"
-            style={{
-              background: 'rgba(255,255,255,0.1)',
-            }}
-          >
+          {/* Liquid glass play button with circular progress */}
+          <div className="relative flex-shrink-0 w-10 h-10">
+            {/* SVG Circular Progress Ring */}
+            <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 40 40">
+              {/* Background circle */}
+              <circle
+                cx="20"
+                cy="20"
+                r="17"
+                fill="none"
+                stroke="rgba(255,255,255,0.15)"
+                strokeWidth="2.5"
+              />
+              {/* Progress circle */}
+              <motion.circle
+                cx="20"
+                cy="20"
+                r="17"
+                fill="none"
+                stroke={state === 'complete' || state === 'completing' || isCelebrating || needsAttention
+                  ? '#34d399'
+                  : 'rgba(255,255,255,0.5)'}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeDasharray={2 * Math.PI * 17}
+                initial={{ strokeDashoffset: 2 * Math.PI * 17 }}
+                animate={{ 
+                  strokeDashoffset: state === 'complete' || state === 'completing' 
+                    ? 0 
+                    : 2 * Math.PI * 17 * (1 - Math.max(progress, 10) / 100)
+                }}
+                transition={{ 
+                  duration: state === 'complete' ? 0.5 : 0.8, 
+                  ease: 'easeOut' 
+                }}
+                style={{
+                  filter: state === 'complete' || state === 'completing' || isCelebrating || needsAttention
+                    ? 'drop-shadow(0 0 4px rgba(52, 211, 153, 0.6))'
+                    : 'none',
+                }}
+              />
+            </svg>
+            
+            {/* Play button center */}
             <motion.div
-              className="h-full rounded-full"
+              className="absolute inset-1 rounded-full flex items-center justify-center overflow-hidden"
               style={{
-                background: state === 'complete' || state === 'completing' || isCelebrating
-                  ? 'linear-gradient(90deg, #34d399 0%, #10b981 50%, #6ee7b7 100%)'
-                  : 'linear-gradient(90deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.6) 100%)',
-                boxShadow: state === 'complete' || state === 'completing' || isCelebrating
-                  ? '0 0 8px rgba(52, 211, 153, 0.5)'
-                  : 'none',
+                background: state === 'complete' || state === 'completing' || isCelebrating || needsAttention
+                  ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.4) 0%, rgba(16, 185, 129, 0.25) 100%)'
+                  : 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: state === 'complete' || state === 'completing' || isCelebrating || needsAttention
+                  ? '1px solid rgba(52, 211, 153, 0.5)'
+                  : '1px solid rgba(255,255,255,0.15)',
+                boxShadow: state === 'complete' || state === 'completing' || isCelebrating || needsAttention
+                  ? '0 0 12px rgba(52, 211, 153, 0.3), inset 0 1px 0 rgba(255,255,255,0.2)'
+                  : 'inset 0 1px 0 rgba(255,255,255,0.1)',
               }}
-              initial={{ width: '0%' }}
-              animate={{ 
-                width: state === 'complete' || state === 'completing' 
-                  ? '100%' 
-                  : `${Math.max(progress, 10)}%` 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              animate={needsAttention ? {
+                scale: [1, 1.1, 1],
+                boxShadow: [
+                  '0 0 12px rgba(52, 211, 153, 0.3)',
+                  '0 0 24px rgba(52, 211, 153, 0.6)',
+                  '0 0 12px rgba(52, 211, 153, 0.3)',
+                ],
+              } : isCelebrating ? {
+                scale: [1, 1.08, 1],
+                boxShadow: [
+                  '0 0 12px rgba(52, 211, 153, 0.3)',
+                  '0 0 20px rgba(52, 211, 153, 0.5)',
+                  '0 0 12px rgba(52, 211, 153, 0.3)',
+                ],
+              } : {}}
+              transition={{
+                duration: 1,
+                repeat: needsAttention || isCelebrating ? Infinity : 0,
+                ease: 'easeInOut',
               }}
-              transition={{ 
-                duration: state === 'complete' ? 0.5 : 0.8, 
-                ease: 'easeOut' 
-              }}
-            />
+            >
+              <Play 
+                className={`w-3.5 h-3.5 ml-0.5 ${
+                  state === 'complete' || state === 'completing' || isCelebrating || needsAttention
+                    ? 'text-emerald-400' 
+                    : 'text-white/70'
+                }`} 
+                fill="currentColor" 
+              />
+            </motion.div>
           </div>
         </div>
       </motion.div>
