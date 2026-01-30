@@ -9,7 +9,8 @@ import PhotoLoggingWidget, { LoggedPhoto } from "@/components/PhotoLoggingWidget
 import AIReelViewer from "@/components/AIReelViewer";
 import CuroSpeechBubble from "@/components/CuroSpeechBubble";
 import FullScreenReel from "@/components/FullScreenReel";
-import { useJourneyActivities, JourneyActivity } from "@/hooks/use-journey-activities";
+import { useJourneyActivities } from "@/hooks/use-journey-activities";
+import { JourneyActivity } from "@/services/journey-service";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 
@@ -187,7 +188,7 @@ const Activity = () => {
   })();
 
   // Convert LoggedPhoto to JourneyActivity format for FullScreenReel
-  const photosAsJourneyActivities = photos.map(p => ({
+  const photosAsJourneyActivities: JourneyActivity[] = photos.map(p => ({
     id: p.id,
     user_id: '',
     storage_url: p.storageUrl,
