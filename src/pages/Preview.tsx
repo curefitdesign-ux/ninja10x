@@ -23,21 +23,27 @@ import { toast } from 'sonner';
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
 
-// Activity options with Lucide icons
+// Activity options with Lucide icons and contextual data inputs
 const activityOptions = [
-  { name: 'Running', icon: Footprints },
-  { name: 'Cycling', icon: Bike },
-  { name: 'Trekking', icon: Mountain },
-  { name: 'Swimming', icon: Waves },
-  { name: 'Yoga', icon: Brain },
-  { name: 'GYM', icon: Dumbbell },
-  { name: 'Cricket', icon: Trophy },
-  { name: 'Badminton', icon: CircleDot },
-  { name: 'Tennis', icon: CircleDot },
-  { name: 'Meditation', icon: Brain },
-  { name: 'Boxing', icon: Swords },
-  { name: 'Dance', icon: Music },
+  { name: 'Running', icon: Footprints, metric: 'Distance', unit: 'km', inputType: 'number' as const },
+  { name: 'Cycling', icon: Bike, metric: 'Distance', unit: 'km', inputType: 'number' as const },
+  { name: 'Trekking', icon: Mountain, metric: 'Elevation', unit: 'm', inputType: 'number' as const },
+  { name: 'Swimming', icon: Waves, metric: 'Laps', unit: 'laps', inputType: 'number' as const },
+  { name: 'Yoga', icon: Brain, metric: 'Session', unit: 'min', inputType: 'wheel' as const },
+  { name: 'GYM', icon: Dumbbell, metric: 'Sets', unit: 'sets', inputType: 'number' as const },
+  { name: 'Cricket', icon: Trophy, metric: 'Runs', unit: 'runs', inputType: 'number' as const },
+  { name: 'Badminton', icon: CircleDot, metric: 'Games', unit: 'games', inputType: 'number' as const },
+  { name: 'Tennis', icon: CircleDot, metric: 'Sets', unit: 'sets', inputType: 'number' as const },
+  { name: 'Meditation', icon: Brain, metric: 'Session', unit: 'min', inputType: 'wheel' as const },
+  { name: 'Boxing', icon: Swords, metric: 'Rounds', unit: 'rounds', inputType: 'number' as const },
+  { name: 'Dance', icon: Music, metric: 'Session', unit: 'min', inputType: 'wheel' as const },
 ];
+
+// Get activity-specific input config
+const getActivityInputConfig = (activityName: string) => {
+  const found = activityOptions.find(a => a.name === activityName);
+  return found || { metric: 'Metric', unit: '', inputType: 'number' as const };
+};
 
 const isVideoUrl = (url: string) => {
   return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
@@ -630,7 +636,7 @@ const Preview = () => {
           </motion.div>
         </div>
         
-        {/* Bottom Sheet for Activity Selection */}
+        {/* Bottom Sheet for Activity Selection - Full visible, no scroll */}
         <motion.div
           className="fixed bottom-0 left-0 right-0 z-30"
           initial={{ y: '100%' }}
@@ -638,26 +644,24 @@ const Preview = () => {
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
           <div 
-            className="rounded-t-3xl px-5 pt-4"
+            className="rounded-t-3xl px-4 pt-3"
             style={{
-              background: 'rgba(20, 20, 25, 0.7)',
+              background: 'rgba(20, 20, 25, 0.85)',
               backdropFilter: 'blur(40px)',
               WebkitBackdropFilter: 'blur(40px)',
               borderTop: '1px solid rgba(255, 255, 255, 0.15)',
               boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.4)',
-              paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
-              height: '420px',
-              maxHeight: '55vh',
+              paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 20px)',
             }}
           >
             {/* Handle */}
-            <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
+            <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-3" />
             
             {/* Title */}
-            <h2 className="text-white text-xl font-semibold text-center mb-5">Choose your activity</h2>
+            <h2 className="text-white text-lg font-semibold text-center mb-3">Choose your activity</h2>
             
-            {/* Activity Grid - Fixed height with scroll */}
-            <div className="grid grid-cols-3 gap-x-4 gap-y-5 overflow-y-auto" style={{ maxHeight: 'calc(100% - 60px)' }}>
+            {/* Activity Grid - 4 columns, compact, all visible */}
+            <div className="grid grid-cols-4 gap-x-2 gap-y-3">
               {activityOptions.map((activityOption, index) => {
                 const IconComponent = activityOption.icon;
                 return (
@@ -668,15 +672,15 @@ const Preview = () => {
                     transition={{ delay: index * 0.02 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleActivitySelection(activityOption.name)}
-                    className="flex flex-col items-center gap-2"
+                    className="flex flex-col items-center gap-1.5"
                   >
                     <div 
-                      className="w-14 h-14 rounded-full flex items-center justify-center"
+                      className="w-12 h-12 rounded-full flex items-center justify-center"
                       style={{ background: 'rgba(255, 255, 255, 0.1)' }}
                     >
-                      <IconComponent className="w-6 h-6 text-white/80" strokeWidth={1.5} />
+                      <IconComponent className="w-5 h-5 text-white/80" strokeWidth={1.5} />
                     </div>
-                    <span className="text-white text-xs font-semibold text-center leading-tight italic">
+                    <span className="text-white text-[10px] font-semibold text-center leading-tight">
                       {activityOption.name}
                     </span>
                   </motion.button>
@@ -963,7 +967,7 @@ const Preview = () => {
         </div>
       )}
 
-      {/* Bottom Sheet Keyboard Overlay */}
+      {/* Bottom Sheet Keyboard Overlay - Context-aware inputs */}
       {editingField && (
         <>
           <div 
@@ -975,49 +979,80 @@ const Preview = () => {
             <div className="bg-white/10 backdrop-blur-2xl border-t border-white/20 rounded-t-3xl p-6 pb-10 focus:outline-none focus-visible:outline-none" tabIndex={-1}>
               <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-6" />
               
-              <p className="text-white text-lg font-semibold text-center mb-4">
-                {editingField === 'duration' ? `Select ${label2}` : `Enter ${label1}`}
-              </p>
-              
-              {editingField === 'duration' ? (
-                <div className="flex items-center justify-center gap-4 mb-4">
-                  <div className="flex-1 max-w-[200px]">
-                    <WheelPicker
-                      items={HOUR_OPTIONS}
-                      value={parseInt(tempValue) || 0}
-                      onChange={handleWheelChange}
-                      itemHeight={50}
-                      visibleItems={5}
-                    />
-                  </div>
-                  <span className="text-white text-2xl font-semibold">hrs</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex-1 flex items-center bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 focus-within:border-white/40">
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      value={tempValue}
-                      onChange={(e) => handleInputChange(e.target.value)}
-                      placeholder={`e.g. ${label1}`}
-                      className="flex-1 bg-transparent text-white text-xl font-semibold px-4 py-4 outline-none placeholder:text-white/30"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          confirmEdit();
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-              
-              <button
-                onClick={confirmEdit}
-                className="mx-auto px-8 py-2 flex items-center justify-center rounded-full bg-white"
-              >
-                <span className="text-black font-semibold text-sm">Confirm</span>
-              </button>
+              {(() => {
+                const activityConfig = getActivityInputConfig(activity || '');
+                const isDuration = editingField === 'duration';
+                const fieldLabel = isDuration ? label2 : activityConfig.metric;
+                const fieldUnit = isDuration ? 'min' : activityConfig.unit;
+                const useWheel = isDuration || activityConfig.inputType === 'wheel';
+                
+                return (
+                  <>
+                    <p className="text-white text-lg font-semibold text-center mb-4">
+                      {isDuration ? `Select ${label2}` : `Enter ${activityConfig.metric}`}
+                    </p>
+                    
+                    {useWheel ? (
+                      <div className="flex items-center justify-center gap-4 mb-4">
+                        <div className="flex-1 max-w-[200px]">
+                          <WheelPicker
+                            items={isDuration ? Array.from({ length: 181 }, (_, i) => i) : Array.from({ length: 101 }, (_, i) => i)}
+                            value={parseInt(tempValue) || 0}
+                            onChange={(value) => {
+                              const numValue = Number(value);
+                              setTempValue(String(numValue));
+                              if (isDuration) {
+                                setDuration(numValue > 0 ? `${numValue} ${fieldUnit}` : '');
+                              } else {
+                                setPr(numValue > 0 ? `${numValue} ${fieldUnit}` : '');
+                              }
+                            }}
+                            itemHeight={50}
+                            visibleItems={5}
+                          />
+                        </div>
+                        <span className="text-white text-2xl font-semibold">{fieldUnit}</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="flex-1 flex items-center bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 focus-within:border-white/40">
+                          <input
+                            ref={inputRef}
+                            type="number"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={tempValue}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setTempValue(val);
+                              if (isDuration) {
+                                setDuration(val ? `${val} ${fieldUnit}` : '');
+                              } else {
+                                setPr(val ? `${val} ${fieldUnit}` : '');
+                              }
+                            }}
+                            placeholder={`Enter ${fieldLabel.toLowerCase()}`}
+                            className="flex-1 bg-transparent text-white text-xl font-semibold px-4 py-4 outline-none placeholder:text-white/30"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                confirmEdit();
+                              }
+                            }}
+                          />
+                          <span className="pr-4 text-white/60 text-lg">{fieldUnit}</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <button
+                      onClick={confirmEdit}
+                      className="mx-auto px-8 py-2 flex items-center justify-center rounded-full bg-white"
+                    >
+                      <span className="text-black font-semibold text-sm">Confirm</span>
+                    </button>
+                  </>
+                );
+              })()}
             </div>
           </div>
         </>
