@@ -303,16 +303,23 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
               }}
               whileTap={{ scale: 0.9 }}
             >
-              {/* Rotating Plus icon */}
+              {/* Bouncing upload icon with shimmer */}
               <motion.div
-                animate={{ rotate: [0, 90, 0] }}
+                animate={{ 
+                  y: [0, -4, 0],
+                  filter: [
+                    'drop-shadow(0 0 8px rgba(52,211,153,0.6))',
+                    'drop-shadow(0 0 16px rgba(52,211,153,0.9))',
+                    'drop-shadow(0 0 8px rgba(52,211,153,0.6))',
+                  ],
+                }}
                 transition={{
-                  duration: 3,
+                  duration: 1.2,
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
               >
-                <Upload className="w-6 h-6 text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]" strokeWidth={2.5} />
+                <Upload className="w-6 h-6 text-emerald-400" strokeWidth={2.5} />
               </motion.div>
             </motion.div>
           </div>
