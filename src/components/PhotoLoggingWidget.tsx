@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { isVideoUrl } from "@/lib/media";
+import WeekRecapViewer from "./WeekRecapViewer";
 
 // Activity icons
 import footballIcon from '@/assets/activities/football.png';
@@ -551,6 +552,9 @@ const PhotoLoggingWidget = ({
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [pendingUpload, setPendingUpload] = useState<{ weekIndex: number; dayIndex: number } | null>(null);
   const [showUploadOptions, setShowUploadOptions] = useState(false);
+  const [recapViewerOpen, setRecapViewerOpen] = useState(false);
+  const [recapWeekPhotos, setRecapWeekPhotos] = useState<LoggedPhoto[]>([]);
+  const [recapWeekNumber, setRecapWeekNumber] = useState(1);
   
   // Auto-expand active week on mount and when it changes
   useEffect(() => {
@@ -638,6 +642,13 @@ const PhotoLoggingWidget = ({
       });
     }
     setPendingUpload(null);
+  };
+
+  // Handle playing week recap
+  const handlePlayWeekRecap = (weekPhotos: LoggedPhoto[], weekIndex: number) => {
+    setRecapWeekPhotos(weekPhotos);
+    setRecapWeekNumber(weekIndex + 1);
+    setRecapViewerOpen(true);
   };
   
   // 4 clusters representing 4 weeks (fixed order, no shuffling)
@@ -727,7 +738,7 @@ const PhotoLoggingWidget = ({
                     isExpanded={isExpanded}
                     onTap={() => handleClusterTap(weekIndex)}
                     onCardTap={(dayIndex, photo) => handleCardTap(weekIndex, dayIndex, photo)}
-                    onPlayReel={onPlayReel}
+                    onPlayReel={(weekPhotos) => handlePlayWeekRecap(weekPhotos, weekIndex)}
                   />
                 </motion.div>
               );
@@ -796,6 +807,14 @@ const PhotoLoggingWidget = ({
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Week Recap Viewer */}
+      <WeekRecapViewer
+        isOpen={recapViewerOpen}
+        onClose={() => setRecapViewerOpen(false)}
+        photos={recapWeekPhotos}
+        weekNumber={recapWeekNumber}
+      />
     </>
   );
 };
