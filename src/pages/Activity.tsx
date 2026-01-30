@@ -607,7 +607,7 @@ const Activity = () => {
                 onClick={() => setActiveTab(item.id)}
                 className="flex flex-col items-center py-2 px-4 rounded-2xl transition-all duration-200"
               >
-                {item.isCenter && activeTab === item.id ? (
+                {item.isCenter ? (
                   <div className="relative">
                     <div className="absolute -inset-2 bg-gradient-to-r from-rose-500/50 to-pink-500/50 rounded-full blur-lg" />
                     <div className="relative w-12 h-12 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center shadow-[0_0_24px_rgba(244,63,94,0.5)]">
