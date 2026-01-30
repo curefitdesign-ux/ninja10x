@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { JourneyActivity, ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
+import { useProfile } from '@/hooks/use-profile';
 import FloatingReactionsOverlay from '@/components/FloatingReactionsOverlay';
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
 import SendReactionSheet from '@/components/SendReactionSheet';
@@ -29,6 +30,7 @@ const Reel = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { profile } = useProfile();
   
   const activities: JourneyActivity[] = location.state?.activities || [];
   const initialIndex: number = location.state?.initialIndex || 0;
@@ -208,7 +210,7 @@ const Reel = () => {
         style={{ 
           maxWidth: '430px',
           paddingTop: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 60px)',
-          paddingBottom: isOwnStory ? '180px' : '200px',
+          paddingBottom: isOwnStory ? '180px' : '220px',
           paddingInline: '20px',
         }}
       >
@@ -338,10 +340,10 @@ const Reel = () => {
             />
           </motion.div>
 
-          {/* User avatar overlapping card bottom */}
+          {/* User avatar and name overlapping card bottom */}
           <motion.div 
-            className="absolute left-1/2 -translate-x-1/2 z-20"
-            style={{ bottom: -32 }}
+            className="absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center"
+            style={{ bottom: -44 }}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3 }}
@@ -353,12 +355,25 @@ const Reel = () => {
                 boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
               }}
             >
-              <img 
-                src={current.storage_url} 
-                alt="User" 
-                className="w-full h-full object-cover"
-              />
+              {profile?.avatar_url ? (
+                <img 
+                  src={profile.avatar_url} 
+                  alt={profile.display_name || 'User'} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+                  <span className="text-white text-xl font-bold">
+                    {profile?.display_name?.charAt(0).toUpperCase() || '?'}
+                  </span>
+                </div>
+              )}
             </div>
+            {profile?.display_name && (
+              <span className="text-white/80 text-sm font-medium mt-2">
+                {profile.display_name}
+              </span>
+            )}
           </motion.div>
         </div>
       </div>
