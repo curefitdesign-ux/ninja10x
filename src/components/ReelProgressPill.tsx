@@ -342,116 +342,115 @@ const ReelProgressPill = ({
             </AnimatePresence>
           </div>
 
-          {/* Liquid glass play button with circular progress */}
-          <div className="relative flex-shrink-0 w-10 h-10">
+          {/* Clean circular progress with play button */}
+          <div className="relative flex-shrink-0 w-11 h-11">
             {/* SVG Circular Progress Ring */}
-            <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 40 40">
-              {/* Background circle */}
+            <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 44 44">
+              {/* Background track - subtle */}
               <circle
-                cx="20"
-                cy="20"
-                r="17"
+                cx="22"
+                cy="22"
+                r="19"
                 fill="none"
-                stroke="rgba(255,255,255,0.15)"
-                strokeWidth="2.5"
+                stroke="rgba(255,255,255,0.1)"
+                strokeWidth="3"
               />
-              {/* Progress circle */}
+              
+              {/* Progress arc */}
               <motion.circle
-                cx="20"
-                cy="20"
-                r="17"
+                cx="22"
+                cy="22"
+                r="19"
                 fill="none"
                 stroke={state === 'complete' || state === 'completing' || isCelebrating || needsAttention
-                  ? '#34d399'
-                  : 'rgba(255,255,255,0.5)'}
-                strokeWidth="2.5"
+                  ? 'url(#progressGradient)'
+                  : 'rgba(255,255,255,0.3)'}
+                strokeWidth="3"
                 strokeLinecap="round"
-                strokeDasharray={2 * Math.PI * 17}
-                initial={{ strokeDashoffset: 2 * Math.PI * 17 }}
+                strokeDasharray={2 * Math.PI * 19}
+                initial={{ strokeDashoffset: 2 * Math.PI * 19 }}
                 animate={{ 
                   strokeDashoffset: state === 'complete' || state === 'completing' 
                     ? 0 
-                    : 2 * Math.PI * 17 * (1 - Math.max(progress, 10) / 100)
+                    : 2 * Math.PI * 19 * (1 - Math.max(progress, 5) / 100)
                 }}
                 transition={{ 
-                  duration: state === 'complete' ? 0.5 : 0.8, 
-                  ease: 'easeOut' 
+                  duration: 0.6, 
+                  ease: [0.4, 0, 0.2, 1]
                 }}
                 style={{
                   filter: state === 'complete' || state === 'completing' || isCelebrating || needsAttention
-                    ? 'drop-shadow(0 0 6px rgba(52, 211, 153, 0.8))'
+                    ? 'drop-shadow(0 0 8px rgba(52, 211, 153, 0.7))'
                     : 'none',
                 }}
               />
-              {/* Animated glow overlay for "creating" state - simulates filling motion */}
+              
+              {/* Animated rotating segment during creation */}
               {state === 'creating' && (
                 <motion.circle
-                  cx="20"
-                  cy="20"
-                  r="17"
+                  cx="22"
+                  cy="22"
+                  r="19"
                   fill="none"
-                  stroke="rgba(52, 211, 153, 0.6)"
-                  strokeWidth="2.5"
+                  stroke="url(#rotatingGradient)"
+                  strokeWidth="3"
                   strokeLinecap="round"
-                  strokeDasharray={2 * Math.PI * 17 * 0.15}
-                  initial={{ strokeDashoffset: 0 }}
-                  animate={{ strokeDashoffset: -2 * Math.PI * 17 }}
+                  strokeDasharray={`${2 * Math.PI * 19 * 0.25} ${2 * Math.PI * 19 * 0.75}`}
+                  animate={{ rotate: 360 }}
                   transition={{ 
-                    duration: 1.5, 
+                    duration: 1.2, 
                     ease: 'linear',
                     repeat: Infinity,
                   }}
                   style={{
-                    filter: 'drop-shadow(0 0 4px rgba(52, 211, 153, 0.8))',
+                    transformOrigin: 'center',
+                    filter: 'drop-shadow(0 0 6px rgba(52, 211, 153, 0.6))',
                   }}
                 />
               )}
+              
+              {/* Gradient definitions */}
+              <defs>
+                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#34d399" />
+                  <stop offset="100%" stopColor="#10b981" />
+                </linearGradient>
+                <linearGradient id="rotatingGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="rgba(52, 211, 153, 0.2)" />
+                  <stop offset="50%" stopColor="#34d399" />
+                  <stop offset="100%" stopColor="rgba(52, 211, 153, 0.2)" />
+                </linearGradient>
+              </defs>
             </svg>
             
-            {/* Play button center */}
+            {/* Play button center - clean glass */}
             <motion.div
-              className="absolute inset-1 rounded-full flex items-center justify-center overflow-hidden"
+              className="absolute inset-[6px] rounded-full flex items-center justify-center"
               style={{
                 background: state === 'complete' || state === 'completing' || isCelebrating || needsAttention
-                  ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.4) 0%, rgba(16, 185, 129, 0.25) 100%)'
-                  : 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
+                  ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%)'
+                  : 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
                 border: state === 'complete' || state === 'completing' || isCelebrating || needsAttention
-                  ? '1px solid rgba(52, 211, 153, 0.5)'
-                  : '1px solid rgba(255,255,255,0.15)',
-                boxShadow: state === 'complete' || state === 'completing' || isCelebrating || needsAttention
-                  ? '0 0 12px rgba(52, 211, 153, 0.3), inset 0 1px 0 rgba(255,255,255,0.2)'
-                  : 'inset 0 1px 0 rgba(255,255,255,0.1)',
+                  ? '1px solid rgba(52, 211, 153, 0.4)'
+                  : '1px solid rgba(255,255,255,0.12)',
               }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.92 }}
               animate={needsAttention ? {
-                scale: [1, 1.1, 1],
-                boxShadow: [
-                  '0 0 12px rgba(52, 211, 153, 0.3)',
-                  '0 0 24px rgba(52, 211, 153, 0.6)',
-                  '0 0 12px rgba(52, 211, 153, 0.3)',
-                ],
-              } : isCelebrating ? {
                 scale: [1, 1.08, 1],
-                boxShadow: [
-                  '0 0 12px rgba(52, 211, 153, 0.3)',
-                  '0 0 20px rgba(52, 211, 153, 0.5)',
-                  '0 0 12px rgba(52, 211, 153, 0.3)',
-                ],
               } : {}}
               transition={{
-                duration: 1,
-                repeat: needsAttention || isCelebrating ? Infinity : 0,
+                duration: 1.5,
+                repeat: needsAttention ? Infinity : 0,
                 ease: 'easeInOut',
               }}
             >
               <Play 
-                className={`w-3.5 h-3.5 ml-0.5 ${
+                className={`w-4 h-4 ml-0.5 ${
                   state === 'complete' || state === 'completing' || isCelebrating || needsAttention
                     ? 'text-emerald-400' 
-                    : 'text-white/70'
+                    : 'text-white/60'
                 }`} 
                 fill="currentColor" 
               />
