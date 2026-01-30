@@ -212,7 +212,10 @@ const ReelProgressPill = ({
             ? '0 0 24px rgba(52, 211, 153, 0.25), inset 0 1px 0 rgba(255,255,255,0.1)'
             : 'inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.1)',
         }}
-        onClick={onPlay}
+        onClick={(e) => {
+          e.stopPropagation();
+          onPlay?.();
+        }}
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.98 }}
         animate={isCelebrating ? {
