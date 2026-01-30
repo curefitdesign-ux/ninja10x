@@ -16,6 +16,7 @@ import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ActivityBackgroundEffect from '@/components/ActivityBackgroundEffect';
 import SyncHealthPopup from '@/components/SyncHealthPopup';
+import ActivityLoggedCelebration from '@/components/ActivityLoggedCelebration';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 import { useFitnessReel } from '@/hooks/use-fitness-reel';
 import { toast } from 'sonner';
@@ -343,14 +344,8 @@ const Preview = () => {
     
     toast.success(`Day ${dayNumber} saved!`);
     
-    // Show share sheet with confirmation popup overlay
-    setShowShareSheet(true);
+    // Show the celebration overlay first, then share sheet
     setShowMicroCelebration(true);
-    
-    // Auto-hide confirmation popup after 2 seconds
-    setTimeout(() => {
-      setShowMicroCelebration(false);
-    }, 2000);
   };
 
   // Navigate back after share sheet (no need to save again, already saved)
@@ -1040,55 +1035,17 @@ const Preview = () => {
         />
       )}
 
-      {/* Micro Celebration Overlay */}
-      <AnimatePresence>
-        {showMicroCelebration && (
-          <motion.div
-            className="fixed inset-0 z-[200] flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {/* Background */}
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-            
-            {/* Celebration card */}
-            <motion.div
-              className="relative z-10 flex flex-col items-center gap-4"
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            >
-              <motion.div
-                className="w-20 h-20 rounded-full bg-emerald-500 flex items-center justify-center"
-                initial={{ scale: 0 }}
-                animate={{ scale: [0, 1.2, 1] }}
-                transition={{ delay: 0.1, duration: 0.5 }}
-              >
-                <Check className="w-10 h-10 text-white" />
-              </motion.div>
-              <motion.p
-                className="text-white text-xl font-bold"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                Activity Logged!
-              </motion.p>
-              <motion.p
-                className="text-white/60 text-sm"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                Day {dayNumber} complete
-              </motion.p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Activity Logged Celebration */}
+      <ActivityLoggedCelebration
+        isVisible={showMicroCelebration}
+        onClose={() => {
+          setShowMicroCelebration(false);
+          setShowShareSheet(true);
+        }}
+        activity={activity || ''}
+        dayNumber={dayNumber}
+        currentWeek={calculatedWeek}
+      />
 
       {/* Share Sheet */}
       {showShareSheet && framedImageUrl && (
