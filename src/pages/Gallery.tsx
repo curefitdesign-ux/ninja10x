@@ -358,7 +358,7 @@ const Gallery = () => {
             }}
           >
             <div className="grid grid-cols-3 gap-2">
-              {/* Camera Button - First Item with liquid glass */}
+            {/* Camera Button - First Item with liquid glass */}
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={handleCameraCapture}
@@ -377,16 +377,7 @@ const Gallery = () => {
                     background: 'radial-gradient(circle at 30% 30%, rgba(52, 211, 153, 0.15) 0%, transparent 60%)',
                   }}
                 />
-                <div 
-                  className="w-12 h-12 rounded-xl flex items-center justify-center relative"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.2) 0%, rgba(52, 211, 153, 0.1) 100%)',
-                    border: '1.5px solid rgba(52, 211, 153, 0.3)',
-                    boxShadow: '0 4px 16px rgba(52, 211, 153, 0.2)',
-                  }}
-                >
-                  <Camera className="w-6 h-6 text-emerald-400" strokeWidth={1.5} />
-                </div>
+                <Camera className="w-8 h-8 text-emerald-400 relative z-10" strokeWidth={1.5} />
               </motion.button>
 
               {/* Cached Gallery Items */}
