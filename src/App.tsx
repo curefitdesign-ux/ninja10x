@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
+import { useProfile } from "@/hooks/use-profile";
 import Index from "./pages/Index";
 import Preview from "./pages/Preview";
 import Activity from "./pages/Activity";
@@ -15,14 +16,16 @@ import Camera from "./pages/Camera";
 import Gallery from "./pages/Gallery";
 import Reel from "./pages/Reel";
 import PageTransition from "./components/PageTransition";
+import ProfileSetup from "./components/ProfileSetup";
 
 const queryClient = new QueryClient();
 
-// Protected route wrapper
+// Protected route wrapper that also checks for profile
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { needsSetup, loading: profileLoading } = useProfile();
   
-  if (loading) {
+  if (authLoading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-white/60">Loading...</div>
@@ -31,6 +34,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (needsSetup) {
     return <Navigate to="/auth" replace />;
   }
   

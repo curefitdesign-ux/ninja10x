@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import ProfileSetup from '@/components/ProfileSetup';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -17,25 +17,44 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [showProfileSetup, setShowProfileSetup] = useState(false);
+  const [checkingProfile, setCheckingProfile] = useState(false);
 
   // Check if already authenticated
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate('/');
+        // Check if profile exists
+        await checkProfileAndRedirect(session.user.id);
       }
     };
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate('/');
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session && event === 'SIGNED_IN') {
+        await checkProfileAndRedirect(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const checkProfileAndRedirect = async (userId: string) => {
+    setCheckingProfile(true);
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (profile) {
+      navigate('/');
+    } else {
+      setShowProfileSetup(true);
+    }
+    setCheckingProfile(false);
+  };
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
@@ -65,7 +84,7 @@ const Auth = () => {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
         });
@@ -80,8 +99,9 @@ const Auth = () => {
         }
 
         toast.success('Welcome back!');
+        // Profile check happens in onAuthStateChange
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
@@ -98,7 +118,11 @@ const Auth = () => {
           return;
         }
 
-        toast.success('Account created! You are now signed in.');
+        toast.success('Account created!');
+        // Show profile setup for new users
+        if (data.user) {
+          setShowProfileSetup(true);
+        }
       }
     } catch (err) {
       toast.error('An unexpected error occurred');
@@ -106,6 +130,22 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  const handleProfileComplete = () => {
+    navigate('/');
+  };
+
+  if (checkingProfile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-white/60">Loading...</div>
+      </div>
+    );
+  }
+
+  if (showProfileSetup) {
+    return <ProfileSetup onComplete={handleProfileComplete} />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black p-4">
