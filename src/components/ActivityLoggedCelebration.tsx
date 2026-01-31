@@ -225,45 +225,92 @@ const ActivityLoggedCelebration = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {/* Background with blur - translucent */}
+          {/* Background with enhanced blur - proper translucent overlay */}
           <motion.div 
             className="absolute inset-0"
+            initial={{ backdropFilter: 'blur(0px)' }}
+            animate={{ backdropFilter: 'blur(48px)' }}
+            transition={{ duration: 0.5 }}
             style={{
-              background: 'linear-gradient(180deg, rgba(15, 12, 20, 0.85) 0%, rgba(20, 18, 28, 0.9) 50%, rgba(15, 12, 20, 0.85) 100%)',
-              backdropFilter: 'blur(32px)',
-              WebkitBackdropFilter: 'blur(32px)',
+              background: 'linear-gradient(180deg, rgba(10, 8, 15, 0.75) 0%, rgba(15, 12, 22, 0.85) 50%, rgba(10, 8, 15, 0.75) 100%)',
+              backdropFilter: 'blur(48px) saturate(150%)',
+              WebkitBackdropFilter: 'blur(48px) saturate(150%)',
             }}
           />
           
-          {/* Main content */}
+          {/* Main content with entrance animation */}
           <motion.div
             className="relative z-10 flex flex-col items-center"
-            initial={{ scale: 0.8, y: 20 }}
-            animate={{ scale: 1, y: 0 }}
-            exit={{ scale: 0.9, y: 10 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            initial={{ scale: 0.7, y: 40, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            exit={{ scale: 0.9, y: 20, opacity: 0 }}
+            transition={{ 
+              type: 'spring', 
+              stiffness: 280, 
+              damping: 22,
+              delay: 0.1,
+            }}
           >
-            {/* Glowing ring background effect */}
+            {/* Outer pulsing glow ring effect */}
             <motion.div
               className="absolute rounded-full pointer-events-none"
               style={{
-                width: size + 80,
-                height: size + 80,
-                background: 'radial-gradient(circle, rgba(57, 255, 133, 0.15) 0%, rgba(57, 255, 133, 0.05) 40%, transparent 70%)',
+                width: size + 120,
+                height: size + 120,
+                background: 'radial-gradient(circle, rgba(57, 255, 133, 0.25) 0%, rgba(57, 255, 133, 0.1) 35%, rgba(57, 255, 133, 0.02) 60%, transparent 75%)',
+                filter: 'blur(8px)',
               }}
+              initial={{ scale: 0.8, opacity: 0 }}
               animate={{
-                scale: [1, 1.1, 1],
-                opacity: [0.6, 1, 0.6],
+                scale: [1, 1.15, 1],
+                opacity: [0.7, 1, 0.7],
               }}
               transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: 'easeInOut',
+                scale: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' },
+                opacity: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' },
               }}
             />
             
-            {/* Progress Ring */}
-            <div className="relative" style={{ width: size, height: size }}>
+            {/* Inner glow ring - tighter, more intense */}
+            <motion.div
+              className="absolute rounded-full pointer-events-none"
+              style={{
+                width: size + 60,
+                height: size + 60,
+                background: 'radial-gradient(circle, rgba(57, 255, 133, 0.3) 0%, rgba(57, 255, 133, 0.15) 40%, transparent 70%)',
+              }}
+              animate={{
+                scale: [1, 1.08, 1],
+                opacity: [0.8, 1, 0.8],
+              }}
+              transition={{
+                duration: 1.8,
+                repeat: Infinity,
+                ease: 'easeInOut',
+                delay: 0.3,
+              }}
+            />
+            
+            {/* Progress Ring Container with glow */}
+            <motion.div 
+              className="relative" 
+              style={{ width: size, height: size }}
+              initial={{ rotate: -10 }}
+              animate={{ rotate: 0 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+            >
+              {/* Glow layer behind canvas */}
+              <motion.div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                style={{
+                  boxShadow: `
+                    0 0 40px rgba(57, 255, 133, ${0.3 * animationProgress}),
+                    0 0 80px rgba(57, 255, 133, ${0.2 * animationProgress}),
+                    inset 0 0 30px rgba(57, 255, 133, ${0.1 * animationProgress})
+                  `,
+                }}
+              />
+              
               <canvas
                 ref={canvasRef}
                 className="absolute inset-0"
@@ -352,42 +399,65 @@ const ActivityLoggedCelebration = ({
                 />
               </div>
               
-              {/* Center content - Lottie tick animation */}
+              {/* Center content - Lottie tick animation (increased size) */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <AnimatePresence mode="wait">
                   {showTick && lottieData && (
                     <motion.div
                       key="tick"
                       className="flex items-center justify-center"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                      initial={{ scale: 0, rotate: -20 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ 
+                        type: 'spring', 
+                        stiffness: 350, 
+                        damping: 18,
+                        delay: 0.05,
+                      }}
                     >
+                      {/* Glow behind tick */}
+                      <motion.div
+                        className="absolute rounded-full"
+                        style={{
+                          width: 200,
+                          height: 200,
+                          background: 'radial-gradient(circle, rgba(57, 255, 133, 0.4) 0%, rgba(57, 255, 133, 0.1) 50%, transparent 70%)',
+                        }}
+                        animate={{
+                          scale: [1, 1.2, 1],
+                          opacity: [0.8, 1, 0.8],
+                        }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                          ease: 'easeInOut',
+                        }}
+                      />
                       <Lottie
                         animationData={lottieData}
                         loop={false}
-                        style={{ width: 160, height: 160 }}
+                        style={{ width: 190, height: 190 }}
                       />
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-            </div>
+            </motion.div>
             
             {/* Activity Logged Text */}
             <motion.div
               className="mt-8 text-center"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
+              transition={{ delay: 0.5, duration: 0.6, ease: 'easeOut' }}
             >
               <motion.h2
                 className="text-2xl font-bold text-white"
                 animate={{ 
                   textShadow: [
-                    '0 0 20px rgba(255,255,255,0.3)',
-                    '0 0 40px rgba(255,255,255,0.5)',
-                    '0 0 20px rgba(255,255,255,0.3)',
+                    '0 0 20px rgba(255,255,255,0.2)',
+                    '0 0 40px rgba(255,255,255,0.4)',
+                    '0 0 20px rgba(255,255,255,0.2)',
                   ],
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
