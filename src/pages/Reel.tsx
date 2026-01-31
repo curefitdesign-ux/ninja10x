@@ -25,10 +25,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-// 3D fitness-themed reaction assets
-import heartFitnessImg from '@/assets/reactions/heart-fitness.png';
-import flexArmImg from '@/assets/reactions/flex-arm.png';
-import clapHandsImg from '@/assets/reactions/clap-hands.png';
+// 3D reaction assets
+import fireEmoji from '@/assets/reactions/fire-3d.png';
+import clapEmoji from '@/assets/reactions/clap-3d.png';
 
 const DEFAULT_REACTIONS: Record<ReactionType, ActivityReaction> = {
   heart: { type: 'heart', count: 0, userReacted: false },
@@ -641,8 +640,8 @@ const Reel = () => {
                   <>
                     {/* Reaction emoji stack */}
                     <div className="flex -space-x-1">
-                      <img src={flexArmImg} alt="flex" className="w-7 h-7 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                      <img src={clapHandsImg} alt="clap" className="w-7 h-7 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                      <img src={fireEmoji} alt="fire" className="w-7 h-7 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                      <img src={clapEmoji} alt="clap" className="w-7 h-7 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                     </div>
                     {/* Count with label */}
                     <div className="flex items-center gap-1.5">
@@ -653,7 +652,7 @@ const Reel = () => {
                   </>
                 ) : (
                   <>
-                    <img src={flexArmImg} alt="flex" className="w-6 h-6 object-contain opacity-40" />
+                    <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain opacity-40" />
                     <span className="text-white/50 text-sm font-medium">No reacts yet</span>
                   </>
                 )}
@@ -672,8 +671,8 @@ const Reel = () => {
                   <>
                     {/* Reaction emoji stack */}
                     <div className="flex -space-x-1">
-                      <img src={flexArmImg} alt="flex" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                      <img src={clapHandsImg} alt="clap" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                      <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                      <img src={clapEmoji} alt="clap" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                     </div>
                     {/* Count */}
                     <span className="text-white font-bold text-base">{currentReactions.total}</span>
@@ -696,7 +695,7 @@ const Reel = () => {
                     {/* First to react */}
                     <span className="text-white/80 text-sm font-medium">Be first to react!</span>
                     <div className="flex -space-x-1">
-                      <img src={flexArmImg} alt="flex" className="w-5 h-5 object-contain opacity-60" />
+                      <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain opacity-60" />
                     </div>
                   </>
                 )}
