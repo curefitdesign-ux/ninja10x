@@ -603,37 +603,35 @@ const Activity = () => {
         </div>
       </PullToRefresh>
 
-      {/* Bottom Navigation - Floating Liquid Glass */}
+      {/* Bottom Navigation - Full-width Liquid Glass */}
       <nav 
-        className="fixed z-50 left-4 right-4"
-        style={{ 
-          bottom: 'max(env(safe-area-inset-bottom, 16px), 16px)',
-        }}
+        className="fixed bottom-0 left-0 right-0 z-50"
       >
         <div 
-          className="relative rounded-3xl overflow-hidden"
+          className="relative"
           style={{
-            background: 'rgba(255, 255, 255, 0.1)',
+            background: 'rgba(255, 255, 255, 0.08)',
             backdropFilter: 'blur(40px) saturate(180%)',
             WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.12)',
             boxShadow: `
-              inset 0 1px 1px rgba(255,255,255,0.2),
-              inset 0 -1px 1px rgba(255,255,255,0.05),
-              0 8px 32px rgba(0,0,0,0.3),
-              0 2px 8px rgba(0,0,0,0.2)
+              inset 0 1px 1px rgba(255,255,255,0.15),
+              0 -8px 32px rgba(0,0,0,0.3)
             `,
           }}
         >
-          {/* Inner glow highlight */}
+          {/* Inner top glow highlight */}
           <div 
-            className="absolute inset-0 rounded-3xl pointer-events-none"
+            className="absolute inset-x-0 top-0 h-px pointer-events-none"
             style={{
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 40%)',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
             }}
           />
           
-          <div className="relative flex items-center justify-around py-2 px-2">
+          <div 
+            className="relative flex items-center justify-around py-2 px-2"
+            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 12px)' }}
+          >
             {navItems.map((item) => (
               <motion.button
                 key={item.id}
