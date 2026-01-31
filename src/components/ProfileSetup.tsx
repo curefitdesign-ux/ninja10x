@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Upload, User, Mail } from 'lucide-react';
+import { Check, Camera, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 import { useProfile, Profile } from '@/hooks/use-profile';
 import { z } from 'zod';
+import { useNavigate } from 'react-router-dom';
 
 // Import Netflix-style preset avatars
 import avatarRed from '@/assets/avatars/avatar-red.png';
@@ -41,6 +42,7 @@ interface ProfileSetupProps {
 const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: ProfileSetupProps) => {
   const { user } = useAuth();
   const { updateProfile } = useProfile();
+  const navigate = useNavigate();
   const [displayName, setDisplayName] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [customAvatarFile, setCustomAvatarFile] = useState<File | null>(null);
@@ -77,15 +79,43 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
       return;
     }
 
-    setCustomAvatarFile(file);
-    setSelectedAvatar(null);
-
+    // Read file and navigate to cropper
     const reader = new FileReader();
     reader.onload = (e) => {
-      setCustomAvatarPreview(e.target?.result as string);
+      const imageData = e.target?.result as string;
+      // Navigate to avatar cropper with the image
+      navigate('/avatar-crop', { 
+        state: { 
+          imageData,
+          returnTo: '/profile-setup' + (editMode ? '?edit=true' : ''),
+        }
+      });
     };
     reader.readAsDataURL(file);
   };
+
+  // Check for cropped image from camera/cropper
+  useEffect(() => {
+    const handleCroppedImage = () => {
+      const croppedImage = sessionStorage.getItem('croppedAvatarImage');
+      if (croppedImage) {
+        // Convert base64 to file
+        fetch(croppedImage)
+          .then(res => res.blob())
+          .then(blob => {
+            const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
+            setCustomAvatarFile(file);
+            setCustomAvatarPreview(croppedImage);
+            setSelectedAvatar(null);
+            sessionStorage.removeItem('croppedAvatarImage');
+          });
+      }
+    };
+
+    handleCroppedImage();
+    window.addEventListener('focus', handleCroppedImage);
+    return () => window.removeEventListener('focus', handleCroppedImage);
+  }, []);
 
   const selectPresetAvatar = (avatarId: string) => {
     setSelectedAvatar(avatarId);
@@ -94,6 +124,18 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
   };
 
   const hasAvatarSelected = selectedAvatar !== null || customAvatarFile !== null || customAvatarPreview !== null;
+
+  // Get current avatar preview
+  const getCurrentAvatarPreview = () => {
+    if (customAvatarPreview) return customAvatarPreview;
+    if (selectedAvatar) {
+      const preset = PRESET_AVATARS.find(a => a.id === selectedAvatar);
+      return preset?.src;
+    }
+    return null;
+  };
+
+  const currentAvatar = getCurrentAvatarPreview();
 
   const handleSubmit = async () => {
     const nameResult = nameSchema.safeParse(displayName);
@@ -172,6 +214,12 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
     }
   };
 
+  const handleClose = () => {
+    if (editMode) {
+      navigate(-1);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -208,33 +256,135 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
         />
       </div>
 
-      <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full relative z-10">
+      {/* Close button for edit mode */}
+      {editMode && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={handleClose}
+          className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full flex items-center justify-center"
+          style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+          }}
+        >
+          <X className="w-5 h-5 text-white/70" />
+        </motion.button>
+      )}
+
+      <div className="flex-1 flex flex-col max-w-md mx-auto w-full relative z-10 pt-8">
         {/* Header */}
         <div className="text-center mb-6">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', delay: 0.1 }}
-            className="w-14 h-14 mx-auto mb-3 rounded-full flex items-center justify-center"
-            style={{
-              background: 'linear-gradient(135deg, hsl(160, 84%, 39%) 0%, hsl(172, 66%, 50%) 100%)',
-              boxShadow: '0 8px 24px rgba(52, 211, 153, 0.3)',
-            }}
-          >
-            <User className="w-7 h-7 text-white" />
-          </motion.div>
-          <h1 className="text-xl font-bold text-white mb-1">
-            {editMode ? 'Edit Your Profile' : 'Complete Your Profile'}
+          <h1 className="text-2xl font-bold text-white mb-1">
+            {editMode ? 'Edit your profile' : 'Complete Your Profile'}
           </h1>
-          <p className="text-white/50 text-xs">
-            {editMode ? 'Update your name and avatar' : 'Add your name and choose an avatar'}
+          <p className="text-white/50 text-sm">
+            {editMode ? 'Choose a photo that represents you!' : 'Add your name and choose an avatar'}
           </p>
         </div>
 
-        {/* Name Input - Moved up, right after header */}
-        <div className="mb-5">
+        {/* Large Avatar Preview */}
+        <div className="flex justify-center mb-4">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', delay: 0.1 }}
+            className="relative"
+          >
+            <div 
+              className="w-36 h-36 rounded-full overflow-hidden flex items-center justify-center"
+              style={{
+                background: currentAvatar ? 'transparent' : 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                border: '3px solid rgba(255, 255, 255, 0.2)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              }}
+            >
+              {currentAvatar ? (
+                <img 
+                  src={currentAvatar} 
+                  alt="Avatar preview" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
+                  <Camera className="w-8 h-8 text-white/40" />
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Upload Photo Button */}
+        <div className="flex justify-center mb-5">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={loading}
+            className="px-6 py-3 rounded-xl flex items-center gap-2 transition-all"
+            style={{
+              background: 'rgba(255, 255, 255, 0.08)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+            }}
+          >
+            <Camera className="w-5 h-5 text-white/80" />
+            <span className="text-white/80 font-medium">Upload Photo</span>
+          </motion.button>
+        </div>
+
+        {/* Or Divider */}
+        <div className="flex items-center gap-4 mb-4">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-white/40 text-sm">or choose a preset</span>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
+
+        {/* Preset Avatars Grid - 4 columns */}
+        <div className="grid grid-cols-4 gap-3 mb-6">
+          {PRESET_AVATARS.map((avatar) => (
+            <motion.button
+              key={avatar.id}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => selectPresetAvatar(avatar.id)}
+              disabled={loading}
+              className={`relative aspect-square rounded-full overflow-hidden border-2 transition-all ${
+                selectedAvatar === avatar.id
+                  ? 'border-green-500 ring-2 ring-green-500/30'
+                  : 'border-transparent hover:border-white/30'
+              }`}
+            >
+              <img
+                src={avatar.src}
+                alt={`Avatar ${avatar.id}`}
+                className="w-full h-full object-cover"
+              />
+              <AnimatePresence>
+                {selectedAvatar === avatar.id && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0 }}
+                    className="absolute inset-0 flex items-center justify-center bg-black/40"
+                  >
+                    <Check className="w-6 h-6 text-green-400" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.button>
+          ))}
+        </div>
+
+        {/* Name Input */}
+        <div className="mb-6">
           <Label htmlFor="displayName" className="text-white/70 mb-2 block text-sm">
-            Your Name *
+            Your Name
           </Label>
           <Input
             id="displayName"
@@ -255,114 +405,7 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
           )}
         </div>
 
-        {/* Email Display (Edit Mode) */}
-        {editMode && user?.email && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="mb-5 rounded-2xl p-4"
-            style={{
-              background: 'rgba(255, 255, 255, 0.04)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-            }}
-          >
-            <Label className="text-white/50 text-xs mb-1.5 block">Email Address</Label>
-            <div className="flex items-center gap-3">
-              <div 
-                className="w-9 h-9 rounded-lg flex items-center justify-center"
-                style={{
-                  background: 'rgba(52, 211, 153, 0.15)',
-                  border: '1px solid rgba(52, 211, 153, 0.2)',
-                }}
-              >
-                <Mail className="w-4 h-4 text-emerald-400" />
-              </div>
-              <span className="text-white/80 text-sm">{user.email}</span>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Avatar Selection */}
-        <div className="mb-8">
-          <Label className="text-white/80 mb-3 block">Choose Avatar *</Label>
-          
-          {/* Custom Upload Option */}
-          <div className="mb-4">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full py-4 rounded-xl border-2 border-dashed border-white/20 hover:border-white/40 transition-colors flex items-center justify-center gap-3"
-              disabled={loading}
-            >
-              {customAvatarPreview ? (
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-green-500">
-                    <img src={customAvatarPreview} alt="Custom avatar" className="w-full h-full object-cover" />
-                  </div>
-                  <span className="text-white/80">Custom photo selected</span>
-                  <Check className="w-5 h-5 text-green-500" />
-                </div>
-              ) : (
-                <>
-                  <Upload className="w-5 h-5 text-white/60" />
-                  <span className="text-white/60">Upload your own photo</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* Or Divider */}
-          <div className="flex items-center gap-4 mb-4">
-            <div className="flex-1 h-px bg-white/10" />
-            <span className="text-white/40 text-sm">or choose a preset</span>
-            <div className="flex-1 h-px bg-white/10" />
-          </div>
-
-          {/* Preset Avatars Grid */}
-          <div className="grid grid-cols-3 gap-3">
-            {PRESET_AVATARS.map((avatar) => (
-              <motion.button
-                key={avatar.id}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => selectPresetAvatar(avatar.id)}
-                disabled={loading}
-                className={`relative aspect-square rounded-2xl overflow-hidden border-2 transition-all ${
-                  selectedAvatar === avatar.id
-                    ? 'border-green-500 ring-2 ring-green-500/30'
-                    : 'border-white/10 hover:border-white/30'
-                }`}
-              >
-                <img
-                  src={avatar.src}
-                  alt={`Avatar ${avatar.id}`}
-                  className="w-full h-full object-cover"
-                />
-                <AnimatePresence>
-                  {selectedAvatar === avatar.id && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0 }}
-                      className="absolute top-1 right-1 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center"
-                    >
-                      <Check className="w-4 h-4 text-white" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-            ))}
-          </div>
-        </div>
-
-        {/* Submit Button - Liquid Glass */}
+        {/* Submit Button */}
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={handleSubmit}
