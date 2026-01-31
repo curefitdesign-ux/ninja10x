@@ -108,7 +108,7 @@ export default function SendReactionSheet({
           <div className="w-10 h-1 rounded-full bg-white/20" />
         </div>
 
-        {/* VIEW REACTIONS SECTION - Enhanced */}
+        {/* REACTIONS SECTION - Show all users' reactions */}
         {totalReactions > 0 && onViewReactions && (
           <motion.div
             className="px-5 py-3"
@@ -131,64 +131,72 @@ export default function SendReactionSheet({
               </button>
             </div>
             
-            {/* Reaction types strip with counts - horizontal scroll */}
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
-              {Object.entries(reactionCounts).map(([type, count]) => (
-                <motion.div 
-                  key={type} 
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-full flex-shrink-0"
-                  style={{ background: 'rgba(255, 255, 255, 0.08)' }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <img 
-                    src={REACTION_IMAGES[type as ReactionType]} 
-                    alt={type} 
-                    className="w-7 h-7 object-contain"
-                    style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}
-                  />
-                  <span className="text-white font-semibold text-sm">{count}</span>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* User's own reaction - easy remove */}
-            {userReaction?.reactionType && (
-              <motion.div 
-                className="mt-3 flex items-center justify-between p-3 rounded-2xl"
-                style={{ background: 'rgba(255, 255, 255, 0.06)' }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <div className="flex items-center gap-3">
-                  <ProfileAvatar
-                    src={userReaction.avatarUrl}
-                    name={userReaction.displayName}
-                    size={40}
-                    style={{ border: '2px solid rgba(255,255,255,0.1)' }}
-                  />
-                  <div>
-                    <span className="text-white/50 text-xs block">Your reaction</span>
-                    <div className="flex items-center gap-1.5">
-                      <img 
-                        src={REACTION_IMAGES[userReaction.reactionType]} 
-                        alt={userReaction.reactionType} 
-                        className="w-6 h-6 object-contain"
-                        style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}
+            {/* All users' reactions - horizontal scroll with avatars */}
+            <div className="flex items-center gap-3 overflow-x-auto scrollbar-none pb-1">
+              {reactorProfiles.slice(0, 8).map((reactor, idx) => {
+                const isCurrentUser = reactor.userId === currentUserId;
+                return (
+                  <motion.div 
+                    key={reactor.userId}
+                    className="flex flex-col items-center gap-1 flex-shrink-0"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.05 + idx * 0.03 }}
+                  >
+                    <div className="relative">
+                      <ProfileAvatar
+                        src={reactor.avatarUrl}
+                        name={reactor.displayName}
+                        size={44}
+                        style={{ 
+                          border: isCurrentUser 
+                            ? '2px solid rgba(34, 197, 94, 0.6)' 
+                            : '2px solid rgba(255,255,255,0.1)',
+                        }}
                       />
-                      <span className="text-white font-medium capitalize">{userReaction.reactionType}</span>
+                      {/* Emoji badge */}
+                      {reactor.reactionType && (
+                        <div className="absolute -bottom-1 -right-1">
+                          <img 
+                            src={REACTION_IMAGES[reactor.reactionType]} 
+                            alt={reactor.reactionType} 
+                            className="w-5 h-5 object-contain"
+                            style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}
+                          />
+                        </div>
+                      )}
+                      {/* Mini X for current user's reaction */}
+                      {isCurrentUser && (
+                        <button
+                          onClick={handleRemoveReaction}
+                          className="absolute -top-1 -right-1 w-4 h-4 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center"
+                          style={{ border: '1px solid rgba(255,255,255,0.2)' }}
+                        >
+                          <X className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                        </button>
+                      )}
                     </div>
-                  </div>
-                </div>
+                    <span className="text-white/60 text-[10px] max-w-[50px] truncate">
+                      {isCurrentUser ? 'You' : reactor.displayName.split(' ')[0]}
+                    </span>
+                  </motion.div>
+                );
+              })}
+              {totalReactions > 8 && (
                 <button
-                  onClick={handleRemoveReaction}
-                  className="p-3 rounded-full bg-white/10 hover:bg-red-500/30 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                  aria-label="Remove your reaction"
+                  onClick={onViewReactions}
+                  className="flex flex-col items-center gap-1 flex-shrink-0"
                 >
-                  <X className="w-5 h-5 text-white/70" />
+                  <div 
+                    className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-white/70 text-sm font-medium"
+                    style={{ border: '2px solid rgba(255,255,255,0.1)' }}
+                  >
+                    +{totalReactions - 8}
+                  </div>
+                  <span className="text-white/40 text-[10px]">more</span>
                 </button>
-              </motion.div>
-            )}
+              )}
+            </div>
           </motion.div>
         )}
 
