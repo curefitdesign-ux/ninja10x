@@ -34,9 +34,8 @@ const Gallery = () => {
     try {
       const cached = localStorage.getItem(GALLERY_STORAGE_KEY);
       if (cached) {
-        const items = JSON.parse(cached);
-        const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
-        return items.filter((item: GalleryItem) => item.timestamp >= twentyFourHoursAgo);
+        // Return all cached items without 24-hour filter
+        return JSON.parse(cached);
       }
     } catch (e) {
       console.error('Failed to load cached gallery:', e);
@@ -86,22 +85,9 @@ const Gallery = () => {
     });
   }, [navigate, dayNumber]);
 
-  const validateFileDate = (file: File): { isValid: boolean; message?: string } => {
-    const fileDate = new Date(file.lastModified);
-    const now = new Date();
-    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    
-    if (fileDate >= twentyFourHoursAgo) {
-      return { isValid: true };
-    }
-    
-    const diffHours = Math.floor((now.getTime() - fileDate.getTime()) / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffHours / 24);
-    const message = diffDays > 0 
-      ? `This photo is ${diffDays} day${diffDays > 1 ? 's' : ''} old. Only photos from the last 24 hours are allowed.`
-      : `This photo is ${diffHours} hours old. Only photos from the last 24 hours are allowed.`;
-    
-    return { isValid: false, message };
+  // Removed 24-hour validation - all photos are now allowed
+  const validateFileDate = (_file: File): { isValid: boolean; message?: string } => {
+    return { isValid: true };
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,7 +120,8 @@ const Gallery = () => {
         
         setGalleryItems(prev => {
           const filtered = prev.filter(p => p.dataUrl !== mediaDataUrl);
-          return [newItem, ...filtered].slice(0, 20);
+          // Keep up to 50 items for better gallery experience
+          return [newItem, ...filtered].slice(0, 50);
         });
         
         setMediaToEdit(mediaDataUrl);
@@ -463,7 +450,7 @@ const Gallery = () => {
                 workout moment.
               </h1>
               <p className="text-white/50 text-sm mt-2.5">
-                Last 24 hours only.
+                Select from your gallery.
               </p>
             </motion.div>
           </div>
@@ -590,11 +577,12 @@ const Gallery = () => {
           {/* Spacer */}
           <div className="flex-1" />
 
-          {/* Bottom Select Button - Liquid glass */}
+          {/* Bottom Select Button - Liquid glass with proper safe area */}
           <motion.div 
-            className="px-4 pb-4 z-20"
+            className="flex-shrink-0 px-4 z-20"
             style={{
-              paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 20px)',
+              paddingBottom: 'calc(env(safe-area-inset-bottom, 24px) + 16px)',
+              paddingTop: '12px',
             }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
