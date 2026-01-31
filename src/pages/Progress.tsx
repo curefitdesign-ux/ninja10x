@@ -32,10 +32,10 @@ const TILE_POSITIONS = [
 ];
 
 const LABELS = [
-  { tileIndex: 0, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 8, left: 6 },
-  { tileIndex: 3, text: ["BUILD", "ENERGY"], side: "right" as const, top: 23, left: 70 },
-  { tileIndex: 6, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 38, left: 6 },
-  { tileIndex: 11, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 58, left: 70 },
+  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 8, left: 70 },
+  { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 23, left: 6 },
+  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 38, left: 70 },
+  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 63, left: 6 },
 ];
 
 const Progress = () => {
