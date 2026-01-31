@@ -1,12 +1,11 @@
 import { motion } from 'framer-motion';
 import { ReactionType } from '@/services/journey-service';
 
-// 3D fitness-themed reaction assets
-import heartFitnessImg from '@/assets/reactions/heart-fitness.png';
-import flexArmImg from '@/assets/reactions/flex-arm.png';
-import clapHandsImg from '@/assets/reactions/clap-hands.png';
-import fistbumpHandsImg from '@/assets/reactions/fistbump-hands.png';
-import energyBoostImg from '@/assets/reactions/energy-boost.png';
+// 3D reaction assets
+import fireImg from '@/assets/reactions/fire-3d.png';
+import clapImg from '@/assets/reactions/clap-3d.png';
+import fistbumpImg from '@/assets/reactions/fistbump.png';
+import wowImg from '@/assets/reactions/wow.png';
 
 interface SendReactionSheetProps {
   onReact: (type: ReactionType) => void;
@@ -16,10 +15,9 @@ interface SendReactionSheetProps {
 }
 
 const REACTIONS: { type: ReactionType; image: string }[] = [
-  { type: 'heart', image: heartFitnessImg },
-  { type: 'fire', image: flexArmImg },
-  { type: 'clap', image: clapHandsImg },
-  { type: 'fistbump', image: fistbumpHandsImg },
+  { type: 'fire', image: fireImg },
+  { type: 'fistbump', image: fistbumpImg },
+  { type: 'clap', image: clapImg },
 ];
 
 export default function SendReactionSheet({ onReact, onClose, onViewReactions, totalReactions = 0 }: SendReactionSheetProps) {
@@ -101,7 +99,7 @@ export default function SendReactionSheet({ onReact, onClose, onViewReactions, t
             ))}
           </div>
 
-          {/* Energy boost reaction */}
+          {/* WOW reaction */}
           <motion.button
             onClick={() => onReact('wow')}
             className="w-full flex justify-center mt-4"
@@ -111,8 +109,8 @@ export default function SendReactionSheet({ onReact, onClose, onViewReactions, t
             whileTap={{ scale: 0.95 }}
           >
             <img 
-              src={energyBoostImg} 
-              alt="Energy!" 
+              src={wowImg} 
+              alt="WOW!" 
               className="h-16 object-contain"
             />
           </motion.button>
