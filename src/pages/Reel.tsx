@@ -452,7 +452,7 @@ const Reel = () => {
                         cy="50"
                         r={radius}
                         fill="none"
-                        strokeWidth="3"
+                        strokeWidth="5"
                         stroke={isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.3)'}
                         strokeDasharray={`${segmentLength} ${circumference}`}
                         strokeDashoffset={-offset}
@@ -518,7 +518,7 @@ const Reel = () => {
       >
         {/* Card container with horizontal swipe */}
         <motion.div 
-          className="relative w-full max-w-[340px] cursor-grab active:cursor-grabbing"
+          className="relative w-full max-w-[400px] cursor-grab active:cursor-grabbing"
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.2}
@@ -780,16 +780,16 @@ const Reel = () => {
               This will permanently remove Day {currentActivity?.dayNumber} from your journey. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-row gap-3">
+          <AlertDialogFooter className="flex-row gap-3 sm:justify-center">
             <AlertDialogCancel 
-              className="flex-1 bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
+              className="flex-1 m-0 bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
               disabled={isDeleting}
             >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteActivity}
-              className="flex-1 bg-red-600 text-white hover:bg-red-700"
+              className="flex-1 m-0 bg-red-600 text-white hover:bg-red-700"
               disabled={isDeleting}
             >
               {isDeleting ? 'Deleting...' : 'Delete'}
