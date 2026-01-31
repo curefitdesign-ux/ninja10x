@@ -5,6 +5,7 @@ import { X, ChevronDown } from "lucide-react";
 import { useJourneyActivities, fetchPublicFeed, LocalActivity } from "@/hooks/use-journey-activities";
 import { useAuth } from "@/hooks/use-auth";
 import { JourneyActivity, ReactionType, ActivityReaction } from "@/services/journey-service";
+import ProfileAvatar from "@/components/ProfileAvatar";
 
 // Import tile assets
 import tileActiveImg from "@/assets/progress/tile-active-new.png";
@@ -45,6 +46,7 @@ const Progress = () => {
   const [showTiles, setShowTiles] = useState(false);
   const [showStories, setShowStories] = useState(false);
   const [showTransitionIn, setShowTransitionIn] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
 
   // Current user's activities (for tile state)
   const { activities: myActivities, loading } = useJourneyActivities();
@@ -62,6 +64,8 @@ const Progress = () => {
   // Pull-down gesture to go back to reel
   const dragY = useMotionValue(0);
   const headerOpacity = useTransform(dragY, [0, 100], [1, 0.5]);
+  const storyStripScale = useTransform(dragY, [0, 100], [1, 1.1]);
+  const contentOpacity = useTransform(dragY, [0, 80], [1, 0.3]);
 
   // Load public feed on mount
   useEffect(() => {
@@ -103,14 +107,17 @@ const Progress = () => {
     is_own: user ? p.userId === user.id : false,
   }));
 
-  const handlePhotoCardTap = (index: number, userId?: string) => {
-    // Navigate to reel page, passing userId to start at that user's stories
-    navigate('/reel', {
-      state: {
-        userId: userId,
-        fromProgress: true,
-      }
-    });
+  const handleStoryStripTap = (index: number, userId?: string) => {
+    // Animate out then navigate to reel
+    setIsExiting(true);
+    setTimeout(() => {
+      navigate('/reel', {
+        state: {
+          userId: userId,
+          fromProgress: true,
+        }
+      });
+    }, 200);
   };
 
   // Animation sequence
@@ -142,8 +149,11 @@ const Progress = () => {
 
   const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (info.offset.y > 80 && fromReel) {
-      // Pull down to return to reel
-      navigate('/reel', { state: { fromProgress: true } });
+      // Pull down to return to reel with exit animation
+      setIsExiting(true);
+      setTimeout(() => {
+        navigate('/reel', { state: { fromProgress: true } });
+      }, 200);
     }
   }, [navigate, fromReel]);
 
@@ -163,6 +173,12 @@ const Progress = () => {
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={{ top: 0, bottom: 0.3 }}
       onDragEnd={handleDragEnd}
+      initial={transitionToProgress ? { opacity: 0, y: 100 } : { opacity: 1 }}
+      animate={{ 
+        opacity: isExiting ? 0 : 1, 
+        y: isExiting ? 100 : 0,
+      }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
       {/* Background aurora */}
       <div 
@@ -221,19 +237,21 @@ const Progress = () => {
         </motion.button>
       </motion.div>
 
-      {/* === TOP ACTIVITY STRIP (PUBLIC FEED) - with proper safe area === */}
+      {/* === TOP STORY STRIP - clickable to go back to reel === */}
       <AnimatePresence>
         {showStories && (
           <motion.div
-            className="flex-shrink-0 w-full overflow-x-auto scrollbar-hide overscroll-x-contain"
+            className="flex-shrink-0 w-full overflow-x-auto scrollbar-hide overscroll-x-contain cursor-pointer"
             style={{
               paddingTop: "12px",
               paddingInline: "4vw",
               paddingBottom: "16px",
-              minHeight: "130px", // Ensure space for stories
+              minHeight: "130px",
+              scale: storyStripScale,
             }}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: -30, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -50, scale: 1.1 }}
             transition={{ type: "spring", stiffness: 200, damping: 25 }}
           >
             <div className="flex items-end gap-3">
@@ -284,9 +302,11 @@ const Progress = () => {
                       boxShadow: index === 0 ? "0 12px 40px rgba(100, 70, 180, 0.5)" : "0 4px 16px rgba(0,0,0,0.25)",
                       border: index === 0 ? "2px solid rgba(160, 120, 220, 0.35)" : "1px solid rgba(255,255,255,0.1)",
                     }}
-                    onClick={() => handlePhotoCardTap(index, photo.userId)}
+                    onClick={() => handleStoryStripTap(index, photo.userId)}
                     initial={{ opacity: 0, x: 40 }}
                     animate={{ opacity: 1, x: 0 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     transition={{ delay: 0.2 + index * 0.05 }}
                   >
                     {photo.isVideo || isVideoUrl(photo.storageUrl) ? (
@@ -314,16 +334,14 @@ const Progress = () => {
                       />
                     )}
                     
-                    {/* User avatar overlay */}
-                    <div 
-                      className="absolute bottom-1.5 left-1.5 w-6 h-6 rounded-full overflow-hidden"
-                      style={{ border: '2px solid rgba(255,255,255,0.6)' }}
-                    >
-                      {photo.avatarUrl ? (
-                        <img src={photo.avatarUrl} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500" />
-                      )}
+                    {/* User avatar overlay with fallback */}
+                    <div className="absolute bottom-1.5 left-1.5">
+                      <ProfileAvatar
+                        src={photo.avatarUrl}
+                        name={photo.displayName}
+                        size={24}
+                        style={{ border: '2px solid rgba(255,255,255,0.6)' }}
+                      />
                     </div>
                     
                     {/* Day badge */}
@@ -383,11 +401,12 @@ const Progress = () => {
       </AnimatePresence>
 
       {/* === MAIN PROGRESS AREA - fills remaining space === */}
-      <div 
+      <motion.div 
         className="flex-1 relative w-full overflow-hidden" 
         style={{ 
           maxWidth: "430px", 
           marginInline: "auto",
+          opacity: contentOpacity,
         }}
       >
         {/* Engine Badge */}
@@ -477,7 +496,7 @@ const Progress = () => {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
     </motion.div>
   );
 };
