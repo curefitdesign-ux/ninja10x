@@ -218,3 +218,20 @@ export async function sendReaction(activityId: string, reactionType: ReactionTyp
 
   return !error;
 }
+
+/**
+ * Remove a specific reaction by the current user
+ */
+export async function removeReaction(activityId: string, reactionType: ReactionType): Promise<boolean> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { error } = await supabase
+    .from('activity_reactions')
+    .delete()
+    .eq('activity_id', activityId)
+    .eq('user_id', user.id)
+    .eq('reaction_type', reactionType);
+
+  return !error;
+}

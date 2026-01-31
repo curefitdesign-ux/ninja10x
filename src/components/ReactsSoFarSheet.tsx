@@ -1,5 +1,8 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ReactionType, ActivityReaction } from '@/services/journey-service';
+import { X } from 'lucide-react';
+import { ReactionType, ActivityReaction, removeReaction } from '@/services/journey-service';
+import { supabase } from '@/integrations/supabase/client';
 import ProfileAvatar from '@/components/ProfileAvatar';
 
 // Import 3D reaction images
@@ -16,10 +19,12 @@ interface ReactorProfile {
 }
 
 interface ReactsSoFarSheetProps {
+  activityId: string;
   total: number;
   reactions: Record<ReactionType, ActivityReaction>;
   reactorProfiles: ReactorProfile[];
   onClose: () => void;
+  onReactionRemoved?: () => void;
 }
 
 const REACTION_IMAGES: Record<ReactionType, string> = {
@@ -45,8 +50,43 @@ function getReactorReactions(reactors: ReactorProfile[], reactions: Record<React
   }));
 }
 
-export default function ReactsSoFarSheet({ total, reactions, reactorProfiles, onClose }: ReactsSoFarSheetProps) {
-  const reactorList = getReactorReactions(reactorProfiles.slice(0, total), reactions);
+export default function ReactsSoFarSheet({ 
+  activityId,
+  total, 
+  reactions, 
+  reactorProfiles, 
+  onClose,
+  onReactionRemoved 
+}: ReactsSoFarSheetProps) {
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [localReactors, setLocalReactors] = useState(reactorProfiles);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setCurrentUserId(data.user?.id || null);
+    });
+  }, []);
+
+  useEffect(() => {
+    setLocalReactors(reactorProfiles);
+  }, [reactorProfiles]);
+
+  const reactorList = getReactorReactions(localReactors.slice(0, total), reactions);
+
+  const handleRemoveReaction = async (reactor: ReactorProfile & { reactionType: ReactionType }) => {
+    if (!reactor.reactionType) return;
+    
+    setRemovingId(reactor.userId);
+    const success = await removeReaction(activityId, reactor.reactionType);
+    
+    if (success) {
+      // Remove from local list
+      setLocalReactors(prev => prev.filter(r => r.userId !== reactor.userId));
+      onReactionRemoved?.();
+    }
+    setRemovingId(null);
+  };
 
   return (
     <>
@@ -85,49 +125,72 @@ export default function ReactsSoFarSheet({ total, reactions, reactorProfiles, on
         <div className="flex items-center justify-between px-5 py-3">
           <span className="text-white font-semibold text-lg">Reacts so far</span>
           <span className="text-white font-bold text-xl">
-            {String(total).padStart(2, '0')}
+            {String(localReactors.length).padStart(2, '0')}
           </span>
         </div>
 
         {/* Reactor list */}
         <div className="px-5 pb-4 space-y-4 max-h-[40vh] overflow-y-auto">
           {reactorList.length > 0 ? (
-            reactorList.map((reactor, i) => (
-              <motion.div
-                key={reactor.userId}
-                className="flex items-center gap-4"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05 }}
-              >
-                {/* Avatar with ProfileAvatar for error handling */}
-                <ProfileAvatar
-                  src={reactor.avatarUrl}
-                  name={reactor.displayName}
-                  size={56}
-                  style={{
-                    border: '2px solid rgba(255, 255, 255, 0.1)',
-                    flexShrink: 0,
-                  }}
-                />
-
-                {/* Name */}
-                <span className="text-white font-medium text-lg flex-1">
-                  {reactor.displayName}
-                </span>
-
-                {/* Reaction - use image for non-heart, emoji for heart */}
-                {reactor.reactionType === 'heart' ? (
-                  <span className="text-3xl">❤️</span>
-                ) : (
-                  <img 
-                    src={REACTION_IMAGES[reactor.reactionType]} 
-                    alt={reactor.reactionType} 
-                    className="w-9 h-9 object-contain"
+            reactorList.map((reactor, i) => {
+              const isOwnReaction = reactor.userId === currentUserId;
+              const isRemoving = removingId === reactor.userId;
+              
+              return (
+                <motion.div
+                  key={reactor.userId}
+                  className="flex items-center gap-4"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: isRemoving ? 0.5 : 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ delay: i * 0.05 }}
+                >
+                  {/* Avatar with ProfileAvatar for error handling */}
+                  <ProfileAvatar
+                    src={reactor.avatarUrl}
+                    name={reactor.displayName}
+                    size={56}
+                    style={{
+                      border: '2px solid rgba(255, 255, 255, 0.1)',
+                      flexShrink: 0,
+                    }}
                   />
-                )}
-              </motion.div>
-            ))
+
+                  {/* Name + "You" label */}
+                  <div className="flex-1 min-w-0">
+                    <span className="text-white font-medium text-lg block truncate">
+                      {reactor.displayName}
+                    </span>
+                    {isOwnReaction && (
+                      <span className="text-white/50 text-xs">Your reaction</span>
+                    )}
+                  </div>
+
+                  {/* Reaction - use image for non-heart, emoji for heart */}
+                  {reactor.reactionType === 'heart' ? (
+                    <span className="text-3xl">❤️</span>
+                  ) : (
+                    <img 
+                      src={REACTION_IMAGES[reactor.reactionType]} 
+                      alt={reactor.reactionType} 
+                      className="w-9 h-9 object-contain"
+                    />
+                  )}
+
+                  {/* Remove button for own reactions */}
+                  {isOwnReaction && (
+                    <button
+                      onClick={() => handleRemoveReaction(reactor)}
+                      disabled={isRemoving}
+                      className="p-2 rounded-full bg-white/10 hover:bg-red-500/30 transition-colors"
+                      aria-label="Remove reaction"
+                    >
+                      <X className="w-4 h-4 text-white/70" />
+                    </button>
+                  )}
+                </motion.div>
+              );
+            })
           ) : (
             <div className="text-center text-white/50 py-8">
               No reactions yet

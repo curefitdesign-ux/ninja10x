@@ -97,39 +97,40 @@ const Reel = () => {
   }, []);
 
   // Load all activities grouped by user
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      const groups = await fetchAllActivitiesGroupedByUser();
-      setUserGroups(groups);
-      
-      // Initialize reactions state with reactor profiles
-      const map: Record<string, { 
-        total: number; 
-        reactions: Record<ReactionType, ActivityReaction>;
-        reactorProfiles: ReactorProfile[];
-      }> = {};
-      for (const group of groups) {
-        for (const a of group.activities) {
-          map[a.id] = {
-            total: a.reactionCount || 0,
-            reactions: a.reactions || { ...DEFAULT_REACTIONS },
-            reactorProfiles: a.reactorProfiles || [],
-          };
-        }
+  const loadActivities = useCallback(async () => {
+    setLoading(true);
+    const groups = await fetchAllActivitiesGroupedByUser();
+    setUserGroups(groups);
+    
+    // Initialize reactions state with reactor profiles
+    const map: Record<string, { 
+      total: number; 
+      reactions: Record<ReactionType, ActivityReaction>;
+      reactorProfiles: ReactorProfile[];
+    }> = {};
+    for (const group of groups) {
+      for (const a of group.activities) {
+        map[a.id] = {
+          total: a.reactionCount || 0,
+          reactions: a.reactions || { ...DEFAULT_REACTIONS },
+          reactorProfiles: a.reactorProfiles || [],
+        };
       }
-      setLocalReactions(map);
-      
-      // Check if we should start at a specific user (from navigation state)
-      if (location.state?.userId && groups.length > 0) {
-        const idx = groups.findIndex(g => g.userId === location.state.userId);
-        if (idx >= 0) setCurrentUserIndex(idx);
-      }
-      
-      setLoading(false);
-    };
-    loadData();
+    }
+    setLocalReactions(map);
+    
+    // Check if we should start at a specific user (from navigation state)
+    if (location.state?.userId && groups.length > 0) {
+      const idx = groups.findIndex(g => g.userId === location.state.userId);
+      if (idx >= 0) setCurrentUserIndex(idx);
+    }
+    
+    setLoading(false);
   }, [location.state?.userId]);
+
+  useEffect(() => {
+    loadActivities();
+  }, [loadActivities]);
 
   const currentGroup = userGroups[currentUserIndex];
   const currentActivity = currentGroup?.activities[currentActivityIndex];
@@ -749,10 +750,12 @@ const Reel = () => {
       <AnimatePresence>
         {showReactsSheet && (
           <ReactsSoFarSheet
+            activityId={currentActivity?.id || ''}
             total={currentReactions.total}
             reactions={currentReactions.reactions}
             reactorProfiles={currentReactions.reactorProfiles}
             onClose={() => setShowReactsSheet(false)}
+            onReactionRemoved={loadActivities}
           />
         )}
       </AnimatePresence>
