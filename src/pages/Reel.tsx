@@ -258,7 +258,7 @@ const Reel = () => {
   };
 
   const handleReact = async (type: ReactionType) => {
-    if (!currentActivity) return;
+    if (!currentActivity || isOwnStory) return; // Owners cannot react to their own activities
 
     setFloatingReaction(type);
     setTimeout(() => setFloatingReaction(null), 1200);
@@ -291,11 +291,7 @@ const Reel = () => {
       };
     });
 
-    if (isOwnStory) {
-      await toggleReaction(currentActivity.id, type);
-    } else {
-      await sendReaction(currentActivity.id, type);
-    }
+    await sendReaction(currentActivity.id, type);
   };
 
   const handleClose = () => {
@@ -614,7 +610,7 @@ const Reel = () => {
       >
         {/* Liquid glass reaction pill */}
         <motion.button
-          onClick={() => setShowSendReactionSheet(true)}
+          onClick={() => isOwnStory ? (currentReactions.total > 0 && setShowReactsSheet(true)) : setShowSendReactionSheet(true)}
           className="relative overflow-hidden mb-3"
           style={{
             minWidth: currentReactions.total > 0 ? 200 : 180,
@@ -632,7 +628,7 @@ const Reel = () => {
         >
           <AnimatePresence mode="wait">
             {isOwnStory ? (
-              /* Owner view: Show reactions summary */
+              /* Owner view: Show reactions summary (view only, no sending) */
               <motion.div
                 key="owner-pill"
                 className="flex items-center justify-center gap-3 h-full px-5"
