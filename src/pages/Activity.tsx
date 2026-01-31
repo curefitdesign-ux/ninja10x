@@ -653,27 +653,6 @@ const Activity = () => {
                 }}
               />
               
-              {/* Center bump/cradle for floating button - enhanced visibility */}
-              <div
-                className="absolute left-1/2 -translate-x-1/2 -top-6 w-24 h-12 pointer-events-none"
-                style={{
-                  background: "radial-gradient(ellipse 100% 80% at center bottom, rgba(8, 8, 16, 0.98) 0%, rgba(15, 15, 25, 0.9) 50%, transparent 100%)",
-                }}
-              />
-              {/* Inner bump glow ring */}
-              <div
-                className="absolute left-1/2 -translate-x-1/2 -top-4 w-20 h-8 pointer-events-none"
-                style={{
-                  background: "radial-gradient(ellipse 100% 100% at center bottom, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 40%, transparent 70%)",
-                }}
-              />
-              {/* Bump edge highlight */}
-              <div
-                className="absolute left-1/2 -translate-x-1/2 -top-5 w-[72px] h-1 pointer-events-none rounded-full"
-                style={{
-                  background: "radial-gradient(ellipse 100% 100% at center, rgba(255,255,255,0.08) 0%, transparent 80%)",
-                }}
-              />
 
               <div 
                 className="relative flex items-center justify-around py-2.5 px-2"
