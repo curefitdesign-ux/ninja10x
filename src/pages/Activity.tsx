@@ -603,27 +603,37 @@ const Activity = () => {
         </div>
       </PullToRefresh>
 
-      {/* Bottom Navigation - Fixed sticky to bottom */}
+      {/* Bottom Navigation - Floating Liquid Glass */}
       <nav 
-        className="fixed bottom-0 left-0 right-0 z-50"
+        className="fixed z-50 left-4 right-4"
         style={{ 
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
+          bottom: 'max(env(safe-area-inset-bottom, 16px), 16px)',
         }}
       >
-        <div className="absolute inset-x-0 -top-6 h-10 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
         <div 
-          className="relative bg-white/[0.08] backdrop-blur-2xl border-t border-white/[0.12]"
+          className="relative rounded-3xl overflow-hidden"
           style={{
-            boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 -8px 32px rgba(0,0,0,0.4)',
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(40px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            boxShadow: `
+              inset 0 1px 1px rgba(255,255,255,0.2),
+              inset 0 -1px 1px rgba(255,255,255,0.05),
+              0 8px 32px rgba(0,0,0,0.3),
+              0 2px 8px rgba(0,0,0,0.2)
+            `,
           }}
         >
+          {/* Inner glow highlight */}
           <div 
-            className="flex items-center justify-around py-2 px-2"
-            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}
-          >
+            className="absolute inset-0 rounded-3xl pointer-events-none"
+            style={{
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 40%)',
+            }}
+          />
+          
+          <div className="relative flex items-center justify-around py-2 px-2">
             {navItems.map((item) => (
               <motion.button
                 key={item.id}
