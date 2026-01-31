@@ -379,7 +379,8 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
                     'flow…', 'glow…', 'shine',      // Week 3
                     'soar…', 'peak…', 'legend'      // Week 4
                   ];
-                  return storyLabels[dayNumber - 1] || `day ${dayNumber}`;
+                  const story = storyLabels[dayNumber - 1];
+                  return story ? `day ${dayNumber} — ${story}` : `day ${dayNumber}`;
                 })()}
               </span>
             </motion.div>
