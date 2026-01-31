@@ -508,11 +508,16 @@ const Activity = () => {
           </div>
 
           {/* Activities Section */}
-          <div className="px-4 mt-10">
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.35 }} className="text-center text-white/70 text-sm mb-4">
-              Do any of the following<br />activities today
-            </motion.p>
-            <div className="grid grid-cols-4 gap-3">
+          <div className="px-4 mt-12">
+            <motion.h2 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              transition={{ duration: 0.5, delay: 0.35 }} 
+              className="text-xl font-semibold text-white mb-6"
+            >
+              Today's Activities
+            </motion.h2>
+            <div className="grid grid-cols-4 gap-4">
               {activities_grid.map((activity, idx) => (
                 <motion.button
                   key={activity.id}
@@ -535,7 +540,7 @@ const Activity = () => {
           </div>
 
           {/* Feature Cards Row */}
-          <div className="px-4 mt-10">
+          <div className="px-4 mt-8">
             <div className="grid grid-cols-2 gap-3">
               <motion.button whileTap={{ scale: 0.98 }} className="relative rounded-3xl overflow-hidden">
                 <img src={connectFitnessDevice} alt="Connect Fitness device" className="w-full h-auto object-contain" />
