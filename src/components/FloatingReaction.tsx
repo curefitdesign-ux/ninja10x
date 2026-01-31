@@ -1,17 +1,23 @@
 import { motion } from 'framer-motion';
 import { ReactionType } from '@/services/journey-service';
 
+// Import 3D reaction images
+import fireImg from '@/assets/reactions/fire-3d.png';
+import clapImg from '@/assets/reactions/clap-3d.png';
+import fistbumpImg from '@/assets/reactions/fistbump.png';
+import wowImg from '@/assets/reactions/wow.png';
+
 interface FloatingReactionProps {
   type: ReactionType;
   onComplete: () => void;
 }
 
-const REACTION_EMOJIS: Record<ReactionType, string> = {
-  heart: '❤️',
-  fire: '🔥',
-  clap: '👏',
-  fistbump: '🤜🤛',
-  wow: '🤩',
+const REACTION_IMAGES: Record<ReactionType, string> = {
+  heart: fireImg,
+  fire: fireImg,
+  clap: clapImg,
+  fistbump: fistbumpImg,
+  wow: wowImg,
 };
 
 export default function FloatingReaction({ type, onComplete }: FloatingReactionProps) {
@@ -24,7 +30,6 @@ export default function FloatingReaction({ type, onComplete }: FloatingReactionP
       onAnimationComplete={onComplete}
     >
       <motion.div
-        className="text-8xl"
         initial={{ scale: 0, rotate: -15 }}
         animate={{ 
           scale: [0, 1.5, 1.2], 
@@ -40,7 +45,7 @@ export default function FloatingReaction({ type, onComplete }: FloatingReactionP
           filter: 'drop-shadow(0 10px 30px rgba(0, 0, 0, 0.4))',
         }}
       >
-        {REACTION_EMOJIS[type]}
+        <img src={REACTION_IMAGES[type]} alt={type} className="w-24 h-24 object-contain" />
       </motion.div>
     </motion.div>
   );

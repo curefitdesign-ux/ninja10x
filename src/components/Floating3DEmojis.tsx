@@ -39,7 +39,6 @@ export default function Floating3DEmojis({ reactions, newReaction }: Floating3DE
         const pos = EDGE_POSITIONS[i % EDGE_POSITIONS.length];
         const isNew = newReaction === type;
         const asset = EMOJI_ASSETS[type];
-        const isImage = typeof asset === 'string' && (asset.startsWith('/') || asset.includes('assets'));
         
         // Create unique animation delay for each emoji
         const animDelay = i * 0.5;
@@ -80,15 +79,11 @@ export default function Floating3DEmojis({ reactions, newReaction }: Floating3DE
                 ease: 'easeInOut',
               }}
             >
-              {isImage ? (
-                <img 
-                  src={asset} 
-                  alt={type} 
-                  className="w-14 h-14 object-contain"
-                />
-              ) : (
-                <span className="text-5xl">{asset}</span>
-              )}
+              <img 
+                src={asset} 
+                alt={type} 
+                className="w-14 h-14 object-contain"
+              />
             </motion.div>
             
             {/* Subtle glow pulse behind emoji */}
