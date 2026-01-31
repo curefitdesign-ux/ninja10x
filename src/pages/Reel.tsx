@@ -426,47 +426,83 @@ const Reel = () => {
                 animate={{ scale: isActive ? 1 : 0.85 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
-                {/* Story ring segments around avatar */}
+                {/* Animated glow ring behind */}
+                {isActive && (
+                  <motion.div
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      width: 60,
+                      height: 60,
+                      left: -2,
+                      top: -2,
+                      background: 'conic-gradient(from 0deg, #a78bfa, #ec4899, #f472b6, #a78bfa)',
+                      filter: 'blur(6px)',
+                    }}
+                    animate={{
+                      rotate: [0, 360],
+                      scale: [1, 1.08, 1],
+                    }}
+                    transition={{
+                      rotate: { duration: 4, repeat: Infinity, ease: 'linear' },
+                      scale: { duration: 2, repeat: Infinity, ease: 'easeInOut' },
+                    }}
+                  />
+                )}
+                
+                {/* Story ring segments around avatar - thicker and more visible */}
                 <svg
                   className="absolute inset-0"
                   style={{
                     width: isActive ? 56 : 44,
                     height: isActive ? 56 : 44,
                     transform: 'rotate(-90deg)',
+                    filter: isActive ? 'drop-shadow(0 0 4px rgba(167, 139, 250, 0.6))' : 'none',
                   }}
                   viewBox="0 0 100 100"
                 >
                   {Array.from({ length: activityCount }).map((_, segIdx) => {
-                    const gapAngle = activityCount > 1 ? 8 : 0;
+                    const gapAngle = activityCount > 1 ? 6 : 0;
                     const totalGap = gapAngle * activityCount;
                     const segmentAngle = (360 - totalGap) / activityCount;
                     const startAngle = segIdx * (segmentAngle + gapAngle);
                     const isSegmentViewed = segIdx <= currentIdx;
                     
-                    const radius = 46;
+                    const radius = 44;
                     const circumference = 2 * Math.PI * radius;
                     const segmentLength = (segmentAngle / 360) * circumference;
                     const offset = (startAngle / 360) * circumference;
                     
                     return (
-                      <circle
+                      <motion.circle
                         key={segIdx}
                         cx="50"
                         cy="50"
                         r={radius}
                         fill="none"
-                        strokeWidth="5"
-                        stroke={isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.3)'}
+                        strokeWidth={isActive ? 8 : 6}
+                        stroke={isActive && isSegmentViewed ? `url(#storyGradient-${group.userId})` : 'rgba(255,255,255,0.4)'}
                         strokeDasharray={`${segmentLength} ${circumference}`}
                         strokeDashoffset={-offset}
                         strokeLinecap="round"
+                        initial={{ opacity: 0.6 }}
+                        animate={isActive && isSegmentViewed ? {
+                          opacity: [0.8, 1, 0.8],
+                          strokeWidth: [8, 9, 8],
+                        } : { opacity: 1 }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                          ease: 'easeInOut',
+                          delay: segIdx * 0.1,
+                        }}
                       />
                     );
                   })}
                   <defs>
-                    <linearGradient id="storyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <linearGradient id={`storyGradient-${group.userId}`} x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="#a78bfa" />
-                      <stop offset="100%" stopColor="#ec4899" />
+                      <stop offset="50%" stopColor="#ec4899" />
+                      <stop offset="100%" stopColor="#f472b6" />
                     </linearGradient>
                   </defs>
                 </svg>
