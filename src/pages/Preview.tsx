@@ -805,18 +805,17 @@ const Preview = () => {
           </button>
         </div>
         
-        {/* Frame carousel - responsive height */}
+        {/* Frame carousel - larger templates */}
         <div 
           className={`flex-shrink-0 flex items-center justify-center transition-all duration-700 ease-out ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''}`}
           style={{ 
-            minHeight: 'min(55vh, 420px)',
-            maxHeight: '55vh',
+            minHeight: 'min(65vh, 520px)',
           }}
         >
           {elementsHidden ? (
             <div className="flex items-center justify-center w-full h-full px-6 animate-scale-in">
               <div 
-                className="w-full max-w-[280px]"
+                className="w-full max-w-[320px]"
                 style={{ maxHeight: '100%', aspectRatio: '9/16' }}
               >
                 {currentFrame === 'shaky' && <ShakyFrame {...frameProps} />}
@@ -830,13 +829,13 @@ const Preview = () => {
             <div 
               ref={containerRef}
               onScroll={handleScroll}
-              className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center py-2"
+              className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center py-2"
               style={{ 
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
-                paddingLeft: 'calc((100vw - min(55vw, 220px)) / 2)',
-                paddingRight: 'calc((100vw - min(55vw, 220px)) / 2)',
+                paddingLeft: 'calc((100vw - min(65vw, 280px)) / 2)',
+                paddingRight: 'calc((100vw - min(65vw, 280px)) / 2)',
               }}
             >
               {FRAMES.map((frame, index) => {
@@ -859,9 +858,9 @@ const Preview = () => {
                       elementsHidden && isRightOfCurrent ? 'opacity-0 translate-x-full' : ''
                     }`}
                     style={{ 
-                      width: 'min(55vw, 220px)',
-                      height: 'calc(min(55vw, 220px) * 16 / 9)',
-                      maxHeight: 'calc(55vh - 16px)',
+                      width: 'min(65vw, 280px)',
+                      height: 'calc(min(65vw, 280px) * 16 / 9)',
+                      maxHeight: 'min(65vh, 500px)',
                       transform: `scale(${scale})`,
                       opacity: elementsHidden && !isActiveFrame ? 0 : opacity,
                       transition: 'transform 0.15s ease-out, opacity 0.15s ease-out',
