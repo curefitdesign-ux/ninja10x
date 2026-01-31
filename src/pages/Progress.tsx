@@ -173,12 +173,13 @@ const Progress = () => {
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={{ top: 0, bottom: 0.3 }}
       onDragEnd={handleDragEnd}
-      initial={transitionToProgress ? { opacity: 0, y: 100 } : { opacity: 1 }}
+      initial={transitionToProgress ? { opacity: 0, y: 150, scale: 0.9 } : { opacity: 1 }}
       animate={{ 
         opacity: isExiting ? 0 : 1, 
-        y: isExiting ? 100 : 0,
+        y: isExiting ? 150 : 0,
+        scale: isExiting ? 0.9 : 1,
       }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      transition={{ type: 'spring', stiffness: 280, damping: 28 }}
     >
       {/* Background aurora */}
       <div 

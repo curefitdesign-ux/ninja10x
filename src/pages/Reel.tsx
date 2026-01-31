@@ -56,12 +56,13 @@ const Reel = () => {
     reactions: Record<ReactionType, ActivityReaction>;
   }>>({});
 
-  // Bottom sheet states
+  // Bottom sheet states and transition animations
   const [isTransitioning, setIsTransitioning] = useState(false);
   const bottomSheetY = useMotionValue(0);
   const bottomSheetOpacity = useTransform(bottomSheetY, [-200, 0], [0, 1]);
-  const contentScale = useTransform(bottomSheetY, [-200, 0], [0.85, 1]);
-  const contentOpacity = useTransform(bottomSheetY, [-150, 0], [0.5, 1]);
+  const contentScale = useTransform(bottomSheetY, [-200, 0], [0.75, 1]);
+  const contentOpacity = useTransform(bottomSheetY, [-100, 0], [0, 1]);
+  const contentY = useTransform(bottomSheetY, [-200, 0], [50, 0]);
 
   // Load all activities grouped by user
   useEffect(() => {
@@ -305,7 +306,7 @@ const Reel = () => {
         </button>
       </motion.div>
 
-      {/* User avatars strip at top - with activity count indicator */}
+      {/* User avatars strip at top - Instagram/WhatsApp style with story rings */}
       <motion.div
         className="absolute z-40 left-0 right-0 flex justify-center"
         style={{ top: 'calc(max(env(safe-area-inset-top, 12px), 12px) + 8px)' }}
@@ -313,91 +314,102 @@ const Reel = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
       >
-        <div 
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full"
-          style={{ 
-            background: 'rgba(255,255,255,0.06)', 
-            backdropFilter: 'blur(40px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-            border: '1px solid rgba(255,255,255,0.1)',
-          }}
-        >
-          {userGroups.slice(0, 7).map((group, idx) => (
-            <motion.button
-              key={group.userId}
-              onClick={() => {
-                setCurrentUserIndex(idx);
-                setCurrentActivityIndex(0);
-              }}
-              className="relative"
-              whileTap={{ scale: 0.9 }}
-            >
-              <ProfileAvatar
-                src={group.avatarUrl}
-                name={group.displayName}
-                size={idx === currentUserIndex ? 44 : 32}
-                style={{
-                  border: idx === currentUserIndex 
-                    ? '2.5px solid #a78bfa' 
-                    : '2px solid rgba(255,255,255,0.25)',
-                  opacity: idx === currentUserIndex ? 1 : 0.7,
-                  transition: 'all 0.2s ease',
+        <div className="flex items-center gap-3 px-4">
+          {userGroups.slice(0, 7).map((group, idx) => {
+            const isActive = idx === currentUserIndex;
+            const activityCount = group.activities.length;
+            const currentIdx = idx === currentUserIndex ? currentActivityIndex : 0;
+            
+            return (
+              <motion.button
+                key={group.userId}
+                onClick={() => {
+                  setCurrentUserIndex(idx);
+                  setCurrentActivityIndex(0);
                 }}
-              />
-              {/* Activity count indicator */}
-              {group.activities.length > 1 && (
-                <div 
-                  className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
-                  style={{ background: 'linear-gradient(135deg, #a78bfa, #ec4899)' }}
+                className="relative"
+                whileTap={{ scale: 0.9 }}
+                animate={{ scale: isActive ? 1 : 0.85 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              >
+                {/* Story ring segments around avatar */}
+                <svg
+                  className="absolute inset-0"
+                  style={{
+                    width: isActive ? 56 : 44,
+                    height: isActive ? 56 : 44,
+                    transform: 'rotate(-90deg)',
+                  }}
+                  viewBox="0 0 100 100"
                 >
-                  {group.activities.length}
+                  {Array.from({ length: activityCount }).map((_, segIdx) => {
+                    const gapAngle = activityCount > 1 ? 8 : 0;
+                    const totalGap = gapAngle * activityCount;
+                    const segmentAngle = (360 - totalGap) / activityCount;
+                    const startAngle = segIdx * (segmentAngle + gapAngle);
+                    const isSegmentViewed = segIdx <= currentIdx;
+                    
+                    const radius = 46;
+                    const circumference = 2 * Math.PI * radius;
+                    const segmentLength = (segmentAngle / 360) * circumference;
+                    const offset = (startAngle / 360) * circumference;
+                    
+                    return (
+                      <circle
+                        key={segIdx}
+                        cx="50"
+                        cy="50"
+                        r={radius}
+                        fill="none"
+                        strokeWidth="3"
+                        stroke={isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.3)'}
+                        strokeDasharray={`${segmentLength} ${circumference}`}
+                        strokeDashoffset={-offset}
+                        strokeLinecap="round"
+                      />
+                    );
+                  })}
+                  <defs>
+                    <linearGradient id="storyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#a78bfa" />
+                      <stop offset="100%" stopColor="#ec4899" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                
+                {/* Avatar */}
+                <div
+                  style={{
+                    width: isActive ? 56 : 44,
+                    height: isActive ? 56 : 44,
+                    padding: 3,
+                  }}
+                >
+                  <ProfileAvatar
+                    src={group.avatarUrl}
+                    name={group.displayName}
+                    size={isActive ? 50 : 38}
+                    style={{
+                      opacity: isActive ? 1 : 0.7,
+                      transition: 'all 0.2s ease',
+                    }}
+                  />
                 </div>
-              )}
-            </motion.button>
-          ))}
+              </motion.button>
+            );
+          })}
         </div>
       </motion.div>
 
-      {/* Current user info + Story progress bar */}
+      {/* Current user info - minimal */}
       <div 
         className="absolute z-40 left-0 right-0 px-4"
-        style={{ top: 'calc(max(env(safe-area-inset-top, 12px), 12px) + 60px)' }}
+        style={{ top: 'calc(max(env(safe-area-inset-top, 12px), 12px) + 72px)' }}
       >
-        {/* User name and info */}
-        <div className="flex items-center justify-center gap-2 mb-2">
+        <div className="flex items-center justify-center gap-2">
           <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
           <span className="text-white/40">•</span>
           <span className="text-white/60 text-xs">Week {week} • Day {dayInWeek}</span>
-        </div>
-        
-        {/* Story progress dots */}
-        <div className="flex justify-center gap-1">
-          {currentGroup.activities.map((_, i) => (
-            <motion.div
-              key={i}
-              className="h-0.5 flex-1 rounded-full transition-all duration-300 cursor-pointer overflow-hidden"
-              style={{
-                maxWidth: 60,
-                background: 'rgba(255, 255, 255, 0.2)',
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                setCurrentActivityIndex(i);
-              }}
-            >
-              <motion.div
-                className="h-full rounded-full"
-                style={{
-                  background: 'linear-gradient(90deg, #a78bfa, #ec4899)',
-                }}
-                initial={{ width: 0 }}
-                animate={{ 
-                  width: i < currentActivityIndex ? '100%' : i === currentActivityIndex ? '100%' : '0%'
-                }}
-                transition={{ duration: i === currentActivityIndex ? 5 : 0.3 }}
-              />
-            </motion.div>
-          ))}
         </div>
       </div>
 
@@ -405,11 +417,12 @@ const Reel = () => {
       <motion.div
         className="absolute inset-0 flex flex-col items-center justify-center"
         style={{ 
-          paddingTop: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 80px)',
+          paddingTop: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 100px)',
           paddingBottom: '160px',
           paddingInline: '20px',
           scale: contentScale,
           opacity: contentOpacity,
+          y: contentY,
         }}
       >
         {/* Card container with horizontal swipe */}
