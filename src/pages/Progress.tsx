@@ -14,27 +14,27 @@ import engineBadgeImg from "@/assets/progress/engine-badge.png";
 import SharedImageTransition from "@/components/SharedImageTransition";
 import { isVideoUrl } from "@/lib/media";
 
-// Tile positions - REVERSED order (Day 12 at top, Day 1 at bottom)
+// Tile positions - optimized for mobile viewport
 const TILE_POSITIONS = [
-  { left: 32, top: 28 },
-  { left: 40, top: 36 },
-  { left: 48, top: 44 },
-  { left: 56, top: 53 },
-  { left: 48, top: 61 },
-  { left: 40, top: 69 },
-  { left: 32, top: 77 },
-  { left: 40, top: 85 },
-  { left: 48, top: 93 },
-  { left: 56, top: 102 },
-  { left: 48, top: 110 },
-  { left: 40, top: 118 },
+  { left: 34, top: 5 },
+  { left: 42, top: 10 },
+  { left: 50, top: 15 },
+  { left: 58, top: 20 },
+  { left: 50, top: 25 },
+  { left: 42, top: 30 },
+  { left: 34, top: 35 },
+  { left: 42, top: 40 },
+  { left: 50, top: 45 },
+  { left: 58, top: 50 },
+  { left: 50, top: 55 },
+  { left: 42, top: 60 },
 ];
 
 const LABELS = [
-  { tileIndex: 0, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 28, left: 4 },
-  { tileIndex: 3, text: ["BUILD", "ENERGY"], side: "right" as const, top: 53, left: 68 },
-  { tileIndex: 6, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 77, left: 4 },
-  { tileIndex: 11, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 110, left: 68 },
+  { tileIndex: 0, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 5, left: 6 },
+  { tileIndex: 3, text: ["BUILD", "ENERGY"], side: "right" as const, top: 20, left: 70 },
+  { tileIndex: 6, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 35, left: 6 },
+  { tileIndex: 11, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 55, left: 70 },
 ];
 
 const Progress = () => {
@@ -98,12 +98,11 @@ const Progress = () => {
     is_own: user ? p.userId === user.id : false,
   }));
 
-  const handlePhotoCardTap = (index: number) => {
-    // Navigate to dedicated reel page
+  const handlePhotoCardTap = (index: number, userId?: string) => {
+    // Navigate to reel page, passing userId to start at that user's stories
     navigate('/reel', {
       state: {
-        activities: feedAsActivities,
-        initialIndex: index,
+        userId: userId,
       }
     });
   };
@@ -139,11 +138,9 @@ const Progress = () => {
   const getDayFromIndex = (index: number) => 12 - index;
   const isTileActive = (dayNumber: number) => myActivities.some(a => a.dayNumber === dayNumber);
 
-  const vw = (val: number) => `${val}vw`;
-
   return (
     <div 
-      className="fixed inset-0 z-50 overflow-x-hidden overflow-y-auto touch-manipulation overscroll-contain"
+      className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-manipulation"
       style={{ 
         background: "linear-gradient(180deg, #3A2A63 0%, #1A1530 45%, #060608 100%)",
         height: '100dvh',
@@ -156,7 +153,7 @@ const Progress = () => {
         style={{ left: "-53px", top: "-40px", width: "131vw", height: "auto" }}
       >
         <div 
-          className="w-full h-[525px] opacity-40 mix-blend-screen"
+          className="w-full h-[400px] opacity-40 mix-blend-screen"
           style={{ background: "radial-gradient(ellipse at center, rgba(138, 100, 200, 0.4) 0%, transparent 70%)" }}
         />
       </div>
@@ -180,31 +177,31 @@ const Progress = () => {
         style={{ 
           top: 'max(env(safe-area-inset-top, 8px), 8px)', 
           right: '4vw', 
-          width: 'clamp(32px, 8vw, 40px)', 
-          height: 'clamp(32px, 8vw, 40px)',
+          width: '36px', 
+          height: '36px',
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        <X className="w-full h-full" strokeWidth={1.5} />
+        <X className="w-6 h-6" strokeWidth={1.5} />
       </motion.button>
 
       {/* === TOP ACTIVITY STRIP (PUBLIC FEED) === */}
       <AnimatePresence>
         {showStories && (
           <motion.div
-            className="w-full overflow-x-auto scrollbar-hide overscroll-x-contain"
+            className="flex-shrink-0 w-full overflow-x-auto scrollbar-hide overscroll-x-contain"
             style={{
-              paddingTop: "calc(max(env(safe-area-inset-top, 16px), 16px) + 48px)",
+              paddingTop: "calc(max(env(safe-area-inset-top, 12px), 12px) + 40px)",
               paddingInline: "4vw",
-              minHeight: "180px",
+              paddingBottom: "12px",
             }}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 200, damping: 25 }}
           >
-            <div className="flex items-end gap-3 pb-4">
+            <div className="flex items-end gap-2.5">
               {feedLoading ? (
                 // Loading state - shimmer placeholders
                 <>
@@ -213,8 +210,8 @@ const Progress = () => {
                       key={i}
                       className="relative flex-shrink-0 overflow-hidden"
                       style={{
-                        width: "80px",
-                        height: "120px",
+                        width: "70px",
+                        height: "100px",
                         borderRadius: "12px",
                         background: "rgba(255,255,255,0.06)",
                         border: "1px solid rgba(255,255,255,0.08)",
@@ -246,13 +243,13 @@ const Progress = () => {
                     data-shared-element={index === 0 ? "progress-hero-card" : undefined}
                     className="relative flex-shrink-0 overflow-hidden cursor-pointer"
                     style={{
-                      width: "80px",
-                      height: "120px",
+                      width: "70px",
+                      height: "100px",
                       borderRadius: "12px",
                       boxShadow: index === 0 ? "0 12px 40px rgba(100, 70, 180, 0.5)" : "0 4px 16px rgba(0,0,0,0.25)",
                       border: index === 0 ? "2px solid rgba(160, 120, 220, 0.35)" : "1px solid rgba(255,255,255,0.1)",
                     }}
-                    onClick={() => handlePhotoCardTap(index)}
+                    onClick={() => handlePhotoCardTap(index, photo.userId)}
                     initial={{ opacity: 0, x: 40 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 + index * 0.06 }}
@@ -282,8 +279,22 @@ const Progress = () => {
                         }}
                       />
                     )}
+                    
+                    {/* User avatar overlay */}
                     <div 
-                      className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-white font-semibold text-[10px]"
+                      className="absolute bottom-1.5 left-1.5 w-5 h-5 rounded-full overflow-hidden"
+                      style={{ border: '1.5px solid rgba(255,255,255,0.6)' }}
+                    >
+                      {photo.avatarUrl ? (
+                        <img src={photo.avatarUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500" />
+                      )}
+                    </div>
+                    
+                    {/* Day badge */}
+                    <div 
+                      className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-white font-semibold text-[9px]"
                       style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
                     >
                       D{photo.dayNumber}
@@ -291,21 +302,20 @@ const Progress = () => {
                   </motion.button>
                 ))
               ) : (
-                // Empty state - no public activities yet
+                // Empty state
                 <motion.div
-                  className="flex items-center gap-4 w-full py-2"
+                  className="flex items-center gap-3 w-full"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
                 >
-                  {/* Empty placeholder cards */}
                   {[0, 1, 2].map((i) => (
                     <motion.div
                       key={i}
                       className="relative flex-shrink-0 flex flex-col items-center justify-center"
                       style={{
-                        width: "80px",
-                        height: "120px",
+                        width: "70px",
+                        height: "100px",
                         borderRadius: "12px",
                         background: "rgba(255,255,255,0.04)",
                         border: "1px dashed rgba(255,255,255,0.15)",
@@ -314,13 +324,12 @@ const Progress = () => {
                       animate={{ opacity: 0.6, y: 0 }}
                       transition={{ delay: 0.3 + i * 0.08 }}
                     >
-                      <span className="text-2xl mb-1">🏃</span>
+                      <span className="text-xl mb-1">🏃</span>
                     </motion.div>
                   ))}
                   
-                  {/* Message */}
                   <motion.div
-                    className="flex-1 flex flex-col justify-center"
+                    className="flex-1 flex flex-col justify-center ml-2"
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5 }}
@@ -339,17 +348,14 @@ const Progress = () => {
         )}
       </AnimatePresence>
 
-      {/* === MAIN PROGRESS AREA === */}
-      <div 
-        className="relative w-full"
-        style={{ marginTop: "2vh", height: vw(130), maxWidth: "430px", marginInline: "auto" }}
-      >
+      {/* === MAIN PROGRESS AREA - fills remaining space === */}
+      <div className="flex-1 relative w-full overflow-hidden" style={{ maxWidth: "430px", marginInline: "auto" }}>
         {/* Engine Badge */}
         <AnimatePresence>
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: vw(18), top: 0, width: vw(40), height: vw(40) }}
+              style={{ left: "12%", top: "-2%", width: "35%", aspectRatio: "1" }}
               initial={{ opacity: 0, scale: 0.6, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.5 }}
@@ -368,7 +374,12 @@ const Progress = () => {
             <motion.div
               key={day}
               className="absolute"
-              style={{ left: vw(pos.left), top: vw(pos.top), width: vw(12), height: vw(12) }}
+              style={{ 
+                left: `${pos.left}%`, 
+                top: `${pos.top}%`, 
+                width: "11%", 
+                aspectRatio: "1",
+              }}
               initial={{ opacity: 0, y: 40, scale: 0.7 }}
               animate={showTiles ? { opacity: 1, y: 0, scale: 1 } : {}}
               transition={{ type: "spring", stiffness: 200, damping: 22, delay: index * 0.04 }}
@@ -383,7 +394,7 @@ const Progress = () => {
           <motion.div
             key={idx}
             className={`absolute ${label.side === "left" ? "text-left" : "text-right"}`}
-            style={{ top: vw(label.top), left: vw(label.left), width: label.side === "left" ? vw(28) : vw(24) }}
+            style={{ top: `${label.top}%`, left: `${label.left}%`, width: label.side === "left" ? "26%" : "22%" }}
             initial={{ opacity: 0, x: label.side === "left" ? -20 : 20 }}
             animate={showTiles ? { opacity: 1, x: 0 } : {}}
             transition={{ delay: 0.6 + idx * 0.1 }}
@@ -392,7 +403,7 @@ const Progress = () => {
               <div 
                 key={i}
                 className="font-bold uppercase"
-                style={{ fontSize: "clamp(12px, 3.2vw, 14px)", letterSpacing: "0.08em", color: "rgba(255, 255, 255, 0.6)", lineHeight: 1.3 }}
+                style={{ fontSize: "clamp(10px, 2.8vw, 13px)", letterSpacing: "0.08em", color: "rgba(255, 255, 255, 0.6)", lineHeight: 1.3 }}
               >
                 {line}
               </div>
@@ -400,7 +411,7 @@ const Progress = () => {
             <div 
               className="absolute h-px"
               style={{
-                top: "40px",
+                top: "36px",
                 ...(label.side === "left" 
                   ? { left: 0, right: "-150%", background: "linear-gradient(90deg, #FFF 0%, rgba(255,255,255,0) 100%)" }
                   : { right: 0, left: "-150%", background: "linear-gradient(270deg, #FFF 0%, rgba(255,255,255,0) 100%)" }
@@ -416,7 +427,7 @@ const Progress = () => {
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: 0, top: vw(105), width: vw(50), height: vw(60) }}
+              style={{ left: 0, bottom: "5%", width: "45%", aspectRatio: "1.2" }}
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.8 }}
@@ -426,8 +437,6 @@ const Progress = () => {
           )}
         </AnimatePresence>
       </div>
-
-      <div style={{ height: "6vh" }} />
     </div>
   );
 };

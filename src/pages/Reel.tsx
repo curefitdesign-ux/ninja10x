@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronUp, ChevronDown } from 'lucide-react';
-import { JourneyActivity, ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
+import { X, ChevronUp, MapPin } from 'lucide-react';
+import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
-import { useProfile } from '@/hooks/use-profile';
+import { fetchAllActivitiesGroupedByUser, UserStoryGroup, LocalActivity } from '@/hooks/use-journey-activities';
 import DynamicBlurBackground from '@/components/DynamicBlurBackground';
 import Floating3DEmojis from '@/components/Floating3DEmojis';
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
@@ -39,12 +39,16 @@ const Reel = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const { profile } = useProfile();
   
-  const activities: JourneyActivity[] = location.state?.activities || [];
-  const initialIndex: number = location.state?.initialIndex || 0;
+  // State for user story groups
+  const [userGroups, setUserGroups] = useState<UserStoryGroup[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  // Current user index (horizontal swipe between users)
+  const [currentUserIndex, setCurrentUserIndex] = useState(0);
+  // Current activity index within current user (tap to cycle)
+  const [currentActivityIndex, setCurrentActivityIndex] = useState(0);
+  
   const [showReactsSheet, setShowReactsSheet] = useState(false);
   const [showSendReactionSheet, setShowSendReactionSheet] = useState(false);
   const [floatingReaction, setFloatingReaction] = useState<ReactionType | null>(null);
@@ -53,27 +57,58 @@ const Reel = () => {
     reactions: Record<ReactionType, ActivityReaction>;
   }>>({});
 
-  const current = activities[currentIndex];
-  const isOwnStory = user && current?.user_id === user.id;
-
+  // Load all activities grouped by user
   useEffect(() => {
-    const map: Record<string, { total: number; reactions: Record<ReactionType, ActivityReaction> }> = {};
-    for (const a of activities) {
-      map[a.id] = {
-        total: a.reaction_count || 0,
-        reactions: a.reactions || { ...DEFAULT_REACTIONS },
-      };
-    }
-    setLocalReactions(map);
-  }, [activities]);
+    const loadData = async () => {
+      setLoading(true);
+      const groups = await fetchAllActivitiesGroupedByUser();
+      setUserGroups(groups);
+      
+      // Initialize reactions state
+      const map: Record<string, { total: number; reactions: Record<ReactionType, ActivityReaction> }> = {};
+      for (const group of groups) {
+        for (const a of group.activities) {
+          map[a.id] = {
+            total: a.reactionCount || 0,
+            reactions: a.reactions || { ...DEFAULT_REACTIONS },
+          };
+        }
+      }
+      setLocalReactions(map);
+      
+      // Check if we should start at a specific user (from navigation state)
+      if (location.state?.userId && groups.length > 0) {
+        const idx = groups.findIndex(g => g.userId === location.state.userId);
+        if (idx >= 0) setCurrentUserIndex(idx);
+      }
+      
+      setLoading(false);
+    };
+    loadData();
+  }, [location.state?.userId]);
 
-  const goNext = useCallback(() => {
-    setCurrentIndex(prev => (prev + 1) % activities.length);
-  }, [activities.length]);
+  const currentGroup = userGroups[currentUserIndex];
+  const currentActivity = currentGroup?.activities[currentActivityIndex];
+  const isOwnStory = user && currentGroup?.userId === user.id;
 
-  const goPrev = useCallback(() => {
-    setCurrentIndex(prev => (prev - 1 + activities.length) % activities.length);
-  }, [activities.length]);
+  // Navigate between users (horizontal swipe)
+  const goNextUser = useCallback(() => {
+    if (userGroups.length === 0) return;
+    setCurrentActivityIndex(0); // Reset to first activity
+    setCurrentUserIndex(prev => (prev + 1) % userGroups.length);
+  }, [userGroups.length]);
+
+  const goPrevUser = useCallback(() => {
+    if (userGroups.length === 0) return;
+    setCurrentActivityIndex(0); // Reset to first activity
+    setCurrentUserIndex(prev => (prev - 1 + userGroups.length) % userGroups.length);
+  }, [userGroups.length]);
+
+  // Navigate between activities within current user (tap)
+  const cycleActivity = useCallback(() => {
+    if (!currentGroup || currentGroup.activities.length <= 1) return;
+    setCurrentActivityIndex(prev => (prev + 1) % currentGroup.activities.length);
+  }, [currentGroup]);
 
   // Swipe gesture handling
   const dragX = useMotionValue(0);
@@ -87,49 +122,43 @@ const Reel = () => {
     // Check if swipe is strong enough
     if (Math.abs(offset.x) > SWIPE_THRESHOLD || Math.abs(velocity.x) > 500) {
       if (offset.x < 0) {
-        goNext(); // Swipe left -> next story
+        goNextUser(); // Swipe left -> next user
       } else {
-        goPrev(); // Swipe right -> previous story
+        goPrevUser(); // Swipe right -> previous user
       }
     }
-  }, [goNext, goPrev]);
+  }, [goNextUser, goPrevUser]);
 
   const [lastTap, setLastTap] = useState(0);
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    // Don't trigger on drag
     const now = Date.now();
     if (now - lastTap < 300) {
+      // Double tap -> heart reaction
       if (!isOwnStory) {
         handleReact('heart');
       }
     } else {
-      // Single tap on left/right sides to navigate
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
-      const relativeX = (x - rect.left) / rect.width;
-      
-      if (relativeX < 0.3) {
-        goPrev();
-      } else if (relativeX > 0.7) {
-        goNext();
+      // Single tap -> cycle to next activity
+      if (currentGroup && currentGroup.activities.length > 1) {
+        cycleActivity();
       }
     }
     setLastTap(now);
-  }, [lastTap, goNext, goPrev, isOwnStory]);
+  }, [lastTap, cycleActivity, isOwnStory, currentGroup]);
 
   const handleNavigateToProgress = () => {
     navigate('/progress');
   };
 
   const handleReact = async (type: ReactionType) => {
-    if (!current) return;
+    if (!currentActivity) return;
 
     setFloatingReaction(type);
     setTimeout(() => setFloatingReaction(null), 1200);
     setShowSendReactionSheet(false);
 
     setLocalReactions(prev => {
-      const existing = prev[current.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS } };
+      const existing = prev[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS } };
       const newReactions = { ...existing.reactions };
       newReactions[type] = {
         ...newReactions[type],
@@ -138,7 +167,7 @@ const Reel = () => {
       };
       return {
         ...prev,
-        [current.id]: {
+        [currentActivity.id]: {
           total: existing.total + 1,
           reactions: newReactions,
         },
@@ -146,9 +175,9 @@ const Reel = () => {
     });
 
     if (isOwnStory) {
-      await toggleReaction(current.id, type);
+      await toggleReaction(currentActivity.id, type);
     } else {
-      await sendReaction(current.id, type);
+      await sendReaction(currentActivity.id, type);
     }
   };
 
@@ -159,34 +188,49 @@ const Reel = () => {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') handleClose();
-      if (e.key === 'ArrowRight' || e.key === ' ') goNext();
-      if (e.key === 'ArrowLeft') goPrev();
+      if (e.key === 'ArrowRight') goNextUser();
+      if (e.key === 'ArrowLeft') goPrevUser();
+      if (e.key === ' ') cycleActivity();
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [goNext, goPrev]);
+  }, [goNextUser, goPrevUser, cycleActivity]);
 
-  if (!activities.length || !current) {
+  if (loading) {
     return (
       <div className="fixed inset-0 bg-black flex items-center justify-center">
-        <div className="text-white/60">No content to display</div>
+        <div className="text-white/60">Loading stories...</div>
       </div>
     );
   }
 
-  const isVideo = current.is_video || isVideoUrl(current.storage_url);
-  const currentReactions = localReactions[current.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS } };
+  if (!userGroups.length || !currentGroup || !currentActivity) {
+    return (
+      <div className="fixed inset-0 bg-black flex flex-col items-center justify-center gap-4">
+        <div className="text-white/60">No stories yet</div>
+        <button
+          onClick={handleClose}
+          className="px-4 py-2 rounded-full text-white/80 bg-white/10"
+        >
+          Go Back
+        </button>
+      </div>
+    );
+  }
+
+  const isVideo = currentActivity.isVideo || isVideoUrl(currentActivity.storageUrl);
+  const currentReactions = localReactions[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS } };
   
   const activeReactionTypes = Object.entries(currentReactions.reactions)
     .filter(([, r]) => r.count > 0)
     .map(([type]) => type as ReactionType);
 
   // Calculate week and day
-  const week = Math.ceil(current.day_number / 3);
-  const dayInWeek = ((current.day_number - 1) % 3) + 1;
+  const week = Math.ceil(currentActivity.dayNumber / 3);
+  const dayInWeek = ((currentActivity.dayNumber - 1) % 3) + 1;
 
   return (
-    <DynamicBlurBackground imageUrl={current.storage_url}>
+    <DynamicBlurBackground imageUrl={currentActivity.storageUrl}>
       {/* Floating 3D emojis around edges */}
       <Floating3DEmojis 
         reactions={activeReactionTypes}
@@ -195,67 +239,88 @@ const Reel = () => {
 
       {/* Header */}
       <motion.div
-        className="absolute top-0 left-0 right-0 z-40 flex items-center justify-between px-5"
+        className="absolute top-0 left-0 right-0 z-40 flex items-center justify-between px-4"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 16px), 16px)' }}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        {/* Progress navigation button */}
-        <button
-          onClick={handleNavigateToProgress}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-full text-white/80 hover:text-white transition-colors"
-          style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(12px)',
-          }}
-        >
-          <ChevronDown className="w-4 h-4" />
-          <span className="text-xs font-medium">Progress</span>
-        </button>
+        {/* User info */}
+        <div className="flex items-center gap-2">
+          <div 
+            className="w-9 h-9 rounded-full overflow-hidden"
+            style={{ border: '2px solid rgba(255,255,255,0.3)' }}
+          >
+            {currentGroup.avatarUrl ? (
+              <img 
+                src={currentGroup.avatarUrl} 
+                alt={currentGroup.displayName} 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
+                <span className="text-white text-sm font-bold">
+                  {currentGroup.displayName?.charAt(0).toUpperCase() || '?'}
+                </span>
+              </div>
+            )}
+          </div>
+          <div>
+            <div className="text-white font-semibold text-sm">{currentGroup.displayName}</div>
+            <div className="text-white/50 text-xs">
+              {currentGroup.activities.length} {currentGroup.activities.length === 1 ? 'story' : 'stories'}
+            </div>
+          </div>
+        </div>
         
-        <span className="text-white font-semibold text-lg tracking-wide">
-          Total Reaction • {String(currentReactions.total).padStart(2, '0')}
-        </span>
         <button
           onClick={handleClose}
-          className="text-white/80 hover:text-white transition-colors"
+          className="text-white/80 hover:text-white transition-colors p-2"
         >
-          <X className="w-7 h-7" strokeWidth={1.5} />
+          <X className="w-6 h-6" strokeWidth={1.5} />
         </button>
       </motion.div>
 
-      {/* Progress dots */}
-      <div 
-        className="absolute z-40 flex justify-center gap-1 left-0 right-0 px-6"
-        style={{ top: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 44px)' }}
-      >
-        {activities.map((_, i) => (
-          <div
-            key={i}
-            className="h-1 rounded-full transition-all duration-300"
-            style={{
-              width: i === currentIndex ? 20 : 6,
-              background: i === currentIndex 
-                ? 'linear-gradient(90deg, #a78bfa, #ec4899)' 
-                : 'rgba(255, 255, 255, 0.3)',
-            }}
-          />
-        ))}
-      </div>
+      {/* User story dots (horizontal) - which activity within this user */}
+      {currentGroup.activities.length > 1 && (
+        <div 
+          className="absolute z-40 flex justify-center gap-1.5 left-0 right-0 px-6"
+          style={{ top: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 52px)' }}
+        >
+          {currentGroup.activities.map((_, i) => (
+            <motion.div
+              key={i}
+              className="h-1 rounded-full transition-all duration-300 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentActivityIndex(i);
+              }}
+              style={{
+                width: i === currentActivityIndex ? 24 : 8,
+                background: i === currentActivityIndex 
+                  ? 'linear-gradient(90deg, #a78bfa, #ec4899)' 
+                  : 'rgba(255, 255, 255, 0.3)',
+              }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.03 }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Main content area */}
       <div
         className="absolute inset-0 flex flex-col items-center justify-center"
         style={{ 
-          paddingTop: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 70px)',
-          paddingBottom: '200px',
-          paddingInline: '24px',
+          paddingTop: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 80px)',
+          paddingBottom: '220px',
+          paddingInline: '20px',
         }}
       >
         {/* Card container with swipe gestures */}
         <motion.div 
-          className="relative w-full max-w-[360px] cursor-grab active:cursor-grabbing"
+          className="relative w-full max-w-[340px] cursor-grab active:cursor-grabbing"
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.2}
@@ -268,12 +333,12 @@ const Reel = () => {
             scale: cardScale,
           }}
         >
-          {/* The main card - Magazine style with liquid glass */}
+          {/* The main card */}
           <motion.div 
             className="relative w-full overflow-hidden"
             style={{ 
               borderRadius: 24,
-              aspectRatio: '3 / 4.2',
+              aspectRatio: '3 / 4',
               background: 'rgba(255, 255, 255, 0.06)',
               backdropFilter: 'blur(40px) saturate(180%)',
               WebkitBackdropFilter: 'blur(40px) saturate(180%)',
@@ -284,12 +349,12 @@ const Reel = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 180, damping: 22 }}
           >
-            {/* Card inner content with slight padding */}
+            {/* Card inner content */}
             <div className="absolute inset-3 rounded-2xl overflow-hidden">
               {/* Full bleed image/video */}
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={current.id}
+                  key={currentActivity.id}
                   className="absolute inset-0"
                   initial={{ opacity: 0, scale: 1.05 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -298,7 +363,7 @@ const Reel = () => {
                 >
                   {isVideo ? (
                     <video
-                      src={current.storage_url}
+                      src={currentActivity.storageUrl}
                       className="w-full h-full object-cover"
                       autoPlay
                       loop
@@ -307,14 +372,14 @@ const Reel = () => {
                     />
                   ) : (
                     <img
-                      src={current.storage_url}
-                      alt={`Day ${current.day_number}`}
+                      src={currentActivity.storageUrl}
+                      alt={`Day ${currentActivity.dayNumber}`}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const img = e.currentTarget;
                         if (!img.dataset.retried) {
                           img.dataset.retried = "true";
-                          img.src = current.storage_url + "?t=" + Date.now();
+                          img.src = currentActivity.storageUrl + "?t=" + Date.now();
                         }
                       }}
                     />
@@ -322,7 +387,7 @@ const Reel = () => {
                 </motion.div>
               </AnimatePresence>
 
-              {/* Gradient overlay for text readability */}
+              {/* Gradient overlay */}
               <div 
                 className="absolute inset-0 pointer-events-none"
                 style={{
@@ -334,7 +399,7 @@ const Reel = () => {
               <div className="absolute top-4 left-4 z-10">
                 <div className="text-white/80 text-xs font-medium italic tracking-wide">the</div>
                 <div 
-                  className="text-white font-black text-4xl leading-none"
+                  className="text-white font-black text-3xl leading-none"
                   style={{ 
                     textShadow: '0 4px 20px rgba(0,0,0,0.5)',
                     fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -342,81 +407,67 @@ const Reel = () => {
                 >
                   Player
                 </div>
-                <div className="text-white/80 text-xs mt-1.5 font-medium">
+                <div className="text-white/80 text-xs mt-1 font-medium">
                   Week {week} | Day {dayInWeek}
                 </div>
               </div>
 
+              {/* Activity badge */}
+              {currentActivity.activity && (
+                <div className="absolute top-4 right-4 z-10">
+                  <div 
+                    className="px-3 py-1.5 rounded-full text-white text-xs font-semibold"
+                    style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
+                  >
+                    {currentActivity.activity}
+                  </div>
+                </div>
+              )}
+
               {/* Stats at bottom */}
               <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between z-10">
-                <div className="flex gap-5">
-                  {current.duration && (
+                <div className="flex gap-4">
+                  {currentActivity.duration && (
                     <div>
-                      <div className="text-white font-bold text-2xl">{current.duration.replace(/[^0-9]/g, '') || '2'}hrs</div>
-                      <div className="text-white/70 text-xs">Duration</div>
+                      <div className="text-white font-bold text-xl">{currentActivity.duration.replace(/[^0-9]/g, '') || '2'}hrs</div>
+                      <div className="text-white/70 text-[10px]">Duration</div>
                     </div>
                   )}
-                  {current.pr && (
+                  {currentActivity.pr && (
                     <div>
-                      <div className="text-white font-bold text-2xl">{current.pr.replace(/[^0-9]/g, '') || '10'}</div>
-                      <div className="text-white/70 text-xs">Rounds</div>
+                      <div className="text-white font-bold text-xl">{currentActivity.pr.replace(/[^0-9]/g, '') || '10'}</div>
+                      <div className="text-white/70 text-[10px]">Rounds</div>
                     </div>
                   )}
-                  {!current.duration && !current.pr && (
+                  {!currentActivity.duration && !currentActivity.pr && (
                     <>
                       <div>
-                        <div className="text-white font-bold text-2xl">2hrs</div>
-                        <div className="text-white/70 text-xs">Duration</div>
-                      </div>
-                      <div>
-                        <div className="text-white font-bold text-2xl">10</div>
-                        <div className="text-white/70 text-xs">Rounds</div>
+                        <div className="text-white font-bold text-xl">Day</div>
+                        <div className="text-white/70 text-[10px]">#{currentActivity.dayNumber}</div>
                       </div>
                     </>
                   )}
                 </div>
+                
+                {/* Reaction count badge */}
+                <div 
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                  style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
+                >
+                  <span>🔥</span>
+                  <span className="text-white font-semibold text-sm">{currentReactions.total}</span>
+                </div>
               </div>
-            </div>
 
-            {/* Navigation overlays */}
-            <button
-              onClick={(e) => { e.stopPropagation(); goPrev(); }}
-              className="absolute left-0 top-0 bottom-0 w-1/4 z-20"
-              aria-label="Previous"
-            />
-            <button
-              onClick={(e) => { e.stopPropagation(); goNext(); }}
-              className="absolute right-0 top-0 bottom-0 w-1/4 z-20"
-              aria-label="Next"
-            />
-          </motion.div>
-
-          {/* User avatar overlapping card bottom */}
-          <motion.div 
-            className="absolute left-1/2 -translate-x-1/2 z-20"
-            style={{ bottom: -40 }}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <div 
-              className="w-20 h-20 rounded-full overflow-hidden"
-              style={{
-                border: '4px solid rgba(255, 255, 255, 0.95)',
-                boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)',
-              }}
-            >
-              {profile?.avatar_url ? (
-                <img 
-                  src={profile.avatar_url} 
-                  alt={profile.display_name || 'User'} 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
-                  <span className="text-white text-2xl font-bold">
-                    {profile?.display_name?.charAt(0).toUpperCase() || '?'}
+              {/* Multi-story indicator */}
+              {currentGroup.activities.length > 1 && (
+                <div 
+                  className="absolute top-1/2 right-3 -translate-y-1/2 flex flex-col items-center gap-1 z-10"
+                >
+                  <span className="text-white/60 text-[10px] font-medium">
+                    {currentActivityIndex + 1}/{currentGroup.activities.length}
                   </span>
+                  <span className="text-white/40 text-[8px]">tap</span>
                 </div>
               )}
             </div>
@@ -424,24 +475,81 @@ const Reel = () => {
         </motion.div>
       </div>
 
-      {/* Footer - Unified bottom pill */}
+      {/* User thumbnails strip (horizontal scroll) */}
+      <motion.div
+        className="absolute z-40 left-0 right-0 flex justify-center"
+        style={{ bottom: 'calc(max(env(safe-area-inset-bottom, 24px), 24px) + 100px)' }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <div className="flex gap-2 px-4 py-2 rounded-full" style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(12px)' }}>
+          {userGroups.map((group, idx) => (
+            <motion.button
+              key={group.userId}
+              onClick={() => {
+                setCurrentUserIndex(idx);
+                setCurrentActivityIndex(0);
+              }}
+              className="relative"
+              whileTap={{ scale: 0.9 }}
+            >
+              <div 
+                className="w-10 h-10 rounded-full overflow-hidden transition-all"
+                style={{ 
+                  border: idx === currentUserIndex 
+                    ? '2px solid #a78bfa' 
+                    : '2px solid rgba(255,255,255,0.2)',
+                  opacity: idx === currentUserIndex ? 1 : 0.6,
+                }}
+              >
+                {group.avatarUrl ? (
+                  <img 
+                    src={group.avatarUrl} 
+                    alt={group.displayName} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">
+                      {group.displayName?.charAt(0).toUpperCase() || '?'}
+                    </span>
+                  </div>
+                )}
+              </div>
+              {/* Activity count badge */}
+              {group.activities.length > 1 && (
+                <div 
+                  className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
+                  style={{ background: 'linear-gradient(135deg, #a78bfa, #ec4899)' }}
+                >
+                  {group.activities.length}
+                </div>
+              )}
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Bottom area: Reaction pill + View Progress button */}
       <motion.div 
-        className="absolute bottom-0 left-0 right-0 z-40 flex flex-col items-center"
+        className="absolute bottom-0 left-0 right-0 z-40 flex flex-col items-center gap-3"
         style={{ 
-          paddingBottom: 'max(env(safe-area-inset-bottom, 28px), 28px)',
+          paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
           paddingInline: '20px',
         }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
+        {/* Reaction pill */}
         <motion.button
           onClick={() => isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true)}
           className="relative overflow-hidden"
           style={{
             minWidth: 200,
-            height: 56,
-            borderRadius: 28,
+            height: 52,
+            borderRadius: 26,
             background: 'rgba(45, 40, 55, 0.92)',
             backdropFilter: 'blur(24px)',
             WebkitBackdropFilter: 'blur(24px)',
@@ -454,7 +562,7 @@ const Reel = () => {
         >
           <AnimatePresence mode="wait">
             {isOwnStory ? (
-              /* Owner view - shows avatars of reactors */
+              /* Owner view */
               <motion.div
                 key="owner-pill"
                 className="flex items-center justify-center gap-2 h-full px-4"
@@ -471,7 +579,7 @@ const Reel = () => {
                           key={reactor.id}
                           src={reactor.avatar}
                           alt={reactor.name}
-                          className="w-11 h-11 rounded-full object-cover"
+                          className="w-10 h-10 rounded-full object-cover"
                           style={{
                             border: '2px solid rgba(45, 40, 55, 0.95)',
                             zIndex: 10 - i,
@@ -483,7 +591,7 @@ const Reel = () => {
                       ))}
                       {currentReactions.total > 3 && (
                         <motion.div
-                          className="w-11 h-11 rounded-full flex items-center justify-center text-white/90 text-sm font-semibold"
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-white/90 text-sm font-semibold"
                           style={{
                             background: 'rgba(80, 75, 95, 0.9)',
                             border: '2px solid rgba(45, 40, 55, 0.95)',
@@ -504,7 +612,7 @@ const Reel = () => {
                 )}
               </motion.div>
             ) : (
-              /* Visitor view - shows SEND YOUR with emojis */
+              /* Visitor view */
               <motion.div
                 key="visitor-pill"
                 className="flex items-center justify-center gap-3 h-full px-5"
@@ -513,12 +621,28 @@ const Reel = () => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
-                <img src={clapEmoji} alt="clap" className="w-8 h-8 object-contain" />
-                <span className="text-white font-bold text-base tracking-widest">SEND YOUR</span>
-                <img src={fireEmoji} alt="fire" className="w-8 h-8 object-contain" />
+                <img src={clapEmoji} alt="clap" className="w-7 h-7 object-contain" />
+                <span className="text-white font-bold text-sm tracking-widest">SEND YOUR</span>
+                <img src={fireEmoji} alt="fire" className="w-7 h-7 object-contain" />
               </motion.div>
             )}
           </AnimatePresence>
+        </motion.button>
+
+        {/* View Progress button */}
+        <motion.button
+          onClick={handleNavigateToProgress}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full text-white/80 hover:text-white transition-colors"
+          style={{
+            background: 'rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <MapPin className="w-4 h-4" />
+          <span className="text-sm font-medium">View Progress</span>
         </motion.button>
       </motion.div>
 
