@@ -134,7 +134,10 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
   const renderCard = (index: number, zIndex: number, opacity: number) => {
     const photo = photos[index];
     const hasPhoto = photo !== null && photo.storageUrl;
-    const isVideo = !!photo && (photo.isVideo === true || isVideoUrl(photo.storageUrl));
+    // storageUrl is always the templated PNG screenshot - render as image, not video
+    // The actual video/image source is in originalUrl
+    const displayUrl = photo?.storageUrl;
+    const isDisplayVideo = displayUrl ? isVideoUrl(displayUrl) : false;
     const isActiveDay = isActiveWeek && !hasPhoto && index === photos.findIndex(p => p === null || !p.storageUrl);
     const dayNumber = weekIndex * 3 + index + 1;
     
@@ -205,11 +208,12 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
         whileTap={{ scale: 0.96 }}
       >
         {/* Photo content - always render if exists */}
+        {/* storageUrl is always the templated PNG - render as image */}
         {hasPhoto && (
           <>
-            {isVideo ? (
+            {isDisplayVideo ? (
               <video
-                src={photo.storageUrl}
+                src={displayUrl}
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{ zIndex: 1 }}
                 muted
@@ -218,12 +222,12 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
                 autoPlay
                 preload="metadata"
                 onError={() => {
-                  console.error("Failed to load video:", photo.storageUrl);
+                  console.error("Failed to load video:", displayUrl);
                 }}
               />
             ) : (
               <img
-                src={photo.storageUrl}
+                src={displayUrl}
                 alt={`Day ${dayNumber}`}
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{ zIndex: 1 }}
@@ -232,9 +236,9 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
                   const img = e.currentTarget;
                   if (!img.dataset.retried) {
                     img.dataset.retried = "true";
-                    img.src = photo.storageUrl + "?t=" + Date.now();
+                    img.src = displayUrl + "?t=" + Date.now();
                   } else {
-                    console.error("Failed to load image:", photo.storageUrl);
+                    console.error("Failed to load image:", displayUrl);
                   }
                 }}
               />

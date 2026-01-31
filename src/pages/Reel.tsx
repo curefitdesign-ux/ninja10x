@@ -347,8 +347,9 @@ const Reel = () => {
   }
 
   // Use templated/framed image (storageUrl) for display
+  // storageUrl is always the templated PNG screenshot - check the actual URL extension
   const mediaUrl = currentActivity.storageUrl;
-  const isVideo = currentActivity.isVideo || isVideoUrl(mediaUrl);
+  const isVideo = isVideoUrl(mediaUrl); // Only check URL, not the isVideo flag
   const currentReactions = localReactions[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS } };
   
   const activeReactionTypes = Object.entries(currentReactions.reactions)
