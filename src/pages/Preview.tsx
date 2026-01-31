@@ -702,16 +702,24 @@ const Preview = () => {
   // Template Selection Step (confirmation is now a popup on ShareSheet)
   return (
     <div 
-      className="fixed inset-0 w-full bg-black touch-manipulation overflow-y-auto" 
+      className="fixed w-full touch-manipulation overflow-y-auto" 
       style={{ 
-        height: '100dvh',
-        minHeight: '-webkit-fill-available',
+        top: 'calc(-1 * env(safe-area-inset-top, 0px))',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        minHeight: 'calc(100dvh + env(safe-area-inset-top, 0px))',
+        backgroundColor: '#252535',
       }}
     >
-      {/* Blurred background image with dynamic color overlay */}
+      {/* Blurred background image with dynamic color overlay - edge to edge */}
       <div 
-        className="fixed inset-0 scale-150 transition-all duration-500 animate-bg-drift pointer-events-none"
+        className="fixed scale-150 transition-all duration-500 animate-bg-drift pointer-events-none"
         style={{
+          top: 'calc(-1 * env(safe-area-inset-top, 0px))',
+          left: 0,
+          right: 0,
+          bottom: 0,
           backgroundImage: `url("${imageUrl}")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -720,7 +728,15 @@ const Preview = () => {
       />
       
       {/* Subtle particle/dust animation */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      <div 
+        className="fixed overflow-hidden pointer-events-none"
+        style={{
+          top: 'calc(-1 * env(safe-area-inset-top, 0px))',
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+      >
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
@@ -761,15 +777,27 @@ const Preview = () => {
         />
       </div>
       
-      {/* Dynamic gradient overlay based on current frame */}
+      {/* Dynamic gradient overlay based on current frame - edge to edge */}
       <div 
-        className="fixed inset-0 transition-all duration-500 animate-color-pulse pointer-events-none"
+        className="fixed transition-all duration-500 animate-color-pulse pointer-events-none"
         style={{ 
+          top: 'calc(-1 * env(safe-area-inset-top, 0px))',
+          left: 0,
+          right: 0,
+          bottom: 0,
           backgroundColor: FRAME_COLORS[currentFrame].bg,
           backgroundImage: FRAME_COLORS[currentFrame].gradient 
         }}
       />
-      <div className="fixed inset-0 bg-black/20 animate-subtle-pulse pointer-events-none" />
+      <div 
+        className="fixed bg-black/20 animate-subtle-pulse pointer-events-none" 
+        style={{
+          top: 'calc(-1 * env(safe-area-inset-top, 0px))',
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+      />
       
       {/* Activity-specific background effect */}
       {activity && <ActivityBackgroundEffect activity={activity} />}
