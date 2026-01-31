@@ -771,6 +771,7 @@ const Reel = () => {
               setShowReactsSheet(true);
             }}
             totalReactions={currentReactions.total}
+            reactorProfiles={currentReactions.reactorProfiles}
           />
         )}
       </AnimatePresence>
