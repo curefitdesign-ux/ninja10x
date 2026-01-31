@@ -197,7 +197,7 @@ export default function SendReactionSheet({
           <div className="mx-5 h-px bg-white/10 my-2" />
         )}
 
-        {/* SEND REACTION SECTION - Scattered random layout */}
+        {/* SEND REACTION SECTION - Scattered layout with subtle grid */}
         <div className="px-5 pt-3 pb-6">
           <motion.span 
             className="text-white/60 text-sm font-medium block mb-5"
@@ -208,24 +208,41 @@ export default function SendReactionSheet({
             {userReaction?.reactionType ? 'Change your reaction' : 'Send a reaction'}
           </motion.span>
 
-          {/* Scattered emoji layout - random positions and sizes */}
-          <div className="relative h-[160px] w-full">
+          {/* Container with subtle grid background */}
+          <div 
+            className="relative h-[180px] w-full rounded-2xl overflow-hidden"
+            style={{
+              background: 'rgba(255, 255, 255, 0.03)',
+              backgroundImage: `
+                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)
+              `,
+              backgroundSize: '40px 40px',
+            }}
+          >
+            {/* Optically balanced 5x2 scattered layout */}
             {SEND_REACTIONS.map((type, i) => {
               const isUserReaction = userReaction?.reactionType === type;
-              // Better spaced scattered positions with varied sizes
-              const positions = [
-                { left: '0%', top: '0%', rotate: -12, size: 48 },
-                { left: '18%', top: '55%', rotate: 8, size: 44 },
-                { left: '35%', top: '5%', rotate: -5, size: 52 },
-                { left: '55%', top: '60%', rotate: 10, size: 40 },
-                { left: '75%', top: '8%', rotate: -8, size: 46 },
-                { left: '5%', top: '70%', rotate: 15, size: 42 },
-                { left: '28%', top: '35%', rotate: -10, size: 50 },
-                { left: '48%', top: '30%', rotate: 5, size: 38 },
-                { left: '68%', top: '50%', rotate: -6, size: 54 },
-                { left: '85%', top: '40%', rotate: 12, size: 44 },
+              // 5 columns x 2 rows - optically balanced with slight offsets
+              const row = Math.floor(i / 5);
+              const col = i % 5;
+              // Base grid positions with organic offsets
+              const baseLeft = col * 20 + 2; // 20% per column, 2% padding
+              const baseTop = row * 50 + 10; // 50% per row, 10% padding
+              // Subtle random offsets for organic feel
+              const offsets = [
+                { dx: 2, dy: 5, rotate: -8, size: 46 },
+                { dx: -1, dy: -3, rotate: 6, size: 50 },
+                { dx: 3, dy: 8, rotate: -4, size: 44 },
+                { dx: -2, dy: 2, rotate: 10, size: 48 },
+                { dx: 1, dy: -5, rotate: -6, size: 52 },
+                { dx: -3, dy: 3, rotate: 8, size: 50 },
+                { dx: 2, dy: -2, rotate: -10, size: 44 },
+                { dx: 0, dy: 6, rotate: 5, size: 46 },
+                { dx: -1, dy: -4, rotate: -5, size: 52 },
+                { dx: 3, dy: 0, rotate: 12, size: 48 },
               ];
-              const pos = positions[i] || positions[0];
+              const offset = offsets[i] || offsets[0];
               
               return (
                 <motion.button
@@ -233,24 +250,24 @@ export default function SendReactionSheet({
                   onClick={() => isUserReaction ? handleRemoveReaction() : onReact(type)}
                   className="absolute flex items-center justify-center"
                   style={{
-                    left: pos.left,
-                    top: pos.top,
+                    left: `${baseLeft + offset.dx}%`,
+                    top: `${baseTop + offset.dy}%`,
                     minWidth: 44,
                     minHeight: 44,
                   }}
-                  initial={{ opacity: 0, scale: 0, rotate: pos.rotate - 30 }}
+                  initial={{ opacity: 0, scale: 0, rotate: offset.rotate - 20 }}
                   animate={{ 
                     opacity: 1, 
                     scale: 1, 
-                    rotate: pos.rotate,
+                    rotate: offset.rotate,
                   }}
                   transition={{ 
-                    delay: 0.08 + i * 0.035, 
+                    delay: 0.08 + i * 0.03, 
                     type: 'spring', 
                     stiffness: 400,
                     damping: 18,
                   }}
-                  whileHover={{ scale: 1.2, rotate: 0 }}
+                  whileHover={{ scale: 1.15, rotate: 0 }}
                   whileTap={{ scale: 0.85 }}
                 >
                   <div className="relative">
@@ -258,10 +275,10 @@ export default function SendReactionSheet({
                       src={REACTION_IMAGES[type]} 
                       alt={type} 
                       style={{ 
-                        width: pos.size,
-                        height: pos.size,
+                        width: offset.size,
+                        height: offset.size,
                         objectFit: 'contain',
-                        filter: `drop-shadow(0 4px 12px rgba(0,0,0,0.5))`,
+                        filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))',
                       }}
                     />
                     {/* Small X badge on user's reaction */}
