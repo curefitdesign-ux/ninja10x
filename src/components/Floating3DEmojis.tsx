@@ -2,10 +2,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ReactionType } from '@/services/journey-service';
 
 // 3D reaction assets
-import clapEmoji from '@/assets/reactions/clap-3d.png';
-import fireEmoji from '@/assets/reactions/fire-3d.png';
-import fistbumpEmoji from '@/assets/reactions/fistbump.png';
-import wowEmoji from '@/assets/reactions/wow.png';
+import clapImg from '@/assets/reactions/clap-hands.png';
+import fireImg from '@/assets/reactions/fire-new.png';
+import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
+import wowImg from '@/assets/reactions/wow.png';
+import flexImg from '@/assets/reactions/flex.png';
+import trophyImg from '@/assets/reactions/dumbbells.png';
+import runnerImg from '@/assets/reactions/runner.png';
+import energyImg from '@/assets/reactions/energy.png';
+import timerImg from '@/assets/reactions/stopwatch.png';
+import heartImg from '@/assets/reactions/heart-workout.png';
 
 interface Floating3DEmojisProps {
   reactions: ReactionType[];
@@ -13,11 +19,16 @@ interface Floating3DEmojisProps {
 }
 
 const EMOJI_ASSETS: Record<ReactionType, string> = {
-  heart: fireEmoji,
-  fire: fireEmoji,
-  clap: clapEmoji,
-  fistbump: fistbumpEmoji,
-  wow: wowEmoji,
+  heart: heartImg,
+  fire: fireImg,
+  clap: clapImg,
+  fistbump: fistbumpImg,
+  wow: wowImg,
+  flex: flexImg,
+  trophy: trophyImg,
+  runner: runnerImg,
+  energy: energyImg,
+  timer: timerImg,
 };
 
 // Positions around the viewport edges for floating emojis

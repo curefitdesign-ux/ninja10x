@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export type ReactionType = 'heart' | 'clap' | 'fistbump' | 'wow' | 'fire';
+export type ReactionType = 'heart' | 'clap' | 'fistbump' | 'wow' | 'fire' | 'flex' | 'trophy' | 'runner' | 'energy' | 'timer';
 
 export interface ActivityReaction {
   type: ReactionType;
@@ -89,6 +89,11 @@ export async function fetchAllActivities(): Promise<JourneyActivity[]> {
         fistbump: { type: 'fistbump', count: 0, userReacted: false },
         wow: { type: 'wow', count: 0, userReacted: false },
         fire: { type: 'fire', count: 0, userReacted: false },
+        flex: { type: 'flex', count: 0, userReacted: false },
+        trophy: { type: 'trophy', count: 0, userReacted: false },
+        runner: { type: 'runner', count: 0, userReacted: false },
+        energy: { type: 'energy', count: 0, userReacted: false },
+        timer: { type: 'timer', count: 0, userReacted: false },
       };
     }
     if (!totalReactionMap[r.activity_id]) {
@@ -114,6 +119,11 @@ export async function fetchAllActivities(): Promise<JourneyActivity[]> {
       fistbump: { type: 'fistbump', count: 0, userReacted: false },
       wow: { type: 'wow', count: 0, userReacted: false },
       fire: { type: 'fire', count: 0, userReacted: false },
+      flex: { type: 'flex', count: 0, userReacted: false },
+      trophy: { type: 'trophy', count: 0, userReacted: false },
+      runner: { type: 'runner', count: 0, userReacted: false },
+      energy: { type: 'energy', count: 0, userReacted: false },
+      timer: { type: 'timer', count: 0, userReacted: false },
     },
     is_own: user ? a.user_id === user.id : false,
   }));

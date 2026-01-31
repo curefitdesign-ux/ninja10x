@@ -4,10 +4,16 @@ import { ReactionType } from '@/services/journey-service';
 import ProfileAvatar from '@/components/ProfileAvatar';
 
 // 3D reaction assets
-import fireImg from '@/assets/reactions/fire-3d.png';
-import clapImg from '@/assets/reactions/clap-3d.png';
-import fistbumpImg from '@/assets/reactions/fistbump.png';
+import clapImg from '@/assets/reactions/clap-hands.png';
+import fireImg from '@/assets/reactions/fire-new.png';
+import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
 import wowImg from '@/assets/reactions/wow.png';
+import flexImg from '@/assets/reactions/flex.png';
+import trophyImg from '@/assets/reactions/dumbbells.png';
+import runnerImg from '@/assets/reactions/runner.png';
+import energyImg from '@/assets/reactions/energy.png';
+import timerImg from '@/assets/reactions/stopwatch.png';
+import heartImg from '@/assets/reactions/heart-workout.png';
 
 interface ReactorProfile {
   userId: string;
@@ -25,15 +31,20 @@ interface SendReactionSheetProps {
 }
 
 const REACTION_IMAGES: Record<ReactionType, string> = {
-  heart: fireImg,
+  heart: heartImg,
   fire: fireImg,
   clap: clapImg,
   fistbump: fistbumpImg,
   wow: wowImg,
+  flex: flexImg,
+  trophy: trophyImg,
+  runner: runnerImg,
+  energy: energyImg,
+  timer: timerImg,
 };
 
-// Full grid of reactions for sending
-const SEND_REACTIONS: ReactionType[] = ['fire', 'clap', 'fistbump', 'wow', 'heart'];
+// Full grid of all 10 reactions for sending
+const SEND_REACTIONS: ReactionType[] = ['fire', 'clap', 'fistbump', 'flex', 'trophy', 'runner', 'energy', 'timer', 'heart', 'wow'];
 
 export default function SendReactionSheet({ 
   onReact, 
@@ -117,23 +128,25 @@ export default function SendReactionSheet({
               )}
             </div>
             
-            {/* Emoji strip showing reaction types */}
-            <div className="flex items-center gap-1 flex-1">
+            {/* Emoji strip showing reaction types with counts - show ALL */}
+            <div className="flex items-center gap-1 flex-1 overflow-x-auto scrollbar-none">
               {Object.entries(
                 reactorProfiles.reduce((acc, r) => {
                   if (r.reactionType) acc[r.reactionType] = (acc[r.reactionType] || 0) + 1;
                   return acc;
                 }, {} as Record<string, number>)
-              ).slice(0, 3).map(([type]) => (
-                <img 
-                  key={type}
-                  src={REACTION_IMAGES[type as ReactionType]} 
-                  alt={type} 
-                  className="w-6 h-6 object-contain"
-                  style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}
-                />
+              ).map(([type, count]) => (
+                <div key={type} className="flex items-center gap-0.5 flex-shrink-0">
+                  <img 
+                    src={REACTION_IMAGES[type as ReactionType]} 
+                    alt={type} 
+                    className="w-6 h-6 object-contain"
+                    style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}
+                  />
+                  <span className="text-white/70 text-xs font-medium">{count}</span>
+                </div>
               ))}
-              <span className="text-white font-semibold text-base ml-1">{totalReactions}</span>
+              <span className="text-white font-semibold text-base ml-2">{totalReactions}</span>
             </div>
             
             {/* View all arrow */}
@@ -160,7 +173,7 @@ export default function SendReactionSheet({
             Send a reaction
           </motion.span>
 
-          {/* Emoji grid - randomized arrangement */}
+          {/* Emoji grid - 5 columns, 2 rows for 10 reactions */}
           <div className="grid grid-cols-5 gap-3">
             {SEND_REACTIONS.map((type, i) => (
               <motion.button
@@ -173,7 +186,7 @@ export default function SendReactionSheet({
                 initial={{ opacity: 0, scale: 0.5, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ 
-                  delay: 0.15 + i * 0.04, 
+                  delay: 0.15 + i * 0.03, 
                   type: 'spring', 
                   stiffness: 400,
                   damping: 18,
@@ -184,7 +197,7 @@ export default function SendReactionSheet({
                 <img 
                   src={REACTION_IMAGES[type]} 
                   alt={type} 
-                  className="w-12 h-12 object-contain"
+                  className="w-10 h-10 object-contain"
                   style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))' }}
                 />
               </motion.button>
