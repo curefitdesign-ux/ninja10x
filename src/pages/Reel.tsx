@@ -37,13 +37,12 @@ const DEFAULT_REACTIONS: Record<ReactionType, ActivityReaction> = {
   fire: { type: 'fire', count: 0, userReacted: false },
 };
 
-// Mock user avatars for demo
-const MOCK_REACTORS = [
-  { id: '1', name: 'Uttam', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face' },
-  { id: '2', name: 'Abhipsha', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face' },
-  { id: '3', name: 'Tavleen', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face' },
-  { id: '4', name: 'Sanya', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face' },
-];
+// Reactor profile type from activities
+interface ReactorProfile {
+  userId: string;
+  displayName: string;
+  avatarUrl?: string;
+}
 
 const SWIPE_THRESHOLD = 50;
 
@@ -68,6 +67,7 @@ const Reel = () => {
   const [localReactions, setLocalReactions] = useState<Record<string, {
     total: number;
     reactions: Record<ReactionType, ActivityReaction>;
+    reactorProfiles: ReactorProfile[];
   }>>({});
   
   // Delete confirmation state
@@ -103,13 +103,18 @@ const Reel = () => {
       const groups = await fetchAllActivitiesGroupedByUser();
       setUserGroups(groups);
       
-      // Initialize reactions state
-      const map: Record<string, { total: number; reactions: Record<ReactionType, ActivityReaction> }> = {};
+      // Initialize reactions state with reactor profiles
+      const map: Record<string, { 
+        total: number; 
+        reactions: Record<ReactionType, ActivityReaction>;
+        reactorProfiles: ReactorProfile[];
+      }> = {};
       for (const group of groups) {
         for (const a of group.activities) {
           map[a.id] = {
             total: a.reactionCount || 0,
             reactions: a.reactions || { ...DEFAULT_REACTIONS },
+            reactorProfiles: a.reactorProfiles || [],
           };
         }
       }
@@ -254,18 +259,28 @@ const Reel = () => {
     setShowSendReactionSheet(false);
 
     setLocalReactions(prev => {
-      const existing = prev[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS } };
+      const existing = prev[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS }, reactorProfiles: [] };
       const newReactions = { ...existing.reactions };
       newReactions[type] = {
         ...newReactions[type],
         count: newReactions[type].count + 1,
         userReacted: true,
       };
+      // Add current user to reactor profiles if not already there
+      const newReactorProfiles = [...existing.reactorProfiles];
+      if (profile && !newReactorProfiles.some(p => p.userId === user?.id)) {
+        newReactorProfiles.unshift({
+          userId: user?.id || '',
+          displayName: profile.display_name,
+          avatarUrl: profile.avatar_url,
+        });
+      }
       return {
         ...prev,
         [currentActivity.id]: {
           total: existing.total + 1,
           reactions: newReactions,
+          reactorProfiles: newReactorProfiles,
         },
       };
     });
@@ -352,7 +367,7 @@ const Reel = () => {
   // storageUrl is always the templated PNG screenshot - check the actual URL extension
   const mediaUrl = currentActivity.storageUrl;
   const isVideo = isVideoUrl(mediaUrl); // Only check URL, not the isVideo flag
-  const currentReactions = localReactions[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS } };
+  const currentReactions = localReactions[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS }, reactorProfiles: [] };
   
   const activeReactionTypes = Object.entries(currentReactions.reactions)
     .filter(([, r]) => r.count > 0)
@@ -426,24 +441,24 @@ const Reel = () => {
                 animate={{ scale: isActive ? 1 : 0.85 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
-                {/* Story ring segments around avatar */}
+                {/* Instagram-style story ring - thicker and more visible */}
                 <svg
                   className="absolute inset-0"
                   style={{
-                    width: isActive ? 56 : 44,
-                    height: isActive ? 56 : 44,
+                    width: isActive ? 64 : 52,
+                    height: isActive ? 64 : 52,
                     transform: 'rotate(-90deg)',
                   }}
                   viewBox="0 0 100 100"
                 >
                   {Array.from({ length: activityCount }).map((_, segIdx) => {
-                    const gapAngle = activityCount > 1 ? 8 : 0;
+                    const gapAngle = activityCount > 1 ? 10 : 0;
                     const totalGap = gapAngle * activityCount;
                     const segmentAngle = (360 - totalGap) / activityCount;
                     const startAngle = segIdx * (segmentAngle + gapAngle);
                     const isSegmentViewed = segIdx <= currentIdx;
                     
-                    const radius = 46;
+                    const radius = 44;
                     const circumference = 2 * Math.PI * radius;
                     const segmentLength = (segmentAngle / 360) * circumference;
                     const offset = (startAngle / 360) * circumference;
@@ -455,34 +470,40 @@ const Reel = () => {
                         cy="50"
                         r={radius}
                         fill="none"
-                        strokeWidth="5"
-                        stroke={isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.3)'}
+                        strokeWidth="7"
+                        stroke={isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.25)'}
                         strokeDasharray={`${segmentLength} ${circumference}`}
                         strokeDashoffset={-offset}
                         strokeLinecap="round"
+                        style={{
+                          filter: isActive && isSegmentViewed ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
+                        }}
                       />
                     );
                   })}
                   <defs>
                     <linearGradient id="storyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#a78bfa" />
-                      <stop offset="100%" stopColor="#ec4899" />
+                      <stop offset="0%" stopColor="#FEDA75" />
+                      <stop offset="25%" stopColor="#FA7E1E" />
+                      <stop offset="50%" stopColor="#D62976" />
+                      <stop offset="75%" stopColor="#962FBF" />
+                      <stop offset="100%" stopColor="#4F5BD5" />
                     </linearGradient>
                   </defs>
                 </svg>
                 
-                {/* Avatar */}
+                {/* Avatar with more padding for thicker ring */}
                 <div
                   style={{
-                    width: isActive ? 56 : 44,
-                    height: isActive ? 56 : 44,
-                    padding: 3,
+                    width: isActive ? 64 : 52,
+                    height: isActive ? 64 : 52,
+                    padding: isActive ? 5 : 4,
                   }}
                 >
                   <ProfileAvatar
                     src={group.avatarUrl}
                     name={group.displayName}
-                    size={isActive ? 50 : 38}
+                    size={isActive ? 54 : 44}
                     style={{
                       opacity: isActive ? 1 : 0.7,
                       transition: 'all 0.2s ease',
@@ -615,37 +636,22 @@ const Reel = () => {
               >
                 {currentReactions.total > 0 ? (
                   <>
-                    <div className="flex -space-x-3">
-                      {MOCK_REACTORS.slice(0, Math.min(currentReactions.total, 3)).map((reactor, i) => (
+                    <div className="flex -space-x-2.5">
+                      {currentReactions.reactorProfiles.slice(0, 3).map((reactor, i) => (
                         <ProfileAvatar
-                          key={reactor.id}
-                          src={reactor.avatar}
-                          name={reactor.name}
-                          size={36}
+                          key={reactor.userId}
+                          src={reactor.avatarUrl}
+                          name={reactor.displayName}
+                          size={32}
                           style={{
-                            border: '2px solid rgba(255, 255, 255, 0.15)',
+                            border: '2px solid rgba(255, 255, 255, 0.2)',
                             zIndex: 10 - i,
                           }}
                         />
                       ))}
-                      {currentReactions.total > 3 && (
-                        <motion.div
-                          className="w-9 h-9 rounded-full flex items-center justify-center text-white/90 text-sm font-semibold"
-                          style={{
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            backdropFilter: 'blur(12px)',
-                            border: '2px solid rgba(255, 255, 255, 0.15)',
-                            zIndex: 7,
-                          }}
-                          initial={{ scale: 0, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: 0.24 }}
-                        >
-                          +{currentReactions.total - 3}
-                        </motion.div>
-                      )}
                     </div>
-                    <ChevronUp className="w-5 h-5 text-white/60 ml-1" />
+                    <span className="text-white font-bold text-base ml-1">{currentReactions.total}</span>
+                    <ChevronUp className="w-5 h-5 text-white/60 ml-0.5" />
                   </>
                 ) : (
                   <span className="text-white/60 text-sm font-medium px-4">No reactions yet</span>
@@ -724,7 +730,7 @@ const Reel = () => {
           <ReactsSoFarSheet
             total={currentReactions.total}
             reactions={currentReactions.reactions}
-            reactors={MOCK_REACTORS}
+            reactorProfiles={currentReactions.reactorProfiles}
             onClose={() => setShowReactsSheet(false)}
           />
         )}
