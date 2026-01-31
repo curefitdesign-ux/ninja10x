@@ -19,6 +19,7 @@ export interface JourneyActivity {
   duration: string | null;
   pr: string | null;
   day_number: number;
+  is_public: boolean;
   created_at: string;
   updated_at: string;
   // Joined fields

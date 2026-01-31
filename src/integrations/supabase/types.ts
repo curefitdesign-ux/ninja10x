@@ -54,6 +54,7 @@ export type Database = {
           duration: string | null
           frame: string | null
           id: string
+          is_public: boolean
           is_video: boolean | null
           original_url: string | null
           pr: string | null
@@ -68,6 +69,7 @@ export type Database = {
           duration?: string | null
           frame?: string | null
           id?: string
+          is_public?: boolean
           is_video?: boolean | null
           original_url?: string | null
           pr?: string | null
@@ -82,6 +84,7 @@ export type Database = {
           duration?: string | null
           frame?: string | null
           id?: string
+          is_public?: boolean
           is_video?: boolean | null
           original_url?: string | null
           pr?: string | null
