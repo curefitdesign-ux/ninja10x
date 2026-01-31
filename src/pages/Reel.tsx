@@ -666,17 +666,38 @@ const Reel = () => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
-                {/* User's own avatar */}
+                {currentReactions.total > 0 ? (
+                  <>
+                    {/* Show reactor avatars for others' posts too */}
+                    <div className="flex -space-x-2">
+                      {currentReactions.reactorProfiles.slice(0, 3).map((reactor, i) => (
+                        <ProfileAvatar
+                          key={reactor.userId}
+                          src={reactor.avatarUrl}
+                          name={reactor.displayName}
+                          size={28}
+                          style={{
+                            border: '2px solid rgba(255, 255, 255, 0.2)',
+                            zIndex: 10 - i,
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-white/70 font-medium text-sm">{currentReactions.total}</span>
+                    <div className="w-px h-5 bg-white/20" />
+                  </>
+                ) : null}
+                {/* User's own avatar - always show for sending */}
                 <ProfileAvatar
                   src={profile?.avatar_url}
                   name={profile?.display_name || 'You'}
-                  size={32}
+                  size={currentReactions.total > 0 ? 26 : 32}
                   style={{
                     border: '2px solid rgba(255, 255, 255, 0.2)',
                   }}
                 />
-                <span className="text-white font-bold text-sm tracking-widest">SEND YOUR</span>
-                <img src={fireEmoji} alt="fire" className="w-7 h-7 object-contain" />
+                <span className="text-white font-bold text-sm tracking-widest">SEND</span>
+                <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain" />
               </motion.div>
             )}
           </AnimatePresence>

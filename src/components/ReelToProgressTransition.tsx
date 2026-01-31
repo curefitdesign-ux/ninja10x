@@ -107,24 +107,13 @@ export default function ReelToProgressTransition({
             height: '100dvh',
             minHeight: '-webkit-fill-available',
           }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.25 }}
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 50 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
-          {/* Pull-down wrapper */}
-          <motion.div
-            className="flex-1 flex flex-col"
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.4 }}
-            onDragEnd={handleDragEnd}
-            style={{ 
-              y: dragY,
-              opacity: progressOpacity,
-              scale: progressScale,
-            }}
-          >
+          {/* No pull-down - just static content */}
+          <motion.div className="flex-1 flex flex-col">
             {/* Background aurora effect */}
             <div 
               className="absolute pointer-events-none"
@@ -136,32 +125,19 @@ export default function ReelToProgressTransition({
               />
             </div>
 
-            {/* Header */}
+            {/* Header - minimal, just close button */}
             <motion.div
-              className="flex-shrink-0 w-full flex items-center justify-between px-4"
+              className="flex-shrink-0 w-full flex items-center justify-end px-4"
               style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)' }}
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ delay: 0.1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.15 }}
             >
-              <motion.div 
-                className="flex items-center gap-2 text-white/60"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                <ChevronDown className="w-5 h-5" />
-                <span className="text-xs font-medium">Pull down for stories</span>
-              </motion.div>
-              
               <motion.button
                 onClick={onClose}
                 className="flex items-center justify-center text-white/80 active:scale-95 transition-transform"
                 style={{ width: '36px', height: '36px' }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
+                whileTap={{ scale: 0.9 }}
               >
                 <X className="w-6 h-6" strokeWidth={1.5} />
               </motion.button>
@@ -184,10 +160,10 @@ export default function ReelToProgressTransition({
                   transition={{ type: "spring", stiffness: 200, damping: 25 }}
                 >
                   <div className="flex items-end gap-3">
-                    {/* Transition card - current activity as hero */}
+                    {/* Transition card - current activity as hero with layoutId for shared-element */}
                     {currentActivity && (
-                      <motion.div
-                        className="relative flex-shrink-0 overflow-hidden"
+                      <motion.button
+                        className="relative flex-shrink-0 overflow-hidden cursor-pointer"
                         style={{
                           width: "72px",
                           height: "100px",
@@ -195,15 +171,17 @@ export default function ReelToProgressTransition({
                           boxShadow: "0 12px 40px rgba(100, 70, 180, 0.5)",
                           border: "2px solid rgba(160, 120, 220, 0.35)",
                         }}
-                        layoutId="reel-card"
-                        initial={{ scale: 3, y: 100, opacity: 0 }}
+                        layoutId="reel-hero-card"
+                        onClick={() => onStoryTap(0, currentActivity.userId)}
+                        initial={{ scale: 2.5, y: 80, opacity: 0.5 }}
                         animate={{ scale: 1, y: 0, opacity: 1 }}
                         exit={{ scale: 2.5, y: 80, opacity: 0 }}
+                        whileTap={{ scale: 0.95 }}
                         transition={{ 
                           type: "spring", 
-                          stiffness: 280, 
-                          damping: 32,
-                          mass: 0.8,
+                          stiffness: 350, 
+                          damping: 35,
+                          mass: 0.6,
                         }}
                       >
                         {isVideo ? (
@@ -240,7 +218,7 @@ export default function ReelToProgressTransition({
                         >
                           D{currentActivity.dayNumber}
                         </div>
-                      </motion.div>
+                      </motion.button>
                     )}
 
                     {/* Other feed items */}

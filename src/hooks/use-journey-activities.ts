@@ -469,10 +469,10 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
     profileMap.set(p.user_id, { display_name: p.display_name, avatar_url: p.avatar_url });
   }
 
-  // Build reaction map + reactor profiles per activity
+  // Build reaction map + reactor profiles per activity (including reaction type)
   const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
   const totalMap: Record<string, number> = {};
-  const reactorProfilesMap: Record<string, { userId: string; displayName: string; avatarUrl?: string }[]> = {};
+  const reactorProfilesMap: Record<string, { userId: string; displayName: string; avatarUrl?: string; reactionType: ReactionType }[]> = {};
 
   for (const r of reactions || []) {
     const type = (r.reaction_type || 'heart') as ReactionType;
@@ -488,13 +488,14 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
     };
     totalMap[r.activity_id]++;
     
-    // Add reactor profile if not already added
+    // Add reactor profile with their actual reaction type
     const profile = profileMap.get(r.user_id);
     if (profile && !reactorProfilesMap[r.activity_id].some(p => p.userId === r.user_id)) {
       reactorProfilesMap[r.activity_id].push({
         userId: r.user_id,
         displayName: profile.display_name,
         avatarUrl: profile.avatar_url,
+        reactionType: type,
       });
     }
   }
