@@ -5,6 +5,7 @@ import { X, ChevronUp, Trash2 } from 'lucide-react';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
+import { useProfile } from '@/hooks/use-profile';
 import { fetchAllActivitiesGroupedByUser, fetchPublicFeed, UserStoryGroup, LocalActivity } from '@/hooks/use-journey-activities';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 import DynamicBlurBackground from '@/components/DynamicBlurBackground';
@@ -50,6 +51,7 @@ const Reel = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { profile } = useProfile();
   
   // State for user story groups
   const [userGroups, setUserGroups] = useState<UserStoryGroup[]>([]);
@@ -658,7 +660,15 @@ const Reel = () => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
-                <img src={clapEmoji} alt="clap" className="w-7 h-7 object-contain" />
+                {/* User's own avatar */}
+                <ProfileAvatar
+                  src={profile?.avatar_url}
+                  name={profile?.display_name || 'You'}
+                  size={32}
+                  style={{
+                    border: '2px solid rgba(255, 255, 255, 0.2)',
+                  }}
+                />
                 <span className="text-white font-bold text-sm tracking-widest">SEND YOUR</span>
                 <img src={fireEmoji} alt="fire" className="w-7 h-7 object-contain" />
               </motion.div>
