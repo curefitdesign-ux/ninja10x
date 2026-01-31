@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Plus, Camera, X } from 'lucide-react';
+import { Check, Camera, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 import { supabase } from '@/integrations/supabase/client';
@@ -67,6 +67,29 @@ const ProfileSetupPage = () => {
     }
   }, [editMode, profile]);
 
+  // Check for cropped image from avatar cropper on mount and focus
+  useEffect(() => {
+    const checkForCroppedImage = () => {
+      const croppedImage = sessionStorage.getItem('croppedAvatarImage');
+      if (croppedImage) {
+        // Convert base64 to file
+        fetch(croppedImage)
+          .then(res => res.blob())
+          .then(blob => {
+            const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
+            setCustomAvatarFile(file);
+            setCustomAvatarPreview(croppedImage);
+            setSelectedAvatar(null);
+            sessionStorage.removeItem('croppedAvatarImage');
+          });
+      }
+    };
+
+    checkForCroppedImage();
+    window.addEventListener('focus', checkForCroppedImage);
+    return () => window.removeEventListener('focus', checkForCroppedImage);
+  }, []);
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -79,14 +102,22 @@ const ProfileSetupPage = () => {
       return;
     }
 
-    setCustomAvatarFile(file);
-    setSelectedAvatar(null);
-
+    // Read file and navigate to cropper
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setCustomAvatarPreview(e.target?.result as string);
+    reader.onload = (evt) => {
+      const imageData = evt.target?.result as string;
+      // Navigate to avatar cropper with the image
+      navigate('/avatar-crop', { 
+        state: { 
+          imageData,
+          returnTo: '/profile-setup' + (editMode ? '?edit=true' : ''),
+        }
+      });
     };
     reader.readAsDataURL(file);
+    
+    // Reset the input so same file can be selected again
+    e.target.value = '';
   };
 
   const selectPresetAvatar = (avatarId: string) => {
