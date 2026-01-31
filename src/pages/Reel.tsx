@@ -426,37 +426,13 @@ const Reel = () => {
                 animate={{ scale: isActive ? 1 : 0.85 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
-                {/* Animated glow ring behind */}
-                {isActive && (
-                  <motion.div
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      width: 60,
-                      height: 60,
-                      left: -2,
-                      top: -2,
-                      background: 'conic-gradient(from 0deg, #a78bfa, #ec4899, #f472b6, #a78bfa)',
-                      filter: 'blur(6px)',
-                    }}
-                    animate={{
-                      rotate: [0, 360],
-                      scale: [1, 1.08, 1],
-                    }}
-                    transition={{
-                      rotate: { duration: 4, repeat: Infinity, ease: 'linear' },
-                      scale: { duration: 2, repeat: Infinity, ease: 'easeInOut' },
-                    }}
-                  />
-                )}
-                
-                {/* Story ring segments around avatar - thicker and more visible */}
+                {/* Story ring segments around avatar - thicker and visible */}
                 <svg
                   className="absolute inset-0"
                   style={{
                     width: isActive ? 56 : 44,
                     height: isActive ? 56 : 44,
                     transform: 'rotate(-90deg)',
-                    filter: isActive ? 'drop-shadow(0 0 4px rgba(167, 139, 250, 0.6))' : 'none',
                   }}
                   viewBox="0 0 100 100"
                 >
@@ -473,7 +449,7 @@ const Reel = () => {
                     const offset = (startAngle / 360) * circumference;
                     
                     return (
-                      <motion.circle
+                      <circle
                         key={segIdx}
                         cx="50"
                         cy="50"
@@ -484,17 +460,6 @@ const Reel = () => {
                         strokeDasharray={`${segmentLength} ${circumference}`}
                         strokeDashoffset={-offset}
                         strokeLinecap="round"
-                        initial={{ opacity: 0.6 }}
-                        animate={isActive && isSegmentViewed ? {
-                          opacity: [0.8, 1, 0.8],
-                          strokeWidth: [8, 9, 8],
-                        } : { opacity: 1 }}
-                        transition={{
-                          duration: 1.5,
-                          repeat: Infinity,
-                          ease: 'easeInOut',
-                          delay: segIdx * 0.1,
-                        }}
                       />
                     );
                   })}
@@ -520,7 +485,7 @@ const Reel = () => {
                     name={group.displayName}
                     size={isActive ? 50 : 38}
                     style={{
-                      opacity: isActive ? 1 : 0.7,
+                      opacity: 1,
                       transition: 'all 0.2s ease',
                     }}
                   />
