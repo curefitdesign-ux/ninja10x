@@ -32,6 +32,7 @@ interface ShareSheetProps {
   imageUrl: string;
   isVideo?: boolean;
   onClose: () => void;
+  onEdit?: () => void;
   onSaveWithTemplate?: () => void;
   dayNumber?: number;
   frameType?: FrameType;
@@ -123,7 +124,7 @@ const socialApps = [
   },
 ];
 
-const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber, frameType, frameProps }: ShareSheetProps) => {
+const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, dayNumber, frameType, frameProps }: ShareSheetProps) => {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [dominantColor, setDominantColor] = useState('rgba(0,0,0,0.95)');
@@ -547,15 +548,12 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
                   transition={{ duration: 0.2 }}
                 >
                   <button
-                    onClick={() => navigate('/preview', { 
-                      state: { 
-                        mediaUrl: frameProps?.imageUrl || imageUrl,
-                        isVideo: isVideo,
-                        dayNumber,
-                        activity: frameProps?.activity,
-                        isEdit: true,
-                      } 
-                    })}
+                    onClick={() => {
+                      triggerHaptic('light');
+                      if (onEdit) {
+                        onEdit();
+                      }
+                    }}
                     className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
                   >
                     <Pencil className="w-4 h-4 text-white/70" />

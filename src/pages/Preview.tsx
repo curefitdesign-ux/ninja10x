@@ -1097,6 +1097,11 @@ const Preview = () => {
           imageUrl={framedImageUrl}
           isVideo={isVideo}
           onClose={() => setShowShareSheet(false)}
+          onEdit={() => {
+            // Close share sheet and return to template selection
+            setShowShareSheet(false);
+            setFramedImageUrl(null);
+          }}
           onSaveWithTemplate={handleFinalSave}
           dayNumber={dayNumber}
           frameType={currentFrame}
