@@ -603,20 +603,24 @@ const Activity = () => {
         </div>
       </PullToRefresh>
 
-      {/* Bottom Navigation - Full-width Liquid Glass */}
+      {/* Bottom Navigation - Fixed to screen viewport, always visible */}
       <nav 
-        className="fixed bottom-0 left-0 right-0 z-50"
+        className="fixed bottom-0 left-0 right-0"
+        style={{
+          zIndex: 9999,
+          position: 'fixed',
+        }}
       >
         <div 
           className="relative"
           style={{
-            background: 'rgba(255, 255, 255, 0.08)',
+            background: 'rgba(30, 30, 50, 0.85)',
             backdropFilter: 'blur(40px) saturate(180%)',
             WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-            borderTop: '1px solid rgba(255, 255, 255, 0.12)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
             boxShadow: `
-              inset 0 1px 1px rgba(255,255,255,0.15),
-              0 -8px 32px rgba(0,0,0,0.3)
+              inset 0 1px 1px rgba(255,255,255,0.1),
+              0 -8px 32px rgba(0,0,0,0.4)
             `,
           }}
         >
@@ -624,13 +628,13 @@ const Activity = () => {
           <div 
             className="absolute inset-x-0 top-0 h-px pointer-events-none"
             style={{
-              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)',
             }}
           />
           
           <div 
-            className="relative flex items-center justify-around py-2 px-2"
-            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 12px)' }}
+            className="relative flex items-center justify-around py-3 px-2"
+            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}
           >
             {navItems.map((item) => (
               <motion.button
@@ -640,16 +644,16 @@ const Activity = () => {
                 className="flex flex-col items-center py-2 px-4 rounded-2xl transition-all duration-200"
               >
                 {item.isCenter ? (
-                  <div className="relative">
-                    <div className="absolute -inset-2 bg-gradient-to-r from-rose-500/50 to-pink-500/50 rounded-full blur-lg" />
-                    <div className="relative w-12 h-12 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center shadow-[0_0_24px_rgba(244,63,94,0.5)]">
-                      <item.icon className="w-6 h-6 text-white" />
+                  <div className="relative -mt-6">
+                    <div className="absolute -inset-3 bg-gradient-to-r from-rose-500/60 to-pink-500/60 rounded-full blur-xl" />
+                    <div className="relative w-14 h-14 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center shadow-[0_0_30px_rgba(244,63,94,0.6)]">
+                      <item.icon className="w-7 h-7 text-white" />
                     </div>
                   </div>
                 ) : (
                   <>
-                    <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-white' : 'text-white/40'}`} />
-                    <span className={`text-[10px] mt-1 ${activeTab === item.id ? 'text-white' : 'text-white/40'}`}>{item.label}</span>
+                    <item.icon className={`w-6 h-6 ${activeTab === item.id ? 'text-white' : 'text-white/50'}`} />
+                    <span className={`text-[10px] mt-1 font-medium tracking-wide ${activeTab === item.id ? 'text-white' : 'text-white/50'}`}>{item.label}</span>
                   </>
                 )}
               </motion.button>
