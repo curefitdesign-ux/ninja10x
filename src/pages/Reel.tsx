@@ -12,8 +12,8 @@ import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
 import SendReactionSheet from '@/components/SendReactionSheet';
 
 // Import 3D emoji assets for display
-import clapEmoji from '@/assets/reactions/clap.png';
-import fireEmoji from '@/assets/reactions/fire-cool.png';
+import clapEmoji from '@/assets/reactions/clap-3d.png';
+import fireEmoji from '@/assets/reactions/fire-3d.png';
 import fistbumpEmoji from '@/assets/reactions/fistbump.png';
 import wowEmoji from '@/assets/reactions/wow.png';
 
