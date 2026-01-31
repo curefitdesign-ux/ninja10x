@@ -2,10 +2,16 @@ import { motion } from 'framer-motion';
 import { ReactionType } from '@/services/journey-service';
 
 // Import 3D reaction images
-import fireImg from '@/assets/reactions/fire-3d.png';
-import clapImg from '@/assets/reactions/clap-3d.png';
-import fistbumpImg from '@/assets/reactions/fistbump.png';
+import clapImg from '@/assets/reactions/clap-hands.png';
+import fireImg from '@/assets/reactions/fire-new.png';
+import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
 import wowImg from '@/assets/reactions/wow.png';
+import flexImg from '@/assets/reactions/flex.png';
+import trophyImg from '@/assets/reactions/dumbbells.png';
+import runnerImg from '@/assets/reactions/runner.png';
+import energyImg from '@/assets/reactions/energy.png';
+import timerImg from '@/assets/reactions/stopwatch.png';
+import heartImg from '@/assets/reactions/heart-workout.png';
 
 interface FloatingReactionProps {
   type: ReactionType;
@@ -13,11 +19,16 @@ interface FloatingReactionProps {
 }
 
 const REACTION_IMAGES: Record<ReactionType, string> = {
-  heart: fireImg,
+  heart: heartImg,
   fire: fireImg,
   clap: clapImg,
   fistbump: fistbumpImg,
   wow: wowImg,
+  flex: flexImg,
+  trophy: trophyImg,
+  runner: runnerImg,
+  energy: energyImg,
+  timer: timerImg,
 };
 
 export default function FloatingReaction({ type, onComplete }: FloatingReactionProps) {

@@ -85,6 +85,11 @@ const Progress = () => {
     fistbump: { type: 'fistbump', count: 0, userReacted: false },
     wow: { type: 'wow', count: 0, userReacted: false },
     fire: { type: 'fire', count: 0, userReacted: false },
+    flex: { type: 'flex', count: 0, userReacted: false },
+    trophy: { type: 'trophy', count: 0, userReacted: false },
+    runner: { type: 'runner', count: 0, userReacted: false },
+    energy: { type: 'energy', count: 0, userReacted: false },
+    timer: { type: 'timer', count: 0, userReacted: false },
   };
 
   // Convert to JourneyActivity shape for reel navigation with reactions
