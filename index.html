@@ -2,25 +2,45 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
     <!-- Theme color for mobile browser status bar - matches app background -->
     <meta name="theme-color" content="#252535" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- iOS PWA configuration for edge-to-edge display -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Cult Ninja" />
+    <link rel="apple-touch-icon" href="/pwa-512x512.png" />
     <!-- TODO: Set the document title to the name of your application -->
-    <title>Lovable App</title>
-    <meta name="description" content="Lovable Generated Project" />
+    <title>Cult Ninja</title>
+    <meta name="description" content="Your fitness journey companion" />
     <meta name="author" content="Lovable" />
 
     <!-- TODO: Update og:title to match your application name -->
-    <meta property="og:title" content="Lovable App" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <meta property="og:title" content="Cult Ninja" />
+    <meta property="og:description" content="Your fitness journey companion" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@Lovable" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- PWA safe area styling -->
+    <style>
+      html, body, #root {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: #252535;
+      }
+      /* Extend background behind status bar on iOS */
+      @supports (padding-top: env(safe-area-inset-top)) {
+        body {
+          padding-top: 0;
+          background-color: #252535;
+        }
+      }
+    </style>
   </head>
 
   <body>
