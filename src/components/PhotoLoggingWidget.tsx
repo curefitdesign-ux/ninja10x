@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { isVideoUrl } from "@/lib/media";
 import ReelProgressPill from "./ReelProgressPill";
 import { useFitnessReel } from "@/hooks/use-fitness-reel";
-import FloatingReactionBadge from "./FloatingReactionBadge";
+import FloatingCardReactions from "./FloatingCardReactions";
 
 // Activity icons
 import footballIcon from '@/assets/activities/football.png';
@@ -414,14 +414,11 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
           )}
         </AnimatePresence>
         
-        {/* Floating reaction badge with attention animation */}
+        {/* Floating animated reactions around card edges */}
         {hasPhoto && photo.reactionCount && photo.reactionCount > 0 && (
-          <FloatingReactionBadge
-            reactionType={photo.topReaction}
-            count={photo.reactionCount}
+          <FloatingCardReactions
+            reactions={photo.topReaction ? [photo.topReaction] : ['fire']}
             size={shouldShowExpanded ? 'md' : 'sm'}
-            position={shouldShowExpanded ? 'bottom-center' : 'bottom-right'}
-            showAttentionAnimation={true}
           />
         )}
       </motion.button>
