@@ -80,7 +80,7 @@ const AnimatedRoutes = () => {
       <Routes location={location}>
         <Route path="/auth" element={<Auth />} />
         <Route path="/profile-setup" element={<ProfileSetupRouteWrapper><ProfileSetupPage /></ProfileSetupRouteWrapper>} />
-        <Route path="/avatar-crop" element={<ProfileSetupRouteWrapper><AvatarCrop /></ProfileSetupRouteWrapper>} />
+        <Route path="/avatar-crop" element={<ProtectedRoute><AvatarCrop /></ProtectedRoute>} />
         <Route path="/" element={<ProtectedRoute><Activity /></ProtectedRoute>} />
         <Route path="/create" element={<ProtectedRoute><Index /></ProtectedRoute>} />
         <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
