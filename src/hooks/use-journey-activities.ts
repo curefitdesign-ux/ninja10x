@@ -71,7 +71,7 @@ export function useJourneyActivities() {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
 
-  // Load activities for current user
+  // Load activities for current user with reaction counts
   const loadActivities = useCallback(async () => {
     setLoading(true);
     try {
@@ -93,9 +93,45 @@ export function useJourneyActivities() {
       if (error) {
         console.error('Error loading activities:', error);
         setActivities([]);
-      } else {
-        setActivities((data || []).map(toLocal));
+        setLoading(false);
+        return;
       }
+
+      if (!data || data.length === 0) {
+        setActivities([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch reactions for these activities
+      const activityIds = data.map(a => a.id);
+      const { data: reactions } = await supabase
+        .from('activity_reactions')
+        .select('activity_id, reaction_type')
+        .in('activity_id', activityIds);
+
+      // Build reaction counts per activity
+      const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
+      const totalMap: Record<string, number> = {};
+
+      for (const r of reactions || []) {
+        const type = (r.reaction_type || 'heart') as ReactionType;
+        if (!reactionMap[r.activity_id]) {
+          reactionMap[r.activity_id] = { ...DEFAULT_REACTIONS };
+          totalMap[r.activity_id] = 0;
+        }
+        reactionMap[r.activity_id][type] = {
+          ...reactionMap[r.activity_id][type],
+          count: reactionMap[r.activity_id][type].count + 1,
+        };
+        totalMap[r.activity_id]++;
+      }
+
+      setActivities(data.map(row => ({
+        ...toLocal(row),
+        reactionCount: totalMap[row.id] || 0,
+        reactions: reactionMap[row.id] || { ...DEFAULT_REACTIONS },
+      })));
     } catch (e) {
       console.error('Failed to load activities:', e);
       setActivities([]);
