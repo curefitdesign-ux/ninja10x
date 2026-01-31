@@ -1,17 +1,22 @@
 import { motion } from 'framer-motion';
 import { ReactionType } from '@/services/journey-service';
 
+// Import 3D reaction images
+import fireImg from '@/assets/reactions/fire-3d.png';
+import clapImg from '@/assets/reactions/clap-3d.png';
+import fistbumpImg from '@/assets/reactions/fistbump.png';
+import wowImg from '@/assets/reactions/wow.png';
+
 interface StoryReactionBarProps {
   onReact: (type: ReactionType) => void;
   disabled?: boolean;
 }
 
-const REACTIONS: { type: ReactionType; emoji: string; label: string }[] = [
-  { type: 'fire', emoji: '🔥', label: 'Fire' },
-  { type: 'wow', emoji: '🤩', label: 'Wow' },
-  { type: 'clap', emoji: '👏', label: 'Clap' },
-  { type: 'fistbump', emoji: '🤜🤛', label: 'Fist bump' },
-  { type: 'heart', emoji: '❤️', label: 'Love' },
+const REACTIONS: { type: ReactionType; image: string; label: string }[] = [
+  { type: 'fire', image: fireImg, label: 'Fire' },
+  { type: 'wow', image: wowImg, label: 'Wow' },
+  { type: 'clap', image: clapImg, label: 'Clap' },
+  { type: 'fistbump', image: fistbumpImg, label: 'Fist bump' },
 ];
 
 export default function StoryReactionBar({ onReact, disabled }: StoryReactionBarProps) {
@@ -37,7 +42,6 @@ export default function StoryReactionBar({ onReact, disabled }: StoryReactionBar
           className="relative flex items-center justify-center w-12 h-12 rounded-full transition-all active:scale-90"
           style={{
             background: 'rgba(255, 255, 255, 0.05)',
-            fontSize: reaction.type === 'fistbump' ? '18px' : '26px',
           }}
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -47,7 +51,7 @@ export default function StoryReactionBar({ onReact, disabled }: StoryReactionBar
           disabled={disabled}
           aria-label={reaction.label}
         >
-          {reaction.emoji}
+          <img src={reaction.image} alt={reaction.label} className="w-8 h-8 object-contain" />
         </motion.button>
       ))}
     </motion.div>

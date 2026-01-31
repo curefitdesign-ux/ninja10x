@@ -1,17 +1,23 @@
 import { motion } from 'framer-motion';
 import { ReactionType } from '@/services/journey-service';
 
+// Import 3D reaction images
+import fireImg from '@/assets/reactions/fire-3d.png';
+import clapImg from '@/assets/reactions/clap-3d.png';
+import fistbumpImg from '@/assets/reactions/fistbump.png';
+import wowImg from '@/assets/reactions/wow.png';
+
 interface FloatingReactionsOverlayProps {
   reactions: ReactionType[];
   newReaction: ReactionType | null;
 }
 
-const REACTION_EMOJIS: Record<ReactionType, string> = {
-  heart: '❤️',
-  fire: '🔥',
-  clap: '👏',
-  fistbump: '🤜🤛',
-  wow: '🤩',
+const REACTION_IMAGES: Record<ReactionType, string> = {
+  heart: fireImg,
+  fire: fireImg,
+  clap: clapImg,
+  fistbump: fistbumpImg,
+  wow: wowImg,
 };
 
 // Positions around the card for floating reactions
@@ -34,7 +40,7 @@ export default function FloatingReactionsOverlay({ reactions, newReaction }: Flo
         return (
           <motion.div
             key={`${type}-${i}`}
-            className="absolute text-4xl"
+            className="absolute"
             style={{
               ...pos,
               filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))',
@@ -53,7 +59,7 @@ export default function FloatingReactionsOverlay({ reactions, newReaction }: Flo
               delay: isNew ? 0 : i * 0.1,
             }}
           >
-            {REACTION_EMOJIS[type]}
+            <img src={REACTION_IMAGES[type]} alt={type} className="w-10 h-10 object-contain" />
           </motion.div>
         );
       })}
@@ -61,13 +67,13 @@ export default function FloatingReactionsOverlay({ reactions, newReaction }: Flo
       {/* Animated new reaction burst */}
       {newReaction && (
         <motion.div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-7xl"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           initial={{ scale: 0, opacity: 1 }}
           animate={{ scale: [0, 1.8, 0], opacity: [1, 1, 0] }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
           style={{ filter: 'drop-shadow(0 8px 24px rgba(0, 0, 0, 0.4))' }}
         >
-          {REACTION_EMOJIS[newReaction]}
+          <img src={REACTION_IMAGES[newReaction]} alt={newReaction} className="w-20 h-20 object-contain" />
         </motion.div>
       )}
     </div>
