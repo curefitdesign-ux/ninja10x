@@ -509,14 +509,15 @@ const Activity = () => {
 
           {/* Activities Section */}
           <div className="px-4 mt-12">
-            <motion.h2 
+            <motion.div
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
               transition={{ duration: 0.5, delay: 0.35 }} 
-              className="text-xl font-semibold text-white mb-6"
+              className="mb-6"
             >
-              Today's Activities
-            </motion.h2>
+              <h2 className="text-xl font-semibold text-white">Stay Active</h2>
+              <p className="text-sm text-white/50 mt-1">Pick an activity & log it above</p>
+            </motion.div>
             <div className="grid grid-cols-4 gap-4">
               {activities_grid.map((activity, idx) => (
                 <motion.button
