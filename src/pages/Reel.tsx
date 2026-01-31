@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronUp, MapPin } from 'lucide-react';
+import { X, ChevronUp } from 'lucide-react';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
@@ -14,8 +14,6 @@ import SendReactionSheet from '@/components/SendReactionSheet';
 // Import 3D emoji assets for display
 import clapEmoji from '@/assets/reactions/clap-3d.png';
 import fireEmoji from '@/assets/reactions/fire-3d.png';
-import fistbumpEmoji from '@/assets/reactions/fistbump.png';
-import wowEmoji from '@/assets/reactions/wow.png';
 
 const DEFAULT_REACTIONS: Record<ReactionType, ActivityReaction> = {
   heart: { type: 'heart', count: 0, userReacted: false },
@@ -57,6 +55,13 @@ const Reel = () => {
     reactions: Record<ReactionType, ActivityReaction>;
   }>>({});
 
+  // Pull-up gesture for View Progress
+  const dragY = useMotionValue(0);
+  const progressBarHeight = useTransform(dragY, [-150, 0], [80, 0]);
+  const progressBarOpacity = useTransform(dragY, [-100, -30, 0], [1, 0.5, 0]);
+  const contentScale = useTransform(dragY, [-150, 0], [0.92, 1]);
+  const [showProgressHint, setShowProgressHint] = useState(false);
+
   // Load all activities grouped by user
   useEffect(() => {
     const loadData = async () => {
@@ -91,43 +96,79 @@ const Reel = () => {
   const currentActivity = currentGroup?.activities[currentActivityIndex];
   const isOwnStory = user && currentGroup?.userId === user.id;
 
+  // Navigate between activities within current user (tap to cycle)
+  const cycleActivity = useCallback(() => {
+    if (!currentGroup) return;
+    
+    if (currentActivityIndex < currentGroup.activities.length - 1) {
+      // More activities in this user's story
+      setCurrentActivityIndex(prev => prev + 1);
+    } else {
+      // Finished this user's stories, move to next user
+      if (currentUserIndex < userGroups.length - 1) {
+        setCurrentUserIndex(prev => prev + 1);
+        setCurrentActivityIndex(0);
+      }
+    }
+  }, [currentGroup, currentActivityIndex, currentUserIndex, userGroups.length]);
+
+  // Navigate to previous activity
+  const prevActivity = useCallback(() => {
+    if (currentActivityIndex > 0) {
+      setCurrentActivityIndex(prev => prev - 1);
+    } else if (currentUserIndex > 0) {
+      // Go to previous user's last activity
+      const prevUser = userGroups[currentUserIndex - 1];
+      setCurrentUserIndex(prev => prev - 1);
+      setCurrentActivityIndex(prevUser ? prevUser.activities.length - 1 : 0);
+    }
+  }, [currentActivityIndex, currentUserIndex, userGroups]);
+
   // Navigate between users (horizontal swipe)
   const goNextUser = useCallback(() => {
     if (userGroups.length === 0) return;
-    setCurrentActivityIndex(0); // Reset to first activity
+    setCurrentActivityIndex(0);
     setCurrentUserIndex(prev => (prev + 1) % userGroups.length);
   }, [userGroups.length]);
 
   const goPrevUser = useCallback(() => {
     if (userGroups.length === 0) return;
-    setCurrentActivityIndex(0); // Reset to first activity
+    setCurrentActivityIndex(0);
     setCurrentUserIndex(prev => (prev - 1 + userGroups.length) % userGroups.length);
   }, [userGroups.length]);
 
-  // Navigate between activities within current user (tap)
-  const cycleActivity = useCallback(() => {
-    if (!currentGroup || currentGroup.activities.length <= 1) return;
-    setCurrentActivityIndex(prev => (prev + 1) % currentGroup.activities.length);
-  }, [currentGroup]);
-
-  // Swipe gesture handling
+  // Swipe gesture handling for horizontal navigation
   const dragX = useMotionValue(0);
   const cardOpacity = useTransform(dragX, [-150, 0, 150], [0.6, 1, 0.6]);
   const cardRotate = useTransform(dragX, [-150, 0, 150], [-8, 0, 8]);
   const cardScale = useTransform(dragX, [-150, 0, 150], [0.95, 1, 0.95]);
   
-  const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+  const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
     
-    // Check if swipe is strong enough
+    // Horizontal swipe between users
     if (Math.abs(offset.x) > SWIPE_THRESHOLD || Math.abs(velocity.x) > 500) {
       if (offset.x < 0) {
-        goNextUser(); // Swipe left -> next user
+        goNextUser();
       } else {
-        goPrevUser(); // Swipe right -> previous user
+        goPrevUser();
       }
     }
   }, [goNextUser, goPrevUser]);
+
+  // Vertical drag for pull-up to progress
+  const handleVerticalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (info.offset.y < -100) {
+      // Navigate to progress with transition
+      navigate('/progress', {
+        state: {
+          fromReel: true,
+          transitionToProgress: true,
+          transitionImage: currentActivity?.storageUrl,
+        }
+      });
+    }
+  }, [navigate, currentActivity]);
 
   const [lastTap, setLastTap] = useState(0);
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -139,15 +180,19 @@ const Reel = () => {
       }
     } else {
       // Single tap -> cycle to next activity
-      if (currentGroup && currentGroup.activities.length > 1) {
-        cycleActivity();
-      }
+      cycleActivity();
     }
     setLastTap(now);
-  }, [lastTap, cycleActivity, isOwnStory, currentGroup]);
+  }, [lastTap, cycleActivity, isOwnStory]);
 
   const handleNavigateToProgress = () => {
-    navigate('/progress');
+    navigate('/progress', {
+      state: {
+        fromReel: true,
+        transitionToProgress: true,
+        transitionImage: currentActivity?.storageUrl,
+      }
+    });
   };
 
   const handleReact = async (type: ReactionType) => {
@@ -237,7 +282,7 @@ const Reel = () => {
         newReaction={floatingReaction}
       />
 
-      {/* Header */}
+      {/* Header with user profile */}
       <motion.div
         className="absolute top-0 left-0 right-0 z-40 flex items-center justify-between px-4"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 16px), 16px)' }}
@@ -245,30 +290,41 @@ const Reel = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        {/* User info */}
-        <div className="flex items-center gap-2">
-          <div 
-            className="w-9 h-9 rounded-full overflow-hidden"
-            style={{ border: '2px solid rgba(255,255,255,0.3)' }}
-          >
-            {currentGroup.avatarUrl ? (
-              <img 
-                src={currentGroup.avatarUrl} 
-                alt={currentGroup.displayName} 
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
-                <span className="text-white text-sm font-bold">
-                  {currentGroup.displayName?.charAt(0).toUpperCase() || '?'}
-                </span>
+        {/* User profile info */}
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div 
+              className="w-11 h-11 rounded-full overflow-hidden"
+              style={{ border: '2.5px solid rgba(255,255,255,0.4)' }}
+            >
+              {currentGroup.avatarUrl ? (
+                <img 
+                  src={currentGroup.avatarUrl} 
+                  alt={currentGroup.displayName} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">
+                    {currentGroup.displayName?.charAt(0).toUpperCase() || '?'}
+                  </span>
+                </div>
+              )}
+            </div>
+            {/* Activity count indicator */}
+            {currentGroup.activities.length > 1 && (
+              <div 
+                className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                style={{ background: 'linear-gradient(135deg, #a78bfa, #ec4899)' }}
+              >
+                {currentGroup.activities.length}
               </div>
             )}
           </div>
           <div>
             <div className="text-white font-semibold text-sm">{currentGroup.displayName}</div>
             <div className="text-white/50 text-xs">
-              {currentGroup.activities.length} {currentGroup.activities.length === 1 ? 'story' : 'stories'}
+              Week {week} • Day {dayInWeek}
             </div>
           </div>
         </div>
@@ -281,50 +337,67 @@ const Reel = () => {
         </button>
       </motion.div>
 
-      {/* User story dots (horizontal) - which activity within this user */}
-      {currentGroup.activities.length > 1 && (
-        <div 
-          className="absolute z-40 flex justify-center gap-1.5 left-0 right-0 px-6"
-          style={{ top: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 52px)' }}
-        >
-          {currentGroup.activities.map((_, i) => (
+      {/* Story progress bar (activity dots within user) */}
+      <div 
+        className="absolute z-40 flex justify-center gap-1 left-0 right-0 px-4"
+        style={{ top: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 56px)' }}
+      >
+        {currentGroup.activities.map((_, i) => (
+          <motion.div
+            key={i}
+            className="h-0.5 flex-1 rounded-full transition-all duration-300 cursor-pointer overflow-hidden"
+            style={{
+              maxWidth: 60,
+              background: 'rgba(255, 255, 255, 0.2)',
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setCurrentActivityIndex(i);
+            }}
+          >
             <motion.div
-              key={i}
-              className="h-1 rounded-full transition-all duration-300 cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                setCurrentActivityIndex(i);
-              }}
+              className="h-full rounded-full"
               style={{
-                width: i === currentActivityIndex ? 24 : 8,
-                background: i === currentActivityIndex 
-                  ? 'linear-gradient(90deg, #a78bfa, #ec4899)' 
-                  : 'rgba(255, 255, 255, 0.3)',
+                background: 'linear-gradient(90deg, #a78bfa, #ec4899)',
               }}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.03 }}
+              initial={{ width: 0 }}
+              animate={{ 
+                width: i < currentActivityIndex ? '100%' : i === currentActivityIndex ? '100%' : '0%'
+              }}
+              transition={{ duration: i === currentActivityIndex ? 5 : 0.3 }}
             />
-          ))}
-        </div>
-      )}
+          </motion.div>
+        ))}
+      </div>
 
-      {/* Main content area */}
-      <div
+      {/* Main content area with pull-up gesture */}
+      <motion.div
         className="absolute inset-0 flex flex-col items-center justify-center"
         style={{ 
           paddingTop: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 80px)',
-          paddingBottom: '220px',
+          paddingBottom: '180px',
           paddingInline: '20px',
+          scale: contentScale,
         }}
+        drag="y"
+        dragConstraints={{ top: -150, bottom: 0 }}
+        dragElastic={{ top: 0.5, bottom: 0 }}
+        onDrag={(e, info) => {
+          if (info.offset.y < -30) {
+            setShowProgressHint(true);
+          } else {
+            setShowProgressHint(false);
+          }
+        }}
+        onDragEnd={handleVerticalDragEnd}
       >
-        {/* Card container with swipe gestures */}
+        {/* Card container with horizontal swipe */}
         <motion.div 
           className="relative w-full max-w-[340px] cursor-grab active:cursor-grabbing"
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.2}
-          onDragEnd={handleDragEnd}
+          onDragEnd={handleHorizontalDragEnd}
           onClick={handleTap}
           style={{ 
             x: dragX,
@@ -440,12 +513,10 @@ const Reel = () => {
                     </div>
                   )}
                   {!currentActivity.duration && !currentActivity.pr && (
-                    <>
-                      <div>
-                        <div className="text-white font-bold text-xl">Day</div>
-                        <div className="text-white/70 text-[10px]">#{currentActivity.dayNumber}</div>
-                      </div>
-                    </>
+                    <div>
+                      <div className="text-white font-bold text-xl">Day</div>
+                      <div className="text-white/70 text-[10px]">#{currentActivity.dayNumber}</div>
+                    </div>
                   )}
                 </div>
                 
@@ -459,32 +530,34 @@ const Reel = () => {
                 </div>
               </div>
 
-              {/* Multi-story indicator */}
+              {/* Tap hint for multiple stories */}
               {currentGroup.activities.length > 1 && (
-                <div 
-                  className="absolute top-1/2 right-3 -translate-y-1/2 flex flex-col items-center gap-1 z-10"
-                >
-                  <span className="text-white/60 text-[10px] font-medium">
-                    {currentActivityIndex + 1}/{currentGroup.activities.length}
-                  </span>
-                  <span className="text-white/40 text-[8px]">tap</span>
+                <div className="absolute inset-y-0 right-0 w-1/3 flex items-center justify-end pr-4 pointer-events-none">
+                  <motion.div
+                    className="text-white/40 text-xs"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0, 1, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, delay: 2 }}
+                  >
+                    tap →
+                  </motion.div>
                 </div>
               )}
             </div>
           </motion.div>
         </motion.div>
-      </div>
+      </motion.div>
 
-      {/* User thumbnails strip (horizontal scroll) */}
+      {/* User thumbnails strip */}
       <motion.div
         className="absolute z-40 left-0 right-0 flex justify-center"
-        style={{ bottom: 'calc(max(env(safe-area-inset-bottom, 24px), 24px) + 100px)' }}
+        style={{ bottom: 'calc(max(env(safe-area-inset-bottom, 24px), 24px) + 90px)' }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
-        <div className="flex gap-2 px-4 py-2 rounded-full" style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(12px)' }}>
-          {userGroups.map((group, idx) => (
+        <div className="flex gap-2 px-3 py-2 rounded-full" style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(12px)' }}>
+          {userGroups.slice(0, 6).map((group, idx) => (
             <motion.button
               key={group.userId}
               onClick={() => {
@@ -495,7 +568,7 @@ const Reel = () => {
               whileTap={{ scale: 0.9 }}
             >
               <div 
-                className="w-10 h-10 rounded-full overflow-hidden transition-all"
+                className="w-9 h-9 rounded-full overflow-hidden transition-all"
                 style={{ 
                   border: idx === currentUserIndex 
                     ? '2px solid #a78bfa' 
@@ -517,13 +590,20 @@ const Reel = () => {
                   </div>
                 )}
               </div>
-              {/* Activity count badge */}
-              {group.activities.length > 1 && (
+              {/* Small dot for stories count */}
+              {group.activities.length > 1 && idx === currentUserIndex && (
                 <div 
-                  className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
-                  style={{ background: 'linear-gradient(135deg, #a78bfa, #ec4899)' }}
+                  className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 flex gap-0.5"
                 >
-                  {group.activities.length}
+                  {group.activities.slice(0, 4).map((_, i) => (
+                    <div 
+                      key={i}
+                      className="w-1 h-1 rounded-full"
+                      style={{
+                        background: i <= currentActivityIndex ? '#a78bfa' : 'rgba(255,255,255,0.3)',
+                      }}
+                    />
+                  ))}
                 </div>
               )}
             </motion.button>
@@ -531,12 +611,11 @@ const Reel = () => {
         </div>
       </motion.div>
 
-      {/* Bottom area: Reaction pill + View Progress button */}
+      {/* Bottom area: Reaction pill + View Progress pull-up bar */}
       <motion.div 
-        className="absolute bottom-0 left-0 right-0 z-40 flex flex-col items-center gap-3"
+        className="absolute bottom-0 left-0 right-0 z-40 flex flex-col items-center"
         style={{ 
-          paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
-          paddingInline: '20px',
+          paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)',
         }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -545,7 +624,7 @@ const Reel = () => {
         {/* Reaction pill */}
         <motion.button
           onClick={() => isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true)}
-          className="relative overflow-hidden"
+          className="relative overflow-hidden mb-3"
           style={{
             minWidth: 200,
             height: 52,
@@ -562,7 +641,6 @@ const Reel = () => {
         >
           <AnimatePresence mode="wait">
             {isOwnStory ? (
-              /* Owner view */
               <motion.div
                 key="owner-pill"
                 className="flex items-center justify-center gap-2 h-full px-4"
@@ -612,7 +690,6 @@ const Reel = () => {
                 )}
               </motion.div>
             ) : (
-              /* Visitor view */
               <motion.div
                 key="visitor-pill"
                 className="flex items-center justify-center gap-3 h-full px-5"
@@ -629,22 +706,41 @@ const Reel = () => {
           </AnimatePresence>
         </motion.button>
 
-        {/* View Progress button */}
+        {/* Edge-to-edge View Progress bar */}
         <motion.button
           onClick={handleNavigateToProgress}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-full text-white/80 hover:text-white transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3"
           style={{
-            background: 'rgba(255, 255, 255, 0.08)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            background: 'linear-gradient(180deg, rgba(60, 50, 80, 0.9) 0%, rgba(40, 35, 55, 0.95) 100%)',
+            backdropFilter: 'blur(20px)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
           }}
-          whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <MapPin className="w-4 h-4" />
-          <span className="text-sm font-medium">View Progress</span>
+          <ChevronUp className="w-5 h-5 text-white/60" />
+          <span className="text-white/80 text-sm font-medium">View Progress</span>
+          <ChevronUp className="w-5 h-5 text-white/60" />
         </motion.button>
       </motion.div>
+
+      {/* Pull-up hint overlay */}
+      <AnimatePresence>
+        {showProgressHint && (
+          <motion.div
+            className="absolute bottom-20 left-0 right-0 flex justify-center pointer-events-none z-50"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+          >
+            <div 
+              className="px-4 py-2 rounded-full text-white text-sm font-medium"
+              style={{ background: 'rgba(100, 80, 150, 0.9)', backdropFilter: 'blur(12px)' }}
+            >
+              Release to view progress
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Reacts bottom sheet for own stories */}
       <AnimatePresence>

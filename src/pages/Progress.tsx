@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
+import { X, ChevronDown } from "lucide-react";
 import { useJourneyActivities, fetchPublicFeed, LocalActivity } from "@/hooks/use-journey-activities";
 import { useAuth } from "@/hooks/use-auth";
 import { JourneyActivity, ReactionType, ActivityReaction } from "@/services/journey-service";
@@ -14,27 +14,27 @@ import engineBadgeImg from "@/assets/progress/engine-badge.png";
 import SharedImageTransition from "@/components/SharedImageTransition";
 import { isVideoUrl } from "@/lib/media";
 
-// Tile positions - optimized for mobile viewport
+// Tile positions - optimized for mobile viewport with percentage-based layout
 const TILE_POSITIONS = [
-  { left: 34, top: 5 },
-  { left: 42, top: 10 },
-  { left: 50, top: 15 },
-  { left: 58, top: 20 },
-  { left: 50, top: 25 },
-  { left: 42, top: 30 },
-  { left: 34, top: 35 },
-  { left: 42, top: 40 },
-  { left: 50, top: 45 },
-  { left: 58, top: 50 },
-  { left: 50, top: 55 },
-  { left: 42, top: 60 },
+  { left: 34, top: 8 },
+  { left: 42, top: 13 },
+  { left: 50, top: 18 },
+  { left: 58, top: 23 },
+  { left: 50, top: 28 },
+  { left: 42, top: 33 },
+  { left: 34, top: 38 },
+  { left: 42, top: 43 },
+  { left: 50, top: 48 },
+  { left: 58, top: 53 },
+  { left: 50, top: 58 },
+  { left: 42, top: 63 },
 ];
 
 const LABELS = [
-  { tileIndex: 0, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 5, left: 6 },
-  { tileIndex: 3, text: ["BUILD", "ENERGY"], side: "right" as const, top: 20, left: 70 },
-  { tileIndex: 6, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 35, left: 6 },
-  { tileIndex: 11, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 55, left: 70 },
+  { tileIndex: 0, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 8, left: 6 },
+  { tileIndex: 3, text: ["BUILD", "ENERGY"], side: "right" as const, top: 23, left: 70 },
+  { tileIndex: 6, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 38, left: 6 },
+  { tileIndex: 11, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 58, left: 70 },
 ];
 
 const Progress = () => {
@@ -57,6 +57,11 @@ const Progress = () => {
   const transitionImage = location.state?.transitionImage;
   const transitionDayNumber = location.state?.dayNumber || 1;
   const transitionToProgress = location.state?.transitionToProgress;
+  const fromReel = location.state?.fromReel;
+
+  // Pull-down gesture to go back to reel
+  const dragY = useMotionValue(0);
+  const headerOpacity = useTransform(dragY, [0, 100], [1, 0.5]);
 
   // Load public feed on mount
   useEffect(() => {
@@ -103,6 +108,7 @@ const Progress = () => {
     navigate('/reel', {
       state: {
         userId: userId,
+        fromProgress: true,
       }
     });
   };
@@ -113,9 +119,9 @@ const Progress = () => {
       setShowTransitionIn(true);
       setTimeout(() => setShowTransitionIn(false), 800);
     }
-    const contentTimer = setTimeout(() => setShowContent(true), 300);
-    const storiesTimer = setTimeout(() => setShowStories(true), 400);
-    const tilesTimer = setTimeout(() => setShowTiles(true), 600);
+    const contentTimer = setTimeout(() => setShowContent(true), 200);
+    const storiesTimer = setTimeout(() => setShowStories(true), 300);
+    const tilesTimer = setTimeout(() => setShowTiles(true), 400);
     return () => {
       clearTimeout(contentTimer);
       clearTimeout(storiesTimer);
@@ -134,18 +140,29 @@ const Progress = () => {
     });
   };
 
+  const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (info.offset.y > 80 && fromReel) {
+      // Pull down to return to reel
+      navigate('/reel', { state: { fromProgress: true } });
+    }
+  }, [navigate, fromReel]);
+
   // Tile state - based on user's own activities
   const getDayFromIndex = (index: number) => 12 - index;
   const isTileActive = (dayNumber: number) => myActivities.some(a => a.dayNumber === dayNumber);
 
   return (
-    <div 
+    <motion.div 
       className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-manipulation"
       style={{ 
         background: "linear-gradient(180deg, #3A2A63 0%, #1A1530 45%, #060608 100%)",
         height: '100dvh',
         minHeight: '-webkit-fill-available',
       }}
+      drag={fromReel ? "y" : false}
+      dragConstraints={{ top: 0, bottom: 0 }}
+      dragElastic={{ top: 0, bottom: 0.3 }}
+      onDragEnd={handleDragEnd}
     >
       {/* Background aurora */}
       <div 
@@ -170,49 +187,67 @@ const Progress = () => {
         )}
       </AnimatePresence>
 
-      {/* Close button */}
-      <motion.button
-        onClick={handleClose}
-        className="fixed z-50 flex items-center justify-center text-white/80 active:scale-95 transition-transform"
+      {/* Header with close/pull indicator */}
+      <motion.div
+        className="flex-shrink-0 w-full flex items-center justify-between px-4"
         style={{ 
-          top: 'max(env(safe-area-inset-top, 8px), 8px)', 
-          right: '4vw', 
-          width: '36px', 
-          height: '36px',
+          paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
+          opacity: headerOpacity,
         }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
       >
-        <X className="w-6 h-6" strokeWidth={1.5} />
-      </motion.button>
+        {fromReel ? (
+          <motion.div 
+            className="flex items-center gap-2 text-white/60"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <ChevronDown className="w-5 h-5" />
+            <span className="text-xs font-medium">Pull down for stories</span>
+          </motion.div>
+        ) : (
+          <div />
+        )}
+        
+        <motion.button
+          onClick={handleClose}
+          className="flex items-center justify-center text-white/80 active:scale-95 transition-transform"
+          style={{ width: '36px', height: '36px' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <X className="w-6 h-6" strokeWidth={1.5} />
+        </motion.button>
+      </motion.div>
 
-      {/* === TOP ACTIVITY STRIP (PUBLIC FEED) === */}
+      {/* === TOP ACTIVITY STRIP (PUBLIC FEED) - with proper safe area === */}
       <AnimatePresence>
         {showStories && (
           <motion.div
             className="flex-shrink-0 w-full overflow-x-auto scrollbar-hide overscroll-x-contain"
             style={{
-              paddingTop: "calc(max(env(safe-area-inset-top, 12px), 12px) + 40px)",
+              paddingTop: "12px",
               paddingInline: "4vw",
-              paddingBottom: "12px",
+              paddingBottom: "16px",
+              minHeight: "130px", // Ensure space for stories
             }}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 200, damping: 25 }}
           >
-            <div className="flex items-end gap-2.5">
+            <div className="flex items-end gap-3">
               {feedLoading ? (
                 // Loading state - shimmer placeholders
                 <>
-                  {[0, 1, 2, 3].map((i) => (
+                  {[0, 1, 2, 3, 4].map((i) => (
                     <motion.div
                       key={i}
                       className="relative flex-shrink-0 overflow-hidden"
                       style={{
-                        width: "70px",
+                        width: "72px",
                         height: "100px",
-                        borderRadius: "12px",
+                        borderRadius: "14px",
                         background: "rgba(255,255,255,0.06)",
                         border: "1px solid rgba(255,255,255,0.08)",
                       }}
@@ -241,19 +276,18 @@ const Progress = () => {
                   <motion.button
                     key={photo.id}
                     data-shared-element={index === 0 ? "progress-hero-card" : undefined}
-                    className="relative flex-shrink-0 overflow-hidden cursor-pointer"
+                    className="relative flex-shrink-0 overflow-hidden cursor-pointer active:scale-95 transition-transform"
                     style={{
-                      width: "70px",
+                      width: "72px",
                       height: "100px",
-                      borderRadius: "12px",
+                      borderRadius: "14px",
                       boxShadow: index === 0 ? "0 12px 40px rgba(100, 70, 180, 0.5)" : "0 4px 16px rgba(0,0,0,0.25)",
                       border: index === 0 ? "2px solid rgba(160, 120, 220, 0.35)" : "1px solid rgba(255,255,255,0.1)",
                     }}
                     onClick={() => handlePhotoCardTap(index, photo.userId)}
                     initial={{ opacity: 0, x: 40 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 + index * 0.06 }}
-                    whileTap={{ scale: 0.95 }}
+                    transition={{ delay: 0.2 + index * 0.05 }}
                   >
                     {photo.isVideo || isVideoUrl(photo.storageUrl) ? (
                       <video
@@ -282,8 +316,8 @@ const Progress = () => {
                     
                     {/* User avatar overlay */}
                     <div 
-                      className="absolute bottom-1.5 left-1.5 w-5 h-5 rounded-full overflow-hidden"
-                      style={{ border: '1.5px solid rgba(255,255,255,0.6)' }}
+                      className="absolute bottom-1.5 left-1.5 w-6 h-6 rounded-full overflow-hidden"
+                      style={{ border: '2px solid rgba(255,255,255,0.6)' }}
                     >
                       {photo.avatarUrl ? (
                         <img src={photo.avatarUrl} alt="" className="w-full h-full object-cover" />
@@ -314,9 +348,9 @@ const Progress = () => {
                       key={i}
                       className="relative flex-shrink-0 flex flex-col items-center justify-center"
                       style={{
-                        width: "70px",
+                        width: "72px",
                         height: "100px",
-                        borderRadius: "12px",
+                        borderRadius: "14px",
                         background: "rgba(255,255,255,0.04)",
                         border: "1px dashed rgba(255,255,255,0.15)",
                       }}
@@ -349,16 +383,22 @@ const Progress = () => {
       </AnimatePresence>
 
       {/* === MAIN PROGRESS AREA - fills remaining space === */}
-      <div className="flex-1 relative w-full overflow-hidden" style={{ maxWidth: "430px", marginInline: "auto" }}>
+      <div 
+        className="flex-1 relative w-full overflow-hidden" 
+        style={{ 
+          maxWidth: "430px", 
+          marginInline: "auto",
+        }}
+      >
         {/* Engine Badge */}
         <AnimatePresence>
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "12%", top: "-2%", width: "35%", aspectRatio: "1" }}
+              style={{ left: "10%", top: "-1%", width: "32%", aspectRatio: "1" }}
               initial={{ opacity: 0, scale: 0.6, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.5 }}
+              transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.4 }}
             >
               <img src={engineBadgeImg} alt="Engine Badge" className="w-full h-full object-contain" style={{ opacity: 0.7 }} />
             </motion.div>
@@ -379,10 +419,11 @@ const Progress = () => {
                 top: `${pos.top}%`, 
                 width: "11%", 
                 aspectRatio: "1",
+                transform: 'translateX(-50%)',
               }}
               initial={{ opacity: 0, y: 40, scale: 0.7 }}
               animate={showTiles ? { opacity: 1, y: 0, scale: 1 } : {}}
-              transition={{ type: "spring", stiffness: 200, damping: 22, delay: index * 0.04 }}
+              transition={{ type: "spring", stiffness: 200, damping: 22, delay: index * 0.035 }}
             >
               <img src={isActive ? tileActiveImg : tileInactiveImg} alt={`Day ${day}`} className="w-full h-full object-contain relative z-10" />
             </motion.div>
@@ -397,13 +438,13 @@ const Progress = () => {
             style={{ top: `${label.top}%`, left: `${label.left}%`, width: label.side === "left" ? "26%" : "22%" }}
             initial={{ opacity: 0, x: label.side === "left" ? -20 : 20 }}
             animate={showTiles ? { opacity: 1, x: 0 } : {}}
-            transition={{ delay: 0.6 + idx * 0.1 }}
+            transition={{ delay: 0.5 + idx * 0.08 }}
           >
             {label.text.map((line, i) => (
               <div 
                 key={i}
                 className="font-bold uppercase"
-                style={{ fontSize: "clamp(10px, 2.8vw, 13px)", letterSpacing: "0.08em", color: "rgba(255, 255, 255, 0.6)", lineHeight: 1.3 }}
+                style={{ fontSize: "clamp(9px, 2.5vw, 12px)", letterSpacing: "0.08em", color: "rgba(255, 255, 255, 0.6)", lineHeight: 1.3 }}
               >
                 {line}
               </div>
@@ -411,7 +452,7 @@ const Progress = () => {
             <div 
               className="absolute h-px"
               style={{
-                top: "36px",
+                top: "32px",
                 ...(label.side === "left" 
                   ? { left: 0, right: "-150%", background: "linear-gradient(90deg, #FFF 0%, rgba(255,255,255,0) 100%)" }
                   : { right: 0, left: "-150%", background: "linear-gradient(270deg, #FFF 0%, rgba(255,255,255,0) 100%)" }
@@ -427,17 +468,17 @@ const Progress = () => {
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: 0, bottom: "5%", width: "45%", aspectRatio: "1.2" }}
+              style={{ left: 0, bottom: "2%", width: "40%", aspectRatio: "1.2" }}
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 }}
+              transition={{ delay: 0.7 }}
             >
               <img src={basePlatformImg} alt="Base Platform" className="w-full h-full object-contain" />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
