@@ -197,7 +197,7 @@ export default function SendReactionSheet({
           <div className="mx-5 h-px bg-white/10 my-2" />
         )}
 
-        {/* SEND REACTION SECTION */}
+        {/* SEND REACTION SECTION - Scattered random layout */}
         <div className="px-5 pt-3 pb-4">
           <motion.span 
             className="text-white/60 text-sm font-medium block mb-4"
@@ -208,43 +208,71 @@ export default function SendReactionSheet({
             {userReaction?.reactionType ? 'Change your reaction' : 'Send a reaction'}
           </motion.span>
 
-          {/* Emoji grid - 5 columns, 2 rows for 10 reactions */}
-          <div className="grid grid-cols-5 gap-3">
+          {/* Scattered emoji layout - random positions */}
+          <div className="relative h-[140px] w-full">
             {SEND_REACTIONS.map((type, i) => {
               const isUserReaction = userReaction?.reactionType === type;
+              // Random-ish scattered positions for organic feel
+              const positions = [
+                { left: '2%', top: '5%', rotate: -8, scale: 1 },
+                { left: '22%', top: '45%', rotate: 5, scale: 0.95 },
+                { left: '40%', top: '8%', rotate: -3, scale: 1.05 },
+                { left: '58%', top: '50%', rotate: 8, scale: 0.9 },
+                { left: '78%', top: '12%', rotate: -5, scale: 1 },
+                { left: '8%', top: '55%', rotate: 12, scale: 0.95 },
+                { left: '32%', top: '65%', rotate: -10, scale: 1 },
+                { left: '52%', top: '20%', rotate: 6, scale: 0.9 },
+                { left: '70%', top: '60%', rotate: -4, scale: 1.05 },
+                { left: '88%', top: '35%', rotate: 10, scale: 0.95 },
+              ];
+              const pos = positions[i] || positions[0];
+              
               return (
                 <motion.button
                   key={type}
                   onClick={() => onReact(type)}
-                  className="aspect-square flex items-center justify-center rounded-2xl transition-transform active:scale-90 relative"
+                  className="absolute flex items-center justify-center transition-transform active:scale-90"
                   style={{
-                    background: isUserReaction 
-                      ? 'rgba(34, 197, 94, 0.2)' 
-                      : 'rgba(255, 255, 255, 0.06)',
-                    border: isUserReaction ? '2px solid rgba(34, 197, 94, 0.5)' : '2px solid transparent',
+                    left: pos.left,
+                    top: pos.top,
+                    minWidth: 44,
+                    minHeight: 44,
                   }}
-                  initial={{ opacity: 0, scale: 0.5, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  initial={{ opacity: 0, scale: 0, rotate: pos.rotate - 20 }}
+                  animate={{ 
+                    opacity: 1, 
+                    scale: isUserReaction ? pos.scale * 1.15 : pos.scale, 
+                    rotate: pos.rotate,
+                  }}
                   transition={{ 
-                    delay: 0.15 + i * 0.03, 
+                    delay: 0.1 + i * 0.04, 
                     type: 'spring', 
-                    stiffness: 400,
-                    damping: 18,
+                    stiffness: 350,
+                    damping: 20,
                   }}
-                  whileHover={{ scale: 1.1, background: 'rgba(255, 255, 255, 0.12)' }}
-                  whileTap={{ scale: 0.85 }}
+                  whileHover={{ scale: pos.scale * 1.25, rotate: 0 }}
+                  whileTap={{ scale: pos.scale * 0.8 }}
                 >
-                  <img 
-                    src={REACTION_IMAGES[type]} 
-                    alt={type} 
-                    className="w-10 h-10 object-contain"
-                    style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))' }}
-                  />
-                  {isUserReaction && (
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-[10px]">✓</span>
-                    </div>
-                  )}
+                  <div className="relative">
+                    <img 
+                      src={REACTION_IMAGES[type]} 
+                      alt={type} 
+                      className="w-12 h-12 object-contain"
+                      style={{ 
+                        filter: `drop-shadow(0 4px 12px rgba(0,0,0,0.5)) ${isUserReaction ? 'brightness(1.1)' : ''}`,
+                      }}
+                    />
+                    {isUserReaction && (
+                      <motion.div 
+                        className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 500 }}
+                      >
+                        <span className="text-white text-xs font-bold">✓</span>
+                      </motion.div>
+                    )}
+                  </div>
                 </motion.button>
               );
             })}
