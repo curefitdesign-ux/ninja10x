@@ -604,75 +604,101 @@ const Activity = () => {
         </div>
       </PullToRefresh>
 
-      {/* Bottom Navigation
-          NOTE: We render via a portal so `position: fixed` stays viewport-sticky even if
-          ancestor containers apply transforms (common with animated route transitions).
-      */}
+      {/* Bottom Navigation - Floating bar with notch cutout */}
       {(() => {
         const nav = (
           <nav
-            className="fixed bottom-0 left-0 right-0"
+            className="fixed bottom-0 left-0 right-0 px-4"
             style={{
               zIndex: 9999,
               position: "fixed",
+              paddingBottom: "max(env(safe-area-inset-bottom, 12px), 12px)",
             }}
           >
+            {/* Floating center button - above the bar */}
+            <div className="absolute left-1/2 -translate-x-1/2 -top-6 z-10">
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setActiveTab("activity")}
+                className="relative"
+              >
+                {/* Glow effect */}
+                <div 
+                  className="absolute -inset-2 rounded-full blur-xl opacity-60"
+                  style={{ background: "linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)" }}
+                />
+                {/* Main button */}
+                <div 
+                  className="relative w-14 h-14 rounded-full flex items-center justify-center"
+                  style={{
+                    background: "linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)",
+                    boxShadow: "0 8px 24px rgba(59, 130, 246, 0.5), 0 0 40px rgba(59, 130, 246, 0.3)",
+                  }}
+                >
+                  <ActivityIcon className="w-6 h-6 text-white" />
+                </div>
+              </motion.button>
+            </div>
+
+            {/* Main bar container */}
             <div
-              className="relative"
+              className="relative rounded-[24px] overflow-hidden"
               style={{
-                background: "rgba(30, 30, 50, 0.85)",
-                backdropFilter: "blur(40px) saturate(180%)",
-                WebkitBackdropFilter: "blur(40px) saturate(180%)",
-                borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+                background: "rgba(20, 20, 28, 0.95)",
+                backdropFilter: "blur(40px) saturate(150%)",
+                WebkitBackdropFilter: "blur(40px) saturate(150%)",
                 boxShadow: `
-                  inset 0 1px 1px rgba(255,255,255,0.1),
-                  0 -8px 32px rgba(0,0,0,0.4)
+                  0 8px 32px rgba(0,0,0,0.6),
+                  0 2px 8px rgba(0,0,0,0.4),
+                  inset 0 1px 0 rgba(255,255,255,0.05)
                 `,
+                border: "1px solid rgba(255,255,255,0.06)",
               }}
             >
-              {/* Inner top glow highlight */}
-              <div
-                className="absolute inset-x-0 top-0 h-px pointer-events-none"
+              {/* Notch cutout visual - semi-circle depression */}
+              <div 
+                className="absolute left-1/2 -translate-x-1/2 -top-1 w-20 h-10 pointer-events-none"
                 style={{
-                  background:
-                    "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)",
+                  background: "radial-gradient(ellipse 50% 100% at 50% 0%, rgba(20, 20, 28, 1) 70%, transparent 70%)",
                 }}
               />
 
-              <div
-                className="relative flex items-center justify-around py-3 px-2"
-                style={{ paddingBottom: "max(env(safe-area-inset-bottom, 16px), 16px)" }}
-              >
-                {navItems.map((item) => (
-                  <motion.button
-                    key={item.id}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => setActiveTab(item.id)}
-                    className="flex flex-col items-center py-2 px-4 rounded-2xl transition-all duration-200"
-                  >
-                    {item.isCenter ? (
-                      <div className="relative -mt-6">
-                        <div className="absolute -inset-3 bg-gradient-to-r from-rose-500/60 to-pink-500/60 rounded-full blur-xl" />
-                        <div className="relative w-14 h-14 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center shadow-[0_0_30px_rgba(244,63,94,0.6)]">
-                          <item.icon className="w-7 h-7 text-white" />
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <item.icon
-                          className={`w-6 h-6 ${activeTab === item.id ? "text-white" : "text-white/50"}`}
+              <div className="relative flex items-center justify-around py-3 px-2">
+                {navItems.map((item) => {
+                  if (item.isCenter) {
+                    // Empty space for center button
+                    return <div key={item.id} className="w-14 h-12" />;
+                  }
+                  
+                  return (
+                    <motion.button
+                      key={item.id}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setActiveTab(item.id)}
+                      className="flex flex-col items-center py-1 px-3 transition-all duration-200 relative"
+                    >
+                      <item.icon
+                        className={`w-6 h-6 ${activeTab === item.id ? "text-white" : "text-white/40"}`}
+                      />
+                      <span
+                        className={`text-[10px] mt-1.5 font-medium tracking-wide ${
+                          activeTab === item.id ? "text-white" : "text-white/40"
+                        }`}
+                      >
+                        {item.label}
+                      </span>
+                      {/* Active indicator line */}
+                      {activeTab === item.id && (
+                        <motion.div
+                          layoutId="navIndicator"
+                          className="absolute -bottom-1 w-8 h-1 rounded-full"
+                          style={{ background: "linear-gradient(90deg, #10b981 0%, #34d399 100%)" }}
+                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
                         />
-                        <span
-                          className={`text-[10px] mt-1 font-medium tracking-wide ${
-                            activeTab === item.id ? "text-white" : "text-white/50"
-                          }`}
-                        >
-                          {item.label}
-                        </span>
-                      </>
-                    )}
-                  </motion.button>
-                ))}
+                      )}
+                    </motion.button>
+                  );
+                })}
               </div>
             </div>
           </nav>
