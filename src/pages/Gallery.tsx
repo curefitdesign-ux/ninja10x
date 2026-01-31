@@ -30,7 +30,6 @@ const Gallery = () => {
   
   const dayNumber = state?.dayNumber ?? 1;
 
-  // Load cached gallery items from localStorage
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(() => {
     try {
       const cached = localStorage.getItem(GALLERY_STORAGE_KEY);
@@ -48,8 +47,6 @@ const Gallery = () => {
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
   const [showWarning, setShowWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
-  
-  // Cropper and trimmer states
   const [showCropper, setShowCropper] = useState(false);
   const [showTrimmer, setShowTrimmer] = useState(false);
   const [mediaToEdit, setMediaToEdit] = useState<string | null>(null);
@@ -57,7 +54,6 @@ const Gallery = () => {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Persist gallery items to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(galleryItems));
@@ -108,20 +104,17 @@ const Gallery = () => {
     return { isValid: false, message };
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, isFromCamera: boolean = false) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const file = files[0];
-    
-    if (!isFromCamera) {
-      const validation = validateFileDate(file);
-      if (!validation.isValid) {
-        triggerHaptic('heavy');
-        setWarningMessage(validation.message || 'Photo too old');
-        setShowWarning(true);
-        return;
-      }
+    const validation = validateFileDate(file);
+    if (!validation.isValid) {
+      triggerHaptic('heavy');
+      setWarningMessage(validation.message || 'Photo too old');
+      setShowWarning(true);
+      return;
     }
 
     const isVideo = file.type.startsWith('video/');
@@ -136,7 +129,7 @@ const Gallery = () => {
           id: Date.now().toString(),
           dataUrl: mediaDataUrl,
           isVideo,
-          timestamp: isFromCamera ? Date.now() : file.lastModified,
+          timestamp: file.lastModified,
         };
         
         setGalleryItems(prev => {
@@ -211,7 +204,6 @@ const Gallery = () => {
     fileInputRef.current?.click();
   };
 
-  // Show cropper for images
   if (showCropper && mediaToEdit) {
     return (
       <ImageCropper
@@ -224,7 +216,6 @@ const Gallery = () => {
     );
   }
 
-  // Show trimmer for videos
   if (showTrimmer && mediaToEdit) {
     return (
       <VideoTrimmer
@@ -238,41 +229,88 @@ const Gallery = () => {
 
   return (
     <>
-      {/* Hidden file inputs */}
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*,video/*"
         className="hidden"
-        onChange={(e) => handleFileSelect(e, false)}
+        onChange={handleFileSelect}
       />
 
-      {/* Full screen page with liquid glass background */}
+      {/* Full screen with blurred gradient background */}
       <div
         className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-manipulation"
         style={{
-          background: '#0a0a12',
           height: '100dvh',
           minHeight: '-webkit-fill-available',
         }}
       >
-        {/* Animated gradient orbs background */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Animated blurred gradient background - matching reference */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Base gradient */}
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(180deg, hsl(200, 25%, 45%) 0%, hsl(250, 35%, 35%) 40%, hsl(260, 30%, 30%) 70%, hsl(180, 25%, 35%) 100%)',
+            }}
+          />
+          
+          {/* Floating gradient orbs with heavy blur */}
+          <motion.div
+            className="absolute w-[500px] h-[500px] rounded-full"
+            style={{
+              background: 'radial-gradient(circle, hsl(270, 50%, 55%) 0%, transparent 60%)',
+              filter: 'blur(120px)',
+              top: '5%',
+              left: '10%',
+              opacity: 0.6,
+            }}
+            animate={{
+              x: [0, 40, 0],
+              y: [0, 30, 0],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              duration: 15,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
           <motion.div
             className="absolute w-[400px] h-[400px] rounded-full"
             style={{
-              background: 'radial-gradient(circle, hsl(250, 60%, 45%) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, hsl(200, 40%, 50%) 0%, transparent 60%)',
               filter: 'blur(100px)',
-              top: '-10%',
-              left: '-10%',
+              top: '-5%',
+              right: '-10%',
+              opacity: 0.5,
+            }}
+            animate={{
+              x: [0, -30, 0],
+              y: [0, 40, 0],
+            }}
+            transition={{
+              duration: 18,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div
+            className="absolute w-[450px] h-[450px] rounded-full"
+            style={{
+              background: 'radial-gradient(circle, hsl(180, 35%, 45%) 0%, transparent 60%)',
+              filter: 'blur(110px)',
+              bottom: '10%',
+              right: '5%',
               opacity: 0.4,
             }}
             animate={{
-              x: [0, 30, 0],
-              y: [0, 20, 0],
+              x: [0, -25, 0],
+              y: [0, -35, 0],
+              scale: [1, 1.05, 1],
             }}
             transition={{
-              duration: 12,
+              duration: 20,
               repeat: Infinity,
               ease: "easeInOut",
             }}
@@ -280,169 +318,198 @@ const Gallery = () => {
           <motion.div
             className="absolute w-[350px] h-[350px] rounded-full"
             style={{
-              background: 'radial-gradient(circle, hsl(280, 50%, 40%) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, hsl(220, 40%, 50%) 0%, transparent 60%)',
               filter: 'blur(90px)',
-              bottom: '20%',
-              right: '-15%',
+              bottom: '30%',
+              left: '-5%',
               opacity: 0.35,
             }}
             animate={{
-              x: [0, -25, 0],
-              y: [0, -30, 0],
+              x: [0, 35, 0],
+              y: [0, -25, 0],
             }}
             transition={{
-              duration: 14,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-          <motion.div
-            className="absolute w-[300px] h-[300px] rounded-full"
-            style={{
-              background: 'radial-gradient(circle, hsl(220, 60%, 40%) 0%, transparent 70%)',
-              filter: 'blur(80px)',
-              top: '40%',
-              left: '30%',
-              opacity: 0.25,
-            }}
-            animate={{
-              scale: [1, 1.15, 1],
-              opacity: [0.25, 0.35, 0.25],
-            }}
-            transition={{
-              duration: 10,
+              duration: 16,
               repeat: Infinity,
               ease: "easeInOut",
             }}
           />
         </div>
 
-        {/* Main Glass Container */}
-        <div 
-          className="flex-1 mx-3 mt-3 mb-3 rounded-3xl overflow-hidden relative z-10 flex flex-col"
-          style={{
-            marginTop: 'max(env(safe-area-inset-top, 12px), 12px)',
-            background: 'rgba(255, 255, 255, 0.06)',
-            backdropFilter: 'blur(40px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            boxShadow: `
-              inset 0 1px 1px rgba(255, 255, 255, 0.1),
-              0 8px 32px rgba(0, 0, 0, 0.3)
-            `,
+        {/* Back Button - Top Left */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={handleClose}
+          className="absolute z-20 p-2.5 rounded-xl"
+          style={{ 
+            top: 'max(env(safe-area-inset-top, 16px), 16px)',
+            left: '16px',
+            background: 'rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
           }}
         >
-          {/* Back Button - Top Left */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={handleClose}
-            className="absolute top-4 left-4 z-20 p-2 rounded-full"
-            style={{ 
-              background: 'rgba(255, 255, 255, 0.08)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-            }}
-          >
-            <ChevronLeft className="w-5 h-5 text-white/80" />
-          </motion.button>
+          <ChevronLeft className="w-5 h-5 text-white/80" />
+        </motion.button>
 
-          {/* Hero Section with Stickers */}
-          <div className="flex-shrink-0 pt-14 pb-4 px-4">
-            {/* Stickers Collage */}
-            <div className="relative w-full h-[200px] flex items-center justify-center mb-4">
-              {/* Lift Weights Sticker - Left */}
+        {/* Main Content */}
+        <div 
+          className="flex-1 flex flex-col relative z-10 overflow-hidden"
+          style={{ paddingTop: 'max(env(safe-area-inset-top, 56px), 56px)' }}
+        >
+          {/* Hero Section with Animated Stickers */}
+          <div className="flex-shrink-0 pt-8 pb-6 px-4 relative">
+            {/* Stickers Collage with floating animations */}
+            <div className="relative w-full h-[220px] flex items-center justify-center mb-6">
+              {/* Lift Weights Sticker - Left, floating animation */}
               <motion.img
                 src={liftWeightsSticker}
                 alt="Lift Weights"
-                className="absolute w-32 h-auto object-contain z-10 drop-shadow-2xl"
+                className="absolute w-36 h-auto object-contain z-10"
                 style={{
-                  left: '5%',
-                  top: '15%',
-                  filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))',
+                  left: '0%',
+                  top: '10%',
+                  filter: 'drop-shadow(0 12px 32px rgba(0,0,0,0.4))',
                 }}
-                initial={{ opacity: 0, x: -30, rotate: -5 }}
-                animate={{ opacity: 1, x: 0, rotate: -3 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
+                initial={{ opacity: 0, x: -40, rotate: -8 }}
+                animate={{ 
+                  opacity: 1, 
+                  x: 0, 
+                  rotate: -5,
+                  y: [0, -8, 0],
+                }}
+                transition={{ 
+                  opacity: { duration: 0.6, delay: 0.1 },
+                  x: { duration: 0.6, delay: 0.1 },
+                  rotate: { duration: 0.6, delay: 0.1 },
+                  y: { 
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }
+                }}
               />
               
-              {/* Play Basketball Sticker - Center/Right */}
+              {/* Play Basketball Sticker - Center/Right, floating animation */}
               <motion.img
                 src={playBasketballSticker}
                 alt="Play Basketball"
-                className="absolute w-36 h-auto object-contain z-20 drop-shadow-2xl"
+                className="absolute w-40 h-auto object-contain z-20"
                 style={{
-                  right: '8%',
-                  top: '0%',
-                  filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))',
+                  right: '5%',
+                  top: '-5%',
+                  filter: 'drop-shadow(0 12px 32px rgba(0,0,0,0.4))',
                 }}
-                initial={{ opacity: 0, y: -30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
+                initial={{ opacity: 0, y: -40, scale: 0.9 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: [0, -10, 0],
+                  scale: 1,
+                }}
+                transition={{ 
+                  opacity: { duration: 0.6, delay: 0.2 },
+                  scale: { duration: 0.6, delay: 0.2 },
+                  y: { 
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.5,
+                  }
+                }}
               />
               
-              {/* Go Running Sticker - Bottom Right */}
+              {/* Go Running Sticker - Bottom Right, floating animation */}
               <motion.img
                 src={goRunningSticker}
                 alt="Go Running"
-                className="absolute w-28 h-auto object-contain z-15 drop-shadow-2xl"
+                className="absolute w-32 h-auto object-contain z-15"
                 style={{
-                  right: '12%',
-                  bottom: '0%',
-                  filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))',
+                  right: '8%',
+                  bottom: '-5%',
+                  filter: 'drop-shadow(0 12px 32px rgba(0,0,0,0.4))',
                 }}
-                initial={{ opacity: 0, x: 30, rotate: 5 }}
-                animate={{ opacity: 1, x: 0, rotate: 3 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
+                initial={{ opacity: 0, x: 40, rotate: 8 }}
+                animate={{ 
+                  opacity: 1, 
+                  x: 0, 
+                  rotate: 5,
+                  y: [0, -6, 0],
+                }}
+                transition={{ 
+                  opacity: { duration: 0.6, delay: 0.3 },
+                  x: { duration: 0.6, delay: 0.3 },
+                  rotate: { duration: 0.6, delay: 0.3 },
+                  y: { 
+                    duration: 3.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 1,
+                  }
+                }}
               />
             </div>
 
             {/* Title and Subtitle */}
-            <div className="text-center">
+            <motion.div 
+              className="text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
               <h1 className="text-2xl font-bold text-white leading-tight tracking-tight">
                 Capture your fitness and
                 <br />
                 workout moment.
               </h1>
-              <p className="text-white/50 text-sm mt-2">
+              <p className="text-white/50 text-sm mt-2.5">
                 Last 24 hours only.
               </p>
-            </div>
+            </motion.div>
           </div>
 
-          {/* Photo Grid Section - Instagram Story Style */}
-          <div 
-            className="flex-1 px-3 pb-4 overflow-y-auto overscroll-contain"
-            style={{ 
-              paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 20px))',
-              WebkitOverflowScrolling: 'touch',
-            }}
+          {/* Photo Grid Section - Horizontal scroll with liquid glass cards */}
+          <motion.div 
+            className="px-4 pb-4"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
           >
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              {/* Camera Button - First Item */}
+            <div 
+              className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide"
+              style={{ 
+                WebkitOverflowScrolling: 'touch',
+              }}
+            >
+              {/* Camera Button - First Item with liquid glass */}
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={handleCameraCapture}
                 className="flex-shrink-0 rounded-2xl flex items-center justify-center relative overflow-hidden"
                 style={{
                   width: '110px',
-                  height: '150px',
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.1)',
+                  height: '155px',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(40px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  boxShadow: `
+                    inset 0 1px 1px rgba(255, 255, 255, 0.15),
+                    0 8px 32px rgba(0, 0, 0, 0.2)
+                  `,
                 }}
               >
                 {/* Camera focus corners */}
-                <div className="absolute inset-4 pointer-events-none">
-                  <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-white/30 rounded-tl-sm" />
-                  <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-white/30 rounded-tr-sm" />
-                  <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-white/30 rounded-bl-sm" />
-                  <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-white/30 rounded-br-sm" />
+                <div className="absolute inset-5 pointer-events-none">
+                  <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-white/40 rounded-tl-sm" />
+                  <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-white/40 rounded-tr-sm" />
+                  <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-white/40 rounded-bl-sm" />
+                  <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-white/40 rounded-br-sm" />
                 </div>
-                <Camera className="w-8 h-8 text-white/50" strokeWidth={1.5} />
+                <Camera className="w-8 h-8 text-white/60" strokeWidth={1.5} />
               </motion.button>
 
-              {/* Gallery Items - Horizontal scroll like Instagram */}
+              {/* Gallery Items - Liquid glass cards */}
               {galleryItems.map((item, index) => (
                 <motion.button
                   key={item.id}
@@ -454,11 +521,11 @@ const Gallery = () => {
                   className="flex-shrink-0 rounded-2xl overflow-hidden relative"
                   style={{
                     width: '110px',
-                    height: '150px',
-                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+                    height: '155px',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
                     border: selectedItem?.id === item.id 
-                      ? '2px solid rgba(255, 255, 255, 0.6)' 
-                      : '1px solid rgba(255, 255, 255, 0.1)',
+                      ? '2px solid rgba(255, 255, 255, 0.7)' 
+                      : '1px solid rgba(255, 255, 255, 0.15)',
                   }}
                 >
                   {item.isVideo ? (
@@ -476,31 +543,35 @@ const Gallery = () => {
                     />
                   )}
                   
-                  {/* Video indicator badge */}
+                  {/* Video indicator badge with glass effect */}
                   {item.isVideo && (
                     <div 
-                      className="absolute bottom-2 left-2 rounded px-1.5 py-0.5 text-[10px] font-medium text-white"
+                      className="absolute bottom-2 left-2 rounded-lg px-2 py-0.5 text-[10px] font-semibold text-white"
                       style={{
-                        background: 'rgba(0, 0, 0, 0.6)',
+                        background: 'rgba(0, 0, 0, 0.5)',
                         backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
                       }}
                     >
                       Video
                     </div>
                   )}
 
-                  {/* Selection indicator */}
+                  {/* Selection overlay */}
                   {selectedItem?.id === item.id && (
                     <motion.div 
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="absolute inset-0 bg-white/10"
+                      className="absolute inset-0"
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.1)',
+                      }}
                     />
                   )}
                 </motion.button>
               ))}
 
-              {/* Empty state - show upload hint if no items */}
+              {/* Empty state placeholder */}
               {galleryItems.length === 0 && (
                 <motion.button
                   whileTap={{ scale: 0.95 }}
@@ -508,24 +579,30 @@ const Gallery = () => {
                   className="flex-shrink-0 rounded-2xl flex flex-col items-center justify-center gap-2"
                   style={{
                     width: '110px',
-                    height: '150px',
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    border: '1.5px dashed rgba(255, 255, 255, 0.15)',
+                    height: '155px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1.5px dashed rgba(255, 255, 255, 0.2)',
                   }}
                 >
-                  <span className="text-white/30 text-xs text-center px-2">Tap to add photos</span>
+                  <span className="text-white/40 text-xs text-center px-2">Tap to add photos</span>
                 </motion.button>
               )}
             </div>
-          </div>
+          </motion.div>
 
-          {/* Bottom Select Button */}
-          <div 
-            className="absolute bottom-0 left-0 right-0 p-4 z-20"
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* Bottom Select Button - Liquid glass */}
+          <motion.div 
+            className="px-4 pb-4 z-20"
             style={{
-              paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)',
-              background: 'linear-gradient(to top, rgba(10, 10, 18, 0.9) 0%, transparent 100%)',
+              paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 20px)',
             }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
           >
             <motion.button
               whileTap={{ scale: 0.98 }}
@@ -534,14 +611,14 @@ const Gallery = () => {
               style={{
                 background: selectedItem 
                   ? 'rgba(255, 255, 255, 0.15)' 
-                  : 'rgba(255, 255, 255, 0.06)',
+                  : 'rgba(255, 255, 255, 0.08)',
                 backdropFilter: 'blur(40px) saturate(180%)',
                 WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                color: selectedItem ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.4)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
+                color: selectedItem ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.45)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
                 boxShadow: `
-                  inset 0 1px 1px rgba(255, 255, 255, 0.1),
-                  0 4px 20px rgba(0, 0, 0, 0.2)
+                  inset 0 1px 1px rgba(255, 255, 255, 0.12),
+                  0 8px 32px rgba(0, 0, 0, 0.2)
                 `,
               }}
             >
@@ -549,7 +626,7 @@ const Gallery = () => {
               <motion.div
                 className="absolute inset-0 opacity-20"
                 style={{
-                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
                 }}
                 animate={{
                   x: ['-100%', '200%'],
@@ -564,7 +641,7 @@ const Gallery = () => {
                 {selectedItem ? 'SELECT' : 'SELECT FROM GALLERY'}
               </span>
             </motion.button>
-          </div>
+          </motion.div>
         </div>
 
         {/* Warning Popup */}
