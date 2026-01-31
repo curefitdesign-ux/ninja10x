@@ -172,7 +172,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
     return (
       <motion.button
         key={index}
-        className={`absolute rounded-xl overflow-hidden border shadow-lg ${
+        className={`absolute rounded-xl border shadow-lg ${
           hasPhoto 
             ? 'border-emerald-400/40' 
             : isActiveDay 
@@ -188,6 +188,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
           WebkitBackdropFilter: 'blur(16px)',
           zIndex,
           willChange: 'transform, opacity',
+          overflow: 'visible', // Allow reaction badge to float outside
         }}
         initial={false}
         animate={
@@ -221,47 +222,46 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
         onClick={(e) => handleCardClick(e, index, photo)}
         whileTap={{ scale: 0.96 }}
       >
-        {/* Photo content - always render if exists */}
-        {/* storageUrl is always the templated PNG - render as image */}
-        {hasPhoto && (
-          <>
-            {isDisplayVideo ? (
-              <video
-                src={displayUrl}
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ zIndex: 1 }}
-                muted
-                playsInline
-                loop
-                autoPlay
-                preload="metadata"
-                onError={() => {
-                  console.error("Failed to load video:", displayUrl);
-                }}
-              />
-            ) : (
-              <img
-                src={displayUrl}
-                alt={`Day ${dayNumber}`}
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ zIndex: 1 }}
-                onError={(e) => {
-                  // Try reloading once on error
-                  const img = e.currentTarget;
-                  if (!img.dataset.retried) {
-                    img.dataset.retried = "true";
-                    img.src = displayUrl + "?t=" + Date.now();
-                  } else {
-                    console.error("Failed to load image:", displayUrl);
-                  }
-                }}
-              />
-            )}
-            {/* Green glow overlay for logged photos */}
-            <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/25 to-transparent pointer-events-none" style={{ zIndex: 2 }} />
-            
-          </>
-        )}
+        {/* Photo content wrapper with overflow hidden for media clipping */}
+        <div className="absolute inset-0 rounded-xl overflow-hidden" style={{ zIndex: 1 }}>
+          {/* storageUrl is always the templated PNG - render as image */}
+          {hasPhoto && (
+            <>
+              {isDisplayVideo ? (
+                <video
+                  src={displayUrl}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  muted
+                  playsInline
+                  loop
+                  autoPlay
+                  preload="metadata"
+                  onError={() => {
+                    console.error("Failed to load video:", displayUrl);
+                  }}
+                />
+              ) : (
+                <img
+                  src={displayUrl}
+                  alt={`Day ${dayNumber}`}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={(e) => {
+                    // Try reloading once on error
+                    const img = e.currentTarget;
+                    if (!img.dataset.retried) {
+                      img.dataset.retried = "true";
+                      img.src = displayUrl + "?t=" + Date.now();
+                    } else {
+                      console.error("Failed to load image:", displayUrl);
+                    }
+                  }}
+                />
+              )}
+              {/* Green glow overlay for logged photos */}
+              <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/25 to-transparent pointer-events-none" />
+            </>
+          )}
+        </div>
         
         {/* Empty state - animated upload icon ONLY when expanded */}
         {!hasPhoto && shouldShowExpanded && isActiveDay && (
