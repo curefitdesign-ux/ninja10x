@@ -1,18 +1,24 @@
 import { motion } from 'framer-motion';
 import { ReactionType, ActivityReaction } from '@/services/journey-service';
 
+// 3D reaction images
+import fire3d from '@/assets/reactions/fire-3d.png';
+import clap3d from '@/assets/reactions/clap-3d.png';
+import fistbump3d from '@/assets/reactions/fistbump.png';
+import wow3d from '@/assets/reactions/wow.png';
+
+const REACTION_IMAGES: Record<ReactionType, string> = {
+  heart: fire3d,
+  fire: fire3d,
+  clap: clap3d,
+  fistbump: fistbump3d,
+  wow: wow3d,
+};
+
 interface StoryReactionDisplayProps {
   reactions: Record<ReactionType, ActivityReaction>;
   totalCount: number;
 }
-
-const REACTION_EMOJIS: Record<ReactionType, string> = {
-  heart: '❤️',
-  fire: '🔥',
-  clap: '👏',
-  fistbump: '🤜🤛',
-  wow: '🤩',
-};
 
 export default function StoryReactionDisplay({ reactions, totalCount }: StoryReactionDisplayProps) {
   // Get non-zero reactions sorted by count
@@ -52,24 +58,28 @@ export default function StoryReactionDisplay({ reactions, totalCount }: StoryRea
       animate={{ opacity: 1, scale: 1 }}
       transition={{ type: 'spring', stiffness: 300 }}
     >
-      {/* Stacked emoji display */}
-      <div className="flex items-center -space-x-1">
+      {/* Stacked reaction images display */}
+      <div className="flex items-center -space-x-2">
         {activeReactions.map(([type], index) => (
-          <motion.span
+          <motion.div
             key={type}
-            className="relative flex items-center justify-center w-8 h-8 rounded-full"
+            className="relative flex items-center justify-center w-8 h-8"
             style={{
-              background: 'rgba(0, 0, 0, 0.3)',
-              fontSize: type === 'fistbump' ? '14px' : '18px',
               zIndex: 10 - index,
-              border: '2px solid rgba(255, 255, 255, 0.1)',
             }}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.05 }}
           >
-            {REACTION_EMOJIS[type as ReactionType]}
-          </motion.span>
+            <img 
+              src={REACTION_IMAGES[type as ReactionType]} 
+              alt={type}
+              className="w-7 h-7 object-contain"
+              style={{
+                filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
+              }}
+            />
+          </motion.div>
         ))}
       </div>
 
