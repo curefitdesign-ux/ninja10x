@@ -769,12 +769,15 @@ const Reel = () => {
       <AnimatePresence>
         {showSendReactionSheet && (
           <SendReactionSheet
+            activityId={currentActivity?.id}
+            currentUserId={user?.id}
             onReact={handleReact}
             onClose={() => setShowSendReactionSheet(false)}
             onViewReactions={() => {
               setShowSendReactionSheet(false);
               setShowReactsSheet(true);
             }}
+            onReactionRemoved={loadActivities}
             totalReactions={currentReactions.total}
             reactorProfiles={currentReactions.reactorProfiles}
           />
