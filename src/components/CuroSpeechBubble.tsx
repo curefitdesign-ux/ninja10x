@@ -3,48 +3,53 @@ import { motion } from "framer-motion";
 interface CuroSpeechBubbleProps {
   photosCount: number;
   currentWeek: number;
+  userName?: string;
 }
 
-const CuroSpeechBubble = ({ photosCount, currentWeek }: CuroSpeechBubbleProps) => {
+const CuroSpeechBubble = ({ photosCount, currentWeek, userName }: CuroSpeechBubbleProps) => {
+  // Use first name only for conversational feel
+  const firstName = userName?.split(' ')[0] || 'there';
+  
   // Calculate contextual state
   const dayInWeek = photosCount % 3; // 0 = start of week, 1 = day 2, 2 = day 3
   const isWeekComplete = dayInWeek === 0 && photosCount > 0;
   const isJourneyComplete = photosCount >= 12;
+  const daysLeft = 3 - dayInWeek;
   
   // Get single contextual message based on exact state
   const getMessage = (): string => {
     // Journey complete
     if (isJourneyComplete) {
-      return "🏆 12 days strong!\nYou've built an incredible habit!";
+      return `${firstName}, you crushed it! 🏆\n12 days — habit unlocked!`;
     }
     
     // Week just completed (3, 6, 9 photos)
     if (isWeekComplete) {
       const completedWeek = photosCount / 3;
       const weekMessages: Record<number, string> = {
-        1: "Week 1 done! 🔥\nYour willpower is unlocked!",
-        2: "Week 2 crushed! ⚡\nEnergy levels rising!",
-        3: "Week 3 complete! 💪\nStamina mode activated!",
+        1: `${firstName}, Week 1 done! 🔥\nYour streak is alive.`,
+        2: `Week 2 in the bag! ⚡\n${firstName}, you're on fire.`,
+        3: `${firstName}, Week 3 locked! 💪\nOne more week to go.`,
       };
-      return weekMessages[completedWeek] || "Amazing week! Keep going!";
+      return weekMessages[completedWeek] || `Great week, ${firstName}!`;
     }
     
     // First time user
     if (photosCount === 0) {
-      return "Hey, I'm Curo! 👋\nTap + to log your first workout!";
+      return `Hey ${firstName}! 👋\nTap + to log your first workout.`;
     }
     
     // Day 2 of any week (1, 4, 7, 10 photos)
     if (dayInWeek === 1) {
-      return "Great start! 📸\nOne more to complete the week!";
+      return `Nice one, ${firstName}! 📸\n${daysLeft} more to complete this week.`;
     }
     
     // Day 3 of any week (2, 5, 8, 11 photos) - about to complete
     if (dayInWeek === 2) {
-      return "Almost there! 🎯\nOne more unlocks your reel!";
+      return `Almost there, ${firstName}! 🎯\n1 more unlocks your reel.`;
     }
     
-    return "Keep the momentum! 💪";
+    return `Keep going, ${firstName}! 💪`;
   };
 
   const message = getMessage();
