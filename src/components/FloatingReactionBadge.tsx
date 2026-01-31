@@ -1,17 +1,17 @@
 import { motion } from 'framer-motion';
 
-// Reaction emoji images
-import fireImg from '@/assets/reactions/fire-cool.png';
-import clapImg from '@/assets/reactions/clap.png';
-import fistbumpImg from '@/assets/reactions/fistbump.png';
-import wowImg from '@/assets/reactions/wow.png';
+// 3D Reaction emoji images
+import fire3d from '@/assets/reactions/fire-3d.png';
+import clap3d from '@/assets/reactions/clap-3d.png';
+import fistbump3d from '@/assets/reactions/fistbump.png';
+import wow3d from '@/assets/reactions/wow.png';
 
 const REACTION_IMAGES: Record<string, string> = {
-  fire: fireImg,
-  clap: clapImg,
-  fistbump: fistbumpImg,
-  wow: wowImg,
-  heart: fireImg, // fallback
+  fire: fire3d,
+  clap: clap3d,
+  fistbump: fistbump3d,
+  wow: wow3d,
+  heart: fire3d, // fallback
 };
 
 interface FloatingReactionBadgeProps {
@@ -45,7 +45,7 @@ export default function FloatingReactionBadge({
 
   const emojiSrc = reactionType && REACTION_IMAGES[reactionType] 
     ? REACTION_IMAGES[reactionType] 
-    : fireImg;
+    : fire3d;
 
   return (
     <motion.div
