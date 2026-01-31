@@ -267,7 +267,7 @@ const ProfileSetupPage = () => {
         {editMode && (
           <motion.button
             whileTap={{ scale: 0.9 }}
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/', { replace: true })}
             className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center z-20"
             style={{
               marginTop: 'max(env(safe-area-inset-top), 12px)',
