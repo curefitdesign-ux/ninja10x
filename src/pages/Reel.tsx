@@ -1,14 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, ChevronUp } from 'lucide-react';
 import { JourneyActivity, ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
-import FloatingReactionsOverlay from '@/components/FloatingReactionsOverlay';
+import DynamicBlurBackground from '@/components/DynamicBlurBackground';
+import Floating3DEmojis from '@/components/Floating3DEmojis';
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
 import SendReactionSheet from '@/components/SendReactionSheet';
+
+// Import 3D emoji assets for display
+import clapEmoji from '@/assets/reactions/clap.png';
+import fireEmoji from '@/assets/reactions/fire-cool.png';
+import fistbumpEmoji from '@/assets/reactions/fistbump.png';
+import wowEmoji from '@/assets/reactions/wow.png';
 
 const DEFAULT_REACTIONS: Record<ReactionType, ActivityReaction> = {
   heart: { type: 'heart', count: 0, userReacted: false },
@@ -142,39 +149,23 @@ const Reel = () => {
   const dayInWeek = ((current.day_number - 1) % 3) + 1;
 
   return (
-    <div 
-      className="fixed inset-0 flex flex-col items-center overflow-hidden"
-      style={{ 
-        height: '100dvh',
-        background: 'radial-gradient(ellipse at 50% 0%, rgba(30, 20, 50, 0.8) 0%, #000 60%)',
-      }}
-    >
-      {/* Star particles background */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...Array(30)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-0.5 h-0.5 bg-white/30 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animation: `twinkle ${2 + Math.random() * 3}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 2}s`,
-            }}
-          />
-        ))}
-      </div>
+    <DynamicBlurBackground imageUrl={current.storage_url}>
+      {/* Floating 3D emojis around edges */}
+      <Floating3DEmojis 
+        reactions={activeReactionTypes}
+        newReaction={floatingReaction}
+      />
 
       {/* Header */}
       <motion.div
-        className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-5"
+        className="absolute top-0 left-0 right-0 z-40 flex items-center justify-between px-5"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 16px), 16px)' }}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
         <div className="w-8" />
-        <span className="text-white font-semibold text-lg">
+        <span className="text-white font-semibold text-lg tracking-wide">
           Total Reaction • {String(currentReactions.total).padStart(2, '0')}
         </span>
         <button
@@ -187,7 +178,7 @@ const Reel = () => {
 
       {/* Progress dots */}
       <div 
-        className="absolute z-30 flex justify-center gap-1 px-6"
+        className="absolute z-40 flex justify-center gap-1 left-0 right-0 px-6"
         style={{ top: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 44px)' }}
       >
         {activities.map((_, i) => (
@@ -206,124 +197,122 @@ const Reel = () => {
 
       {/* Main content area */}
       <div
-        className="relative w-full flex-1 flex flex-col items-center justify-center"
+        className="absolute inset-0 flex flex-col items-center justify-center"
         style={{ 
-          maxWidth: '430px',
-          paddingTop: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 60px)',
-          paddingBottom: isOwnStory ? '180px' : '220px',
-          paddingInline: '20px',
+          paddingTop: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 70px)',
+          paddingBottom: '200px',
+          paddingInline: '24px',
         }}
       >
-        {/* Card container with floating reactions */}
-        <div className="relative w-full" onClick={handleTap}>
-          {/* Floating reactions around the card */}
-          {activeReactionTypes.length > 0 && (
-            <FloatingReactionsOverlay 
-              reactions={activeReactionTypes}
-              newReaction={floatingReaction}
-            />
-          )}
-
-          {/* The main card - Magazine style like "the Player" */}
+        {/* Card container */}
+        <div className="relative w-full max-w-[360px]" onClick={handleTap}>
+          {/* The main card - Magazine style with liquid glass */}
           <motion.div 
             className="relative w-full overflow-hidden"
             style={{ 
-              borderRadius: 20,
-              aspectRatio: '3 / 4',
-              boxShadow: '0 30px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+              borderRadius: 24,
+              aspectRatio: '3 / 4.2',
+              background: 'rgba(255, 255, 255, 0.06)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
             }}
-            initial={{ opacity: 0, scale: 0.9, y: 30 }}
+            initial={{ opacity: 0, scale: 0.92, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ type: 'spring', stiffness: 180, damping: 20 }}
+            transition={{ type: 'spring', stiffness: 180, damping: 22 }}
           >
-            {/* Full bleed image/video */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={current.id}
-                className="absolute inset-0"
-                initial={{ opacity: 0, scale: 1.05 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.25 }}
-              >
-                {isVideo ? (
-                  <video
-                    src={current.storage_url}
-                    className="w-full h-full object-cover"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                  />
-                ) : (
-                  <img
-                    src={current.storage_url}
-                    alt={`Day ${current.day_number}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const img = e.currentTarget;
-                      if (!img.dataset.retried) {
-                        img.dataset.retried = "true";
-                        img.src = current.storage_url + "?t=" + Date.now();
-                      }
-                    }}
-                  />
-                )}
-              </motion.div>
-            </AnimatePresence>
+            {/* Card inner content with slight padding */}
+            <div className="absolute inset-3 rounded-2xl overflow-hidden">
+              {/* Full bleed image/video */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={current.id}
+                  className="absolute inset-0"
+                  initial={{ opacity: 0, scale: 1.05 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  {isVideo ? (
+                    <video
+                      src={current.storage_url}
+                      className="w-full h-full object-cover"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                    />
+                  ) : (
+                    <img
+                      src={current.storage_url}
+                      alt={`Day ${current.day_number}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        if (!img.dataset.retried) {
+                          img.dataset.retried = "true";
+                          img.src = current.storage_url + "?t=" + Date.now();
+                        }
+                      }}
+                    />
+                  )}
+                </motion.div>
+              </AnimatePresence>
 
-            {/* Gradient overlay for text readability */}
-            <div 
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 60%, rgba(0,0,0,0.6) 100%)',
-              }}
-            />
-
-            {/* Magazine-style title overlay */}
-            <div className="absolute top-5 left-5 z-10">
-              <div className="text-white/70 text-sm font-medium italic">the</div>
+              {/* Gradient overlay for text readability */}
               <div 
-                className="text-white font-black text-5xl leading-none"
-                style={{ 
-                  textShadow: '0 4px 20px rgba(0,0,0,0.5)',
-                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 35%, transparent 55%, rgba(0,0,0,0.5) 100%)',
                 }}
-              >
-                Player
-              </div>
-              <div className="text-white/80 text-sm mt-1">
-                Week {week} | Day {dayInWeek}
-              </div>
-            </div>
+              />
 
-            {/* Stats at bottom */}
-            <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between z-10">
-              <div className="flex gap-6">
-                {current.duration && (
-                  <div>
-                    <div className="text-white font-bold text-3xl">{current.duration.replace(/[^0-9]/g, '') || '2'}hrs</div>
-                    <div className="text-white/70 text-sm">Duration</div>
-                  </div>
-                )}
-                {current.pr && (
-                  <div>
-                    <div className="text-white font-bold text-3xl">{current.pr.replace(/[^0-9]/g, '') || '10'}</div>
-                    <div className="text-white/70 text-sm">Rounds</div>
-                  </div>
-                )}
-                {!current.duration && !current.pr && (
-                  <>
+              {/* Magazine-style title overlay */}
+              <div className="absolute top-4 left-4 z-10">
+                <div className="text-white/80 text-xs font-medium italic tracking-wide">the</div>
+                <div 
+                  className="text-white font-black text-4xl leading-none"
+                  style={{ 
+                    textShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                  }}
+                >
+                  Player
+                </div>
+                <div className="text-white/80 text-xs mt-1.5 font-medium">
+                  Week {week} | Day {dayInWeek}
+                </div>
+              </div>
+
+              {/* Stats at bottom */}
+              <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between z-10">
+                <div className="flex gap-5">
+                  {current.duration && (
                     <div>
-                      <div className="text-white font-bold text-3xl">2hrs</div>
-                      <div className="text-white/70 text-sm">Duration</div>
+                      <div className="text-white font-bold text-2xl">{current.duration.replace(/[^0-9]/g, '') || '2'}hrs</div>
+                      <div className="text-white/70 text-xs">Duration</div>
                     </div>
+                  )}
+                  {current.pr && (
                     <div>
-                      <div className="text-white font-bold text-3xl">10</div>
-                      <div className="text-white/70 text-sm">Rounds</div>
+                      <div className="text-white font-bold text-2xl">{current.pr.replace(/[^0-9]/g, '') || '10'}</div>
+                      <div className="text-white/70 text-xs">Rounds</div>
                     </div>
-                  </>
-                )}
+                  )}
+                  {!current.duration && !current.pr && (
+                    <>
+                      <div>
+                        <div className="text-white font-bold text-2xl">2hrs</div>
+                        <div className="text-white/70 text-xs">Duration</div>
+                      </div>
+                      <div>
+                        <div className="text-white font-bold text-2xl">10</div>
+                        <div className="text-white/70 text-xs">Rounds</div>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -340,19 +329,19 @@ const Reel = () => {
             />
           </motion.div>
 
-          {/* User avatar and name overlapping card bottom */}
+          {/* User avatar overlapping card bottom */}
           <motion.div 
-            className="absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center"
-            style={{ bottom: -44 }}
+            className="absolute left-1/2 -translate-x-1/2 z-20"
+            style={{ bottom: -40 }}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3 }}
           >
             <div 
-              className="w-16 h-16 rounded-full overflow-hidden"
+              className="w-20 h-20 rounded-full overflow-hidden"
               style={{
-                border: '3px solid rgba(255, 255, 255, 0.9)',
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
+                border: '4px solid rgba(255, 255, 255, 0.95)',
+                boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)',
               }}
             >
               {profile?.avatar_url ? (
@@ -363,27 +352,22 @@ const Reel = () => {
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
-                  <span className="text-white text-xl font-bold">
+                  <span className="text-white text-2xl font-bold">
                     {profile?.display_name?.charAt(0).toUpperCase() || '?'}
                   </span>
                 </div>
               )}
             </div>
-            {profile?.display_name && (
-              <span className="text-white/80 text-sm font-medium mt-2">
-                {profile.display_name}
-              </span>
-            )}
           </motion.div>
         </div>
       </div>
 
       {/* Footer */}
       <motion.div 
-        className="absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center gap-3"
+        className="absolute bottom-0 left-0 right-0 z-40 flex flex-col items-center gap-4"
         style={{ 
-          paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
-          paddingInline: '16px',
+          paddingBottom: 'max(env(safe-area-inset-bottom, 28px), 28px)',
+          paddingInline: '20px',
         }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -400,28 +384,33 @@ const Reel = () => {
             </span>
             
             {currentReactions.total > 0 && (
-              <div 
-                className="flex items-center px-4 py-2 rounded-full"
+              <motion.div 
+                className="flex items-center px-3 py-2 rounded-full"
                 style={{
-                  background: 'rgba(60, 60, 70, 0.8)',
+                  background: 'rgba(60, 55, 70, 0.85)',
                   backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
                 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
                 <div className="flex -space-x-3">
-                  {MOCK_REACTORS.slice(0, Math.min(currentReactions.total, 4)).map((reactor, i) => (
+                  {MOCK_REACTORS.slice(0, Math.min(currentReactions.total, 3)).map((reactor, i) => (
                     <img
                       key={reactor.id}
                       src={reactor.avatar}
                       alt={reactor.name}
                       className="w-10 h-10 rounded-full object-cover"
                       style={{
-                        border: '2px solid rgba(60, 60, 70, 0.8)',
+                        border: '2px solid rgba(60, 55, 70, 0.9)',
                         zIndex: 10 - i,
                       }}
                     />
                   ))}
                 </div>
-              </div>
+                <ChevronUp className="w-5 h-5 text-white/70 ml-3" />
+              </motion.div>
             )}
           </button>
         ) : (
@@ -431,21 +420,23 @@ const Reel = () => {
               Reacts so far • {String(currentReactions.total).padStart(2, '0')}
             </span>
             
-            {/* SEND YOUR button with emojis */}
+            {/* SEND YOUR button with 3D emojis */}
             <motion.button
               onClick={() => setShowSendReactionSheet(true)}
               className="flex items-center gap-3 px-5 py-3 rounded-full"
               style={{
-                background: 'rgba(60, 55, 70, 0.9)',
+                background: 'rgba(60, 55, 70, 0.85)',
                 backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
               }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
             >
-              <span className="text-2xl">👏</span>
-              <span className="text-white font-semibold tracking-wide">SEND YOUR</span>
-              <span className="text-2xl">🔥</span>
+              <img src={clapEmoji} alt="clap" className="w-7 h-7 object-contain" />
+              <span className="text-white font-semibold tracking-wider">SEND YOUR</span>
+              <img src={fireEmoji} alt="fire" className="w-7 h-7 object-contain" />
             </motion.button>
           </div>
         )}
@@ -472,15 +463,7 @@ const Reel = () => {
           />
         )}
       </AnimatePresence>
-
-      {/* Twinkle animation styles */}
-      <style>{`
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.2); }
-        }
-      `}</style>
-    </div>
+    </DynamicBlurBackground>
   );
 };
 
