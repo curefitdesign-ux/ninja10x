@@ -210,58 +210,29 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
 
       <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full relative z-10">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', delay: 0.1 }}
-            className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
+            className="w-14 h-14 mx-auto mb-3 rounded-full flex items-center justify-center"
             style={{
               background: 'linear-gradient(135deg, hsl(160, 84%, 39%) 0%, hsl(172, 66%, 50%) 100%)',
               boxShadow: '0 8px 24px rgba(52, 211, 153, 0.3)',
             }}
           >
-            <User className="w-8 h-8 text-white" />
+            <User className="w-7 h-7 text-white" />
           </motion.div>
-          <h1 className="text-2xl font-bold text-white mb-2">
+          <h1 className="text-xl font-bold text-white mb-1">
             {editMode ? 'Edit Your Profile' : 'Complete Your Profile'}
           </h1>
-          <p className="text-white/50 text-sm">
+          <p className="text-white/50 text-xs">
             {editMode ? 'Update your name and avatar' : 'Add your name and choose an avatar'}
           </p>
         </div>
 
-        {/* Email Display (Edit Mode) */}
-        {editMode && user?.email && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="mb-6 rounded-2xl p-4"
-            style={{
-              background: 'rgba(255, 255, 255, 0.04)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-            }}
-          >
-            <Label className="text-white/50 text-xs mb-1.5 block">Email Address</Label>
-            <div className="flex items-center gap-3">
-              <div 
-                className="w-9 h-9 rounded-lg flex items-center justify-center"
-                style={{
-                  background: 'rgba(52, 211, 153, 0.15)',
-                  border: '1px solid rgba(52, 211, 153, 0.2)',
-                }}
-              >
-                <Mail className="w-4 h-4 text-emerald-400" />
-              </div>
-              <span className="text-white/80 text-sm">{user.email}</span>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Name Input - Liquid Glass */}
-        <div className="mb-6">
+        {/* Name Input - Moved up, right after header */}
+        <div className="mb-5">
           <Label htmlFor="displayName" className="text-white/70 mb-2 block text-sm">
             Your Name *
           </Label>
@@ -283,6 +254,35 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
             <p className="text-red-400 text-xs mt-1">{nameError}</p>
           )}
         </div>
+
+        {/* Email Display (Edit Mode) */}
+        {editMode && user?.email && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-5 rounded-2xl p-4"
+            style={{
+              background: 'rgba(255, 255, 255, 0.04)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+            }}
+          >
+            <Label className="text-white/50 text-xs mb-1.5 block">Email Address</Label>
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-9 h-9 rounded-lg flex items-center justify-center"
+                style={{
+                  background: 'rgba(52, 211, 153, 0.15)',
+                  border: '1px solid rgba(52, 211, 153, 0.2)',
+                }}
+              >
+                <Mail className="w-4 h-4 text-emerald-400" />
+              </div>
+              <span className="text-white/80 text-sm">{user.email}</span>
+            </div>
+          </motion.div>
+        )}
 
         {/* Avatar Selection */}
         <div className="mb-8">
