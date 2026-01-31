@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronUp } from 'lucide-react';
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { X, ChevronUp, ChevronDown } from 'lucide-react';
 import { JourneyActivity, ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
@@ -32,6 +32,8 @@ const MOCK_REACTORS = [
   { id: '3', name: 'Tavleen', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face' },
   { id: '4', name: 'Sanya', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face' },
 ];
+
+const SWIPE_THRESHOLD = 50;
 
 const Reel = () => {
   const navigate = useNavigate();
@@ -73,16 +75,51 @@ const Reel = () => {
     setCurrentIndex(prev => (prev - 1 + activities.length) % activities.length);
   }, [activities.length]);
 
+  // Swipe gesture handling
+  const dragX = useMotionValue(0);
+  const cardOpacity = useTransform(dragX, [-150, 0, 150], [0.6, 1, 0.6]);
+  const cardRotate = useTransform(dragX, [-150, 0, 150], [-8, 0, 8]);
+  const cardScale = useTransform(dragX, [-150, 0, 150], [0.95, 1, 0.95]);
+  
+  const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const { offset, velocity } = info;
+    
+    // Check if swipe is strong enough
+    if (Math.abs(offset.x) > SWIPE_THRESHOLD || Math.abs(velocity.x) > 500) {
+      if (offset.x < 0) {
+        goNext(); // Swipe left -> next story
+      } else {
+        goPrev(); // Swipe right -> previous story
+      }
+    }
+  }, [goNext, goPrev]);
+
   const [lastTap, setLastTap] = useState(0);
-  const handleTap = useCallback(() => {
+  const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    // Don't trigger on drag
     const now = Date.now();
     if (now - lastTap < 300) {
-      handleReact('heart');
+      if (!isOwnStory) {
+        handleReact('heart');
+      }
     } else {
-      goNext();
+      // Single tap on left/right sides to navigate
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const relativeX = (x - rect.left) / rect.width;
+      
+      if (relativeX < 0.3) {
+        goPrev();
+      } else if (relativeX > 0.7) {
+        goNext();
+      }
     }
     setLastTap(now);
-  }, [lastTap, goNext]);
+  }, [lastTap, goNext, goPrev, isOwnStory]);
+
+  const handleNavigateToProgress = () => {
+    navigate('/progress');
+  };
 
   const handleReact = async (type: ReactionType) => {
     if (!current) return;
@@ -164,7 +201,19 @@ const Reel = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <div className="w-8" />
+        {/* Progress navigation button */}
+        <button
+          onClick={handleNavigateToProgress}
+          className="flex items-center gap-1 px-3 py-1.5 rounded-full text-white/80 hover:text-white transition-colors"
+          style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(12px)',
+          }}
+        >
+          <ChevronDown className="w-4 h-4" />
+          <span className="text-xs font-medium">Progress</span>
+        </button>
+        
         <span className="text-white font-semibold text-lg tracking-wide">
           Total Reaction • {String(currentReactions.total).padStart(2, '0')}
         </span>
@@ -204,8 +253,21 @@ const Reel = () => {
           paddingInline: '24px',
         }}
       >
-        {/* Card container */}
-        <div className="relative w-full max-w-[360px]" onClick={handleTap}>
+        {/* Card container with swipe gestures */}
+        <motion.div 
+          className="relative w-full max-w-[360px] cursor-grab active:cursor-grabbing"
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.2}
+          onDragEnd={handleDragEnd}
+          onClick={handleTap}
+          style={{ 
+            x: dragX,
+            opacity: cardOpacity,
+            rotate: cardRotate,
+            scale: cardScale,
+          }}
+        >
           {/* The main card - Magazine style with liquid glass */}
           <motion.div 
             className="relative w-full overflow-hidden"
@@ -359,7 +421,7 @@ const Reel = () => {
               )}
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Footer - Unified bottom pill */}
