@@ -251,24 +251,25 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
     img.src = imageUrl;
   }, [imageUrl, isVideo]);
 
-  // Handle VIEW PROGRESS - navigate to progress page with transition data
+  // Handle VIEW PROGRESS - navigate to progress page with smooth transition
   const handleViewProgress = () => {
     triggerHaptic('success');
     setIsExiting(true);
     
-    // Wait for animation, then navigate to progress page
+    // Navigate quickly to progress page with transition data
+    // Shorter delay for snappier feel - let Progress handle the animation
     setTimeout(() => {
       navigate('/progress', {
         state: {
           fromShare: true,
           transitionImage: imageUrl,
-          transitionToProgress: true, // Animation goes to progress top strip
+          transitionToProgress: true,
           dayNumber,
           frameType,
           frameProps,
         },
       });
-    }, 400);
+    }, 250); // Reduced from 400ms for snappier transition
   };
 
   // Close with X - shared-element transition back to Activity page (PhotoLoggingWidget)
@@ -495,21 +496,25 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
              <div className="flex-1 overflow-y-auto scrollbar-hide px-6 pb-40">
                <div className="flex flex-col items-center pt-4">
                {/* Preview Card - locked to 9:16 with shared-element exit animation */}
-               <motion.div 
+                <motion.div 
                  className="relative w-full max-w-[280px] aspect-[9/16] rounded-[20px] overflow-hidden"
+                 data-shared-element="share-preview-card"
                  animate={isExiting ? {
-                   scale: 0.2,
+                   scale: 0.15,
                    opacity: 0,
-                   y: 200,
+                   y: -300, // Move up toward where progress strip will be
+                   x: -80,  // Move left toward first card position
                  } : {
                    scale: 1,
                    opacity: 1,
                    y: 0,
+                   x: 0,
                  }}
                  transition={{
                    type: 'spring',
-                   stiffness: 300,
-                   damping: 30,
+                   stiffness: 400,
+                   damping: 35,
+                   mass: 0.8,
                  }}
                >
                  {/* Glass border + glow */}
