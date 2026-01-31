@@ -609,10 +609,10 @@ const Reel = () => {
       >
         {/* Liquid glass reaction pill */}
         <motion.button
-          onClick={() => isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true)}
+          onClick={() => setShowSendReactionSheet(true)}
           className="relative overflow-hidden mb-3"
           style={{
-            minWidth: isOwnStory ? 160 : 180,
+            minWidth: currentReactions.total > 0 ? 200 : 180,
             height: 52,
             borderRadius: 26,
             background: 'rgba(255, 255, 255, 0.08)',
@@ -658,7 +658,7 @@ const Reel = () => {
                 )}
               </motion.div>
             ) : (
-              /* Visitor view: Send reaction prompt */
+              /* Visitor view: Show count + tap to react */
               <motion.div
                 key="visitor-pill"
                 className="flex items-center justify-center gap-3 h-full px-5"
@@ -667,22 +667,38 @@ const Reel = () => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
-                {/* User's avatar on the left */}
-                <ProfileAvatar
-                  src={profile?.avatar_url}
-                  name={profile?.display_name || 'You'}
-                  size={32}
-                  style={{
-                    border: '2px solid rgba(255, 255, 255, 0.25)',
-                  }}
-                />
-                {/* Send text */}
-                <span className="text-white font-semibold text-sm">Send React</span>
-                {/* Reaction icons */}
-                <div className="flex -space-x-1">
-                  <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                  <img src={clapEmoji} alt="clap" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                </div>
+                {currentReactions.total > 0 ? (
+                  <>
+                    {/* Reaction emoji stack */}
+                    <div className="flex -space-x-1">
+                      <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                      <img src={clapEmoji} alt="clap" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                    </div>
+                    {/* Count */}
+                    <span className="text-white font-bold text-base">{currentReactions.total}</span>
+                    {/* Divider */}
+                    <div className="w-px h-5 bg-white/20" />
+                    {/* Tap to react */}
+                    <span className="text-white/70 text-sm">Tap to react</span>
+                  </>
+                ) : (
+                  <>
+                    {/* User's avatar */}
+                    <ProfileAvatar
+                      src={profile?.avatar_url}
+                      name={profile?.display_name || 'You'}
+                      size={28}
+                      style={{
+                        border: '2px solid rgba(255, 255, 255, 0.25)',
+                      }}
+                    />
+                    {/* First to react */}
+                    <span className="text-white/80 text-sm font-medium">Be first to react!</span>
+                    <div className="flex -space-x-1">
+                      <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain opacity-60" />
+                    </div>
+                  </>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -744,12 +760,17 @@ const Reel = () => {
         )}
       </AnimatePresence>
 
-      {/* Send reaction sheet for other users' stories */}
+      {/* Send reaction sheet for all stories */}
       <AnimatePresence>
         {showSendReactionSheet && (
           <SendReactionSheet
             onReact={handleReact}
             onClose={() => setShowSendReactionSheet(false)}
+            onViewReactions={() => {
+              setShowSendReactionSheet(false);
+              setShowReactsSheet(true);
+            }}
+            totalReactions={currentReactions.total}
           />
         )}
       </AnimatePresence>

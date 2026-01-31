@@ -10,6 +10,8 @@ import wowImg from '@/assets/reactions/wow.png';
 interface SendReactionSheetProps {
   onReact: (type: ReactionType) => void;
   onClose: () => void;
+  onViewReactions?: () => void;
+  totalReactions?: number;
 }
 
 const REACTIONS: { type: ReactionType; image: string }[] = [
@@ -18,7 +20,7 @@ const REACTIONS: { type: ReactionType; image: string }[] = [
   { type: 'clap', image: clapImg },
 ];
 
-export default function SendReactionSheet({ onReact, onClose }: SendReactionSheetProps) {
+export default function SendReactionSheet({ onReact, onClose, onViewReactions, totalReactions = 0 }: SendReactionSheetProps) {
   return (
     <>
       {/* Backdrop */}
@@ -52,9 +54,17 @@ export default function SendReactionSheet({ onReact, onClose }: SendReactionShee
           <div className="w-10 h-1 rounded-full bg-white/25" />
         </div>
 
-        {/* Title */}
-        <div className="text-center py-4">
+        {/* Title + View all link */}
+        <div className="flex items-center justify-between py-4 px-6">
           <span className="text-white font-semibold text-xl">Send reaction</span>
+          {totalReactions > 0 && onViewReactions && (
+            <button 
+              onClick={onViewReactions}
+              className="text-white/60 text-sm hover:text-white transition-colors"
+            >
+              See all ({totalReactions})
+            </button>
+          )}
         </div>
 
         {/* Emoji grid */}
