@@ -5,12 +5,14 @@ import { X, ChevronUp, GripHorizontal } from 'lucide-react';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
-import { fetchAllActivitiesGroupedByUser, UserStoryGroup, LocalActivity } from '@/hooks/use-journey-activities';
+import { fetchAllActivitiesGroupedByUser, fetchPublicFeed, UserStoryGroup, LocalActivity } from '@/hooks/use-journey-activities';
+import { useJourneyActivities } from '@/hooks/use-journey-activities';
 import DynamicBlurBackground from '@/components/DynamicBlurBackground';
 import Floating3DEmojis from '@/components/Floating3DEmojis';
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
 import SendReactionSheet from '@/components/SendReactionSheet';
 import ProfileAvatar from '@/components/ProfileAvatar';
+import ReelToProgressTransition from '@/components/ReelToProgressTransition';
 
 // Import 3D emoji assets for display
 import clapEmoji from '@/assets/reactions/clap-3d.png';
@@ -58,11 +60,25 @@ const Reel = () => {
 
   // Bottom sheet states and transition animations
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showProgressOverlay, setShowProgressOverlay] = useState(false);
   const bottomSheetY = useMotionValue(0);
   const bottomSheetOpacity = useTransform(bottomSheetY, [-200, 0], [0, 1]);
   const contentScale = useTransform(bottomSheetY, [-200, 0], [0.75, 1]);
   const contentOpacity = useTransform(bottomSheetY, [-100, 0], [0, 1]);
   const contentY = useTransform(bottomSheetY, [-200, 0], [50, 0]);
+
+  // Data for progress overlay
+  const { activities: myActivities } = useJourneyActivities();
+  const [publicFeed, setPublicFeed] = useState<LocalActivity[]>([]);
+
+  // Load public feed for progress overlay
+  useEffect(() => {
+    const loadFeed = async () => {
+      const feed = await fetchPublicFeed();
+      setPublicFeed(feed);
+    };
+    loadFeed();
+  }, []);
 
   // Load all activities grouped by user
   useEffect(() => {
@@ -158,22 +174,17 @@ const Reel = () => {
     }
   }, [goNextUser, goPrevUser]);
 
-  // Bottom sheet drag handling
+  // Bottom sheet drag handling - opens progress overlay instead of navigating
   const handleBottomSheetDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (info.offset.y < -100 || info.velocity.y < -500) {
       setIsTransitioning(true);
-      // Navigate to progress with animation
+      // Open progress overlay with animation
       setTimeout(() => {
-        navigate('/progress', {
-          state: {
-            fromReel: true,
-            transitionToProgress: true,
-            transitionImage: currentActivity?.storageUrl,
-          }
-        });
-      }, 200);
+        setShowProgressOverlay(true);
+        setIsTransitioning(false);
+      }, 150);
     }
-  }, [navigate, currentActivity]);
+  }, []);
 
   const [lastTap, setLastTap] = useState(0);
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -192,15 +203,26 @@ const Reel = () => {
 
   const handleNavigateToProgress = () => {
     setIsTransitioning(true);
+    // Open progress overlay with smooth transition
     setTimeout(() => {
-      navigate('/progress', {
-        state: {
-          fromReel: true,
-          transitionToProgress: true,
-          transitionImage: currentActivity?.storageUrl,
-        }
-      });
-    }, 200);
+      setShowProgressOverlay(true);
+      setIsTransitioning(false);
+    }, 150);
+  };
+
+  const handleCloseProgressOverlay = () => {
+    setShowProgressOverlay(false);
+  };
+
+  const handleProgressStoryTap = (index: number, userId?: string) => {
+    setShowProgressOverlay(false);
+    if (userId) {
+      const idx = userGroups.findIndex(g => g.userId === userId);
+      if (idx >= 0) {
+        setCurrentUserIndex(idx);
+        setCurrentActivityIndex(0);
+      }
+    }
   };
 
   const handleReact = async (type: ReactionType) => {
@@ -653,6 +675,34 @@ const Reel = () => {
           />
         )}
       </AnimatePresence>
+
+      {/* Progress overlay - inline transition without page navigation */}
+      <ReelToProgressTransition
+        isOpen={showProgressOverlay}
+        onClose={handleCloseProgressOverlay}
+        currentActivity={currentActivity ? {
+          id: currentActivity.id,
+          storageUrl: currentActivity.storageUrl,
+          originalUrl: currentActivity.originalUrl,
+          isVideo: currentActivity.isVideo,
+          dayNumber: currentActivity.dayNumber,
+          avatarUrl: currentGroup?.avatarUrl,
+          displayName: currentGroup?.displayName,
+          userId: currentGroup?.userId,
+        } : null}
+        publicFeed={publicFeed.map(p => ({
+          id: p.id,
+          storageUrl: p.storageUrl,
+          originalUrl: p.originalUrl,
+          isVideo: p.isVideo,
+          dayNumber: p.dayNumber,
+          avatarUrl: p.avatarUrl,
+          displayName: p.displayName,
+          userId: p.userId,
+        }))}
+        myActivities={myActivities.map(a => ({ dayNumber: a.dayNumber }))}
+        onStoryTap={handleProgressStoryTap}
+      />
     </DynamicBlurBackground>
   );
 };
