@@ -5,11 +5,12 @@ import { ReactionType, ActivityReaction, removeReaction } from '@/services/journ
 import { supabase } from '@/integrations/supabase/client';
 import ProfileAvatar from '@/components/ProfileAvatar';
 
-// Import 3D reaction images
-import fireImg from '@/assets/reactions/fire-3d.png';
-import clapImg from '@/assets/reactions/clap-3d.png';
-import fistbumpImg from '@/assets/reactions/fistbump.png';
-import wowImg from '@/assets/reactions/wow.png';
+// 3D fitness-themed reaction assets
+import heartFitnessImg from '@/assets/reactions/heart-fitness.png';
+import flexArmImg from '@/assets/reactions/flex-arm.png';
+import clapHandsImg from '@/assets/reactions/clap-hands.png';
+import fistbumpHandsImg from '@/assets/reactions/fistbump-hands.png';
+import energyBoostImg from '@/assets/reactions/energy-boost.png';
 
 interface ReactorProfile {
   userId: string;
@@ -28,11 +29,11 @@ interface ReactsSoFarSheetProps {
 }
 
 const REACTION_IMAGES: Record<ReactionType, string> = {
-  heart: '❤️',
-  fire: fireImg,
-  clap: clapImg,
-  fistbump: fistbumpImg,
-  wow: wowImg,
+  heart: heartFitnessImg,
+  fire: flexArmImg,
+  clap: clapHandsImg,
+  fistbump: fistbumpHandsImg,
+  wow: energyBoostImg,
 };
 
 // Map reactors to their reactions - use actual reaction type if available

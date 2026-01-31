@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReactionType } from '@/services/journey-service';
 
-// Use consistent 3D emoji assets
-import clapEmoji from '@/assets/reactions/clap-3d.png';
-import fireEmoji from '@/assets/reactions/fire-3d.png';
-import fistbumpEmoji from '@/assets/reactions/fistbump.png';
-import wowEmoji from '@/assets/reactions/wow.png';
+// 3D fitness-themed reaction assets
+import heartFitnessImg from '@/assets/reactions/heart-fitness.png';
+import flexArmImg from '@/assets/reactions/flex-arm.png';
+import clapHandsImg from '@/assets/reactions/clap-hands.png';
+import fistbumpHandsImg from '@/assets/reactions/fistbump-hands.png';
+import energyBoostImg from '@/assets/reactions/energy-boost.png';
 
 interface Floating3DEmojisProps {
   reactions: ReactionType[];
@@ -13,11 +14,11 @@ interface Floating3DEmojisProps {
 }
 
 const EMOJI_ASSETS: Record<ReactionType, string> = {
-  heart: fireEmoji, // Use fire as fallback for heart
-  fire: fireEmoji,
-  clap: clapEmoji,
-  fistbump: fistbumpEmoji,
-  wow: wowEmoji,
+  heart: heartFitnessImg,
+  fire: flexArmImg,
+  clap: clapHandsImg,
+  fistbump: fistbumpHandsImg,
+  wow: energyBoostImg,
 };
 
 // Positions around the viewport edges for floating emojis
