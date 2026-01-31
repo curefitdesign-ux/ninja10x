@@ -1,17 +1,17 @@
 import { motion } from 'framer-motion';
-import { X } from 'lucide-react';
 import { ReactionType, ActivityReaction } from '@/services/journey-service';
+import ProfileAvatar from '@/components/ProfileAvatar';
 
-interface Reactor {
-  id: string;
-  name: string;
-  avatar: string;
+interface ReactorProfile {
+  userId: string;
+  displayName: string;
+  avatarUrl?: string;
 }
 
 interface ReactsSoFarSheetProps {
   total: number;
   reactions: Record<ReactionType, ActivityReaction>;
-  reactors: Reactor[];
+  reactorProfiles: ReactorProfile[];
   onClose: () => void;
 }
 
@@ -23,8 +23,8 @@ const REACTION_EMOJIS: Record<ReactionType, string> = {
   wow: '🤩',
 };
 
-// Map reactors to their random reactions
-function getReactorReactions(reactors: Reactor[], reactions: Record<ReactionType, ActivityReaction>) {
+// Map reactors to their reactions
+function getReactorReactions(reactors: ReactorProfile[], reactions: Record<ReactionType, ActivityReaction>) {
   const activeTypes = Object.entries(reactions)
     .filter(([, r]) => r.count > 0)
     .map(([type]) => type as ReactionType);
@@ -37,8 +37,8 @@ function getReactorReactions(reactors: Reactor[], reactions: Record<ReactionType
   }));
 }
 
-export default function ReactsSoFarSheet({ total, reactions, reactors, onClose }: ReactsSoFarSheetProps) {
-  const reactorList = getReactorReactions(reactors.slice(0, total), reactions);
+export default function ReactsSoFarSheet({ total, reactions, reactorProfiles, onClose }: ReactsSoFarSheetProps) {
+  const reactorList = getReactorReactions(reactorProfiles.slice(0, total), reactions);
 
   return (
     <>
@@ -86,29 +86,26 @@ export default function ReactsSoFarSheet({ total, reactions, reactors, onClose }
           {reactorList.length > 0 ? (
             reactorList.map((reactor, i) => (
               <motion.div
-                key={reactor.id}
+                key={reactor.userId}
                 className="flex items-center gap-4"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
               >
-                {/* Avatar */}
-                <div 
-                  className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0"
+                {/* Avatar with ProfileAvatar for error handling */}
+                <ProfileAvatar
+                  src={reactor.avatarUrl}
+                  name={reactor.displayName}
+                  size={56}
                   style={{
                     border: '2px solid rgba(255, 255, 255, 0.1)',
+                    flexShrink: 0,
                   }}
-                >
-                  <img 
-                    src={reactor.avatar} 
-                    alt={reactor.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                />
 
                 {/* Name */}
                 <span className="text-white font-medium text-lg flex-1">
-                  {reactor.name}
+                  {reactor.displayName}
                 </span>
 
                 {/* Reaction emoji */}

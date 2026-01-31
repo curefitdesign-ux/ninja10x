@@ -34,6 +34,7 @@ export interface LocalActivity {
   reactions?: Record<ReactionType, ActivityReaction>;
   displayName?: string;
   avatarUrl?: string;
+  reactorProfiles?: { userId: string; displayName: string; avatarUrl?: string }[];
 }
 
 // Convert DB row to local shape
@@ -451,27 +452,34 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
     .select('activity_id, user_id, reaction_type')
     .in('activity_id', activityIds);
 
-  // Fetch profiles for all users
-  const userIds = Array.from(userActivitiesMap.keys());
+  // Collect all unique user IDs (activity owners + reactors)
+  const allUserIds = new Set<string>(Array.from(userActivitiesMap.keys()));
+  for (const r of reactions || []) {
+    allUserIds.add(r.user_id);
+  }
+
+  // Fetch profiles for ALL users (activity owners + reactors)
   const { data: profiles } = await supabase
     .from('profiles')
     .select('user_id, display_name, avatar_url')
-    .in('user_id', userIds);
+    .in('user_id', Array.from(allUserIds));
 
   const profileMap = new Map<string, { display_name: string; avatar_url: string }>();
   for (const p of profiles || []) {
     profileMap.set(p.user_id, { display_name: p.display_name, avatar_url: p.avatar_url });
   }
 
-  // Build reaction map
+  // Build reaction map + reactor profiles per activity
   const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
   const totalMap: Record<string, number> = {};
+  const reactorProfilesMap: Record<string, { userId: string; displayName: string; avatarUrl?: string }[]> = {};
 
   for (const r of reactions || []) {
     const type = (r.reaction_type || 'heart') as ReactionType;
     if (!reactionMap[r.activity_id]) {
       reactionMap[r.activity_id] = { ...DEFAULT_REACTIONS };
       totalMap[r.activity_id] = 0;
+      reactorProfilesMap[r.activity_id] = [];
     }
     reactionMap[r.activity_id][type] = {
       ...reactionMap[r.activity_id][type],
@@ -479,6 +487,16 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
       userReacted: user && r.user_id === user.id ? true : reactionMap[r.activity_id][type].userReacted,
     };
     totalMap[r.activity_id]++;
+    
+    // Add reactor profile if not already added
+    const profile = profileMap.get(r.user_id);
+    if (profile && !reactorProfilesMap[r.activity_id].some(p => p.userId === r.user_id)) {
+      reactorProfilesMap[r.activity_id].push({
+        userId: r.user_id,
+        displayName: profile.display_name,
+        avatarUrl: profile.avatar_url,
+      });
+    }
   }
 
   // Build user story groups
@@ -496,6 +514,7 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
         ...toLocal(row),
         reactionCount: totalMap[row.id] || 0,
         reactions: reactionMap[row.id] || { ...DEFAULT_REACTIONS },
+        reactorProfiles: reactorProfilesMap[row.id] || [],
         displayName: profile?.display_name,
         avatarUrl: profile?.avatar_url,
       })),
@@ -514,6 +533,7 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
         ...toLocal(row),
         reactionCount: totalMap[row.id] || 0,
         reactions: reactionMap[row.id] || { ...DEFAULT_REACTIONS },
+        reactorProfiles: reactorProfilesMap[row.id] || [],
         displayName: profile?.display_name,
         avatarUrl: profile?.avatar_url,
       })),
