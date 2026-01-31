@@ -353,7 +353,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
           </div>
         )}
         
-        {/* Day label - inspiring and subtle */}
+        {/* Day label - Gen Z style with day number */}
         <AnimatePresence>
           {shouldShowExpanded && (
             <motion.div 
@@ -364,20 +364,25 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
               exit={{ opacity: 0, y: 4, x: "-50%" }}
               transition={{ delay: 0.1 + index * 0.03, duration: 0.2 }}
             >
-              <span className={`text-[10px] font-medium tracking-wide uppercase ${
-                isActiveDay 
-                  ? 'text-emerald-400' 
-                  : hasPhoto 
-                    ? 'text-white/70' 
-                    : 'text-white/40'
-              }`}>
-                {hasPhoto 
-                  ? ['rise', 'push', 'shine'][index] 
-                  : isActiveDay 
-                    ? ['begin', 'grow', 'glow'][index]
-                    : ['one', 'two', 'three'][index]
-                }
-              </span>
+              <div 
+                className={`px-2 py-0.5 rounded-full ${
+                  isActiveDay 
+                    ? 'bg-emerald-500/20 border border-emerald-400/30' 
+                    : hasPhoto 
+                      ? 'bg-white/10' 
+                      : 'bg-white/5'
+                }`}
+              >
+                <span className={`text-[9px] font-semibold tracking-wider ${
+                  isActiveDay 
+                    ? 'text-emerald-400' 
+                    : hasPhoto 
+                      ? 'text-white/80' 
+                      : 'text-white/40'
+                }`}>
+                  {isActiveDay ? `day ${dayNumber}` : hasPhoto ? `day ${dayNumber} ✓` : `day ${dayNumber}`}
+                </span>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
