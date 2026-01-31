@@ -16,6 +16,7 @@ import Camera from "./pages/Camera";
 import Gallery from "./pages/Gallery";
 import Reel from "./pages/Reel";
 import ProfileSetupPage from "./pages/ProfileSetupPage";
+import AvatarCrop from "./pages/AvatarCrop";
 import PageTransition from "./components/PageTransition";
 
 const queryClient = new QueryClient();
@@ -79,6 +80,7 @@ const AnimatedRoutes = () => {
       <Routes location={location}>
         <Route path="/auth" element={<Auth />} />
         <Route path="/profile-setup" element={<ProfileSetupRouteWrapper><ProfileSetupPage /></ProfileSetupRouteWrapper>} />
+        <Route path="/avatar-crop" element={<ProfileSetupRouteWrapper><AvatarCrop /></ProfileSetupRouteWrapper>} />
         <Route path="/" element={<ProtectedRoute><Activity /></ProtectedRoute>} />
         <Route path="/create" element={<ProtectedRoute><Index /></ProtectedRoute>} />
         <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
