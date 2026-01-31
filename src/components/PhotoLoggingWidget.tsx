@@ -353,7 +353,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
           </div>
         )}
         
-        {/* Day label - Gen Z style with day number */}
+        {/* Day label - Story-like progression text */}
         <AnimatePresence>
           {shouldShowExpanded && (
             <motion.div 
@@ -364,25 +364,24 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
               exit={{ opacity: 0, y: 4, x: "-50%" }}
               transition={{ delay: 0.1 + index * 0.03, duration: 0.2 }}
             >
-              <div 
-                className={`px-2 py-0.5 rounded-full ${
-                  isActiveDay 
-                    ? 'bg-emerald-500/20 border border-emerald-400/30' 
-                    : hasPhoto 
-                      ? 'bg-white/10' 
-                      : 'bg-white/5'
-                }`}
-              >
-                <span className={`text-[9px] font-semibold tracking-wider ${
-                  isActiveDay 
-                    ? 'text-emerald-400' 
-                    : hasPhoto 
-                      ? 'text-white/80' 
-                      : 'text-white/40'
-                }`}>
-                  {isActiveDay ? `day ${dayNumber}` : hasPhoto ? `day ${dayNumber} ✓` : `day ${dayNumber}`}
-                </span>
-              </div>
+              <span className={`text-[10px] italic ${
+                isActiveDay 
+                  ? 'text-emerald-400' 
+                  : hasPhoto 
+                    ? 'text-white/70' 
+                    : 'text-white/35'
+              }`}>
+                {(() => {
+                  // Story progression across 12 days (4 weeks × 3 days)
+                  const storyLabels = [
+                    'begin…', 'push…', 'rise',      // Week 1
+                    'grow…', 'build…', 'strong',    // Week 2  
+                    'flow…', 'glow…', 'shine',      // Week 3
+                    'soar…', 'peak…', 'legend'      // Week 4
+                  ];
+                  return storyLabels[dayNumber - 1] || `day ${dayNumber}`;
+                })()}
+              </span>
             </motion.div>
           )}
         </AnimatePresence>
