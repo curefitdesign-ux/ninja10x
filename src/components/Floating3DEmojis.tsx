@@ -1,9 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReactionType } from '@/services/journey-service';
 
-// Import 3D emoji assets
-import clapEmoji from '@/assets/reactions/clap.png';
-import fireEmoji from '@/assets/reactions/fire-cool.png';
+// Use consistent 3D emoji assets
+import clapEmoji from '@/assets/reactions/clap-3d.png';
+import fireEmoji from '@/assets/reactions/fire-3d.png';
 import fistbumpEmoji from '@/assets/reactions/fistbump.png';
 import wowEmoji from '@/assets/reactions/wow.png';
 
@@ -13,7 +13,7 @@ interface Floating3DEmojisProps {
 }
 
 const EMOJI_ASSETS: Record<ReactionType, string> = {
-  heart: '❤️', // fallback emoji
+  heart: fireEmoji, // Use fire as fallback for heart
   fire: fireEmoji,
   clap: clapEmoji,
   fistbump: fistbumpEmoji,
@@ -39,7 +39,7 @@ export default function Floating3DEmojis({ reactions, newReaction }: Floating3DE
         const pos = EDGE_POSITIONS[i % EDGE_POSITIONS.length];
         const isNew = newReaction === type;
         const asset = EMOJI_ASSETS[type];
-        const isImage = typeof asset === 'string' && asset.startsWith('/') || asset.includes('assets');
+        const isImage = typeof asset === 'string' && (asset.startsWith('/') || asset.includes('assets'));
         
         // Create unique animation delay for each emoji
         const animDelay = i * 0.5;
@@ -124,15 +124,11 @@ export default function Floating3DEmojis({ reactions, newReaction }: Floating3DE
             transition={{ duration: 0.7, ease: 'easeOut' }}
             style={{ filter: 'drop-shadow(0 12px 32px rgba(0, 0, 0, 0.5))' }}
           >
-            {EMOJI_ASSETS[newReaction].startsWith('/') || EMOJI_ASSETS[newReaction].includes('assets') ? (
-              <img 
-                src={EMOJI_ASSETS[newReaction]} 
-                alt={newReaction} 
-                className="w-24 h-24 object-contain"
-              />
-            ) : (
-              <span className="text-8xl">{EMOJI_ASSETS[newReaction]}</span>
-            )}
+            <img 
+              src={EMOJI_ASSETS[newReaction]} 
+              alt={newReaction} 
+              className="w-24 h-24 object-contain"
+            />
           </motion.div>
         )}
       </AnimatePresence>

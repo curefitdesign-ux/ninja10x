@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
 import { ReactionType } from '@/services/journey-service';
 
-import fireImg from '@/assets/reactions/fire-cool.png';
-import clapImg from '@/assets/reactions/clap.png';
+// Use consistent 3D reaction images
+import fireImg from '@/assets/reactions/fire-3d.png';
+import clapImg from '@/assets/reactions/clap-3d.png';
 import fistbumpImg from '@/assets/reactions/fistbump.png';
 import wowImg from '@/assets/reactions/wow.png';
 
