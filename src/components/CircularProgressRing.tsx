@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import curoMascot from "@/assets/activity-page/curo-mascot.png";
 
 interface CircularProgressRingProps {
-  currentDay: number; // 1-12
+  currentDay: number; // 0-12 (0 = no photos uploaded yet)
   currentWeek: number; // 1-4
   className?: string;
   highlight?: boolean; // Trigger focus animation
@@ -13,7 +13,7 @@ interface CircularProgressRingProps {
 }
 
 const CircularProgressRing = ({
-  currentDay = 1,
+  currentDay = 0,
   currentWeek = 1,
   className = "",
   highlight = false,
