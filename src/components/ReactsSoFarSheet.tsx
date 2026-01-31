@@ -2,10 +2,17 @@ import { motion } from 'framer-motion';
 import { ReactionType, ActivityReaction } from '@/services/journey-service';
 import ProfileAvatar from '@/components/ProfileAvatar';
 
+// Import 3D reaction images
+import fireImg from '@/assets/reactions/fire-3d.png';
+import clapImg from '@/assets/reactions/clap-3d.png';
+import fistbumpImg from '@/assets/reactions/fistbump.png';
+import wowImg from '@/assets/reactions/wow.png';
+
 interface ReactorProfile {
   userId: string;
   displayName: string;
   avatarUrl?: string;
+  reactionType?: ReactionType;
 }
 
 interface ReactsSoFarSheetProps {
@@ -15,15 +22,15 @@ interface ReactsSoFarSheetProps {
   onClose: () => void;
 }
 
-const REACTION_EMOJIS: Record<ReactionType, string> = {
+const REACTION_IMAGES: Record<ReactionType, string> = {
   heart: '❤️',
-  fire: '🔥',
-  clap: '👏',
-  fistbump: '🤜🤛',
-  wow: '🤩',
+  fire: fireImg,
+  clap: clapImg,
+  fistbump: fistbumpImg,
+  wow: wowImg,
 };
 
-// Map reactors to their reactions
+// Map reactors to their reactions - use actual reaction type if available
 function getReactorReactions(reactors: ReactorProfile[], reactions: Record<ReactionType, ActivityReaction>) {
   const activeTypes = Object.entries(reactions)
     .filter(([, r]) => r.count > 0)
@@ -33,7 +40,8 @@ function getReactorReactions(reactors: ReactorProfile[], reactions: Record<React
   
   return reactors.map((reactor, i) => ({
     ...reactor,
-    reactionType: activeTypes[i % activeTypes.length],
+    // Use actual reaction type from reactor if available, otherwise cycle through active types
+    reactionType: reactor.reactionType || activeTypes[i % activeTypes.length],
   }));
 }
 
@@ -108,10 +116,16 @@ export default function ReactsSoFarSheet({ total, reactions, reactorProfiles, on
                   {reactor.displayName}
                 </span>
 
-                {/* Reaction emoji */}
-                <span className="text-3xl">
-                  {REACTION_EMOJIS[reactor.reactionType]}
-                </span>
+                {/* Reaction - use image for non-heart, emoji for heart */}
+                {reactor.reactionType === 'heart' ? (
+                  <span className="text-3xl">❤️</span>
+                ) : (
+                  <img 
+                    src={REACTION_IMAGES[reactor.reactionType]} 
+                    alt={reactor.reactionType} 
+                    className="w-9 h-9 object-contain"
+                  />
+                )}
               </motion.div>
             ))
           ) : (
