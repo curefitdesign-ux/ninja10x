@@ -783,6 +783,7 @@ const Reel = () => {
           avatarUrl: currentGroup?.avatarUrl,
           displayName: currentGroup?.displayName,
           userId: currentGroup?.userId,
+          createdAt: currentActivity.createdAt,
         } : null}
         publicFeed={publicFeed.map(p => ({
           id: p.id,
@@ -793,6 +794,7 @@ const Reel = () => {
           avatarUrl: p.avatarUrl,
           displayName: p.displayName,
           userId: p.userId,
+          createdAt: p.createdAt,
         }))}
         myActivities={myActivities.map(a => ({ dayNumber: a.dayNumber }))}
         onStoryTap={handleProgressStoryTap}

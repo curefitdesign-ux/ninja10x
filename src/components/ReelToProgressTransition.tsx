@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronDown, ChevronUp, GripHorizontal } from 'lucide-react';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import { X } from 'lucide-react';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import { isVideoUrl } from '@/lib/media';
 import tileActiveImg from '@/assets/progress/tile-active-new.png';
@@ -40,6 +40,7 @@ interface Activity {
   avatarUrl?: string;
   displayName?: string;
   userId?: string;
+  createdAt?: string;
 }
 
 interface ReelToProgressTransitionProps {
@@ -61,13 +62,33 @@ export default function ReelToProgressTransition({
 }: ReelToProgressTransitionProps) {
   const [showTiles, setShowTiles] = useState(false);
   const [showStories, setShowStories] = useState(false);
+  const [expandingCardId, setExpandingCardId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Animation values for pull-down gesture
-  const dragY = useMotionValue(0);
-  const progressOpacity = useTransform(dragY, [0, 150], [1, 0]);
-  const progressScale = useTransform(dragY, [0, 150], [1, 0.85]);
-  const progressY = useTransform(dragY, [0, 150], [0, 100]);
+  // Combine current activity with public feed and sort by latest first
+  const allStories = (() => {
+    const stories: Activity[] = [];
+    
+    // Add public feed items first
+    publicFeed.forEach(item => {
+      if (!stories.some(s => s.id === item.id)) {
+        stories.push(item);
+      }
+    });
+    
+    // Add current activity if not already in list
+    if (currentActivity && !stories.some(s => s.id === currentActivity.id)) {
+      stories.unshift(currentActivity);
+    }
+    
+    // Sort by createdAt or dayNumber (latest first)
+    return stories.sort((a, b) => {
+      if (a.createdAt && b.createdAt) {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+      return b.dayNumber - a.dayNumber;
+    });
+  })();
 
   // Stagger animations when opening
   useEffect(() => {
@@ -81,20 +102,22 @@ export default function ReelToProgressTransition({
     } else {
       setShowTiles(false);
       setShowStories(false);
+      setExpandingCardId(null);
     }
   }, [isOpen]);
 
-  const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.y > 100 || info.velocity.y > 500) {
-      onClose();
-    }
-  }, [onClose]);
+  const handleStoryTap = useCallback((story: Activity, index: number) => {
+    // Set expanding card for animation
+    setExpandingCardId(story.id);
+    
+    // Slight delay to show expansion animation before closing
+    setTimeout(() => {
+      onStoryTap(index, story.userId);
+    }, 250);
+  }, [onStoryTap]);
 
   const getDayFromIndex = (index: number) => 12 - index;
   const isTileActive = (dayNumber: number) => myActivities.some(a => a.dayNumber === dayNumber);
-
-  const mediaUrl = currentActivity?.originalUrl || currentActivity?.storageUrl || '';
-  const isVideo = currentActivity?.isVideo || isVideoUrl(mediaUrl);
 
   return (
     <AnimatePresence>
@@ -112,271 +135,261 @@ export default function ReelToProgressTransition({
           exit={{ opacity: 0, y: 50 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
-          {/* No pull-down - just static content */}
-          <motion.div className="flex-1 flex flex-col">
-            {/* Background aurora effect */}
-            <div 
-              className="absolute pointer-events-none"
-              style={{ left: "-53px", top: "-40px", width: "131vw", height: "auto" }}
-            >
+          <LayoutGroup>
+            <motion.div className="flex-1 flex flex-col">
+              {/* Background aurora effect */}
               <div 
-                className="w-full h-[400px] opacity-40 mix-blend-screen"
-                style={{ background: "radial-gradient(ellipse at center, rgba(138, 100, 200, 0.4) 0%, transparent 70%)" }}
-              />
-            </div>
-
-            {/* Header - minimal, just close button */}
-            <motion.div
-              className="flex-shrink-0 w-full flex items-center justify-end px-4"
-              style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)' }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.15 }}
-            >
-              <motion.button
-                onClick={onClose}
-                className="flex items-center justify-center text-white/80 active:scale-95 transition-transform"
-                style={{ width: '36px', height: '36px' }}
-                whileTap={{ scale: 0.9 }}
+                className="absolute pointer-events-none"
+                style={{ left: "-53px", top: "-40px", width: "131vw", height: "auto" }}
               >
-                <X className="w-6 h-6" strokeWidth={1.5} />
-              </motion.button>
-            </motion.div>
+                <div 
+                  className="w-full h-[400px] opacity-40 mix-blend-screen"
+                  style={{ background: "radial-gradient(ellipse at center, rgba(138, 100, 200, 0.4) 0%, transparent 70%)" }}
+                />
+              </div>
 
-            {/* Story strip with current activity transitioning into first position */}
-            <AnimatePresence>
-              {showStories && (
-                <motion.div
-                  className="flex-shrink-0 w-full overflow-x-auto scrollbar-hide overscroll-x-contain"
-                  style={{
-                    paddingTop: "12px",
-                    paddingInline: "4vw",
-                    paddingBottom: "16px",
-                    minHeight: "130px",
-                  }}
-                  initial={{ opacity: 0, y: -40 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -60, transition: { duration: 0.15 } }}
-                  transition={{ type: "spring", stiffness: 200, damping: 25 }}
+              {/* Header - minimal, just close button */}
+              <motion.div
+                className="flex-shrink-0 w-full flex items-center justify-end px-4"
+                style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)' }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.15 }}
+              >
+                <motion.button
+                  onClick={onClose}
+                  className="flex items-center justify-center text-white/80 active:scale-95 transition-transform"
+                  style={{ width: '36px', height: '36px' }}
+                  whileTap={{ scale: 0.9 }}
                 >
-                  <div className="flex items-end gap-3">
-                    {/* Transition card - current activity as hero with layoutId for shared-element */}
-                    {currentActivity && (
-                      <motion.button
-                        className="relative flex-shrink-0 overflow-hidden cursor-pointer"
-                        style={{
-                          width: "72px",
-                          height: "100px",
-                          borderRadius: "14px",
-                          boxShadow: "0 12px 40px rgba(100, 70, 180, 0.5)",
-                          border: "2px solid rgba(160, 120, 220, 0.35)",
-                        }}
-                        layoutId="reel-hero-card"
-                        onClick={() => onStoryTap(0, currentActivity.userId)}
-                        initial={{ scale: 2.5, y: 80, opacity: 0.5 }}
-                        animate={{ scale: 1, y: 0, opacity: 1 }}
-                        exit={{ scale: 2.5, y: 80, opacity: 0 }}
+                  <X className="w-6 h-6" strokeWidth={1.5} />
+                </motion.button>
+              </motion.div>
+
+              {/* Story strip - all stories sorted by latest */}
+              <AnimatePresence>
+                {showStories && (
+                  <motion.div
+                    className="flex-shrink-0 w-full overflow-x-auto scrollbar-hide overscroll-x-contain"
+                    style={{
+                      paddingTop: "12px",
+                      paddingInline: "4vw",
+                      paddingBottom: "16px",
+                      minHeight: "130px",
+                    }}
+                    initial={{ opacity: 0, y: -40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -60, transition: { duration: 0.15 } }}
+                    transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                  >
+                    <div className="flex items-end gap-3">
+                      {allStories.slice(0, 8).map((story, index) => {
+                        const isExpanding = expandingCardId === story.id;
+                        const storyMediaUrl = story.originalUrl || story.storageUrl;
+                        const storyIsVideo = story.isVideo || isVideoUrl(storyMediaUrl);
+                        
+                        return (
+                          <motion.button
+                            key={story.id}
+                            layoutId={`story-card-${story.id}`}
+                            className="relative flex-shrink-0 overflow-hidden cursor-pointer"
+                            style={{
+                              width: isExpanding ? "100vw" : "72px",
+                              height: isExpanding ? "70vh" : "100px",
+                              borderRadius: isExpanding ? "24px" : "14px",
+                              boxShadow: isExpanding 
+                                ? "0 24px 60px rgba(100, 70, 180, 0.6)"
+                                : index === 0 
+                                  ? "0 12px 40px rgba(100, 70, 180, 0.5)"
+                                  : "0 4px 16px rgba(0,0,0,0.25)",
+                              border: isExpanding 
+                                ? "3px solid rgba(160, 120, 220, 0.5)"
+                                : index === 0 
+                                  ? "2px solid rgba(160, 120, 220, 0.35)"
+                                  : "1px solid rgba(255,255,255,0.1)",
+                              zIndex: isExpanding ? 100 : 10 - index,
+                              position: isExpanding ? 'fixed' : 'relative',
+                              left: isExpanding ? '50%' : 'auto',
+                              top: isExpanding ? '50%' : 'auto',
+                              x: isExpanding ? '-50%' : 0,
+                              y: isExpanding ? '-50%' : 0,
+                            }}
+                            onClick={() => handleStoryTap(story, index)}
+                            initial={{ opacity: 0, x: 40, scale: 0.8 }}
+                            animate={{ 
+                              opacity: 1, 
+                              x: 0, 
+                              scale: isExpanding ? 1.02 : 1,
+                            }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            whileTap={{ scale: isExpanding ? 1 : 0.95 }}
+                            transition={{ 
+                              type: "spring", 
+                              stiffness: 350, 
+                              damping: 35,
+                              delay: isExpanding ? 0 : index * 0.03,
+                            }}
+                          >
+                            {storyIsVideo ? (
+                              <video
+                                src={storyMediaUrl}
+                                className="w-full h-full object-cover"
+                                muted
+                                playsInline
+                                loop
+                                autoPlay
+                                preload="metadata"
+                              />
+                            ) : (
+                              <img
+                                src={storyMediaUrl}
+                                alt={`Day ${story.dayNumber}`}
+                                className="w-full h-full object-cover"
+                              />
+                            )}
+                            
+                            {/* Avatar - hide when expanding */}
+                            {story.avatarUrl && !isExpanding && (
+                              <motion.div 
+                                className="absolute bottom-1.5 left-1.5"
+                                animate={{ opacity: isExpanding ? 0 : 1 }}
+                              >
+                                <ProfileAvatar
+                                  src={story.avatarUrl}
+                                  name={story.displayName || ''}
+                                  size={24}
+                                  style={{ border: '2px solid rgba(255,255,255,0.6)' }}
+                                />
+                              </motion.div>
+                            )}
+                            
+                            {/* Day badge - hide when expanding */}
+                            {!isExpanding && (
+                              <motion.div 
+                                className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-white font-semibold text-[9px]"
+                                style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+                                animate={{ opacity: isExpanding ? 0 : 1 }}
+                              >
+                                D{story.dayNumber}
+                              </motion.div>
+                            )}
+                            
+                            {/* Tap to view text when expanding */}
+                            {isExpanding && (
+                              <motion.div
+                                className="absolute inset-0 flex items-center justify-center bg-black/20"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                              >
+                                <span className="text-white text-lg font-semibold tracking-wide">Opening...</span>
+                              </motion.div>
+                            )}
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Progress tiles area */}
+              <motion.div 
+                className="flex-1 relative w-full overflow-hidden" 
+                style={{ maxWidth: "430px", marginInline: "auto" }}
+                animate={{ opacity: expandingCardId ? 0.3 : 1 }}
+              >
+                {/* Engine Badge */}
+                <AnimatePresence>
+                  {showTiles && (
+                    <motion.div
+                      className="absolute"
+                      style={{ left: "10%", top: "-1%", width: "32%", aspectRatio: "1" }}
+                      initial={{ opacity: 0, scale: 0.5, y: 50 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.5, y: 50 }}
+                      transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.15 }}
+                    >
+                      <img src={engineBadgeImg} alt="Engine Badge" className="w-full h-full object-contain" style={{ opacity: 0.7 }} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Diagonal Progress Tiles with cascade animation */}
+                {TILE_POSITIONS.map((pos, index) => {
+                  const day = getDayFromIndex(index);
+                  const isActive = isTileActive(day);
+
+                  return (
+                    <motion.div
+                      key={day}
+                      className="absolute"
+                      style={{ 
+                        left: `${pos.left}%`, 
+                        top: `${pos.top}%`, 
+                        width: "11%", 
+                        aspectRatio: "1",
+                        transform: 'translateX(-50%)',
+                      }}
+                      initial={{ opacity: 0, y: -80, scale: 0.5, rotate: -20 }}
+                      animate={showTiles ? { opacity: 1, y: 0, scale: 1, rotate: 0 } : {}}
+                      exit={{ opacity: 0, y: -50, scale: 0.7, rotate: -10, transition: { duration: 0.15, delay: index * 0.01 } }}
+                      transition={{ 
+                        type: "spring", 
+                        stiffness: 300, 
+                        damping: 24, 
+                        delay: index * 0.025 
+                      }}
+                    >
+                      <motion.img 
+                        src={isActive ? tileActiveImg : tileInactiveImg} 
+                        alt={`Day ${day}`} 
+                        className="w-full h-full object-contain relative z-10"
+                        whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
-                        transition={{ 
-                          type: "spring", 
-                          stiffness: 350, 
-                          damping: 35,
-                          mass: 0.6,
-                        }}
-                      >
-                        {isVideo ? (
-                          <video
-                            src={mediaUrl}
-                            className="w-full h-full object-cover"
-                            muted
-                            playsInline
-                            loop
-                            autoPlay
-                          />
-                        ) : (
-                          <img
-                            src={mediaUrl}
-                            alt="Current activity"
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                        
-                        {currentActivity.avatarUrl && (
-                          <div className="absolute bottom-1.5 left-1.5">
-                            <ProfileAvatar
-                              src={currentActivity.avatarUrl}
-                              name={currentActivity.displayName || ''}
-                              size={24}
-                              style={{ border: '2px solid rgba(255,255,255,0.6)' }}
-                            />
-                          </div>
-                        )}
-                        
-                        <div 
-                          className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-white font-semibold text-[9px]"
-                          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
-                        >
-                          D{currentActivity.dayNumber}
-                        </div>
-                      </motion.button>
-                    )}
+                      />
+                    </motion.div>
+                  );
+                })}
 
-                    {/* Other feed items */}
-                    {publicFeed.slice(0, 6).map((photo, index) => (
-                      <motion.button
-                        key={photo.id}
-                        className="relative flex-shrink-0 overflow-hidden cursor-pointer active:scale-95 transition-transform"
-                        style={{
-                          width: "72px",
-                          height: "100px",
-                          borderRadius: "14px",
-                          boxShadow: "0 4px 16px rgba(0,0,0,0.25)",
-                          border: "1px solid rgba(255,255,255,0.1)",
-                        }}
-                        onClick={() => onStoryTap(index + 1, photo.userId)}
-                        initial={{ opacity: 0, x: 40, scale: 0.8 }}
-                        animate={{ opacity: 1, x: 0, scale: 1 }}
-                        exit={{ opacity: 0, x: 20, scale: 0.9 }}
-                        transition={{ delay: 0.1 + index * 0.04 }}
-                      >
-                        {photo.isVideo || isVideoUrl(photo.storageUrl) ? (
-                          <video
-                            src={photo.storageUrl}
-                            className="w-full h-full object-cover"
-                            muted
-                            playsInline
-                            loop
-                            autoPlay
-                            preload="metadata"
-                          />
-                        ) : (
-                          <img
-                            src={photo.storageUrl}
-                            alt={`Day ${photo.dayNumber}`}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                        
-                        {photo.avatarUrl && (
-                          <div className="absolute bottom-1.5 left-1.5">
-                            <ProfileAvatar
-                              src={photo.avatarUrl}
-                              name={photo.displayName || ''}
-                              size={24}
-                              style={{ border: '2px solid rgba(255,255,255,0.6)' }}
-                            />
-                          </div>
-                        )}
-                        
-                        <div 
-                          className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-white font-semibold text-[9px]"
-                          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
-                        >
-                          D{photo.dayNumber}
-                        </div>
-                      </motion.button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Progress tiles area */}
-            <motion.div 
-              className="flex-1 relative w-full overflow-hidden" 
-              style={{ maxWidth: "430px", marginInline: "auto" }}
-            >
-              {/* Engine Badge */}
-              <AnimatePresence>
-                {showTiles && (
+                {/* Milestone Labels */}
+                {LABELS.map((label, idx) => (
                   <motion.div
-                    className="absolute"
-                    style={{ left: "10%", top: "-1%", width: "32%", aspectRatio: "1" }}
-                    initial={{ opacity: 0, scale: 0.5, y: 50 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.5, y: 50 }}
-                    transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.15 }}
-                  >
-                    <img src={engineBadgeImg} alt="Engine Badge" className="w-full h-full object-contain" style={{ opacity: 0.7 }} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Diagonal Progress Tiles with cascade animation */}
-              {TILE_POSITIONS.map((pos, index) => {
-                const day = getDayFromIndex(index);
-                const isActive = isTileActive(day);
-
-                return (
-                  <motion.div
-                    key={day}
-                    className="absolute"
-                    style={{ 
-                      left: `${pos.left}%`, 
-                      top: `${pos.top}%`, 
-                      width: "11%", 
-                      aspectRatio: "1",
-                      transform: 'translateX(-50%)',
+                    key={idx}
+                    className="absolute flex flex-col"
+                    style={{
+                      left: `${label.left}%`,
+                      top: `${label.top}%`,
+                      textAlign: label.side === "left" ? "right" : "left",
+                      alignItems: label.side === "left" ? "flex-end" : "flex-start",
                     }}
-                    initial={{ opacity: 0, y: -80, scale: 0.5, rotate: -20 }}
-                    animate={showTiles ? { opacity: 1, y: 0, scale: 1, rotate: 0 } : {}}
-                    exit={{ opacity: 0, y: -50, scale: 0.7, rotate: -10, transition: { duration: 0.15, delay: index * 0.01 } }}
-                    transition={{ 
-                      type: "spring", 
-                      stiffness: 300, 
-                      damping: 24, 
-                      delay: index * 0.025 
-                    }}
+                    initial={{ opacity: 0, x: label.side === "left" ? -30 : 30 }}
+                    animate={showTiles ? { opacity: 1, x: 0 } : {}}
+                    exit={{ opacity: 0, x: label.side === "left" ? -20 : 20 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 22, delay: 0.3 + idx * 0.08 }}
                   >
-                    <motion.img 
-                      src={isActive ? tileActiveImg : tileInactiveImg} 
-                      alt={`Day ${day}`} 
-                      className="w-full h-full object-contain relative z-10"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                    />
+                    <span className="text-white/50 text-[10px] font-bold tracking-widest">{label.text[0]}</span>
+                    <span className="text-white/80 text-xs font-bold">{label.text[1]}</span>
                   </motion.div>
-                );
-              })}
+                ))}
 
-              {/* Milestone Labels */}
-              {LABELS.map((label, idx) => (
-                <motion.div
-                  key={idx}
-                  className="absolute flex flex-col"
-                  style={{
-                    left: `${label.left}%`,
-                    top: `${label.top}%`,
-                    textAlign: label.side === "left" ? "right" : "left",
-                    alignItems: label.side === "left" ? "flex-end" : "flex-start",
-                  }}
-                  initial={{ opacity: 0, x: label.side === "left" ? -30 : 30 }}
-                  animate={showTiles ? { opacity: 1, x: 0 } : {}}
-                  exit={{ opacity: 0, x: label.side === "left" ? -20 : 20 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 22, delay: 0.3 + idx * 0.08 }}
-                >
-                  <span className="text-white/50 text-[10px] font-bold tracking-widest">{label.text[0]}</span>
-                  <span className="text-white/80 text-xs font-bold">{label.text[1]}</span>
-                </motion.div>
-              ))}
-
-              {/* Base platform */}
-              <AnimatePresence>
-                {showTiles && (
-                  <motion.div
-                    className="absolute"
-                    style={{ left: "10%", bottom: "2%", width: "80%", maxWidth: "320px" }}
-                    initial={{ opacity: 0, y: 60, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 40, scale: 0.9 }}
-                    transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.35 }}
-                  >
-                    <img src={basePlatformImg} alt="Base" className="w-full object-contain" style={{ opacity: 0.85 }} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                {/* Base platform */}
+                <AnimatePresence>
+                  {showTiles && (
+                    <motion.div
+                      className="absolute"
+                      style={{ left: "10%", bottom: "2%", width: "80%", maxWidth: "320px" }}
+                      initial={{ opacity: 0, y: 60, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 40, scale: 0.9 }}
+                      transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.35 }}
+                    >
+                      <img src={basePlatformImg} alt="Base" className="w-full object-contain" style={{ opacity: 0.85 }} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             </motion.div>
-          </motion.div>
+          </LayoutGroup>
         </motion.div>
       )}
     </AnimatePresence>
