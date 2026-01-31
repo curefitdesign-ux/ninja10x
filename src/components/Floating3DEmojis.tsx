@@ -41,6 +41,9 @@ export default function Floating3DEmojis({ reactions, newReaction }: Floating3DE
         const asset = EMOJI_ASSETS[type];
         const isImage = typeof asset === 'string' && asset.startsWith('/') || asset.includes('assets');
         
+        // Create unique animation delay for each emoji
+        const animDelay = i * 0.5;
+        
         return (
           <motion.div
             key={`${type}-${i}`}
@@ -63,15 +66,49 @@ export default function Floating3DEmojis({ reactions, newReaction }: Floating3DE
               delay: isNew ? 0 : i * 0.08,
             }}
           >
-            {isImage ? (
-              <img 
-                src={asset} 
-                alt={type} 
-                className="w-14 h-14 object-contain"
-              />
-            ) : (
-              <span className="text-5xl">{asset}</span>
-            )}
+            {/* Attention-grabbing floating animation wrapper */}
+            <motion.div
+              animate={{
+                y: [0, -6, 0, -3, 0],
+                rotate: [0, -8, 0, 5, 0],
+                scale: [1, 1.1, 1, 1.05, 1],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                repeatDelay: animDelay + 2,
+                ease: 'easeInOut',
+              }}
+            >
+              {isImage ? (
+                <img 
+                  src={asset} 
+                  alt={type} 
+                  className="w-14 h-14 object-contain"
+                />
+              ) : (
+                <span className="text-5xl">{asset}</span>
+              )}
+            </motion.div>
+            
+            {/* Subtle glow pulse behind emoji */}
+            <motion.div
+              className="absolute inset-0 rounded-full pointer-events-none -z-10"
+              style={{
+                background: 'radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, transparent 70%)',
+                transform: 'scale(1.5)',
+              }}
+              animate={{
+                opacity: [0, 0.6, 0],
+                scale: [1.2, 1.8, 1.2],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                repeatDelay: animDelay + 3,
+                ease: 'easeInOut',
+              }}
+            />
           </motion.div>
         );
       })}
