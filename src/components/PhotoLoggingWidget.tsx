@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { isVideoUrl } from "@/lib/media";
 import ReelProgressPill from "./ReelProgressPill";
 import { useFitnessReel } from "@/hooks/use-fitness-reel";
+import FloatingReactionBadge from "./FloatingReactionBadge";
 
 // Activity icons
 import footballIcon from '@/assets/activities/football.png';
@@ -18,20 +19,6 @@ import runningIcon from '@/assets/activities/running.png';
 import trekkingIcon from '@/assets/activities/trekking.png';
 import boxingIcon from '@/assets/activities/boxing.png';
 import yogaIcon from '@/assets/activities/yoga.png';
-
-// Reaction emoji images
-import fireImg from '@/assets/reactions/fire-cool.png';
-import clapImg from '@/assets/reactions/clap.png';
-import fistbumpImg from '@/assets/reactions/fistbump.png';
-import wowImg from '@/assets/reactions/wow.png';
-
-const REACTION_IMAGES: Record<string, string> = {
-  fire: fireImg,
-  clap: clapImg,
-  fistbump: fistbumpImg,
-  wow: wowImg,
-  heart: fireImg, // fallback to fire for heart
-};
 
 const activities = [
   { name: 'Running', icon: runningIcon },
@@ -427,40 +414,15 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
           )}
         </AnimatePresence>
         
-        {/* Reaction pill badge for photos with reactions - always visible */}
+        {/* Floating reaction badge with attention animation */}
         {hasPhoto && photo.reactionCount && photo.reactionCount > 0 && (
-          <motion.div
-            className={`absolute z-20 flex items-center gap-1 rounded-full ${
-              shouldShowExpanded 
-                ? '-bottom-3 left-1/2 -translate-x-1/2 px-2 py-1'
-                : 'bottom-1 right-1 px-1.5 py-0.5'
-            }`}
-            style={{
-              background: 'rgba(0,0,0,0.7)',
-              backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-            }}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.1, type: 'spring', stiffness: 400 }}
-          >
-            {/* Show PNG emoji image */}
-            {photo.topReaction && REACTION_IMAGES[photo.topReaction] ? (
-              <img 
-                src={REACTION_IMAGES[photo.topReaction]} 
-                alt={photo.topReaction} 
-                className={shouldShowExpanded ? "w-4 h-4 object-contain" : "w-3 h-3 object-contain"}
-              />
-            ) : (
-              <img 
-                src={fireImg} 
-                alt="reaction" 
-                className={shouldShowExpanded ? "w-4 h-4 object-contain" : "w-3 h-3 object-contain"}
-              />
-            )}
-            <span className={`text-white/90 font-semibold ${shouldShowExpanded ? 'text-xs' : 'text-[10px]'}`}>+{photo.reactionCount}</span>
-          </motion.div>
+          <FloatingReactionBadge
+            reactionType={photo.topReaction}
+            count={photo.reactionCount}
+            size={shouldShowExpanded ? 'md' : 'sm'}
+            position={shouldShowExpanded ? 'bottom-center' : 'bottom-right'}
+            showAttentionAnimation={true}
+          />
         )}
       </motion.button>
     );
