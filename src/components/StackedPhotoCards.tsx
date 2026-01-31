@@ -106,6 +106,9 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
     const isVideo = photo.isVideo || isVideoUrl(photo.storageUrl);
     const activityIcon = photo.activity ? activityIcons[photo.activity] : null;
 
+    // Use storageUrl which contains the templated/framed image
+    const displayUrl = photo.storageUrl;
+
     return (
       <div className="absolute top-1/2 left-1/2 cursor-pointer" style={{ transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale}) rotate(${rotate}deg)`, zIndex }} onClick={() => handlePhotoTap(photo)}>
         {activityIcon && (
@@ -114,7 +117,7 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
           </div>
         )}
         <div className="rounded-2xl overflow-hidden" style={{ width: `${cardWidth}px`, height: `${cardHeight}px`, border: '3px solid rgba(0,0,0,0.9)', boxShadow: isCenter ? '0 15px 40px rgba(0,0,0,0.5)' : '0 8px 25px rgba(0,0,0,0.3)' }}>
-          {isVideo ? <video src={photo.storageUrl} className="w-full h-full object-cover" muted playsInline autoPlay loop /> : <img src={photo.storageUrl} alt="" className="w-full h-full object-cover" />}
+          {isVideo ? <video src={displayUrl} className="w-full h-full object-cover" muted playsInline autoPlay loop /> : <img src={displayUrl} alt="" className="w-full h-full object-cover" />}
         </div>
         <div className="absolute -bottom-3 left-1/2 -translate-x-1/2">
           <p className="text-sm font-bold tracking-wide whitespace-nowrap italic" style={{ color: 'rgba(255,255,255,0.9)', textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>DAY {photo.dayNumber}</p>
