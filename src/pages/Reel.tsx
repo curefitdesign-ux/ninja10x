@@ -400,11 +400,11 @@ const Reel = () => {
         transition={{ delay: 0.1 }}
       >
         {/* Left side - Delete button for owner (only within 24 hours) */}
-        <div className="w-10">
+        <div className="w-11">
           {canEdit && (
             <motion.button
               onClick={() => setShowDeleteConfirm(true)}
-              className="p-2 transition-colors rounded-full text-white/80 hover:text-red-400"
+              className="p-3 -m-1 transition-colors rounded-full text-white/80 hover:text-red-400 min-w-[44px] min-h-[44px] flex items-center justify-center"
               whileTap={{ scale: 0.9 }}
             >
               <Trash2 className="w-5 h-5" strokeWidth={1.5} />
@@ -415,7 +415,7 @@ const Reel = () => {
         {/* Right side - Close button */}
         <button
           onClick={handleClose}
-          className="text-white/80 hover:text-white transition-colors p-2"
+          className="text-white/80 hover:text-white transition-colors p-3 -m-1 min-w-[44px] min-h-[44px] flex items-center justify-center"
         >
           <X className="w-6 h-6" strokeWidth={1.5} />
         </button>
