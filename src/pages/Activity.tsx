@@ -63,16 +63,9 @@ const Activity = () => {
     topReaction: getTopReaction(a.reactions),
   }));
   
-  // Helper to get the top reaction emoji
+  // Helper to get the top reaction type (key like "fire", "clap", etc.)
   function getTopReaction(reactions?: Record<string, { count: number }>): string | undefined {
     if (!reactions) return undefined;
-    const EMOJI_MAP: Record<string, string> = {
-      heart: '❤️',
-      fire: '🔥',
-      clap: '👏',
-      fistbump: '🤜',
-      wow: '🤩',
-    };
     let topType: string | undefined;
     let topCount = 0;
     for (const [type, data] of Object.entries(reactions)) {
@@ -81,7 +74,7 @@ const Activity = () => {
         topType = type;
       }
     }
-    return topType ? EMOJI_MAP[topType] : undefined;
+    return topType;
   }
   
   // Gallery picker state
