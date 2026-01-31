@@ -362,9 +362,9 @@ const Reel = () => {
         </div>
       </div>
 
-      {/* Footer */}
+      {/* Footer - Unified bottom pill */}
       <motion.div 
-        className="absolute bottom-0 left-0 right-0 z-40 flex flex-col items-center gap-4"
+        className="absolute bottom-0 left-0 right-0 z-40 flex flex-col items-center"
         style={{ 
           paddingBottom: 'max(env(safe-area-inset-bottom, 28px), 28px)',
           paddingInline: '20px',
@@ -373,73 +373,91 @@ const Reel = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        {isOwnStory ? (
-          // Own story - show "Reacts so far" with avatar stack
-          <button 
-            onClick={() => setShowReactsSheet(true)}
-            className="flex flex-col items-center gap-3"
-          >
-            <span className="text-white font-semibold text-lg">
-              Reacts so far • {String(currentReactions.total).padStart(2, '0')}
-            </span>
-            
-            {currentReactions.total > 0 && (
-              <motion.div 
-                className="flex items-center px-3 py-2 rounded-full"
-                style={{
-                  background: 'rgba(60, 55, 70, 0.85)',
-                  backdropFilter: 'blur(20px)',
-                  WebkitBackdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+        <motion.button
+          onClick={() => isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true)}
+          className="relative overflow-hidden"
+          style={{
+            minWidth: 200,
+            height: 56,
+            borderRadius: 28,
+            background: 'rgba(45, 40, 55, 0.92)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+          }}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          layout
+        >
+          <AnimatePresence mode="wait">
+            {isOwnStory ? (
+              /* Owner view - shows avatars of reactors */
+              <motion.div
+                key="owner-pill"
+                className="flex items-center justify-center gap-2 h-full px-4"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
-                <div className="flex -space-x-3">
-                  {MOCK_REACTORS.slice(0, Math.min(currentReactions.total, 3)).map((reactor, i) => (
-                    <img
-                      key={reactor.id}
-                      src={reactor.avatar}
-                      alt={reactor.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                      style={{
-                        border: '2px solid rgba(60, 55, 70, 0.9)',
-                        zIndex: 10 - i,
-                      }}
-                    />
-                  ))}
-                </div>
-                <ChevronUp className="w-5 h-5 text-white/70 ml-3" />
+                {currentReactions.total > 0 ? (
+                  <>
+                    <div className="flex -space-x-3">
+                      {MOCK_REACTORS.slice(0, Math.min(currentReactions.total, 3)).map((reactor, i) => (
+                        <motion.img
+                          key={reactor.id}
+                          src={reactor.avatar}
+                          alt={reactor.name}
+                          className="w-11 h-11 rounded-full object-cover"
+                          style={{
+                            border: '2px solid rgba(45, 40, 55, 0.95)',
+                            zIndex: 10 - i,
+                          }}
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: i * 0.08 }}
+                        />
+                      ))}
+                      {currentReactions.total > 3 && (
+                        <motion.div
+                          className="w-11 h-11 rounded-full flex items-center justify-center text-white/90 text-sm font-semibold"
+                          style={{
+                            background: 'rgba(80, 75, 95, 0.9)',
+                            border: '2px solid rgba(45, 40, 55, 0.95)',
+                            zIndex: 7,
+                          }}
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.24 }}
+                        >
+                          +{currentReactions.total - 3}
+                        </motion.div>
+                      )}
+                    </div>
+                    <ChevronUp className="w-5 h-5 text-white/60 ml-1" />
+                  </>
+                ) : (
+                  <span className="text-white/60 text-sm font-medium px-4">No reactions yet</span>
+                )}
+              </motion.div>
+            ) : (
+              /* Visitor view - shows SEND YOUR with emojis */
+              <motion.div
+                key="visitor-pill"
+                className="flex items-center justify-center gap-3 h-full px-5"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              >
+                <img src={clapEmoji} alt="clap" className="w-8 h-8 object-contain" />
+                <span className="text-white font-bold text-base tracking-widest">SEND YOUR</span>
+                <img src={fireEmoji} alt="fire" className="w-8 h-8 object-contain" />
               </motion.div>
             )}
-          </button>
-        ) : (
-          // Other's story - show reaction bar to send reactions
-          <div className="flex flex-col items-center gap-3">
-            <span className="text-white font-semibold text-lg">
-              Reacts so far • {String(currentReactions.total).padStart(2, '0')}
-            </span>
-            
-            {/* SEND YOUR button with 3D emojis */}
-            <motion.button
-              onClick={() => setShowSendReactionSheet(true)}
-              className="flex items-center gap-3 px-5 py-3 rounded-full"
-              style={{
-                background: 'rgba(60, 55, 70, 0.85)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
-              }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              <img src={clapEmoji} alt="clap" className="w-7 h-7 object-contain" />
-              <span className="text-white font-semibold tracking-wider">SEND YOUR</span>
-              <img src={fireEmoji} alt="fire" className="w-7 h-7 object-contain" />
-            </motion.button>
-          </div>
-        )}
+          </AnimatePresence>
+        </motion.button>
       </motion.div>
 
       {/* Reacts bottom sheet for own stories */}
