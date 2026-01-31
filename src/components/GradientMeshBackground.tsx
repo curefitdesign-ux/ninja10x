@@ -2,8 +2,16 @@ import { motion } from "framer-motion";
 
 const GradientMeshBackground = () => {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none">
-      {/* Deep muted base */}
+    <div 
+      className="fixed overflow-hidden pointer-events-none"
+      style={{
+        top: 'calc(-1 * env(safe-area-inset-top, 0px))',
+        left: 0,
+        right: 0,
+        bottom: 0,
+      }}
+    >
+      {/* Deep muted base - extends into safe area */}
       <div className="absolute inset-0 bg-[#252535]" />
       
       {/* Top-left warm taupe/brown glow - more visible */}
