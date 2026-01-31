@@ -393,8 +393,23 @@ const Progress = () => {
                       
                       {/* Lock overlay for blurred content */}
                       {shouldBlur && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                          <Lock className="w-5 h-5 text-white/80" />
+                        <div 
+                          className="absolute inset-0 flex flex-col items-center justify-center gap-1"
+                          style={{
+                            background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%)',
+                            backdropFilter: 'blur(2px)',
+                          }}
+                        >
+                          <div 
+                            className="w-8 h-8 rounded-full flex items-center justify-center"
+                            style={{
+                              background: 'rgba(255,255,255,0.15)',
+                              backdropFilter: 'blur(8px)',
+                              border: '1px solid rgba(255,255,255,0.2)',
+                            }}
+                          >
+                            <Lock className="w-3.5 h-3.5 text-white" />
+                          </div>
                         </div>
                       )}
                       
