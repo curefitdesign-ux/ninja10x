@@ -22,6 +22,7 @@ interface ReelProgressPillProps {
   state: PillState;
   progress?: number; // 0-100
   reactions?: Reaction[];
+  totalReactions?: number; // Total reaction count to display
   onPlay?: () => void;
   className?: string;
   isAnimating?: boolean; // Trigger celebration animation
@@ -113,6 +114,7 @@ const ReelProgressPill = ({
   state,
   progress = 0,
   reactions = [],
+  totalReactions = 0,
   onPlay,
   className = '',
   isAnimating = false,
@@ -199,6 +201,11 @@ const ReelProgressPill = ({
   // Show reaction avatar or stacked cards based on state
   const showReactionAvatar = state === 'complete' && reactions.length > 0;
   const topReaction = reactions[0];
+  
+  // Calculate total reactions to display
+  const displayReactionCount = totalReactions > 0 
+    ? totalReactions 
+    : reactions.reduce((sum, r) => sum + r.count, 0);
 
   return (
     <motion.div
@@ -330,7 +337,7 @@ const ReelProgressPill = ({
           <div className="flex-1 min-w-0">
             <AnimatePresence mode="wait">
               <motion.span
-                className="text-white font-semibold text-sm tracking-wide block"
+                className="text-white font-semibold text-sm tracking-wide flex items-center gap-2"
                 key={state}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -338,6 +345,19 @@ const ReelProgressPill = ({
                 transition={{ duration: 0.25 }}
               >
                 <span className={isCelebrating ? 'text-emerald-300' : ''}>{getText()}</span>
+                {/* Total reactions badge */}
+                {displayReactionCount > 0 && (state === 'complete' || state === 'completing') && (
+                  <span 
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(236, 72, 153, 0.15) 100%)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      color: '#fca5a5',
+                    }}
+                  >
+                    ❤️ {displayReactionCount}
+                  </span>
+                )}
               </motion.span>
             </AnimatePresence>
           </div>
