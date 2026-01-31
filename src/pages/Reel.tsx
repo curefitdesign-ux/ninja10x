@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronUp, GripHorizontal } from 'lucide-react';
+import { X, ChevronUp, Pencil, Trash2 } from 'lucide-react';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
@@ -13,6 +13,16 @@ import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
 import SendReactionSheet from '@/components/SendReactionSheet';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import ReelToProgressTransition from '@/components/ReelToProgressTransition';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 // Import 3D emoji assets for display
 import clapEmoji from '@/assets/reactions/clap-3d.png';
@@ -57,6 +67,11 @@ const Reel = () => {
     total: number;
     reactions: Record<ReactionType, ActivityReaction>;
   }>>({});
+  
+  // Edit mode state
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Bottom sheet states and transition animations
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -68,7 +83,7 @@ const Reel = () => {
   const contentY = useTransform(bottomSheetY, [-200, 0], [50, 0]);
 
   // Data for progress overlay
-  const { activities: myActivities } = useJourneyActivities();
+  const { activities: myActivities, deleteActivity } = useJourneyActivities();
   const [publicFeed, setPublicFeed] = useState<LocalActivity[]>([]);
 
   // Load public feed for progress overlay
@@ -147,12 +162,14 @@ const Reel = () => {
     if (userGroups.length === 0) return;
     setCurrentActivityIndex(0);
     setCurrentUserIndex(prev => (prev + 1) % userGroups.length);
+    setIsEditMode(false); // Exit edit mode when switching users
   }, [userGroups.length]);
 
   const goPrevUser = useCallback(() => {
     if (userGroups.length === 0) return;
     setCurrentActivityIndex(0);
     setCurrentUserIndex(prev => (prev - 1 + userGroups.length) % userGroups.length);
+    setIsEditMode(false); // Exit edit mode when switching users
   }, [userGroups.length]);
 
   // Swipe gesture handling for horizontal navigation
@@ -260,6 +277,41 @@ const Reel = () => {
     navigate(-1);
   };
 
+  const handleDeleteActivity = async () => {
+    if (!currentActivity) return;
+    
+    setIsDeleting(true);
+    const success = await deleteActivity(currentActivity.dayNumber);
+    setIsDeleting(false);
+    setShowDeleteConfirm(false);
+    setIsEditMode(false);
+    
+    if (success) {
+      // Refresh the data
+      const groups = await fetchAllActivitiesGroupedByUser();
+      setUserGroups(groups);
+      
+      // If no more activities, go back
+      if (groups.length === 0 || !groups.some(g => g.activities.length > 0)) {
+        navigate(-1);
+        return;
+      }
+      
+      // If current user has no more activities, move to next user
+      const updatedGroup = groups[currentUserIndex];
+      if (!updatedGroup || updatedGroup.activities.length === 0) {
+        if (currentUserIndex > 0) {
+          setCurrentUserIndex(prev => prev - 1);
+        } else if (groups.length > 0) {
+          setCurrentUserIndex(0);
+        }
+        setCurrentActivityIndex(0);
+      } else if (currentActivityIndex >= updatedGroup.activities.length) {
+        setCurrentActivityIndex(Math.max(0, updatedGroup.activities.length - 1));
+      }
+    }
+  };
+
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') handleClose();
@@ -314,14 +366,32 @@ const Reel = () => {
         newReaction={floatingReaction}
       />
 
-      {/* Header with close button */}
+      {/* Header with edit and close buttons */}
       <motion.div
-        className="absolute top-0 left-0 right-0 z-40 flex items-center justify-end px-4"
+        className="absolute top-0 left-0 right-0 z-40 flex items-center justify-between px-4"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)' }}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
+        {/* Left side - Edit button for owner */}
+        <div className="w-10">
+          {isOwnStory && (
+            <motion.button
+              onClick={() => setIsEditMode(!isEditMode)}
+              className={`p-2 transition-colors rounded-full ${
+                isEditMode 
+                  ? 'bg-white/20 text-white' 
+                  : 'text-white/80 hover:text-white'
+              }`}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Pencil className="w-5 h-5" strokeWidth={1.5} />
+            </motion.button>
+          )}
+        </div>
+        
+        {/* Right side - Close button */}
         <button
           onClick={handleClose}
           className="text-white/80 hover:text-white transition-colors p-2"
@@ -329,6 +399,46 @@ const Reel = () => {
           <X className="w-6 h-6" strokeWidth={1.5} />
         </button>
       </motion.div>
+      
+      {/* Edit mode overlay - Delete button on card */}
+      <AnimatePresence>
+        {isEditMode && isOwnStory && (
+          <motion.div
+            className="absolute z-50 inset-0 pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            {/* Delete button positioned on the card */}
+            <motion.button
+              className="absolute pointer-events-auto"
+              style={{
+                top: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 116px)',
+                right: 28,
+                background: 'rgba(239, 68, 68, 0.9)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                borderRadius: 12,
+                padding: '10px 16px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              }}
+              onClick={() => setShowDeleteConfirm(true)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.8, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: -10 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            >
+              <div className="flex items-center gap-2">
+                <Trash2 className="w-4 h-4 text-white" />
+                <span className="text-white text-sm font-semibold">Delete</span>
+              </div>
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* User avatars strip at top - Instagram/WhatsApp style with story rings */}
       <motion.div
@@ -703,6 +813,33 @@ const Reel = () => {
         myActivities={myActivities.map(a => ({ dayNumber: a.dayNumber }))}
         onStoryTap={handleProgressStoryTap}
       />
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-[320px] rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Delete this activity?</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              This will permanently remove Day {currentActivity?.dayNumber} from your journey. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-3">
+            <AlertDialogCancel 
+              className="flex-1 bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
+              disabled={isDeleting}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteActivity}
+              className="flex-1 bg-red-600 text-white hover:bg-red-700"
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DynamicBlurBackground>
   );
 };
