@@ -614,18 +614,17 @@ const Activity = () => {
               position: "fixed",
             }}
           >
-            {/* Premium liquid glass container - end to end */}
+            {/* Premium liquid glass container - clear translucent */}
             <div
               className="relative mx-0"
               style={{
-                background: "linear-gradient(180deg, rgba(20, 20, 30, 0.75) 0%, rgba(10, 10, 18, 0.9) 100%)",
-                backdropFilter: "blur(60px) saturate(200%)",
-                WebkitBackdropFilter: "blur(60px) saturate(200%)",
-                borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+                background: "rgba(255, 255, 255, 0.06)",
+                backdropFilter: "blur(40px) saturate(180%)",
+                WebkitBackdropFilter: "blur(40px) saturate(180%)",
+                borderTop: "1px solid rgba(255, 255, 255, 0.12)",
                 boxShadow: `
-                  0 -8px 40px rgba(0, 0, 0, 0.5),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.07),
-                  inset 0 2px 20px rgba(255, 255, 255, 0.03)
+                  0 -4px 30px rgba(0, 0, 0, 0.3),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1)
                 `,
               }}
             >
@@ -688,32 +687,25 @@ const Activity = () => {
                             filter: "blur(6px)",
                           }}
                         />
-                        {/* Main glossy liquid glass button */}
+                        {/* Main glossy liquid glass button - solid blue, no cutout */}
                         <div 
-                          className="relative w-14 h-14 rounded-full flex items-center justify-center overflow-hidden"
+                          className="relative w-14 h-14 rounded-full flex items-center justify-center"
                           style={{
-                            background: "linear-gradient(145deg, rgba(80, 140, 255, 0.9) 0%, rgba(59, 130, 246, 1) 40%, rgba(37, 99, 235, 0.95) 100%)",
+                            background: "linear-gradient(145deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%)",
                             boxShadow: `
                               0 6px 24px rgba(59, 130, 246, 0.6),
                               0 2px 8px rgba(0, 0, 0, 0.4),
-                              inset 0 2px 4px rgba(255, 255, 255, 0.25),
-                              inset 0 -2px 6px rgba(0, 0, 0, 0.2)
+                              inset 0 2px 4px rgba(255, 255, 255, 0.3),
+                              inset 0 -2px 6px rgba(0, 0, 0, 0.15)
                             `,
-                            border: "1px solid rgba(255, 255, 255, 0.2)",
+                            border: "1px solid rgba(255, 255, 255, 0.25)",
                           }}
                         >
                           {/* Specular highlight */}
                           <div 
-                            className="absolute top-1 left-2 right-2 h-4 rounded-full pointer-events-none"
+                            className="absolute top-1.5 left-3 right-3 h-3 rounded-full pointer-events-none"
                             style={{
-                              background: "linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 50%, transparent 100%)",
-                            }}
-                          />
-                          {/* Glass reflection */}
-                          <div 
-                            className="absolute inset-0 pointer-events-none"
-                            style={{
-                              background: "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%)",
+                              background: "linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 100%)",
                             }}
                           />
                           <item.icon className="w-6 h-6 text-white drop-shadow-lg relative z-10" />
