@@ -547,7 +547,15 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
                   transition={{ duration: 0.2 }}
                 >
                   <button
-                    onClick={() => navigate('/gallery', { state: { dayNumber, isEdit: true } })}
+                    onClick={() => navigate('/preview', { 
+                      state: { 
+                        mediaUrl: frameProps?.imageUrl || imageUrl,
+                        isVideo: isVideo,
+                        dayNumber,
+                        activity: frameProps?.activity,
+                        isEdit: true,
+                      } 
+                    })}
                     className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
                   >
                     <Pencil className="w-4 h-4 text-white/70" />
