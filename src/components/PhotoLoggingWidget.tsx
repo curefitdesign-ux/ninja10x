@@ -353,7 +353,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
           </div>
         )}
         
-        {/* Day label - Story-like progression text at TOP */}
+        {/* Day number at TOP */}
         <AnimatePresence>
           {shouldShowExpanded && (
             <motion.div 
@@ -371,16 +371,38 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
                     ? 'text-white/70' 
                     : 'text-white/35'
               }`}>
+                day {dayNumber}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        {/* Story label at BOTTOM */}
+        <AnimatePresence>
+          {shouldShowExpanded && (
+            <motion.div 
+              className="absolute bottom-2 left-1/2"
+              style={{ zIndex: 10 }}
+              initial={{ opacity: 0, y: 6, x: "-50%" }}
+              animate={{ opacity: 1, y: 0, x: "-50%" }}
+              exit={{ opacity: 0, y: 4, x: "-50%" }}
+              transition={{ delay: 0.1 + index * 0.03, duration: 0.2 }}
+            >
+              <span className={`text-[10px] italic ${
+                isActiveDay 
+                  ? 'text-emerald-400' 
+                  : hasPhoto 
+                    ? 'text-white/70' 
+                    : 'text-white/35'
+              }`}>
                 {(() => {
-                  // Story progression across 12 days (4 weeks × 3 days)
                   const storyLabels = [
                     'begin…', 'push…', 'rise',      // Week 1
                     'grow…', 'build…', 'strong',    // Week 2  
                     'flow…', 'glow…', 'shine',      // Week 3
                     'soar…', 'peak…', 'legend'      // Week 4
                   ];
-                  const story = storyLabels[dayNumber - 1];
-                  return story ? `day ${dayNumber} ${story}` : `day ${dayNumber}`;
+                  return storyLabels[dayNumber - 1] || '';
                 })()}
               </span>
             </motion.div>
