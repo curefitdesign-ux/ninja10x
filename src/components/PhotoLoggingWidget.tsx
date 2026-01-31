@@ -19,6 +19,20 @@ import trekkingIcon from '@/assets/activities/trekking.png';
 import boxingIcon from '@/assets/activities/boxing.png';
 import yogaIcon from '@/assets/activities/yoga.png';
 
+// Reaction emoji images
+import fireImg from '@/assets/reactions/fire-cool.png';
+import clapImg from '@/assets/reactions/clap.png';
+import fistbumpImg from '@/assets/reactions/fistbump.png';
+import wowImg from '@/assets/reactions/wow.png';
+
+const REACTION_IMAGES: Record<string, string> = {
+  fire: fireImg,
+  clap: clapImg,
+  fistbump: fistbumpImg,
+  wow: wowImg,
+  heart: fireImg, // fallback to fire for heart
+};
+
 const activities = [
   { name: 'Running', icon: runningIcon },
   { name: 'Cycling', icon: cyclingIcon },
@@ -431,7 +445,20 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
             animate={{ scale: 1 }}
             transition={{ delay: 0.1, type: 'spring', stiffness: 400 }}
           >
-            <span className={shouldShowExpanded ? "text-sm" : "text-xs"}>{photo.topReaction || '💖'}</span>
+            {/* Show PNG emoji image */}
+            {photo.topReaction && REACTION_IMAGES[photo.topReaction] ? (
+              <img 
+                src={REACTION_IMAGES[photo.topReaction]} 
+                alt={photo.topReaction} 
+                className={shouldShowExpanded ? "w-4 h-4 object-contain" : "w-3 h-3 object-contain"}
+              />
+            ) : (
+              <img 
+                src={fireImg} 
+                alt="reaction" 
+                className={shouldShowExpanded ? "w-4 h-4 object-contain" : "w-3 h-3 object-contain"}
+              />
+            )}
             <span className={`text-white/90 font-semibold ${shouldShowExpanded ? 'text-xs' : 'text-[10px]'}`}>+{photo.reactionCount}</span>
           </motion.div>
         )}
