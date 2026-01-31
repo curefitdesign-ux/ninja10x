@@ -701,24 +701,21 @@ const Preview = () => {
   // Template Selection Step (confirmation is now a popup on ShareSheet)
   return (
     <div 
-      className="fixed w-full touch-manipulation overflow-y-auto" 
+      className="fixed w-full touch-manipulation overflow-hidden" 
       style={{ 
-        top: 'calc(-1 * env(safe-area-inset-top, 0px))',
+        top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        minHeight: 'calc(100dvh + env(safe-area-inset-top, 0px))',
+        height: '100dvh',
+        minHeight: '-webkit-fill-available',
         backgroundColor: '#252535',
       }}
     >
       {/* Blurred background image with dynamic color overlay - edge to edge */}
       <div 
-        className="fixed scale-150 transition-all duration-500 animate-bg-drift pointer-events-none"
+        className="fixed inset-0 scale-150 transition-all duration-500 animate-bg-drift pointer-events-none"
         style={{
-          top: 'calc(-1 * env(safe-area-inset-top, 0px))',
-          left: 0,
-          right: 0,
-          bottom: 0,
           backgroundImage: `url("${imageUrl}")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -727,15 +724,7 @@ const Preview = () => {
       />
       
       {/* Subtle particle/dust animation */}
-      <div 
-        className="fixed overflow-hidden pointer-events-none"
-        style={{
-          top: 'calc(-1 * env(safe-area-inset-top, 0px))',
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
-      >
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
@@ -778,31 +767,22 @@ const Preview = () => {
       
       {/* Dynamic gradient overlay based on current frame - edge to edge */}
       <div 
-        className="fixed transition-all duration-500 animate-color-pulse pointer-events-none"
+        className="fixed inset-0 transition-all duration-500 animate-color-pulse pointer-events-none"
         style={{ 
-          top: 'calc(-1 * env(safe-area-inset-top, 0px))',
-          left: 0,
-          right: 0,
-          bottom: 0,
           backgroundColor: FRAME_COLORS[currentFrame].bg,
           backgroundImage: FRAME_COLORS[currentFrame].gradient 
         }}
       />
-      <div 
-        className="fixed bg-black/20 animate-subtle-pulse pointer-events-none" 
-        style={{
-          top: 'calc(-1 * env(safe-area-inset-top, 0px))',
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
-      />
+      <div className="fixed inset-0 bg-black/20 animate-subtle-pulse pointer-events-none" />
       
       {/* Activity-specific background effect */}
       {activity && <ActivityBackgroundEffect activity={activity} />}
 
-      {/* Content - scrollable layout */}
-      <div className="relative z-10 flex flex-col min-h-full">
+      {/* Content - fixed height layout */}
+      <div 
+        className="relative z-10 flex flex-col h-full"
+        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+      >
         {/* Offscreen capture target (unscaled) for image saves */}
         <div
           ref={captureRef}
@@ -812,10 +792,9 @@ const Preview = () => {
           {renderFrame()}
         </div>
 
-        {/* Header - sticky */}
+        {/* Header - fixed height */}
         <div 
-          className={`sticky top-0 z-20 flex items-center justify-between py-4 px-5 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 -translate-y-8 pointer-events-none' : ''}`}
-          style={{ paddingTop: 'max(env(safe-area-inset-top, 16px), 16px)' }}
+          className={`flex-shrink-0 flex items-center justify-between py-3 px-5 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 -translate-y-8 pointer-events-none' : ''}`}
         >
           <button 
             onClick={handleSaveWithoutTemplate}
@@ -823,7 +802,7 @@ const Preview = () => {
           >
             <X className="w-5 h-5 text-white" />
           </button>
-          <h2 className="text-white/80 text-lg font-semibold">Select your frame</h2>
+          <h2 className="text-white/80 text-base font-semibold">Select your frame</h2>
           <button 
             onClick={handleRetake}
             className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'retake-btn' ? 'animate-liquid-tap' : ''}`}
@@ -832,18 +811,23 @@ const Preview = () => {
           </button>
         </div>
         
-        {/* Frame carousel - larger templates */}
+        {/* Frame carousel - device-responsive fixed height */}
         <div 
-          className={`flex-shrink-0 flex items-center justify-center transition-all duration-700 ease-out ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''}`}
+          className={`flex-1 flex items-center justify-center transition-all duration-700 ease-out ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''}`}
           style={{ 
-            minHeight: 'min(65vh, 520px)',
+            minHeight: 0, // Allow flex to shrink
+            maxHeight: 'calc(100dvh - 280px)', // Reserve space for header + content + CTA
           }}
         >
           {elementsHidden ? (
             <div className="flex items-center justify-center w-full h-full px-6 animate-scale-in">
               <div 
-                className="w-full max-w-[320px]"
-                style={{ maxHeight: '100%', aspectRatio: '9/16' }}
+                className="w-full"
+                style={{ 
+                  maxWidth: 'min(50vw, 200px)',
+                  aspectRatio: '9/16',
+                  maxHeight: '100%',
+                }}
               >
                 {currentFrame === 'shaky' && <ShakyFrame {...frameProps} />}
                 {currentFrame === 'journal' && <JournalFrame {...frameProps} />}
@@ -856,13 +840,13 @@ const Preview = () => {
             <div 
               ref={containerRef}
               onScroll={handleScroll}
-              className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center py-2"
+              className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center"
               style={{ 
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
-                paddingLeft: 'calc((100vw - min(65vw, 280px)) / 2)',
-                paddingRight: 'calc((100vw - min(65vw, 280px)) / 2)',
+                paddingLeft: 'calc((100vw - min(50vw, 200px)) / 2)',
+                paddingRight: 'calc((100vw - min(50vw, 200px)) / 2)',
               }}
             >
               {FRAMES.map((frame, index) => {
@@ -885,9 +869,9 @@ const Preview = () => {
                       elementsHidden && isRightOfCurrent ? 'opacity-0 translate-x-full' : ''
                     }`}
                     style={{ 
-                      width: 'min(65vw, 280px)',
-                      height: 'calc(min(65vw, 280px) * 16 / 9)',
-                      maxHeight: 'min(65vh, 500px)',
+                      width: 'min(50vw, 200px)',
+                      height: 'calc(min(50vw, 200px) * 16 / 9)',
+                      maxHeight: 'calc(100dvh - 300px)',
                       transform: `scale(${scale})`,
                       opacity: elementsHidden && !isActiveFrame ? 0 : opacity,
                       transition: 'transform 0.15s ease-out, opacity 0.15s ease-out',
@@ -910,93 +894,88 @@ const Preview = () => {
           )}
         </div>
 
-        {/* Content section - scrollable */}
+        {/* Content section - fixed, no scroll */}
         <div 
-          className={`flex-1 space-y-3 px-5 py-4 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
-          style={{ 
-            animationDelay: '0.3s',
-            paddingBottom: 'calc(100px + env(safe-area-inset-bottom, 16px))',
-          }}
+          className={`flex-shrink-0 space-y-2 px-5 py-3 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
+          style={{ animationDelay: '0.3s' }}
         >
-          {/* Editable data points */}
-          <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 relative overflow-hidden">
+          {/* Editable data points - compact */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-xl p-2.5 relative overflow-hidden">
             <button 
               onClick={() => { handleTap('duration'); openEditSheet('duration'); }}
-              className={`w-full flex justify-between items-center py-2 border-b border-white/10 tap-bounce min-h-[44px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
+              className={`w-full flex justify-between items-center py-1.5 border-b border-white/10 tap-bounce min-h-[40px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
             >
-              <span className="text-white/80 text-sm flex items-center gap-2">
+              <span className="text-white/80 text-xs flex items-center gap-2">
                 {label2}
-                <span className="text-[10px] text-white/40">tap to edit</span>
+                <span className="text-[9px] text-white/40">tap to edit</span>
               </span>
-              <span className={`font-semibold text-sm ${duration ? 'text-white' : 'text-white/50 italic'}`}>
+              <span className={`font-semibold text-xs ${duration ? 'text-white' : 'text-white/50 italic'}`}>
                 {duration || `e.g. ${label2.toLowerCase()}`}
               </span>
             </button>
             <button 
               onClick={() => { handleTap('pr'); openEditSheet('pr'); }}
-              className={`w-full flex justify-between items-center py-2 tap-bounce min-h-[44px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
+              className={`w-full flex justify-between items-center py-1.5 tap-bounce min-h-[40px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
             >
-              <span className="text-white/80 text-sm flex items-center gap-2">
+              <span className="text-white/80 text-xs flex items-center gap-2">
                 {label1} <span className="text-white/40">(Optional)</span>
               </span>
-              <span className={`font-semibold text-sm ${pr ? 'text-white' : 'text-white/50'}`}>
+              <span className={`font-semibold text-xs ${pr ? 'text-white' : 'text-white/50'}`}>
                 {pr || '-'}
               </span>
             </button>
           </div>
 
-          {/* Health sync widget */}
+          {/* Health sync widget - compact */}
           <div 
-            className={`bg-white/10 backdrop-blur-xl rounded-xl p-3 flex items-center gap-3 tap-bounce min-h-[60px] ${tappedElement === 'connect' ? 'animate-liquid-tap' : ''}`}
+            className={`bg-white/10 backdrop-blur-xl rounded-xl p-2.5 flex items-center gap-2 tap-bounce min-h-[50px] ${tappedElement === 'connect' ? 'animate-liquid-tap' : ''}`}
             onClick={() => { handleTap('connect'); setShowSyncPopup(true); }}
           >
             <div className="flex-1">
-              <h3 className="text-white font-medium text-sm">Auto sync with a device</h3>
-              <p className="text-white/60 text-xs">Sync your health & fitness data</p>
+              <h3 className="text-white font-medium text-xs">Auto sync with a device</h3>
+              <p className="text-white/60 text-[10px]">Sync your health & fitness data</p>
             </div>
-            <button className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg">
-              <span className="text-white font-semibold text-xs">CONNECT</span>
+            <button className="bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-lg">
+              <span className="text-white font-semibold text-[10px]">CONNECT</span>
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Floating CTA */}
-      {!showShareSheet && (
-        <div 
-          className={`fixed bottom-0 left-0 right-0 z-[100] px-5 pt-3 bg-gradient-to-t from-black/90 via-black/60 to-transparent transition-all duration-500 ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : 'opacity-100 translate-y-0'}`}
-          style={{ 
-            paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 20px)',
-          }}
-        >
-          <div className="flex flex-col items-center gap-3">
-            <button 
-              onClick={handleSaveWithTemplate}
-              disabled={isSaving || isDeleting}
-              className={`w-full bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce ${tappedElement === 'done-btn' ? 'animate-liquid-tap' : ''}`}
-              style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
-            >
-              <span className="text-black font-bold text-lg">
-                {isSaving ? 'Saving...' : 'DONE'}
-              </span>
-            </button>
-            
-            {/* Delete button - only show in review mode (existing activity) */}
-            {isReview && (
-              <button
-                onClick={handleDeleteActivity}
-                disabled={isDeleting || isSaving}
-                className="flex items-center gap-2 px-4 py-2 text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+        {/* Floating CTA - integrated at bottom */}
+        {!showShareSheet && (
+          <div 
+            className={`flex-shrink-0 px-5 py-3 transition-all duration-500 ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : 'opacity-100 translate-y-0'}`}
+            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 16px)' }}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <button 
+                onClick={handleSaveWithTemplate}
+                disabled={isSaving || isDeleting}
+                className={`w-full bg-white py-3.5 rounded-2xl disabled:opacity-50 tap-bounce ${tappedElement === 'done-btn' ? 'animate-liquid-tap' : ''}`}
+                style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
               >
-                <Trash2 className="w-4 h-4" />
-                <span className="text-sm font-medium">
-                  {isDeleting ? 'Deleting...' : 'Remove Photo'}
+                <span className="text-black font-bold text-base">
+                  {isSaving ? 'Saving...' : 'DONE'}
                 </span>
               </button>
-            )}
+              
+              {/* Delete button - only show in review mode (existing activity) */}
+              {isReview && (
+                <button
+                  onClick={handleDeleteActivity}
+                  disabled={isDeleting || isSaving}
+                  className="flex items-center gap-2 px-4 py-1.5 text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="text-xs font-medium">
+                    {isDeleting ? 'Deleting...' : 'Remove Photo'}
+                  </span>
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Bottom Sheet Keyboard Overlay - Context-aware inputs */}
       {editingField && (
