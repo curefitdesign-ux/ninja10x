@@ -206,10 +206,40 @@ const Progress = () => {
           >
             <div className="flex items-end gap-3 pb-4">
               {feedLoading ? (
-                <div className="flex items-center justify-center w-full py-8">
-                  <div className="w-6 h-6 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
-                </div>
+                // Loading state - shimmer placeholders
+                <>
+                  {[0, 1, 2, 3].map((i) => (
+                    <motion.div
+                      key={i}
+                      className="relative flex-shrink-0 overflow-hidden"
+                      style={{
+                        width: "80px",
+                        height: "120px",
+                        borderRadius: "12px",
+                        background: "rgba(255,255,255,0.06)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                      }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: [0.3, 0.6, 0.3] }}
+                      transition={{ 
+                        delay: i * 0.1, 
+                        duration: 1.5, 
+                        repeat: Infinity,
+                        ease: "easeInOut" 
+                      }}
+                    >
+                      <div 
+                        className="absolute inset-0"
+                        style={{
+                          background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%)",
+                          animation: "shimmer 1.5s infinite",
+                        }}
+                      />
+                    </motion.div>
+                  ))}
+                </>
               ) : publicFeed.length > 0 ? (
+                // Show public feed
                 publicFeed.map((photo, index) => (
                   <motion.button
                     key={photo.id}
@@ -260,41 +290,48 @@ const Progress = () => {
                     </div>
                   </motion.button>
                 ))
-              ) : transitionImage ? (
-                <motion.div
-                  data-shared-element="progress-hero-card"
-                  className="relative flex-shrink-0 overflow-hidden"
-                  style={{
-                    width: "80px",
-                    height: "120px",
-                    borderRadius: "12px",
-                    boxShadow: "0 12px 40px rgba(100, 70, 180, 0.5)",
-                    border: "2px solid rgba(160, 120, 220, 0.35)",
-                    transform: "rotate(-3deg)",
-                  }}
-                  initial={{ scale: 1.3, x: 80 }}
-                  animate={{ scale: 1, x: 0 }}
-                  transition={{ type: "spring", stiffness: 180, damping: 22 }}
-                >
-                  <img src={transitionImage} alt="Your activity" className="w-full h-full object-cover" />
-                </motion.div>
               ) : (
+                // Empty state - no public activities yet
                 <motion.div
-                  className="relative flex-shrink-0 flex items-center justify-center"
-                  style={{
-                    width: "80px",
-                    height: "120px",
-                    borderRadius: "12px",
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px dashed rgba(255,255,255,0.2)",
-                  }}
+                  className="flex items-center gap-4 w-full py-2"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <span className="text-white/40 text-xs text-center px-2">
-                    Activities will appear here
-                  </span>
+                  {/* Empty placeholder cards */}
+                  {[0, 1, 2].map((i) => (
+                    <motion.div
+                      key={i}
+                      className="relative flex-shrink-0 flex flex-col items-center justify-center"
+                      style={{
+                        width: "80px",
+                        height: "120px",
+                        borderRadius: "12px",
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px dashed rgba(255,255,255,0.15)",
+                      }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 0.6, y: 0 }}
+                      transition={{ delay: 0.3 + i * 0.08 }}
+                    >
+                      <span className="text-2xl mb-1">🏃</span>
+                    </motion.div>
+                  ))}
+                  
+                  {/* Message */}
+                  <motion.div
+                    className="flex-1 flex flex-col justify-center"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <span className="text-white/70 text-sm font-medium">
+                      No activities yet
+                    </span>
+                    <span className="text-white/40 text-xs mt-0.5">
+                      Be the first to log!
+                    </span>
+                  </motion.div>
                 </motion.div>
               )}
             </div>
