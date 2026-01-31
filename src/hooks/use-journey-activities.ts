@@ -499,18 +499,31 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
     }
   }
 
-  // Build user story groups
+  // Build user story groups - deduplicate by day_number and sort properly
   const groups: UserStoryGroup[] = [];
   
-  // Put current user first if they have activities
-  if (user && userActivitiesMap.has(user.id)) {
-    const userActivities = userActivitiesMap.get(user.id)!;
-    const profile = profileMap.get(user.id);
-    groups.push({
-      userId: user.id,
-      displayName: profile?.display_name || 'You',
+  // Helper to deduplicate and sort activities by day_number
+  const processUserActivities = (userId: string, userActivities: (typeof data[0])[]) => {
+    const profile = profileMap.get(userId);
+    
+    // Deduplicate by day_number, keeping the latest activity for each day
+    const byDayNumber = new Map<number, typeof data[0]>();
+    for (const row of userActivities) {
+      const existing = byDayNumber.get(row.day_number);
+      if (!existing || new Date(row.created_at) > new Date(existing.created_at)) {
+        byDayNumber.set(row.day_number, row);
+      }
+    }
+    
+    // Sort by day_number ascending for proper story progression
+    const dedupedActivities = Array.from(byDayNumber.values())
+      .sort((a, b) => a.day_number - b.day_number);
+    
+    return {
+      userId,
+      displayName: profile?.display_name || (user && userId === user.id ? 'You' : 'User'),
       avatarUrl: profile?.avatar_url,
-      activities: userActivities.map(row => ({
+      activities: dedupedActivities.map(row => ({
         ...toLocal(row),
         reactionCount: totalMap[row.id] || 0,
         reactions: reactionMap[row.id] || { ...DEFAULT_REACTIONS },
@@ -518,26 +531,18 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
         displayName: profile?.display_name,
         avatarUrl: profile?.avatar_url,
       })),
-    });
+    };
+  };
+  
+  // Put current user first if they have activities
+  if (user && userActivitiesMap.has(user.id)) {
+    groups.push(processUserActivities(user.id, userActivitiesMap.get(user.id)!));
     userActivitiesMap.delete(user.id);
   }
 
   // Add other users
   for (const [userId, userActivities] of userActivitiesMap) {
-    const profile = profileMap.get(userId);
-    groups.push({
-      userId,
-      displayName: profile?.display_name || 'User',
-      avatarUrl: profile?.avatar_url,
-      activities: userActivities.map(row => ({
-        ...toLocal(row),
-        reactionCount: totalMap[row.id] || 0,
-        reactions: reactionMap[row.id] || { ...DEFAULT_REACTIONS },
-        reactorProfiles: reactorProfilesMap[row.id] || [],
-        displayName: profile?.display_name,
-        avatarUrl: profile?.avatar_url,
-      })),
-    });
+    groups.push(processUserActivities(userId, userActivities));
   }
 
   return groups;
