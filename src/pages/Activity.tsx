@@ -231,6 +231,7 @@ const Activity = () => {
   const navItems = [
     { id: "home", icon: Home, label: "HOME" },
     { id: "fitness", icon: Dumbbell, label: "FITNESS" },
+    { id: "activity", icon: ActivityIcon, label: "ACTIVITY", isCenter: true },
     { id: "store", icon: ShoppingBag, label: "STORE" },
     { id: "social", icon: Users, label: "SOCIAL" },
   ];
@@ -571,6 +572,66 @@ const Activity = () => {
                 style={{ paddingBottom: "max(calc(env(safe-area-inset-bottom, 8px) + 4px), 12px)" }}
               >
                 {navItems.map((item) => {
+                  if (item.isCenter) {
+                    return (
+                      <motion.button
+                        key={item.id}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setActiveTab(item.id)}
+                        className="relative -mt-8 flex flex-col items-center"
+                      >
+                        {/* Bloom halo effect */}
+                        <motion.div 
+                          className="absolute -inset-4 rounded-full pointer-events-none"
+                          animate={{ 
+                            opacity: [0.4, 0.6, 0.4],
+                            scale: [1, 1.1, 1],
+                          }}
+                          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                          style={{ 
+                            background: "radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, rgba(96, 165, 250, 0.2) 40%, transparent 70%)",
+                            filter: "blur(8px)",
+                          }}
+                        />
+                        {/* Secondary glow ring */}
+                        <div 
+                          className="absolute -inset-2 rounded-full opacity-60"
+                          style={{ 
+                            background: "radial-gradient(circle, rgba(59, 130, 246, 0.5) 0%, transparent 60%)",
+                            filter: "blur(6px)",
+                          }}
+                        />
+                        {/* Main glossy liquid glass button - solid blue, no cutout */}
+                        <div 
+                          className="relative w-14 h-14 rounded-full flex items-center justify-center"
+                          style={{
+                            background: "linear-gradient(145deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%)",
+                            boxShadow: `
+                              0 6px 24px rgba(59, 130, 246, 0.6),
+                              0 2px 8px rgba(0, 0, 0, 0.4),
+                              inset 0 2px 4px rgba(255, 255, 255, 0.3),
+                              inset 0 -2px 6px rgba(0, 0, 0, 0.15)
+                            `,
+                            border: "1px solid rgba(255, 255, 255, 0.25)",
+                          }}
+                        >
+                          {/* Specular highlight */}
+                          <div 
+                            className="absolute top-1.5 left-3 right-3 h-3 rounded-full pointer-events-none"
+                            style={{
+                              background: "linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 100%)",
+                            }}
+                          />
+                          <item.icon className="w-6 h-6 text-white drop-shadow-lg relative z-10" />
+                        </div>
+                        {/* Label below center button */}
+                        <span className="text-[8px] mt-2 font-semibold tracking-wider text-white/90">
+                          {item.label}
+                        </span>
+                      </motion.button>
+                    );
+                  }
+                  
                   const isActive = activeTab === item.id;
                   
                   return (

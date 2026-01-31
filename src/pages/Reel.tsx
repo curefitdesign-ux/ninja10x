@@ -426,7 +426,7 @@ const Reel = () => {
                 animate={{ scale: isActive ? 1 : 0.85 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
-                {/* Story ring segments around avatar - thicker and visible */}
+                {/* Story ring segments around avatar */}
                 <svg
                   className="absolute inset-0"
                   style={{
@@ -437,13 +437,13 @@ const Reel = () => {
                   viewBox="0 0 100 100"
                 >
                   {Array.from({ length: activityCount }).map((_, segIdx) => {
-                    const gapAngle = activityCount > 1 ? 6 : 0;
+                    const gapAngle = activityCount > 1 ? 8 : 0;
                     const totalGap = gapAngle * activityCount;
                     const segmentAngle = (360 - totalGap) / activityCount;
                     const startAngle = segIdx * (segmentAngle + gapAngle);
                     const isSegmentViewed = segIdx <= currentIdx;
                     
-                    const radius = 44;
+                    const radius = 46;
                     const circumference = 2 * Math.PI * radius;
                     const segmentLength = (segmentAngle / 360) * circumference;
                     const offset = (startAngle / 360) * circumference;
@@ -455,8 +455,8 @@ const Reel = () => {
                         cy="50"
                         r={radius}
                         fill="none"
-                        strokeWidth={isActive ? 8 : 6}
-                        stroke={isActive && isSegmentViewed ? `url(#storyGradient-${group.userId})` : 'rgba(255,255,255,0.4)'}
+                        strokeWidth="5"
+                        stroke={isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.3)'}
                         strokeDasharray={`${segmentLength} ${circumference}`}
                         strokeDashoffset={-offset}
                         strokeLinecap="round"
@@ -464,10 +464,9 @@ const Reel = () => {
                     );
                   })}
                   <defs>
-                    <linearGradient id={`storyGradient-${group.userId}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                    <linearGradient id="storyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="#a78bfa" />
-                      <stop offset="50%" stopColor="#ec4899" />
-                      <stop offset="100%" stopColor="#f472b6" />
+                      <stop offset="100%" stopColor="#ec4899" />
                     </linearGradient>
                   </defs>
                 </svg>
@@ -485,7 +484,7 @@ const Reel = () => {
                     name={group.displayName}
                     size={isActive ? 50 : 38}
                     style={{
-                      opacity: 1,
+                      opacity: isActive ? 1 : 0.7,
                       transition: 'all 0.2s ease',
                     }}
                   />
