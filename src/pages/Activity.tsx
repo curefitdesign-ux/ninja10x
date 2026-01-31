@@ -59,7 +59,30 @@ const Activity = () => {
     duration: a.duration,
     pr: a.pr,
     dayNumber: a.dayNumber,
+    reactionCount: a.reactionCount,
+    topReaction: getTopReaction(a.reactions),
   }));
+  
+  // Helper to get the top reaction emoji
+  function getTopReaction(reactions?: Record<string, { count: number }>): string | undefined {
+    if (!reactions) return undefined;
+    const EMOJI_MAP: Record<string, string> = {
+      heart: '❤️',
+      fire: '🔥',
+      clap: '👏',
+      fistbump: '🤜',
+      wow: '🤩',
+    };
+    let topType: string | undefined;
+    let topCount = 0;
+    for (const [type, data] of Object.entries(reactions)) {
+      if (data.count > topCount) {
+        topCount = data.count;
+        topType = type;
+      }
+    }
+    return topType ? EMOJI_MAP[topType] : undefined;
+  }
   
   // Gallery picker state
   // (migrated to /gallery route)
