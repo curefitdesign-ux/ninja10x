@@ -282,53 +282,14 @@ const Reel = () => {
         newReaction={floatingReaction}
       />
 
-      {/* Header with user profile */}
+      {/* Header with close button */}
       <motion.div
-        className="absolute top-0 left-0 right-0 z-40 flex items-center justify-between px-4"
-        style={{ paddingTop: 'max(env(safe-area-inset-top, 16px), 16px)' }}
+        className="absolute top-0 left-0 right-0 z-40 flex items-center justify-end px-4"
+        style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)' }}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        {/* User profile info */}
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div 
-              className="w-11 h-11 rounded-full overflow-hidden"
-              style={{ border: '2.5px solid rgba(255,255,255,0.4)' }}
-            >
-              {currentGroup.avatarUrl ? (
-                <img 
-                  src={currentGroup.avatarUrl} 
-                  alt={currentGroup.displayName} 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">
-                    {currentGroup.displayName?.charAt(0).toUpperCase() || '?'}
-                  </span>
-                </div>
-              )}
-            </div>
-            {/* Activity count indicator */}
-            {currentGroup.activities.length > 1 && (
-              <div 
-                className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-                style={{ background: 'linear-gradient(135deg, #a78bfa, #ec4899)' }}
-              >
-                {currentGroup.activities.length}
-              </div>
-            )}
-          </div>
-          <div>
-            <div className="text-white font-semibold text-sm">{currentGroup.displayName}</div>
-            <div className="text-white/50 text-xs">
-              Week {week} • Day {dayInWeek}
-            </div>
-          </div>
-        </div>
-        
         <button
           onClick={handleClose}
           className="text-white/80 hover:text-white transition-colors p-2"
@@ -337,37 +298,105 @@ const Reel = () => {
         </button>
       </motion.div>
 
-      {/* Story progress bar (activity dots within user) */}
-      <div 
-        className="absolute z-40 flex justify-center gap-1 left-0 right-0 px-4"
-        style={{ top: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 56px)' }}
+      {/* User avatars strip at top */}
+      <motion.div
+        className="absolute z-40 left-0 right-0 flex justify-center"
+        style={{ top: 'calc(max(env(safe-area-inset-top, 12px), 12px) + 8px)' }}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
       >
-        {currentGroup.activities.map((_, i) => (
-          <motion.div
-            key={i}
-            className="h-0.5 flex-1 rounded-full transition-all duration-300 cursor-pointer overflow-hidden"
-            style={{
-              maxWidth: 60,
-              background: 'rgba(255, 255, 255, 0.2)',
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              setCurrentActivityIndex(i);
-            }}
-          >
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(12px)' }}>
+          {userGroups.slice(0, 7).map((group, idx) => (
+            <motion.button
+              key={group.userId}
+              onClick={() => {
+                setCurrentUserIndex(idx);
+                setCurrentActivityIndex(0);
+              }}
+              className="relative"
+              whileTap={{ scale: 0.9 }}
+            >
+              <div 
+                className="rounded-full overflow-hidden transition-all"
+                style={{ 
+                  width: idx === currentUserIndex ? 44 : 32,
+                  height: idx === currentUserIndex ? 44 : 32,
+                  border: idx === currentUserIndex 
+                    ? '2.5px solid #a78bfa' 
+                    : '2px solid rgba(255,255,255,0.25)',
+                  opacity: idx === currentUserIndex ? 1 : 0.7,
+                }}
+              >
+                {group.avatarUrl ? (
+                  <img 
+                    src={group.avatarUrl} 
+                    alt={group.displayName} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">
+                      {group.displayName?.charAt(0).toUpperCase() || '?'}
+                    </span>
+                  </div>
+                )}
+              </div>
+              {/* Activity count for current user */}
+              {idx === currentUserIndex && group.activities.length > 1 && (
+                <div 
+                  className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
+                  style={{ background: 'linear-gradient(135deg, #a78bfa, #ec4899)' }}
+                >
+                  {group.activities.length}
+                </div>
+              )}
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Current user info + Story progress bar */}
+      <div 
+        className="absolute z-40 left-0 right-0 px-4"
+        style={{ top: 'calc(max(env(safe-area-inset-top, 12px), 12px) + 60px)' }}
+      >
+        {/* User name and info */}
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
+          <span className="text-white/40">•</span>
+          <span className="text-white/60 text-xs">Week {week} • Day {dayInWeek}</span>
+        </div>
+        
+        {/* Story progress dots */}
+        <div className="flex justify-center gap-1">
+          {currentGroup.activities.map((_, i) => (
             <motion.div
-              className="h-full rounded-full"
+              key={i}
+              className="h-0.5 flex-1 rounded-full transition-all duration-300 cursor-pointer overflow-hidden"
               style={{
-                background: 'linear-gradient(90deg, #a78bfa, #ec4899)',
+                maxWidth: 60,
+                background: 'rgba(255, 255, 255, 0.2)',
               }}
-              initial={{ width: 0 }}
-              animate={{ 
-                width: i < currentActivityIndex ? '100%' : i === currentActivityIndex ? '100%' : '0%'
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentActivityIndex(i);
               }}
-              transition={{ duration: i === currentActivityIndex ? 5 : 0.3 }}
-            />
-          </motion.div>
-        ))}
+            >
+              <motion.div
+                className="h-full rounded-full"
+                style={{
+                  background: 'linear-gradient(90deg, #a78bfa, #ec4899)',
+                }}
+                initial={{ width: 0 }}
+                animate={{ 
+                  width: i < currentActivityIndex ? '100%' : i === currentActivityIndex ? '100%' : '0%'
+                }}
+                transition={{ duration: i === currentActivityIndex ? 5 : 0.3 }}
+              />
+            </motion.div>
+          ))}
+        </div>
       </div>
 
       {/* Main content area with pull-up gesture */}
@@ -548,68 +577,6 @@ const Reel = () => {
         </motion.div>
       </motion.div>
 
-      {/* User thumbnails strip */}
-      <motion.div
-        className="absolute z-40 left-0 right-0 flex justify-center"
-        style={{ bottom: 'calc(max(env(safe-area-inset-bottom, 24px), 24px) + 90px)' }}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        <div className="flex gap-2 px-3 py-2 rounded-full" style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(12px)' }}>
-          {userGroups.slice(0, 6).map((group, idx) => (
-            <motion.button
-              key={group.userId}
-              onClick={() => {
-                setCurrentUserIndex(idx);
-                setCurrentActivityIndex(0);
-              }}
-              className="relative"
-              whileTap={{ scale: 0.9 }}
-            >
-              <div 
-                className="w-9 h-9 rounded-full overflow-hidden transition-all"
-                style={{ 
-                  border: idx === currentUserIndex 
-                    ? '2px solid #a78bfa' 
-                    : '2px solid rgba(255,255,255,0.2)',
-                  opacity: idx === currentUserIndex ? 1 : 0.6,
-                }}
-              >
-                {group.avatarUrl ? (
-                  <img 
-                    src={group.avatarUrl} 
-                    alt={group.displayName} 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">
-                      {group.displayName?.charAt(0).toUpperCase() || '?'}
-                    </span>
-                  </div>
-                )}
-              </div>
-              {/* Small dot for stories count */}
-              {group.activities.length > 1 && idx === currentUserIndex && (
-                <div 
-                  className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 flex gap-0.5"
-                >
-                  {group.activities.slice(0, 4).map((_, i) => (
-                    <div 
-                      key={i}
-                      className="w-1 h-1 rounded-full"
-                      style={{
-                        background: i <= currentActivityIndex ? '#a78bfa' : 'rgba(255,255,255,0.3)',
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-            </motion.button>
-          ))}
-        </div>
-      </motion.div>
 
       {/* Bottom area: Reaction pill + View Progress pull-up bar */}
       <motion.div 
