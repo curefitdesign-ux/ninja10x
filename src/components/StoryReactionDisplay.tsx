@@ -59,21 +59,20 @@ export default function StoryReactionDisplay({ reactions, totalCount }: StoryRea
       transition={{ type: 'spring', stiffness: 300 }}
     >
       {/* Stacked reaction display */}
-      <div className="flex items-center -space-x-1">
+      <div className="flex items-center -space-x-2">
         {activeReactions.map(([type], index) => (
           <motion.div
             key={type}
-            className="relative flex items-center justify-center w-8 h-8 rounded-full overflow-hidden"
+            className="relative"
             style={{
-              background: 'rgba(0, 0, 0, 0.3)',
               zIndex: 10 - index,
-              border: '2px solid rgba(255, 255, 255, 0.1)',
+              filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
             }}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.05 }}
           >
-            <img src={REACTION_IMAGES[type as ReactionType]} alt={type} className="w-5 h-5 object-contain" />
+            <img src={REACTION_IMAGES[type as ReactionType]} alt={type} className="w-7 h-7 object-contain" />
           </motion.div>
         ))}
       </div>
