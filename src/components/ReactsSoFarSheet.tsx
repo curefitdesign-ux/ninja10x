@@ -166,16 +166,13 @@ export default function ReactsSoFarSheet({
                     )}
                   </div>
 
-                  {/* Reaction - use image for non-heart, emoji for heart */}
-                  {reactor.reactionType === 'heart' ? (
-                    <span className="text-3xl">❤️</span>
-                  ) : (
-                    <img 
-                      src={REACTION_IMAGES[reactor.reactionType]} 
-                      alt={reactor.reactionType} 
-                      className="w-9 h-9 object-contain"
-                    />
-                  )}
+                  {/* Reaction image */}
+                  <img 
+                    src={REACTION_IMAGES[reactor.reactionType]} 
+                    alt={reactor.reactionType} 
+                    className="w-10 h-10 object-contain"
+                    style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}
+                  />
 
                   {/* Remove button for own reactions */}
                   {isOwnReaction && (
