@@ -1,4 +1,4 @@
-import { X, Download, Copy, Check } from 'lucide-react';
+import { X, Download, Copy, Check, Pencil } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -535,12 +535,19 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onSaveWithTemplate, dayNumber,
                  </div>
                 </motion.div>
                 
-                {/* Download/Copy tertiary buttons - below template */}
+                {/* Edit/Download/Copy tertiary buttons - below template */}
                 <motion.div 
                   className="flex gap-3 mt-4 mb-4"
                   animate={isExiting ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
                 >
+                  <button
+                    onClick={() => navigate('/gallery', { state: { dayNumber, isEdit: true } })}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                  >
+                    <Pencil className="w-4 h-4 text-white/70" />
+                    <span className="text-white/70 font-medium text-sm">Edit</span>
+                  </button>
                   <button
                     onClick={handleDownload}
                     className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
