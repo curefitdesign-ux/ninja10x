@@ -120,15 +120,20 @@ const Progress = () => {
     }, 200);
   };
 
-  // Animation sequence
+  // Animation sequence - smoother and faster
   useEffect(() => {
+    // Show transition animation immediately if coming from share
     if (transitionToProgress && transitionImage) {
       setShowTransitionIn(true);
-      setTimeout(() => setShowTransitionIn(false), 800);
+      // Extend transition duration for smoother feel
+      setTimeout(() => setShowTransitionIn(false), 600);
     }
-    const contentTimer = setTimeout(() => setShowContent(true), 200);
-    const storiesTimer = setTimeout(() => setShowStories(true), 300);
-    const tilesTimer = setTimeout(() => setShowTiles(true), 400);
+    
+    // Stagger content animations
+    const contentTimer = setTimeout(() => setShowContent(true), 100);
+    const storiesTimer = setTimeout(() => setShowStories(true), 150);
+    const tilesTimer = setTimeout(() => setShowTiles(true), 250);
+    
     return () => {
       clearTimeout(contentTimer);
       clearTimeout(storiesTimer);
@@ -173,13 +178,13 @@ const Progress = () => {
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={{ top: 0, bottom: 0.3 }}
       onDragEnd={handleDragEnd}
-      initial={transitionToProgress ? { opacity: 0, y: 150, scale: 0.9 } : { opacity: 1 }}
+      initial={transitionToProgress ? { opacity: 0.8, y: 80, scale: 0.95 } : { opacity: 1 }}
       animate={{ 
         opacity: isExiting ? 0 : 1, 
-        y: isExiting ? 150 : 0,
-        scale: isExiting ? 0.9 : 1,
+        y: isExiting ? 80 : 0,
+        scale: isExiting ? 0.95 : 1,
       }}
-      transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+      transition={{ type: 'spring', stiffness: 350, damping: 32, mass: 0.8 }}
     >
       {/* Background aurora */}
       <div 
