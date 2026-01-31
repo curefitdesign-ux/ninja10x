@@ -517,7 +517,7 @@ const Reel = () => {
           y: contentY,
         }}
       >
-        {/* Card container with horizontal swipe */}
+        {/* Card container with horizontal swipe - full templated image, no container */}
         <motion.div 
           className="relative w-full max-w-[400px] cursor-grab active:cursor-grabbing"
           drag="x"
@@ -532,61 +532,47 @@ const Reel = () => {
             scale: cardScale,
           }}
         >
-          {/* The main card */}
-          <motion.div 
-            className="relative w-full overflow-hidden"
-            style={{ 
-              borderRadius: 24,
-              aspectRatio: '3 / 4',
-              background: 'rgba(255, 255, 255, 0.06)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-            }}
-            initial={{ opacity: 0, scale: 0.92, y: 30 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ type: 'spring', stiffness: 180, damping: 22 }}
-          >
-            {/* Card inner content */}
-            <div className="absolute inset-3 rounded-2xl overflow-hidden">
-              {/* Full bleed image/video */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentActivity.id}
-                  className="absolute inset-0"
-                  initial={{ opacity: 0, scale: 1.05 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  {isVideo ? (
-                    <video
-                      src={mediaUrl}
-                      className="w-full h-full object-cover"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                    />
-                  ) : (
-                    <img
-                      src={mediaUrl}
-                      alt={`Day ${currentActivity.dayNumber}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const img = e.currentTarget;
-                        if (!img.dataset.retried) {
-                          img.dataset.retried = "true";
-                          img.src = mediaUrl + "?t=" + Date.now();
-                        }
-                      }}
-                    />
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </motion.div>
+          {/* Full templated image/video - no container wrapper */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentActivity.id}
+              className="relative w-full"
+              initial={{ opacity: 0, scale: 0.92, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 180, damping: 22 }}
+            >
+              {isVideo ? (
+                <video
+                  src={mediaUrl}
+                  className="w-full h-auto rounded-2xl"
+                  style={{ 
+                    boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
+                  }}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                />
+              ) : (
+                <img
+                  src={mediaUrl}
+                  alt={`Day ${currentActivity.dayNumber}`}
+                  className="w-full h-auto rounded-2xl"
+                  style={{ 
+                    boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
+                  }}
+                  onError={(e) => {
+                    const img = e.currentTarget;
+                    if (!img.dataset.retried) {
+                      img.dataset.retried = "true";
+                      img.src = mediaUrl + "?t=" + Date.now();
+                    }
+                  }}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
         </motion.div>
       </motion.div>
 
