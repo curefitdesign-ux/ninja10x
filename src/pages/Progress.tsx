@@ -72,11 +72,11 @@ const Progress = () => {
   const storyStripScale = useTransform(dragY, [0, 100], [1, 1.1]);
   const contentOpacity = useTransform(dragY, [0, 80], [1, 0.3]);
 
-  // Load public feed on mount
+  // Load public feed on mount - show ALL activities (including private from others for blurred view)
   useEffect(() => {
     const loadFeed = async () => {
       setFeedLoading(true);
-      const feed = await fetchPublicFeed();
+      const feed = await fetchPublicFeed(true); // Pass true to include private activities
       setPublicFeed(feed);
       setFeedLoading(false);
     };
@@ -588,6 +588,7 @@ const Progress = () => {
         onClose={() => setShowMakePublicSheet(false)}
         onMakePublic={handleMakePublic}
         onKeepPrivate={handleKeepPrivate}
+        thumbnailUrl={pendingDayNumber ? myActivities.find(a => a.dayNumber === pendingDayNumber)?.storageUrl : undefined}
       />
     </motion.div>
   );

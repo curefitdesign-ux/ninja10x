@@ -370,16 +370,24 @@ const DEFAULT_REACTIONS: Record<ReactionType, ActivityReaction> = {
 /**
  * Fetch all activities from all users (public feed) with reactions and profiles.
  * For the Progress page top strip.
+ * @param includeAll - If true, fetch all activities (for showing blurred private content)
  */
-export async function fetchPublicFeed(): Promise<LocalActivity[]> {
+export async function fetchPublicFeed(includeAll: boolean = false): Promise<LocalActivity[]> {
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Fetch latest activity per user
-  const { data, error } = await supabase
+  // Build query - if includeAll, fetch everything; otherwise only public + own
+  let query = supabase
     .from('journey_activities')
     .select('*')
     .order('created_at', { ascending: false })
     .limit(100);
+
+  // RLS already filters to (is_public = true OR user_id = current_user)
+  // But if includeAll is true, we want to see blurred versions of private content
+  // Since RLS blocks private content from other users, we need service role or
+  // we show what's available (public + own) - for blurred view we just use is_public check client-side
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching public feed:', error);

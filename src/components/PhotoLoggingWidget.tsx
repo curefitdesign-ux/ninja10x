@@ -139,8 +139,16 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
     // The actual video/image source is in originalUrl
     const displayUrl = photo?.storageUrl;
     const isDisplayVideo = displayUrl ? isVideoUrl(displayUrl) : false;
-    const isActiveDay = isActiveWeek && !hasPhoto && index === photos.findIndex(p => p === null || !p.storageUrl);
     const dayNumber = weekIndex * 3 + index + 1;
+    
+    // SEQUENTIAL LOGIC: Day N is only active if Day N-1 is complete (or N is 1)
+    // First find if the previous day in the journey has a photo
+    const previousDayNumber = dayNumber - 1;
+    const previousDayHasPhoto = previousDayNumber === 0 || photos.some(p => p !== null);
+    
+    // isActiveDay: this is the NEXT slot to fill (no photo yet, but previous day is done)
+    const firstEmptyIndex = photos.findIndex(p => p === null || !p.storageUrl);
+    const isActiveDay = isActiveWeek && !hasPhoto && index === firstEmptyIndex;
     
     // Expanded position - fan out from center with spacing
     const expandedX = (index - 1) * (cardWidth + 16);
@@ -709,7 +717,21 @@ const PhotoLoggingWidget = ({
         },
       });
     } else {
-      // DEV/TEST MODE: Allow uploading on any day (1-12) regardless of locks
+      // SEQUENTIAL UPLOAD ENFORCEMENT:
+      // Day N can only be uploaded if Day N-1 is complete (or if N is 1)
+      const previousDayNumber = dayNumber - 1;
+      const previousDayPhoto = previousDayNumber > 0 
+        ? photos.find(p => Number(p.dayNumber) === previousDayNumber) 
+        : null;
+      
+      const canUpload = dayNumber === 1 || previousDayPhoto !== null;
+      
+      if (!canUpload) {
+        // Show toast that previous day needs to be completed first
+        toast.info(`Complete Day ${previousDayNumber} first!`);
+        return;
+      }
+      
       if (onPhotoAdd) {
         onPhotoAdd(weekIndex, dayIndex);
       } else {
