@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
-import { X, ChevronDown } from "lucide-react";
+import { X, ChevronDown, Lock } from "lucide-react";
 import { useJourneyActivities, fetchPublicFeed, LocalActivity } from "@/hooks/use-journey-activities";
 import { useAuth } from "@/hooks/use-auth";
 import { JourneyActivity, ReactionType, ActivityReaction } from "@/services/journey-service";
 import ProfileAvatar from "@/components/ProfileAvatar";
+import MakePublicSheet from "@/components/MakePublicSheet";
 
 // Import tile assets
 import tileActiveImg from "@/assets/progress/tile-active-new.png";
@@ -49,11 +50,15 @@ const Progress = () => {
   const [isExiting, setIsExiting] = useState(false);
 
   // Current user's activities (for tile state)
-  const { activities: myActivities, loading } = useJourneyActivities();
+  const { activities: myActivities, loading, hasPublicActivity, makeActivityPublic } = useJourneyActivities();
 
   // Public feed for top strip (all users)
   const [publicFeed, setPublicFeed] = useState<LocalActivity[]>([]);
   const [feedLoading, setFeedLoading] = useState(true);
+  
+  // Privacy sheet state
+  const [showMakePublicSheet, setShowMakePublicSheet] = useState(false);
+  const [pendingDayNumber, setPendingDayNumber] = useState<number | null>(null);
 
   // Get transition data from navigation state
   const transitionImage = location.state?.transitionImage;
@@ -104,6 +109,7 @@ const Progress = () => {
     duration: p.duration || null,
     pr: p.pr || null,
     day_number: p.dayNumber,
+    is_public: p.isPublic || false,
     created_at: '',
     updated_at: '',
     reaction_count: p.reactionCount || 0,
@@ -132,6 +138,15 @@ const Progress = () => {
       setShowTransitionIn(true);
       // Extend transition duration for smoother feel
       setTimeout(() => setShowTransitionIn(false), 600);
+      
+      // Show make public prompt if coming from share and activity is not public
+      const currentActivity = myActivities.find(a => a.dayNumber === transitionDayNumber);
+      if (currentActivity && !currentActivity.isPublic) {
+        setTimeout(() => {
+          setPendingDayNumber(transitionDayNumber);
+          setShowMakePublicSheet(true);
+        }, 800);
+      }
     }
     
     // Stagger content animations
@@ -144,7 +159,21 @@ const Progress = () => {
       clearTimeout(storiesTimer);
       clearTimeout(tilesTimer);
     };
-  }, [transitionToProgress, transitionImage]);
+  }, [transitionToProgress, transitionImage, transitionDayNumber, myActivities]);
+
+  // Handle making activity public
+  const handleMakePublic = async () => {
+    if (pendingDayNumber) {
+      await makeActivityPublic(pendingDayNumber);
+    }
+    setShowMakePublicSheet(false);
+    setPendingDayNumber(null);
+  };
+
+  const handleKeepPrivate = () => {
+    setShowMakePublicSheet(false);
+    setPendingDayNumber(null);
+  };
 
   const handleClose = () => {
     navigate("/", { 
@@ -300,70 +329,99 @@ const Progress = () => {
                   ))}
                 </>
               ) : publicFeed.length > 0 ? (
-                // Show public feed
-                publicFeed.map((photo, index) => (
-                  <motion.button
-                    key={photo.id}
-                    data-shared-element={index === 0 ? "progress-hero-card" : undefined}
-                    className="relative flex-shrink-0 overflow-hidden cursor-pointer active:scale-95 transition-transform"
-                    style={{
-                      width: "72px",
-                      height: "100px",
-                      borderRadius: "14px",
-                      boxShadow: index === 0 ? "0 12px 40px rgba(100, 70, 180, 0.5)" : "0 4px 16px rgba(0,0,0,0.25)",
-                      border: index === 0 ? "2px solid rgba(160, 120, 220, 0.35)" : "1px solid rgba(255,255,255,0.1)",
-                    }}
-                    onClick={() => handleStoryStripTap(index, photo.userId)}
-                    initial={{ opacity: 0, x: 40 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{ delay: 0.2 + index * 0.05 }}
-                  >
-                    {photo.isVideo || isVideoUrl(photo.storageUrl) ? (
-                      <video
-                        src={photo.storageUrl}
-                        className="w-full h-full object-cover"
-                        muted
-                        playsInline
-                        loop
-                        autoPlay
-                        preload="metadata"
-                      />
-                    ) : (
-                      <img
-                        src={photo.storageUrl}
-                        alt={`Day ${photo.dayNumber}`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const img = e.currentTarget;
-                          if (!img.dataset.retried) {
-                            img.dataset.retried = "true";
-                            img.src = photo.storageUrl + "?t=" + Date.now();
+                // Show public feed - blur if user has no public activity
+                publicFeed.map((photo, index) => {
+                  const isOwnStory = user && photo.userId === user.id;
+                  const shouldBlur = !hasPublicActivity && !isOwnStory;
+                  
+                  return (
+                    <motion.button
+                      key={photo.id}
+                      data-shared-element={index === 0 ? "progress-hero-card" : undefined}
+                      className="relative flex-shrink-0 overflow-hidden cursor-pointer active:scale-95 transition-transform"
+                      style={{
+                        width: "72px",
+                        height: "100px",
+                        borderRadius: "14px",
+                        boxShadow: index === 0 ? "0 12px 40px rgba(100, 70, 180, 0.5)" : "0 4px 16px rgba(0,0,0,0.25)",
+                        border: index === 0 ? "2px solid rgba(160, 120, 220, 0.35)" : "1px solid rgba(255,255,255,0.1)",
+                      }}
+                      onClick={() => {
+                        if (shouldBlur) {
+                          // Prompt to make public
+                          const latestActivity = myActivities[myActivities.length - 1];
+                          if (latestActivity) {
+                            setPendingDayNumber(latestActivity.dayNumber);
+                            setShowMakePublicSheet(true);
                           }
-                        }}
-                      />
-                    )}
-                    
-                    {/* User avatar overlay with fallback */}
-                    <div className="absolute bottom-1.5 left-1.5">
-                      <ProfileAvatar
-                        src={photo.avatarUrl}
-                        name={photo.displayName}
-                        size={24}
-                        style={{ border: '2px solid rgba(255,255,255,0.6)' }}
-                      />
-                    </div>
-                    
-                    {/* Day badge */}
-                    <div 
-                      className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-white font-semibold text-[9px]"
-                      style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+                        } else {
+                          handleStoryStripTap(index, photo.userId);
+                        }
+                      }}
+                      initial={{ opacity: 0, x: 40 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ delay: 0.2 + index * 0.05 }}
                     >
-                      D{photo.dayNumber}
-                    </div>
-                  </motion.button>
-                ))
+                      {photo.isVideo || isVideoUrl(photo.storageUrl) ? (
+                        <video
+                          src={photo.storageUrl}
+                          className="w-full h-full object-cover"
+                          style={{ filter: shouldBlur ? 'blur(12px)' : 'none' }}
+                          muted
+                          playsInline
+                          loop
+                          autoPlay
+                          preload="metadata"
+                        />
+                      ) : (
+                        <img
+                          src={photo.storageUrl}
+                          alt={`Day ${photo.dayNumber}`}
+                          className="w-full h-full object-cover"
+                          style={{ filter: shouldBlur ? 'blur(12px)' : 'none' }}
+                          onError={(e) => {
+                            const img = e.currentTarget;
+                            if (!img.dataset.retried) {
+                              img.dataset.retried = "true";
+                              img.src = photo.storageUrl + "?t=" + Date.now();
+                            }
+                          }}
+                        />
+                      )}
+                      
+                      {/* Lock overlay for blurred content */}
+                      {shouldBlur && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                          <Lock className="w-5 h-5 text-white/80" />
+                        </div>
+                      )}
+                      
+                      {/* User avatar overlay with fallback */}
+                      {!shouldBlur && (
+                        <div className="absolute bottom-1.5 left-1.5">
+                          <ProfileAvatar
+                            src={photo.avatarUrl}
+                            name={photo.displayName}
+                            size={24}
+                            style={{ border: '2px solid rgba(255,255,255,0.6)' }}
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Day badge */}
+                      {!shouldBlur && (
+                        <div 
+                          className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-white font-semibold text-[9px]"
+                          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+                        >
+                          D{photo.dayNumber}
+                        </div>
+                      )}
+                    </motion.button>
+                  );
+                })
               ) : (
                 // Empty state
                 <motion.div
@@ -508,6 +566,14 @@ const Progress = () => {
           )}
         </AnimatePresence>
       </motion.div>
+      
+      {/* Make Public Sheet */}
+      <MakePublicSheet
+        isOpen={showMakePublicSheet}
+        onClose={() => setShowMakePublicSheet(false)}
+        onMakePublic={handleMakePublic}
+        onKeepPrivate={handleKeepPrivate}
+      />
     </motion.div>
   );
 };

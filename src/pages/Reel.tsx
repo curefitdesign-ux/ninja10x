@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronUp, Trash2 } from 'lucide-react';
+import { X, ChevronUp, Trash2, Lock } from 'lucide-react';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
@@ -14,6 +14,7 @@ import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
 import SendReactionSheet from '@/components/SendReactionSheet';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import ReelToProgressTransition from '@/components/ReelToProgressTransition';
+import MakePublicSheet from '@/components/MakePublicSheet';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -89,8 +90,11 @@ const Reel = () => {
   const contentY = useTransform(bottomSheetY, [-200, 0], [50, 0]);
 
   // Data for progress overlay
-  const { activities: myActivities, deleteActivity } = useJourneyActivities();
+  const { activities: myActivities, deleteActivity, hasPublicActivity, makeActivityPublic } = useJourneyActivities();
   const [publicFeed, setPublicFeed] = useState<LocalActivity[]>([]);
+  
+  // Privacy sheet state
+  const [showMakePublicSheet, setShowMakePublicSheet] = useState(false);
 
   // Load public feed for progress overlay
   useEffect(() => {
@@ -836,6 +840,21 @@ const Reel = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      {/* Make Public Sheet */}
+      <MakePublicSheet
+        isOpen={showMakePublicSheet}
+        onClose={() => setShowMakePublicSheet(false)}
+        onMakePublic={async () => {
+          const latestActivity = myActivities[myActivities.length - 1];
+          if (latestActivity) {
+            await makeActivityPublic(latestActivity.dayNumber);
+          }
+          setShowMakePublicSheet(false);
+          loadActivities(); // Refresh to see unlocked content
+        }}
+        onKeepPrivate={() => setShowMakePublicSheet(false)}
+      />
     </DynamicBlurBackground>
   );
 };

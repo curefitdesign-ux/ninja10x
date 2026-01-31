@@ -160,6 +160,7 @@ const Activity = () => {
     duration: p.duration || null,
     pr: p.pr || null,
     day_number: p.dayNumber,
+    is_public: false,
     created_at: '',
     updated_at: '',
     reaction_count: p.reactionCount || 0,

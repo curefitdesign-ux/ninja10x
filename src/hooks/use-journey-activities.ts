@@ -14,6 +14,7 @@ export interface JourneyActivity {
   duration: string | null;
   pr: string | null;
   day_number: number;
+  is_public: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -28,6 +29,7 @@ export interface LocalActivity {
   duration?: string;
   pr?: string;
   dayNumber: number;
+  isPublic?: boolean;
   userId?: string;
   createdAt?: string;
   reactionCount?: number;
@@ -54,6 +56,7 @@ function toLocal(row: JourneyActivity & {
     duration: row.duration || undefined,
     pr: row.pr || undefined,
     dayNumber: row.day_number,
+    isPublic: row.is_public,
     userId: row.user_id,
     createdAt: row.created_at,
     reactionCount: row.reaction_count,
@@ -307,14 +310,47 @@ export function useJourneyActivities() {
     return true;
   }, [activities]);
 
+  /**
+   * Make an activity public by dayNumber.
+   */
+  const makeActivityPublic = useCallback(async (dayNumber: number): Promise<boolean> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { error } = await supabase
+      .from('journey_activities')
+      .update({ is_public: true })
+      .eq('user_id', user.id)
+      .eq('day_number', dayNumber);
+
+    if (error) {
+      console.error('Make public error:', error);
+      return false;
+    }
+
+    // Update local state
+    setActivities(prev => prev.map(a => 
+      a.dayNumber === dayNumber ? { ...a, isPublic: true } : a
+    ));
+
+    return true;
+  }, []);
+
+  /**
+   * Check if current user has any public activities.
+   */
+  const hasPublicActivity = activities.some(a => a.isPublic);
+
   return {
     activities,
     loading,
     userId,
+    hasPublicActivity,
     refresh: loadActivities,
     upsertActivity,
     deleteActivity,
     clearAllActivities,
+    makeActivityPublic,
   };
 }
 
