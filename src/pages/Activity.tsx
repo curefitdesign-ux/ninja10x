@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Home, Dumbbell, Activity as ActivityIcon, ShoppingBag, Users, Flame, Footprints, Trash2 } from "lucide-react";
@@ -603,64 +604,82 @@ const Activity = () => {
         </div>
       </PullToRefresh>
 
-      {/* Bottom Navigation - Fixed to screen viewport, always visible */}
-      <nav 
-        className="fixed bottom-0 left-0 right-0"
-        style={{
-          zIndex: 9999,
-          position: 'fixed',
-        }}
-      >
-        <div 
-          className="relative"
-          style={{
-            background: 'rgba(30, 30, 50, 0.85)',
-            backdropFilter: 'blur(40px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-            boxShadow: `
-              inset 0 1px 1px rgba(255,255,255,0.1),
-              0 -8px 32px rgba(0,0,0,0.4)
-            `,
-          }}
-        >
-          {/* Inner top glow highlight */}
-          <div 
-            className="absolute inset-x-0 top-0 h-px pointer-events-none"
+      {/* Bottom Navigation
+          NOTE: We render via a portal so `position: fixed` stays viewport-sticky even if
+          ancestor containers apply transforms (common with animated route transitions).
+      */}
+      {(() => {
+        const nav = (
+          <nav
+            className="fixed bottom-0 left-0 right-0"
             style={{
-              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)',
+              zIndex: 9999,
+              position: "fixed",
             }}
-          />
-          
-          <div 
-            className="relative flex items-center justify-around py-3 px-2"
-            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}
           >
-            {navItems.map((item) => (
-              <motion.button
-                key={item.id}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setActiveTab(item.id)}
-                className="flex flex-col items-center py-2 px-4 rounded-2xl transition-all duration-200"
+            <div
+              className="relative"
+              style={{
+                background: "rgba(30, 30, 50, 0.85)",
+                backdropFilter: "blur(40px) saturate(180%)",
+                WebkitBackdropFilter: "blur(40px) saturate(180%)",
+                borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+                boxShadow: `
+                  inset 0 1px 1px rgba(255,255,255,0.1),
+                  0 -8px 32px rgba(0,0,0,0.4)
+                `,
+              }}
+            >
+              {/* Inner top glow highlight */}
+              <div
+                className="absolute inset-x-0 top-0 h-px pointer-events-none"
+                style={{
+                  background:
+                    "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)",
+                }}
+              />
+
+              <div
+                className="relative flex items-center justify-around py-3 px-2"
+                style={{ paddingBottom: "max(env(safe-area-inset-bottom, 16px), 16px)" }}
               >
-                {item.isCenter ? (
-                  <div className="relative -mt-6">
-                    <div className="absolute -inset-3 bg-gradient-to-r from-rose-500/60 to-pink-500/60 rounded-full blur-xl" />
-                    <div className="relative w-14 h-14 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center shadow-[0_0_30px_rgba(244,63,94,0.6)]">
-                      <item.icon className="w-7 h-7 text-white" />
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <item.icon className={`w-6 h-6 ${activeTab === item.id ? 'text-white' : 'text-white/50'}`} />
-                    <span className={`text-[10px] mt-1 font-medium tracking-wide ${activeTab === item.id ? 'text-white' : 'text-white/50'}`}>{item.label}</span>
-                  </>
-                )}
-              </motion.button>
-            ))}
-          </div>
-        </div>
-      </nav>
+                {navItems.map((item) => (
+                  <motion.button
+                    key={item.id}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setActiveTab(item.id)}
+                    className="flex flex-col items-center py-2 px-4 rounded-2xl transition-all duration-200"
+                  >
+                    {item.isCenter ? (
+                      <div className="relative -mt-6">
+                        <div className="absolute -inset-3 bg-gradient-to-r from-rose-500/60 to-pink-500/60 rounded-full blur-xl" />
+                        <div className="relative w-14 h-14 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center shadow-[0_0_30px_rgba(244,63,94,0.6)]">
+                          <item.icon className="w-7 h-7 text-white" />
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <item.icon
+                          className={`w-6 h-6 ${activeTab === item.id ? "text-white" : "text-white/50"}`}
+                        />
+                        <span
+                          className={`text-[10px] mt-1 font-medium tracking-wide ${
+                            activeTab === item.id ? "text-white" : "text-white/50"
+                          }`}
+                        >
+                          {item.label}
+                        </span>
+                      </>
+                    )}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          </nav>
+        );
+
+        return typeof document !== "undefined" ? createPortal(nav, document.body) : nav;
+      })()}
       
       {/* AI Reel Viewer */}
       <AIReelViewer
