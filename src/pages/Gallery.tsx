@@ -361,23 +361,23 @@ const Gallery = () => {
           {/* Hero Section with Animated Stickers */}
           <div className="flex-shrink-0 pt-8 pb-6 px-4 relative">
             {/* Stickers Collage with floating animations */}
-            <div className="relative w-full h-[220px] flex items-center justify-center mb-6">
+            <div className="relative w-full h-[200px] flex items-center justify-center mb-6">
               {/* Lift Weights Sticker - Left, floating animation */}
               <motion.img
                 src={liftWeightsSticker}
                 alt="Lift Weights"
-                className="absolute w-36 h-auto object-contain z-10"
+                className="absolute w-32 h-auto object-contain z-10"
                 style={{
-                  left: '0%',
-                  top: '10%',
-                  filter: 'drop-shadow(0 12px 32px rgba(0,0,0,0.4))',
+                  left: '8%',
+                  top: '15%',
+                  filter: 'drop-shadow(0 6px 16px rgba(0,0,0,0.25))',
                 }}
-                initial={{ opacity: 0, x: -40, rotate: -8 }}
+                initial={{ opacity: 0, x: -30, rotate: -8 }}
                 animate={{ 
                   opacity: 1, 
                   x: 0, 
-                  rotate: -5,
-                  y: [0, -8, 0],
+                  rotate: -3,
+                  y: [0, -6, 0],
                 }}
                 transition={{ 
                   opacity: { duration: 0.6, delay: 0.1 },
@@ -395,16 +395,16 @@ const Gallery = () => {
               <motion.img
                 src={playBasketballSticker}
                 alt="Play Basketball"
-                className="absolute w-40 h-auto object-contain z-20"
+                className="absolute w-36 h-auto object-contain z-20"
                 style={{
-                  right: '5%',
-                  top: '-5%',
-                  filter: 'drop-shadow(0 12px 32px rgba(0,0,0,0.4))',
+                  right: '12%',
+                  top: '0%',
+                  filter: 'drop-shadow(0 6px 16px rgba(0,0,0,0.25))',
                 }}
-                initial={{ opacity: 0, y: -40, scale: 0.9 }}
+                initial={{ opacity: 0, y: -30, scale: 0.9 }}
                 animate={{ 
                   opacity: 1, 
-                  y: [0, -10, 0],
+                  y: [0, -8, 0],
                   scale: 1,
                 }}
                 transition={{ 
@@ -423,18 +423,18 @@ const Gallery = () => {
               <motion.img
                 src={goRunningSticker}
                 alt="Go Running"
-                className="absolute w-32 h-auto object-contain z-15"
+                className="absolute w-28 h-auto object-contain z-15"
                 style={{
-                  right: '8%',
-                  bottom: '-5%',
-                  filter: 'drop-shadow(0 12px 32px rgba(0,0,0,0.4))',
+                  right: '18%',
+                  bottom: '5%',
+                  filter: 'drop-shadow(0 6px 16px rgba(0,0,0,0.25))',
                 }}
-                initial={{ opacity: 0, x: 40, rotate: 8 }}
+                initial={{ opacity: 0, x: 30, rotate: 8 }}
                 animate={{ 
                   opacity: 1, 
                   x: 0, 
-                  rotate: 5,
-                  y: [0, -6, 0],
+                  rotate: 3,
+                  y: [0, -5, 0],
                 }}
                 transition={{ 
                   opacity: { duration: 0.6, delay: 0.3 },
@@ -481,7 +481,7 @@ const Gallery = () => {
                 WebkitOverflowScrolling: 'touch',
               }}
             >
-              {/* Camera Button - First Item with liquid glass */}
+              {/* Camera Button - First Item with liquid glass, no shadow */}
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={handleCameraCapture}
@@ -493,10 +493,6 @@ const Gallery = () => {
                   backdropFilter: 'blur(40px) saturate(180%)',
                   WebkitBackdropFilter: 'blur(40px) saturate(180%)',
                   border: '1px solid rgba(255, 255, 255, 0.15)',
-                  boxShadow: `
-                    inset 0 1px 1px rgba(255, 255, 255, 0.15),
-                    0 8px 32px rgba(0, 0, 0, 0.2)
-                  `,
                 }}
               >
                 {/* Camera focus corners */}
