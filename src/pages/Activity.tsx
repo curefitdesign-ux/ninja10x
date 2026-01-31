@@ -10,6 +10,7 @@ import AIReelViewer from "@/components/AIReelViewer";
 import CuroSpeechBubble from "@/components/CuroSpeechBubble";
 import ProfileMenu from "@/components/ProfileMenu";
 import { useJourneyActivities } from "@/hooks/use-journey-activities";
+import { useProfile } from "@/hooks/use-profile";
 import { JourneyActivity } from "@/services/journey-service";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
@@ -43,6 +44,7 @@ const Activity = () => {
   
   // Journey activities from DB (single source of truth)
   const { activities, loading, refresh, clearAllActivities } = useJourneyActivities();
+  const { profile } = useProfile();
   const [isClearing, setIsClearing] = useState(false);
   
   // Convert to LoggedPhoto shape for PhotoLoggingWidget
@@ -481,7 +483,7 @@ const Activity = () => {
                 mascotAlt={mascot.alt}
                 onMascotTap={handleMascotTap}
               />
-              <CuroSpeechBubble photosCount={photos.length} currentWeek={currentWeek} />
+              <CuroSpeechBubble photosCount={photos.length} currentWeek={currentWeek} userName={profile?.display_name} />
             </motion.div>
           </div>
 
