@@ -29,6 +29,7 @@ export interface LocalActivity {
   pr?: string;
   dayNumber: number;
   userId?: string;
+  createdAt?: string;
   reactionCount?: number;
   reactions?: Record<ReactionType, ActivityReaction>;
   displayName?: string;
@@ -53,6 +54,7 @@ function toLocal(row: JourneyActivity & {
     pr: row.pr || undefined,
     dayNumber: row.day_number,
     userId: row.user_id,
+    createdAt: row.created_at,
     reactionCount: row.reaction_count,
     reactions: row.reactions,
     displayName: row.display_name,
