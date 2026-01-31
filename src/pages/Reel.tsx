@@ -612,7 +612,7 @@ const Reel = () => {
           onClick={() => isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true)}
           className="relative overflow-hidden mb-3"
           style={{
-            minWidth: 200,
+            minWidth: isOwnStory ? 160 : 180,
             height: 52,
             borderRadius: 26,
             background: 'rgba(255, 255, 255, 0.08)',
@@ -627,9 +627,10 @@ const Reel = () => {
         >
           <AnimatePresence mode="wait">
             {isOwnStory ? (
+              /* Owner view: Show reactions summary */
               <motion.div
                 key="owner-pill"
-                className="flex items-center justify-center gap-2 h-full px-4"
+                className="flex items-center justify-center gap-3 h-full px-5"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
@@ -637,28 +638,27 @@ const Reel = () => {
               >
                 {currentReactions.total > 0 ? (
                   <>
-                    <div className="flex -space-x-2.5">
-                      {currentReactions.reactorProfiles.slice(0, 3).map((reactor, i) => (
-                        <ProfileAvatar
-                          key={reactor.userId}
-                          src={reactor.avatarUrl}
-                          name={reactor.displayName}
-                          size={32}
-                          style={{
-                            border: '2px solid rgba(255, 255, 255, 0.2)',
-                            zIndex: 10 - i,
-                          }}
-                        />
-                      ))}
+                    {/* Reaction emoji stack */}
+                    <div className="flex -space-x-1">
+                      <img src={fireEmoji} alt="fire" className="w-7 h-7 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                      <img src={clapEmoji} alt="clap" className="w-7 h-7 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                     </div>
-                    <span className="text-white font-bold text-base ml-1">{currentReactions.total}</span>
-                    <ChevronUp className="w-5 h-5 text-white/60 ml-0.5" />
+                    {/* Count with label */}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-white font-bold text-lg">{currentReactions.total}</span>
+                      <span className="text-white/50 text-sm">reacts</span>
+                    </div>
+                    <ChevronUp className="w-4 h-4 text-white/40" />
                   </>
                 ) : (
-                  <span className="text-white/60 text-sm font-medium px-4">No reactions yet</span>
+                  <>
+                    <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain opacity-40" />
+                    <span className="text-white/50 text-sm font-medium">No reacts yet</span>
+                  </>
                 )}
               </motion.div>
             ) : (
+              /* Visitor view: Send reaction prompt */
               <motion.div
                 key="visitor-pill"
                 className="flex items-center justify-center gap-3 h-full px-5"
@@ -667,38 +667,22 @@ const Reel = () => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
-                {currentReactions.total > 0 ? (
-                  <>
-                    {/* Show reactor avatars for others' posts too */}
-                    <div className="flex -space-x-2">
-                      {currentReactions.reactorProfiles.slice(0, 3).map((reactor, i) => (
-                        <ProfileAvatar
-                          key={reactor.userId}
-                          src={reactor.avatarUrl}
-                          name={reactor.displayName}
-                          size={28}
-                          style={{
-                            border: '2px solid rgba(255, 255, 255, 0.2)',
-                            zIndex: 10 - i,
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-white/70 font-medium text-sm">{currentReactions.total}</span>
-                    <div className="w-px h-5 bg-white/20" />
-                  </>
-                ) : null}
-                {/* User's own avatar - always show for sending */}
+                {/* User's avatar on the left */}
                 <ProfileAvatar
                   src={profile?.avatar_url}
                   name={profile?.display_name || 'You'}
-                  size={currentReactions.total > 0 ? 26 : 32}
+                  size={32}
                   style={{
-                    border: '2px solid rgba(255, 255, 255, 0.2)',
+                    border: '2px solid rgba(255, 255, 255, 0.25)',
                   }}
                 />
-                <span className="text-white font-bold text-sm tracking-widest">SEND</span>
-                <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain" />
+                {/* Send text */}
+                <span className="text-white font-semibold text-sm">Send React</span>
+                {/* Reaction icons */}
+                <div className="flex -space-x-1">
+                  <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                  <img src={clapEmoji} alt="clap" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
