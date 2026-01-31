@@ -271,7 +271,9 @@ const Reel = () => {
     );
   }
 
-  const isVideo = currentActivity.isVideo || isVideoUrl(currentActivity.storageUrl);
+  // Use original (non-templated) media if available, fallback to storage url
+  const mediaUrl = currentActivity.originalUrl || currentActivity.storageUrl;
+  const isVideo = currentActivity.isVideo || isVideoUrl(mediaUrl);
   const currentReactions = localReactions[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS } };
   
   const activeReactionTypes = Object.entries(currentReactions.reactions)
@@ -283,7 +285,7 @@ const Reel = () => {
   const dayInWeek = ((currentActivity.dayNumber - 1) % 3) + 1;
 
   return (
-    <DynamicBlurBackground imageUrl={currentActivity.storageUrl}>
+    <DynamicBlurBackground imageUrl={mediaUrl}>
       {/* Floating 3D emojis around edges */}
       <Floating3DEmojis 
         reactions={activeReactionTypes}
@@ -470,7 +472,7 @@ const Reel = () => {
                 >
                   {isVideo ? (
                     <video
-                      src={currentActivity.storageUrl}
+                      src={mediaUrl}
                       className="w-full h-full object-cover"
                       autoPlay
                       loop
@@ -479,14 +481,14 @@ const Reel = () => {
                     />
                   ) : (
                     <img
-                      src={currentActivity.storageUrl}
+                      src={mediaUrl}
                       alt={`Day ${currentActivity.dayNumber}`}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const img = e.currentTarget;
                         if (!img.dataset.retried) {
                           img.dataset.retried = "true";
-                          img.src = currentActivity.storageUrl + "?t=" + Date.now();
+                          img.src = mediaUrl + "?t=" + Date.now();
                         }
                       }}
                     />
