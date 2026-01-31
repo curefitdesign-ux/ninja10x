@@ -476,7 +476,7 @@ const Activity = () => {
               className="flex flex-col items-center"
             >
               <CircularProgressRing 
-                currentDay={photos.length > 0 ? photos.length : 1} 
+                currentDay={photos.length} 
                 currentWeek={currentWeek}
                 highlight={celebrateSuccess}
                 mascotSrc={mascot.src}
