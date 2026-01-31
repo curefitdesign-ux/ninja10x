@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Lottie from "lottie-react";
+import confetti from "canvas-confetti";
 
 interface ActivityLoggedCelebrationProps {
   isVisible: boolean;
@@ -38,6 +39,9 @@ const ActivityLoggedCelebration = ({
   const activeBarCount = dayNumber;
   const activeWeekIndex = currentWeek - 1;
   const dayInWeek = ((dayNumber - 1) % 3) + 1;
+  
+  // Check if this is the 3rd activity of a week (week completion)
+  const isWeekComplete = dayInWeek === 3;
 
   // Load Lottie animation
   useEffect(() => {
@@ -47,7 +51,7 @@ const ActivityLoggedCelebration = ({
       .catch(err => console.error('Failed to load Lottie:', err));
   }, []);
 
-  // Animation sequence
+  // Animation sequence with confetti for week completion
   useEffect(() => {
     if (!isVisible) {
       setAnimationProgress(0);
@@ -72,21 +76,46 @@ const ActivityLoggedCelebration = ({
       } else {
         // Show tick after progress completes
         setTimeout(() => setShowTick(true), 200);
+        
+        // Trigger confetti for week completion
+        if (isWeekComplete) {
+          const end = Date.now() + 2500;
+          const frame = () => {
+            confetti({
+              particleCount: 4,
+              angle: 60,
+              spread: 55,
+              origin: { x: 0, y: 0.6 },
+              colors: ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#fbbf24'],
+            });
+            confetti({
+              particleCount: 4,
+              angle: 120,
+              spread: 55,
+              origin: { x: 1, y: 0.6 },
+              colors: ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#fbbf24'],
+            });
+            if (Date.now() < end) {
+              requestAnimationFrame(frame);
+            }
+          };
+          frame();
+        }
       }
     };
     
     requestAnimationFrame(animate);
-  }, [isVisible]);
+  }, [isVisible, isWeekComplete]);
 
-  // Auto-close after tick animation completes
+  // Auto-close after tick animation completes (longer for week completion)
   useEffect(() => {
     if (showTick) {
       const timeout = setTimeout(() => {
         onClose();
-      }, 1800); // Wait for Lottie to play, then close
+      }, isWeekComplete ? 2800 : 1800); // Longer celebration for week complete
       return () => clearTimeout(timeout);
     }
-  }, [showTick, onClose]);
+  }, [showTick, onClose, isWeekComplete]);
 
   // Draw the progress ring with animation
   useEffect(() => {
@@ -225,18 +254,46 @@ const ActivityLoggedCelebration = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {/* Background with enhanced blur - proper translucent overlay */}
+          {/* Background - Enhanced for week completion */}
           <motion.div 
             className="absolute inset-0"
             initial={{ backdropFilter: 'blur(0px)' }}
             animate={{ backdropFilter: 'blur(48px)' }}
             transition={{ duration: 0.5 }}
             style={{
-              background: 'linear-gradient(180deg, rgba(10, 8, 15, 0.75) 0%, rgba(15, 12, 22, 0.85) 50%, rgba(10, 8, 15, 0.75) 100%)',
+              background: isWeekComplete 
+                ? 'radial-gradient(circle at center, rgba(52, 211, 153, 0.2) 0%, rgba(16, 185, 129, 0.1) 25%, rgba(10, 8, 15, 0.85) 60%, rgba(10, 8, 15, 0.95) 100%)'
+                : 'linear-gradient(180deg, rgba(10, 8, 15, 0.75) 0%, rgba(15, 12, 22, 0.85) 50%, rgba(10, 8, 15, 0.75) 100%)',
               backdropFilter: 'blur(48px) saturate(150%)',
               WebkitBackdropFilter: 'blur(48px) saturate(150%)',
             }}
           />
+          
+          {/* Week completion extra glow rings */}
+          {isWeekComplete && (
+            <>
+              <motion.div
+                className="absolute w-[500px] h-[500px] rounded-full pointer-events-none"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ 
+                  scale: [0.5, 1.5, 2, 2.5], 
+                  opacity: [0.8, 0.5, 0.2, 0] 
+                }}
+                transition={{ duration: 2, ease: "easeOut" }}
+                style={{ background: 'radial-gradient(circle, rgba(52, 211, 153, 0.4) 0%, transparent 70%)' }}
+              />
+              <motion.div
+                className="absolute w-[400px] h-[400px] rounded-full pointer-events-none"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ 
+                  scale: [0.5, 1.3, 1.8], 
+                  opacity: [0.6, 0.3, 0] 
+                }}
+                transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
+                style={{ background: 'radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, transparent 70%)' }}
+              />
+            </>
+          )}
           
           {/* Main content with entrance animation */}
           <motion.div
@@ -251,23 +308,25 @@ const ActivityLoggedCelebration = ({
               delay: 0.1,
             }}
           >
-            {/* Outer pulsing glow ring effect */}
+            {/* Outer pulsing glow ring effect - more intense for week completion */}
             <motion.div
               className="absolute rounded-full pointer-events-none"
               style={{
                 width: size + 120,
                 height: size + 120,
-                background: 'radial-gradient(circle, rgba(57, 255, 133, 0.25) 0%, rgba(57, 255, 133, 0.1) 35%, rgba(57, 255, 133, 0.02) 60%, transparent 75%)',
+                background: isWeekComplete
+                  ? 'radial-gradient(circle, rgba(251, 191, 36, 0.25) 0%, rgba(52, 211, 153, 0.15) 35%, rgba(52, 211, 153, 0.02) 60%, transparent 75%)'
+                  : 'radial-gradient(circle, rgba(57, 255, 133, 0.25) 0%, rgba(57, 255, 133, 0.1) 35%, rgba(57, 255, 133, 0.02) 60%, transparent 75%)',
                 filter: 'blur(8px)',
               }}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{
-                scale: [1, 1.15, 1],
+                scale: [1, 1.2, 1],
                 opacity: [0.7, 1, 0.7],
               }}
               transition={{
-                scale: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' },
-                opacity: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' },
+                scale: { duration: isWeekComplete ? 1.5 : 2.5, repeat: Infinity, ease: 'easeInOut' },
+                opacity: { duration: isWeekComplete ? 1.5 : 2.5, repeat: Infinity, ease: 'easeInOut' },
               }}
             />
             
@@ -277,14 +336,16 @@ const ActivityLoggedCelebration = ({
               style={{
                 width: size + 60,
                 height: size + 60,
-                background: 'radial-gradient(circle, rgba(57, 255, 133, 0.3) 0%, rgba(57, 255, 133, 0.15) 40%, transparent 70%)',
+                background: isWeekComplete
+                  ? 'radial-gradient(circle, rgba(251, 191, 36, 0.35) 0%, rgba(52, 211, 153, 0.2) 40%, transparent 70%)'
+                  : 'radial-gradient(circle, rgba(57, 255, 133, 0.3) 0%, rgba(57, 255, 133, 0.15) 40%, transparent 70%)',
               }}
               animate={{
-                scale: [1, 1.08, 1],
+                scale: [1, 1.12, 1],
                 opacity: [0.8, 1, 0.8],
               }}
               transition={{
-                duration: 1.8,
+                duration: isWeekComplete ? 1.2 : 1.8,
                 repeat: Infinity,
                 ease: 'easeInOut',
                 delay: 0.3,
@@ -299,15 +360,21 @@ const ActivityLoggedCelebration = ({
               animate={{ rotate: 0 }}
               transition={{ type: 'spring', stiffness: 200, damping: 20 }}
             >
-              {/* Glow layer behind canvas */}
+              {/* Glow layer behind canvas - enhanced for week completion */}
               <motion.div
                 className="absolute inset-0 rounded-full pointer-events-none"
                 style={{
-                  boxShadow: `
-                    0 0 40px rgba(57, 255, 133, ${0.3 * animationProgress}),
-                    0 0 80px rgba(57, 255, 133, ${0.2 * animationProgress}),
-                    inset 0 0 30px rgba(57, 255, 133, ${0.1 * animationProgress})
-                  `,
+                  boxShadow: isWeekComplete
+                    ? `
+                      0 0 50px rgba(251, 191, 36, ${0.4 * animationProgress}),
+                      0 0 100px rgba(52, 211, 153, ${0.3 * animationProgress}),
+                      inset 0 0 40px rgba(251, 191, 36, ${0.15 * animationProgress})
+                    `
+                    : `
+                      0 0 40px rgba(57, 255, 133, ${0.3 * animationProgress}),
+                      0 0 80px rgba(57, 255, 133, ${0.2 * animationProgress}),
+                      inset 0 0 30px rgba(57, 255, 133, ${0.1 * animationProgress})
+                    `,
                 }}
               />
               
@@ -333,7 +400,7 @@ const ActivityLoggedCelebration = ({
                 </defs>
                 
                 <text
-                  fill="rgba(57, 255, 133, 0.9)"
+                  fill={isWeekComplete ? "rgba(251, 191, 36, 0.9)" : "rgba(57, 255, 133, 0.9)"}
                   fontSize="10"
                   fontFamily="Inter, sans-serif"
                   fontWeight="500"
@@ -350,34 +417,34 @@ const ActivityLoggedCelebration = ({
                 </text>
               </svg>
               
-              {/* Confetti particles */}
+              {/* Confetti particles - more for week completion */}
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <motion.div 
-                  className="absolute w-3 h-1.5 rounded-sm bg-cyan-400/80" 
+                  className={`absolute w-3 h-1.5 rounded-sm ${isWeekComplete ? 'bg-yellow-400/80' : 'bg-cyan-400/80'}`}
                   style={{ top: '25%', left: '38%' }}
                   animate={{ 
                     rotate: [45, 90, 45],
                     y: [0, -5, 0],
                   }}
-                  transition={{ duration: 2, repeat: Infinity }}
+                  transition={{ duration: isWeekComplete ? 1 : 2, repeat: Infinity }}
                 />
                 <motion.div 
-                  className="absolute w-2 h-3 rounded-sm bg-cyan-300/70" 
+                  className={`absolute w-2 h-3 rounded-sm ${isWeekComplete ? 'bg-emerald-400/70' : 'bg-cyan-300/70'}`}
                   style={{ top: '30%', right: '36%' }}
                   animate={{ 
                     rotate: [-30, -60, -30],
                     y: [0, -8, 0],
                   }}
-                  transition={{ duration: 1.8, repeat: Infinity, delay: 0.2 }}
+                  transition={{ duration: isWeekComplete ? 0.8 : 1.8, repeat: Infinity, delay: 0.2 }}
                 />
                 <motion.div 
-                  className="absolute w-2.5 h-1.5 rounded-sm bg-teal-400/75" 
+                  className={`absolute w-2.5 h-1.5 rounded-sm ${isWeekComplete ? 'bg-yellow-300/75' : 'bg-teal-400/75'}`}
                   style={{ top: '22%', left: '48%' }}
                   animate={{ 
                     rotate: [15, 45, 15],
                     y: [0, -6, 0],
                   }}
-                  transition={{ duration: 2.2, repeat: Infinity, delay: 0.4 }}
+                  transition={{ duration: isWeekComplete ? 1.2 : 2.2, repeat: Infinity, delay: 0.4 }}
                 />
                 <motion.div 
                   className="absolute w-1.5 h-2.5 rounded-sm bg-cyan-400/65" 
@@ -386,17 +453,49 @@ const ActivityLoggedCelebration = ({
                     rotate: [-60, -30, -60],
                     x: [0, -4, 0],
                   }}
-                  transition={{ duration: 1.6, repeat: Infinity, delay: 0.1 }}
+                  transition={{ duration: isWeekComplete ? 0.8 : 1.6, repeat: Infinity, delay: 0.1 }}
                 />
                 <motion.div 
-                  className="absolute w-2 h-1 rounded-sm bg-teal-300/70" 
+                  className={`absolute w-2 h-1 rounded-sm ${isWeekComplete ? 'bg-emerald-300/70' : 'bg-teal-300/70'}`}
                   style={{ top: '42%', right: '32%' }}
                   animate={{ 
                     rotate: [75, 105, 75],
                     x: [0, 4, 0],
                   }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
+                  transition={{ duration: isWeekComplete ? 1 : 2, repeat: Infinity, delay: 0.3 }}
                 />
+                {/* Extra confetti for week completion */}
+                {isWeekComplete && (
+                  <>
+                    <motion.div 
+                      className="absolute w-2 h-2 rounded-full bg-yellow-400/80" 
+                      style={{ top: '18%', left: '55%' }}
+                      animate={{ 
+                        scale: [1, 1.3, 1],
+                        opacity: [0.8, 1, 0.8],
+                      }}
+                      transition={{ duration: 0.8, repeat: Infinity, delay: 0.1 }}
+                    />
+                    <motion.div 
+                      className="absolute w-1.5 h-1.5 rounded-full bg-emerald-400/80" 
+                      style={{ top: '35%', left: '28%' }}
+                      animate={{ 
+                        scale: [1, 1.4, 1],
+                        opacity: [0.7, 1, 0.7],
+                      }}
+                      transition={{ duration: 0.6, repeat: Infinity, delay: 0.3 }}
+                    />
+                    <motion.div 
+                      className="absolute w-2.5 h-1 rounded-sm bg-yellow-300/75" 
+                      style={{ top: '15%', right: '40%' }}
+                      animate={{ 
+                        rotate: [0, 180, 360],
+                        y: [0, -10, 0],
+                      }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    />
+                  </>
+                )}
               </div>
               
               {/* Center content - Lottie tick animation (increased size) */}
@@ -421,14 +520,16 @@ const ActivityLoggedCelebration = ({
                         style={{
                           width: 200,
                           height: 200,
-                          background: 'radial-gradient(circle, rgba(57, 255, 133, 0.4) 0%, rgba(57, 255, 133, 0.1) 50%, transparent 70%)',
+                          background: isWeekComplete
+                            ? 'radial-gradient(circle, rgba(251, 191, 36, 0.4) 0%, rgba(52, 211, 153, 0.2) 50%, transparent 70%)'
+                            : 'radial-gradient(circle, rgba(57, 255, 133, 0.4) 0%, rgba(57, 255, 133, 0.1) 50%, transparent 70%)',
                         }}
                         animate={{
-                          scale: [1, 1.2, 1],
+                          scale: [1, 1.25, 1],
                           opacity: [0.8, 1, 0.8],
                         }}
                         transition={{
-                          duration: 1.5,
+                          duration: isWeekComplete ? 1 : 1.5,
                           repeat: Infinity,
                           ease: 'easeInOut',
                         }}
@@ -444,26 +545,62 @@ const ActivityLoggedCelebration = ({
               </div>
             </motion.div>
             
-            {/* Activity Logged Text */}
+            {/* Activity Logged Text - or Week Complete for week completion */}
             <motion.div
               className="mt-8 text-center"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.6, ease: 'easeOut' }}
             >
-              <motion.h2
-                className="text-2xl font-bold text-white"
-                animate={{ 
-                  textShadow: [
-                    '0 0 20px rgba(255,255,255,0.2)',
-                    '0 0 40px rgba(255,255,255,0.4)',
-                    '0 0 20px rgba(255,255,255,0.2)',
-                  ],
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                {activity} Logged
-              </motion.h2>
+              {isWeekComplete ? (
+                <>
+                  <motion.div
+                    className="text-5xl mb-3"
+                    animate={{ 
+                      scale: [1, 1.2, 1], 
+                      rotate: [0, 10, -10, 0] 
+                    }}
+                    transition={{ duration: 0.8, delay: 0.8 }}
+                  >
+                    🏆
+                  </motion.div>
+                  <motion.h2
+                    className="text-2xl font-bold text-white mb-2"
+                    animate={{ 
+                      textShadow: [
+                        '0 0 20px rgba(251, 191, 36, 0.3)',
+                        '0 0 40px rgba(251, 191, 36, 0.5)',
+                        '0 0 20px rgba(251, 191, 36, 0.3)',
+                      ],
+                    }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    Week {currentWeek} Complete!
+                  </motion.h2>
+                  <motion.p
+                    className="text-emerald-400/90 text-sm"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1 }}
+                  >
+                    Amazing progress! Keep it up! 💪
+                  </motion.p>
+                </>
+              ) : (
+                <motion.h2
+                  className="text-2xl font-bold text-white"
+                  animate={{ 
+                    textShadow: [
+                      '0 0 20px rgba(255,255,255,0.2)',
+                      '0 0 40px rgba(255,255,255,0.4)',
+                      '0 0 20px rgba(255,255,255,0.2)',
+                    ],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  {activity} Logged
+                </motion.h2>
+              )}
             </motion.div>
           </motion.div>
         </motion.div>
