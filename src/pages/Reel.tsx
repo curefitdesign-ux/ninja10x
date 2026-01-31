@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronUp } from 'lucide-react';
+import { X, ChevronUp, GripHorizontal } from 'lucide-react';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
@@ -10,6 +10,7 @@ import DynamicBlurBackground from '@/components/DynamicBlurBackground';
 import Floating3DEmojis from '@/components/Floating3DEmojis';
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
 import SendReactionSheet from '@/components/SendReactionSheet';
+import ProfileAvatar from '@/components/ProfileAvatar';
 
 // Import 3D emoji assets for display
 import clapEmoji from '@/assets/reactions/clap-3d.png';
@@ -55,12 +56,12 @@ const Reel = () => {
     reactions: Record<ReactionType, ActivityReaction>;
   }>>({});
 
-  // Pull-up gesture for View Progress
-  const dragY = useMotionValue(0);
-  const progressBarHeight = useTransform(dragY, [-150, 0], [80, 0]);
-  const progressBarOpacity = useTransform(dragY, [-100, -30, 0], [1, 0.5, 0]);
-  const contentScale = useTransform(dragY, [-150, 0], [0.92, 1]);
-  const [showProgressHint, setShowProgressHint] = useState(false);
+  // Bottom sheet states
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const bottomSheetY = useMotionValue(0);
+  const bottomSheetOpacity = useTransform(bottomSheetY, [-200, 0], [0, 1]);
+  const contentScale = useTransform(bottomSheetY, [-200, 0], [0.85, 1]);
+  const contentOpacity = useTransform(bottomSheetY, [-150, 0], [0.5, 1]);
 
   // Load all activities grouped by user
   useEffect(() => {
@@ -156,17 +157,20 @@ const Reel = () => {
     }
   }, [goNextUser, goPrevUser]);
 
-  // Vertical drag for pull-up to progress
-  const handleVerticalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.y < -100) {
-      // Navigate to progress with transition
-      navigate('/progress', {
-        state: {
-          fromReel: true,
-          transitionToProgress: true,
-          transitionImage: currentActivity?.storageUrl,
-        }
-      });
+  // Bottom sheet drag handling
+  const handleBottomSheetDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (info.offset.y < -100 || info.velocity.y < -500) {
+      setIsTransitioning(true);
+      // Navigate to progress with animation
+      setTimeout(() => {
+        navigate('/progress', {
+          state: {
+            fromReel: true,
+            transitionToProgress: true,
+            transitionImage: currentActivity?.storageUrl,
+          }
+        });
+      }, 200);
     }
   }, [navigate, currentActivity]);
 
@@ -186,13 +190,16 @@ const Reel = () => {
   }, [lastTap, cycleActivity, isOwnStory]);
 
   const handleNavigateToProgress = () => {
-    navigate('/progress', {
-      state: {
-        fromReel: true,
-        transitionToProgress: true,
-        transitionImage: currentActivity?.storageUrl,
-      }
-    });
+    setIsTransitioning(true);
+    setTimeout(() => {
+      navigate('/progress', {
+        state: {
+          fromReel: true,
+          transitionToProgress: true,
+          transitionImage: currentActivity?.storageUrl,
+        }
+      });
+    }, 200);
   };
 
   const handleReact = async (type: ReactionType) => {
@@ -298,7 +305,7 @@ const Reel = () => {
         </button>
       </motion.div>
 
-      {/* User avatars strip at top */}
+      {/* User avatars strip at top - with activity count indicator */}
       <motion.div
         className="absolute z-40 left-0 right-0 flex justify-center"
         style={{ top: 'calc(max(env(safe-area-inset-top, 12px), 12px) + 8px)' }}
@@ -306,7 +313,15 @@ const Reel = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
       >
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(12px)' }}>
+        <div 
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full"
+          style={{ 
+            background: 'rgba(255,255,255,0.06)', 
+            backdropFilter: 'blur(40px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+            border: '1px solid rgba(255,255,255,0.1)',
+          }}
+        >
           {userGroups.slice(0, 7).map((group, idx) => (
             <motion.button
               key={group.userId}
@@ -317,33 +332,20 @@ const Reel = () => {
               className="relative"
               whileTap={{ scale: 0.9 }}
             >
-              <div 
-                className="rounded-full overflow-hidden transition-all"
-                style={{ 
-                  width: idx === currentUserIndex ? 44 : 32,
-                  height: idx === currentUserIndex ? 44 : 32,
+              <ProfileAvatar
+                src={group.avatarUrl}
+                name={group.displayName}
+                size={idx === currentUserIndex ? 44 : 32}
+                style={{
                   border: idx === currentUserIndex 
                     ? '2.5px solid #a78bfa' 
                     : '2px solid rgba(255,255,255,0.25)',
                   opacity: idx === currentUserIndex ? 1 : 0.7,
+                  transition: 'all 0.2s ease',
                 }}
-              >
-                {group.avatarUrl ? (
-                  <img 
-                    src={group.avatarUrl} 
-                    alt={group.displayName} 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">
-                      {group.displayName?.charAt(0).toUpperCase() || '?'}
-                    </span>
-                  </div>
-                )}
-              </div>
-              {/* Activity count for current user */}
-              {idx === currentUserIndex && group.activities.length > 1 && (
+              />
+              {/* Activity count indicator */}
+              {group.activities.length > 1 && (
                 <div 
                   className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
                   style={{ background: 'linear-gradient(135deg, #a78bfa, #ec4899)' }}
@@ -399,26 +401,16 @@ const Reel = () => {
         </div>
       </div>
 
-      {/* Main content area with pull-up gesture */}
+      {/* Main content area */}
       <motion.div
         className="absolute inset-0 flex flex-col items-center justify-center"
         style={{ 
           paddingTop: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 80px)',
-          paddingBottom: '180px',
+          paddingBottom: '160px',
           paddingInline: '20px',
           scale: contentScale,
+          opacity: contentOpacity,
         }}
-        drag="y"
-        dragConstraints={{ top: -150, bottom: 0 }}
-        dragElastic={{ top: 0.5, bottom: 0 }}
-        onDrag={(e, info) => {
-          if (info.offset.y < -30) {
-            setShowProgressHint(true);
-          } else {
-            setShowProgressHint(false);
-          }
-        }}
-        onDragEnd={handleVerticalDragEnd}
       >
         {/* Card container with horizontal swipe */}
         <motion.div 
@@ -577,18 +569,14 @@ const Reel = () => {
         </motion.div>
       </motion.div>
 
-
-      {/* Bottom area: Reaction pill + View Progress pull-up bar */}
+      {/* Bottom area: Reaction pill + View Progress bottom sheet */}
       <motion.div 
         className="absolute bottom-0 left-0 right-0 z-40 flex flex-col items-center"
-        style={{ 
-          paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)',
-        }}
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={{ opacity: isTransitioning ? 0 : 1, y: isTransitioning ? -100 : 0 }}
         transition={{ delay: 0.4 }}
       >
-        {/* Reaction pill */}
+        {/* Liquid glass reaction pill */}
         <motion.button
           onClick={() => isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true)}
           className="relative overflow-hidden mb-3"
@@ -596,11 +584,11 @@ const Reel = () => {
             minWidth: 200,
             height: 52,
             borderRadius: 26,
-            background: 'rgba(45, 40, 55, 0.92)',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+            background: 'rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(40px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
           }}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
@@ -620,26 +608,24 @@ const Reel = () => {
                   <>
                     <div className="flex -space-x-3">
                       {MOCK_REACTORS.slice(0, Math.min(currentReactions.total, 3)).map((reactor, i) => (
-                        <motion.img
+                        <ProfileAvatar
                           key={reactor.id}
                           src={reactor.avatar}
-                          alt={reactor.name}
-                          className="w-10 h-10 rounded-full object-cover"
+                          name={reactor.name}
+                          size={36}
                           style={{
-                            border: '2px solid rgba(45, 40, 55, 0.95)',
+                            border: '2px solid rgba(255, 255, 255, 0.15)',
                             zIndex: 10 - i,
                           }}
-                          initial={{ scale: 0, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: i * 0.08 }}
                         />
                       ))}
                       {currentReactions.total > 3 && (
                         <motion.div
-                          className="w-10 h-10 rounded-full flex items-center justify-center text-white/90 text-sm font-semibold"
+                          className="w-9 h-9 rounded-full flex items-center justify-center text-white/90 text-sm font-semibold"
                           style={{
-                            background: 'rgba(80, 75, 95, 0.9)',
-                            border: '2px solid rgba(45, 40, 55, 0.95)',
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            backdropFilter: 'blur(12px)',
+                            border: '2px solid rgba(255, 255, 255, 0.15)',
                             zIndex: 7,
                           }}
                           initial={{ scale: 0, opacity: 0 }}
@@ -673,41 +659,47 @@ const Reel = () => {
           </AnimatePresence>
         </motion.button>
 
-        {/* Edge-to-edge View Progress bar */}
-        <motion.button
-          onClick={handleNavigateToProgress}
-          className="w-full flex items-center justify-center gap-2 py-3"
-          style={{
-            background: 'linear-gradient(180deg, rgba(60, 50, 80, 0.9) 0%, rgba(40, 35, 55, 0.95) 100%)',
-            backdropFilter: 'blur(20px)',
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+        {/* Bottom sheet with grab bar - edge to edge */}
+        <motion.div
+          className="w-full"
+          style={{ 
+            y: bottomSheetY,
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
           }}
-          whileTap={{ scale: 0.98 }}
+          drag="y"
+          dragConstraints={{ top: -200, bottom: 0 }}
+          dragElastic={{ top: 0.3, bottom: 0 }}
+          onDragEnd={handleBottomSheetDragEnd}
         >
-          <ChevronUp className="w-5 h-5 text-white/60" />
-          <span className="text-white/80 text-sm font-medium">View Progress</span>
-          <ChevronUp className="w-5 h-5 text-white/60" />
-        </motion.button>
-      </motion.div>
-
-      {/* Pull-up hint overlay */}
-      <AnimatePresence>
-        {showProgressHint && (
-          <motion.div
-            className="absolute bottom-20 left-0 right-0 flex justify-center pointer-events-none z-50"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
+          <div
+            className="w-full flex flex-col items-center cursor-grab active:cursor-grabbing"
+            style={{
+              background: 'rgba(255, 255, 255, 0.06)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
+            }}
           >
-            <div 
-              className="px-4 py-2 rounded-full text-white text-sm font-medium"
-              style={{ background: 'rgba(100, 80, 150, 0.9)', backdropFilter: 'blur(12px)' }}
-            >
-              Release to view progress
+            {/* Grab bar */}
+            <div className="pt-2 pb-1 flex justify-center">
+              <div 
+                className="w-9 h-1 rounded-full"
+                style={{ background: 'rgba(255, 255, 255, 0.3)' }}
+              />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            
+            {/* View Progress button */}
+            <button
+              onClick={handleNavigateToProgress}
+              className="w-full flex items-center justify-center gap-2 py-3 active:bg-white/5 transition-colors"
+            >
+              <ChevronUp className="w-5 h-5 text-white/60" />
+              <span className="text-white/80 text-sm font-medium">View Progress</span>
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
 
       {/* Reacts bottom sheet for own stories */}
       <AnimatePresence>
