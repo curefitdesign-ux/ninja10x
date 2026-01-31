@@ -507,15 +507,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
           }}
         />
         
-        {/* CULT NINJA branding */}
-        <div className="absolute top-0 left-0 right-0 flex flex-col items-center pt-14 z-10">
-          <span 
-            className="text-white/80 text-xs font-semibold tracking-[3px]"
-            style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}
-          >
-            CULT NINJA
-          </span>
-        </div>
+        {/* CULT NINJA branding removed - now in header */}
         {/* Bottom blur section - smooth & translucent */}
         <div 
           className="absolute bottom-0 left-0 right-0 backdrop-blur-xl bg-black/15"
@@ -653,8 +645,13 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
         style={{ paddingTop: 'max(env(safe-area-inset-top, 24px), 24px)' }}
       >
         <div>
-          <h2 className="text-2xl font-bold text-white">{activity}</h2>
-          <p className="text-white/80 text-sm">Week {week} • Day {day}</p>
+          <h2 
+            className="text-lg font-bold text-white tracking-[0.2em]"
+            style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}
+          >
+            CULT NINJA
+          </h2>
+          <p className="text-white/70 text-sm mt-0.5">Week {week} • Day {day}</p>
         </div>
         
         <button
