@@ -31,12 +31,16 @@ export interface LocalActivity {
   userId?: string;
   reactionCount?: number;
   reactions?: Record<ReactionType, ActivityReaction>;
+  displayName?: string;
+  avatarUrl?: string;
 }
 
 // Convert DB row to local shape
 function toLocal(row: JourneyActivity & { 
   reaction_count?: number; 
   reactions?: Record<ReactionType, ActivityReaction>;
+  display_name?: string;
+  avatar_url?: string;
 }): LocalActivity {
   return {
     id: row.id,
@@ -51,6 +55,8 @@ function toLocal(row: JourneyActivity & {
     userId: row.user_id,
     reactionCount: row.reaction_count,
     reactions: row.reactions,
+    displayName: row.display_name,
+    avatarUrl: row.avatar_url,
   };
 }
 
@@ -282,7 +288,7 @@ const DEFAULT_REACTIONS: Record<ReactionType, ActivityReaction> = {
 };
 
 /**
- * Fetch all activities from all users (public feed) with reactions.
+ * Fetch all activities from all users (public feed) with reactions and profiles.
  * For the Progress page top strip.
  */
 export async function fetchPublicFeed(): Promise<LocalActivity[]> {
@@ -321,6 +327,18 @@ export async function fetchPublicFeed(): Promise<LocalActivity[]> {
     .select('activity_id, user_id, reaction_type')
     .in('activity_id', activityIds);
 
+  // Fetch profiles for these users
+  const userIds = activities.map(a => a.user_id);
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('user_id, display_name, avatar_url')
+    .in('user_id', userIds);
+
+  const profileMap = new Map<string, { display_name: string; avatar_url: string }>();
+  for (const p of profiles || []) {
+    profileMap.set(p.user_id, { display_name: p.display_name, avatar_url: p.avatar_url });
+  }
+
   // Build reaction map
   const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
   const totalMap: Record<string, number> = {};
@@ -339,9 +357,130 @@ export async function fetchPublicFeed(): Promise<LocalActivity[]> {
     totalMap[r.activity_id]++;
   }
 
-  return activities.map(row => ({
-    ...toLocal(row),
-    reactionCount: totalMap[row.id] || 0,
-    reactions: reactionMap[row.id] || { ...DEFAULT_REACTIONS },
-  }));
+  return activities.map(row => {
+    const profile = profileMap.get(row.user_id);
+    return {
+      ...toLocal(row),
+      reactionCount: totalMap[row.id] || 0,
+      reactions: reactionMap[row.id] || { ...DEFAULT_REACTIONS },
+      displayName: profile?.display_name,
+      avatarUrl: profile?.avatar_url,
+    };
+  });
+}
+
+export interface UserStoryGroup {
+  userId: string;
+  displayName: string;
+  avatarUrl?: string;
+  activities: LocalActivity[];
+}
+
+/**
+ * Fetch ALL activities from all users grouped by user, with reactions and profiles.
+ * For the Reel page to show user-based story pages.
+ */
+export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[]> {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Fetch all activities
+  const { data, error } = await supabase
+    .from('journey_activities')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(200);
+
+  if (error) {
+    console.error('Error fetching activities:', error);
+    return [];
+  }
+
+  if (!data || data.length === 0) return [];
+
+  // Group by user
+  const userActivitiesMap = new Map<string, (typeof data[0])[]>();
+  for (const row of data) {
+    if (!userActivitiesMap.has(row.user_id)) {
+      userActivitiesMap.set(row.user_id, []);
+    }
+    userActivitiesMap.get(row.user_id)!.push(row);
+  }
+
+  // Fetch reactions for all activities
+  const activityIds = data.map(a => a.id);
+  const { data: reactions } = await supabase
+    .from('activity_reactions')
+    .select('activity_id, user_id, reaction_type')
+    .in('activity_id', activityIds);
+
+  // Fetch profiles for all users
+  const userIds = Array.from(userActivitiesMap.keys());
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('user_id, display_name, avatar_url')
+    .in('user_id', userIds);
+
+  const profileMap = new Map<string, { display_name: string; avatar_url: string }>();
+  for (const p of profiles || []) {
+    profileMap.set(p.user_id, { display_name: p.display_name, avatar_url: p.avatar_url });
+  }
+
+  // Build reaction map
+  const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
+  const totalMap: Record<string, number> = {};
+
+  for (const r of reactions || []) {
+    const type = (r.reaction_type || 'heart') as ReactionType;
+    if (!reactionMap[r.activity_id]) {
+      reactionMap[r.activity_id] = { ...DEFAULT_REACTIONS };
+      totalMap[r.activity_id] = 0;
+    }
+    reactionMap[r.activity_id][type] = {
+      ...reactionMap[r.activity_id][type],
+      count: reactionMap[r.activity_id][type].count + 1,
+      userReacted: user && r.user_id === user.id ? true : reactionMap[r.activity_id][type].userReacted,
+    };
+    totalMap[r.activity_id]++;
+  }
+
+  // Build user story groups
+  const groups: UserStoryGroup[] = [];
+  
+  // Put current user first if they have activities
+  if (user && userActivitiesMap.has(user.id)) {
+    const userActivities = userActivitiesMap.get(user.id)!;
+    const profile = profileMap.get(user.id);
+    groups.push({
+      userId: user.id,
+      displayName: profile?.display_name || 'You',
+      avatarUrl: profile?.avatar_url,
+      activities: userActivities.map(row => ({
+        ...toLocal(row),
+        reactionCount: totalMap[row.id] || 0,
+        reactions: reactionMap[row.id] || { ...DEFAULT_REACTIONS },
+        displayName: profile?.display_name,
+        avatarUrl: profile?.avatar_url,
+      })),
+    });
+    userActivitiesMap.delete(user.id);
+  }
+
+  // Add other users
+  for (const [userId, userActivities] of userActivitiesMap) {
+    const profile = profileMap.get(userId);
+    groups.push({
+      userId,
+      displayName: profile?.display_name || 'User',
+      avatarUrl: profile?.avatar_url,
+      activities: userActivities.map(row => ({
+        ...toLocal(row),
+        reactionCount: totalMap[row.id] || 0,
+        reactions: reactionMap[row.id] || { ...DEFAULT_REACTIONS },
+        displayName: profile?.display_name,
+        avatarUrl: profile?.avatar_url,
+      })),
+    });
+  }
+
+  return groups;
 }
