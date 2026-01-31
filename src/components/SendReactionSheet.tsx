@@ -132,7 +132,7 @@ export default function SendReactionSheet({
             </div>
             
             {/* All users' reactions - horizontal scroll with avatars */}
-            <div className="flex items-center gap-3 overflow-x-auto scrollbar-none pb-1">
+            <div className="flex items-center gap-4 overflow-x-auto overflow-y-visible scrollbar-none pb-2 pt-2 -mt-1">
               {reactorProfiles.slice(0, 8).map((reactor, idx) => {
                 const isCurrentUser = reactor.userId === currentUserId;
                 return (
@@ -143,7 +143,7 @@ export default function SendReactionSheet({
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.05 + idx * 0.03 }}
                   >
-                    <div className="relative">
+                    <div className="relative" style={{ overflow: 'visible' }}>
                       <ProfileAvatar
                         src={reactor.avatarUrl}
                         name={reactor.displayName}
@@ -165,14 +165,26 @@ export default function SendReactionSheet({
                           />
                         </div>
                       )}
-                      {/* Mini X for current user's reaction */}
+                      {/* Remove reaction button - larger touch target */}
                       {isCurrentUser && (
                         <button
-                          onClick={handleRemoveReaction}
-                          className="absolute -top-1 -right-1 w-4 h-4 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center"
-                          style={{ border: '1px solid rgba(255,255,255,0.2)' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveReaction();
+                          }}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center active:scale-90 transition-transform"
+                          style={{ 
+                            border: '1.5px solid rgba(255,255,255,0.3)',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                            minWidth: 44,
+                            minHeight: 44,
+                            width: 24,
+                            height: 24,
+                            padding: 10,
+                            margin: -10,
+                          }}
                         >
-                          <X className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                          <X className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
                         </button>
                       )}
                     </div>
