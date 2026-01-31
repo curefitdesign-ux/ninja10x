@@ -256,13 +256,12 @@ const Preview = () => {
   }, [editingField]);
 
 
-  // Capture framed image for sharing
+  // Capture framed image for sharing (works for both images and videos)
   const captureFramedImage = async (): Promise<string | null> => {
-    if (isVideo) return imageUrl;
-
     if (!captureRef.current) return null;
 
     try {
+      // For videos, we still capture the template frame (showing the video's first frame)
       const canvas = await html2canvas(captureRef.current, {
         backgroundColor: null,
         scale: 2,
