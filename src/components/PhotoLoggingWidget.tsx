@@ -353,15 +353,15 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
           </div>
         )}
         
-        {/* Day label - Story-like progression text */}
+        {/* Day label - Story-like progression text at TOP */}
         <AnimatePresence>
           {shouldShowExpanded && (
             <motion.div 
-              className="absolute bottom-2 left-1/2"
+              className="absolute top-2 left-1/2"
               style={{ zIndex: 10 }}
-              initial={{ opacity: 0, y: 6, x: "-50%" }}
+              initial={{ opacity: 0, y: -6, x: "-50%" }}
               animate={{ opacity: 1, y: 0, x: "-50%" }}
-              exit={{ opacity: 0, y: 4, x: "-50%" }}
+              exit={{ opacity: 0, y: -4, x: "-50%" }}
               transition={{ delay: 0.1 + index * 0.03, duration: 0.2 }}
             >
               <span className={`text-[10px] italic ${
@@ -380,7 +380,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
                     'soar…', 'peak…', 'legend'      // Week 4
                   ];
                   const story = storyLabels[dayNumber - 1];
-                  return story ? `day ${dayNumber} — ${story}` : `day ${dayNumber}`;
+                  return story ? `day ${dayNumber} ${story}` : `day ${dayNumber}`;
                 })()}
               </span>
             </motion.div>
