@@ -385,7 +385,7 @@ const Activity = () => {
       </AnimatePresence>
       
       <PullToRefresh onRefresh={handleRefresh}>
-        <div className="relative z-10 pb-28 pt-2">
+        <div className="relative z-10 pb-32 pt-2">
           {/* Profile Menu - Top Right */}
           <div className="px-4 pt-3 flex justify-end">
             <ProfileMenu />
@@ -597,11 +597,27 @@ const Activity = () => {
         </div>
       </PullToRefresh>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-50">
-        <div className="absolute inset-x-0 -top-4 h-8 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
-        <div className="relative bg-white/[0.08] backdrop-blur-2xl border-t border-white/[0.12] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_-8px_32px_rgba(0,0,0,0.4)]">
-          <div className="flex items-center justify-around py-2 px-2" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 12px)' }}>
+      {/* Bottom Navigation - Fixed sticky to bottom */}
+      <nav 
+        className="fixed bottom-0 left-0 right-0 z-50"
+        style={{ 
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+        }}
+      >
+        <div className="absolute inset-x-0 -top-6 h-10 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+        <div 
+          className="relative bg-white/[0.08] backdrop-blur-2xl border-t border-white/[0.12]"
+          style={{
+            boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 -8px 32px rgba(0,0,0,0.4)',
+          }}
+        >
+          <div 
+            className="flex items-center justify-around py-2 px-2"
+            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}
+          >
             {navItems.map((item) => (
               <motion.button
                 key={item.id}
@@ -626,7 +642,7 @@ const Activity = () => {
             ))}
           </div>
         </div>
-      </div>
+      </nav>
       
       {/* AI Reel Viewer */}
       <AIReelViewer
