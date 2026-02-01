@@ -336,10 +336,11 @@ const Progress = () => {
                   ))}
                 </>
               ) : publicFeed.length > 0 ? (
-                // Show public feed - blur if user has no public activity
+                // Show all users' stories - blur others if current user hasn't made anything public
                 publicFeed.map((photo, index) => {
                   const isOwnStory = user && photo.userId === user.id;
-                  const shouldBlur = !hasPublicActivity && !isOwnStory;
+                  // Blur OTHER users' content if current user hasn't shared publicly yet
+                  const shouldBlur = !isOwnStory && !hasPublicActivity;
                   
                   return (
                     <motion.button
@@ -350,12 +351,12 @@ const Progress = () => {
                         width: "72px",
                         height: "100px",
                         borderRadius: "14px",
-                        boxShadow: index === 0 ? "0 12px 40px rgba(100, 70, 180, 0.5)" : "0 4px 16px rgba(0,0,0,0.25)",
-                        border: index === 0 ? "2px solid rgba(160, 120, 220, 0.35)" : "1px solid rgba(255,255,255,0.1)",
+                        boxShadow: isOwnStory ? "0 12px 40px rgba(100, 70, 180, 0.5)" : "0 4px 16px rgba(0,0,0,0.25)",
+                        border: isOwnStory ? "2px solid rgba(160, 120, 220, 0.35)" : "1px solid rgba(255,255,255,0.1)",
                       }}
                       onClick={() => {
                         if (shouldBlur) {
-                          // Prompt to make public
+                          // Prompt to make public - use the most recent activity
                           const latestActivity = myActivities[myActivities.length - 1];
                           if (latestActivity) {
                             setPendingDayNumber(latestActivity.dayNumber);
@@ -420,7 +421,17 @@ const Progress = () => {
                         </div>
                       )}
                       
-                      {/* User avatar overlay with fallback */}
+                      {/* Activity tag at top */}
+                      {!shouldBlur && photo.activity && (
+                        <div 
+                          className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-white font-semibold text-[8px]"
+                          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+                        >
+                          {photo.activity}
+                        </div>
+                      )}
+                      
+                      {/* User avatar overlay */}
                       {!shouldBlur && (
                         <div className="absolute bottom-1.5 left-1.5">
                           <ProfileAvatar
