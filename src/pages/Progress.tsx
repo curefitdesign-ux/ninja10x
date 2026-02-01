@@ -431,27 +431,53 @@ const Progress = () => {
                         </div>
                       )}
                       
-                      {/* User avatar overlay */}
-                      {!shouldBlur && (
-                        <div className="absolute bottom-1.5 left-1.5">
-                          <ProfileAvatar
-                            src={photo.avatarUrl}
-                            name={photo.displayName}
-                            size={24}
-                            style={{ border: '2px solid rgba(255,255,255,0.6)' }}
-                          />
+                      {/* User avatar overlay - blurred with lock for locked content */}
+                      <div className="absolute bottom-1.5 left-1.5">
+                        <div className="relative">
+                          <div 
+                            className="rounded-full overflow-hidden"
+                            style={{ 
+                              filter: shouldBlur ? 'blur(4px)' : 'none',
+                              opacity: shouldBlur ? 0.5 : 1,
+                            }}
+                          >
+                            <ProfileAvatar
+                              src={photo.avatarUrl}
+                              name={photo.displayName}
+                              size={24}
+                              style={{ border: '2px solid rgba(255,255,255,0.6)' }}
+                            />
+                          </div>
+                          {/* Lock icon on blurred avatar */}
+                          {shouldBlur && (
+                            <div 
+                              className="absolute inset-0 flex items-center justify-center"
+                            >
+                              <div 
+                                className="w-3 h-3 rounded-full flex items-center justify-center"
+                                style={{
+                                  background: 'rgba(0,0,0,0.6)',
+                                  backdropFilter: 'blur(4px)',
+                                }}
+                              >
+                                <Lock className="w-1.5 h-1.5 text-white/90" />
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
                       
                       {/* Day badge */}
-                      {!shouldBlur && (
-                        <div 
-                          className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-white font-semibold text-[9px]"
-                          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
-                        >
-                          D{photo.dayNumber}
-                        </div>
-                      )}
+                      <div 
+                        className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-white font-semibold text-[9px]"
+                        style={{ 
+                          background: "rgba(0,0,0,0.5)", 
+                          backdropFilter: "blur(4px)",
+                          opacity: shouldBlur ? 0.5 : 1,
+                        }}
+                      >
+                        D{photo.dayNumber}
+                      </div>
                     </motion.button>
                   );
                 })
