@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, X } from 'lucide-react';
 import { ReactionType, removeReaction } from '@/services/journey-service';
@@ -59,6 +60,11 @@ export default function SendReactionSheet({
   totalReactions = 0,
   reactorProfiles = []
 }: SendReactionSheetProps) {
+  const [isRemoving, setIsRemoving] = useState(false);
+  
+  // Use reactorProfiles.length as the accurate count (matches displayed users)
+  const actualReactionCount = reactorProfiles.length;
+  
   // Find current user's reaction
   const userReaction = reactorProfiles.find(r => r.userId === currentUserId);
   
@@ -69,10 +75,16 @@ export default function SendReactionSheet({
   }, {} as Record<string, number>);
   
   const handleRemoveReaction = async () => {
-    if (!activityId || !userReaction?.reactionType) return;
-    const success = await removeReaction(activityId, userReaction.reactionType);
-    if (success) {
-      onReactionRemoved?.();
+    if (!activityId || !userReaction?.reactionType || isRemoving) return;
+    setIsRemoving(true);
+    try {
+      const success = await removeReaction(activityId, userReaction.reactionType);
+      if (success) {
+        onReactionRemoved?.();
+        onClose();
+      }
+    } finally {
+      setIsRemoving(false);
     }
   };
 
@@ -109,17 +121,17 @@ export default function SendReactionSheet({
         </div>
 
         {/* REACTIONS SECTION - Show all users' reactions */}
-        {totalReactions > 0 && onViewReactions && (
+        {actualReactionCount > 0 && onViewReactions && (
           <motion.div
             className="px-5 py-3"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
           >
-            {/* Header with total count */}
+            {/* Header with total count - use actualReactionCount for accuracy */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <span className="text-white font-bold text-2xl">{totalReactions}</span>
+                <span className="text-white font-bold text-2xl">{actualReactionCount}</span>
                 <span className="text-white/60 text-sm">reactions</span>
               </div>
               <button
@@ -165,26 +177,33 @@ export default function SendReactionSheet({
                           />
                         </div>
                       )}
-                      {/* Remove reaction button - larger touch target */}
+                      {/* Remove reaction button - proper tap area without cropping */}
                       {isCurrentUser && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRemoveReaction();
                           }}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center active:scale-90 transition-transform"
+                          disabled={isRemoving}
+                          className="absolute flex items-center justify-center active:scale-90 transition-transform"
                           style={{ 
-                            border: '1.5px solid rgba(255,255,255,0.3)',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                            minWidth: 44,
-                            minHeight: 44,
-                            width: 24,
-                            height: 24,
-                            padding: 10,
-                            margin: -10,
+                            top: -14,
+                            right: -14,
+                            width: 44,
+                            height: 44,
+                            zIndex: 10,
                           }}
                         >
-                          <X className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+                          {/* Visual X badge - smaller, centered in tap area */}
+                          <div 
+                            className="w-5 h-5 bg-white/25 backdrop-blur-md rounded-full flex items-center justify-center"
+                            style={{ 
+                              border: '1.5px solid rgba(255,255,255,0.4)',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                            }}
+                          >
+                            <X className="w-3 h-3 text-white" strokeWidth={2.5} />
+                          </div>
                         </button>
                       )}
                     </div>
@@ -194,7 +213,7 @@ export default function SendReactionSheet({
                   </motion.div>
                 );
               })}
-              {totalReactions > 8 && (
+              {actualReactionCount > 8 && (
                 <button
                   onClick={onViewReactions}
                   className="flex flex-col items-center gap-1 flex-shrink-0"
@@ -203,7 +222,7 @@ export default function SendReactionSheet({
                     className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-white/70 text-sm font-medium"
                     style={{ border: '2px solid rgba(255,255,255,0.1)' }}
                   >
-                    +{totalReactions - 8}
+                    +{actualReactionCount - 8}
                   </div>
                   <span className="text-white/40 text-[10px]">more</span>
                 </button>
@@ -213,7 +232,7 @@ export default function SendReactionSheet({
         )}
 
         {/* Divider */}
-        {totalReactions > 0 && (
+        {actualReactionCount > 0 && (
           <div className="mx-5 h-px bg-white/10 my-2" />
         )}
 
