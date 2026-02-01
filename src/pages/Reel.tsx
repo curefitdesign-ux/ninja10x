@@ -501,7 +501,7 @@ const Reel = () => {
                   </defs>
                 </svg>
                 
-                {/* Avatar with blur for locked profiles */}
+                {/* Avatar - show clear profile photos, content stays locked */}
                 <div
                   className="relative"
                   style={{
@@ -510,40 +510,17 @@ const Reel = () => {
                     padding: isActive ? 5 : 4,
                   }}
                 >
-                  <div 
-                    className="w-full h-full rounded-full overflow-hidden"
-                    style={{
-                      filter: isProfileLocked ? 'blur(6px)' : 'none',
-                    }}
-                  >
+                  <div className="w-full h-full rounded-full overflow-hidden">
                     <ProfileAvatar
                       src={group.avatarUrl}
                       name={group.displayName}
                       size={isActive ? 54 : 44}
                       style={{
-                        opacity: isProfileLocked ? 0.5 : (isActive ? 1 : 0.7),
+                        opacity: isActive ? 1 : 0.7,
                         transition: 'all 0.2s ease',
                       }}
                     />
                   </div>
-                  
-                  {/* Lock icon overlay for locked profiles */}
-                  {isProfileLocked && (
-                    <div 
-                      className="absolute inset-0 flex items-center justify-center"
-                      style={{ padding: isActive ? 5 : 4 }}
-                    >
-                      <div 
-                        className="w-5 h-5 rounded-full flex items-center justify-center"
-                        style={{
-                          background: 'rgba(0,0,0,0.5)',
-                          backdropFilter: 'blur(4px)',
-                        }}
-                      >
-                        <Lock className="w-2.5 h-2.5 text-white/80" />
-                      </div>
-                    </div>
-                  )}
                 </div>
               </motion.button>
             );
