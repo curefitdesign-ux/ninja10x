@@ -561,57 +561,128 @@ const Reel = () => {
             scale: cardScale,
           }}
         >
-          {/* Full templated image/video - no container wrapper */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentActivity.id}
-              className="relative w-full"
-              initial={{ opacity: 0, scale: 0.92, y: 30 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 180, damping: 22 }}
-            >
-              {isVideo ? (
-                <video
-                  src={mediaUrl}
-                  className="w-full h-auto rounded-2xl"
-                  style={{ 
-                    boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
-                  }}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                />
-              ) : (
-                <img
-                  src={mediaUrl}
-                  alt={`Day ${currentActivity.dayNumber}`}
-                  className="w-full h-auto rounded-2xl"
-                  style={{ 
-                    boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
-                  }}
-                  onError={(e) => {
-                    const img = e.currentTarget;
-                    if (!img.dataset.retried) {
-                      img.dataset.retried = "true";
-                      img.src = mediaUrl + "?t=" + Date.now();
-                    }
-                  }}
-                />
-              )}
-            </motion.div>
-          </AnimatePresence>
+          {/* Full templated image/video - with lock overlay for non-public users */}
+          {(() => {
+            // Show locked state for other users' content when current user hasn't shared publicly
+            const shouldShowLocked = !isOwnStory && !hasPublicActivity;
+            
+            return (
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentActivity.id}
+                  className="relative w-full"
+                  initial={{ opacity: 0, scale: 0.92, y: 30 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 180, damping: 22 }}
+                >
+                  {isVideo ? (
+                    <video
+                      src={mediaUrl}
+                      className="w-full h-auto rounded-2xl"
+                      style={{ 
+                        boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
+                        filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                      }}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                    />
+                  ) : (
+                    <img
+                      src={mediaUrl}
+                      alt={`Day ${currentActivity.dayNumber}`}
+                      className="w-full h-auto rounded-2xl"
+                      style={{ 
+                        boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
+                        filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                      }}
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        if (!img.dataset.retried) {
+                          img.dataset.retried = "true";
+                          img.src = mediaUrl + "?t=" + Date.now();
+                        }
+                      }}
+                    />
+                  )}
+                  
+                  {/* Lock overlay for locked content */}
+                  {shouldShowLocked && (
+                    <motion.div
+                      className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      {/* Frosted glass lock badge */}
+                      <motion.div
+                        className="flex flex-col items-center gap-3"
+                        initial={{ scale: 0.8, y: 20 }}
+                        animate={{ scale: 1, y: 0 }}
+                        transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+                      >
+                        <div 
+                          className="w-16 h-16 rounded-full flex items-center justify-center"
+                          style={{
+                            background: 'rgba(255,255,255,0.12)',
+                            backdropFilter: 'blur(16px)',
+                            border: '2px solid rgba(255,255,255,0.25)',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                          }}
+                        >
+                          <Lock className="w-7 h-7 text-white" />
+                        </div>
+                        
+                        <div className="text-center px-6">
+                          <p className="text-white font-semibold text-lg">Share to see others</p>
+                          <p className="text-white/60 text-sm mt-1">
+                            Make your workout public to unlock
+                          </p>
+                        </div>
+                        
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Find the most recent activity to make public
+                            const latestActivity = myActivities[myActivities.length - 1];
+                            if (latestActivity) {
+                              setShowMakePublicSheet(true);
+                            }
+                          }}
+                          className="mt-2 px-6 py-2.5 rounded-full font-semibold text-sm active:scale-95 transition-transform"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%)',
+                            color: '#000',
+                            boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
+                          }}
+                        >
+                          Share my progress
+                        </button>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            );
+          })()}
         </motion.div>
       </motion.div>
 
       {/* Bottom area: Reaction pill + View Progress bottom sheet */}
-      <motion.div 
-        className="absolute bottom-0 left-0 right-0 z-40 flex flex-col items-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: isTransitioning ? 0 : 1, y: isTransitioning ? -100 : 0 }}
-        transition={{ delay: 0.4 }}
-      >
+      {/* Hide reaction pill when content is locked (non-owner, user hasn't made public) */}
+      {(() => {
+        const isContentLocked = !isOwnStory && !hasPublicActivity;
+        
+        return (
+          <motion.div 
+            className="absolute bottom-0 left-0 right-0 z-40 flex flex-col items-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: (isTransitioning || isContentLocked) ? 0 : 1, y: isTransitioning ? -100 : 0 }}
+            transition={{ delay: 0.4 }}
+            style={{ pointerEvents: isContentLocked ? 'none' : 'auto' }}
+          >
         {/* Liquid glass reaction pill */}
         <motion.button
           onClick={() => isOwnStory ? (currentReactions.total > 0 && setShowReactsSheet(true)) : setShowSendReactionSheet(true)}
@@ -750,6 +821,8 @@ const Reel = () => {
           </div>
         </motion.div>
       </motion.div>
+        );
+      })()}
 
       {/* Reacts bottom sheet for own stories */}
       <AnimatePresence>
