@@ -6,7 +6,7 @@ import { useJourneyActivities, fetchPublicFeed, LocalActivity } from "@/hooks/us
 import { useAuth } from "@/hooks/use-auth";
 import { JourneyActivity, ReactionType, ActivityReaction } from "@/services/journey-service";
 import ProfileAvatar from "@/components/ProfileAvatar";
-import MakePublicSheet from "@/components/MakePublicSheet";
+import MakePublicSheet, { hasUserChosenPublic } from "@/components/MakePublicSheet";
 
 // Import tile assets
 import tileActiveImg from "@/assets/progress/tile-active-new.png";
@@ -140,12 +140,19 @@ const Progress = () => {
       setTimeout(() => setShowTransitionIn(false), 600);
       
       // Show make public prompt if coming from share and activity is not public
+      // BUT only if user hasn't already chosen to make things public
       const currentActivity = myActivities.find(a => a.dayNumber === transitionDayNumber);
       if (currentActivity && !currentActivity.isPublic) {
-        setTimeout(() => {
-          setPendingDayNumber(transitionDayNumber);
-          setShowMakePublicSheet(true);
-        }, 800);
+        // If user previously chose public, auto-make it public
+        if (hasUserChosenPublic()) {
+          makeActivityPublic(transitionDayNumber);
+        } else {
+          // Otherwise, show the sheet to ask
+          setTimeout(() => {
+            setPendingDayNumber(transitionDayNumber);
+            setShowMakePublicSheet(true);
+          }, 800);
+        }
       }
     }
     
@@ -159,7 +166,7 @@ const Progress = () => {
       clearTimeout(storiesTimer);
       clearTimeout(tilesTimer);
     };
-  }, [transitionToProgress, transitionImage, transitionDayNumber, myActivities]);
+  }, [transitionToProgress, transitionImage, transitionDayNumber, myActivities, makeActivityPublic]);
 
   // Handle making activity public
   const handleMakePublic = async () => {

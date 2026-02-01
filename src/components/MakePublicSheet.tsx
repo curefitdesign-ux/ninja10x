@@ -2,12 +2,27 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, Lock, Sparkles, Eye } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 
+const PUBLIC_PREFERENCE_KEY = 'user_public_preference';
+
 interface MakePublicSheetProps {
   isOpen: boolean;
   onClose: () => void;
   onMakePublic: () => void;
   onKeepPrivate: () => void;
   thumbnailUrl?: string;
+}
+
+// Check if user has previously chosen to make activities public
+export function hasUserChosenPublic(): boolean {
+  return localStorage.getItem(PUBLIC_PREFERENCE_KEY) === 'true';
+}
+
+// Save user's public preference
+function savePublicPreference(isPublic: boolean) {
+  if (isPublic) {
+    localStorage.setItem(PUBLIC_PREFERENCE_KEY, 'true');
+  }
+  // Don't save if private - we'll ask again next time
 }
 
 export default function MakePublicSheet({ 
@@ -21,11 +36,13 @@ export default function MakePublicSheet({
 
   const handleMakePublic = () => {
     triggerHaptic('success');
+    savePublicPreference(true);
     onMakePublic();
   };
 
   const handleKeepPrivate = () => {
     triggerHaptic('light');
+    // Don't save preference - will ask again next time
     onKeepPrivate();
   };
 
@@ -74,7 +91,7 @@ export default function MakePublicSheet({
             />
 
             {/* Handle bar */}
-            <div className="flex justify-center pt-3 pb-5">
+            <div className="flex justify-center pt-3 pb-4">
               <div 
                 className="w-10 h-1 rounded-full"
                 style={{
@@ -85,7 +102,7 @@ export default function MakePublicSheet({
 
             <div className="px-6 pb-4">
               {/* Thumbnail + Icon */}
-              <div className="flex justify-center mb-5">
+              <div className="flex justify-center mb-4">
                 <div className="relative">
                   {thumbnailUrl ? (
                     <div 
@@ -129,61 +146,44 @@ export default function MakePublicSheet({
               </div>
 
               {/* Title */}
-              <h2 className="text-white text-xl font-semibold text-center mb-2 tracking-tight">
+              <h2 className="text-white text-xl font-semibold text-center mb-5 tracking-tight">
                 Share with Community?
               </h2>
 
-              {/* Description */}
-              <p className="text-white/50 text-center text-sm mb-6 leading-relaxed max-w-[280px] mx-auto">
-                Make public to get reactions & see what others are achieving
-              </p>
-
-              {/* Benefits - Liquid glass cards */}
-              <div className="space-y-2.5 mb-6">
+              {/* Benefits - Non-clickable info cards */}
+              <div className="space-y-2 mb-5">
                 <div 
-                  className="flex items-center gap-3.5 p-3.5 rounded-2xl"
+                  className="flex items-center gap-3 p-3 rounded-xl"
                   style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    background: 'rgba(255,255,255,0.04)',
                   }}
                 >
                   <div 
-                    className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(52,211,153,0.25) 0%, rgba(16,185,129,0.15) 100%)',
-                      border: '1px solid rgba(52,211,153,0.2)',
+                      background: 'rgba(52,211,153,0.15)',
                     }}
                   >
-                    <Sparkles className="w-5 h-5 text-emerald-400" />
+                    <Sparkles className="w-4 h-4 text-emerald-400" />
                   </div>
-                  <div>
-                    <span className="text-white text-sm font-medium block">Get reactions</span>
-                    <p className="text-white/40 text-xs mt-0.5">Friends can cheer you on</p>
-                  </div>
+                  <span className="text-white/70 text-sm">Get reactions from friends</span>
                 </div>
                 
                 <div 
-                  className="flex items-center gap-3.5 p-3.5 rounded-2xl"
+                  className="flex items-center gap-3 p-3 rounded-xl"
                   style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    background: 'rgba(255,255,255,0.04)',
                   }}
                 >
                   <div 
-                    className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(59,130,246,0.25) 0%, rgba(99,102,241,0.15) 100%)',
-                      border: '1px solid rgba(59,130,246,0.2)',
+                      background: 'rgba(59,130,246,0.15)',
                     }}
                   >
-                    <Eye className="w-5 h-5 text-blue-400" />
+                    <Eye className="w-4 h-4 text-blue-400" />
                   </div>
-                  <div>
-                    <span className="text-white text-sm font-medium block">See others' progress</span>
-                    <p className="text-white/40 text-xs mt-0.5">Unlock the community feed</p>
-                  </div>
+                  <span className="text-white/70 text-sm">See others' progress</span>
                 </div>
               </div>
 
@@ -208,7 +208,6 @@ export default function MakePublicSheet({
                   className="w-full py-3.5 rounded-2xl font-medium text-white/60 text-base active:scale-[0.98] transition-all duration-200"
                   style={{
                     background: 'rgba(255,255,255,0.06)',
-                    backdropFilter: 'blur(20px)',
                     border: '1px solid rgba(255,255,255,0.08)',
                   }}
                 >
@@ -219,8 +218,8 @@ export default function MakePublicSheet({
                 </button>
               </div>
 
-              <p className="text-white/30 text-xs text-center mt-4">
-                You can change this anytime
+              <p className="text-white/25 text-xs text-center mt-3">
+                Change anytime in settings
               </p>
             </div>
           </motion.div>
