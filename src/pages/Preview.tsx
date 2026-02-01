@@ -11,7 +11,7 @@ import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
 import WheelPicker from '@/components/WheelPicker';
 // CameraUI is now in a separate page
-import { useActivityDataPoints } from '@/hooks/use-activity-data-points';
+// useActivityDataPoints removed - using local getActivityInputConfig instead
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ActivityBackgroundEffect from '@/components/ActivityBackgroundEffect';
 import SyncHealthPopup from '@/components/SyncHealthPopup';
@@ -25,24 +25,31 @@ type FrameType = typeof FRAMES[number];
 
 // Activity options with Lucide icons and contextual data inputs
 const activityOptions = [
-  { name: 'Running', icon: Footprints, metric: 'Distance', unit: 'km', inputType: 'number' as const },
-  { name: 'Cycling', icon: Bike, metric: 'Distance', unit: 'km', inputType: 'number' as const },
-  { name: 'Trekking', icon: Mountain, metric: 'Elevation', unit: 'm', inputType: 'number' as const },
-  { name: 'Swimming', icon: Waves, metric: 'Laps', unit: 'laps', inputType: 'number' as const },
-  { name: 'Yoga', icon: Brain, metric: 'Session', unit: 'min', inputType: 'wheel' as const },
-  { name: 'GYM', icon: Dumbbell, metric: 'Sets', unit: 'sets', inputType: 'number' as const },
-  { name: 'Cricket', icon: Trophy, metric: 'Runs', unit: 'runs', inputType: 'number' as const },
-  { name: 'Badminton', icon: CircleDot, metric: 'Games', unit: 'games', inputType: 'number' as const },
-  { name: 'Tennis', icon: CircleDot, metric: 'Sets', unit: 'sets', inputType: 'number' as const },
-  { name: 'Meditation', icon: Brain, metric: 'Session', unit: 'min', inputType: 'wheel' as const },
-  { name: 'Boxing', icon: Swords, metric: 'Rounds', unit: 'rounds', inputType: 'number' as const },
-  { name: 'Dance', icon: Music, metric: 'Session', unit: 'min', inputType: 'wheel' as const },
+  { name: 'Running', icon: Footprints, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' as const },
+  { name: 'Cycling', icon: Bike, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' as const },
+  { name: 'Trekking', icon: Mountain, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Elevation', secondaryUnit: 'm', secondaryInputType: 'number' as const },
+  { name: 'Swimming', icon: Waves, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Laps', secondaryUnit: 'laps', secondaryInputType: 'number' as const },
+  { name: 'Yoga', icon: Brain, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
+  { name: 'GYM', icon: Dumbbell, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' as const },
+  { name: 'Cricket', icon: Trophy, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Runs', secondaryUnit: 'runs', secondaryInputType: 'number' as const },
+  { name: 'Badminton', icon: CircleDot, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Games', secondaryUnit: 'games', secondaryInputType: 'number' as const },
+  { name: 'Tennis', icon: CircleDot, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' as const },
+  { name: 'Meditation', icon: Brain, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
+  { name: 'Boxing', icon: Swords, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Rounds', secondaryUnit: 'rounds', secondaryInputType: 'number' as const },
+  { name: 'Dance', icon: Music, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
 ];
 
 // Get activity-specific input config
 const getActivityInputConfig = (activityName: string) => {
-  const found = activityOptions.find(a => a.name === activityName);
-  return found || { metric: 'Metric', unit: '', inputType: 'number' as const };
+  const found = activityOptions.find(a => a.name.toLowerCase() === activityName.toLowerCase());
+  return found || { 
+    primaryMetric: 'Duration', 
+    primaryUnit: 'min', 
+    primaryInputType: 'wheel' as const,
+    secondaryMetric: 'Metric', 
+    secondaryUnit: '', 
+    secondaryInputType: 'number' as const 
+  };
 };
 
 const isVideoUrl = (url: string) => {
@@ -97,7 +104,7 @@ const Preview = () => {
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [imageScale, setImageScale] = useState(1.0);
 
-  const { label1, label2 } = useActivityDataPoints(activity || '');
+  
   
   // Bottom sheet keyboard state
   const [editingField, setEditingField] = useState<EditingField>(null);
@@ -524,6 +531,9 @@ const Preview = () => {
   // Calculate week from dayNumber
   const calculatedWeek = Math.ceil(dayNumber / 3);
 
+  // Get activity-specific labels for the frame
+  const activityLabels = getActivityInputConfig(activity || '');
+
   const frameProps = {
     imageUrl: imageUrl || '',
     isVideo,
@@ -534,8 +544,8 @@ const Preview = () => {
     pr,
     imagePosition,
     imageScale,
-    label1,
-    label2,
+    label1: activityLabels.secondaryMetric, // The secondary metric (e.g., Distance, Laps)
+    label2: activityLabels.primaryMetric, // The primary metric (Duration)
   };
 
   const renderFrame = () => {
@@ -811,12 +821,12 @@ const Preview = () => {
           </button>
         </div>
         
-        {/* Frame carousel - device-responsive fixed height */}
+        {/* Frame carousel - larger templates */}
         <div 
           className={`flex-1 flex items-center justify-center transition-all duration-700 ease-out ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''}`}
           style={{ 
-            minHeight: 0, // Allow flex to shrink
-            maxHeight: 'calc(100dvh - 280px)', // Reserve space for header + content + CTA
+            minHeight: 0,
+            maxHeight: 'calc(100dvh - 220px)', // More space for larger templates
           }}
         >
           {elementsHidden ? (
@@ -824,7 +834,7 @@ const Preview = () => {
               <div 
                 className="w-full"
                 style={{ 
-                  maxWidth: 'min(50vw, 200px)',
+                  maxWidth: 'min(65vw, 280px)',
                   aspectRatio: '9/16',
                   maxHeight: '100%',
                 }}
@@ -840,13 +850,13 @@ const Preview = () => {
             <div 
               ref={containerRef}
               onScroll={handleScroll}
-              className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center"
+              className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center"
               style={{ 
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
-                paddingLeft: 'calc((100vw - min(50vw, 200px)) / 2)',
-                paddingRight: 'calc((100vw - min(50vw, 200px)) / 2)',
+                paddingLeft: 'calc((100vw - min(65vw, 280px)) / 2)',
+                paddingRight: 'calc((100vw - min(65vw, 280px)) / 2)',
               }}
             >
               {FRAMES.map((frame, index) => {
@@ -869,9 +879,9 @@ const Preview = () => {
                       elementsHidden && isRightOfCurrent ? 'opacity-0 translate-x-full' : ''
                     }`}
                     style={{ 
-                      width: 'min(50vw, 200px)',
-                      height: 'calc(min(50vw, 200px) * 16 / 9)',
-                      maxHeight: 'calc(100dvh - 300px)',
+                      width: 'min(65vw, 280px)',
+                      height: 'calc(min(65vw, 280px) * 16 / 9)',
+                      maxHeight: 'calc(100dvh - 240px)',
                       transform: `scale(${scale})`,
                       opacity: elementsHidden && !isActiveFrame ? 0 : opacity,
                       transition: 'transform 0.15s ease-out, opacity 0.15s ease-out',
@@ -896,35 +906,45 @@ const Preview = () => {
 
         {/* Content section - fixed, no scroll */}
         <div 
-          className={`flex-shrink-0 space-y-2 px-5 py-3 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
+          className={`flex-shrink-0 space-y-2 px-5 py-2 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
           style={{ animationDelay: '0.3s' }}
         >
-          {/* Editable data points - compact */}
-          <div className="bg-white/10 backdrop-blur-xl rounded-xl p-2.5 relative overflow-hidden">
-            <button 
-              onClick={() => { handleTap('duration'); openEditSheet('duration'); }}
-              className={`w-full flex justify-between items-center py-1.5 border-b border-white/10 tap-bounce min-h-[40px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
-            >
-              <span className="text-white/80 text-xs flex items-center gap-2">
-                {label2}
-                <span className="text-[9px] text-white/40">tap to edit</span>
-              </span>
-              <span className={`font-semibold text-xs ${duration ? 'text-white' : 'text-white/50 italic'}`}>
-                {duration || `e.g. ${label2.toLowerCase()}`}
-              </span>
-            </button>
-            <button 
-              onClick={() => { handleTap('pr'); openEditSheet('pr'); }}
-              className={`w-full flex justify-between items-center py-1.5 tap-bounce min-h-[40px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
-            >
-              <span className="text-white/80 text-xs flex items-center gap-2">
-                {label1} <span className="text-white/40">(Optional)</span>
-              </span>
-              <span className={`font-semibold text-xs ${pr ? 'text-white' : 'text-white/50'}`}>
-                {pr || '-'}
-              </span>
-            </button>
-          </div>
+          {/* Editable data points - contextual to activity */}
+          {(() => {
+            const config = getActivityInputConfig(activity || '');
+            return (
+              <div className="bg-white/10 backdrop-blur-xl rounded-xl p-2.5 relative overflow-hidden">
+                {/* Primary: Duration (always shown) */}
+                <button 
+                  onClick={() => { handleTap('duration'); openEditSheet('duration'); }}
+                  className={`w-full flex justify-between items-center py-1.5 ${config.secondaryInputType !== 'none' ? 'border-b border-white/10' : ''} tap-bounce min-h-[40px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
+                >
+                  <span className="text-white/80 text-xs flex items-center gap-2">
+                    {config.primaryMetric}
+                    <span className="text-[9px] text-white/40">tap to edit</span>
+                  </span>
+                  <span className={`font-semibold text-xs ${duration ? 'text-white' : 'text-white/50 italic'}`}>
+                    {duration || '-'}
+                  </span>
+                </button>
+                
+                {/* Secondary: Contextual metric (only if activity has one) */}
+                {config.secondaryInputType !== 'none' && (
+                  <button 
+                    onClick={() => { handleTap('pr'); openEditSheet('pr'); }}
+                    className={`w-full flex justify-between items-center py-1.5 tap-bounce min-h-[40px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
+                  >
+                    <span className="text-white/80 text-xs flex items-center gap-2">
+                      {config.secondaryMetric} <span className="text-white/40">(Optional)</span>
+                    </span>
+                    <span className={`font-semibold text-xs ${pr ? 'text-white' : 'text-white/50'}`}>
+                      {pr || '-'}
+                    </span>
+                  </button>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Health sync widget - compact */}
           <div 
@@ -940,42 +960,46 @@ const Preview = () => {
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Floating CTA - integrated at bottom */}
-        {!showShareSheet && (
-          <div 
-            className={`flex-shrink-0 px-5 py-3 transition-all duration-500 ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : 'opacity-100 translate-y-0'}`}
-            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 16px)' }}
-          >
-            <div className="flex flex-col items-center gap-2">
-              <button 
-                onClick={handleSaveWithTemplate}
-                disabled={isSaving || isDeleting}
-                className={`w-full bg-white py-3.5 rounded-2xl disabled:opacity-50 tap-bounce ${tappedElement === 'done-btn' ? 'animate-liquid-tap' : ''}`}
-                style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
+      {/* Floating DONE CTA - fixed at bottom, always visible */}
+      {!showShareSheet && (
+        <div 
+          className={`fixed bottom-0 left-0 right-0 z-30 px-5 transition-all duration-500 ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : 'opacity-100 translate-y-0'}`}
+          style={{ 
+            paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 20px)',
+            paddingTop: 12,
+            background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
+          }}
+        >
+          <div className="flex flex-col items-center gap-2">
+            <button 
+              onClick={handleSaveWithTemplate}
+              disabled={isSaving || isDeleting}
+              className={`w-full bg-white py-4 rounded-2xl disabled:opacity-50 tap-bounce ${tappedElement === 'done-btn' ? 'animate-liquid-tap' : ''}`}
+              style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
+            >
+              <span className="text-black font-bold text-base">
+                {isSaving ? 'Saving...' : 'DONE'}
+              </span>
+            </button>
+            
+            {/* Delete button - only show in review mode (existing activity) */}
+            {isReview && (
+              <button
+                onClick={handleDeleteActivity}
+                disabled={isDeleting || isSaving}
+                className="flex items-center gap-2 px-4 py-1.5 text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
               >
-                <span className="text-black font-bold text-base">
-                  {isSaving ? 'Saving...' : 'DONE'}
+                <Trash2 className="w-3.5 h-3.5" />
+                <span className="text-xs font-medium">
+                  {isDeleting ? 'Deleting...' : 'Remove Photo'}
                 </span>
               </button>
-              
-              {/* Delete button - only show in review mode (existing activity) */}
-              {isReview && (
-                <button
-                  onClick={handleDeleteActivity}
-                  disabled={isDeleting || isSaving}
-                  className="flex items-center gap-2 px-4 py-1.5 text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span className="text-xs font-medium">
-                    {isDeleting ? 'Deleting...' : 'Remove Photo'}
-                  </span>
-                </button>
-              )}
-            </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Bottom Sheet Keyboard Overlay - Context-aware inputs */}
       {editingField && (
@@ -992,21 +1016,23 @@ const Preview = () => {
               {(() => {
                 const activityConfig = getActivityInputConfig(activity || '');
                 const isDuration = editingField === 'duration';
-                const fieldLabel = isDuration ? label2 : activityConfig.metric;
-                const fieldUnit = isDuration ? 'min' : activityConfig.unit;
-                const useWheel = isDuration || activityConfig.inputType === 'wheel';
+                const fieldLabel = isDuration ? activityConfig.primaryMetric : activityConfig.secondaryMetric;
+                const fieldUnit = isDuration ? activityConfig.primaryUnit : activityConfig.secondaryUnit;
+                const inputType = isDuration ? activityConfig.primaryInputType : activityConfig.secondaryInputType;
+                const useWheel = inputType === 'wheel';
+                const useDecimal = inputType === 'decimal';
                 
                 return (
                   <>
                     <p className="text-white text-lg font-semibold text-center mb-4">
-                      {isDuration ? `Select ${label2}` : `Enter ${activityConfig.metric}`}
+                      {isDuration ? `Select ${fieldLabel}` : `Enter ${fieldLabel}`}
                     </p>
                     
                     {useWheel ? (
                       <div className="flex items-center justify-center gap-4 mb-4">
                         <div className="flex-1 max-w-[200px]">
                           <WheelPicker
-                            items={isDuration ? Array.from({ length: 181 }, (_, i) => i) : Array.from({ length: 101 }, (_, i) => i)}
+                            items={Array.from({ length: 181 }, (_, i) => i)}
                             value={parseInt(tempValue) || 0}
                             onChange={(value) => {
                               const numValue = Number(value);
@@ -1028,9 +1054,9 @@ const Preview = () => {
                         <div className="flex-1 flex items-center bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 focus-within:border-white/40">
                           <input
                             ref={inputRef}
-                            type="number"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
+                            type="text"
+                            inputMode={useDecimal ? 'decimal' : 'numeric'}
+                            pattern={useDecimal ? '[0-9]*\\.?[0-9]*' : '[0-9]*'}
                             value={tempValue}
                             onChange={(e) => {
                               const val = e.target.value;
@@ -1049,7 +1075,7 @@ const Preview = () => {
                               }
                             }}
                           />
-                          <span className="pr-4 text-white/60 text-lg">{fieldUnit}</span>
+                          {fieldUnit && <span className="pr-4 text-white/60 text-lg">{fieldUnit}</span>}
                         </div>
                       </div>
                     )}
