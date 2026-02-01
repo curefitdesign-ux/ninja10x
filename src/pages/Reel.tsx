@@ -434,6 +434,9 @@ const Reel = () => {
             const isActive = idx === currentUserIndex;
             const activityCount = group.activities.length;
             const currentIdx = idx === currentUserIndex ? currentActivityIndex : 0;
+            const isOwnProfile = user && group.userId === user.id;
+            // Lock other users' avatars when current user hasn't shared publicly
+            const isProfileLocked = !isOwnProfile && !hasPublicActivity;
             
             return (
               <motion.button
@@ -477,12 +480,12 @@ const Reel = () => {
                         r={radius}
                         fill="none"
                         strokeWidth="7"
-                        stroke={isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.25)'}
+                        stroke={isProfileLocked ? 'rgba(255,255,255,0.15)' : (isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.25)')}
                         strokeDasharray={`${segmentLength} ${circumference}`}
                         strokeDashoffset={-offset}
                         strokeLinecap="round"
                         style={{
-                          filter: isActive && isSegmentViewed ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
+                          filter: !isProfileLocked && isActive && isSegmentViewed ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
                         }}
                       />
                     );
@@ -498,23 +501,49 @@ const Reel = () => {
                   </defs>
                 </svg>
                 
-                {/* Avatar with more padding for thicker ring */}
+                {/* Avatar with blur for locked profiles */}
                 <div
+                  className="relative"
                   style={{
                     width: isActive ? 64 : 52,
                     height: isActive ? 64 : 52,
                     padding: isActive ? 5 : 4,
                   }}
                 >
-                  <ProfileAvatar
-                    src={group.avatarUrl}
-                    name={group.displayName}
-                    size={isActive ? 54 : 44}
+                  <div 
+                    className="w-full h-full rounded-full overflow-hidden"
                     style={{
-                      opacity: isActive ? 1 : 0.7,
-                      transition: 'all 0.2s ease',
+                      filter: isProfileLocked ? 'blur(6px)' : 'none',
                     }}
-                  />
+                  >
+                    <ProfileAvatar
+                      src={group.avatarUrl}
+                      name={group.displayName}
+                      size={isActive ? 54 : 44}
+                      style={{
+                        opacity: isProfileLocked ? 0.5 : (isActive ? 1 : 0.7),
+                        transition: 'all 0.2s ease',
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Lock icon overlay for locked profiles */}
+                  {isProfileLocked && (
+                    <div 
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{ padding: isActive ? 5 : 4 }}
+                    >
+                      <div 
+                        className="w-5 h-5 rounded-full flex items-center justify-center"
+                        style={{
+                          background: 'rgba(0,0,0,0.5)',
+                          backdropFilter: 'blur(4px)',
+                        }}
+                      >
+                        <Lock className="w-2.5 h-2.5 text-white/80" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </motion.button>
             );
