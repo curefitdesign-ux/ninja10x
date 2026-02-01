@@ -169,15 +169,8 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
       
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        // Flip horizontally if using front camera to avoid mirror image
-        if (facingMode === 'user') {
-          ctx.translate(canvas.width, 0);
-          ctx.scale(-1, 1);
-          // Adjust cropX for mirrored image
-          ctx.drawImage(video, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
-        } else {
-          ctx.drawImage(video, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
-        }
+        // Keep mirrored for front camera (what user sees = what they get)
+        ctx.drawImage(video, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
         
         const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
         // Open cropper instead of directly setting captured image
@@ -492,6 +485,7 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
           playsInline
           muted
           className="absolute inset-0 w-full h-full object-cover"
+          style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
         />
       )}
 
