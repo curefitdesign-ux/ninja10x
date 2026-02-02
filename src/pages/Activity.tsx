@@ -12,6 +12,7 @@ import CuroSpeechBubble from "@/components/CuroSpeechBubble";
 import ProfileMenu from "@/components/ProfileMenu";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
 import NotificationSheet, { Notification } from "@/components/NotificationSheet";
+import { ActivityPageSkeleton } from "@/components/SkeletonLoaders";
 import { useJourneyActivities } from "@/hooks/use-journey-activities";
 import { useProfile } from "@/hooks/use-profile";
 import { JourneyActivity } from "@/services/journey-service";
@@ -282,6 +283,16 @@ const Activity = () => {
     { id: "store", icon: ShoppingBag, label: "STORE" },
     { id: "social", icon: Users, label: "SOCIAL" },
   ];
+
+  // Show skeleton during initial load
+  if (loading && photos.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#0a0a12] text-white overflow-x-hidden relative">
+        <GradientMeshBackground />
+        <ActivityPageSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0a12] text-white overflow-x-hidden relative">

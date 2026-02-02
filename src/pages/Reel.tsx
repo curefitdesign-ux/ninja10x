@@ -15,6 +15,7 @@ import SendReactionSheet from '@/components/SendReactionSheet';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import ReelToProgressTransition from '@/components/ReelToProgressTransition';
 import MakePublicSheet from '@/components/MakePublicSheet';
+import { ReelViewerSkeleton } from '@/components/SkeletonLoaders';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -364,11 +365,7 @@ const Reel = () => {
   }, [goNextUser, goPrevUser, cycleActivity]);
 
   if (loading) {
-    return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center">
-        <div className="text-white/60">Loading stories...</div>
-      </div>
-    );
+    return <ReelViewerSkeleton />;
   }
 
   if (!userGroups.length || !currentGroup || !currentActivity) {
