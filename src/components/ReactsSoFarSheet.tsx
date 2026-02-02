@@ -51,19 +51,15 @@ const REACTION_IMAGES: Record<ReactionType, string> = {
   timer: timerImg,
 };
 
-// Map reactors to their reactions - use actual reaction type if available
-function getReactorReactions(reactors: ReactorProfile[], reactions: Record<ReactionType, ActivityReaction>): ReactorWithReaction[] {
-  const activeTypes = Object.entries(reactions)
-    .filter(([, r]) => r.count > 0)
-    .map(([type]) => type as ReactionType);
-  
-  if (activeTypes.length === 0) return [];
-  
-  return reactors.map((reactor, i) => ({
-    ...reactor,
-    // Use actual reaction type from reactor if available, otherwise cycle through active types
-    reactionType: reactor.reactionType || activeTypes[i % activeTypes.length],
-  }));
+// Map reactors to their reactions - use actual reaction type from each reactor entry
+function getReactorReactions(reactors: ReactorProfile[]): ReactorWithReaction[] {
+  // Filter out any reactors without a reaction type (safety check)
+  return reactors
+    .filter((reactor): reactor is ReactorWithReaction => !!reactor.reactionType)
+    .map(reactor => ({
+      ...reactor,
+      reactionType: reactor.reactionType,
+    }));
 }
 
 export default function ReactsSoFarSheet({ 
@@ -88,7 +84,7 @@ export default function ReactsSoFarSheet({
     setLocalReactors(reactorProfiles);
   }, [reactorProfiles]);
 
-  const reactorList = getReactorReactions(localReactors.slice(0, total), reactions);
+  const reactorList = getReactorReactions(localReactors);
 
   const handleRemoveReaction = async (reactor: ReactorWithReaction) => {
     console.log('[ReactsSoFarSheet] Removing reaction:', reactor);
@@ -146,7 +142,7 @@ export default function ReactsSoFarSheet({
         <div className="flex items-center justify-between px-5 py-3">
           <span className="text-white font-semibold text-lg">Reacts so far</span>
           <span className="text-white font-bold text-xl">
-            {String(localReactors.length).padStart(2, '0')}
+            {String(reactorList.length).padStart(2, '0')}
           </span>
         </div>
 

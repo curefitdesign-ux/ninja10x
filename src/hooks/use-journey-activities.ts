@@ -523,6 +523,7 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
   }
 
   // Build reaction map + reactor profiles per activity (including reaction type)
+  // Each reaction row = one reaction entry (same user can have multiple reactions)
   const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
   const totalMap: Record<string, number> = {};
   const reactorProfilesMap: Record<string, { userId: string; displayName: string; avatarUrl?: string; reactionType: ReactionType }[]> = {};
@@ -541,9 +542,9 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
     };
     totalMap[r.activity_id]++;
     
-    // Add reactor profile with their actual reaction type
+    // Add each reaction as a separate entry (same user can appear multiple times with different reactions)
     const profile = profileMap.get(r.user_id);
-    if (profile && !reactorProfilesMap[r.activity_id].some(p => p.userId === r.user_id)) {
+    if (profile) {
       reactorProfilesMap[r.activity_id].push({
         userId: r.user_id,
         displayName: profile.display_name,
