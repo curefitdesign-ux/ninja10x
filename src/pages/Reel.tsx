@@ -108,6 +108,10 @@ const Reel = () => {
   const autoAdvanceTimer = useRef<NodeJS.Timeout | null>(null);
   const [storyProgress, setStoryProgress] = useState(0);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Track transition type for different animations
+  const [transitionType, setTransitionType] = useState<'story' | 'user'>('story');
+  const prevUserIndexRef = useRef(currentUserIndex);
 
   // Load public feed for progress overlay
   useEffect(() => {
@@ -183,11 +187,13 @@ const Reel = () => {
     if (!currentGroup) return;
     
     if (currentActivityIndex < currentGroup.activities.length - 1) {
-      // More activities in this user's story
+      // More activities in this user's story - use story transition
+      setTransitionType('story');
       setCurrentActivityIndex(prev => prev + 1);
     } else {
-      // Finished this user's stories, move to next user
+      // Finished this user's stories, move to next user - use user transition
       if (currentUserIndex < userGroups.length - 1) {
+        setTransitionType('user');
         setCurrentUserIndex(prev => prev + 1);
         setCurrentActivityIndex(0);
       }
@@ -197,9 +203,11 @@ const Reel = () => {
   // Navigate to previous activity
   const prevActivity = useCallback(() => {
     if (currentActivityIndex > 0) {
+      setTransitionType('story');
       setCurrentActivityIndex(prev => prev - 1);
     } else if (currentUserIndex > 0) {
       // Go to previous user's last activity
+      setTransitionType('user');
       const prevUser = userGroups[currentUserIndex - 1];
       setCurrentUserIndex(prev => prev - 1);
       setCurrentActivityIndex(prevUser ? prevUser.activities.length - 1 : 0);
@@ -209,12 +217,14 @@ const Reel = () => {
   // Navigate between users (horizontal swipe)
   const goNextUser = useCallback(() => {
     if (userGroups.length === 0) return;
+    setTransitionType('user');
     setCurrentActivityIndex(0);
     setCurrentUserIndex(prev => (prev + 1) % userGroups.length);
   }, [userGroups.length]);
 
   const goPrevUser = useCallback(() => {
     if (userGroups.length === 0) return;
+    setTransitionType('user');
     setCurrentActivityIndex(0);
     setCurrentUserIndex(prev => (prev - 1 + userGroups.length) % userGroups.length);
   }, [userGroups.length]);
@@ -685,10 +695,19 @@ const Reel = () => {
                     <motion.div
                       key={currentActivity.id}
                       className="relative w-full flex items-center justify-center"
-                      initial={{ opacity: 0.8, scale: 0.98 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0.8, scale: 0.98 }}
-                      transition={{ duration: 0.15, ease: 'easeOut' }}
+                      initial={transitionType === 'user' 
+                        ? { opacity: 0, x: 60, scale: 0.92, rotateY: -8 }
+                        : { opacity: 0, y: -20, scale: 0.98 }
+                      }
+                      animate={{ opacity: 1, x: 0, y: 0, scale: 1, rotateY: 0 }}
+                      exit={transitionType === 'user'
+                        ? { opacity: 0, x: -60, scale: 0.92, rotateY: 8 }
+                        : { opacity: 0, y: 20, scale: 0.98 }
+                      }
+                      transition={{ 
+                        duration: transitionType === 'user' ? 0.25 : 0.18, 
+                        ease: [0.32, 0.72, 0, 1],
+                      }}
                     >
                       {isVideo ? (
                         <video
