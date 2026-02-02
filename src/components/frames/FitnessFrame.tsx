@@ -199,13 +199,13 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
         </div>
       </div>
       
-      {/* Bottom right content */}
+      {/* Bottom right content - journey progress */}
       <div className="absolute right-4 z-20 text-right" style={{ bottom: '6%' }}>
         <p 
           className="text-[13px] font-medium mb-0"
           style={{ color: 'rgba(255,255,255,0.5)' }}
         >
-          Week
+          {week > 1 ? 'Week' : 'Day'}
         </p>
         <p 
           className="text-[52px] font-black leading-none animate-subtle-pulse"
@@ -215,13 +215,13 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
             letterSpacing: '-0.02em'
           }}
         >
-          {week}/{day + 2}
+          {week > 1 ? week : day}
         </p>
         <p 
           className="text-[15px] font-medium -mt-1"
           style={{ color: '#F4E14D' }}
         >
-          Activity
+          {week > 1 ? `Day ${((day - 1) % 3) + 1} of 3` : 'Journey'}
         </p>
       </div>
     </div>
