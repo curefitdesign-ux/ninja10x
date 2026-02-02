@@ -160,7 +160,11 @@ const Reel = () => {
   // Check if activity was created within the last 24 hours
   const isWithin24Hours = currentActivity ? 
     (Date.now() - new Date(currentActivity.createdAt).getTime()) < 24 * 60 * 60 * 1000 : false;
-  const canEdit = isOwnStory && isWithin24Hours;
+  
+  // Only allow deletion of the latest (most recent) activity - no jumping
+  const maxDayNumber = myActivities.length > 0 ? Math.max(...myActivities.map(a => a.dayNumber)) : 0;
+  const isLatestActivity = currentActivity?.dayNumber === maxDayNumber;
+  const canEdit = isOwnStory && isWithin24Hours && isLatestActivity;
 
   // Navigate between activities within current user (tap to cycle)
   const cycleActivity = useCallback(() => {

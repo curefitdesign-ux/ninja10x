@@ -989,19 +989,23 @@ const Preview = () => {
               </span>
             </button>
             
-            {/* Delete button - only show in review mode (existing activity) */}
-            {isReview && (
-              <button
-                onClick={handleDeleteActivity}
-                disabled={isDeleting || isSaving}
-                className="flex items-center gap-2 px-4 py-1.5 text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span className="text-xs font-medium">
-                  {isDeleting ? 'Deleting...' : 'Remove Photo'}
-                </span>
-              </button>
-            )}
+            {/* Delete button - only show in review mode for the latest activity */}
+            {(() => {
+              const maxDayNumber = activities.length > 0 ? Math.max(...activities.map(a => a.dayNumber)) : 0;
+              const isLatestActivity = dayNumber === maxDayNumber;
+              return isReview && isLatestActivity && (
+                <button
+                  onClick={handleDeleteActivity}
+                  disabled={isDeleting || isSaving}
+                  className="flex items-center gap-2 px-4 py-1.5 text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="text-xs font-medium">
+                    {isDeleting ? 'Deleting...' : 'Remove Photo'}
+                  </span>
+                </button>
+              );
+            })()}
           </div>
         </div>
       )}
