@@ -51,6 +51,7 @@ interface ReactorProfile {
   displayName: string;
   avatarUrl?: string;
   reactionType?: ReactionType;
+  createdAt?: string;
 }
 
 const SWIPE_THRESHOLD = 50;
