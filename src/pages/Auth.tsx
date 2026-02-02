@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import ProfileSetup from '@/components/ProfileSetup';
+import cultLogo from '@/assets/cult-logo.svg';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -161,10 +162,18 @@ const Auth = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Headline */}
+        {/* Logo and Headline */}
         <div className="mb-8 text-center">
+          <motion.img 
+            src={cultLogo} 
+            alt="Cult Logo" 
+            className="w-12 h-14 mx-auto mb-4"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1, duration: 0.4 }}
+          />
           <h1 className="text-3xl font-bold text-white mb-3">
-            {isLogin ? 'Welcome Back' : 'Get Started'}
+            Welcome to Cult
           </h1>
           <p className="text-white/50 text-sm">
             {isLogin 
