@@ -1,5 +1,6 @@
 import { User, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 import cyclingIcon from '@/assets/activities/cycling.png';
 import runningIcon from '@/assets/activities/running.png';
@@ -11,6 +12,20 @@ import boxingIcon from '@/assets/activities/boxing.png';
 import basketballIcon from '@/assets/activities/basketball.png';
 import racquetIcon from '@/assets/activities/racquet.png';
 
+// 3D Reaction assets
+import clapImg from '@/assets/reactions/clap-hands.png';
+import fireImg from '@/assets/reactions/fire-new.png';
+import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
+import wowImg from '@/assets/reactions/wow.png';
+import flexImg from '@/assets/reactions/flex.png';
+import trophyImg from '@/assets/reactions/dumbbells.png';
+import runnerImg from '@/assets/reactions/runner.png';
+import energyImg from '@/assets/reactions/energy.png';
+import timerImg from '@/assets/reactions/stopwatch.png';
+import heartImg from '@/assets/reactions/heart-workout.png';
+
+import { ReactionType } from '@/services/journey-service';
+
 interface Photo {
   id: string;
   storageUrl: string;
@@ -20,6 +35,7 @@ interface Photo {
   duration?: string;
   pr?: string;
   dayNumber: number;
+  reactions?: Record<ReactionType, { count: number }>;
 }
 
 const isVideoUrl = (url: string) => url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
@@ -29,9 +45,22 @@ const activityIcons: { [key: string]: string } = {
   'Cricket': cricketIcon, 'Trekking': trekkingIcon, 'Boxing': boxingIcon, 'Basketball': basketballIcon, 'Racquet': racquetIcon,
 };
 
+const REACTION_IMAGES: Record<ReactionType, string> = {
+  heart: heartImg,
+  fire: fireImg,
+  clap: clapImg,
+  fistbump: fistbumpImg,
+  wow: wowImg,
+  flex: flexImg,
+  trophy: trophyImg,
+  runner: runnerImg,
+  energy: energyImg,
+  timer: timerImg,
+};
+
 interface StackedPhotoCardsProps {
   photos: Photo[];
-  onCardClick?: () => void; // Optional, now navigates to gallery/camera pages
+  onCardClick?: () => void;
   currentDate: string;
 }
 
@@ -39,17 +68,15 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
   const navigate = useNavigate();
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
   
-  // Calculate next day number - find first missing day in sequence (1-12)
   const existingDays = new Set(photos.map(p => p.dayNumber));
   const nextDayNumber = (() => {
     for (let day = 1; day <= 12; day++) {
       if (!existingDays.has(day)) return day;
     }
-    return 13; // All days complete
+    return 13;
   })();
   
   const handleEmptyCardTap = () => {
-    // Navigate to gallery page (has camera option inside)
     navigate('/gallery', {
       state: { dayNumber: nextDayNumber },
     });
@@ -72,8 +99,15 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
     });
   };
 
-  // Show last 3 photos as stacked cards
   const displayPhotos = photos.slice(-3).reverse();
+  
+  // Get active reaction types for a photo
+  const getActiveReactions = (photo: Photo): ReactionType[] => {
+    if (!photo.reactions) return [];
+    return (Object.entries(photo.reactions) as [ReactionType, { count: number }][])
+      .filter(([, r]) => r.count > 0)
+      .map(([type]) => type);
+  };
   
   const CardComponent = ({ photo, position }: { photo: Photo | null; position: number }) => {
     const isCenter = position === 0;
@@ -81,8 +115,10 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
     const scale = isCenter ? 1 : 0.85;
     const rotate = position === 0 ? 0 : position === 1 ? -8 : 8;
     const zIndex = 30 - position * 10;
-    const cardWidth = isCenter ? 150 : 130;
-    const cardHeight = isCenter ? 190 : 165;
+    
+    // Use 9:16 aspect ratio like the reel
+    const cardWidth = isCenter ? 140 : 120;
+    const cardHeight = isCenter ? 248 : 213; // 9:16 ratio
 
     if (!photo) {
       return (
@@ -105,12 +141,60 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
 
     const isVideo = photo.isVideo || isVideoUrl(photo.storageUrl);
     const activityIcon = photo.activity ? activityIcons[photo.activity] : null;
-
-    // Use storageUrl which contains the templated/framed image
     const displayUrl = photo.storageUrl;
+    const activeReactions = getActiveReactions(photo);
+
+    // Positions for floating emojis around the card
+    const emojiPositions = [
+      { top: -10, right: -12, rotate: 15 },
+      { bottom: 20, left: -14, rotate: -10 },
+      { top: '40%', right: -16, rotate: 8 },
+      { bottom: '30%', left: -10, rotate: -12 },
+    ];
 
     return (
-      <div className="absolute top-1/2 left-1/2 cursor-pointer" style={{ transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale}) rotate(${rotate}deg)`, zIndex }} onClick={() => handlePhotoTap(photo)}>
+      <div 
+        className="absolute top-1/2 left-1/2 cursor-pointer" 
+        style={{ transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale}) rotate(${rotate}deg)`, zIndex }} 
+        onClick={() => handlePhotoTap(photo)}
+      >
+        {/* Floating 3D emoji reactions around card edges */}
+        {isCenter && activeReactions.slice(0, 4).map((type, idx) => {
+          const pos = emojiPositions[idx];
+          return (
+            <motion.div
+              key={type}
+              className="absolute z-50 pointer-events-none"
+              style={{
+                ...(pos.top !== undefined && typeof pos.top === 'number' && { top: pos.top }),
+                ...(pos.top !== undefined && typeof pos.top === 'string' && { top: pos.top }),
+                ...(pos.bottom !== undefined && typeof pos.bottom === 'number' && { bottom: pos.bottom }),
+                ...(pos.bottom !== undefined && typeof pos.bottom === 'string' && { bottom: pos.bottom }),
+                ...(pos.left !== undefined && { left: pos.left }),
+                ...(pos.right !== undefined && { right: pos.right }),
+              }}
+              initial={{ scale: 0, rotate: pos.rotate }}
+              animate={{ 
+                scale: [0.9, 1.1, 1],
+                y: [0, -3, 0],
+              }}
+              transition={{
+                scale: { duration: 0.4, delay: idx * 0.1 },
+                y: { duration: 2, repeat: Infinity, ease: 'easeInOut', delay: idx * 0.3 },
+              }}
+            >
+              <img 
+                src={REACTION_IMAGES[type]} 
+                alt={type} 
+                className="w-7 h-7 object-contain drop-shadow-lg"
+                style={{
+                  filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))',
+                }}
+              />
+            </motion.div>
+          );
+        })}
+
         {activityIcon && (
           <div className="absolute -top-3 -right-3 w-9 h-9 rounded-lg flex items-center justify-center z-10" style={{ background: 'rgba(30, 30, 50, 0.95)', border: '2px solid rgba(0,0,0,0.9)' }}>
             <img src={activityIcon} alt="" className="w-5 h-5 object-contain" />
@@ -129,10 +213,10 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
   return (
     <div
       className="relative w-full flex justify-center items-center"
-      style={{ height: '280px' }}
+      style={{ height: '320px' }}
       data-shared-element="cult-ninja-widget"
     >
-      <div className="relative w-full" style={{ height: '240px' }}>
+      <div className="relative w-full" style={{ height: '280px' }}>
         {displayPhotos.length === 0 ? (
           <CardComponent photo={null} position={0} />
         ) : (
