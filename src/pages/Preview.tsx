@@ -710,7 +710,7 @@ const Preview = () => {
   // Template Selection Step (confirmation is now a popup on ShareSheet)
   return (
     <div 
-      className="fixed w-full touch-manipulation overflow-hidden" 
+      className="fixed w-full touch-manipulation overflow-y-auto" 
       style={{ 
         top: 0,
         left: 0,
