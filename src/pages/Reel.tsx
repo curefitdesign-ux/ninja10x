@@ -645,32 +645,21 @@ const Reel = () => {
         <div
           className="flex-1 flex items-center justify-center z-30 overflow-hidden px-4"
         >
-          <motion.div
-            className="w-full h-full flex items-center justify-center"
+          {/* Card container with horizontal swipe + shake animation - single wrapper */}
+          <motion.div 
+            className="relative w-full max-w-[340px] cursor-grab active:cursor-grabbing flex items-center justify-center"
             style={{ 
-              scale: contentScale,
-              opacity: contentOpacity,
-              y: contentY,
+              maxHeight: '100%',
+              x: dragX,
             }}
+            animate={shakeAnimation}
+            transition={shakeTransition}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleHorizontalDragEnd}
+            onClick={handleTap}
           >
-            {/* Card container with horizontal swipe + shake animation */}
-            <motion.div 
-              className="relative w-full max-w-[340px] cursor-grab active:cursor-grabbing flex items-center justify-center"
-              style={{ 
-                maxHeight: '100%',
-                x: dragX,
-                opacity: cardOpacity,
-                rotate: cardRotate,
-                scale: cardScale,
-              }}
-              animate={shakeAnimation}
-              transition={shakeTransition}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.2}
-              onDragEnd={handleHorizontalDragEnd}
-              onClick={handleTap}
-            >
               {/* Full templated image/video - with lock overlay for non-public users */}
               {(() => {
                 const shouldShowLocked = !isOwnStory && !hasPublicActivity;
@@ -777,7 +766,6 @@ const Reel = () => {
                   </div>
                 );
               })()}
-            </motion.div>
           </motion.div>
         </div>
 
