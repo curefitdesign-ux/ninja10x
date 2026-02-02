@@ -203,9 +203,6 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
         <div className="rounded-2xl overflow-hidden" style={{ width: `${cardWidth}px`, height: `${cardHeight}px`, border: '3px solid rgba(0,0,0,0.9)', boxShadow: isCenter ? '0 15px 40px rgba(0,0,0,0.5)' : '0 8px 25px rgba(0,0,0,0.3)' }}>
           {isVideo ? <video src={displayUrl} className="w-full h-full object-cover" muted playsInline autoPlay loop /> : <img src={displayUrl} alt="" className="w-full h-full object-cover" />}
         </div>
-        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2">
-          <p className="text-sm font-bold tracking-wide whitespace-nowrap italic" style={{ color: 'rgba(255,255,255,0.9)', textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>DAY {photo.dayNumber}</p>
-        </div>
       </div>
     );
   };
