@@ -191,32 +191,103 @@ export const ActivityGridSkeleton = () => {
   );
 };
 
-// Full Activity page skeleton
+// Premium minimal loader with breathing animation
+const PremiumLoader = () => {
+  return (
+    <div className="flex flex-col items-center justify-center gap-6">
+      {/* Breathing ring */}
+      <motion.div
+        className="relative"
+        style={{ width: 64, height: 64 }}
+      >
+        {/* Outer glow ring */}
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(138, 43, 226, 0.15) 0%, transparent 70%)',
+          }}
+          animate={{
+            scale: [1, 1.5, 1],
+            opacity: [0.5, 0.2, 0.5],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+        
+        {/* Inner spinning arc */}
+        <motion.div
+          className="absolute inset-2 rounded-full"
+          style={{
+            border: '2px solid transparent',
+            borderTopColor: 'rgba(255, 255, 255, 0.4)',
+            borderRightColor: 'rgba(255, 255, 255, 0.15)',
+          }}
+          animate={{ rotate: 360 }}
+          transition={{
+            duration: 1.2,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+        />
+        
+        {/* Center dot */}
+        <motion.div
+          className="absolute rounded-full"
+          style={{
+            width: 8,
+            height: 8,
+            top: '50%',
+            left: '50%',
+            marginTop: -4,
+            marginLeft: -4,
+            background: 'rgba(255, 255, 255, 0.6)',
+            boxShadow: '0 0 12px rgba(255, 255, 255, 0.4)',
+          }}
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.6, 1, 0.6],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+      </motion.div>
+      
+      {/* Subtle text */}
+      <motion.span
+        className="text-white/30 text-xs font-medium tracking-widest uppercase"
+        animate={{
+          opacity: [0.3, 0.5, 0.3],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      >
+        Loading
+      </motion.span>
+    </div>
+  );
+};
+
+// Full Activity page skeleton - Premium minimal version
 export const ActivityPageSkeleton = () => {
   return (
-    <div className="relative min-h-screen w-full flex flex-col">
-      {/* Safe area spacer */}
-      <div style={{ height: 'env(safe-area-inset-top, 0px)' }} />
-      
-      {/* Header area */}
-      <div className="pt-4 pb-2">
-        <StatsRowSkeleton />
-      </div>
-
-      {/* Mascot + Progress */}
-      <div className="py-6">
-        <MascotProgressSkeleton />
-      </div>
-
-      {/* Cult Ninja Cards */}
-      <div className="flex-1 flex items-center justify-center">
-        <CultNinjaCardsSkeleton />
-      </div>
-
-      {/* Week progress */}
-      <div className="pb-4 px-8">
-        <WeekProgressSkeleton />
-      </div>
+    <div 
+      className="fixed inset-0 flex items-center justify-center"
+      style={{
+        background: 'transparent',
+        height: '100dvh',
+        minHeight: '-webkit-fill-available',
+      }}
+    >
+      <PremiumLoader />
     </div>
   );
 };
