@@ -250,10 +250,8 @@ const Preview = () => {
       setFlowStep('template');
       setTimeout(() => setIsLoaded(true), 100);
     } else {
-      // No existing data - redirect to gallery page (camera is now separate)
-      const dayNum = state?.dayNumber != null ? Number(state.dayNumber as number | string) : 1;
-      setDayNumber(dayNum);
-      navigate('/gallery', { state: { dayNumber: dayNum }, replace: true });
+      // No existing data - redirect to home
+      navigate('/', { replace: true });
     }
   }, []);
 
@@ -284,10 +282,10 @@ const Preview = () => {
     }
   };
 
-  // Handle removing the current image - redirect to gallery
+  // Handle removing the current image - redirect to home
   const handleRemoveImage = () => {
     triggerHaptic('medium');
-    navigate('/gallery', { state: { dayNumber }, replace: true });
+    navigate('/', { replace: true });
   };
 
   // Handle deleting the activity from DB (only for review mode)
@@ -415,11 +413,11 @@ const Preview = () => {
     }, 400);
   };
 
-  // Retake - navigate to gallery page
+  // Retake - navigate to home to select new media
   const handleRetake = () => {
     triggerHaptic('light');
     handleTap('retake-btn');
-    navigate('/gallery', { state: { dayNumber }, replace: true });
+    navigate('/', { replace: true });
   };
 
   // Handle scroll to update current frame

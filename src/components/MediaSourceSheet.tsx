@@ -38,7 +38,8 @@ const MediaSourceSheet = ({ isOpen, onClose, dayNumber }: MediaSourceSheetProps)
       onClose();
       navigate('/preview', {
         state: {
-          image: url,
+          imageUrl: url,
+          originalUrl: url,
           isVideo,
           dayNumber,
           fromGallery: true,
