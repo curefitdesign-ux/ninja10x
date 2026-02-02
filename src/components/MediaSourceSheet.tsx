@@ -33,7 +33,7 @@ const MediaSourceSheet = ({ isOpen, onClose, dayNumber }: MediaSourceSheetProps)
     if (type === 'camera') {
       navigate('/camera', { state: { dayNumber } });
     } else {
-      navigate('/gallery', { state: { dayNumber } });
+      navigate('/gallery', { state: { dayNumber, autoOpenPicker: true } });
     }
   };
 

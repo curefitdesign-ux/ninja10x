@@ -26,9 +26,11 @@ const Gallery = () => {
   
   const state = location.state as {
     dayNumber?: number;
+    autoOpenPicker?: boolean;
   } | null;
   
   const dayNumber = state?.dayNumber ?? 1;
+  const autoOpenPicker = state?.autoOpenPicker ?? false;
 
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(() => {
     try {
@@ -52,6 +54,19 @@ const Gallery = () => {
   const [isVideoMedia, setIsVideoMedia] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const hasAutoOpenedRef = useRef(false);
+
+  // Auto-open native picker when navigating from MediaSourceSheet
+  useEffect(() => {
+    if (autoOpenPicker && !hasAutoOpenedRef.current) {
+      hasAutoOpenedRef.current = true;
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        fileInputRef.current?.click();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [autoOpenPicker]);
 
   useEffect(() => {
     try {
