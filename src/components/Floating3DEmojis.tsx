@@ -32,15 +32,16 @@ const EMOJI_ASSETS: Record<ReactionType, string> = {
 };
 
 // Positions INSIDE the story image border - on the edges but within bounds
+// Increased scale values for bigger emojis
 const EDGE_POSITIONS = [
-  { top: '5%', left: '5%', rotate: -12, scale: 0.7 },
-  { top: '25%', left: '3%', rotate: 10, scale: 0.75 },
-  { bottom: '30%', left: '4%', rotate: -15, scale: 0.65 },
-  { top: '8%', right: '5%', rotate: 14, scale: 0.72 },
-  { top: '30%', right: '3%', rotate: -8, scale: 0.78 },
-  { bottom: '25%', right: '4%', rotate: 12, scale: 0.68 },
-  { bottom: '8%', left: '12%', rotate: 5, scale: 0.6 },
-  { bottom: '6%', right: '10%', rotate: -6, scale: 0.65 },
+  { top: '4%', left: '4%', rotate: -12, scale: 1.0 },
+  { top: '22%', left: '2%', rotate: 10, scale: 0.95 },
+  { bottom: '28%', left: '3%', rotate: -15, scale: 0.9 },
+  { top: '6%', right: '4%', rotate: 14, scale: 0.98 },
+  { top: '28%', right: '2%', rotate: -8, scale: 1.0 },
+  { bottom: '22%', right: '3%', rotate: 12, scale: 0.92 },
+  { bottom: '6%', left: '10%', rotate: 5, scale: 0.85 },
+  { bottom: '5%', right: '8%', rotate: -6, scale: 0.88 },
 ];
 
 export default function Floating3DEmojis({ reactions, newReaction }: Floating3DEmojisProps) {
@@ -52,8 +53,8 @@ export default function Floating3DEmojis({ reactions, newReaction }: Floating3DE
         const asset = EMOJI_ASSETS[type];
         
         // Create unique animation delay for each emoji - staggered entrance
-        const entranceDelay = 0.4 + i * 0.1;
-        const animDelay = i * 0.6;
+        const entranceDelay = 0.2 + i * 0.08;
+        const animDelay = i * 0.5;
         
         return (
           <motion.div
@@ -62,40 +63,60 @@ export default function Floating3DEmojis({ reactions, newReaction }: Floating3DE
             style={{
               ...pos,
               zIndex: 50,
-              filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5))',
+              filter: 'drop-shadow(0 6px 16px rgba(0, 0, 0, 0.6))',
             }}
-            initial={{ scale: 0, opacity: 0, rotate: pos.rotate - 30 }}
+            initial={{ scale: 0, opacity: 0, rotate: pos.rotate - 45, y: 30 }}
             animate={{ 
-              scale: isNew ? [0, pos.scale * 1.4, pos.scale] : pos.scale, 
+              scale: isNew ? [0, pos.scale * 1.5, pos.scale] : pos.scale, 
               opacity: 1,
               rotate: pos.rotate,
-              y: isNew ? [20, -10, 0] : 0,
+              y: isNew ? [30, -15, 0] : 0,
             }}
             transition={{ 
               type: 'spring', 
-              stiffness: 350, 
-              damping: 22,
+              stiffness: 400, 
+              damping: 18,
               delay: isNew ? 0 : entranceDelay,
             }}
           >
-            {/* Attention-grabbing floating animation wrapper */}
+            {/* Attention-grabbing floating animation wrapper with bounce */}
             <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
               animate={{
-                y: [0, -5, 0, -3, 0],
-                rotate: [0, -6, 0, 4, 0],
-                scale: [1, 1.12, 1, 1.06, 1],
+                scale: [1, 1.15, 1, 1.08, 1],
+                opacity: 1,
+                y: [0, -6, 0, -4, 0],
+                rotate: [0, -8, 0, 5, 0],
               }}
               transition={{
-                duration: 3.5,
-                repeat: Infinity,
-                repeatDelay: animDelay + 1.5,
-                ease: 'easeInOut',
+                scale: {
+                  duration: 4,
+                  repeat: Infinity,
+                  repeatDelay: animDelay + 1,
+                  ease: 'easeInOut',
+                },
+                opacity: {
+                  duration: 0.3,
+                  delay: entranceDelay,
+                },
+                y: {
+                  duration: 4,
+                  repeat: Infinity,
+                  repeatDelay: animDelay + 1,
+                  ease: 'easeInOut',
+                },
+                rotate: {
+                  duration: 4,
+                  repeat: Infinity,
+                  repeatDelay: animDelay + 1,
+                  ease: 'easeInOut',
+                },
               }}
             >
               <img 
                 src={asset} 
                 alt={type} 
-                className="w-11 h-11 object-contain"
+                className="w-14 h-14 object-contain"
               />
             </motion.div>
           </motion.div>
@@ -108,16 +129,16 @@ export default function Floating3DEmojis({ reactions, newReaction }: Floating3DE
           <motion.div
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             style={{ zIndex: 60 }}
-            initial={{ scale: 0, opacity: 1 }}
-            animate={{ scale: [0, 1.8, 0], opacity: [1, 1, 0] }}
+            initial={{ scale: 0, opacity: 1, rotate: -20 }}
+            animate={{ scale: [0, 2.2, 0], opacity: [1, 1, 0], rotate: [0, 15, 0] }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
           >
             <img 
               src={EMOJI_ASSETS[newReaction]} 
               alt={newReaction} 
-              className="w-20 h-20 object-contain"
-              style={{ filter: 'drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5))' }}
+              className="w-24 h-24 object-contain"
+              style={{ filter: 'drop-shadow(0 10px 30px rgba(0, 0, 0, 0.6))' }}
             />
           </motion.div>
         )}
