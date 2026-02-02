@@ -356,7 +356,7 @@ const Activity = () => {
             {/* Reaction Pill - Center (compact, shows latest reactor) */}
             {latestNotification && (
               <motion.button
-                onClick={() => setShowNotifications(true)}
+                onClick={() => navigate('/reel', { state: { targetActivityId: latestNotification.activityId } })}
                 className="flex items-center gap-2 px-3 h-10 rounded-full"
                 style={{
                   background: 'rgba(255, 255, 255, 0.08)',
