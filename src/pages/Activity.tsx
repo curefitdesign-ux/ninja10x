@@ -187,17 +187,10 @@ const Activity = () => {
   const handlePhotoAdd = useCallback((weekIndex: number, dayIndex: number) => {
     const dayNum = weekIndex * 3 + dayIndex + 1;
     
-    // If first photo (no photos yet), show the MediaSourceSheet with onboarding
-    if (photos.length === 0) {
-      setPendingDayNumber(dayNum);
-      setShowMediaSourceSheet(true);
-    } else {
-      // For subsequent uploads, directly open native gallery picker
-      navigate('/gallery', {
-        state: { dayNumber: dayNum, autoOpenPicker: true },
-      });
-    }
-  }, [navigate, photos.length]);
+    // Always show the MediaSourceSheet bottom sheet
+    setPendingDayNumber(dayNum);
+    setShowMediaSourceSheet(true);
+  }, []);
   
   // Handle file selection from hidden input (direct gallery trigger)
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
