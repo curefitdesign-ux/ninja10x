@@ -356,7 +356,12 @@ const Activity = () => {
             {/* Reaction Pill - Center (compact, shows latest reactor) */}
             {latestNotification && (
               <motion.button
-                onClick={() => navigate('/reel', { state: { targetActivityId: latestNotification.activityId } })}
+                onClick={() => {
+                  const activityId = latestNotification.activityId;
+                  setLatestNotification(null);
+                  setNotificationCount(0);
+                  navigate('/reel', { state: { targetActivityId: activityId } });
+                }}
                 className="flex items-center gap-2 px-3 h-10 rounded-full"
                 style={{
                   background: 'rgba(255, 255, 255, 0.08)',
@@ -366,6 +371,7 @@ const Activity = () => {
                 }}
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
                 whileTap={{ scale: 0.95 }}
               >
                 {/* Single reaction icon - only use clean assets */}
