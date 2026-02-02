@@ -1,26 +1,27 @@
 import { motion } from 'framer-motion';
 
-// 3D reaction images
-import fire3d from '@/assets/reactions/fire-3d.png';
-import clap3d from '@/assets/reactions/clap-3d.png';
-import fistbump3d from '@/assets/reactions/fistbump.png';
-import wow3d from '@/assets/reactions/wow.png';
+// Clean 3D reaction images (no white backgrounds)
+import fireImg from '@/assets/reactions/fire-new.png';
+import clapImg from '@/assets/reactions/clap-hands.png';
+import flexImg from '@/assets/reactions/flex.png';
 
+// Only use clean assets - fallback to fire for unknown types
 const REACTION_IMAGES: Record<string, string> = {
-  fire: fire3d,
-  clap: clap3d,
-  fistbump: fistbump3d,
-  wow: wow3d,
-  heart: fire3d,
+  fire: fireImg,
+  clap: clapImg,
+  flex: flexImg,
+  heart: fireImg,  // fallback
+  fistbump: flexImg, // fallback
+  wow: clapImg, // fallback
 };
 
-// Edge positions for floating reactions - relative to card
+// Edge positions for floating reactions - relative to card (OUTSIDE the card edges)
 const EDGE_POSITIONS = [
-  { top: '-8px', right: '-6px', baseRotate: 15 },
-  { bottom: '20%', left: '-10px', baseRotate: -12 },
-  { top: '25%', right: '-8px', baseRotate: 8 },
-  { bottom: '-6px', right: '20%', baseRotate: -5 },
-  { top: '45%', left: '-8px', baseRotate: 10 },
+  { top: '-12px', right: '-10px', baseRotate: 15 },
+  { bottom: '15%', left: '-14px', baseRotate: -12 },
+  { top: '20%', right: '-12px', baseRotate: 8 },
+  { bottom: '-10px', right: '15%', baseRotate: -5 },
+  { top: '40%', left: '-12px', baseRotate: 10 },
 ];
 
 interface FloatingCardReactionsProps {
@@ -47,7 +48,7 @@ export default function FloatingCardReactions({
     <div className="absolute inset-0 pointer-events-none overflow-visible" style={{ zIndex: 25 }}>
       {uniqueReactions.map((reactionType, index) => {
         const pos = EDGE_POSITIONS[index % EDGE_POSITIONS.length];
-        const imageSrc = REACTION_IMAGES[reactionType] || fire3d;
+        const imageSrc = REACTION_IMAGES[reactionType] || fireImg;
         
         // Each reaction gets unique animation timing
         const animationDelay = index * 0.4;
