@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { Camera, Image, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
@@ -26,7 +27,7 @@ const MediaSourceSheet = ({ isOpen, onClose, dayNumber }: MediaSourceSheetProps)
     }
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <>
@@ -36,18 +37,21 @@ const MediaSourceSheet = ({ isOpen, onClose, dayNumber }: MediaSourceSheetProps)
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/60 z-50"
+            className="fixed inset-0 z-[9998]"
+            style={{ background: 'rgba(0,0,0,0.6)' }}
             onClick={onClose}
           />
 
-          {/* Sheet */}
+          {/* Sheet - fixed to viewport bottom with highest z-index */}
           <motion.div
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 350 }}
-            className="fixed left-0 right-0 bottom-0 z-50 rounded-t-3xl overflow-hidden"
+            className="fixed left-0 right-0 rounded-t-3xl overflow-hidden"
             style={{
+              bottom: 0,
+              zIndex: 9999,
               background: 'linear-gradient(180deg, rgba(40, 40, 55, 0.75) 0%, rgba(25, 25, 35, 0.8) 100%)',
               backdropFilter: 'blur(60px) saturate(180%)',
               WebkitBackdropFilter: 'blur(60px) saturate(180%)',
@@ -176,7 +180,8 @@ const MediaSourceSheet = ({ isOpen, onClose, dayNumber }: MediaSourceSheetProps)
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 
