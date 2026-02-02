@@ -5,8 +5,28 @@ interface DynamicBlurBackgroundProps {
 
 export default function DynamicBlurBackground({ imageUrl, children }: DynamicBlurBackgroundProps) {
   return (
-    <div className="fixed inset-0 overflow-hidden bg-[#1a1a2e]" style={{ height: '100dvh' }}>
-      {/* Children content - background is now applied directly to story card */}
+    <div className="fixed inset-0 overflow-hidden" style={{ height: '100dvh' }}>
+      {/* Static blurred background - no animations */}
+      <div className="absolute inset-0">
+        {/* Background image with heavy blur */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${imageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'blur(60px) saturate(120%)',
+            transform: 'scale(1.2)',
+          }}
+        />
+        
+        {/* Dark overlay for contrast */}
+        <div 
+          className="absolute inset-0 bg-black/60"
+        />
+      </div>
+
+      {/* Children content */}
       {children}
     </div>
   );
