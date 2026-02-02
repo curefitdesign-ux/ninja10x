@@ -1010,17 +1010,38 @@ const Preview = () => {
         </div>
       )}
 
-      {/* Bottom Sheet Keyboard Overlay - Context-aware inputs */}
+      {/* Bottom Sheet Keyboard Overlay - iOS Liquid Glass Style */}
       {editingField && (
         <>
+          {/* Backdrop with heavy blur like iOS */}
           <div 
-            className="fixed inset-0 z-40 backdrop-blur-md bg-black/70"
+            className="fixed inset-0 z-40"
+            style={{
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            }}
             onClick={closeSheet}
           />
           
+          {/* iOS-style bottom sheet with liquid glass */}
           <div className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom duration-300 focus:outline-none focus-visible:outline-none" tabIndex={-1}>
-            <div className="bg-white/10 backdrop-blur-2xl border-t border-white/20 rounded-t-3xl p-6 pb-10 focus:outline-none focus-visible:outline-none" tabIndex={-1}>
-              <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-6" />
+            <div 
+              className="rounded-t-[28px] p-6 pb-10 focus:outline-none focus-visible:outline-none"
+              style={{
+                background: 'linear-gradient(180deg, rgba(60, 60, 67, 0.85) 0%, rgba(45, 45, 48, 0.92) 100%)',
+                backdropFilter: 'blur(60px) saturate(200%)',
+                WebkitBackdropFilter: 'blur(60px) saturate(200%)',
+                borderTop: '1px solid rgba(255, 255, 255, 0.12)',
+                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 -10px 40px rgba(0, 0, 0, 0.3)',
+              }}
+              tabIndex={-1}
+            >
+              {/* iOS-style drag handle */}
+              <div 
+                className="w-9 h-1 rounded-full mx-auto mb-5"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.25)' }}
+              />
               
               {(() => {
                 const activityConfig = getActivityInputConfig(activity || '');
@@ -1033,12 +1054,12 @@ const Preview = () => {
                 
                 return (
                   <>
-                    <p className="text-white text-lg font-semibold text-center mb-4">
+                    <p className="text-white text-lg font-semibold text-center mb-5">
                       {isDuration ? `Select ${fieldLabel}` : `Enter ${fieldLabel}`}
                     </p>
                     
                     {useWheel ? (
-                      <div className="flex items-center justify-center gap-4 mb-4">
+                      <div className="flex items-center justify-center gap-6 mb-6">
                         <div className="flex-1 max-w-[200px]">
                           <WheelPicker
                             items={Array.from({ length: 181 }, (_, i) => i)}
@@ -1052,15 +1073,21 @@ const Preview = () => {
                                 setPr(numValue > 0 ? `${numValue} ${fieldUnit}` : '');
                               }
                             }}
-                            itemHeight={50}
+                            itemHeight={52}
                             visibleItems={5}
                           />
                         </div>
-                        <span className="text-white text-2xl font-semibold">{fieldUnit}</span>
+                        <span className="text-white text-xl font-medium">{fieldUnit}</span>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="flex-1 flex items-center bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 focus-within:border-white/40">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div 
+                          className="flex-1 flex items-center rounded-xl"
+                          style={{
+                            background: 'rgba(120, 120, 128, 0.24)',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                          }}
+                        >
                           <input
                             ref={inputRef}
                             type="text"
@@ -1077,21 +1104,26 @@ const Preview = () => {
                               }
                             }}
                             placeholder={`Enter ${fieldLabel.toLowerCase()}`}
-                            className="flex-1 bg-transparent text-white text-xl font-semibold px-4 py-4 outline-none placeholder:text-white/30"
+                            className="flex-1 bg-transparent text-white text-xl font-medium px-4 py-4 outline-none placeholder:text-white/40"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 confirmEdit();
                               }
                             }}
                           />
-                          {fieldUnit && <span className="pr-4 text-white/60 text-lg">{fieldUnit}</span>}
+                          {fieldUnit && <span className="pr-4 text-white/50 text-lg">{fieldUnit}</span>}
                         </div>
                       </div>
                     )}
                     
+                    {/* iOS-style confirm button */}
                     <button
                       onClick={confirmEdit}
-                      className="mx-auto px-8 py-2 flex items-center justify-center rounded-full bg-white"
+                      className="mx-auto px-10 py-2.5 flex items-center justify-center rounded-full"
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.95)',
+                        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.15)',
+                      }}
                     >
                       <span className="text-black font-semibold text-sm">Confirm</span>
                     </button>
