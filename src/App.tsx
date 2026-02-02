@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import BrutalistGenerator from "./pages/BrutalistGenerator";
 import Progress from "./pages/Progress";
 import Camera from "./pages/Camera";
+import Gallery from "./pages/Gallery";
 
 import Reel from "./pages/Reel";
 import ProfileSetupPage from "./pages/ProfileSetupPage";
@@ -89,6 +90,7 @@ const AnimatedRoutes = () => {
         <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
         <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
         <Route path="/camera" element={<ProtectedRoute><Camera /></ProtectedRoute>} />
+        <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
         
         <Route path="/reel" element={<ProtectedRoute><Reel /></ProtectedRoute>} />
         <Route path="/brutalist" element={<BrutalistGenerator />} />
