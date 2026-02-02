@@ -29,6 +29,7 @@ import { ReactionType } from '@/services/journey-service';
 interface Photo {
   id: string;
   storageUrl: string;
+  originalUrl?: string;
   isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
@@ -139,9 +140,10 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
       );
     }
 
-    const isVideo = photo.isVideo || isVideoUrl(photo.storageUrl);
+    // Prefer original clean image for card display (no frame overlay text)
+    const displayUrl = photo.originalUrl || photo.storageUrl;
+    const isVideo = photo.isVideo || isVideoUrl(displayUrl);
     const activityIcon = photo.activity ? activityIcons[photo.activity] : null;
-    const displayUrl = photo.storageUrl;
     const activeReactions = getActiveReactions(photo);
 
     // Positions for floating emojis around the card
