@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { JourneyActivity, ReactionType, ActivityReaction } from "@/services/journey-service";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import MakePublicSheet, { hasUserChosenPublic } from "@/components/MakePublicSheet";
+import { StoryCardSkeleton } from "@/components/SkeletonLoaders";
 
 // Import tile assets
 import tileActiveImg from "@/assets/progress/tile-active-new.png";
@@ -291,38 +292,19 @@ const Progress = () => {
           >
             <div className="flex items-end gap-3">
               {feedLoading ? (
-                // Loading state - shimmer placeholders
-                <>
+                // Loading state - skeleton placeholders
+                <div className="flex items-end gap-3">
                   {[0, 1, 2, 3, 4].map((i) => (
                     <motion.div
                       key={i}
-                      className="relative flex-shrink-0 overflow-hidden"
-                      style={{
-                        width: "72px",
-                        height: "100px",
-                        borderRadius: "14px",
-                        background: "rgba(255,255,255,0.06)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                      }}
                       initial={{ opacity: 0 }}
-                      animate={{ opacity: [0.3, 0.6, 0.3] }}
-                      transition={{ 
-                        delay: i * 0.1, 
-                        duration: 1.5, 
-                        repeat: Infinity,
-                        ease: "easeInOut" 
-                      }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: i * 0.05 }}
                     >
-                      <div 
-                        className="absolute inset-0"
-                        style={{
-                          background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%)",
-                          animation: "shimmer 1.5s infinite",
-                        }}
-                      />
+                      <StoryCardSkeleton size="lg" />
                     </motion.div>
                   ))}
-                </>
+                </div>
               ) : publicFeed.length > 0 ? (
                 // Show all users' stories - blur others if current user hasn't made anything public
                 publicFeed.map((photo, index) => {
