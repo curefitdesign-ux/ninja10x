@@ -432,7 +432,7 @@ const Reel = () => {
               )}
             </div>
 
-            {/* Center - User avatars strip */}
+            {/* Center - User avatars strip - ALWAYS show clear profile photos */}
             <div className="flex-1 flex justify-center">
               <div className="flex items-center gap-2">
                 {userGroups.slice(0, 5).map((group, idx) => {
@@ -440,7 +440,8 @@ const Reel = () => {
                   const activityCount = group.activities.length;
                   const currentIdx = idx === currentUserIndex ? currentActivityIndex : 0;
                   const isOwnProfile = user && group.userId === user.id;
-                  const isProfileLocked = !isOwnProfile && !hasPublicActivity;
+                  // Stories are locked, but profile photos are ALWAYS visible
+                  const isStoryLocked = !isOwnProfile && !hasPublicActivity;
                   const avatarSize = isActive ? 48 : 40;
                   
                   return (
@@ -455,7 +456,7 @@ const Reel = () => {
                       animate={{ scale: isActive ? 1 : 0.9 }}
                       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                     >
-                      {/* Instagram-style story ring */}
+                      {/* Instagram-style story ring - dim if story is locked */}
                       <svg
                         className="absolute inset-0"
                         style={{
@@ -485,12 +486,12 @@ const Reel = () => {
                               r={radius}
                               fill="none"
                               strokeWidth="6"
-                              stroke={isProfileLocked ? 'rgba(255,255,255,0.15)' : (isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.25)')}
+                              stroke={isStoryLocked ? 'rgba(255,255,255,0.15)' : (isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.25)')}
                               strokeDasharray={`${segmentLength} ${circumference}`}
                               strokeDashoffset={-offset}
                               strokeLinecap="round"
                               style={{
-                                filter: !isProfileLocked && isActive && isSegmentViewed ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
+                                filter: !isStoryLocked && isActive && isSegmentViewed ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
                               }}
                             />
                           );
@@ -506,7 +507,7 @@ const Reel = () => {
                         </defs>
                       </svg>
                       
-                      {/* Avatar */}
+                      {/* Avatar - ALWAYS visible and clear (never locked/blurred) */}
                       <div
                         className="relative"
                         style={{
@@ -523,6 +524,7 @@ const Reel = () => {
                             style={{
                               opacity: isActive ? 1 : 0.7,
                               transition: 'all 0.2s ease',
+                              // Profile photos are NEVER blurred - only stories are locked
                             }}
                           />
                         </div>

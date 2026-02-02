@@ -84,9 +84,30 @@ export const useProfile = () => {
 
     if (error) throw error;
 
-    setProfile(data as Profile);
+    // Update local state immediately to keep UI in sync
+    const updatedProfile = data as Profile;
+    setProfile(updatedProfile);
+    setNeedsSetup(false);
+    
+    return updatedProfile;
+  };
+  
+  // Force refresh profile from database
+  const refreshProfile = async () => {
+    if (!user) return null;
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    
+    if (!error && data) {
+      setProfile(data as Profile);
+      setNeedsSetup(false);
+    }
     return data;
   };
 
-  return { profile, loading, needsSetup, createProfile, updateProfile };
+  return { profile, loading, needsSetup, createProfile, updateProfile, refreshProfile };
 };

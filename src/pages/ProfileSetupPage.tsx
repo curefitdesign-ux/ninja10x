@@ -105,6 +105,10 @@ const ProfileSetupPage = () => {
       return;
     }
 
+    // IMPORTANT: Clear preset selection when user uploads custom photo
+    // This ensures the gallery upload takes precedence over any selected preset
+    setSelectedAvatar(null);
+
     // Read file and navigate to cropper
     const reader = new FileReader();
     reader.onload = (evt) => {
