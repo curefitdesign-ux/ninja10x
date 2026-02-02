@@ -55,6 +55,7 @@ interface ReactorProfile {
 }
 
 const SWIPE_THRESHOLD = 50;
+const STORY_AUTO_ADVANCE_MS = 5000; // 5 seconds per story
 
 const Reel = () => {
   const navigate = useNavigate();
@@ -102,6 +103,11 @@ const Reel = () => {
 
   // Story nudge animation for inactivity hint
   const { triggerShake, shakeAnimation, shakeTransition } = useStoryNudgeAnimation();
+  
+  // Auto-advance timer ref
+  const autoAdvanceTimer = useRef<NodeJS.Timeout | null>(null);
+  const [storyProgress, setStoryProgress] = useState(0);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load public feed for progress overlay
   useEffect(() => {
@@ -369,6 +375,48 @@ const Reel = () => {
     return () => window.removeEventListener('keydown', handleKey);
   }, [goNextUser, goPrevUser, cycleActivity]);
 
+  // Auto-advance stories timer
+  useEffect(() => {
+    // Clear existing timers
+    if (autoAdvanceTimer.current) {
+      clearTimeout(autoAdvanceTimer.current);
+    }
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+    
+    // Don't auto-advance if sheets are open or transitioning
+    if (showReactsSheet || showSendReactionSheet || showDeleteConfirm || showMakePublicSheet || showProgressOverlay || isTransitioning) {
+      setStoryProgress(0);
+      return;
+    }
+    
+    // Reset progress and start animation
+    setStoryProgress(0);
+    const startTime = Date.now();
+    
+    // Update progress bar smoothly
+    progressIntervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min((elapsed / STORY_AUTO_ADVANCE_MS) * 100, 100);
+      setStoryProgress(progress);
+    }, 50);
+    
+    // Auto-advance to next story
+    autoAdvanceTimer.current = setTimeout(() => {
+      cycleActivity();
+    }, STORY_AUTO_ADVANCE_MS);
+    
+    return () => {
+      if (autoAdvanceTimer.current) {
+        clearTimeout(autoAdvanceTimer.current);
+      }
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+    };
+  }, [currentUserIndex, currentActivityIndex, showReactsSheet, showSendReactionSheet, showDeleteConfirm, showMakePublicSheet, showProgressOverlay, isTransitioning, cycleActivity]);
+
   if (loading) {
     return <ReelViewerSkeleton />;
   }
@@ -565,7 +613,32 @@ const Reel = () => {
             </div>
           </motion.div>
 
-          {/* Row 2: Current user name/info */}
+          {/* Row 2: Story progress bars (Instagram-style) */}
+          <div className="flex items-center gap-1 px-4 pb-2" style={{ height: 8 }}>
+            {currentGroup.activities.map((_, idx) => {
+              const isCompleted = idx < currentActivityIndex;
+              const isCurrent = idx === currentActivityIndex;
+              
+              return (
+                <div
+                  key={idx}
+                  className="flex-1 h-1 rounded-full overflow-hidden"
+                  style={{ background: 'rgba(255,255,255,0.25)' }}
+                >
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{
+                      background: 'rgba(255,255,255,0.9)',
+                      width: isCompleted ? '100%' : isCurrent ? `${storyProgress}%` : '0%',
+                    }}
+                    transition={{ duration: isCurrent ? 0.05 : 0.2 }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Row 3: Current user name/info */}
           <div className="flex items-center justify-center gap-2 shrink-0 px-4 pb-2" style={{ height: 28 }}>
             <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
             <span className="text-white/40">•</span>
