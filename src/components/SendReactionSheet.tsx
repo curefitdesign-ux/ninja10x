@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { ReactionType, removeReaction } from '@/services/journey-service';
 import ProfileAvatar from '@/components/ProfileAvatar';
 
@@ -29,7 +30,7 @@ interface SendReactionSheetProps {
   onReact: (type: ReactionType) => void;
   onClose: () => void;
   onViewReactions?: () => void;
-  onReactionRemoved?: () => void;
+  onReactionRemoved?: (reactionType: ReactionType) => void;
   totalReactions?: number;
   reactorProfiles?: ReactorProfile[];
 }
@@ -61,26 +62,46 @@ export default function SendReactionSheet({
   reactorProfiles = []
 }: SendReactionSheetProps) {
   const [isRemoving, setIsRemoving] = useState(false);
+  const [localReactorProfiles, setLocalReactorProfiles] = useState(reactorProfiles);
   
-  // Use reactorProfiles.length as the accurate count (matches displayed users)
-  const actualReactionCount = reactorProfiles.length;
+  // Use local state for reaction count
+  const actualReactionCount = localReactorProfiles.length;
   
   // Find current user's reaction
-  const userReaction = reactorProfiles.find(r => r.userId === currentUserId);
+  const userReaction = localReactorProfiles.find(r => r.userId === currentUserId);
   
   // Group reactions by type with counts
-  const reactionCounts = reactorProfiles.reduce((acc, r) => {
+  const reactionCounts = localReactorProfiles.reduce((acc, r) => {
     if (r.reactionType) acc[r.reactionType] = (acc[r.reactionType] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
   
   const handleRemoveReaction = async () => {
     if (!activityId || !userReaction?.reactionType || isRemoving) return;
+    
+    const reactionType = userReaction.reactionType;
     setIsRemoving(true);
+    
     try {
-      const success = await removeReaction(activityId, userReaction.reactionType);
+      const success = await removeReaction(activityId, reactionType);
       if (success) {
-        onReactionRemoved?.();
+        // Update local state to remove user's reaction
+        setLocalReactorProfiles(prev => prev.filter(r => r.userId !== currentUserId));
+        
+        // Notify parent to update its local state
+        onReactionRemoved?.(reactionType);
+        
+        // Show toast and close
+        toast.success('Reaction removed', {
+          duration: 2000,
+          style: {
+            background: 'rgba(30, 30, 40, 0.95)',
+            backdropFilter: 'blur(40px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            color: 'white',
+          },
+        });
+        
         onClose();
       }
     } finally {

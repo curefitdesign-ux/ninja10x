@@ -872,7 +872,31 @@ const Reel = () => {
               setShowSendReactionSheet(false);
               setShowReactsSheet(true);
             }}
-            onReactionRemoved={loadActivities}
+            onReactionRemoved={(reactionType) => {
+              // Update local state without reloading
+              setLocalReactions(prev => {
+                const existing = prev[currentActivity!.id];
+                if (!existing) return prev;
+                
+                const newReactions = { ...existing.reactions };
+                if (newReactions[reactionType]) {
+                  newReactions[reactionType] = {
+                    ...newReactions[reactionType],
+                    count: Math.max(0, newReactions[reactionType].count - 1),
+                    userReacted: false,
+                  };
+                }
+                
+                return {
+                  ...prev,
+                  [currentActivity!.id]: {
+                    total: Math.max(0, existing.total - 1),
+                    reactions: newReactions,
+                    reactorProfiles: existing.reactorProfiles.filter(p => p.userId !== user?.id),
+                  },
+                };
+              });
+            }}
             totalReactions={currentReactions.total}
             reactorProfiles={currentReactions.reactorProfiles}
           />
