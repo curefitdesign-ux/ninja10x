@@ -679,6 +679,24 @@ const Reel = () => {
                   <div
                     className="relative w-full flex items-center justify-center"
                   >
+                    {/* Blurred background matching card dimensions */}
+                    <div 
+                      className="absolute inset-0 rounded-2xl overflow-hidden -z-10"
+                      style={{
+                        transform: 'scale(1.15)',
+                      }}
+                    >
+                      <div 
+                        className="absolute inset-0"
+                        style={{
+                          backgroundImage: `url(${mediaUrl})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          filter: 'blur(40px) saturate(120%)',
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-black/40" />
+                    </div>
                     {isVideo ? (
                       <video
                         key={mediaUrl}
