@@ -82,6 +82,12 @@ const Reel = () => {
   
   // Delete confirmation state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  
+  // Auto-advance timer state
+  const AUTO_ADVANCE_DURATION = 5000; // 5 seconds
+  const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
+  const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoAdvanceStartRef = useRef<number>(0);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Bottom sheet states and transition animations
@@ -358,6 +364,42 @@ const Reel = () => {
     }
   };
 
+  // Auto-advance timer - pause when modals are open
+  const isPaused = showReactsSheet || showSendReactionSheet || showDeleteConfirm || showMakePublicSheet || showProgressOverlay;
+  
+  useEffect(() => {
+    // Clear any existing timer
+    if (autoAdvanceTimerRef.current) {
+      clearInterval(autoAdvanceTimerRef.current);
+    }
+    
+    if (isPaused || loading || !currentActivity) {
+      return;
+    }
+    
+    // Reset progress when activity changes
+    setAutoAdvanceProgress(0);
+    autoAdvanceStartRef.current = Date.now();
+    
+    // Update progress every 50ms for smooth animation
+    autoAdvanceTimerRef.current = setInterval(() => {
+      const elapsed = Date.now() - autoAdvanceStartRef.current;
+      const progress = Math.min(elapsed / AUTO_ADVANCE_DURATION, 1);
+      setAutoAdvanceProgress(progress);
+      
+      if (progress >= 1) {
+        // Auto-advance to next story
+        cycleActivity();
+      }
+    }, 50);
+    
+    return () => {
+      if (autoAdvanceTimerRef.current) {
+        clearInterval(autoAdvanceTimerRef.current);
+      }
+    };
+  }, [currentUserIndex, currentActivityIndex, isPaused, loading, currentActivity, cycleActivity]);
+
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') handleClose();
@@ -475,7 +517,7 @@ const Reel = () => {
                       animate={{ scale: isActive ? 1 : 0.9 }}
                       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                     >
-                      {/* Instagram-style story ring - dim if story is locked */}
+                      {/* Instagram-style story ring with auto-advance progress */}
                       <svg
                         className="absolute inset-0"
                         style={{
@@ -490,29 +532,61 @@ const Reel = () => {
                           const totalGap = gapAngle * activityCount;
                           const segmentAngle = (360 - totalGap) / activityCount;
                           const startAngle = segIdx * (segmentAngle + gapAngle);
-                          const isSegmentViewed = segIdx <= currentIdx;
+                          const isCurrentSegment = isActive && segIdx === currentIdx;
+                          const isSegmentViewed = segIdx < currentIdx;
+                          const isSegmentUnviewed = segIdx > currentIdx;
                           
                           const radius = 44;
                           const circumference = 2 * Math.PI * radius;
                           const segmentLength = (segmentAngle / 360) * circumference;
                           const offset = (startAngle / 360) * circumference;
                           
+                          // For the current segment, show progress animation
+                          const progressLength = isCurrentSegment 
+                            ? segmentLength * autoAdvanceProgress 
+                            : segmentLength;
+                          
                           return (
-                            <circle
-                              key={segIdx}
-                              cx="50"
-                              cy="50"
-                              r={radius}
-                              fill="none"
-                              strokeWidth="6"
-                              stroke={isStoryLocked ? 'rgba(255,255,255,0.15)' : (isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.25)')}
-                              strokeDasharray={`${segmentLength} ${circumference}`}
-                              strokeDashoffset={-offset}
-                              strokeLinecap="round"
-                              style={{
-                                filter: !isStoryLocked && isActive && isSegmentViewed ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
-                              }}
-                            />
+                            <g key={segIdx}>
+                              {/* Background track for current segment */}
+                              {isCurrentSegment && (
+                                <circle
+                                  cx="50"
+                                  cy="50"
+                                  r={radius}
+                                  fill="none"
+                                  strokeWidth="6"
+                                  stroke="rgba(255,255,255,0.15)"
+                                  strokeDasharray={`${segmentLength} ${circumference}`}
+                                  strokeDashoffset={-offset}
+                                  strokeLinecap="round"
+                                />
+                              )}
+                              {/* Segment fill */}
+                              <circle
+                                cx="50"
+                                cy="50"
+                                r={radius}
+                                fill="none"
+                                strokeWidth="6"
+                                stroke={
+                                  isStoryLocked 
+                                    ? 'rgba(255,255,255,0.15)' 
+                                    : isSegmentUnviewed 
+                                      ? 'rgba(255,255,255,0.25)'
+                                      : 'url(#storyGradient)'
+                                }
+                                strokeDasharray={`${isCurrentSegment ? progressLength : segmentLength} ${circumference}`}
+                                strokeDashoffset={-offset}
+                                strokeLinecap="round"
+                                style={{
+                                  filter: !isStoryLocked && (isSegmentViewed || isCurrentSegment) 
+                                    ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' 
+                                    : 'none',
+                                  transition: isCurrentSegment ? 'none' : 'stroke-dasharray 0.3s ease',
+                                }}
+                              />
+                            </g>
                           );
                         })}
                         <defs>
