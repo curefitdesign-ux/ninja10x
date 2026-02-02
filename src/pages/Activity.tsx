@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Home, Dumbbell, Activity as ActivityIcon, ShoppingBag, Users, Flame, Footprints, Trash2 } from "lucide-react";
+import { ArrowRight, Home, Dumbbell, Activity as ActivityIcon, ShoppingBag, Users, Flame, Footprints, Trash2, Bell } from "lucide-react";
 import CircularProgressRing from "@/components/CircularProgressRing";
 import GradientMeshBackground from "@/components/GradientMeshBackground";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -302,9 +302,43 @@ const Activity = () => {
       
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="relative z-10 pb-32 pt-2">
-          {/* Profile Menu - Top Right */}
-          <div className="px-4 pt-3 flex justify-end">
+          {/* Header Row: Profile Left - Nudges Center - Notification Right */}
+          <div className="px-4 pt-3 flex items-center justify-between gap-3">
+            {/* Profile Menu - Left */}
             <ProfileMenu />
+            
+            {/* Center Nudges */}
+            <div className="flex-1 flex justify-center">
+              <motion.div 
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-2 px-4 py-2 rounded-full"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                }}
+              >
+                <span className="text-white/70 text-xs font-medium">
+                  Week {currentWeek} · Day {dayInWeek}
+                </span>
+              </motion.div>
+            </div>
+            
+            {/* Notification Bell - Right */}
+            <motion.button
+              className="relative w-10 h-10 rounded-full flex items-center justify-center"
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.2)',
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Bell className="w-5 h-5 text-white/70" />
+            </motion.button>
           </div>
           
           {/* Stats Header */}

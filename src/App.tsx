@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
-import { useReactionNotifications } from "@/hooks/use-reaction-notifications";
+import NotificationCenter from "@/components/NotificationCenter";
 import Index from "./pages/Index";
 import Preview from "./pages/Preview";
 import Activity from "./pages/Activity";
@@ -26,9 +26,6 @@ const queryClient = new QueryClient();
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading: authLoading } = useAuth();
   const { needsSetup, loading: profileLoading } = useProfile();
-  
-  // Enable realtime reaction notifications when user is logged in
-  useReactionNotifications();
   
   if (authLoading || profileLoading) {
     return (
@@ -106,6 +103,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <NotificationCenter />
         <AnimatedRoutes />
       </BrowserRouter>
     </TooltipProvider>
