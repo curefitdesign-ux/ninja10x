@@ -180,33 +180,13 @@ const CircularProgressRing = ({
   
   const dayInWeek = currentDay === 0 ? 0 : ((currentDay - 1) % 3) + 1;
   
-  // Contextual journey text based on progress
+  // Contextual journey text - always includes CULT NINJA
   const getJourneyText = () => {
     if (currentDay === 0) {
-      return "START YOUR JOURNEY";
+      return "CULT NINJA • START JOURNEY";
     }
     
-    // Week milestone labels (matching ShareSheet)
-    const weekMilestones = [
-      "CONQUER WILL POWER",  // Week 1
-      "BUILD ENERGY",        // Week 2
-      "INCREASE STAMINA",    // Week 3
-      "BUILD STRENGTH"       // Week 4
-    ];
-    
-    const milestone = weekMilestones[currentWeek - 1] || "CULT NINJA";
-    
-    // If week complete (day 3, 6, 9, 12 done)
-    if (dayInWeek === 3 || (currentDay > 0 && currentDay % 3 === 0)) {
-      return `${milestone} ✓`;
-    }
-    
-    // During week progress
-    if (currentWeek === 1) {
-      return `DAY ${currentDay} JOURNEY`;
-    }
-    
-    return `WEEK ${currentWeek} • DAY ${dayInWeek} OF 3`;
+    return `CULT NINJA • WEEK ${currentWeek} • DAY ${dayInWeek}`;
   };
   
   const journeyText = getJourneyText();
