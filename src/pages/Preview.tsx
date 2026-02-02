@@ -710,12 +710,8 @@ const Preview = () => {
   // Template Selection Step (confirmation is now a popup on ShareSheet)
   return (
     <div 
-      className="fixed w-full touch-manipulation overflow-y-auto" 
+      className="fixed inset-0 w-full touch-manipulation overflow-hidden" 
       style={{ 
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
         height: '100dvh',
         minHeight: '-webkit-fill-available',
         backgroundColor: '#252535',
@@ -961,17 +957,18 @@ const Preview = () => {
         </div>
       </div>
 
-      {/* Floating DONE CTA - fixed at bottom, always visible */}
+      {/* Floating DONE CTA - fixed at bottom with proper safe-area */}
       {!showShareSheet && (
         <div 
-          className={`fixed bottom-0 left-0 right-0 z-30 px-5 transition-all duration-500 ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : 'opacity-100 translate-y-0'}`}
+          className={`fixed left-0 right-0 z-30 px-5 transition-all duration-500 ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : 'opacity-100 translate-y-0'}`}
           style={{ 
-            paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 20px)',
-            paddingTop: 12,
-            background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
+            bottom: 0,
+            paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 20px)',
+            paddingTop: 16,
+            background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 60%, transparent 100%)',
           }}
         >
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-2 max-w-md mx-auto">
             <button 
               onClick={handleSaveWithTemplate}
               disabled={isSaving || isDeleting}

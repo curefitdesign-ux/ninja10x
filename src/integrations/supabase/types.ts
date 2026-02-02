@@ -100,6 +100,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          stories_public: boolean
           updated_at: string
           user_id: string
         }
@@ -108,6 +109,7 @@ export type Database = {
           created_at?: string
           display_name: string
           id?: string
+          stories_public?: boolean
           updated_at?: string
           user_id: string
         }
@@ -116,6 +118,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          stories_public?: boolean
           updated_at?: string
           user_id?: string
         }

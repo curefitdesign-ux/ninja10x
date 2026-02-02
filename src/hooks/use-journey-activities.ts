@@ -507,15 +507,19 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
     allUserIds.add(r.user_id);
   }
 
-  // Fetch profiles for ALL users (activity owners + reactors)
+  // Fetch profiles for ALL users (activity owners + reactors) - including stories_public setting
   const { data: profiles } = await supabase
     .from('profiles')
-    .select('user_id, display_name, avatar_url')
+    .select('user_id, display_name, avatar_url, stories_public')
     .in('user_id', Array.from(allUserIds));
 
-  const profileMap = new Map<string, { display_name: string; avatar_url: string }>();
+  const profileMap = new Map<string, { display_name: string; avatar_url: string; stories_public: boolean }>();
   for (const p of profiles || []) {
-    profileMap.set(p.user_id, { display_name: p.display_name, avatar_url: p.avatar_url });
+    profileMap.set(p.user_id, { 
+      display_name: p.display_name, 
+      avatar_url: p.avatar_url,
+      stories_public: p.stories_public ?? true,
+    });
   }
 
   // Build reaction map + reactor profiles per activity (including reaction type)
@@ -590,8 +594,13 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
     userActivitiesMap.delete(user.id);
   }
 
-  // Add other users
+  // Add other users - only if their profile allows public stories
   for (const [userId, userActivities] of userActivitiesMap) {
+    const profile = profileMap.get(userId);
+    // Skip users who have set their profile to private (stories_public = false)
+    if (profile && profile.stories_public === false) {
+      continue;
+    }
     groups.push(processUserActivities(userId, userActivities));
   }
 

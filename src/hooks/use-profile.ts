@@ -7,6 +7,7 @@ export interface Profile {
   user_id: string;
   display_name: string;
   avatar_url: string;
+  stories_public: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -71,7 +72,7 @@ export const useProfile = () => {
     return data;
   };
 
-  const updateProfile = async (updates: Partial<Pick<Profile, 'display_name' | 'avatar_url'>>) => {
+  const updateProfile = async (updates: Partial<Pick<Profile, 'display_name' | 'avatar_url' | 'stories_public'>>) => {
     if (!user || !profile) throw new Error('No user or profile');
 
     const { data, error } = await supabase
