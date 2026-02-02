@@ -1169,6 +1169,32 @@ const Preview = () => {
             setShowShareSheet(false);
             setFramedImageUrl(null);
           }}
+          onReupload={() => {
+            // Close share sheet and go to gallery to pick new photo
+            setShowShareSheet(false);
+            setFramedImageUrl(null);
+            navigate('/gallery', { 
+              state: { 
+                dayNumber,
+                activity,
+                returnToPreview: true,
+              }, 
+              replace: true,
+            });
+          }}
+          onRecapture={() => {
+            // Close share sheet and go to camera
+            setShowShareSheet(false);
+            setFramedImageUrl(null);
+            navigate('/camera', { 
+              state: { 
+                dayNumber,
+                activity,
+                returnToPreview: true,
+              }, 
+              replace: true,
+            });
+          }}
           onSaveWithTemplate={handleFinalSave}
           dayNumber={dayNumber}
           frameType={currentFrame}

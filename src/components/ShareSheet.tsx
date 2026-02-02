@@ -1,4 +1,4 @@
-import { X, Download, Copy, Check, Pencil, Loader2 } from 'lucide-react';
+import { X, Download, Copy, Check, Pencil, Loader2, ImagePlus, Camera } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,6 +34,8 @@ interface ShareSheetProps {
   isVideo?: boolean;
   onClose: () => void;
   onEdit?: () => void;
+  onReupload?: () => void;
+  onRecapture?: () => void;
   onSaveWithTemplate?: () => void;
   dayNumber?: number;
   frameType?: FrameType;
@@ -125,7 +127,7 @@ const socialApps = [
   },
 ];
 
-const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, dayNumber, frameType, frameProps }: ShareSheetProps) => {
+const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onReupload, onRecapture, onSaveWithTemplate, dayNumber, frameType, frameProps }: ShareSheetProps) => {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [dominantColor, setDominantColor] = useState('rgba(0,0,0,0.95)');
@@ -360,26 +362,62 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
     try {
       let blob: Blob;
       
-      // For base64 or blob URLs, we need to properly handle download
-      if (imageUrl.startsWith('data:') || imageUrl.startsWith('blob:')) {
+      // For base64 or blob URLs, convert to blob
+      if (imageUrl.startsWith('data:')) {
+        // Convert base64 to blob
+        const response = await fetch(imageUrl);
+        blob = await response.blob();
+      } else if (imageUrl.startsWith('blob:')) {
         const response = await fetch(imageUrl);
         blob = await response.blob();
       } else {
-        // For remote URLs, fetch with CORS
-        const response = await fetch(imageUrl, { mode: 'cors' });
-        blob = await response.blob();
+        // For remote URLs (Supabase storage), fetch with no-cors fallback
+        try {
+          const response = await fetch(imageUrl, { 
+            mode: 'cors',
+            cache: 'no-cache',
+          });
+          if (!response.ok) throw new Error('CORS fetch failed');
+          blob = await response.blob();
+        } catch {
+          // Fallback: create an image element and draw to canvas
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          await new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = reject;
+            img.src = imageUrl + (imageUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+          });
+          
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) throw new Error('Canvas context failed');
+          ctx.drawImage(img, 0, 0);
+          
+          blob = await new Promise<Blob>((resolve, reject) => {
+            canvas.toBlob(b => b ? resolve(b) : reject(new Error('toBlob failed')), 'image/png', 1.0);
+          });
+        }
       }
       
+      // Create download link
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `activity-${Date.now()}.${isVideo ? 'mp4' : 'png'}`;
+      
+      // Use click() on iOS Safari requires this approach
+      link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
       
-      // Cleanup after a short delay to ensure download starts
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      // Small delay before cleanup for iOS
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
       
       // Success state with haptic
       triggerHaptic('success');
@@ -564,24 +602,50 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
                  </div>
                 </motion.div>
                 
-                {/* Edit/Download/Copy tertiary buttons - below template */}
+                {/* Edit options - Edit Frame, Reupload, Recapture */}
                 <motion.div 
-                  className="flex gap-3 mt-4 mb-4"
+                  className="flex flex-wrap justify-center gap-2 mt-4 mb-4"
                   animate={isExiting ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
                 >
                   <button
                     onClick={() => {
                       triggerHaptic('light');
-                      if (onEdit) {
-                        onEdit();
-                      }
+                      if (onEdit) onEdit();
                     }}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
                   >
                     <Pencil className="w-4 h-4 text-white/70" />
-                    <span className="text-white/70 font-medium text-sm">Edit</span>
+                    <span className="text-white/70 font-medium text-sm">Edit Frame</span>
                   </button>
+                  <button
+                    onClick={() => {
+                      triggerHaptic('light');
+                      if (onReupload) onReupload();
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                  >
+                    <ImagePlus className="w-4 h-4 text-white/70" />
+                    <span className="text-white/70 font-medium text-sm">Reupload</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      triggerHaptic('light');
+                      if (onRecapture) onRecapture();
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                  >
+                    <Camera className="w-4 h-4 text-white/70" />
+                    <span className="text-white/70 font-medium text-sm">Recapture</span>
+                  </button>
+                </motion.div>
+                
+                {/* Download/Copy buttons */}
+                <motion.div 
+                  className="flex gap-3 mb-4"
+                  animate={isExiting ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: 0.05 }}
+                >
                   <button
                     onClick={handleDownload}
                     disabled={downloadState === 'downloading'}
