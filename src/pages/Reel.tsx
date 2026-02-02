@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
 import { fetchAllActivitiesGroupedByUser, fetchPublicFeed, UserStoryGroup, LocalActivity } from '@/hooks/use-journey-activities';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
-
+import DynamicBlurBackground from '@/components/DynamicBlurBackground';
 import Floating3DEmojis from '@/components/Floating3DEmojis';
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
 import SendReactionSheet from '@/components/SendReactionSheet';
@@ -55,7 +55,6 @@ interface ReactorProfile {
 }
 
 const SWIPE_THRESHOLD = 50;
-const STORY_AUTO_ADVANCE_MS = 5000; // 5 seconds per story
 
 const Reel = () => {
   const navigate = useNavigate();
@@ -103,16 +102,6 @@ const Reel = () => {
 
   // Story nudge animation for inactivity hint
   const { triggerShake, shakeAnimation, shakeTransition } = useStoryNudgeAnimation();
-  
-  // Auto-advance timer ref
-  const autoAdvanceTimer = useRef<NodeJS.Timeout | null>(null);
-  const [storyProgress, setStoryProgress] = useState(0);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Track transition type for different animations
-  const [transitionType, setTransitionType] = useState<'story' | 'user'>('story');
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right'>('left');
-  const prevUserIndexRef = useRef(currentUserIndex);
 
   // Load public feed for progress overlay
   useEffect(() => {
@@ -188,13 +177,11 @@ const Reel = () => {
     if (!currentGroup) return;
     
     if (currentActivityIndex < currentGroup.activities.length - 1) {
-      // More activities in this user's story - use story transition
-      setTransitionType('story');
+      // More activities in this user's story
       setCurrentActivityIndex(prev => prev + 1);
     } else {
-      // Finished this user's stories, move to next user - use user transition
+      // Finished this user's stories, move to next user
       if (currentUserIndex < userGroups.length - 1) {
-        setTransitionType('user');
         setCurrentUserIndex(prev => prev + 1);
         setCurrentActivityIndex(0);
       }
@@ -204,11 +191,9 @@ const Reel = () => {
   // Navigate to previous activity
   const prevActivity = useCallback(() => {
     if (currentActivityIndex > 0) {
-      setTransitionType('story');
       setCurrentActivityIndex(prev => prev - 1);
     } else if (currentUserIndex > 0) {
       // Go to previous user's last activity
-      setTransitionType('user');
       const prevUser = userGroups[currentUserIndex - 1];
       setCurrentUserIndex(prev => prev - 1);
       setCurrentActivityIndex(prevUser ? prevUser.activities.length - 1 : 0);
@@ -218,16 +203,12 @@ const Reel = () => {
   // Navigate between users (horizontal swipe)
   const goNextUser = useCallback(() => {
     if (userGroups.length === 0) return;
-    setTransitionType('user');
-    setSwipeDirection('left');
     setCurrentActivityIndex(0);
     setCurrentUserIndex(prev => (prev + 1) % userGroups.length);
   }, [userGroups.length]);
 
   const goPrevUser = useCallback(() => {
     if (userGroups.length === 0) return;
-    setTransitionType('user');
-    setSwipeDirection('right');
     setCurrentActivityIndex(0);
     setCurrentUserIndex(prev => (prev - 1 + userGroups.length) % userGroups.length);
   }, [userGroups.length]);
@@ -388,48 +369,6 @@ const Reel = () => {
     return () => window.removeEventListener('keydown', handleKey);
   }, [goNextUser, goPrevUser, cycleActivity]);
 
-  // Auto-advance stories timer
-  useEffect(() => {
-    // Clear existing timers
-    if (autoAdvanceTimer.current) {
-      clearTimeout(autoAdvanceTimer.current);
-    }
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-    }
-    
-    // Don't auto-advance if sheets are open or transitioning
-    if (showReactsSheet || showSendReactionSheet || showDeleteConfirm || showMakePublicSheet || showProgressOverlay || isTransitioning) {
-      setStoryProgress(0);
-      return;
-    }
-    
-    // Reset progress and start animation
-    setStoryProgress(0);
-    const startTime = Date.now();
-    
-    // Update progress bar smoothly
-    progressIntervalRef.current = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min((elapsed / STORY_AUTO_ADVANCE_MS) * 100, 100);
-      setStoryProgress(progress);
-    }, 50);
-    
-    // Auto-advance to next story
-    autoAdvanceTimer.current = setTimeout(() => {
-      cycleActivity();
-    }, STORY_AUTO_ADVANCE_MS);
-    
-    return () => {
-      if (autoAdvanceTimer.current) {
-        clearTimeout(autoAdvanceTimer.current);
-      }
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-      }
-    };
-  }, [currentUserIndex, currentActivityIndex, showReactsSheet, showSendReactionSheet, showDeleteConfirm, showMakePublicSheet, showProgressOverlay, isTransitioning, cycleActivity]);
-
   if (loading) {
     return <ReelViewerSkeleton />;
   }
@@ -466,11 +405,8 @@ const Reel = () => {
   const HEADER_HEIGHT = 100; // Row: delete + avatars + close + user name
   const BOTTOM_HEIGHT = 100; // Reaction pill + view progress
 
-  // Unique key for AnimatePresence based on user change
-  const userTransitionKey = `${currentGroup.userId}-${currentUserIndex}`;
-
   return (
-    <div className="fixed inset-0 bg-black">
+    <DynamicBlurBackground imageUrl={mediaUrl}>
       {/* Fixed height container - no vertical scroll */}
       <div 
         className="fixed inset-0 flex flex-col"
@@ -539,7 +475,7 @@ const Reel = () => {
                       animate={{ scale: isActive ? 1 : 0.9 }}
                       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                     >
-                      {/* Instagram-style story ring with progress indicator */}
+                      {/* Instagram-style story ring - dim if story is locked */}
                       <svg
                         className="absolute inset-0"
                         style={{
@@ -549,12 +485,12 @@ const Reel = () => {
                         }}
                         viewBox="0 0 100 100"
                       >
-                        {/* Background segments (gray) */}
                         {Array.from({ length: activityCount }).map((_, segIdx) => {
                           const gapAngle = activityCount > 1 ? 10 : 0;
                           const totalGap = gapAngle * activityCount;
                           const segmentAngle = (360 - totalGap) / activityCount;
                           const startAngle = segIdx * (segmentAngle + gapAngle);
+                          const isSegmentViewed = segIdx <= currentIdx;
                           
                           const radius = 44;
                           const circumference = 2 * Math.PI * radius;
@@ -563,61 +499,22 @@ const Reel = () => {
                           
                           return (
                             <circle
-                              key={`bg-${segIdx}`}
+                              key={segIdx}
                               cx="50"
                               cy="50"
                               r={radius}
                               fill="none"
-                              strokeWidth="5"
-                              stroke={isStoryLocked ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.25)'}
+                              strokeWidth="6"
+                              stroke={isStoryLocked ? 'rgba(255,255,255,0.15)' : (isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.25)')}
                               strokeDasharray={`${segmentLength} ${circumference}`}
                               strokeDashoffset={-offset}
                               strokeLinecap="round"
-                            />
-                          );
-                        })}
-                        
-                        {/* Viewed/progress segments (gradient) */}
-                        {Array.from({ length: activityCount }).map((_, segIdx) => {
-                          const gapAngle = activityCount > 1 ? 10 : 0;
-                          const totalGap = gapAngle * activityCount;
-                          const segmentAngle = (360 - totalGap) / activityCount;
-                          const startAngle = segIdx * (segmentAngle + gapAngle);
-                          const isViewed = segIdx < currentIdx;
-                          const isCurrent = segIdx === currentIdx && isActive;
-                          
-                          const radius = 44;
-                          const circumference = 2 * Math.PI * radius;
-                          const fullSegmentLength = (segmentAngle / 360) * circumference;
-                          const offset = (startAngle / 360) * circumference;
-                          
-                          // For current segment, show progress
-                          const progressLength = isCurrent 
-                            ? (storyProgress / 100) * fullSegmentLength 
-                            : isViewed ? fullSegmentLength : 0;
-                          
-                          if (progressLength <= 0 || isStoryLocked) return null;
-                          
-                          return (
-                            <circle
-                              key={`progress-${segIdx}`}
-                              cx="50"
-                              cy="50"
-                              r={radius}
-                              fill="none"
-                              strokeWidth="5"
-                              stroke="url(#storyGradient)"
-                              strokeDasharray={`${progressLength} ${circumference}`}
-                              strokeDashoffset={-offset}
-                              strokeLinecap="round"
                               style={{
-                                filter: 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.6))',
-                                transition: isCurrent ? 'none' : 'stroke-dasharray 0.2s ease',
+                                filter: !isStoryLocked && isActive && isSegmentViewed ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
                               }}
                             />
                           );
                         })}
-                        
                         <defs>
                           <linearGradient id="storyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" stopColor="#FEDA75" />
@@ -668,7 +565,7 @@ const Reel = () => {
             </div>
           </motion.div>
 
-          {/* User name/info - moved progress bars to inside card */}
+          {/* Row 2: Current user name/info */}
           <div className="flex items-center justify-center gap-2 shrink-0 px-4 pb-2" style={{ height: 28 }}>
             <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
             <span className="text-white/40">•</span>
@@ -677,149 +574,152 @@ const Reel = () => {
         </div>
 
         {/* MAIN CONTENT ZONE - flexible middle section */}
-        <div className="flex-1 flex items-center justify-center z-30 overflow-hidden px-4">
-          <AnimatePresence mode="popLayout" initial={false}>
+        <div
+          className="flex-1 flex items-center justify-center z-30 overflow-hidden px-4"
+        >
+          <motion.div
+            className="w-full h-full flex items-center justify-center"
+            style={{ 
+              scale: contentScale,
+              opacity: contentOpacity,
+              y: contentY,
+            }}
+          >
             {/* Card container with horizontal swipe + shake animation */}
             <motion.div 
-              key={userTransitionKey}
-              className="relative w-full max-w-[340px] cursor-grab active:cursor-grabbing"
+              className="relative w-full max-w-[340px] cursor-grab active:cursor-grabbing flex items-center justify-center"
               style={{ 
+                maxHeight: '100%',
                 x: dragX,
                 opacity: cardOpacity,
                 rotate: cardRotate,
                 scale: cardScale,
               }}
-              initial={transitionType === 'user' ? { 
-                x: swipeDirection === 'left' ? 300 : -300, 
-                opacity: 0,
-                scale: 0.9,
-              } : false}
-              animate={{ 
-                x: 0, 
-                opacity: 1,
-                scale: 1,
-                ...shakeAnimation,
-              }}
-              exit={transitionType === 'user' ? { 
-                x: swipeDirection === 'left' ? -300 : 300, 
-                opacity: 0,
-                scale: 0.9,
-              } : { opacity: 0 }}
-              transition={{ 
-                type: 'spring', 
-                stiffness: 350, 
-                damping: 30,
-                ...shakeTransition,
-              }}
+              animate={shakeAnimation}
+              transition={shakeTransition}
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.2}
               onDragEnd={handleHorizontalDragEnd}
               onClick={handleTap}
             >
-            {/* Full templated image/video - with lock overlay for non-public users */}
-            {(() => {
-              const shouldShowLocked = !isOwnStory && !hasPublicActivity;
-              
-              return (
-                <div className="relative w-full">
-                  {isVideo ? (
-                    <video
-                      key={mediaUrl}
-                      src={mediaUrl}
-                      className="w-full h-auto rounded-2xl"
-                      style={{ 
-                        maxHeight: 'calc(100dvh - 240px)',
-                        objectFit: 'contain',
-                        boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
-                        filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                      }}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                    />
-                  ) : (
-                    <img
-                      key={mediaUrl}
-                      src={mediaUrl}
-                      alt={`Day ${currentActivity.dayNumber}`}
-                      className="w-full h-auto rounded-2xl"
-                      style={{ 
-                        maxHeight: 'calc(100dvh - 240px)',
-                        objectFit: 'contain',
-                        boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
-                        filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                      }}
-                    />
-                  )}
-                  
-                  {/* Lock overlay for locked content */}
-                  {shouldShowLocked && (
+              {/* Full templated image/video - with lock overlay for non-public users */}
+              {(() => {
+                const shouldShowLocked = !isOwnStory && !hasPublicActivity;
+                
+                return (
+                  <AnimatePresence mode="sync" initial={false}>
                     <motion.div
-                      className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.2 }}
+                      key={currentActivity.id}
+                      className="relative w-full flex items-center justify-center"
+                      initial={{ opacity: 0.8, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0.8, scale: 0.98 }}
+                      transition={{ duration: 0.15, ease: 'easeOut' }}
                     >
-                      <motion.div
-                        className="flex flex-col items-center gap-3"
-                        initial={{ scale: 0.8, y: 20 }}
-                        animate={{ scale: 1, y: 0 }}
-                        transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
-                      >
-                        <div 
-                          className="w-16 h-16 rounded-full flex items-center justify-center"
-                          style={{
-                            background: 'rgba(255,255,255,0.12)',
-                            backdropFilter: 'blur(16px)',
-                            border: '2px solid rgba(255,255,255,0.25)',
-                            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                      {isVideo ? (
+                        <video
+                          src={mediaUrl}
+                          className="w-full h-auto rounded-2xl"
+                          style={{ 
+                            maxHeight: 'calc(100dvh - 240px)',
+                            objectFit: 'contain',
+                            boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
+                            filter: shouldShowLocked ? 'blur(20px)' : 'none',
                           }}
-                        >
-                          <Lock className="w-7 h-7 text-white" />
-                        </div>
-                        
-                        <div className="text-center px-6">
-                          <p className="text-white font-semibold text-lg">Share to see others</p>
-                          <p className="text-white/60 text-sm mt-1">
-                            Make your workout public to unlock
-                          </p>
-                        </div>
-                        
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const latestActivity = myActivities[myActivities.length - 1];
-                            if (latestActivity) {
-                              setShowMakePublicSheet(true);
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                        />
+                      ) : (
+                        <img
+                          src={mediaUrl}
+                          alt={`Day ${currentActivity.dayNumber}`}
+                          className="w-full h-auto rounded-2xl"
+                          style={{ 
+                            maxHeight: 'calc(100dvh - 240px)',
+                            objectFit: 'contain',
+                            boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
+                            filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                          }}
+                          onError={(e) => {
+                            const img = e.currentTarget;
+                            if (!img.dataset.retried) {
+                              img.dataset.retried = "true";
+                              img.src = mediaUrl + "?t=" + Date.now();
                             }
                           }}
-                          className="mt-2 px-6 py-2.5 rounded-full font-semibold text-sm active:scale-95 transition-transform"
-                          style={{
-                            background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%)',
-                            color: '#000',
-                            boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
-                          }}
+                        />
+                      )}
+                      
+                      {/* Lock overlay for locked content */}
+                      {shouldShowLocked && (
+                        <motion.div
+                          className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.2 }}
                         >
-                          Share my progress
-                        </button>
-                      </motion.div>
+                          <motion.div
+                            className="flex flex-col items-center gap-3"
+                            initial={{ scale: 0.8, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+                          >
+                            <div 
+                              className="w-16 h-16 rounded-full flex items-center justify-center"
+                              style={{
+                                background: 'rgba(255,255,255,0.12)',
+                                backdropFilter: 'blur(16px)',
+                                border: '2px solid rgba(255,255,255,0.25)',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                              }}
+                            >
+                              <Lock className="w-7 h-7 text-white" />
+                            </div>
+                            
+                            <div className="text-center px-6">
+                              <p className="text-white font-semibold text-lg">Share to see others</p>
+                              <p className="text-white/60 text-sm mt-1">
+                                Make your workout public to unlock
+                              </p>
+                            </div>
+                            
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const latestActivity = myActivities[myActivities.length - 1];
+                                if (latestActivity) {
+                                  setShowMakePublicSheet(true);
+                                }
+                              }}
+                              className="mt-2 px-6 py-2.5 rounded-full font-semibold text-sm active:scale-95 transition-transform"
+                              style={{
+                                background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%)',
+                                color: '#000',
+                                boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
+                              }}
+                            >
+                              Share my progress
+                            </button>
+                          </motion.div>
+                        </motion.div>
+                      )}
+                      
+                      {/* Floating 3D emoji reactions - inside image container */}
+                      {!shouldShowLocked && (
+                        <Floating3DEmojis 
+                          reactions={activeReactionTypes}
+                          newReaction={floatingReaction}
+                        />
+                      )}
                     </motion.div>
-                  )}
-                  
-                  {/* Floating 3D emoji reactions - inside image container */}
-                  {!shouldShowLocked && (
-                    <Floating3DEmojis 
-                      reactions={activeReactionTypes}
-                      newReaction={floatingReaction}
-                    />
-                  )}
-                </div>
-              );
-            })()}
+                  </AnimatePresence>
+                );
+              })()}
+            </motion.div>
           </motion.div>
-          </AnimatePresence>
         </div>
 
         {/* FIXED BOTTOM ZONE - Reaction pill + View Progress - compact sticky */}
@@ -1087,7 +987,7 @@ const Reel = () => {
         }}
         onKeepPrivate={() => setShowMakePublicSheet(false)}
       />
-    </div>
+    </DynamicBlurBackground>
   );
 };
 
