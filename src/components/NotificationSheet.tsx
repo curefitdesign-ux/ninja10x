@@ -176,51 +176,52 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
   const ui = (
     <AnimatePresence>
       {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/60 z-[100]"
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
+          className="fixed inset-0 z-[100] flex flex-col"
+          style={{ height: '100dvh' }}
+        >
+          {/* Full-screen blur background */}
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(180deg, rgba(20, 20, 30, 0.85) 0%, rgba(10, 10, 20, 0.95) 100%)',
+              backdropFilter: 'blur(60px) saturate(150%)',
+              WebkitBackdropFilter: 'blur(60px) saturate(150%)',
+            }}
             onClick={onClose}
           />
 
-          {/* Sheet */}
+          {/* Content container */}
           <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 350 }}
-            className="fixed bottom-0 left-0 right-0 z-[100] rounded-t-3xl overflow-hidden max-h-[70vh]"
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 40, opacity: 0 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 300, delay: 0.05 }}
+            className="relative flex flex-col h-full"
             style={{
-              background: 'linear-gradient(180deg, rgba(45, 45, 55, 0.98) 0%, rgba(30, 30, 40, 0.99) 100%)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              paddingTop: 'calc(env(safe-area-inset-top) + 16px)',
               paddingBottom: 'env(safe-area-inset-bottom)',
             }}
           >
-            {/* Handle */}
-            <div className="flex justify-center pt-3 pb-2">
-              <div className="w-10 h-1 rounded-full bg-white/20" />
-            </div>
-
             {/* Header */}
-            <div className="flex items-center justify-between px-5 pb-4">
-              <h2 className="text-white text-lg font-semibold">Reactions</h2>
+            <div className="flex items-center justify-between px-5 pb-4 flex-shrink-0">
+              <h2 className="text-white text-xl font-semibold">Reactions</h2>
               <div className="flex items-center gap-3">
                 {notifications.length > 0 && (
                   <button
                     onClick={dismissAll}
-                    className="text-white/50 text-xs hover:text-white transition-colors"
+                    className="text-white/50 text-sm hover:text-white transition-colors"
                   >
                     Clear all
                   </button>
                 )}
                 <button
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  className="w-9 h-9 rounded-full flex items-center justify-center"
                   style={{
                     background: 'rgba(255,255,255,0.1)',
                     border: '1px solid rgba(255,255,255,0.15)',
@@ -231,81 +232,81 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
               </div>
             </div>
 
-            {/* Notification list */}
-            <div className="px-4 pb-6 overflow-y-auto max-h-[calc(70vh-100px)]">
+            {/* Scrollable notification list */}
+            <div className="flex-1 overflow-y-auto px-4 pb-6">
               {notifications.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="flex flex-col items-center justify-center py-24 text-center">
                   <div className="flex -space-x-2 mb-4">
-                    <img src={fireImg} alt="fire" className="w-10 h-10 object-contain opacity-40" />
-                    <img src={clapImg} alt="clap" className="w-10 h-10 object-contain opacity-40" />
-                    <img src={flexImg} alt="flex" className="w-10 h-10 object-contain opacity-40" />
+                    <img src={fireImg} alt="fire" className="w-12 h-12 object-contain opacity-40" />
+                    <img src={clapImg} alt="clap" className="w-12 h-12 object-contain opacity-40" />
+                    <img src={flexImg} alt="flex" className="w-12 h-12 object-contain opacity-40" />
                   </div>
-                  <p className="text-white/50 text-sm">No reactions yet</p>
-                  <p className="text-white/30 text-xs mt-1">Share your activities to get reactions!</p>
+                  <p className="text-white/50 text-base">No reactions yet</p>
+                  <p className="text-white/30 text-sm mt-1">Share your activities to get reactions!</p>
                 </div>
               ) : (
                 <div className="space-y-2">
                   {notifications.map((notif, index) => {
                     const iconSrc = REACTION_IMAGES[notif.reactionType];
                     return (
-                    <motion.div
-                      key={notif.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20, height: 0 }}
-                      transition={{ delay: index * 0.03 }}
-                      className="relative flex items-center gap-3 p-3 rounded-2xl"
-                      style={{
-                        background: 'rgba(255, 255, 255, 0.06)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                      }}
-                    >
-                      {/* Reaction icon */}
-                      <div 
-                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                      <motion.div
+                        key={notif.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20, height: 0 }}
+                        transition={{ delay: index * 0.03 }}
+                        className="relative flex items-center gap-3 p-3.5 rounded-2xl"
                         style={{
-                          background: 'rgba(255, 255, 255, 0.08)',
+                          background: 'rgba(255, 255, 255, 0.06)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
                         }}
                       >
-                        {iconSrc ? (
-                          <img
-                            src={iconSrc}
-                            alt={notif.reactionType}
-                            className="w-6 h-6 object-contain"
-                          />
-                        ) : (
-                          <div className="w-2 h-2 rounded-full bg-white/30" />
-                        )}
-                      </div>
+                        {/* Reaction icon */}
+                        <div 
+                          className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.08)',
+                          }}
+                        >
+                          {iconSrc ? (
+                            <img
+                              src={iconSrc}
+                              alt={notif.reactionType}
+                              className="w-7 h-7 object-contain"
+                            />
+                          ) : (
+                            <div className="w-2 h-2 rounded-full bg-white/30" />
+                          )}
+                        </div>
 
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm">
-                          <span className="font-medium">{notif.reactorName}</span>
-                          <span className="text-white/70"> {REACTION_VERBS[notif.reactionType] || 'reacted to'} your activity</span>
-                        </p>
-                        <p className="text-white/40 text-xs mt-0.5">Just now</p>
-                      </div>
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-sm">
+                            <span className="font-medium">{notif.reactorName}</span>
+                            <span className="text-white/70"> {REACTION_VERBS[notif.reactionType] || 'reacted to'} your activity</span>
+                          </p>
+                          <p className="text-white/40 text-xs mt-0.5">Just now</p>
+                        </div>
 
-                      {/* Dismiss */}
-                      <motion.button
-                        onClick={() => dismissNotification(notif.id)}
-                        className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.08)',
-                        }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <X className="w-3.5 h-3.5 text-white/50" />
-                      </motion.button>
-                    </motion.div>
+                        {/* Dismiss */}
+                        <motion.button
+                          onClick={() => dismissNotification(notif.id)}
+                          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.08)',
+                          }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <X className="w-3.5 h-3.5 text-white/50" />
+                        </motion.button>
+                      </motion.div>
                     );
                   })}
                 </div>
               )}
             </div>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );
