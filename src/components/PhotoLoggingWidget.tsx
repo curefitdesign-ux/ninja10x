@@ -261,33 +261,6 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
         {/* Empty state - animated upload icon ONLY when expanded */}
         {!hasPhoto && shouldShowExpanded && isActiveDay && (
           <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-            {/* Floating particles */}
-            {[...Array(6)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1.5 h-1.5 rounded-full bg-emerald-400"
-                style={{
-                  boxShadow: '0 0 6px rgba(52, 211, 153, 0.8)',
-                }}
-                initial={{
-                  x: 0,
-                  y: 0,
-                  opacity: 0,
-                }}
-                animate={{
-                  x: [0, Math.cos((i * 60) * Math.PI / 180) * 28, 0],
-                  y: [0, Math.sin((i * 60) * Math.PI / 180) * 28, 0],
-                  opacity: [0, 0.9, 0],
-                  scale: [0.5, 1, 0.5],
-                }}
-                transition={{
-                  duration: 2.5,
-                  repeat: Infinity,
-                  delay: i * 0.4,
-                  ease: "easeInOut",
-                }}
-              />
-            ))}
             
             {/* Breathing outer glow */}
             <motion.div
