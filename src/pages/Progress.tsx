@@ -131,41 +131,31 @@ const Progress = () => {
     }, 200);
   };
 
-  // Animation sequence - smoother and faster
+  // Animation sequence - instant content, no staggered delays
   useEffect(() => {
-    // Show transition animation immediately if coming from share
+    // Show all content immediately for zero friction
+    setShowContent(true);
+    setShowStories(true);
+    setShowTiles(true);
+    
+    // Show transition animation if coming from share (brief overlay)
     if (transitionToProgress && transitionImage) {
       setShowTransitionIn(true);
-      // Extend transition duration for smoother feel
-      setTimeout(() => setShowTransitionIn(false), 600);
+      setTimeout(() => setShowTransitionIn(false), 300);
       
       // Show make public prompt if coming from share and activity is not public
-      // BUT only if user hasn't already chosen to make things public
       const currentActivity = myActivities.find(a => a.dayNumber === transitionDayNumber);
       if (currentActivity && !currentActivity.isPublic) {
-        // If user previously chose public, auto-make it public
         if (hasUserChosenPublic()) {
           makeActivityPublic(transitionDayNumber);
         } else {
-          // Otherwise, show the sheet to ask
           setTimeout(() => {
             setPendingDayNumber(transitionDayNumber);
             setShowMakePublicSheet(true);
-          }, 800);
+          }, 400);
         }
       }
     }
-    
-    // Stagger content animations
-    const contentTimer = setTimeout(() => setShowContent(true), 100);
-    const storiesTimer = setTimeout(() => setShowStories(true), 150);
-    const tilesTimer = setTimeout(() => setShowTiles(true), 250);
-    
-    return () => {
-      clearTimeout(contentTimer);
-      clearTimeout(storiesTimer);
-      clearTimeout(tilesTimer);
-    };
   }, [transitionToProgress, transitionImage, transitionDayNumber, myActivities, makeActivityPublic]);
 
   // Handle making activity public
@@ -219,13 +209,11 @@ const Progress = () => {
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={{ top: 0, bottom: 0.3 }}
       onDragEnd={handleDragEnd}
-      initial={transitionToProgress ? { opacity: 0.8, y: 80, scale: 0.95 } : { opacity: 1 }}
+      initial={transitionToProgress ? { opacity: 0 } : { opacity: 1 }}
       animate={{ 
         opacity: isExiting ? 0 : 1, 
-        y: isExiting ? 80 : 0,
-        scale: isExiting ? 0.95 : 1,
       }}
-      transition={{ type: 'spring', stiffness: 350, damping: 32, mass: 0.8 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
     >
       {/* Background aurora */}
       <div 
@@ -296,10 +284,10 @@ const Progress = () => {
               minHeight: "130px",
               scale: storyStripScale,
             }}
-            initial={{ opacity: 0, y: -30, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -50, scale: 1.1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 25 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
           >
             <div className="flex items-end gap-3">
               {feedLoading ? (
