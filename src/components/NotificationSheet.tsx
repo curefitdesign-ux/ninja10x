@@ -61,22 +61,55 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const userActivitiesRef = useRef<Set<string>>(new Set());
 
-  // Fetch user's activity IDs on mount
+  // Fetch user's activity IDs and past reactions on mount
   useEffect(() => {
     if (!user) return;
 
-    const fetchMyActivities = async () => {
-      const { data } = await supabase
+    const fetchMyActivitiesAndReactions = async () => {
+      // First get user's activity IDs
+      const { data: activities } = await supabase
         .from('journey_activities')
         .select('id')
         .eq('user_id', user.id);
       
-      if (data) {
-        userActivitiesRef.current = new Set(data.map(a => a.id));
+      if (activities) {
+        const activityIds = activities.map(a => a.id);
+        userActivitiesRef.current = new Set(activityIds);
+        
+        if (activityIds.length > 0) {
+          // Fetch past reactions on user's activities (excluding self-reactions)
+          const { data: reactions } = await supabase
+            .from('activity_reactions')
+            .select('id, activity_id, user_id, reaction_type, created_at')
+            .in('activity_id', activityIds)
+            .neq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(20);
+          
+          if (reactions && reactions.length > 0) {
+            // Fetch all reactor profiles in one query
+            const reactorIds = [...new Set(reactions.map(r => r.user_id))];
+            const { data: profiles } = await supabase
+              .from('profiles')
+              .select('user_id, display_name')
+              .in('user_id', reactorIds);
+            
+            const profileMap = new Map(profiles?.map(p => [p.user_id, p.display_name]) || []);
+            
+            const pastNotifications: Notification[] = reactions.map(r => ({
+              id: r.id,
+              reactorName: profileMap.get(r.user_id) || 'Someone',
+              reactionType: r.reaction_type,
+              timestamp: new Date(r.created_at),
+            }));
+            
+            setNotifications(pastNotifications);
+          }
+        }
       }
     };
 
-    fetchMyActivities();
+    fetchMyActivitiesAndReactions();
   }, [user]);
 
   // Subscribe to realtime reaction inserts
