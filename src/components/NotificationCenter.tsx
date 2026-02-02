@@ -4,10 +4,10 @@ import { Bell, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 
-// 3D reaction assets
-import fireImg from '@/assets/reactions/fire-3d.png';
-import clapImg from '@/assets/reactions/clap-3d.png';
-import fistbumpImg from '@/assets/reactions/fistbump.png';
+// 3D reaction assets (clean transparency)
+import fireImg from '@/assets/reactions/fire-new.png';
+import clapImg from '@/assets/reactions/clap-hands.png';
+import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
 import wowImg from '@/assets/reactions/wow.png';
 import flexImg from '@/assets/reactions/flex.png';
 import trophyImg from '@/assets/reactions/dumbbells.png';
