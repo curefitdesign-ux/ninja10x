@@ -35,6 +35,8 @@ import trekkingIcon from '@/assets/activities/trekking.png';
 import boxingIcon from '@/assets/activities/boxing.png';
 import yogaIcon from '@/assets/activities/yoga.png';
 
+import { ReactionType, ActivityReaction } from '@/services/journey-service';
+
 // Photo interface - storage-first: only storageUrl is persisted
 export interface Photo {
   id: string;
@@ -45,6 +47,7 @@ export interface Photo {
   duration?: string;
   pr?: string;
   dayNumber: number; // 1-12, each upload = new day
+  reactions?: Record<ReactionType, { count: number }>;
 }
 
 const MAX_DAYS = 12;
@@ -80,6 +83,9 @@ const Index = () => {
     duration: a.duration,
     pr: a.pr,
     dayNumber: a.dayNumber,
+    reactions: a.reactions ? Object.fromEntries(
+      Object.entries(a.reactions).map(([type, data]) => [type, { count: data.count }])
+    ) as Record<ReactionType, { count: number }> : undefined,
   }));
 
   // Shared-element transition from ShareSheet (X) to Cult Ninja widget (this page)

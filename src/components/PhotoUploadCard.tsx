@@ -85,7 +85,7 @@ const PhotoUploadCard = ({
         </div>
       
         {/* Week Progress */}
-        <div className="relative z-10">
+        <div className="relative z-10 mt-6">
           <WeekProgress currentWeek={currentWeek} photosPerWeek={photosPerWeek} />
         </div>
       </div>
