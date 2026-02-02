@@ -636,17 +636,20 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
             </div>
             
              {/* Floating Bottom Action Button - VIEW PROGRESS only, always visible */}
-            <motion.div 
-              className="fixed bottom-0 left-0 right-0 z-30 px-6"
+            <div 
+              className="fixed left-0 right-0 z-30 px-6"
               style={{ 
+                bottom: 0,
                 paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
                 paddingTop: '16px',
                 background: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 50%, rgba(0,0,0,0.7) 80%, transparent 100%)',
               }}
-              animate={isExiting ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
             >
-              <div className="w-full max-w-sm mx-auto">
+              <motion.div 
+                className="w-full max-w-sm mx-auto"
+                animate={isExiting ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+              >
                {/* View Progress button */}
                 <button
                   onClick={handleViewProgress}
@@ -655,8 +658,8 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
                 >
                   <span>VIEW PROGRESS</span>
                 </button>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
           </div>
         </motion.div>
       </AnimatePresence>

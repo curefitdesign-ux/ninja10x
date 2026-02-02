@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Camera, X } from 'lucide-react';
+import { Check, Camera, X, Eye, EyeOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
@@ -43,6 +44,7 @@ const ProfileSetupPage = () => {
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [customAvatarFile, setCustomAvatarFile] = useState<File | null>(null);
   const [customAvatarPreview, setCustomAvatarPreview] = useState<string | null>(null);
+  const [storiesPublic, setStoriesPublic] = useState(true);
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -58,6 +60,7 @@ const ProfileSetupPage = () => {
   useEffect(() => {
     if (editMode && profile) {
       setDisplayName(profile.display_name);
+      setStoriesPublic(profile.stories_public ?? true);
       const presetMatch = PRESET_AVATARS.find(a => profile.avatar_url.includes(a.id) || profile.avatar_url === a.src);
       if (presetMatch) {
         setSelectedAvatar(presetMatch.id);
@@ -183,6 +186,7 @@ const ProfileSetupPage = () => {
         await updateProfile({
           display_name: displayName.trim(),
           avatar_url: avatarUrl,
+          stories_public: storiesPublic,
         });
         navigate(-1);
       } else {
@@ -192,6 +196,7 @@ const ProfileSetupPage = () => {
             user_id: user.id,
             display_name: displayName.trim(),
             avatar_url: avatarUrl,
+            stories_public: storiesPublic,
           });
 
         if (insertError) throw insertError;
@@ -437,6 +442,40 @@ const ProfileSetupPage = () => {
             <p className="text-red-400 text-xs mt-2">{nameError}</p>
           )}
         </div>
+
+        {/* Story Visibility Toggle - Only in edit mode */}
+        {editMode && (
+          <div 
+            className="rounded-2xl p-4 mb-6"
+            style={{
+              background: 'rgba(255, 255, 255, 0.06)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.08)',
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {storiesPublic ? (
+                  <Eye className="w-5 h-5 text-emerald-400" />
+                ) : (
+                  <EyeOff className="w-5 h-5 text-white/50" />
+                )}
+                <div>
+                  <p className="text-white font-medium text-sm">Stories Visibility</p>
+                  <p className="text-white/50 text-xs mt-0.5">
+                    {storiesPublic ? 'Visible to community' : 'Only you can see'}
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={storiesPublic}
+                onCheckedChange={setStoriesPublic}
+                disabled={loading}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Spacer */}
         <div className="flex-1" />

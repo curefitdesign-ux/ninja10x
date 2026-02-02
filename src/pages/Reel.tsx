@@ -695,7 +695,7 @@ const Reel = () => {
         <div 
           className="shrink-0 z-40 flex flex-col items-center"
           style={{
-            paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)',
+            paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 12px)',
           }}
         >
           {(() => {
