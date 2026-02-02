@@ -80,17 +80,23 @@ const Journal2Frame = ({ imageUrl, activity, week, day, duration, pr, imagePosit
         {/* Activity name */}
         <h2 className="text-black text-[28px] font-black italic leading-none mb-2">{activity}</h2>
         
-        {/* Stats row */}
-        <div className="flex gap-6">
-          <div>
-            <p className="text-gray-500 text-[10px] font-medium">{durationLabel}</p>
-            <p className="text-black text-xl font-bold">{duration || "02hrs"}</p>
+        {/* Stats row - only show if user entered values */}
+        {(duration || pr) && (
+          <div className="flex gap-6">
+            {duration && (
+              <div>
+                <p className="text-gray-500 text-[10px] font-medium">{durationLabel}</p>
+                <p className="text-black text-xl font-bold">{duration}</p>
+              </div>
+            )}
+            {pr && (
+              <div>
+                <p className="text-gray-500 text-[10px] font-medium">{metricLabel}</p>
+                <p className="text-black text-xl font-bold">{pr}</p>
+              </div>
+            )}
           </div>
-          <div>
-            <p className="text-gray-500 text-[10px] font-medium">{metricLabel}</p>
-            <p className="text-black text-xl font-bold">{pr || "10"}</p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

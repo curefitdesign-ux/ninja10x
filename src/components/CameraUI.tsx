@@ -169,7 +169,13 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
       
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        // Keep mirrored for front camera (what user sees = what they get)
+        // WYSIWYG: Mirror the captured image for front camera to match preview
+        // The preview uses scaleX(-1), so we apply the same transform to the capture
+        if (facingMode === 'user') {
+          ctx.translate(cropWidth, 0);
+          ctx.scale(-1, 1);
+        }
+        
         ctx.drawImage(video, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
         
         const dataUrl = canvas.toDataURL('image/jpeg', 0.9);

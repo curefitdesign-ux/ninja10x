@@ -165,39 +165,45 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
         </div>
       </div>
       
-      {/* Left side stats pills */}
-      <div className="absolute left-3 z-20 space-y-1.5" style={{ bottom: '26%' }}>
-        <div 
-          className="px-2.5 py-1 animate-subtle-float"
-          style={{ 
-            background: '#F45B4A',
-            borderRadius: '2px',
-            animationDelay: '0.2s'
-          }}
-        >
-          <span 
-            className="text-white font-bold text-[11px]"
-            style={{ fontFamily: 'system-ui, sans-serif' }}
-          >
-            {metricLabel} : {pr || '20'}
-          </span>
+      {/* Left side stats pills - only show if user entered values */}
+      {(duration || pr) && (
+        <div className="absolute left-3 z-20 space-y-1.5" style={{ bottom: '26%' }}>
+          {pr && (
+            <div 
+              className="px-2.5 py-1 animate-subtle-float"
+              style={{ 
+                background: '#F45B4A',
+                borderRadius: '2px',
+                animationDelay: '0.2s'
+              }}
+            >
+              <span 
+                className="text-white font-bold text-[11px]"
+                style={{ fontFamily: 'system-ui, sans-serif' }}
+              >
+                {metricLabel} : {pr}
+              </span>
+            </div>
+          )}
+          {duration && (
+            <div 
+              className="px-2.5 py-1 animate-subtle-float"
+              style={{ 
+                background: '#F45B4A',
+                borderRadius: '2px',
+                animationDelay: '0.4s'
+              }}
+            >
+              <span 
+                className="text-white font-bold text-[11px]"
+                style={{ fontFamily: 'system-ui, sans-serif' }}
+              >
+                {durationLabel} : {duration}
+              </span>
+            </div>
+          )}
         </div>
-        <div 
-          className="px-2.5 py-1 animate-subtle-float"
-          style={{ 
-            background: '#F45B4A',
-            borderRadius: '2px',
-            animationDelay: '0.4s'
-          }}
-        >
-          <span 
-            className="text-white font-bold text-[11px]"
-            style={{ fontFamily: 'system-ui, sans-serif' }}
-          >
-            {durationLabel} : {duration || '02:00:50'}
-          </span>
-        </div>
-      </div>
+      )}
       
       {/* Bottom right content - journey progress */}
       <div className="absolute right-4 z-20 text-right" style={{ bottom: '6%' }}>

@@ -96,7 +96,8 @@ const Preview = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isVideo, setIsVideo] = useState(false);
   const [activity, setActivity] = useState<string | null>(null);
-  const [duration, setDuration] = useState('2hrs');
+  // Start with empty values - only show on card if user enters data
+  const [duration, setDuration] = useState('');
   const [pr, setPr] = useState('');
   const [currentFrame, setCurrentFrame] = useState<FrameType>('shaky');
   const [originalFrame, setOriginalFrame] = useState<FrameType | null>(null);
@@ -220,7 +221,8 @@ const Preview = () => {
       setImageUrl(mediaUrl);
       setIsVideo(state.isVideo ?? isVideoUrl(mediaUrl));
       setActivity(null); // Don't set default - let user select
-      setDuration(state.duration || '2hrs');
+      // Start with empty values - only show on card if user enters data
+      setDuration(state.duration || '');
       setPr(state.pr || '');
       setIsReview(false);
       setPhotoId(null);
@@ -232,10 +234,11 @@ const Preview = () => {
 
     if (mediaUrl && state?.activity) {
       // Existing photo/video - go directly to template selection (review mode)
+      // Preserve existing values from DB
       setImageUrl(mediaUrl);
       setIsVideo(state.isVideo ?? isVideoUrl(mediaUrl));
       setActivity(state.activity);
-      setDuration(state.duration || '2hrs');
+      setDuration(state.duration || ''); // Preserve existing or empty
       setPr(state.pr || '');
       setIsReview(state.isReview || false);
       setPhotoId(state.photoId || null);

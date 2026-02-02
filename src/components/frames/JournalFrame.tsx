@@ -127,17 +127,23 @@ const JournalFrame = ({
         {/* Activity name */}
         <h2 className="text-black text-[32px] font-black leading-none mb-3">{activity}</h2>
         
-        {/* Stats row */}
-        <div className="flex gap-8">
-          <div>
-            <p className="text-gray-500 text-xs font-medium">{metricLabel}</p>
-            <p className="text-black text-2xl font-black">{pr || "10"}</p>
+        {/* Stats row - only show if user entered values */}
+        {(duration || pr) && (
+          <div className="flex gap-8">
+            {pr && (
+              <div>
+                <p className="text-gray-500 text-xs font-medium">{metricLabel}</p>
+                <p className="text-black text-2xl font-black">{pr}</p>
+              </div>
+            )}
+            {duration && (
+              <div>
+                <p className="text-gray-500 text-xs font-medium">{durationLabel}</p>
+                <p className="text-black text-2xl font-black">{duration}</p>
+              </div>
+            )}
           </div>
-          <div>
-            <p className="text-gray-500 text-xs font-medium">{durationLabel}</p>
-            <p className="text-black text-2xl font-black">{duration || "02hrs"}</p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
