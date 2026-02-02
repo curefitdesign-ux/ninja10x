@@ -383,473 +383,461 @@ const Reel = () => {
   const week = Math.ceil(currentActivity.dayNumber / 3);
   const dayInWeek = ((currentActivity.dayNumber - 1) % 3) + 1;
 
-  // Calculate fixed header height for layout - more compact
-  const HEADER_HEIGHT = 140; // Safe-area + buttons + avatars + name (slightly increased for spacing)
-  const BOTTOM_HEIGHT = 110; // Reaction pill + view progress (slightly reduced)
+  // Fixed zone heights for layout
+  const HEADER_HEIGHT = 100; // Row: delete + avatars + close + user name
+  const BOTTOM_HEIGHT = 100; // Reaction pill + view progress
 
   return (
     <DynamicBlurBackground imageUrl={mediaUrl}>
-      {/* Floating 3D emojis around edges */}
-      <Floating3DEmojis 
-        reactions={activeReactionTypes}
-        newReaction={floatingReaction}
-      />
-
-      {/* FIXED HEADER ZONE - contains delete/close buttons, avatars strip, user info */}
+      {/* Fixed height container - no vertical scroll */}
       <div 
-        className="absolute top-0 left-0 right-0 z-50 flex flex-col"
+        className="fixed inset-0 flex flex-col"
         style={{ 
-          paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
-        }}
-      >
-        {/* Row 1: Delete + Close buttons */}
-        <motion.div
-          className="flex items-center justify-between px-4 shrink-0"
-          style={{ height: 44 }}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          {/* Left side - Delete button for owner (only within 24 hours) */}
-          <div className="w-11">
-            {canEdit && (
-              <motion.button
-                onClick={() => setShowDeleteConfirm(true)}
-                className="p-3 -m-1 transition-colors rounded-full text-white/80 hover:text-red-400 min-w-[44px] min-h-[44px] flex items-center justify-center"
-                whileTap={{ scale: 0.9 }}
-              >
-                <Trash2 className="w-5 h-5" strokeWidth={1.5} />
-              </motion.button>
-            )}
-          </div>
-          
-          {/* Right side - Close button */}
-          <button
-            onClick={handleClose}
-            className="text-white/80 hover:text-white transition-colors p-3 -m-1 min-w-[44px] min-h-[44px] flex items-center justify-center"
-          >
-            <X className="w-6 h-6" strokeWidth={1.5} />
-          </button>
-        </motion.div>
-
-        {/* Row 2: User avatars strip - centered within header, NOT absolute */}
-        <motion.div
-          className="flex justify-center shrink-0"
-          style={{ height: 64 }}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-        >
-          <div className="flex items-center gap-3 px-4">
-            {userGroups.slice(0, 7).map((group, idx) => {
-              const isActive = idx === currentUserIndex;
-              const activityCount = group.activities.length;
-              const currentIdx = idx === currentUserIndex ? currentActivityIndex : 0;
-              const isOwnProfile = user && group.userId === user.id;
-              // Lock other users' avatars when current user hasn't shared publicly
-              const isProfileLocked = !isOwnProfile && !hasPublicActivity;
-              
-              return (
-                <motion.button
-                  key={group.userId}
-                  onClick={() => {
-                    setCurrentUserIndex(idx);
-                    setCurrentActivityIndex(0);
-                  }}
-                  className="relative"
-                  whileTap={{ scale: 0.9 }}
-                  animate={{ scale: isActive ? 1 : 0.85 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                >
-                  {/* Instagram-style story ring - thicker and more visible */}
-                  <svg
-                    className="absolute inset-0"
-                    style={{
-                      width: isActive ? 64 : 52,
-                      height: isActive ? 64 : 52,
-                      transform: 'rotate(-90deg)',
-                    }}
-                    viewBox="0 0 100 100"
-                  >
-                    {Array.from({ length: activityCount }).map((_, segIdx) => {
-                      const gapAngle = activityCount > 1 ? 10 : 0;
-                      const totalGap = gapAngle * activityCount;
-                      const segmentAngle = (360 - totalGap) / activityCount;
-                      const startAngle = segIdx * (segmentAngle + gapAngle);
-                      const isSegmentViewed = segIdx <= currentIdx;
-                      
-                      const radius = 44;
-                      const circumference = 2 * Math.PI * radius;
-                      const segmentLength = (segmentAngle / 360) * circumference;
-                      const offset = (startAngle / 360) * circumference;
-                      
-                      return (
-                        <circle
-                          key={segIdx}
-                          cx="50"
-                          cy="50"
-                          r={radius}
-                          fill="none"
-                          strokeWidth="7"
-                          stroke={isProfileLocked ? 'rgba(255,255,255,0.15)' : (isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.25)')}
-                          strokeDasharray={`${segmentLength} ${circumference}`}
-                          strokeDashoffset={-offset}
-                          strokeLinecap="round"
-                          style={{
-                            filter: !isProfileLocked && isActive && isSegmentViewed ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
-                          }}
-                        />
-                      );
-                    })}
-                    <defs>
-                      <linearGradient id="storyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#FEDA75" />
-                        <stop offset="25%" stopColor="#FA7E1E" />
-                        <stop offset="50%" stopColor="#D62976" />
-                        <stop offset="75%" stopColor="#962FBF" />
-                        <stop offset="100%" stopColor="#4F5BD5" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                  
-                  {/* Avatar - show clear profile photos, content stays locked */}
-                  <div
-                    className="relative"
-                    style={{
-                      width: isActive ? 64 : 52,
-                      height: isActive ? 64 : 52,
-                      padding: isActive ? 5 : 4,
-                    }}
-                  >
-                    <div className="w-full h-full rounded-full overflow-hidden">
-                      <ProfileAvatar
-                        src={group.avatarUrl}
-                        name={group.displayName}
-                        size={isActive ? 54 : 44}
-                        style={{
-                          opacity: isActive ? 1 : 0.7,
-                          transition: 'all 0.2s ease',
-                        }}
-                      />
-                    </div>
-                  </div>
-                </motion.button>
-              );
-            })}
-          </div>
-        </motion.div>
-
-        {/* Row 3: Current user name/info */}
-        <div className="flex items-center justify-center gap-2 shrink-0 px-4" style={{ height: 24 }}>
-          <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
-          <span className="text-white/40">•</span>
-          <span className="text-white/60 text-xs">Week {week} • Day {dayInWeek}</span>
-        </div>
-      </div>
-
-      {/* MAIN CONTENT ZONE - fills space between header and bottom, no overlap */}
-      <div
-        className="absolute left-0 right-0 z-30 flex items-center justify-center"
-        style={{ 
-          top: `calc(env(safe-area-inset-top, 12px) + ${HEADER_HEIGHT}px)`,
-          bottom: `calc(env(safe-area-inset-bottom, 0px) + ${BOTTOM_HEIGHT}px)`,
-          paddingInline: 16,
+          height: '100dvh',
+          minHeight: '-webkit-fill-available',
           overflow: 'hidden',
         }}
       >
-        <motion.div
-          className="w-full h-full flex items-center justify-center"
+        {/* Floating 3D emojis around edges */}
+        <Floating3DEmojis 
+          reactions={activeReactionTypes}
+          newReaction={floatingReaction}
+        />
+
+        {/* FIXED HEADER ZONE - Single row: delete, avatars, close + user name below */}
+        <div 
+          className="shrink-0 z-50 flex flex-col"
           style={{ 
-            scale: contentScale,
-            opacity: contentOpacity,
-            y: contentY,
+            paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
           }}
         >
-        {/* Card container with horizontal swipe */}
-          <motion.div 
-            className="relative w-full max-w-[320px] cursor-grab active:cursor-grabbing flex items-center justify-center"
-            style={{ 
-              maxHeight: '100%',
-              x: dragX,
-              opacity: cardOpacity,
-              rotate: cardRotate,
-              scale: cardScale,
-            }}
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.2}
-            onDragEnd={handleHorizontalDragEnd}
-            onClick={handleTap}
+          {/* Row 1: Delete + Avatars + Close - all in one row */}
+          <motion.div
+            className="flex items-center justify-between px-3 shrink-0"
+            style={{ height: 56 }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
           >
-          {/* Full templated image/video - with lock overlay for non-public users */}
-          {(() => {
-            // Show locked state for other users' content when current user hasn't shared publicly
-            const shouldShowLocked = !isOwnStory && !hasPublicActivity;
-            
-            return (
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentActivity.id}
-                  className="relative w-full flex items-center justify-center"
-                  style={{ maxHeight: '100%' }}
-                  initial={{ opacity: 0, scale: 0.92, y: 30 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 180, damping: 22 }}
+            {/* Left side - Delete button */}
+            <div className="w-10 shrink-0">
+              {canEdit && (
+                <motion.button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="p-2 transition-colors rounded-full text-white/80 hover:text-red-400 min-w-[40px] min-h-[40px] flex items-center justify-center"
+                  whileTap={{ scale: 0.9 }}
                 >
-                  {isVideo ? (
-                    <video
-                      src={mediaUrl}
-                      className="w-full h-auto rounded-2xl"
-                      style={{ 
-                        maxHeight: '100%',
-                        objectFit: 'contain',
-                        boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
-                        filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                      }}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                    />
-                  ) : (
-                    <img
-                      src={mediaUrl}
-                      alt={`Day ${currentActivity.dayNumber}`}
-                      className="w-full h-auto rounded-2xl"
-                      style={{ 
-                        maxHeight: '100%',
-                        objectFit: 'contain',
-                        boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
-                        filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                      }}
-                      onError={(e) => {
-                        const img = e.currentTarget;
-                        if (!img.dataset.retried) {
-                          img.dataset.retried = "true";
-                          img.src = mediaUrl + "?t=" + Date.now();
-                        }
-                      }}
-                    />
-                  )}
+                  <Trash2 className="w-5 h-5" strokeWidth={1.5} />
+                </motion.button>
+              )}
+            </div>
+
+            {/* Center - User avatars strip */}
+            <div className="flex-1 flex justify-center">
+              <div className="flex items-center gap-2">
+                {userGroups.slice(0, 5).map((group, idx) => {
+                  const isActive = idx === currentUserIndex;
+                  const activityCount = group.activities.length;
+                  const currentIdx = idx === currentUserIndex ? currentActivityIndex : 0;
+                  const isOwnProfile = user && group.userId === user.id;
+                  const isProfileLocked = !isOwnProfile && !hasPublicActivity;
+                  const avatarSize = isActive ? 48 : 40;
                   
-                  {/* Lock overlay for locked content */}
-                  {shouldShowLocked && (
-                    <motion.div
-                      className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.2 }}
-                    >
-                      {/* Frosted glass lock badge */}
-                      <motion.div
-                        className="flex flex-col items-center gap-3"
-                        initial={{ scale: 0.8, y: 20 }}
-                        animate={{ scale: 1, y: 0 }}
-                        transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
-                      >
-                        <div 
-                          className="w-16 h-16 rounded-full flex items-center justify-center"
-                          style={{
-                            background: 'rgba(255,255,255,0.12)',
-                            backdropFilter: 'blur(16px)',
-                            border: '2px solid rgba(255,255,255,0.25)',
-                            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                          }}
-                        >
-                          <Lock className="w-7 h-7 text-white" />
-                        </div>
-                        
-                        <div className="text-center px-6">
-                          <p className="text-white font-semibold text-lg">Share to see others</p>
-                          <p className="text-white/60 text-sm mt-1">
-                            Make your workout public to unlock
-                          </p>
-                        </div>
-                        
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Find the most recent activity to make public
-                            const latestActivity = myActivities[myActivities.length - 1];
-                            if (latestActivity) {
-                              setShowMakePublicSheet(true);
-                            }
-                          }}
-                          className="mt-2 px-6 py-2.5 rounded-full font-semibold text-sm active:scale-95 transition-transform"
-                          style={{
-                            background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%)',
-                            color: '#000',
-                            boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
-                          }}
-                        >
-                          Share my progress
-                        </button>
-                      </motion.div>
-                    </motion.div>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            );
-          })()}
-          </motion.div>
-        </motion.div>
-      </div>
-
-      {/* FIXED BOTTOM ZONE - Reaction pill + View Progress */}
-      {/* Hide reaction pill when content is locked (non-owner, user hasn't made public) */}
-      {(() => {
-        const isContentLocked = !isOwnStory && !hasPublicActivity;
-        
-        return (
-          <motion.div 
-            className="absolute left-0 right-0 z-40 flex flex-col items-center justify-end"
-            style={{
-              bottom: 0,
-              paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-              pointerEvents: isContentLocked ? 'none' : 'auto',
-            }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: (isTransitioning || isContentLocked) ? 0 : 1, y: isTransitioning ? -100 : 0 }}
-            transition={{ delay: 0.4 }}
-          >
-        {/* Liquid glass reaction pill */}
-        <motion.button
-          onClick={() => isOwnStory ? (currentReactions.total > 0 && setShowReactsSheet(true)) : setShowSendReactionSheet(true)}
-          className="relative overflow-hidden mb-3"
-          style={{
-            minWidth: currentReactions.total > 0 ? 200 : 180,
-            height: 52,
-            borderRadius: 26,
-            background: 'rgba(255, 255, 255, 0.08)',
-            backdropFilter: 'blur(40px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-          }}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          layout
-        >
-          <AnimatePresence mode="wait">
-            {isOwnStory ? (
-              /* Owner view: Show reactions summary (view only, no sending) */
-              <motion.div
-                key="owner-pill"
-                className="flex items-center justify-center gap-3 h-full px-5"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              >
-                {currentReactions.total > 0 ? (
-                  <>
-                    {/* Reaction emoji stack */}
-                    <div className="flex -space-x-1">
-                      <img src={fireEmoji} alt="fire" className="w-7 h-7 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                      <img src={clapEmoji} alt="clap" className="w-7 h-7 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                    </div>
-                    {/* Count with label */}
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-white font-bold text-lg">{currentReactions.total}</span>
-                      <span className="text-white/50 text-sm">reacts</span>
-                    </div>
-                    <ChevronUp className="w-4 h-4 text-white/40" />
-                  </>
-                ) : (
-                  <>
-                    <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain opacity-40" />
-                    <span className="text-white/50 text-sm font-medium">No reacts yet</span>
-                  </>
-                )}
-              </motion.div>
-            ) : (
-              /* Visitor view: Show count + tap to react */
-              <motion.div
-                key="visitor-pill"
-                className="flex items-center justify-center gap-3 h-full px-5"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              >
-                {currentReactions.total > 0 ? (
-                  <>
-                    {/* Reaction emoji stack */}
-                    <div className="flex -space-x-1">
-                      <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                      <img src={clapEmoji} alt="clap" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                    </div>
-                    {/* Count */}
-                    <span className="text-white font-bold text-base">{currentReactions.total}</span>
-                    {/* Divider */}
-                    <div className="w-px h-5 bg-white/20" />
-                    {/* Tap to react */}
-                    <span className="text-white/70 text-sm">Tap to react</span>
-                  </>
-                ) : (
-                  <>
-                    {/* User's avatar */}
-                    <ProfileAvatar
-                      src={profile?.avatar_url}
-                      name={profile?.display_name || 'You'}
-                      size={28}
-                      style={{
-                        border: '2px solid rgba(255, 255, 255, 0.25)',
+                  return (
+                    <motion.button
+                      key={group.userId}
+                      onClick={() => {
+                        setCurrentUserIndex(idx);
+                        setCurrentActivityIndex(0);
                       }}
-                    />
-                    {/* First to react */}
-                    <span className="text-white/80 text-sm font-medium">Be first to react!</span>
-                    <div className="flex -space-x-1">
-                      <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain opacity-60" />
-                    </div>
-                  </>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.button>
-
-        {/* Bottom sheet with grab bar - edge to edge */}
-        <motion.div
-          className="w-full mt-auto"
-          style={{ y: bottomSheetY }}
-          drag="y"
-          dragConstraints={{ top: -200, bottom: 0 }}
-          dragElastic={{ top: 0.3, bottom: 0 }}
-          onDragEnd={handleBottomSheetDragEnd}
-        >
-          <div
-            className="w-full flex flex-col items-center cursor-grab active:cursor-grabbing"
-            style={{
-              background: 'rgba(255, 255, 255, 0.06)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
-            }}
-          >
-            {/* Grab bar */}
-            <div className="pt-2 pb-1 flex justify-center">
-              <div 
-                className="w-9 h-1 rounded-full"
-                style={{ background: 'rgba(255, 255, 255, 0.3)' }}
-              />
+                      className="relative"
+                      whileTap={{ scale: 0.9 }}
+                      animate={{ scale: isActive ? 1 : 0.9 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                    >
+                      {/* Instagram-style story ring */}
+                      <svg
+                        className="absolute inset-0"
+                        style={{
+                          width: avatarSize,
+                          height: avatarSize,
+                          transform: 'rotate(-90deg)',
+                        }}
+                        viewBox="0 0 100 100"
+                      >
+                        {Array.from({ length: activityCount }).map((_, segIdx) => {
+                          const gapAngle = activityCount > 1 ? 10 : 0;
+                          const totalGap = gapAngle * activityCount;
+                          const segmentAngle = (360 - totalGap) / activityCount;
+                          const startAngle = segIdx * (segmentAngle + gapAngle);
+                          const isSegmentViewed = segIdx <= currentIdx;
+                          
+                          const radius = 44;
+                          const circumference = 2 * Math.PI * radius;
+                          const segmentLength = (segmentAngle / 360) * circumference;
+                          const offset = (startAngle / 360) * circumference;
+                          
+                          return (
+                            <circle
+                              key={segIdx}
+                              cx="50"
+                              cy="50"
+                              r={radius}
+                              fill="none"
+                              strokeWidth="6"
+                              stroke={isProfileLocked ? 'rgba(255,255,255,0.15)' : (isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.25)')}
+                              strokeDasharray={`${segmentLength} ${circumference}`}
+                              strokeDashoffset={-offset}
+                              strokeLinecap="round"
+                              style={{
+                                filter: !isProfileLocked && isActive && isSegmentViewed ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
+                              }}
+                            />
+                          );
+                        })}
+                        <defs>
+                          <linearGradient id="storyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#FEDA75" />
+                            <stop offset="25%" stopColor="#FA7E1E" />
+                            <stop offset="50%" stopColor="#D62976" />
+                            <stop offset="75%" stopColor="#962FBF" />
+                            <stop offset="100%" stopColor="#4F5BD5" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      
+                      {/* Avatar */}
+                      <div
+                        className="relative"
+                        style={{
+                          width: avatarSize,
+                          height: avatarSize,
+                          padding: 4,
+                        }}
+                      >
+                        <div className="w-full h-full rounded-full overflow-hidden">
+                          <ProfileAvatar
+                            src={group.avatarUrl}
+                            name={group.displayName}
+                            size={avatarSize - 8}
+                            style={{
+                              opacity: isActive ? 1 : 0.7,
+                              transition: 'all 0.2s ease',
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </motion.button>
+                  );
+                })}
+              </div>
             </div>
             
-            {/* View Progress button */}
-            <button
-              onClick={handleNavigateToProgress}
-              className="w-full flex items-center justify-center gap-2 py-3 active:bg-white/5 transition-colors"
-            >
-              <ChevronUp className="w-5 h-5 text-white/60" />
-              <span className="text-white/80 text-sm font-medium">View Progress</span>
-            </button>
+            {/* Right side - Close button */}
+            <div className="w-10 shrink-0 flex justify-end">
+              <button
+                onClick={handleClose}
+                className="text-white/80 hover:text-white transition-colors p-2 min-w-[40px] min-h-[40px] flex items-center justify-center"
+              >
+                <X className="w-6 h-6" strokeWidth={1.5} />
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Row 2: Current user name/info */}
+          <div className="flex items-center justify-center gap-2 shrink-0 px-4 pb-2" style={{ height: 28 }}>
+            <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
+            <span className="text-white/40">•</span>
+            <span className="text-white/60 text-xs">Week {week} • Day {dayInWeek}</span>
           </div>
-        </motion.div>
-      </motion.div>
-        );
-      })()}
+        </div>
+
+        {/* MAIN CONTENT ZONE - flexible middle section */}
+        <div
+          className="flex-1 flex items-center justify-center z-30 overflow-hidden px-4"
+        >
+          <motion.div
+            className="w-full h-full flex items-center justify-center"
+            style={{ 
+              scale: contentScale,
+              opacity: contentOpacity,
+              y: contentY,
+            }}
+          >
+            {/* Card container with horizontal swipe */}
+            <motion.div 
+              className="relative w-full max-w-[340px] cursor-grab active:cursor-grabbing flex items-center justify-center"
+              style={{ 
+                maxHeight: '100%',
+                x: dragX,
+                opacity: cardOpacity,
+                rotate: cardRotate,
+                scale: cardScale,
+              }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.2}
+              onDragEnd={handleHorizontalDragEnd}
+              onClick={handleTap}
+            >
+              {/* Full templated image/video - with lock overlay for non-public users */}
+              {(() => {
+                const shouldShowLocked = !isOwnStory && !hasPublicActivity;
+                
+                return (
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={currentActivity.id}
+                      className="relative w-full flex items-center justify-center"
+                      initial={{ opacity: 0, scale: 0.92, y: 30 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ type: 'spring', stiffness: 180, damping: 22 }}
+                    >
+                      {isVideo ? (
+                        <video
+                          src={mediaUrl}
+                          className="w-full h-auto rounded-2xl"
+                          style={{ 
+                            maxHeight: 'calc(100dvh - 240px)',
+                            objectFit: 'contain',
+                            boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
+                            filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                          }}
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                        />
+                      ) : (
+                        <img
+                          src={mediaUrl}
+                          alt={`Day ${currentActivity.dayNumber}`}
+                          className="w-full h-auto rounded-2xl"
+                          style={{ 
+                            maxHeight: 'calc(100dvh - 240px)',
+                            objectFit: 'contain',
+                            boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
+                            filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                          }}
+                          onError={(e) => {
+                            const img = e.currentTarget;
+                            if (!img.dataset.retried) {
+                              img.dataset.retried = "true";
+                              img.src = mediaUrl + "?t=" + Date.now();
+                            }
+                          }}
+                        />
+                      )}
+                      
+                      {/* Lock overlay for locked content */}
+                      {shouldShowLocked && (
+                        <motion.div
+                          className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          <motion.div
+                            className="flex flex-col items-center gap-3"
+                            initial={{ scale: 0.8, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+                          >
+                            <div 
+                              className="w-16 h-16 rounded-full flex items-center justify-center"
+                              style={{
+                                background: 'rgba(255,255,255,0.12)',
+                                backdropFilter: 'blur(16px)',
+                                border: '2px solid rgba(255,255,255,0.25)',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                              }}
+                            >
+                              <Lock className="w-7 h-7 text-white" />
+                            </div>
+                            
+                            <div className="text-center px-6">
+                              <p className="text-white font-semibold text-lg">Share to see others</p>
+                              <p className="text-white/60 text-sm mt-1">
+                                Make your workout public to unlock
+                              </p>
+                            </div>
+                            
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const latestActivity = myActivities[myActivities.length - 1];
+                                if (latestActivity) {
+                                  setShowMakePublicSheet(true);
+                                }
+                              }}
+                              className="mt-2 px-6 py-2.5 rounded-full font-semibold text-sm active:scale-95 transition-transform"
+                              style={{
+                                background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%)',
+                                color: '#000',
+                                boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
+                              }}
+                            >
+                              Share my progress
+                            </button>
+                          </motion.div>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+                );
+              })()}
+            </motion.div>
+          </motion.div>
+        </div>
+
+        {/* FIXED BOTTOM ZONE - Reaction pill + View Progress - always visible */}
+        <div 
+          className="shrink-0 z-40 flex flex-col items-center"
+          style={{
+            paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)',
+          }}
+        >
+          {(() => {
+            const isContentLocked = !isOwnStory && !hasPublicActivity;
+            
+            return (
+              <motion.div 
+                className="w-full flex flex-col items-center"
+                style={{
+                  pointerEvents: isContentLocked ? 'none' : 'auto',
+                }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: (isTransitioning || isContentLocked) ? 0 : 1, y: isTransitioning ? -100 : 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                {/* Liquid glass reaction pill */}
+                <motion.button
+                  onClick={() => isOwnStory ? (currentReactions.total > 0 && setShowReactsSheet(true)) : setShowSendReactionSheet(true)}
+                  className="relative overflow-hidden mb-2"
+                  style={{
+                    minWidth: currentReactions.total > 0 ? 200 : 180,
+                    height: 48,
+                    borderRadius: 24,
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    backdropFilter: 'blur(40px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                  }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  layout
+                >
+                  <AnimatePresence mode="wait">
+                    {isOwnStory ? (
+                      <motion.div
+                        key="owner-pill"
+                        className="flex items-center justify-center gap-3 h-full px-5"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                      >
+                        {currentReactions.total > 0 ? (
+                          <>
+                            <div className="flex -space-x-1">
+                              <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                              <img src={clapEmoji} alt="clap" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-white font-bold text-base">{currentReactions.total}</span>
+                              <span className="text-white/50 text-sm">reacts</span>
+                            </div>
+                            <ChevronUp className="w-4 h-4 text-white/40" />
+                          </>
+                        ) : (
+                          <>
+                            <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain opacity-40" />
+                            <span className="text-white/50 text-sm font-medium">No reacts yet</span>
+                          </>
+                        )}
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="visitor-pill"
+                        className="flex items-center justify-center gap-3 h-full px-5"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                      >
+                        {currentReactions.total > 0 ? (
+                          <>
+                            <div className="flex -space-x-1">
+                              <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                              <img src={clapEmoji} alt="clap" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                            </div>
+                            <span className="text-white font-bold text-sm">{currentReactions.total}</span>
+                            <div className="w-px h-4 bg-white/20" />
+                            <span className="text-white/70 text-sm">Tap to react</span>
+                          </>
+                        ) : (
+                          <>
+                            <ProfileAvatar
+                              src={profile?.avatar_url}
+                              name={profile?.display_name || 'You'}
+                              size={26}
+                              style={{
+                                border: '2px solid rgba(255, 255, 255, 0.25)',
+                              }}
+                            />
+                            <span className="text-white/80 text-sm font-medium">Be first to react!</span>
+                            <div className="flex -space-x-1">
+                              <img src={fireEmoji} alt="fire" className="w-4 h-4 object-contain opacity-60" />
+                            </div>
+                          </>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              </motion.div>
+            );
+          })()}
+
+          {/* View Progress button - always visible sticky */}
+          <motion.div
+            className="w-full"
+            style={{ y: bottomSheetY }}
+            drag="y"
+            dragConstraints={{ top: -200, bottom: 0 }}
+            dragElastic={{ top: 0.3, bottom: 0 }}
+            onDragEnd={handleBottomSheetDragEnd}
+          >
+            <div
+              className="w-full flex flex-col items-center cursor-grab active:cursor-grabbing"
+              style={{
+                background: 'rgba(255, 255, 255, 0.06)',
+                backdropFilter: 'blur(40px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
+              }}
+            >
+              <div className="pt-2 pb-1 flex justify-center">
+                <div 
+                  className="w-9 h-1 rounded-full"
+                  style={{ background: 'rgba(255, 255, 255, 0.3)' }}
+                />
+              </div>
+              
+              <button
+                onClick={handleNavigateToProgress}
+                className="w-full flex items-center justify-center gap-2 py-2.5 active:bg-white/5 transition-colors"
+              >
+                <ChevronUp className="w-5 h-5 text-white/60" />
+                <span className="text-white/80 text-sm font-medium">View Progress</span>
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
 
       {/* Reacts bottom sheet for own stories */}
       <AnimatePresence>
@@ -951,7 +939,7 @@ const Reel = () => {
             await makeActivityPublic(latestActivity.dayNumber);
           }
           setShowMakePublicSheet(false);
-          loadActivities(); // Refresh to see unlocked content
+          loadActivities();
         }}
         onKeepPrivate={() => setShowMakePublicSheet(false)}
       />
