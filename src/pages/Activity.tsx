@@ -357,11 +357,12 @@ const Activity = () => {
             {latestNotification && (
               <motion.button
                 onClick={() => setShowNotifications(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+                className="flex items-center gap-2 px-3 h-10 rounded-full"
                 style={{
                   background: 'rgba(255, 255, 255, 0.08)',
                   backdropFilter: 'blur(20px)',
                   border: '1px solid rgba(255, 255, 255, 0.12)',
+                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.2)',
                 }}
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -371,14 +372,14 @@ const Activity = () => {
                 <img 
                   src={CLEAN_REACTION_ICONS[latestNotification.reactionType] || fireImg} 
                   alt={latestNotification.reactionType} 
-                  className="w-4 h-4 object-contain" 
+                  className="w-5 h-5 object-contain" 
                   style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} 
                 />
-                <span className="text-white/80 text-[11px] font-medium max-w-[80px] truncate">
+                <span className="text-white/80 text-xs font-medium max-w-[80px] truncate">
                   {latestNotification.reactorName}
                 </span>
                 {notificationCount > 1 && (
-                  <span className="text-white/50 text-[10px]">+{notificationCount - 1}</span>
+                  <span className="text-white/50 text-[11px]">+{notificationCount - 1}</span>
                 )}
               </motion.button>
             )}
