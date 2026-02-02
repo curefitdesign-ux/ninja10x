@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
 import { fetchAllActivitiesGroupedByUser, fetchPublicFeed, UserStoryGroup, LocalActivity } from '@/hooks/use-journey-activities';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
-import DynamicBlurBackground from '@/components/DynamicBlurBackground';
+
 import Floating3DEmojis from '@/components/Floating3DEmojis';
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
 import SendReactionSheet from '@/components/SendReactionSheet';
@@ -448,7 +448,7 @@ const Reel = () => {
   const BOTTOM_HEIGHT = 100; // Reaction pill + view progress
 
   return (
-    <DynamicBlurBackground imageUrl={mediaUrl}>
+    <div className="fixed inset-0 bg-black">
       {/* Fixed height container - no vertical scroll */}
       <div 
         className="fixed inset-0 flex flex-col"
@@ -676,9 +676,19 @@ const Reel = () => {
                 const shouldShowLocked = !isOwnStory && !hasPublicActivity;
                 
                 return (
-                  <div
-                    className="relative w-full flex items-center justify-center"
-                  >
+                  <div className="relative w-full flex items-center justify-center">
+                    {/* Blurred background matching card size */}
+                    <div 
+                      className="absolute inset-0 rounded-2xl overflow-hidden"
+                      style={{
+                        backgroundImage: `url(${mediaUrl})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        filter: 'blur(40px) saturate(120%)',
+                        transform: 'scale(1.1)',
+                        opacity: 0.6,
+                      }}
+                    />
                     {isVideo ? (
                       <video
                         key={mediaUrl}
@@ -1031,7 +1041,7 @@ const Reel = () => {
         }}
         onKeepPrivate={() => setShowMakePublicSheet(false)}
       />
-    </DynamicBlurBackground>
+    </div>
   );
 };
 
