@@ -11,6 +11,7 @@ import AIReelViewer from "@/components/AIReelViewer";
 import CuroSpeechBubble from "@/components/CuroSpeechBubble";
 import ProfileMenu from "@/components/ProfileMenu";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
+import NotificationSheet from "@/components/NotificationSheet";
 import { useJourneyActivities } from "@/hooks/use-journey-activities";
 import { useProfile } from "@/hooks/use-profile";
 import { JourneyActivity } from "@/services/journey-service";
@@ -39,6 +40,10 @@ import curoHappy from "@/assets/mascot/curo-happy.png";
 import curoThumbs from "@/assets/mascot/curo-thumbs.png";
 import curoParty from "@/assets/mascot/curo-party.png";
 
+// 3D reaction assets for pill
+import fireImg from "@/assets/reactions/fire-3d.png";
+import clapImg from "@/assets/reactions/clap-3d.png";
+
 const Activity = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -53,6 +58,10 @@ const Activity = () => {
   const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
   const [pendingDayNumber, setPendingDayNumber] = useState<number>(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Notification state
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
   
   // Convert to LoggedPhoto shape for PhotoLoggingWidget
   const photos: LoggedPhoto[] = activities.map(a => ({
@@ -330,13 +339,38 @@ const Activity = () => {
       
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="relative z-10 pb-32 pt-2">
-          {/* Header Row: Profile Left - Notification Right */}
+          {/* Header Row: Profile Left - Reaction Pill Center - Notification Right */}
           <div className="px-4 pt-3 flex items-center justify-between">
             {/* Profile Menu - Left */}
             <ProfileMenu />
             
+            {/* Reaction Pill - Center (only show if has notifications) */}
+            {notificationCount > 0 && (
+              <motion.button
+                onClick={() => setShowNotifications(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1)',
+                }}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {/* Reaction icons stack */}
+                <div className="flex -space-x-1.5">
+                  <img src={fireImg} alt="fire" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
+                  <img src={clapImg} alt="clap" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
+                </div>
+                <span className="text-white/80 text-xs font-medium">{notificationCount}</span>
+              </motion.button>
+            )}
+            
             {/* Notification Bell - Right */}
             <motion.button
+              onClick={() => setShowNotifications(true)}
               className="relative w-10 h-10 rounded-full flex items-center justify-center"
               style={{
                 background: 'rgba(255, 255, 255, 0.08)',
@@ -348,6 +382,11 @@ const Activity = () => {
               whileTap={{ scale: 0.95 }}
             >
               <Bell className="w-5 h-5 text-white/70" />
+              {notificationCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-[9px] font-bold text-white flex items-center justify-center">
+                  {notificationCount > 9 ? '9+' : notificationCount}
+                </span>
+              )}
             </motion.button>
           </div>
           
@@ -758,11 +797,18 @@ const Activity = () => {
         }))}
       />
       
-      {/* MediaSourceSheet for first-time upload */}
+      {/* MediaSourceSheet for upload */}
       <MediaSourceSheet
         isOpen={showMediaSourceSheet}
         onClose={() => setShowMediaSourceSheet(false)}
         dayNumber={pendingDayNumber}
+      />
+      
+      {/* Notification Sheet */}
+      <NotificationSheet
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+        onNotificationCountChange={setNotificationCount}
       />
       
       {/* Hidden file input for direct gallery access */}
