@@ -473,23 +473,19 @@ const Reel = () => {
           }}
         >
           {/* Row 1: Delete + Avatars + Close - all in one row */}
-          <motion.div
+          <div
             className="flex items-center justify-between px-3 shrink-0"
             style={{ height: 56 }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
           >
             {/* Left side - Delete button */}
             <div className="w-10 shrink-0">
               {canEdit && (
-                <motion.button
+                <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="p-2 transition-colors rounded-full text-white/80 hover:text-red-400 min-w-[40px] min-h-[40px] flex items-center justify-center"
-                  whileTap={{ scale: 0.9 }}
+                  className="p-2 transition-colors rounded-full text-white/80 hover:text-red-400 min-w-[40px] min-h-[40px] flex items-center justify-center active:scale-95"
                 >
                   <Trash2 className="w-5 h-5" strokeWidth={1.5} />
-                </motion.button>
+                </button>
               )}
             </div>
 
@@ -505,17 +501,15 @@ const Reel = () => {
                   const isStoryLocked = !isOwnProfile && !hasPublicActivity;
                   const avatarSize = isActive ? 48 : 40;
                   
-                  return (
-                    <motion.button
+                    return (
+                    <button
                       key={group.userId}
                       onClick={() => {
                         setCurrentUserIndex(idx);
                         setCurrentActivityIndex(0);
                       }}
-                      className="relative"
-                      whileTap={{ scale: 0.9 }}
-                      animate={{ scale: isActive ? 1 : 0.9 }}
-                      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                      className="relative active:scale-95 transition-transform"
+                      style={{ transform: isActive ? 'scale(1)' : 'scale(0.9)' }}
                     >
                       {/* Instagram-style story ring with auto-advance progress */}
                       <svg
@@ -622,7 +616,7 @@ const Reel = () => {
                           />
                         </div>
                       </div>
-                    </motion.button>
+                    </button>
                   );
                 })}
               </div>
@@ -637,7 +631,7 @@ const Reel = () => {
                 <X className="w-6 h-6" strokeWidth={1.5} />
               </button>
             </div>
-          </motion.div>
+          </div>
 
           {/* Row 2: Current user name/info */}
           <div className="flex items-center justify-center gap-2 shrink-0 px-4 pb-2" style={{ height: 28 }}>
@@ -729,17 +723,11 @@ const Reel = () => {
                       
                       {/* Lock overlay for locked content */}
                       {shouldShowLocked && (
-                        <motion.div
+                        <div
                           className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.2 }}
                         >
-                          <motion.div
+                          <div
                             className="flex flex-col items-center gap-3"
-                            initial={{ scale: 0.8, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
                           >
                             <div 
                               className="w-16 h-16 rounded-full flex items-center justify-center"
@@ -777,8 +765,8 @@ const Reel = () => {
                             >
                               Share my progress
                             </button>
-                          </motion.div>
-                        </motion.div>
+                          </div>
+                        </div>
                       )}
                       
                       {/* Floating 3D emoji reactions - inside image container */}
@@ -807,19 +795,19 @@ const Reel = () => {
             const isContentLocked = !isOwnStory && !hasPublicActivity;
             
             return (
-              <motion.div 
+              <div 
                 className="w-full flex flex-col items-center"
                 style={{
                   pointerEvents: isContentLocked ? 'none' : 'auto',
+                  opacity: (isTransitioning || isContentLocked) ? 0 : 1,
+                  transform: isTransitioning ? 'translateY(-100px)' : 'translateY(0)',
+                  transition: 'opacity 0.2s ease, transform 0.2s ease',
                 }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: (isTransitioning || isContentLocked) ? 0 : 1, y: isTransitioning ? -100 : 0 }}
-                transition={{ delay: 0.4 }}
               >
                 {/* Liquid glass reaction pill */}
-                <motion.button
+                <button
                   onClick={() => isOwnStory ? (currentReactions.total > 0 && setShowReactsSheet(true)) : setShowSendReactionSheet(true)}
-                  className="relative overflow-hidden mb-2"
+                  className="relative overflow-hidden mb-2 active:scale-[0.97] transition-transform"
                   style={{
                     minWidth: currentReactions.total > 0 ? 200 : 180,
                     height: 48,
@@ -830,79 +818,64 @@ const Reel = () => {
                     border: '1px solid rgba(255, 255, 255, 0.15)',
                     boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
                   }}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  layout
                 >
-                  <AnimatePresence mode="wait">
-                    {isOwnStory ? (
-                      <motion.div
-                        key="owner-pill"
-                        className="flex items-center justify-center gap-3 h-full px-5"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                      >
-                        {currentReactions.total > 0 ? (
-                          <>
-                            <div className="flex -space-x-1">
-                              <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                              <img src={clapEmoji} alt="clap" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-white font-bold text-base">{currentReactions.total}</span>
-                              <span className="text-white/50 text-sm">reacts</span>
-                            </div>
-                            <ChevronUp className="w-4 h-4 text-white/40" />
-                          </>
-                        ) : (
-                          <>
-                            <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain opacity-40" />
-                            <span className="text-white/50 text-sm font-medium">No reacts yet</span>
-                          </>
-                        )}
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="visitor-pill"
-                        className="flex items-center justify-center gap-3 h-full px-5"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                      >
-                        {currentReactions.total > 0 ? (
-                          <>
-                            <div className="flex -space-x-1">
-                              <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                              <img src={clapEmoji} alt="clap" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                            </div>
-                            <span className="text-white font-bold text-sm">{currentReactions.total}</span>
-                            <div className="w-px h-4 bg-white/20" />
-                            <span className="text-white/70 text-sm">Tap to react</span>
-                          </>
-                        ) : (
-                          <>
-                            <ProfileAvatar
-                              src={profile?.avatar_url}
-                              name={profile?.display_name || 'You'}
-                              size={26}
-                              style={{
-                                border: '2px solid rgba(255, 255, 255, 0.25)',
-                              }}
-                            />
-                            <span className="text-white/80 text-sm font-medium">Be first to react!</span>
-                            <div className="flex -space-x-1">
-                              <img src={fireEmoji} alt="fire" className="w-4 h-4 object-contain opacity-60" />
-                            </div>
-                          </>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.button>
-              </motion.div>
+                  {isOwnStory ? (
+                    <div
+                      className="flex items-center justify-center gap-3 h-full px-5"
+                    >
+                      {currentReactions.total > 0 ? (
+                        <>
+                          <div className="flex -space-x-1">
+                            <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                            <img src={clapEmoji} alt="clap" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-white font-bold text-base">{currentReactions.total}</span>
+                            <span className="text-white/50 text-sm">reacts</span>
+                          </div>
+                          <ChevronUp className="w-4 h-4 text-white/40" />
+                        </>
+                      ) : (
+                        <>
+                          <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain opacity-40" />
+                          <span className="text-white/50 text-sm font-medium">No reacts yet</span>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <div
+                      className="flex items-center justify-center gap-3 h-full px-5"
+                    >
+                      {currentReactions.total > 0 ? (
+                        <>
+                          <div className="flex -space-x-1">
+                            <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                            <img src={clapEmoji} alt="clap" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                          </div>
+                          <span className="text-white font-bold text-sm">{currentReactions.total}</span>
+                          <div className="w-px h-4 bg-white/20" />
+                          <span className="text-white/70 text-sm">Tap to react</span>
+                        </>
+                      ) : (
+                        <>
+                          <ProfileAvatar
+                            src={profile?.avatar_url}
+                            name={profile?.display_name || 'You'}
+                            size={26}
+                            style={{
+                              border: '2px solid rgba(255, 255, 255, 0.25)',
+                            }}
+                          />
+                          <span className="text-white/80 text-sm font-medium">Be first to react!</span>
+                          <div className="flex -space-x-1">
+                            <img src={fireEmoji} alt="fire" className="w-4 h-4 object-contain opacity-60" />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </button>
+              </div>
             );
           })()}
 
