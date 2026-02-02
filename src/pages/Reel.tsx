@@ -676,108 +676,105 @@ const Reel = () => {
                 const shouldShowLocked = !isOwnStory && !hasPublicActivity;
                 
                 return (
-                  <AnimatePresence mode="sync" initial={false}>
-                    <motion.div
-                      key={currentActivity.id}
-                      className="relative w-full flex items-center justify-center"
-                      initial={{ opacity: 0.8, scale: 0.98 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0.8, scale: 0.98 }}
-                      transition={{ duration: 0.15, ease: 'easeOut' }}
-                    >
-                      {isVideo ? (
-                        <video
-                          src={mediaUrl}
-                          className="w-full h-auto rounded-2xl"
-                          style={{ 
-                            maxHeight: 'calc(100dvh - 240px)',
-                            objectFit: 'contain',
-                            boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
-                            filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                          }}
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                        />
-                      ) : (
-                        <img
-                          src={mediaUrl}
-                          alt={`Day ${currentActivity.dayNumber}`}
-                          className="w-full h-auto rounded-2xl"
-                          style={{ 
-                            maxHeight: 'calc(100dvh - 240px)',
-                            objectFit: 'contain',
-                            boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
-                            filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                          }}
-                          onError={(e) => {
-                            const img = e.currentTarget;
-                            if (!img.dataset.retried) {
-                              img.dataset.retried = "true";
-                              img.src = mediaUrl + "?t=" + Date.now();
-                            }
-                          }}
-                        />
-                      )}
-                      
-                      {/* Lock overlay for locked content */}
-                      {shouldShowLocked && (
+                  <div
+                    className="relative w-full flex items-center justify-center"
+                  >
+                    {isVideo ? (
+                      <video
+                        key={mediaUrl}
+                        src={mediaUrl}
+                        className="w-full h-auto rounded-2xl"
+                        style={{ 
+                          maxHeight: 'calc(100dvh - 240px)',
+                          objectFit: 'contain',
+                          boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
+                          filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                        }}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                      />
+                    ) : (
+                      <img
+                        key={mediaUrl}
+                        src={mediaUrl}
+                        alt={`Day ${currentActivity.dayNumber}`}
+                        className="w-full h-auto rounded-2xl"
+                        loading="eager"
+                        decoding="async"
+                        style={{ 
+                          maxHeight: 'calc(100dvh - 240px)',
+                          objectFit: 'contain',
+                          boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
+                          filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                        }}
+                        onError={(e) => {
+                          const img = e.currentTarget;
+                          if (!img.dataset.retried) {
+                            img.dataset.retried = "true";
+                            img.src = mediaUrl + "?t=" + Date.now();
+                          }
+                        }}
+                      />
+                    )}
+                    
+                    {/* Lock overlay for locked content */}
+                    {shouldShowLocked && (
+                      <div
+                        className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl"
+                      >
                         <div
-                          className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl"
+                          className="flex flex-col items-center gap-3"
                         >
-                          <div
-                            className="flex flex-col items-center gap-3"
+                          <div 
+                            className="w-16 h-16 rounded-full flex items-center justify-center"
+                            style={{
+                              background: 'rgba(255,255,255,0.12)',
+                              backdropFilter: 'blur(16px)',
+                              border: '2px solid rgba(255,255,255,0.25)',
+                              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                            }}
                           >
-                            <div 
-                              className="w-16 h-16 rounded-full flex items-center justify-center"
-                              style={{
-                                background: 'rgba(255,255,255,0.12)',
-                                backdropFilter: 'blur(16px)',
-                                border: '2px solid rgba(255,255,255,0.25)',
-                                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                              }}
-                            >
-                              <Lock className="w-7 h-7 text-white" />
-                            </div>
-                            
-                            <div className="text-center px-6">
-                              <p className="text-white font-semibold text-lg">Share to see others</p>
-                              <p className="text-white/60 text-sm mt-1">
-                                Make your workout public to unlock
-                              </p>
-                            </div>
-                            
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const latestActivity = myActivities[myActivities.length - 1];
-                                if (latestActivity) {
-                                  setShowMakePublicSheet(true);
-                                }
-                              }}
-                              className="mt-2 px-6 py-2.5 rounded-full font-semibold text-sm active:scale-95 transition-transform"
-                              style={{
-                                background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%)',
-                                color: '#000',
-                                boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
-                              }}
-                            >
-                              Share my progress
-                            </button>
+                            <Lock className="w-7 h-7 text-white" />
                           </div>
+                          
+                          <div className="text-center px-6">
+                            <p className="text-white font-semibold text-lg">Share to see others</p>
+                            <p className="text-white/60 text-sm mt-1">
+                              Make your workout public to unlock
+                            </p>
+                          </div>
+                          
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const latestActivity = myActivities[myActivities.length - 1];
+                              if (latestActivity) {
+                                setShowMakePublicSheet(true);
+                              }
+                            }}
+                            className="mt-2 px-6 py-2.5 rounded-full font-semibold text-sm active:scale-95 transition-transform"
+                            style={{
+                              background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%)',
+                              color: '#000',
+                              boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
+                            }}
+                          >
+                            Share my progress
+                          </button>
                         </div>
-                      )}
-                      
-                      {/* Floating 3D emoji reactions - inside image container */}
-                      {!shouldShowLocked && (
-                        <Floating3DEmojis 
-                          reactions={activeReactionTypes}
-                          newReaction={floatingReaction}
-                        />
-                      )}
-                    </motion.div>
-                  </AnimatePresence>
+                      </div>
+                    )}
+                    
+                    {/* Floating 3D emoji reactions - inside image container */}
+                    {!shouldShowLocked && (
+                      <Floating3DEmojis 
+                        reactions={activeReactionTypes}
+                        newReaction={floatingReaction}
+                      />
+                    )}
+                  </div>
                 );
               })()}
             </motion.div>
