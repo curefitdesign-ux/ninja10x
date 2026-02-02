@@ -46,14 +46,14 @@ const MediaSourceSheet = ({ isOpen, onClose, dayNumber }: MediaSourceSheetProps)
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 350 }}
-            className="fixed left-0 right-0 z-50 rounded-t-3xl overflow-hidden"
+            className="fixed left-0 right-0 bottom-0 z-50 rounded-t-3xl overflow-hidden"
             style={{
-              bottom: 'calc(70px + env(safe-area-inset-bottom, 0px))', // Above bottom nav bar
               background: 'linear-gradient(180deg, rgba(40, 40, 55, 0.75) 0%, rgba(25, 25, 35, 0.8) 100%)',
               backdropFilter: 'blur(60px) saturate(180%)',
               WebkitBackdropFilter: 'blur(60px) saturate(180%)',
               boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.4)',
               border: '1px solid rgba(255, 255, 255, 0.08)',
+              paddingBottom: 'env(safe-area-inset-bottom, 0px)',
             }}
           >
             {/* Handle */}
