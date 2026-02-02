@@ -493,8 +493,8 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
               </button>
             </div>
             
-             {/* Main Content - Scrollable */}
-             <div className="flex-1 overflow-y-auto scrollbar-hide px-6 pb-40">
+             {/* Main Content - Scrollable with extra padding for fixed CTA */}
+             <div className="flex-1 overflow-y-auto scrollbar-hide px-6" style={{ paddingBottom: 'calc(100px + env(safe-area-inset-bottom, 24px))' }}>
                <div className="flex flex-col items-center pt-4">
                {/* Preview Card - locked to 9:16 with shared-element exit animation */}
                 <motion.div 
@@ -635,10 +635,14 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
               </div>
             </div>
             
-             {/* Floating Bottom Action Button - VIEW PROGRESS only */}
+             {/* Floating Bottom Action Button - VIEW PROGRESS only, always visible */}
             <motion.div 
-              className="fixed bottom-0 left-0 right-0 z-20 px-6 pt-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent"
-              style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)' }}
+              className="fixed bottom-0 left-0 right-0 z-30 px-6"
+              style={{ 
+                paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
+                paddingTop: '16px',
+                background: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 50%, rgba(0,0,0,0.7) 80%, transparent 100%)',
+              }}
               animate={isExiting ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
             >
@@ -647,6 +651,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
                 <button
                   onClick={handleViewProgress}
                   className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-white text-black font-semibold tap-bounce transition-all active:scale-95"
+                  style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
                 >
                   <span>VIEW PROGRESS</span>
                 </button>
