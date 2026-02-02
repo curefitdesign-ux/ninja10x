@@ -623,32 +623,7 @@ const Reel = () => {
             </div>
           </motion.div>
 
-          {/* Row 2: Story progress bars (Instagram-style) */}
-          <div className="flex items-center gap-1 px-4 pb-2" style={{ height: 8 }}>
-            {currentGroup.activities.map((_, idx) => {
-              const isCompleted = idx < currentActivityIndex;
-              const isCurrent = idx === currentActivityIndex;
-              
-              return (
-                <div
-                  key={idx}
-                  className="flex-1 h-1 rounded-full overflow-hidden"
-                  style={{ background: 'rgba(255,255,255,0.25)' }}
-                >
-                  <motion.div
-                    className="h-full rounded-full"
-                    style={{
-                      background: 'rgba(255,255,255,0.9)',
-                      width: isCompleted ? '100%' : isCurrent ? `${storyProgress}%` : '0%',
-                    }}
-                    transition={{ duration: isCurrent ? 0.05 : 0.2 }}
-                  />
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Row 3: Current user name/info */}
+          {/* User name/info - moved progress bars to inside card */}
           <div className="flex items-center justify-center gap-2 shrink-0 px-4 pb-2" style={{ height: 28 }}>
             <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
             <span className="text-white/40">•</span>
@@ -691,23 +666,49 @@ const Reel = () => {
                 const shouldShowLocked = !isOwnStory && !hasPublicActivity;
                 
                 return (
-                  <AnimatePresence mode="sync" initial={false}>
+                  <div className="relative w-full flex flex-col items-center justify-center">
+                    {/* Progress bars inside card - at top */}
+                    <div 
+                      className="absolute top-3 left-3 right-3 z-20 flex items-center gap-1"
+                      style={{ height: 4 }}
+                    >
+                      {currentGroup.activities.map((_, idx) => {
+                        const isCompleted = idx < currentActivityIndex;
+                        const isCurrent = idx === currentActivityIndex;
+                        
+                        return (
+                          <div
+                            key={idx}
+                            className="flex-1 h-1 rounded-full overflow-hidden"
+                            style={{ 
+                              background: 'rgba(255,255,255,0.3)',
+                              backdropFilter: 'blur(4px)',
+                            }}
+                          >
+                            <motion.div
+                              className="h-full rounded-full"
+                              style={{
+                                background: 'rgba(255,255,255,0.95)',
+                                boxShadow: '0 0 8px rgba(255,255,255,0.5)',
+                              }}
+                              initial={false}
+                              animate={{
+                                width: isCompleted ? '100%' : isCurrent ? `${storyProgress}%` : '0%',
+                              }}
+                              transition={{ duration: 0.05, ease: 'linear' }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                    
+                    {/* Media with crossfade - no AnimatePresence to avoid flicker */}
                     <motion.div
                       key={currentActivity.id}
-                      className="relative w-full flex items-center justify-center"
-                      initial={transitionType === 'user' 
-                        ? { opacity: 0, x: 60, scale: 0.92, rotateY: -8 }
-                        : { opacity: 0, y: -20, scale: 0.98 }
-                      }
-                      animate={{ opacity: 1, x: 0, y: 0, scale: 1, rotateY: 0 }}
-                      exit={transitionType === 'user'
-                        ? { opacity: 0, x: -60, scale: 0.92, rotateY: 8 }
-                        : { opacity: 0, y: 20, scale: 0.98 }
-                      }
-                      transition={{ 
-                        duration: transitionType === 'user' ? 0.25 : 0.18, 
-                        ease: [0.32, 0.72, 0, 1],
-                      }}
+                      className="relative w-full"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.15 }}
                     >
                       {isVideo ? (
                         <video
@@ -735,79 +736,74 @@ const Reel = () => {
                             boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
                             filter: shouldShowLocked ? 'blur(20px)' : 'none',
                           }}
-                          onError={(e) => {
-                            const img = e.currentTarget;
-                            if (!img.dataset.retried) {
-                              img.dataset.retried = "true";
-                              img.src = mediaUrl + "?t=" + Date.now();
-                            }
-                          }}
-                        />
-                      )}
-                      
-                      {/* Lock overlay for locked content */}
-                      {shouldShowLocked && (
-                        <motion.div
-                          className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.2 }}
-                        >
-                          <motion.div
-                            className="flex flex-col items-center gap-3"
-                            initial={{ scale: 0.8, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
-                          >
-                            <div 
-                              className="w-16 h-16 rounded-full flex items-center justify-center"
-                              style={{
-                                background: 'rgba(255,255,255,0.12)',
-                                backdropFilter: 'blur(16px)',
-                                border: '2px solid rgba(255,255,255,0.25)',
-                                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                              }}
-                            >
-                              <Lock className="w-7 h-7 text-white" />
-                            </div>
-                            
-                            <div className="text-center px-6">
-                              <p className="text-white font-semibold text-lg">Share to see others</p>
-                              <p className="text-white/60 text-sm mt-1">
-                                Make your workout public to unlock
-                              </p>
-                            </div>
-                            
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const latestActivity = myActivities[myActivities.length - 1];
-                                if (latestActivity) {
-                                  setShowMakePublicSheet(true);
-                                }
-                              }}
-                              className="mt-2 px-6 py-2.5 rounded-full font-semibold text-sm active:scale-95 transition-transform"
-                              style={{
-                                background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%)',
-                                color: '#000',
-                                boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
-                              }}
-                            >
-                              Share my progress
-                            </button>
-                          </motion.div>
-                        </motion.div>
-                      )}
-                      
-                      {/* Floating 3D emoji reactions - inside image container */}
-                      {!shouldShowLocked && (
-                        <Floating3DEmojis 
-                          reactions={activeReactionTypes}
-                          newReaction={floatingReaction}
+                          loading="eager"
+                          decoding="async"
                         />
                       )}
                     </motion.div>
-                  </AnimatePresence>
+                      
+                    {/* Lock overlay for locked content */}
+                    {shouldShowLocked && (
+                      <motion.div
+                        className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        <motion.div
+                          className="flex flex-col items-center gap-3"
+                          initial={{ scale: 0.8, y: 20 }}
+                          animate={{ scale: 1, y: 0 }}
+                          transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+                        >
+                          <div 
+                            className="w-16 h-16 rounded-full flex items-center justify-center"
+                            style={{
+                              background: 'rgba(255,255,255,0.12)',
+                              backdropFilter: 'blur(16px)',
+                              border: '2px solid rgba(255,255,255,0.25)',
+                              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                            }}
+                          >
+                            <Lock className="w-7 h-7 text-white" />
+                          </div>
+                          
+                          <div className="text-center px-6">
+                            <p className="text-white font-semibold text-lg">Share to see others</p>
+                            <p className="text-white/60 text-sm mt-1">
+                              Make your workout public to unlock
+                            </p>
+                          </div>
+                          
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const latestActivity = myActivities[myActivities.length - 1];
+                              if (latestActivity) {
+                                setShowMakePublicSheet(true);
+                              }
+                            }}
+                            className="mt-2 px-6 py-2.5 rounded-full font-semibold text-sm active:scale-95 transition-transform"
+                            style={{
+                              background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%)',
+                              color: '#000',
+                              boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
+                            }}
+                          >
+                            Share my progress
+                          </button>
+                        </motion.div>
+                      </motion.div>
+                    )}
+                    
+                    {/* Floating 3D emoji reactions - inside image container */}
+                    {!shouldShowLocked && (
+                      <Floating3DEmojis 
+                        reactions={activeReactionTypes}
+                        newReaction={floatingReaction}
+                      />
+                    )}
+                  </div>
                 );
               })()}
             </motion.div>
