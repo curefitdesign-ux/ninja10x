@@ -429,10 +429,10 @@ const Reel = () => {
     );
   }
 
-  // Use templated/framed image (storageUrl) for display
-  // storageUrl is always the templated PNG screenshot - check the actual URL extension
-  const mediaUrl = currentActivity.storageUrl;
-  const isVideo = isVideoUrl(mediaUrl); // Only check URL, not the isVideo flag
+  // Use original raw image without text overlays for cleaner display
+  // Fall back to storageUrl if originalUrl is not available
+  const mediaUrl = currentActivity.originalUrl || currentActivity.storageUrl;
+  const isVideo = isVideoUrl(mediaUrl);
   const currentReactions = localReactions[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS }, reactorProfiles: [] };
   
   const activeReactionTypes = Object.entries(currentReactions.reactions)
