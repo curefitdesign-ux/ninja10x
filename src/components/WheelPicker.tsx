@@ -138,26 +138,28 @@ const WheelPicker = ({
       className="relative overflow-hidden select-none"
       style={{ height: containerHeight }}
     >
-      {/* Selection indicator - centered highlight bar */}
+      {/* iOS-style selection indicator - frosted glass rounded rect */}
       <div 
-        className="absolute left-4 right-4 pointer-events-none rounded-xl border border-white/25 bg-white/8"
+        className="absolute left-2 right-2 pointer-events-none rounded-xl"
         style={{ 
           top: centerOffset,
           height: itemHeight,
+          background: 'rgba(120, 120, 128, 0.24)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
         }}
       />
       
-      {/* Gradient overlays for depth */}
+      {/* Subtle gradient overlays for depth - matching iOS picker */}
       <div 
-        className="absolute inset-x-0 top-0 h-16 pointer-events-none z-10"
+        className="absolute inset-x-0 top-0 h-20 pointer-events-none z-10"
         style={{ 
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%)',
+          background: 'linear-gradient(to bottom, rgba(45,45,48,0.95) 0%, rgba(45,45,48,0.5) 40%, transparent 100%)',
         }}
       />
       <div 
-        className="absolute inset-x-0 bottom-0 h-16 pointer-events-none z-10"
+        className="absolute inset-x-0 bottom-0 h-20 pointer-events-none z-10"
         style={{ 
-          background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)',
+          background: 'linear-gradient(to top, rgba(45,45,48,0.95) 0%, rgba(45,45,48,0.5) 40%, transparent 100%)',
         }}
       />
       
@@ -188,7 +190,7 @@ const WheelPicker = ({
               }}
               onClick={() => handleItemClick(index)}
             >
-              <span className="text-3xl font-semibold tabular-nums">
+              <span className="text-2xl font-medium tabular-nums">
                 {item}
               </span>
             </div>
