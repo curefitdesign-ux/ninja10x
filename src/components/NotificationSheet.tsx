@@ -33,6 +33,7 @@ const REACTION_VERBS: Record<string, string> = {
 
 export interface Notification {
   id: string;
+  activityId: string;
   reactorName: string;
   reactionType: string;
   timestamp: Date;
@@ -87,6 +88,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             
             const pastNotifications: Notification[] = reactions.map(r => ({
               id: r.id,
+              activityId: r.activity_id,
               reactorName: profileMap.get(r.user_id) || 'Someone',
               reactionType: r.reaction_type,
               timestamp: new Date(r.created_at),
@@ -139,6 +141,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             
             const newNotif: Notification = {
               id: newReaction.id,
+              activityId: newReaction.activity_id,
               reactorName,
               reactionType: newReaction.reaction_type,
               timestamp: new Date(),
