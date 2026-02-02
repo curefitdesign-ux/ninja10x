@@ -967,8 +967,14 @@ const Preview = () => {
           style={{ 
             bottom: 0,
             paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 20px)',
-            paddingTop: 16,
-            background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 60%, transparent 100%)',
+            paddingTop: 20,
+            background: 'rgba(255, 255, 255, 0.04)',
+            backdropFilter: 'blur(40px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+            maskImage: 'linear-gradient(to top, black 80%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to top, black 80%, transparent 100%)',
           }}
         >
           <div className="flex flex-col items-center gap-2 max-w-md mx-auto">

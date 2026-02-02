@@ -641,8 +641,14 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
               style={{ 
                 bottom: 0,
                 paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
-                paddingTop: '16px',
-                background: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 50%, rgba(0,0,0,0.7) 80%, transparent 100%)',
+                paddingTop: '20px',
+                background: 'rgba(255, 255, 255, 0.04)',
+                backdropFilter: 'blur(40px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+                maskImage: 'linear-gradient(to top, black 80%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to top, black 80%, transparent 100%)',
               }}
             >
               <motion.div 
