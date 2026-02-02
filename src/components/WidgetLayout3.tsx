@@ -12,6 +12,7 @@ import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
 import ReelProgressPill from '@/components/ReelProgressPill';
 import { useFitnessReel } from '@/hooks/use-fitness-reel';
+import MediaSourceSheet from '@/components/MediaSourceSheet';
 
 interface Photo {
   id: string;
@@ -119,6 +120,7 @@ const WidgetLayout3 = ({
   const [tappedElement, setTappedElement] = useState<string | null>(null);
   const prevPhotosLength = useRef(photos.length);
   const [newPhotoIndex, setNewPhotoIndex] = useState<number | null>(null);
+  const [showMediaSheet, setShowMediaSheet] = useState(false);
   
   // Get reel state from hook
   const { 
@@ -324,9 +326,7 @@ const WidgetLayout3 = ({
               className={`relative cursor-pointer tap-bounce group ${tappedElement === 'empty' ? 'animate-liquid-tap' : ''}`}
               onClick={() => { 
                 handleTap('empty'); 
-                // Navigate to gallery page instead of popup
-                const nextDayNumber = photos.length + 1;
-                navigate('/gallery', { state: { dayNumber: nextDayNumber } });
+                setShowMediaSheet(true);
               }}
               style={{ 
                 width: '160px',
@@ -471,9 +471,7 @@ const WidgetLayout3 = ({
         <button
           onClick={() => { 
             handleTap('add-btn'); 
-            // Navigate to gallery page instead of popup
-            const nextDayNumber = photos.length + 1;
-            navigate('/gallery', { state: { dayNumber: nextDayNumber } });
+            setShowMediaSheet(true);
           }}
           className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl transition-all duration-150 ${tappedElement === 'add-btn' ? 'scale-[0.92] brightness-110' : 'hover:scale-[1.02] active:scale-[0.96]'}`}
           style={{
@@ -515,6 +513,13 @@ const WidgetLayout3 = ({
           </div>
         )}
       </AnimatePresence>
+
+      {/* Media Source Sheet */}
+      <MediaSourceSheet
+        isOpen={showMediaSheet}
+        onClose={() => setShowMediaSheet(false)}
+        dayNumber={photos.length + 1}
+      />
     </div>
   );
 };
