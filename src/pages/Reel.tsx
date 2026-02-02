@@ -15,6 +15,7 @@ import SendReactionSheet from '@/components/SendReactionSheet';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import ReelToProgressTransition from '@/components/ReelToProgressTransition';
 import MakePublicSheet from '@/components/MakePublicSheet';
+import StoryHint from '@/components/StoryHint';
 import { ReelViewerSkeleton } from '@/components/SkeletonLoaders';
 import {
   AlertDialog,
@@ -411,10 +412,10 @@ const Reel = () => {
           overflow: 'hidden',
         }}
       >
-        {/* Floating 3D emojis around edges */}
-        <Floating3DEmojis 
-          reactions={activeReactionTypes}
-          newReaction={floatingReaction}
+        {/* Story Hint - one-time tutorial */}
+        <StoryHint 
+          hasMultipleStories={currentGroup?.activities.length > 1}
+          hasMultipleUsers={userGroups.length > 1}
         />
 
         {/* FIXED HEADER ZONE - Single row: delete, avatars, close + user name below */}
@@ -697,6 +698,14 @@ const Reel = () => {
                             </button>
                           </motion.div>
                         </motion.div>
+                      )}
+                      
+                      {/* Floating 3D emoji reactions - inside image container */}
+                      {!shouldShowLocked && (
+                        <Floating3DEmojis 
+                          reactions={activeReactionTypes}
+                          newReaction={floatingReaction}
+                        />
                       )}
                     </motion.div>
                   </AnimatePresence>

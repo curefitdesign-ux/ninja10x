@@ -31,92 +31,73 @@ const EMOJI_ASSETS: Record<ReactionType, string> = {
   timer: timerImg,
 };
 
-// Positions around the story card edges (closer to the media)
+// Positions INSIDE the story image border - on the edges but within bounds
 const EDGE_POSITIONS = [
-  { top: '8%', left: '2%', rotate: -12, scale: 0.85 },
-  { top: '30%', left: '-2%', rotate: 8, scale: 0.95 },
-  { bottom: '30%', left: '0%', rotate: -18, scale: 0.8 },
-  { top: '5%', right: '3%', rotate: 12, scale: 0.9 },
-  { top: '35%', right: '0%', rotate: -8, scale: 1 },
-  { bottom: '25%', right: '2%', rotate: 15, scale: 0.85 },
-  { bottom: '10%', left: '15%', rotate: 5, scale: 0.75 },
-  { bottom: '8%', right: '12%', rotate: -6, scale: 0.8 },
+  { top: '5%', left: '5%', rotate: -12, scale: 0.7 },
+  { top: '25%', left: '3%', rotate: 10, scale: 0.75 },
+  { bottom: '30%', left: '4%', rotate: -15, scale: 0.65 },
+  { top: '8%', right: '5%', rotate: 14, scale: 0.72 },
+  { top: '30%', right: '3%', rotate: -8, scale: 0.78 },
+  { bottom: '25%', right: '4%', rotate: 12, scale: 0.68 },
+  { bottom: '8%', left: '12%', rotate: 5, scale: 0.6 },
+  { bottom: '6%', right: '10%', rotate: -6, scale: 0.65 },
 ];
 
 export default function Floating3DEmojis({ reactions, newReaction }: Floating3DEmojisProps) {
   return (
-    <div className="absolute inset-0 pointer-events-none z-30 overflow-visible">
+    <>
       {reactions.slice(0, 8).map((type, i) => {
         const pos = EDGE_POSITIONS[i % EDGE_POSITIONS.length];
         const isNew = newReaction === type;
         const asset = EMOJI_ASSETS[type];
         
         // Create unique animation delay for each emoji - staggered entrance
-        const entranceDelay = 0.3 + i * 0.12;
-        const animDelay = i * 0.5;
+        const entranceDelay = 0.4 + i * 0.1;
+        const animDelay = i * 0.6;
         
         return (
           <motion.div
             key={`${type}-${i}`}
-            className="absolute"
+            className="absolute pointer-events-none"
             style={{
               ...pos,
-              filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4))',
+              zIndex: 50,
+              filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5))',
             }}
-            initial={{ scale: 0, opacity: 0, rotate: pos.rotate - 30, x: pos.left ? -50 : 50 }}
+            initial={{ scale: 0, opacity: 0, rotate: pos.rotate - 30 }}
             animate={{ 
-              scale: isNew ? [0, pos.scale * 1.3, pos.scale] : pos.scale, 
+              scale: isNew ? [0, pos.scale * 1.4, pos.scale] : pos.scale, 
               opacity: 1,
               rotate: pos.rotate,
-              y: isNew ? [30, -15, 0] : 0,
-              x: 0,
+              y: isNew ? [20, -10, 0] : 0,
             }}
             transition={{ 
               type: 'spring', 
-              stiffness: 300, 
-              damping: 20,
+              stiffness: 350, 
+              damping: 22,
               delay: isNew ? 0 : entranceDelay,
             }}
           >
             {/* Attention-grabbing floating animation wrapper */}
             <motion.div
               animate={{
-                y: [0, -6, 0, -3, 0],
-                rotate: [0, -8, 0, 5, 0],
-                scale: [1, 1.1, 1, 1.05, 1],
+                y: [0, -5, 0, -3, 0],
+                rotate: [0, -6, 0, 4, 0],
+                scale: [1, 1.12, 1, 1.06, 1],
               }}
               transition={{
-                duration: 3,
+                duration: 3.5,
                 repeat: Infinity,
-                repeatDelay: animDelay + 2,
+                repeatDelay: animDelay + 1.5,
                 ease: 'easeInOut',
               }}
             >
               <img 
                 src={asset} 
                 alt={type} 
-                className="w-14 h-14 object-contain"
+                className="w-11 h-11 object-contain"
               />
             </motion.div>
-            
-            {/* Subtle glow pulse behind emoji */}
-            <motion.div
-              className="absolute inset-0 rounded-full pointer-events-none -z-10"
-              style={{
-                background: 'radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, transparent 70%)',
-                transform: 'scale(1.5)',
-              }}
-              animate={{
-                opacity: [0, 0.6, 0],
-                scale: [1.2, 1.8, 1.2],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                repeatDelay: animDelay + 3,
-                ease: 'easeInOut',
-              }}
-            />
           </motion.div>
         );
       })}
@@ -125,21 +106,22 @@ export default function Floating3DEmojis({ reactions, newReaction }: Floating3DE
       <AnimatePresence>
         {newReaction && (
           <motion.div
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ zIndex: 60 }}
             initial={{ scale: 0, opacity: 1 }}
-            animate={{ scale: [0, 2, 0], opacity: [1, 1, 0] }}
+            animate={{ scale: [0, 1.8, 0], opacity: [1, 1, 0] }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.7, ease: 'easeOut' }}
-            style={{ filter: 'drop-shadow(0 12px 32px rgba(0, 0, 0, 0.5))' }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
           >
             <img 
               src={EMOJI_ASSETS[newReaction]} 
               alt={newReaction} 
-              className="w-24 h-24 object-contain"
+              className="w-20 h-20 object-contain"
+              style={{ filter: 'drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5))' }}
             />
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 }
