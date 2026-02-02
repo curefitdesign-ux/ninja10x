@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, ChevronLeft, AlertTriangle } from 'lucide-react';
@@ -591,57 +592,6 @@ const Gallery = () => {
           <div style={{ height: 'calc(100px + env(safe-area-inset-bottom, 24px))' }} />
         </div>
 
-        {/* Bottom Select Button - Fixed floating at bottom, never cropped */}
-        <motion.div 
-          className="fixed left-0 right-0 px-4 z-30"
-          style={{
-            bottom: 0,
-            paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
-            paddingTop: '16px',
-            background: 'linear-gradient(to top, rgba(37, 37, 53, 1) 0%, rgba(37, 37, 53, 0.95) 50%, rgba(37, 37, 53, 0.7) 80%, transparent 100%)',
-          }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-        >
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={selectedItem ? handleItemSelect : handleGallerySelect}
-            className="w-full py-4 rounded-2xl font-semibold text-sm tracking-wider relative overflow-hidden"
-            style={{
-              background: selectedItem 
-                ? 'rgba(255, 255, 255, 0.15)' 
-                : 'rgba(255, 255, 255, 0.08)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              color: selectedItem ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.45)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              boxShadow: `
-                inset 0 1px 1px rgba(255, 255, 255, 0.12),
-                0 8px 32px rgba(0, 0, 0, 0.2)
-              `,
-            }}
-          >
-            {/* Shimmer effect */}
-            <motion.div
-              className="absolute inset-0 opacity-20"
-              style={{
-                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
-              }}
-              animate={{
-                x: ['-100%', '200%'],
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                repeatDelay: 4,
-              }}
-            />
-            <span className="relative z-10">
-              {selectedItem ? 'SELECT' : 'SELECT FROM GALLERY'}
-            </span>
-          </motion.button>
-        </motion.div>
 
         {/* Warning Popup */}
         <AnimatePresence>
@@ -711,6 +661,62 @@ const Gallery = () => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Bottom Select Button - Portaled to document.body for true fixed positioning */}
+      {createPortal(
+        <motion.div 
+          className="fixed left-0 right-0 px-4"
+          style={{
+            bottom: 0,
+            paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
+            paddingTop: '16px',
+            background: 'linear-gradient(to top, rgba(37, 37, 53, 1) 0%, rgba(37, 37, 53, 0.95) 50%, rgba(37, 37, 53, 0.7) 80%, transparent 100%)',
+            zIndex: 9999,
+          }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={selectedItem ? handleItemSelect : handleGallerySelect}
+            className="w-full py-4 rounded-2xl font-semibold text-sm tracking-wider relative overflow-hidden"
+            style={{
+              background: selectedItem 
+                ? 'rgba(255, 255, 255, 0.15)' 
+                : 'rgba(255, 255, 255, 0.08)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              color: selectedItem ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.45)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: `
+                inset 0 1px 1px rgba(255, 255, 255, 0.12),
+                0 8px 32px rgba(0, 0, 0, 0.2)
+              `,
+            }}
+          >
+            {/* Shimmer effect */}
+            <motion.div
+              className="absolute inset-0 opacity-20"
+              style={{
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+              }}
+              animate={{
+                x: ['-100%', '200%'],
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                repeatDelay: 4,
+              }}
+            />
+            <span className="relative z-10">
+              {selectedItem ? 'SELECT' : 'SELECT FROM GALLERY'}
+            </span>
+          </motion.button>
+        </motion.div>,
+        document.body
+      )}
     </>
   );
 };
