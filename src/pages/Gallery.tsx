@@ -554,38 +554,36 @@ const Gallery = () => {
                 </motion.button>
               ))}
 
-              {/* Empty state placeholder */}
-              {galleryItems.length === 0 && (
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleGallerySelect}
-                  className="flex-shrink-0 rounded-2xl flex flex-col items-center justify-center gap-2"
-                  style={{
-                    width: '110px',
-                    height: '155px',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1.5px dashed rgba(255, 255, 255, 0.2)',
-                  }}
-                >
-                  <span className="text-white/40 text-xs text-center px-2">Tap to add photos</span>
-                </motion.button>
-              )}
+              {/* Tap to Upload Card - Always visible */}
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={handleGallerySelect}
+                className="flex-shrink-0 rounded-2xl flex flex-col items-center justify-center gap-2"
+                style={{
+                  width: '110px',
+                  height: '155px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1.5px dashed rgba(255, 255, 255, 0.2)',
+                }}
+              >
+                <span className="text-white/40 text-xs text-center px-2">Tap to add photos</span>
+              </motion.button>
             </div>
           </motion.div>
 
           {/* Bottom spacer to account for fixed button */}
-          <div style={{ height: 'calc(80px + env(safe-area-inset-bottom, 24px))' }} />
+          <div style={{ height: 'calc(100px + env(safe-area-inset-bottom, 24px))' }} />
         </div>
 
-        {/* Bottom Select Button - Fixed floating at bottom */}
+        {/* Bottom Select Button - Fixed floating at bottom, never cropped */}
         <motion.div 
           className="fixed left-0 right-0 px-4 z-30"
           style={{
             bottom: 0,
-            paddingBottom: 'calc(env(safe-area-inset-bottom, 24px) + 16px)',
-            paddingTop: '12px',
-            background: 'linear-gradient(to top, rgba(37, 37, 53, 0.95) 0%, rgba(37, 37, 53, 0.8) 60%, transparent 100%)',
+            paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
+            paddingTop: '16px',
+            background: 'linear-gradient(to top, rgba(37, 37, 53, 1) 0%, rgba(37, 37, 53, 0.95) 50%, rgba(37, 37, 53, 0.7) 80%, transparent 100%)',
           }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
