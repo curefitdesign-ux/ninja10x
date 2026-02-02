@@ -31,16 +31,16 @@ const EMOJI_ASSETS: Record<ReactionType, string> = {
   timer: timerImg,
 };
 
-// Positions around the viewport edges for floating emojis
+// Positions around the story card edges (closer to the media)
 const EDGE_POSITIONS = [
-  { top: '12%', left: '-4%', rotate: -15, scale: 0.9 },
-  { top: '35%', left: '-6%', rotate: 10, scale: 1.1 },
-  { bottom: '35%', left: '-5%', rotate: -20, scale: 0.85 },
-  { top: '10%', right: '-3%', rotate: 15, scale: 0.95 },
-  { top: '40%', right: '-4%', rotate: -10, scale: 1.05 },
-  { bottom: '25%', right: '-5%', rotate: 20, scale: 0.9 },
-  { bottom: '15%', left: '10%', rotate: 5, scale: 0.8 },
-  { bottom: '12%', right: '8%', rotate: -8, scale: 0.85 },
+  { top: '8%', left: '2%', rotate: -12, scale: 0.85 },
+  { top: '30%', left: '-2%', rotate: 8, scale: 0.95 },
+  { bottom: '30%', left: '0%', rotate: -18, scale: 0.8 },
+  { top: '5%', right: '3%', rotate: 12, scale: 0.9 },
+  { top: '35%', right: '0%', rotate: -8, scale: 1 },
+  { bottom: '25%', right: '2%', rotate: 15, scale: 0.85 },
+  { bottom: '10%', left: '15%', rotate: 5, scale: 0.75 },
+  { bottom: '8%', right: '12%', rotate: -6, scale: 0.8 },
 ];
 
 export default function Floating3DEmojis({ reactions, newReaction }: Floating3DEmojisProps) {

@@ -42,6 +42,42 @@ const REACTION_VERBS: Record<string, string> = {
   timer: 'timed',
 };
 
+// Web Audio API notification sound
+const playNotificationSound = () => {
+  try {
+    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Create a pleasant two-tone chime
+    const playTone = (freq: number, startTime: number, duration: number) => {
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      oscillator.frequency.value = freq;
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0, startTime);
+      gainNode.gain.linearRampToValueAtTime(0.12, startTime + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+      
+      oscillator.start(startTime);
+      oscillator.stop(startTime + duration);
+    };
+    
+    const now = audioCtx.currentTime;
+    playTone(880, now, 0.12); // A5
+    playTone(1108.73, now + 0.08, 0.15); // C#6
+    playTone(1318.51, now + 0.14, 0.18); // E6
+    
+    // Auto-close context after sounds complete
+    setTimeout(() => audioCtx.close(), 500);
+  } catch (e) {
+    console.log('Audio not available');
+  }
+};
+
 interface Notification {
   id: string;
   reactorName: string;
@@ -112,6 +148,9 @@ export default function NotificationCenter({ onNotificationCountChange }: Notifi
               .maybeSingle();
 
             const reactorName = profile?.display_name || 'Someone';
+            
+            // Play notification sound
+            playNotificationSound();
             
             const newNotif: Notification = {
               id: newReaction.id,

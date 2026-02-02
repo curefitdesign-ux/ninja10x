@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-route
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import NotificationCenter from "@/components/NotificationCenter";
+import ReactionNotificationPill from "@/components/ReactionNotificationPill";
 import Index from "./pages/Index";
 import Preview from "./pages/Preview";
 import Activity from "./pages/Activity";
@@ -104,6 +105,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <NotificationCenter />
+        <ReactionNotificationPill />
         <AnimatedRoutes />
       </BrowserRouter>
     </TooltipProvider>
