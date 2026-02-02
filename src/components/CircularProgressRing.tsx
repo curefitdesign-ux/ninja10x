@@ -178,7 +178,38 @@ const CircularProgressRing = ({
     
   }, [currentDay, currentWeek]);
   
-  const dayInWeek = ((currentDay - 1) % 3) + 1;
+  const dayInWeek = currentDay === 0 ? 0 : ((currentDay - 1) % 3) + 1;
+  
+  // Contextual journey text based on progress
+  const getJourneyText = () => {
+    if (currentDay === 0) {
+      return "START YOUR JOURNEY";
+    }
+    
+    // Week milestone labels (matching ShareSheet)
+    const weekMilestones = [
+      "CONQUER WILL POWER",  // Week 1
+      "BUILD ENERGY",        // Week 2
+      "INCREASE STAMINA",    // Week 3
+      "BUILD STRENGTH"       // Week 4
+    ];
+    
+    const milestone = weekMilestones[currentWeek - 1] || "CULT NINJA";
+    
+    // If week complete (day 3, 6, 9, 12 done)
+    if (dayInWeek === 3 || (currentDay > 0 && currentDay % 3 === 0)) {
+      return `${milestone} ✓`;
+    }
+    
+    // During week progress
+    if (currentWeek === 1) {
+      return `DAY ${currentDay} JOURNEY`;
+    }
+    
+    return `WEEK ${currentWeek} • DAY ${dayInWeek} OF 3`;
+  };
+  
+  const journeyText = getJourneyText();
   
   return (
     <motion.div 
@@ -212,7 +243,7 @@ const CircularProgressRing = ({
         style={{ width: size, height: size }}
       />
       
-      {/* Curved text - aligned with progress ring */}
+      {/* Curved text - contextual journey progress */}
       <svg 
         className="absolute inset-0 pointer-events-none"
         viewBox={`0 0 ${size} ${size}`}
@@ -228,20 +259,20 @@ const CircularProgressRing = ({
           />
         </defs>
         
-        {/* Combined "CULT NINJA • Week X • Day Y" text */}
+        {/* Contextual journey text */}
         <text
           fill="rgba(255, 255, 255, 0.6)"
-          fontSize="9"
+          fontSize="8"
           fontFamily="Inter, sans-serif"
-          fontWeight="500"
-          letterSpacing="1.2px"
+          fontWeight="600"
+          letterSpacing="1.5px"
         >
           <textPath
             href="#curvedTextPath"
             startOffset="50%"
             textAnchor="middle"
           >
-            CULT NINJA  •  Week {currentWeek}  •  Day {dayInWeek}
+            {journeyText}
           </textPath>
         </text>
       </svg>

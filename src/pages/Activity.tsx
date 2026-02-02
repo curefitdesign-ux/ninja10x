@@ -337,28 +337,10 @@ const Activity = () => {
       
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="relative z-10 pb-32 pt-2">
-          {/* Header Row: Profile Left - Nudges Center - Notification Right */}
-          <div className="px-4 pt-3 flex items-center justify-between gap-3">
+          {/* Header Row: Profile Left - Notification Right */}
+          <div className="px-4 pt-3 flex items-center justify-between">
             {/* Profile Menu - Left */}
             <ProfileMenu />
-            
-            {/* Center Nudges */}
-            <div className="flex-1 flex justify-center">
-              <motion.div 
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-full"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                }}
-              >
-                <span className="text-white/70 text-xs font-medium">
-                  Week {currentWeek} · Day {dayInWeek}
-                </span>
-              </motion.div>
-            </div>
             
             {/* Notification Bell - Right */}
             <motion.button

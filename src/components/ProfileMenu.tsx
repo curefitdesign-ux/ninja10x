@@ -35,43 +35,26 @@ const ProfileMenu = ({ onEditProfile }: ProfileMenuProps) => {
   return (
     <>
       <div className="relative">
-        {/* Profile Button */}
+        {/* Profile Button - Simple avatar only */}
         <motion.button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 p-1.5 pr-3 rounded-full"
-          style={{
-            background: 'rgba(255, 255, 255, 0.08)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.2)',
-          }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white/20 hover:ring-emerald-400/40 transition-all"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-          {/* Avatar */}
-          <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-emerald-400/40">
-            {profile?.avatar_url ? (
-              <img 
-                src={profile.avatar_url} 
-                alt={profile.display_name || 'Profile'} 
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
-                <span className="text-white text-sm font-semibold">
-                  {profile?.display_name?.charAt(0).toUpperCase() || '?'}
-                </span>
-              </div>
-            )}
-          </div>
-          
-          {/* Chevron */}
-          <motion.div
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <ChevronDown className="w-4 h-4 text-white/60" />
-          </motion.div>
+          {profile?.avatar_url ? (
+            <img 
+              src={profile.avatar_url} 
+              alt={profile.display_name || 'Profile'} 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+              <span className="text-white text-sm font-semibold">
+                {profile?.display_name?.charAt(0).toUpperCase() || '?'}
+              </span>
+            </div>
+          )}
         </motion.button>
 
         {/* Dropdown Menu */}
