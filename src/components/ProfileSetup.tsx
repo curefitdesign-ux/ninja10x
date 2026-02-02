@@ -176,9 +176,10 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
 
         avatarUrl = urlData.publicUrl;
       } else if (selectedAvatar) {
-        // Use preset avatar
+        // Use preset avatar - convert to full URL so it works across sessions/users
         const preset = PRESET_AVATARS.find(a => a.id === selectedAvatar);
-        avatarUrl = preset?.src || '';
+        // Vite asset paths are relative, need full URL for database storage
+        avatarUrl = preset?.src ? `${window.location.origin}${preset.src}` : '';
       } else {
         // Keep existing custom avatar
         avatarUrl = customAvatarPreview || '';
