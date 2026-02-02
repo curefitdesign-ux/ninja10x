@@ -40,9 +40,9 @@ import curoHappy from "@/assets/mascot/curo-happy.png";
 import curoThumbs from "@/assets/mascot/curo-thumbs.png";
 import curoParty from "@/assets/mascot/curo-party.png";
 
-// 3D reaction assets for pill
-import fireImg from "@/assets/reactions/fire-3d.png";
-import clapImg from "@/assets/reactions/clap-3d.png";
+// 3D reaction assets for pill (clean transparency)
+import fireImg from "@/assets/reactions/fire-new.png";
+import clapImg from "@/assets/reactions/clap-hands.png";
 
 const Activity = () => {
   const navigate = useNavigate();
