@@ -407,7 +407,7 @@ const Activity = () => {
           </div>
           
           {/* Stats Header */}
-          <div className="px-4 pt-2 relative">
+          <div className="px-4 pt-5 relative">
             <div className="flex gap-3">
               {/* Days Streak */}
               <motion.div 
