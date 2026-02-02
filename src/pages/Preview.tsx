@@ -846,13 +846,14 @@ const Preview = () => {
             <div 
               ref={containerRef}
               onScroll={handleScroll}
-              className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center"
+              className="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center touch-pan-x"
               style={{ 
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
-                paddingLeft: 'calc((100vw - min(65vw, 280px)) / 2)',
-                paddingRight: 'calc((100vw - min(65vw, 280px)) / 2)',
+                overscrollBehaviorX: 'contain',
+                paddingLeft: 'calc((100vw - min(60vw, 260px)) / 2)',
+                paddingRight: 'calc((100vw - min(60vw, 260px)) / 2)',
               }}
             >
               {FRAMES.map((frame, index) => {
@@ -875,12 +876,13 @@ const Preview = () => {
                       elementsHidden && isRightOfCurrent ? 'opacity-0 translate-x-full' : ''
                     }`}
                     style={{ 
-                      width: 'min(65vw, 280px)',
-                      height: 'calc(min(65vw, 280px) * 16 / 9)',
-                      maxHeight: 'calc(100dvh - 240px)',
+                      width: 'min(60vw, 260px)',
+                      height: 'calc(min(60vw, 260px) * 16 / 9)',
+                      maxHeight: 'calc(100dvh - 260px)',
                       transform: `scale(${scale})`,
                       opacity: elementsHidden && !isActiveFrame ? 0 : opacity,
-                      transition: 'transform 0.15s ease-out, opacity 0.15s ease-out',
+                      transition: 'transform 0.12s ease-out, opacity 0.12s ease-out',
+                      willChange: 'transform, opacity',
                     }}
                   >
                     <div 
@@ -909,17 +911,17 @@ const Preview = () => {
           {(() => {
             const config = getActivityInputConfig(activity || '');
             return (
-              <div className="bg-white/10 backdrop-blur-xl rounded-xl p-2.5 relative overflow-hidden">
+              <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 relative overflow-hidden">
                 {/* Primary: Duration (always shown) */}
                 <button 
                   onClick={() => { handleTap('duration'); openEditSheet('duration'); }}
-                  className={`w-full flex justify-between items-center py-1.5 ${config.secondaryInputType !== 'none' ? 'border-b border-white/10' : ''} tap-bounce min-h-[40px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
+                  className={`w-full flex justify-between items-center py-2 ${config.secondaryInputType !== 'none' ? 'border-b border-white/10' : ''} tap-bounce min-h-[44px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
                 >
-                  <span className="text-white/80 text-xs flex items-center gap-2">
+                  <span className="text-white/80 text-sm flex items-center gap-2">
                     {config.primaryMetric}
-                    <span className="text-[9px] text-white/40">tap to edit</span>
+                    <span className="text-[10px] text-white/40">tap to edit</span>
                   </span>
-                  <span className={`font-semibold text-xs ${duration ? 'text-white' : 'text-white/50 italic'}`}>
+                  <span className={`font-semibold text-sm ${duration ? 'text-white' : 'text-white/50 italic'}`}>
                     {duration || '-'}
                   </span>
                 </button>
@@ -928,12 +930,12 @@ const Preview = () => {
                 {config.secondaryInputType !== 'none' && (
                   <button 
                     onClick={() => { handleTap('pr'); openEditSheet('pr'); }}
-                    className={`w-full flex justify-between items-center py-1.5 tap-bounce min-h-[40px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
+                    className={`w-full flex justify-between items-center py-2 tap-bounce min-h-[44px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
                   >
-                    <span className="text-white/80 text-xs flex items-center gap-2">
+                    <span className="text-white/80 text-sm flex items-center gap-2">
                       {config.secondaryMetric} <span className="text-white/40">(Optional)</span>
                     </span>
-                    <span className={`font-semibold text-xs ${pr ? 'text-white' : 'text-white/50'}`}>
+                    <span className={`font-semibold text-sm ${pr ? 'text-white' : 'text-white/50'}`}>
                       {pr || '-'}
                     </span>
                   </button>
