@@ -43,11 +43,12 @@ const DEFAULT_REACTIONS: Record<ReactionType, ActivityReaction> = {
   timer: { type: 'timer', count: 0, userReacted: false },
 };
 
-// Reactor profile type from activities
+// Reactor profile type from activities - includes reactionType for removal
 interface ReactorProfile {
   userId: string;
   displayName: string;
   avatarUrl?: string;
+  reactionType?: ReactionType;
 }
 
 const SWIPE_THRESHOLD = 50;

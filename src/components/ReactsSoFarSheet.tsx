@@ -24,6 +24,11 @@ interface ReactorProfile {
   reactionType?: ReactionType;
 }
 
+// Extended type with guaranteed reactionType for internal use
+interface ReactorWithReaction extends ReactorProfile {
+  reactionType: ReactionType;
+}
+
 interface ReactsSoFarSheetProps {
   activityId: string;
   total: number;
@@ -47,7 +52,7 @@ const REACTION_IMAGES: Record<ReactionType, string> = {
 };
 
 // Map reactors to their reactions - use actual reaction type if available
-function getReactorReactions(reactors: ReactorProfile[], reactions: Record<ReactionType, ActivityReaction>) {
+function getReactorReactions(reactors: ReactorProfile[], reactions: Record<ReactionType, ActivityReaction>): ReactorWithReaction[] {
   const activeTypes = Object.entries(reactions)
     .filter(([, r]) => r.count > 0)
     .map(([type]) => type as ReactionType);
@@ -85,16 +90,21 @@ export default function ReactsSoFarSheet({
 
   const reactorList = getReactorReactions(localReactors.slice(0, total), reactions);
 
-  const handleRemoveReaction = async (reactor: ReactorProfile & { reactionType: ReactionType }) => {
-    if (!reactor.reactionType) return;
+  const handleRemoveReaction = async (reactor: ReactorWithReaction) => {
+    console.log('[ReactsSoFarSheet] Removing reaction:', reactor);
     
     setRemovingId(reactor.userId);
-    const success = await removeReaction(activityId, reactor.reactionType);
-    
-    if (success) {
-      // Remove from local list
-      setLocalReactors(prev => prev.filter(r => r.userId !== reactor.userId));
-      onReactionRemoved?.();
+    try {
+      const success = await removeReaction(activityId, reactor.reactionType);
+      console.log('[ReactsSoFarSheet] Remove result:', success);
+      
+      if (success) {
+        // Remove from local list
+        setLocalReactors(prev => prev.filter(r => r.userId !== reactor.userId));
+        onReactionRemoved?.();
+      }
+    } catch (error) {
+      console.error('[ReactsSoFarSheet] Remove error:', error);
     }
     setRemovingId(null);
   };
