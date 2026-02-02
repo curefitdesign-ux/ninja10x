@@ -15,7 +15,7 @@ import SendReactionSheet from '@/components/SendReactionSheet';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import ReelToProgressTransition from '@/components/ReelToProgressTransition';
 import MakePublicSheet from '@/components/MakePublicSheet';
-import StoryHint from '@/components/StoryHint';
+import StoryHint, { useStoryNudgeAnimation } from '@/components/StoryHint';
 import { ReelViewerSkeleton } from '@/components/SkeletonLoaders';
 import {
   AlertDialog,
@@ -98,6 +98,9 @@ const Reel = () => {
   
   // Privacy sheet state
   const [showMakePublicSheet, setShowMakePublicSheet] = useState(false);
+
+  // Story nudge animation for inactivity hint
+  const { triggerShake, shakeAnimation, shakeTransition } = useStoryNudgeAnimation();
 
   // Load public feed for progress overlay
   useEffect(() => {
@@ -412,10 +415,11 @@ const Reel = () => {
           overflow: 'hidden',
         }}
       >
-        {/* Story Hint - one-time tutorial */}
+        {/* Story Hint - one-time tutorial with shake nudge */}
         <StoryHint 
           hasMultipleStories={currentGroup?.activities.length > 1}
           hasMultipleUsers={userGroups.length > 1}
+          onNudge={triggerShake}
         />
 
         {/* FIXED HEADER ZONE - Single row: delete, avatars, close + user name below */}
@@ -580,7 +584,7 @@ const Reel = () => {
               y: contentY,
             }}
           >
-            {/* Card container with horizontal swipe */}
+            {/* Card container with horizontal swipe + shake animation */}
             <motion.div 
               className="relative w-full max-w-[340px] cursor-grab active:cursor-grabbing flex items-center justify-center"
               style={{ 
@@ -590,6 +594,8 @@ const Reel = () => {
                 rotate: cardRotate,
                 scale: cardScale,
               }}
+              animate={shakeAnimation}
+              transition={shakeTransition}
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.2}
