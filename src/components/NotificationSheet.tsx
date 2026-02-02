@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,26 +8,14 @@ import { useAuth } from '@/hooks/use-auth';
 // 3D reaction assets (clean transparency)
 import fireImg from '@/assets/reactions/fire-new.png';
 import clapImg from '@/assets/reactions/clap-hands.png';
-import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
-import wowImg from '@/assets/reactions/wow.png';
 import flexImg from '@/assets/reactions/flex.png';
-import trophyImg from '@/assets/reactions/dumbbells.png';
-import runnerImg from '@/assets/reactions/runner.png';
-import energyImg from '@/assets/reactions/energy.png';
-import timerImg from '@/assets/reactions/stopwatch.png';
-import heartImg from '@/assets/reactions/heart-workout.png';
 
+// Only use icons we know are clean (no white background).
+// For other reaction types we still show text, but avoid rendering a potentially white-backed asset.
 const REACTION_IMAGES: Record<string, string> = {
-  heart: heartImg,
   fire: fireImg,
   clap: clapImg,
-  fistbump: fistbumpImg,
-  wow: wowImg,
   flex: flexImg,
-  trophy: trophyImg,
-  runner: runnerImg,
-  energy: energyImg,
-  timer: timerImg,
 };
 
 const REACTION_VERBS: Record<string, string> = {
@@ -184,7 +173,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
     onClose();
   }, [onClose]);
 
-  return (
+  const ui = (
     <AnimatePresence>
       {isOpen && (
         <>
@@ -194,7 +183,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/60 z-50"
+            className="fixed inset-0 bg-black/60 z-[100]"
             onClick={onClose}
           />
 
@@ -204,7 +193,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 350 }}
-            className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl overflow-hidden max-h-[70vh]"
+            className="fixed bottom-0 left-0 right-0 z-[100] rounded-t-3xl overflow-hidden max-h-[70vh]"
             style={{
               background: 'linear-gradient(180deg, rgba(45, 45, 55, 0.98) 0%, rgba(30, 30, 40, 0.99) 100%)',
               backdropFilter: 'blur(40px) saturate(180%)',
@@ -256,7 +245,9 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {notifications.map((notif, index) => (
+                  {notifications.map((notif, index) => {
+                    const iconSrc = REACTION_IMAGES[notif.reactionType];
+                    return (
                     <motion.div
                       key={notif.id}
                       initial={{ opacity: 0, x: -20 }}
@@ -276,11 +267,15 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                           background: 'rgba(255, 255, 255, 0.08)',
                         }}
                       >
-                        <img
-                          src={REACTION_IMAGES[notif.reactionType] || fireImg}
-                          alt={notif.reactionType}
-                          className="w-6 h-6 object-contain"
-                        />
+                        {iconSrc ? (
+                          <img
+                            src={iconSrc}
+                            alt={notif.reactionType}
+                            className="w-6 h-6 object-contain"
+                          />
+                        ) : (
+                          <div className="w-2 h-2 rounded-full bg-white/30" />
+                        )}
                       </div>
 
                       {/* Content */}
@@ -304,7 +299,8 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                         <X className="w-3.5 h-3.5 text-white/50" />
                       </motion.button>
                     </motion.div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -313,4 +309,8 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
       )}
     </AnimatePresence>
   );
+
+  // Portal to body to avoid being clipped by transformed/scroll containers on mobile.
+  if (typeof document === 'undefined') return null;
+  return createPortal(ui, document.body);
 }
