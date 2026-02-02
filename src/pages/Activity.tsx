@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,6 +10,7 @@ import PhotoLoggingWidget, { LoggedPhoto } from "@/components/PhotoLoggingWidget
 import AIReelViewer from "@/components/AIReelViewer";
 import CuroSpeechBubble from "@/components/CuroSpeechBubble";
 import ProfileMenu from "@/components/ProfileMenu";
+import MediaSourceSheet from "@/components/MediaSourceSheet";
 import { useJourneyActivities } from "@/hooks/use-journey-activities";
 import { useProfile } from "@/hooks/use-profile";
 import { JourneyActivity } from "@/services/journey-service";
@@ -47,6 +48,11 @@ const Activity = () => {
   const { activities, loading, refresh, clearAllActivities } = useJourneyActivities();
   const { profile } = useProfile();
   const [isClearing, setIsClearing] = useState(false);
+  
+  // Media source sheet state for first-time upload
+  const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
+  const [pendingDayNumber, setPendingDayNumber] = useState<number>(1);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Convert to LoggedPhoto shape for PhotoLoggingWidget
   const photos: LoggedPhoto[] = activities.map(a => ({
@@ -180,11 +186,40 @@ const Activity = () => {
 
   const handlePhotoAdd = useCallback((weekIndex: number, dayIndex: number) => {
     const dayNum = weekIndex * 3 + dayIndex + 1;
-    // Open dedicated Gallery page (no overlay)
-    navigate('/gallery', {
-      state: { dayNumber: dayNum },
-    });
-  }, [navigate]);
+    
+    // If first photo (no photos yet), show the MediaSourceSheet with onboarding
+    if (photos.length === 0) {
+      setPendingDayNumber(dayNum);
+      setShowMediaSourceSheet(true);
+    } else {
+      // For subsequent uploads, directly open native gallery picker
+      navigate('/gallery', {
+        state: { dayNumber: dayNum, autoOpenPicker: true },
+      });
+    }
+  }, [navigate, photos.length]);
+  
+  // Handle file selection from hidden input (direct gallery trigger)
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const isVideo = file.type.startsWith('video/');
+      const url = URL.createObjectURL(file);
+      
+      // Navigate to preview with the selected file
+      navigate('/preview', {
+        state: {
+          image: url,
+          isVideo,
+          dayNumber: pendingDayNumber,
+          fromGallery: true,
+          file,
+        },
+      });
+    }
+    // Reset input
+    if (e.target) e.target.value = '';
+  }, [navigate, pendingDayNumber]);
 
   const handlePlayReel = useCallback((weekPhotos: LoggedPhoto[]) => {
     if (weekPhotos.length >= 3) {
@@ -748,6 +783,21 @@ const Activity = () => {
         }))}
       />
       
+      {/* MediaSourceSheet for first-time upload */}
+      <MediaSourceSheet
+        isOpen={showMediaSourceSheet}
+        onClose={() => setShowMediaSourceSheet(false)}
+        dayNumber={pendingDayNumber}
+      />
+      
+      {/* Hidden file input for direct gallery access */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,video/*"
+        className="hidden"
+        onChange={handleFileSelect}
+      />
     </div>
   );
 };
