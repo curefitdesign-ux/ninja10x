@@ -172,27 +172,25 @@ const Auth = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1, duration: 0.4 }}
           />
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <h1 className="text-3xl font-bold text-white">
-              Welcome to Cult
-            </h1>
-            <span 
-              className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full"
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                color: 'rgba(255, 255, 255, 0.7)',
-              }}
-            >
-              Beta
-            </span>
-          </div>
-          <p className="text-white/50 text-sm">
+          <h1 className="text-3xl font-bold text-white mb-3">
+            Welcome to Cult
+          </h1>
+          <p className="text-white/50 text-sm mb-4">
             {isLogin 
               ? 'Sign in to continue your journey.' 
               : 'Create an account to begin.'}
           </p>
+          <span 
+            className="inline-block px-3 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-full"
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              color: 'rgba(255, 255, 255, 0.7)',
+            }}
+          >
+            Beta
+          </span>
         </div>
 
         {/* Liquid glass card */}
