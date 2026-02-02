@@ -29,7 +29,7 @@ const JournalFrame = ({
   label1,
   label2,
 }: JournalFrameProps) => {
-  const metricLabel = label1 || 'Metric';
+  const metricLabel = label1 || 'Distance';
   const durationLabel = label2 || 'Duration';
   const videoRef = useRef<HTMLVideoElement>(null);
 

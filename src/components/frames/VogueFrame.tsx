@@ -10,10 +10,14 @@ interface VogueFrameProps {
   pr: string;
   imagePosition: { x: number; y: number };
   imageScale: number;
+  label1?: string; // Secondary metric label (e.g., "Distance")
+  label2?: string; // Primary metric label (e.g., "Duration")
 }
 
-const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imagePosition, imageScale }: VogueFrameProps) => {
+const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: VogueFrameProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const durationLabel = label2 || 'Duration';
+  const metricLabel = label1 || 'Metric';
 
   // Ensure video plays on mount and when URL changes
   useEffect(() => {
@@ -79,28 +83,48 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
         </p>
       </div>
       
-      {/* Bottom stats */}
+      {/* Bottom stats with contextual labels */}
       <div className="absolute bottom-6 left-4 right-4 flex gap-4">
-        <p 
-          className="font-bold tracking-tight"
-          style={{
-            fontSize: 'clamp(28px, 10vw, 40px)',
-            color: 'rgba(255,255,255,0.9)',
-            textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-          }}
-        >
-          {duration || "2hrs"}
-        </p>
-        <p 
-          className="font-bold tracking-tight"
-          style={{
-            fontSize: 'clamp(28px, 10vw, 40px)',
-            color: 'rgba(255,255,255,0.9)',
-            textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-          }}
-        >
-          {pr || "10"}
-        </p>
+        {/* Duration stat */}
+        <div className="flex flex-col">
+          <span 
+            className="text-[10px] font-medium tracking-wide mb-0.5"
+            style={{ color: 'rgba(255,255,255,0.6)' }}
+          >
+            {durationLabel}
+          </span>
+          <p 
+            className="font-bold tracking-tight"
+            style={{
+              fontSize: 'clamp(28px, 10vw, 40px)',
+              color: 'rgba(255,255,255,0.9)',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+            }}
+          >
+            {duration || "2hrs"}
+          </p>
+        </div>
+        {/* Secondary metric stat - only show if provided */}
+        {pr && (
+          <div className="flex flex-col">
+            <span 
+              className="text-[10px] font-medium tracking-wide mb-0.5"
+              style={{ color: 'rgba(255,255,255,0.6)' }}
+            >
+              {metricLabel}
+            </span>
+            <p 
+              className="font-bold tracking-tight"
+              style={{
+                fontSize: 'clamp(28px, 10vw, 40px)',
+                color: 'rgba(255,255,255,0.9)',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+              }}
+            >
+              {pr}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -10,8 +10,7 @@ import VogueFrame from '@/components/frames/VogueFrame';
 import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
 import WheelPicker from '@/components/WheelPicker';
-// CameraUI is now in a separate page
-// useActivityDataPoints removed - using local getActivityInputConfig instead
+import { getActivityConfig } from '@/lib/activity-context';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ActivityBackgroundEffect from '@/components/ActivityBackgroundEffect';
 import SyncHealthPopup from '@/components/SyncHealthPopup';
@@ -39,16 +38,16 @@ const activityOptions = [
   { name: 'Dance', icon: Music, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
 ];
 
-// Get activity-specific input config
+// Get activity-specific input config from centralized utility
 const getActivityInputConfig = (activityName: string) => {
-  const found = activityOptions.find(a => a.name.toLowerCase() === activityName.toLowerCase());
-  return found || { 
-    primaryMetric: 'Duration', 
-    primaryUnit: 'min', 
-    primaryInputType: 'wheel' as const,
-    secondaryMetric: 'Metric', 
-    secondaryUnit: '', 
-    secondaryInputType: 'number' as const 
+  const config = getActivityConfig(activityName);
+  return {
+    primaryMetric: config.primaryMetric,
+    primaryUnit: config.primaryUnit,
+    primaryInputType: config.primaryInputType,
+    secondaryMetric: config.secondaryMetric,
+    secondaryUnit: config.secondaryUnit,
+    secondaryInputType: config.secondaryInputType,
   };
 };
 
