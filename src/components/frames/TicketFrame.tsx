@@ -138,74 +138,82 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
         />
       </div>
       
-      {/* Layer 6-9: Stats Section */}
-      <div 
-        className="absolute z-20 left-0 right-0 px-[10%] flex items-center justify-center"
-        style={{ 
-          top: '71%',
-          height: '24%'
-        }}
-      >
-        <div className="flex items-center justify-center w-full">
-          {/* Left stat - Metric Label + Value */}
-          <div className="text-center flex-1">
-            <p 
-              className="text-[#888888] font-normal mb-1"
-              style={{ 
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-                fontSize: 'clamp(9px, 2.5vw, 12px)',
-                letterSpacing: '0.5px'
-              }}
-            >
-              {metricLabel}
-            </p>
-            <p 
-              className="text-[#2A2A2A] leading-none"
-              style={{ 
-                fontFamily: 'Impact, "Arial Black", sans-serif',
-                fontSize: 'clamp(32px, 10vw, 48px)',
-                fontWeight: 900
-              }}
-            >
-              {pr || '20'}
-            </p>
-          </div>
-          
-          {/* Vertical divider */}
-            <div 
-              className="mx-3 rounded-full"
-              style={{ 
-                width: '2px',
-                height: 'clamp(40px, 12vw, 60px)',
-                background: '#2A2A2A'
-              }}
-            />
-          
-          {/* Right stat - Duration Label + Value */}
-          <div className="text-center flex-1">
-            <p 
-              className="text-[#888888] font-normal mb-1"
-              style={{ 
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-                fontSize: 'clamp(9px, 2.5vw, 12px)',
-                letterSpacing: '0.5px'
-              }}
-            >
-              {durationLabel}
-            </p>
-            <p 
-              className="text-[#2A2A2A] leading-none uppercase"
-              style={{ 
-                fontFamily: 'Impact, "Arial Black", sans-serif',
-                fontSize: 'clamp(32px, 10vw, 48px)',
-                fontWeight: 900
-              }}
-            >
-              {duration || '2HRS'}
-            </p>
+      {/* Layer 6-9: Stats Section - only show if user entered values */}
+      {(duration || pr) && (
+        <div 
+          className="absolute z-20 left-0 right-0 px-[10%] flex items-center justify-center"
+          style={{ 
+            top: '71%',
+            height: '24%'
+          }}
+        >
+          <div className="flex items-center justify-center w-full">
+            {/* Left stat - Metric Label + Value */}
+            {pr && (
+              <div className="text-center flex-1">
+                <p 
+                  className="text-[#888888] font-normal mb-1"
+                  style={{ 
+                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                    fontSize: 'clamp(9px, 2.5vw, 12px)',
+                    letterSpacing: '0.5px'
+                  }}
+                >
+                  {metricLabel}
+                </p>
+                <p 
+                  className="text-[#2A2A2A] leading-none"
+                  style={{ 
+                    fontFamily: 'Impact, "Arial Black", sans-serif',
+                    fontSize: 'clamp(32px, 10vw, 48px)',
+                    fontWeight: 900
+                  }}
+                >
+                  {pr}
+                </p>
+              </div>
+            )}
+            
+            {/* Vertical divider - only show if both values present */}
+            {pr && duration && (
+              <div 
+                className="mx-3 rounded-full"
+                style={{ 
+                  width: '2px',
+                  height: 'clamp(40px, 12vw, 60px)',
+                  background: '#2A2A2A'
+                }}
+              />
+            )}
+            
+            {/* Right stat - Duration Label + Value */}
+            {duration && (
+              <div className="text-center flex-1">
+                <p 
+                  className="text-[#888888] font-normal mb-1"
+                  style={{ 
+                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                    fontSize: 'clamp(9px, 2.5vw, 12px)',
+                    letterSpacing: '0.5px'
+                  }}
+                >
+                  {durationLabel}
+                </p>
+                <p 
+                  className="text-[#2A2A2A] leading-none uppercase"
+                  style={{ 
+                    fontFamily: 'Impact, "Arial Black", sans-serif',
+                    fontSize: 'clamp(32px, 10vw, 48px)',
+                    fontWeight: 900
+                  }}
+                >
+                  {duration}
+                </p>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

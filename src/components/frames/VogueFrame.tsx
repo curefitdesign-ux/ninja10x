@@ -83,49 +83,53 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
         </p>
       </div>
       
-      {/* Bottom stats with contextual labels */}
-      <div className="absolute bottom-6 left-4 right-4 flex gap-4">
-        {/* Duration stat */}
-        <div className="flex flex-col">
-          <span 
-            className="text-[10px] font-medium tracking-wide mb-0.5"
-            style={{ color: 'rgba(255,255,255,0.6)' }}
-          >
-            {durationLabel}
-          </span>
-          <p 
-            className="font-bold tracking-tight"
-            style={{
-              fontSize: 'clamp(28px, 10vw, 40px)',
-              color: 'rgba(255,255,255,0.9)',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-            }}
-          >
-            {duration || "2hrs"}
-          </p>
+      {/* Bottom stats with contextual labels - only show if user entered values */}
+      {(duration || pr) && (
+        <div className="absolute bottom-6 left-4 right-4 flex gap-4">
+          {/* Duration stat */}
+          {duration && (
+            <div className="flex flex-col">
+              <span 
+                className="text-[10px] font-medium tracking-wide mb-0.5"
+                style={{ color: 'rgba(255,255,255,0.6)' }}
+              >
+                {durationLabel}
+              </span>
+              <p 
+                className="font-bold tracking-tight"
+                style={{
+                  fontSize: 'clamp(28px, 10vw, 40px)',
+                  color: 'rgba(255,255,255,0.9)',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+                }}
+              >
+                {duration}
+              </p>
+            </div>
+          )}
+          {/* Secondary metric stat - only show if provided */}
+          {pr && (
+            <div className="flex flex-col">
+              <span 
+                className="text-[10px] font-medium tracking-wide mb-0.5"
+                style={{ color: 'rgba(255,255,255,0.6)' }}
+              >
+                {metricLabel}
+              </span>
+              <p 
+                className="font-bold tracking-tight"
+                style={{
+                  fontSize: 'clamp(28px, 10vw, 40px)',
+                  color: 'rgba(255,255,255,0.9)',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+                }}
+              >
+                {pr}
+              </p>
+            </div>
+          )}
         </div>
-        {/* Secondary metric stat - only show if provided */}
-        {pr && (
-          <div className="flex flex-col">
-            <span 
-              className="text-[10px] font-medium tracking-wide mb-0.5"
-              style={{ color: 'rgba(255,255,255,0.6)' }}
-            >
-              {metricLabel}
-            </span>
-            <p 
-              className="font-bold tracking-tight"
-              style={{
-                fontSize: 'clamp(28px, 10vw, 40px)',
-                color: 'rgba(255,255,255,0.9)',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-              }}
-            >
-              {pr}
-            </p>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };

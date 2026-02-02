@@ -84,44 +84,50 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
         {/* Spacer */}
         <div className="flex-1" />
         
-        {/* Stats at bottom */}
-        <div className="flex gap-6">
-          <div className="flex-1">
-            <p className="text-white/60 text-[10px] font-medium mb-0.5 tracking-wide">{durationLabel}</p>
-            <p 
-              className="text-white font-bold leading-none text-xl animate-subtle-pulse"
-              style={{ fontVariantNumeric: 'tabular-nums' }}
-            >
-              {duration || "02:00:50"}
-            </p>
-            <div className="flex items-end gap-0.5 mt-2 h-6">
-              <div className="w-2.5 h-2.5 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0s' }} />
-              <div className="w-2.5 h-5 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0.2s' }} />
-              <div className="w-2.5 h-6 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0.4s' }} />
-              <div className="w-2.5 h-4 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0.6s' }} />
-            </div>
+        {/* Stats at bottom - only show if user entered values */}
+        {(duration || pr) && (
+          <div className="flex gap-6">
+            {duration && (
+              <div className="flex-1">
+                <p className="text-white/60 text-[10px] font-medium mb-0.5 tracking-wide">{durationLabel}</p>
+                <p 
+                  className="text-white font-bold leading-none text-xl animate-subtle-pulse"
+                  style={{ fontVariantNumeric: 'tabular-nums' }}
+                >
+                  {duration}
+                </p>
+                <div className="flex items-end gap-0.5 mt-2 h-6">
+                  <div className="w-2.5 h-2.5 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0s' }} />
+                  <div className="w-2.5 h-5 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0.2s' }} />
+                  <div className="w-2.5 h-6 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0.4s' }} />
+                  <div className="w-2.5 h-4 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0.6s' }} />
+                </div>
+              </div>
+            )}
+            
+            {pr && (
+              <div className="flex-1">
+                <p className="text-white/60 text-[10px] font-medium mb-0.5 tracking-wide">{metricLabel}</p>
+                <p 
+                  className="text-white font-bold leading-none text-xl animate-subtle-pulse"
+                  style={{ fontVariantNumeric: 'tabular-nums', animationDelay: '0.5s' }}
+                >
+                  {pr}
+                </p>
+                <svg className="w-16 h-6 mt-2 animate-subtle-wave" viewBox="0 0 96 40" fill="none">
+                  <path 
+                    d="M0 30 L14 22 L28 26 L42 14 L56 20 L70 10 L84 14 L96 6" 
+                    fill="none" 
+                    stroke="rgba(255,255,255,0.2)" 
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            )}
           </div>
-          
-          <div className="flex-1">
-            <p className="text-white/60 text-[10px] font-medium mb-0.5 tracking-wide">{metricLabel}</p>
-            <p 
-              className="text-white font-bold leading-none text-xl animate-subtle-pulse"
-              style={{ fontVariantNumeric: 'tabular-nums', animationDelay: '0.5s' }}
-            >
-              {pr || "10"}
-            </p>
-            <svg className="w-16 h-6 mt-2 animate-subtle-wave" viewBox="0 0 96 40" fill="none">
-              <path 
-                d="M0 30 L14 22 L28 26 L42 14 L56 20 L70 10 L84 14 L96 6" 
-                fill="none" 
-                stroke="rgba(255,255,255,0.2)" 
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
