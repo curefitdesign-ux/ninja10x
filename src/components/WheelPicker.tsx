@@ -1,4 +1,5 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
+import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 
 interface WheelPickerProps {
   items: (string | number)[];
@@ -12,160 +13,187 @@ const WheelPicker = ({
   items, 
   value, 
   onChange, 
-  itemHeight = 50,
+  itemHeight = 56, // Increased from 50
   visibleItems = 5 
 }: WheelPickerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const startY = useRef(0);
-  const scrollY = useRef(0);
-  const lastY = useRef(0);
-  const velocity = useRef(0);
-  const animationFrame = useRef<number>();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const lastSelectedRef = useRef<number>(-1);
+  const isScrollingRef = useRef(false);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const centerOffset = Math.floor(visibleItems / 2) * itemHeight;
   const containerHeight = visibleItems * itemHeight;
 
-  const getSelectedIndex = () => {
+  const getSelectedIndex = useCallback(() => {
     const index = items.indexOf(value);
     return index >= 0 ? index : 0;
-  };
+  }, [items, value]);
 
+  // Scroll to value when it changes externally
   useEffect(() => {
+    if (!scrollRef.current || isScrollingRef.current) return;
     const index = getSelectedIndex();
-    scrollY.current = index * itemHeight;
-    updateTransform();
-  }, [value, items]);
+    scrollRef.current.scrollTop = index * itemHeight;
+  }, [value, items, itemHeight, getSelectedIndex]);
 
-  const updateTransform = () => {
-    if (containerRef.current) {
-      const children = containerRef.current.children;
-      const selectedIndex = Math.round(scrollY.current / itemHeight);
+  // Handle scroll with snapping and haptic
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current) return;
+    
+    // Clear existing timeout
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    
+    isScrollingRef.current = true;
+    
+    const scrollTop = scrollRef.current.scrollTop;
+    const selectedIndex = Math.round(scrollTop / itemHeight);
+    const clampedIndex = Math.max(0, Math.min(items.length - 1, selectedIndex));
+    
+    // Trigger haptic when selection changes
+    if (clampedIndex !== lastSelectedRef.current) {
+      lastSelectedRef.current = clampedIndex;
+      triggerHaptic('light');
+    }
+    
+    // Snap after scroll ends
+    scrollTimeoutRef.current = setTimeout(() => {
+      if (!scrollRef.current) return;
       
-      for (let i = 0; i < children.length; i++) {
-        const child = children[i] as HTMLElement;
-        const isSelected = i === selectedIndex;
-        
-        // Selected item is big and white, others are smaller and dimmed
-        if (isSelected) {
-          child.style.opacity = '1';
-          child.style.transform = 'scale(1.3)';
-          child.style.color = 'white';
-          child.style.fontWeight = '700';
-        } else {
-          const distance = Math.abs(i - selectedIndex);
-          const opacity = Math.max(0.3, 1 - distance * 0.25);
-          child.style.opacity = String(opacity);
-          child.style.transform = 'scale(1)';
-          child.style.color = 'rgba(255,255,255,0.5)';
-          child.style.fontWeight = '500';
-        }
-      }
-    }
-  };
+      const finalIndex = Math.round(scrollRef.current.scrollTop / itemHeight);
+      const clampedFinal = Math.max(0, Math.min(items.length - 1, finalIndex));
+      
+      // Smooth snap to nearest item
+      scrollRef.current.scrollTo({
+        top: clampedFinal * itemHeight,
+        behavior: 'smooth'
+      });
+      
+      // Update value after snap
+      setTimeout(() => {
+        isScrollingRef.current = false;
+        onChange(items[clampedFinal]);
+      }, 100);
+    }, 80);
+  }, [items, itemHeight, onChange]);
 
-  const snapToItem = () => {
-    let index = Math.round(scrollY.current / itemHeight);
-    index = Math.max(0, Math.min(items.length - 1, index));
-    scrollY.current = index * itemHeight;
-    updateTransform();
-    onChange(items[index]);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setIsDragging(true);
-    startY.current = e.touches[0].clientY;
-    lastY.current = e.touches[0].clientY;
-    velocity.current = 0;
-    if (animationFrame.current) {
-      cancelAnimationFrame(animationFrame.current);
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
-    
-    const currentY = e.touches[0].clientY;
-    const deltaY = lastY.current - currentY;
-    velocity.current = deltaY;
-    lastY.current = currentY;
-    
-    scrollY.current = Math.max(
-      0,
-      Math.min((items.length - 1) * itemHeight, scrollY.current + deltaY)
-    );
-    
-    updateTransform();
-  };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-    
-    // Apply momentum
-    const decelerate = () => {
-      if (Math.abs(velocity.current) > 0.5) {
-        scrollY.current = Math.max(
-          0,
-          Math.min((items.length - 1) * itemHeight, scrollY.current + velocity.current)
-        );
-        velocity.current *= 0.92;
-        updateTransform();
-        animationFrame.current = requestAnimationFrame(decelerate);
-      } else {
-        snapToItem();
-      }
-    };
-    
-    if (Math.abs(velocity.current) > 2) {
-      animationFrame.current = requestAnimationFrame(decelerate);
-    } else {
-      snapToItem();
-    }
-  };
-
+  // Handle direct item click
   const handleItemClick = (index: number) => {
-    scrollY.current = index * itemHeight;
-    updateTransform();
-    onChange(items[index]);
+    if (!scrollRef.current) return;
+    triggerHaptic('medium');
+    
+    scrollRef.current.scrollTo({
+      top: index * itemHeight,
+      behavior: 'smooth'
+    });
+    
+    setTimeout(() => {
+      onChange(items[index]);
+    }, 150);
   };
+
+  // Calculate item styles based on distance from center
+  const getItemStyle = (index: number) => {
+    if (!scrollRef.current) {
+      const selectedIdx = getSelectedIndex();
+      const isSelected = index === selectedIdx;
+      return {
+        opacity: isSelected ? 1 : 0.5,
+        transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+        fontWeight: isSelected ? 700 : 500,
+        color: isSelected ? 'white' : 'rgba(255,255,255,0.6)',
+      };
+    }
+    
+    const scrollTop = scrollRef.current.scrollTop;
+    const selectedIndex = Math.round(scrollTop / itemHeight);
+    const distance = Math.abs(index - selectedIndex);
+    const isSelected = distance === 0;
+    
+    // More visible non-selected items
+    const opacity = isSelected ? 1 : Math.max(0.45, 0.9 - distance * 0.15);
+    const scale = isSelected ? 1.15 : Math.max(0.9, 1 - distance * 0.03);
+    
+    return {
+      opacity,
+      transform: `scale(${scale})`,
+      fontWeight: isSelected ? 700 : 500,
+      color: isSelected ? 'white' : 'rgba(255,255,255,0.6)',
+    };
+  };
+
+  const [, forceUpdate] = useState(0);
+  
+  // Force re-render on scroll for visual updates
+  const handleScrollWithUpdate = useCallback(() => {
+    handleScroll();
+    forceUpdate(n => n + 1);
+  }, [handleScroll]);
 
   return (
     <div 
+      ref={containerRef}
       className="relative overflow-hidden select-none"
       style={{ height: containerHeight }}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
     >
-      {/* Selection indicator */}
+      {/* Selection indicator - centered highlight bar */}
       <div 
-        className="absolute left-0 right-0 pointer-events-none border-y border-white/30 bg-white/5"
+        className="absolute left-4 right-4 pointer-events-none rounded-xl border border-white/25 bg-white/8"
         style={{ 
           top: centerOffset,
           height: itemHeight,
         }}
       />
       
-      {/* Removed gradient overlays */}
+      {/* Gradient overlays for depth */}
+      <div 
+        className="absolute inset-x-0 top-0 h-16 pointer-events-none z-10"
+        style={{ 
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%)',
+        }}
+      />
+      <div 
+        className="absolute inset-x-0 bottom-0 h-16 pointer-events-none z-10"
+        style={{ 
+          background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)',
+        }}
+      />
       
-      {/* Items container */}
+      {/* Scrollable items container with native scroll snap */}
       <div
-        ref={containerRef}
-        className="absolute left-0 right-0 transition-transform"
+        ref={scrollRef}
+        className="h-full overflow-y-auto scrollbar-hide"
+        onScroll={handleScrollWithUpdate}
         style={{
-          transform: `translateY(${centerOffset - scrollY.current}px)`,
+          scrollSnapType: 'y mandatory',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch',
+          paddingTop: centerOffset,
+          paddingBottom: centerOffset,
         }}
       >
-        {items.map((item, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-center text-white text-2xl font-semibold cursor-pointer transition-all duration-75"
-            style={{ height: itemHeight }}
-            onClick={() => handleItemClick(index)}
-          >
-            {item}
-          </div>
-        ))}
+        {items.map((item, index) => {
+          const style = getItemStyle(index);
+          return (
+            <div
+              key={index}
+              className="flex items-center justify-center cursor-pointer transition-all duration-100 ease-out"
+              style={{ 
+                height: itemHeight,
+                scrollSnapAlign: 'center',
+                ...style,
+              }}
+              onClick={() => handleItemClick(index)}
+            >
+              <span className="text-3xl font-semibold tabular-nums">
+                {item}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
