@@ -42,7 +42,7 @@ const REACTION_VERBS: Record<string, string> = {
   timer: 'timed',
 };
 
-interface Notification {
+export interface Notification {
   id: string;
   reactorName: string;
   reactionType: string;
@@ -53,9 +53,10 @@ interface NotificationSheetProps {
   isOpen: boolean;
   onClose: () => void;
   onNotificationCountChange?: (count: number) => void;
+  onLatestNotificationChange?: (notification: Notification | null) => void;
 }
 
-export default function NotificationSheet({ isOpen, onClose, onNotificationCountChange }: NotificationSheetProps) {
+export default function NotificationSheet({ isOpen, onClose, onNotificationCountChange, onLatestNotificationChange }: NotificationSheetProps) {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const userActivitiesRef = useRef<Set<string>>(new Set());
@@ -135,10 +136,11 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
     };
   }, [user]);
 
-  // Notify parent of count changes
+  // Notify parent of count and latest notification changes
   useEffect(() => {
     onNotificationCountChange?.(notifications.length);
-  }, [notifications.length, onNotificationCountChange]);
+    onLatestNotificationChange?.(notifications.length > 0 ? notifications[0] : null);
+  }, [notifications, onNotificationCountChange, onLatestNotificationChange]);
 
   const dismissNotification = useCallback((id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
