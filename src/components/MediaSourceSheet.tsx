@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
+import { useRef } from 'react';
 import { Camera, Image, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
@@ -15,16 +16,38 @@ interface MediaSourceSheetProps {
 
 const MediaSourceSheet = ({ isOpen, onClose, dayNumber }: MediaSourceSheetProps) => {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSelect = (type: 'camera' | 'gallery') => {
+  const handleCameraSelect = () => {
     triggerHaptic('medium');
     onClose();
-    
-    if (type === 'camera') {
-      navigate('/camera', { state: { dayNumber } });
-    } else {
-      navigate('/gallery', { state: { dayNumber, autoOpenPicker: true } });
+    navigate('/camera', { state: { dayNumber } });
+  };
+
+  const handleGallerySelect = () => {
+    triggerHaptic('medium');
+    // Directly trigger file picker
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const isVideo = file.type.startsWith('video/');
+      const url = URL.createObjectURL(file);
+      onClose();
+      navigate('/preview', {
+        state: {
+          image: url,
+          isVideo,
+          dayNumber,
+          fromGallery: true,
+          file,
+        },
+      });
     }
+    // Reset input
+    if (e.target) e.target.value = '';
   };
 
   return createPortal(
@@ -129,13 +152,22 @@ const MediaSourceSheet = ({ isOpen, onClose, dayNumber }: MediaSourceSheetProps)
               </div>
             </motion.div>
 
+            {/* Hidden file input for direct gallery access */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+
             {/* Options */}
             <div className="px-6 pb-6 flex gap-3">
               {/* Camera Option */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.96 }}
-                onClick={() => handleSelect('camera')}
+                onClick={handleCameraSelect}
                 className="flex-1 flex flex-col items-center gap-3 py-5 rounded-2xl"
                 style={{
                   background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)',
@@ -158,7 +190,7 @@ const MediaSourceSheet = ({ isOpen, onClose, dayNumber }: MediaSourceSheetProps)
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.96 }}
-                onClick={() => handleSelect('gallery')}
+                onClick={handleGallerySelect}
                 className="flex-1 flex flex-col items-center gap-3 py-5 rounded-2xl"
                 style={{
                   background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)',
