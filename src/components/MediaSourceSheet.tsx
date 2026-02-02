@@ -49,10 +49,11 @@ const MediaSourceSheet = ({ isOpen, onClose, dayNumber }: MediaSourceSheetProps)
             className="fixed left-0 right-0 z-50 rounded-t-3xl overflow-hidden"
             style={{
               bottom: 'calc(70px + env(safe-area-inset-bottom, 0px))', // Above bottom nav bar
-              background: 'linear-gradient(180deg, rgba(45, 45, 55, 0.98) 0%, rgba(30, 30, 40, 0.99) 100%)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              background: 'linear-gradient(180deg, rgba(40, 40, 55, 0.75) 0%, rgba(25, 25, 35, 0.8) 100%)',
+              backdropFilter: 'blur(60px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(60px) saturate(180%)',
               boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.4)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
             }}
           >
             {/* Handle */}
