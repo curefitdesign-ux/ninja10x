@@ -41,17 +41,6 @@ import curoHappy from "@/assets/mascot/curo-happy.png";
 import curoThumbs from "@/assets/mascot/curo-thumbs.png";
 import curoParty from "@/assets/mascot/curo-party.png";
 
-// Clean reaction assets (no white backgrounds)
-import fireImg from "@/assets/reactions/fire-new.png";
-import clapImg from "@/assets/reactions/clap-hands.png";
-import flexImg from "@/assets/reactions/flex.png";
-
-// Mapping for clean reaction icons only
-const CLEAN_REACTION_ICONS: Record<string, string> = {
-  fire: fireImg,
-  clap: clapImg,
-  flex: flexImg,
-};
 
 const Activity = () => {
   const navigate = useNavigate();
@@ -71,7 +60,6 @@ const Activity = () => {
   // Notification state
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
-  const [latestNotification, setLatestNotification] = useState<Notification | null>(null);
   
   // Convert to LoggedPhoto shape for PhotoLoggingWidget
   const photos: LoggedPhoto[] = activities.map(a => ({
@@ -359,47 +347,13 @@ const Activity = () => {
       
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="relative z-10 pb-32 pt-2">
-          {/* Header Row: Profile Left - Reaction Pill Center - Notification Right */}
+          {/* Header Row: Profile Left - Notification Right */}
           <div className="px-4 pt-3 flex items-center justify-between">
             {/* Profile Menu - Left */}
             <ProfileMenu />
             
-            {/* Reaction Pill - Center (compact, shows latest reactor) */}
-            {latestNotification && (
-              <motion.button
-                onClick={() => {
-                  const activityId = latestNotification.activityId;
-                  setLatestNotification(null);
-                  setNotificationCount(0);
-                  navigate('/reel', { state: { targetActivityId: activityId } });
-                }}
-                className="flex items-center gap-2 px-3 h-10 rounded-full"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.2)',
-                }}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {/* Single reaction icon - only use clean assets */}
-                <img 
-                  src={CLEAN_REACTION_ICONS[latestNotification.reactionType] || fireImg} 
-                  alt={latestNotification.reactionType} 
-                  className="w-5 h-5 object-contain" 
-                  style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} 
-                />
-                <span className="text-white/80 text-xs font-medium max-w-[80px] truncate">
-                  {latestNotification.reactorName}
-                </span>
-                {notificationCount > 1 && (
-                  <span className="text-white/50 text-[11px]">+{notificationCount - 1}</span>
-                )}
-              </motion.button>
-            )}
+            {/* Spacer */}
+            <div className="flex-1" />
             
             {/* Notification Bell - Right */}
             <motion.button
@@ -849,7 +803,6 @@ const Activity = () => {
         isOpen={showNotifications}
         onClose={() => setShowNotifications(false)}
         onNotificationCountChange={setNotificationCount}
-        onLatestNotificationChange={setLatestNotification}
       />
       
       {/* Hidden file input for direct gallery access */}
