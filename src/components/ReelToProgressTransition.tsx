@@ -90,15 +90,12 @@ export default function ReelToProgressTransition({
     });
   })();
 
-  // Stagger animations when opening
+  // Show content immediately when opening - no delays for instant feel
   useEffect(() => {
     if (isOpen) {
-      const storiesTimer = setTimeout(() => setShowStories(true), 150);
-      const tilesTimer = setTimeout(() => setShowTiles(true), 250);
-      return () => {
-        clearTimeout(storiesTimer);
-        clearTimeout(tilesTimer);
-      };
+      // Show everything immediately for instant transition
+      setShowStories(true);
+      setShowTiles(true);
     } else {
       setShowTiles(false);
       setShowStories(false);
@@ -130,10 +127,10 @@ export default function ReelToProgressTransition({
             height: '100dvh',
             minHeight: '-webkit-fill-available',
           }}
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
           exit={{ opacity: 0, y: 50 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          transition={{ duration: 0.15 }}
         >
           <LayoutGroup>
             <motion.div className="flex-1 flex flex-col">
