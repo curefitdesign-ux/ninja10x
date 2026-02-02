@@ -38,13 +38,13 @@ interface ReactionNotification {
   timestamp: Date;
 }
 
-// Web Audio API notification sound
+// Improved Web Audio API notification sound - soft, pleasant chime
 const playNotificationSound = () => {
   try {
     const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
     
-    // Create a pleasant two-tone chime
-    const playTone = (freq: number, startTime: number, duration: number) => {
+    // Create a soft, pleasant notification chime using triangle waves
+    const playTone = (freq: number, startTime: number, duration: number, volume: number = 0.08) => {
       const oscillator = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
       
@@ -52,23 +52,26 @@ const playNotificationSound = () => {
       gainNode.connect(audioCtx.destination);
       
       oscillator.frequency.value = freq;
-      oscillator.type = 'sine';
+      oscillator.type = 'triangle'; // Softer sound than sine
       
+      // Gentle envelope
       gainNode.gain.setValueAtTime(0, startTime);
-      gainNode.gain.linearRampToValueAtTime(0.15, startTime + 0.02);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+      gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.015);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
       
       oscillator.start(startTime);
       oscillator.stop(startTime + duration);
     };
     
     const now = audioCtx.currentTime;
-    playTone(880, now, 0.12); // A5
-    playTone(1108.73, now + 0.08, 0.15); // C#6
-    playTone(1318.51, now + 0.14, 0.18); // E6
+    // Pleasant ascending arpeggio - C major chord
+    playTone(523.25, now, 0.15, 0.06);        // C5
+    playTone(659.25, now + 0.06, 0.18, 0.08); // E5
+    playTone(783.99, now + 0.12, 0.22, 0.07); // G5
+    playTone(1046.5, now + 0.18, 0.28, 0.05); // C6 (soft finish)
     
     // Auto-close context after sounds complete
-    setTimeout(() => audioCtx.close(), 500);
+    setTimeout(() => audioCtx.close(), 600);
   } catch (e) {
     console.log('Audio not available');
   }
