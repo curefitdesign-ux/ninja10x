@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { ReactionType, ActivityReaction, removeReaction } from '@/services/journey-service';
 import { supabase } from '@/integrations/supabase/client';
 import ProfileAvatar from '@/components/ProfileAvatar';
+import { formatDistanceToNow } from 'date-fns';
 
 // 3D reaction assets
 import clapImg from '@/assets/reactions/clap-hands.png';
@@ -22,11 +23,13 @@ interface ReactorProfile {
   displayName: string;
   avatarUrl?: string;
   reactionType?: ReactionType;
+  createdAt?: string;
 }
 
 // Extended type with guaranteed reactionType for internal use
 interface ReactorWithReaction extends ReactorProfile {
   reactionType: ReactionType;
+  createdAt?: string;
 }
 
 interface ReactsSoFarSheetProps {
@@ -50,6 +53,16 @@ const REACTION_IMAGES: Record<ReactionType, string> = {
   energy: energyImg,
   timer: timerImg,
 };
+
+// Format time ago (e.g., "2h ago", "3d ago")
+function formatTimeAgo(dateString?: string): string {
+  if (!dateString) return '';
+  try {
+    return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+  } catch {
+    return '';
+  }
+}
 
 // Map reactors to their reactions - use actual reaction type from each reactor entry
 function getReactorReactions(reactors: ReactorProfile[]): ReactorWithReaction[] {
@@ -173,14 +186,14 @@ export default function ReactsSoFarSheet({
                     }}
                   />
 
-                  {/* Name + "You" label */}
+                  {/* Name + time ago */}
                   <div className="flex-1 min-w-0">
                     <span className="text-white font-medium text-lg block truncate">
                       {reactor.displayName}
                     </span>
-                    {isOwnReaction && (
-                      <span className="text-white/50 text-xs">Your reaction</span>
-                    )}
+                    <span className="text-white/50 text-xs">
+                      {isOwnReaction ? 'You • ' : ''}{formatTimeAgo(reactor.createdAt)}
+                    </span>
                   </div>
 
                   {/* Reaction image */}

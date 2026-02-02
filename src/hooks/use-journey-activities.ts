@@ -36,7 +36,7 @@ export interface LocalActivity {
   reactions?: Record<ReactionType, ActivityReaction>;
   displayName?: string;
   avatarUrl?: string;
-  reactorProfiles?: { userId: string; displayName: string; avatarUrl?: string }[];
+  reactorProfiles?: { userId: string; displayName: string; avatarUrl?: string; reactionType?: ReactionType; createdAt?: string }[];
 }
 
 // Convert DB row to local shape
@@ -498,7 +498,7 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
   const activityIds = data.map(a => a.id);
   const { data: reactions } = await supabase
     .from('activity_reactions')
-    .select('activity_id, user_id, reaction_type')
+    .select('activity_id, user_id, reaction_type, created_at')
     .in('activity_id', activityIds);
 
   // Collect all unique user IDs (activity owners + reactors)
@@ -522,11 +522,11 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
     });
   }
 
-  // Build reaction map + reactor profiles per activity (including reaction type)
+  // Build reaction map + reactor profiles per activity (including reaction type and timestamp)
   // Each reaction row = one reaction entry (same user can have multiple reactions)
   const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
   const totalMap: Record<string, number> = {};
-  const reactorProfilesMap: Record<string, { userId: string; displayName: string; avatarUrl?: string; reactionType: ReactionType }[]> = {};
+  const reactorProfilesMap: Record<string, { userId: string; displayName: string; avatarUrl?: string; reactionType: ReactionType; createdAt: string }[]> = {};
 
   for (const r of reactions || []) {
     const type = (r.reaction_type || 'heart') as ReactionType;
@@ -542,7 +542,7 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
     };
     totalMap[r.activity_id]++;
     
-    // Add each reaction as a separate entry (same user can appear multiple times with different reactions)
+    // Add each reaction as a separate entry with timestamp
     const profile = profileMap.get(r.user_id);
     if (profile) {
       reactorProfilesMap[r.activity_id].push({
@@ -550,8 +550,16 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
         displayName: profile.display_name,
         avatarUrl: profile.avatar_url,
         reactionType: type,
+        createdAt: r.created_at,
       });
     }
+  }
+  
+  // Sort reactor profiles by createdAt descending (most recent first)
+  for (const activityId of Object.keys(reactorProfilesMap)) {
+    reactorProfilesMap[activityId].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
   }
 
   // Build user story groups - deduplicate by day_number and sort properly
