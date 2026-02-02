@@ -671,140 +671,125 @@ const Reel = () => {
         </div>
 
         {/* MAIN CONTENT ZONE - flexible middle section */}
-        <div
-          className="flex-1 flex items-center justify-center z-30 overflow-hidden px-4"
-        >
-          <motion.div
-            className="w-full h-full flex items-center justify-center"
+        <div className="flex-1 flex items-center justify-center z-30 overflow-hidden px-4">
+          {/* Card container with horizontal swipe + shake animation */}
+          <motion.div 
+            className="relative w-full max-w-[340px] cursor-grab active:cursor-grabbing"
             style={{ 
-              scale: contentScale,
-              opacity: contentOpacity,
-              y: contentY,
+              x: dragX,
+              opacity: cardOpacity,
+              rotate: cardRotate,
+              scale: cardScale,
             }}
+            animate={shakeAnimation}
+            transition={shakeTransition}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleHorizontalDragEnd}
+            onClick={handleTap}
           >
-            {/* Card container with horizontal swipe + shake animation */}
-            <motion.div 
-              className="relative w-full max-w-[340px] cursor-grab active:cursor-grabbing flex items-center justify-center"
-              style={{ 
-                maxHeight: '100%',
-                x: dragX,
-                opacity: cardOpacity,
-                rotate: cardRotate,
-                scale: cardScale,
-              }}
-              animate={shakeAnimation}
-              transition={shakeTransition}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.2}
-              onDragEnd={handleHorizontalDragEnd}
-              onClick={handleTap}
-            >
-              {/* Full templated image/video - with lock overlay for non-public users */}
-              {(() => {
-                const shouldShowLocked = !isOwnStory && !hasPublicActivity;
-                
-                return (
-                  <div className="relative w-full flex flex-col items-center justify-center">
-                    {/* Media - stable rendering without AnimatePresence */}
-                    <div className="relative w-full">
-                      {isVideo ? (
-                        <video
-                          key={mediaUrl}
-                          src={mediaUrl}
-                          className="w-full h-auto rounded-2xl"
-                          style={{ 
-                            maxHeight: 'calc(100dvh - 240px)',
-                            objectFit: 'contain',
-                            boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
-                            filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                          }}
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                        />
-                      ) : (
-                        <img
-                          key={mediaUrl}
-                          src={mediaUrl}
-                          alt={`Day ${currentActivity.dayNumber}`}
-                          className="w-full h-auto rounded-2xl"
-                          style={{ 
-                            maxHeight: 'calc(100dvh - 240px)',
-                            objectFit: 'contain',
-                            boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
-                            filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                          }}
-                        />
-                      )}
-                    </div>
-                      
-                    {/* Lock overlay for locked content */}
-                    {shouldShowLocked && (
+            {/* Full templated image/video - with lock overlay for non-public users */}
+            {(() => {
+              const shouldShowLocked = !isOwnStory && !hasPublicActivity;
+              
+              return (
+                <div className="relative w-full">
+                  {isVideo ? (
+                    <video
+                      key={mediaUrl}
+                      src={mediaUrl}
+                      className="w-full h-auto rounded-2xl"
+                      style={{ 
+                        maxHeight: 'calc(100dvh - 240px)',
+                        objectFit: 'contain',
+                        boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
+                        filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                      }}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                    />
+                  ) : (
+                    <img
+                      key={mediaUrl}
+                      src={mediaUrl}
+                      alt={`Day ${currentActivity.dayNumber}`}
+                      className="w-full h-auto rounded-2xl"
+                      style={{ 
+                        maxHeight: 'calc(100dvh - 240px)',
+                        objectFit: 'contain',
+                        boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
+                        filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                      }}
+                    />
+                  )}
+                  
+                  {/* Lock overlay for locked content */}
+                  {shouldShowLocked && (
+                    <motion.div
+                      className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                    >
                       <motion.div
-                        className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
+                        className="flex flex-col items-center gap-3"
+                        initial={{ scale: 0.8, y: 20 }}
+                        animate={{ scale: 1, y: 0 }}
+                        transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
                       >
-                        <motion.div
-                          className="flex flex-col items-center gap-3"
-                          initial={{ scale: 0.8, y: 20 }}
-                          animate={{ scale: 1, y: 0 }}
-                          transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+                        <div 
+                          className="w-16 h-16 rounded-full flex items-center justify-center"
+                          style={{
+                            background: 'rgba(255,255,255,0.12)',
+                            backdropFilter: 'blur(16px)',
+                            border: '2px solid rgba(255,255,255,0.25)',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                          }}
                         >
-                          <div 
-                            className="w-16 h-16 rounded-full flex items-center justify-center"
-                            style={{
-                              background: 'rgba(255,255,255,0.12)',
-                              backdropFilter: 'blur(16px)',
-                              border: '2px solid rgba(255,255,255,0.25)',
-                              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                            }}
-                          >
-                            <Lock className="w-7 h-7 text-white" />
-                          </div>
-                          
-                          <div className="text-center px-6">
-                            <p className="text-white font-semibold text-lg">Share to see others</p>
-                            <p className="text-white/60 text-sm mt-1">
-                              Make your workout public to unlock
-                            </p>
-                          </div>
-                          
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const latestActivity = myActivities[myActivities.length - 1];
-                              if (latestActivity) {
-                                setShowMakePublicSheet(true);
-                              }
-                            }}
-                            className="mt-2 px-6 py-2.5 rounded-full font-semibold text-sm active:scale-95 transition-transform"
-                            style={{
-                              background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%)',
-                              color: '#000',
-                              boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
-                            }}
-                          >
-                            Share my progress
-                          </button>
-                        </motion.div>
+                          <Lock className="w-7 h-7 text-white" />
+                        </div>
+                        
+                        <div className="text-center px-6">
+                          <p className="text-white font-semibold text-lg">Share to see others</p>
+                          <p className="text-white/60 text-sm mt-1">
+                            Make your workout public to unlock
+                          </p>
+                        </div>
+                        
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const latestActivity = myActivities[myActivities.length - 1];
+                            if (latestActivity) {
+                              setShowMakePublicSheet(true);
+                            }
+                          }}
+                          className="mt-2 px-6 py-2.5 rounded-full font-semibold text-sm active:scale-95 transition-transform"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%)',
+                            color: '#000',
+                            boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
+                          }}
+                        >
+                          Share my progress
+                        </button>
                       </motion.div>
-                    )}
-                    
-                    {/* Floating 3D emoji reactions - inside image container */}
-                    {!shouldShowLocked && (
-                      <Floating3DEmojis 
-                        reactions={activeReactionTypes}
-                        newReaction={floatingReaction}
-                      />
-                    )}
-                  </div>
-                );
-              })()}
-            </motion.div>
+                    </motion.div>
+                  )}
+                  
+                  {/* Floating 3D emoji reactions - inside image container */}
+                  {!shouldShowLocked && (
+                    <Floating3DEmojis 
+                      reactions={activeReactionTypes}
+                      newReaction={floatingReaction}
+                    />
+                  )}
+                </div>
+              );
+            })()}
           </motion.div>
         </div>
 
