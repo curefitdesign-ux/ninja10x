@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Camera, X, Eye, EyeOff } from 'lucide-react';
@@ -39,7 +39,7 @@ const ProfileSetupPage = () => {
   const editMode = searchParams.get('edit') === 'true';
   
   const { user } = useAuth();
-  const { profile, updateProfile, needsSetup } = useProfile();
+  const { profile, updateProfile, needsSetup, loading: profileLoading } = useProfile();
   const [displayName, setDisplayName] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [customAvatarFile, setCustomAvatarFile] = useState<File | null>(null);
@@ -47,17 +47,20 @@ const ProfileSetupPage = () => {
   const [storiesPublic, setStoriesPublic] = useState(true);
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Redirect if profile already exists and not in edit mode
+  // Redirect if profile already exists and not in edit mode - only after loading is done
   useEffect(() => {
+    if (profileLoading) return;
     if (!editMode && !needsSetup && profile) {
       navigate('/', { replace: true });
     }
-  }, [editMode, needsSetup, profile, navigate]);
+  }, [editMode, needsSetup, profile, navigate, profileLoading]);
 
-  // Pre-fill data in edit mode
+  // Pre-fill data in edit mode - only once
   useEffect(() => {
+    if (isInitialized) return;
     if (editMode && profile) {
       setDisplayName(profile.display_name);
       setStoriesPublic(profile.stories_public ?? true);
@@ -67,15 +70,17 @@ const ProfileSetupPage = () => {
       } else if (profile.avatar_url) {
         setCustomAvatarPreview(profile.avatar_url);
       }
+      setIsInitialized(true);
+    } else if (!editMode) {
+      setIsInitialized(true);
     }
-  }, [editMode, profile]);
+  }, [editMode, profile, isInitialized]);
 
-  // Check for cropped image from avatar cropper on mount and focus
+  // Check for cropped image from avatar cropper on mount only
   useEffect(() => {
     const checkForCroppedImage = () => {
       const croppedImage = sessionStorage.getItem('croppedAvatarImage');
       if (croppedImage) {
-        // Convert base64 to file
         fetch(croppedImage)
           .then(res => res.blob())
           .then(blob => {
@@ -97,23 +102,14 @@ const ProfileSetupPage = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      return;
-    }
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > 5 * 1024 * 1024) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      return;
-    }
-
-    // IMPORTANT: Clear preset selection when user uploads custom photo
-    // This ensures the gallery upload takes precedence over any selected preset
     setSelectedAvatar(null);
 
-    // Read file and navigate to cropper
     const reader = new FileReader();
     reader.onload = (evt) => {
       const imageData = evt.target?.result as string;
-      // Navigate to avatar cropper with the image
       navigate('/avatar-crop', { 
         state: { 
           imageData,
@@ -122,8 +118,6 @@ const ProfileSetupPage = () => {
       });
     };
     reader.readAsDataURL(file);
-    
-    // Reset the input so same file can be selected again
     e.target.value = '';
   };
 
@@ -135,14 +129,14 @@ const ProfileSetupPage = () => {
 
   const hasAvatarSelected = selectedAvatar !== null || customAvatarFile !== null || customAvatarPreview !== null;
   
-  const getCurrentAvatarPreview = () => {
+  const avatarPreview = useMemo(() => {
     if (customAvatarPreview) return customAvatarPreview;
     if (selectedAvatar) {
       const preset = PRESET_AVATARS.find(a => a.id === selectedAvatar);
       return preset?.src;
     }
     return null;
-  };
+  }, [customAvatarPreview, selectedAvatar]);
 
   const handleSubmit = async () => {
     const nameResult = nameSchema.safeParse(displayName);
@@ -151,13 +145,7 @@ const ProfileSetupPage = () => {
       return;
     }
 
-    if (!hasAvatarSelected) {
-      return;
-    }
-
-    if (!user) {
-      return;
-    }
+    if (!hasAvatarSelected || !user) return;
 
     setLoading(true);
 
@@ -213,7 +201,17 @@ const ProfileSetupPage = () => {
     }
   };
 
-  const avatarPreview = getCurrentAvatarPreview();
+  // Show nothing while checking profile status
+  if (profileLoading) {
+    return (
+      <div 
+        className="fixed inset-0 flex items-center justify-center"
+        style={{ background: '#0a0a12' }}
+      >
+        <div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -224,45 +222,17 @@ const ProfileSetupPage = () => {
         background: '#0a0a12',
       }}
     >
-      {/* Animated gradient orbs background */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <motion.div
-          className="absolute w-[350px] h-[350px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, hsl(160, 84%, 39%) 0%, transparent 70%)',
-            filter: 'blur(100px)',
-            top: '-15%',
-            left: '-20%',
-            opacity: 0.3,
-          }}
-          animate={{ x: [0, 40, 0], y: [0, 30, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute w-[300px] h-[300px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, hsl(280, 60%, 50%) 0%, transparent 70%)',
-            filter: 'blur(80px)',
-            bottom: '5%',
-            right: '-15%',
-            opacity: 0.25,
-          }}
-          animate={{ x: [0, -30, 0], y: [0, -40, 0] }}
-          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute w-[200px] h-[200px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, hsl(200, 80%, 50%) 0%, transparent 70%)',
-            filter: 'blur(60px)',
-            top: '40%',
-            right: '10%',
-            opacity: 0.2,
-          }}
-          animate={{ x: [0, 20, 0], y: [0, -20, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
+      {/* Static gradient background - no animations for performance */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(circle at 10% 20%, hsla(160, 84%, 39%, 0.25) 0%, transparent 50%),
+            radial-gradient(circle at 90% 80%, hsla(280, 60%, 50%, 0.2) 0%, transparent 50%),
+            radial-gradient(circle at 80% 30%, hsla(200, 80%, 50%, 0.15) 0%, transparent 40%)
+          `,
+        }}
+      />
 
       {/* Content */}
       <div 
@@ -274,10 +244,9 @@ const ProfileSetupPage = () => {
       >
         {/* Close button for edit mode */}
         {editMode && (
-          <motion.button
-            whileTap={{ scale: 0.9 }}
+          <button
             onClick={() => navigate('/', { replace: true })}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center z-20"
+            className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center z-20 active:scale-95 transition-transform"
             style={{
               marginTop: 'max(env(safe-area-inset-top), 12px)',
               background: 'rgba(255, 255, 255, 0.1)',
@@ -286,7 +255,7 @@ const ProfileSetupPage = () => {
             }}
           >
             <X className="w-5 h-5 text-white/70" />
-          </motion.button>
+          </button>
         )}
 
         {/* Header */}
@@ -299,7 +268,7 @@ const ProfileSetupPage = () => {
           </p>
         </div>
 
-        {/* Avatar Display + Upload Button - Liquid Glass */}
+        {/* Avatar Display + Upload Button */}
         <div className="flex flex-col items-center mb-6">
           <input
             ref={fileInputRef}
@@ -310,7 +279,7 @@ const ProfileSetupPage = () => {
           />
           
           {/* Avatar Display Circle */}
-          <motion.div
+          <div
             className="relative w-36 h-36 rounded-full overflow-hidden mb-5"
             style={{
               background: avatarPreview 
@@ -320,7 +289,7 @@ const ProfileSetupPage = () => {
                 ? '3px solid rgba(255, 255, 255, 0.2)' 
                 : '2px solid rgba(255, 255, 255, 0.15)',
               boxShadow: avatarPreview 
-                ? '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)' 
+                ? '0 12px 40px rgba(0,0,0,0.5)' 
                 : 'inset 0 2px 4px rgba(255,255,255,0.05)',
             }}
           >
@@ -335,35 +304,23 @@ const ProfileSetupPage = () => {
                 <Camera className="w-10 h-10 text-white/25" strokeWidth={1.5} />
               </div>
             )}
-          </motion.div>
+          </div>
 
-          {/* Upload Photo Button - Liquid Glass Style */}
-          <motion.button
+          {/* Upload Photo Button */}
+          <button
             onClick={() => fileInputRef.current?.click()}
-            className="relative flex items-center gap-3 px-6 py-3 rounded-2xl overflow-hidden"
+            className="relative flex items-center gap-3 px-6 py-3 rounded-2xl overflow-hidden active:scale-98 transition-transform"
             style={{
               background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.2) 100%)',
               backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: '0 8px 32px rgba(99, 102, 241, 0.2), inset 0 1px 0 rgba(255,255,255,0.15)',
+              boxShadow: '0 8px 32px rgba(99, 102, 241, 0.2)',
             }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
             disabled={loading}
           >
-            {/* Shimmer effect */}
-            <motion.div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
-              }}
-              animate={{ x: ['-100%', '200%'] }}
-              transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }}
-            />
             <Camera className="w-5 h-5 text-white/90" strokeWidth={2} />
-            <span className="text-white font-medium text-sm relative z-10">Upload Photo</span>
-          </motion.button>
+            <span className="text-white font-medium text-sm">Upload Photo</span>
+          </button>
         </div>
 
         {/* Divider */}
@@ -376,12 +333,11 @@ const ProfileSetupPage = () => {
         {/* Preset Avatars Grid - 4x2 */}
         <div className="grid grid-cols-4 gap-3 mb-8">
           {PRESET_AVATARS.map((avatar) => (
-            <motion.button
+            <button
               key={avatar.id}
-              whileTap={{ scale: 0.92 }}
               onClick={() => selectPresetAvatar(avatar.id)}
               disabled={loading}
-              className="relative aspect-square rounded-full overflow-hidden"
+              className="relative aspect-square rounded-full overflow-hidden active:scale-95 transition-transform"
               style={{
                 border: selectedAvatar === avatar.id 
                   ? '3px solid hsl(160, 84%, 50%)' 
@@ -402,6 +358,7 @@ const ProfileSetupPage = () => {
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0 }}
+                    transition={{ duration: 0.15 }}
                     className="absolute inset-0 flex items-center justify-center bg-black/30"
                   >
                     <div 
@@ -415,18 +372,17 @@ const ProfileSetupPage = () => {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </motion.button>
+            </button>
           ))}
         </div>
 
-        {/* Name Input - Liquid Glass */}
+        {/* Name Input */}
         <div 
           className="rounded-2xl p-4 mb-6"
           style={{
             background: 'rgba(255, 255, 255, 0.06)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
-            boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.08)',
           }}
         >
           <label className="text-white/50 text-xs mb-2 block">Your Name</label>
@@ -455,7 +411,6 @@ const ProfileSetupPage = () => {
               background: 'rgba(255, 255, 255, 0.06)',
               backdropFilter: 'blur(20px)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.08)',
             }}
           >
             <div className="flex items-center justify-between">
@@ -484,12 +439,11 @@ const ProfileSetupPage = () => {
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Submit Button - Liquid Glass with Shimmer */}
-        <motion.button
-          whileTap={{ scale: 0.98 }}
+        {/* Submit Button */}
+        <button
           onClick={handleSubmit}
           disabled={loading || !displayName.trim() || !hasAvatarSelected}
-          className="w-full py-4 rounded-2xl font-semibold text-white transition-all duration-200 disabled:opacity-40 relative overflow-hidden"
+          className="w-full py-4 rounded-2xl font-semibold text-white transition-all duration-200 disabled:opacity-40 relative overflow-hidden active:scale-98"
           style={{
             background: hasAvatarSelected && displayName.trim()
               ? 'linear-gradient(135deg, hsl(160, 84%, 39%) 0%, hsl(172, 66%, 50%) 100%)'
@@ -497,23 +451,14 @@ const ProfileSetupPage = () => {
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.12)',
             boxShadow: hasAvatarSelected && displayName.trim()
-              ? '0 8px 32px rgba(52, 211, 153, 0.3), inset 0 1px 0 rgba(255,255,255,0.2)'
-              : 'inset 0 1px 1px rgba(255,255,255,0.1)',
+              ? '0 8px 32px rgba(52, 211, 153, 0.3)'
+              : 'none',
           }}
         >
-          {/* Shimmer effect */}
-          <motion.div
-            className="absolute inset-0 opacity-30"
-            style={{
-              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
-            }}
-            animate={{ x: ['-100%', '200%'] }}
-            transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }}
-          />
-          <span className="relative z-10 text-lg">
+          <span className="text-lg">
             {loading ? 'Saving...' : (editMode ? 'Save Changes' : 'Continue')}
           </span>
-        </motion.button>
+        </button>
       </div>
     </div>
   );
