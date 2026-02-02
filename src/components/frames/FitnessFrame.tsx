@@ -15,7 +15,7 @@ interface FitnessFrameProps {
 }
 
 const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: FitnessFrameProps) => {
-  const metricLabel = label1 || 'Metric';
+  const metricLabel = label1 || 'Distance';
   const durationLabel = label2 || 'Duration';
   const videoRef = useRef<HTMLVideoElement>(null);
 

@@ -17,7 +17,7 @@ interface TicketFrameProps {
 }
 
 const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: TicketFrameProps) => {
-  const metricLabel = label1 || 'Laps';
+  const metricLabel = label1 || 'Distance';
   const durationLabel = label2 || 'Duration';
   const videoRef = useRef<HTMLVideoElement>(null);
 
