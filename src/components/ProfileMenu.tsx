@@ -70,9 +70,9 @@ const ProfileMenu = ({ onEditProfile }: ProfileMenuProps) => {
                 onClick={() => setIsOpen(false)}
               />
               
-              {/* Menu - Liquid Glass */}
+              {/* Menu - Liquid Glass - Position left since button is on left side */}
               <motion.div
-                className="absolute right-0 top-full mt-2 w-56 z-50 rounded-2xl overflow-hidden"
+                className="absolute left-0 top-full mt-2 w-56 z-50 rounded-2xl overflow-hidden"
                 style={{
                   background: 'rgba(20, 20, 30, 0.95)',
                   backdropFilter: 'blur(40px) saturate(180%)',
