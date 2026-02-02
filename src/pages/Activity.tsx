@@ -11,7 +11,7 @@ import AIReelViewer from "@/components/AIReelViewer";
 import CuroSpeechBubble from "@/components/CuroSpeechBubble";
 import ProfileMenu from "@/components/ProfileMenu";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
-import NotificationSheet from "@/components/NotificationSheet";
+import NotificationSheet, { Notification } from "@/components/NotificationSheet";
 import { useJourneyActivities } from "@/hooks/use-journey-activities";
 import { useProfile } from "@/hooks/use-profile";
 import { JourneyActivity } from "@/services/journey-service";
@@ -40,9 +40,17 @@ import curoHappy from "@/assets/mascot/curo-happy.png";
 import curoThumbs from "@/assets/mascot/curo-thumbs.png";
 import curoParty from "@/assets/mascot/curo-party.png";
 
-// 3D reaction assets for pill (clean transparency)
+// Clean reaction assets (no white backgrounds)
 import fireImg from "@/assets/reactions/fire-new.png";
 import clapImg from "@/assets/reactions/clap-hands.png";
+import flexImg from "@/assets/reactions/flex.png";
+
+// Mapping for clean reaction icons only
+const CLEAN_REACTION_ICONS: Record<string, string> = {
+  fire: fireImg,
+  clap: clapImg,
+  flex: flexImg,
+};
 
 const Activity = () => {
   const navigate = useNavigate();
@@ -62,6 +70,7 @@ const Activity = () => {
   // Notification state
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [latestNotification, setLatestNotification] = useState<Notification | null>(null);
   
   // Convert to LoggedPhoto shape for PhotoLoggingWidget
   const photos: LoggedPhoto[] = activities.map(a => ({
@@ -344,27 +353,33 @@ const Activity = () => {
             {/* Profile Menu - Left */}
             <ProfileMenu />
             
-            {/* Reaction Pill - Center (only show if has notifications) */}
-            {notificationCount > 0 && (
+            {/* Reaction Pill - Center (compact, shows latest reactor) */}
+            {latestNotification && (
               <motion.button
                 onClick={() => setShowNotifications(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
                 style={{
                   background: 'rgba(255, 255, 255, 0.08)',
                   backdropFilter: 'blur(20px)',
                   border: '1px solid rgba(255, 255, 255, 0.12)',
-                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1)',
                 }}
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {/* Reaction icons stack */}
-                <div className="flex -space-x-1.5">
-                  <img src={fireImg} alt="fire" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
-                  <img src={clapImg} alt="clap" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
-                </div>
-                <span className="text-white/80 text-xs font-medium">{notificationCount}</span>
+                {/* Single reaction icon - only use clean assets */}
+                <img 
+                  src={CLEAN_REACTION_ICONS[latestNotification.reactionType] || fireImg} 
+                  alt={latestNotification.reactionType} 
+                  className="w-4 h-4 object-contain" 
+                  style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} 
+                />
+                <span className="text-white/80 text-[11px] font-medium max-w-[80px] truncate">
+                  {latestNotification.reactorName}
+                </span>
+                {notificationCount > 1 && (
+                  <span className="text-white/50 text-[10px]">+{notificationCount - 1}</span>
+                )}
               </motion.button>
             )}
             
@@ -809,6 +824,7 @@ const Activity = () => {
         isOpen={showNotifications}
         onClose={() => setShowNotifications(false)}
         onNotificationCountChange={setNotificationCount}
+        onLatestNotificationChange={setLatestNotification}
       />
       
       {/* Hidden file input for direct gallery access */}
