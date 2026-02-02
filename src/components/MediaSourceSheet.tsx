@@ -1,7 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Image, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import goRunningSticker from '@/assets/stickers/go-running.png';
 import liftWeightsSticker from '@/assets/stickers/lift-weights.png';
@@ -13,21 +12,11 @@ interface MediaSourceSheetProps {
   dayNumber: number;
 }
 
-const FIRST_TIME_KEY = 'media_source_sheet_seen';
-
 const MediaSourceSheet = ({ isOpen, onClose, dayNumber }: MediaSourceSheetProps) => {
   const navigate = useNavigate();
-  const [isFirstTime, setIsFirstTime] = useState(false);
-
-  useEffect(() => {
-    const hasSeen = localStorage.getItem(FIRST_TIME_KEY);
-    setIsFirstTime(!hasSeen);
-  }, []);
 
   const handleSelect = (type: 'camera' | 'gallery') => {
     triggerHaptic('medium');
-    // Mark as seen after first interaction
-    localStorage.setItem(FIRST_TIME_KEY, 'true');
     onClose();
     
     if (type === 'camera') {
@@ -82,62 +71,60 @@ const MediaSourceSheet = ({ isOpen, onClose, dayNumber }: MediaSourceSheetProps)
               <X className="w-4 h-4 text-white/70" />
             </button>
 
-            {/* First Time Content */}
-            {isFirstTime && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="px-6 pt-4 pb-6"
-              >
-                {/* Stickers Collage */}
-                <div className="relative h-48 mb-6 flex items-center justify-center">
-                  {/* Lift Weights - Left */}
-                  <motion.img
-                    src={liftWeightsSticker}
-                    alt="Lift Weights"
-                    className="absolute w-32 h-auto drop-shadow-lg"
-                    style={{ left: '5%', bottom: '10%' }}
-                    initial={{ opacity: 0, scale: 0.5, rotate: -15 }}
-                    animate={{ opacity: 1, scale: 1, rotate: -5 }}
-                    transition={{ delay: 0.2, type: 'spring', stiffness: 300 }}
-                  />
-                  {/* Play Basketball - Right */}
-                  <motion.img
-                    src={playBasketballSticker}
-                    alt="Play Basketball"
-                    className="absolute w-28 h-auto drop-shadow-lg"
-                    style={{ right: '5%', top: '0%' }}
-                    initial={{ opacity: 0, scale: 0.5, rotate: 15 }}
-                    animate={{ opacity: 1, scale: 1, rotate: 5 }}
-                    transition={{ delay: 0.3, type: 'spring', stiffness: 300 }}
-                  />
-                  {/* Go Running - Center Bottom */}
-                  <motion.img
-                    src={goRunningSticker}
-                    alt="Go Running"
-                    className="absolute w-28 h-auto drop-shadow-lg"
-                    style={{ right: '20%', bottom: '0%' }}
-                    initial={{ opacity: 0, scale: 0.5, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: 0.4, type: 'spring', stiffness: 300 }}
-                  />
-                </div>
+            {/* Content - Always show stickers */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="px-6 pt-4 pb-6"
+            >
+              {/* Stickers Collage */}
+              <div className="relative h-48 mb-6 flex items-center justify-center">
+                {/* Lift Weights - Left */}
+                <motion.img
+                  src={liftWeightsSticker}
+                  alt="Lift Weights"
+                  className="absolute w-32 h-auto drop-shadow-lg"
+                  style={{ left: '5%', bottom: '10%' }}
+                  initial={{ opacity: 0, scale: 0.5, rotate: -15 }}
+                  animate={{ opacity: 1, scale: 1, rotate: -5 }}
+                  transition={{ delay: 0.2, type: 'spring', stiffness: 300 }}
+                />
+                {/* Play Basketball - Right */}
+                <motion.img
+                  src={playBasketballSticker}
+                  alt="Play Basketball"
+                  className="absolute w-28 h-auto drop-shadow-lg"
+                  style={{ right: '5%', top: '0%' }}
+                  initial={{ opacity: 0, scale: 0.5, rotate: 15 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 5 }}
+                  transition={{ delay: 0.3, type: 'spring', stiffness: 300 }}
+                />
+                {/* Go Running - Center Bottom */}
+                <motion.img
+                  src={goRunningSticker}
+                  alt="Go Running"
+                  className="absolute w-28 h-auto drop-shadow-lg"
+                  style={{ right: '20%', bottom: '0%' }}
+                  initial={{ opacity: 0, scale: 0.5, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ delay: 0.4, type: 'spring', stiffness: 300 }}
+                />
+              </div>
 
-                {/* Text */}
-                <div className="text-center mb-6">
-                  <h2 className="text-white text-xl font-bold mb-2">
-                    Capture your fitness and workout moment.
-                  </h2>
-                  <p className="text-white/50 text-sm">
-                    Select from your gallery.
-                  </p>
-                </div>
-              </motion.div>
-            )}
+              {/* Text */}
+              <div className="text-center mb-6">
+                <h2 className="text-white text-xl font-bold mb-2">
+                  Capture your fitness and workout moment.
+                </h2>
+                <p className="text-white/50 text-sm">
+                  Last 24 hours only.
+                </p>
+              </div>
+            </motion.div>
 
             {/* Options */}
-            <div className={`px-6 ${isFirstTime ? 'pb-6' : 'py-6'} flex gap-3`}>
+            <div className="px-6 pb-6 flex gap-3">
               {/* Camera Option */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
