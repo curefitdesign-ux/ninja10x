@@ -383,9 +383,9 @@ const Reel = () => {
   const week = Math.ceil(currentActivity.dayNumber / 3);
   const dayInWeek = ((currentActivity.dayNumber - 1) % 3) + 1;
 
-  // Calculate fixed header height for layout
-  const HEADER_HEIGHT = 120; // Fixed header zone (safe-area + avatars + name)
-  const BOTTOM_HEIGHT = 120; // Fixed bottom zone (reaction pill + view progress)
+  // Calculate fixed header height for layout - more compact
+  const HEADER_HEIGHT = 140; // Safe-area + buttons + avatars + name (slightly increased for spacing)
+  const BOTTOM_HEIGHT = 110; // Reaction pill + view progress (slightly reduced)
 
   return (
     <DynamicBlurBackground imageUrl={mediaUrl}>
@@ -397,10 +397,9 @@ const Reel = () => {
 
       {/* FIXED HEADER ZONE - contains delete/close buttons, avatars strip, user info */}
       <div 
-        className="absolute top-0 left-0 right-0 z-40 flex flex-col"
+        className="absolute top-0 left-0 right-0 z-50 flex flex-col"
         style={{ 
           paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
-          height: HEADER_HEIGHT,
         }}
       >
         {/* Row 1: Delete + Close buttons */}
@@ -548,34 +547,40 @@ const Reel = () => {
         </div>
       </div>
 
-      {/* MAIN CONTENT ZONE - fills space between header and bottom */}
-      <motion.div
-        className="absolute left-0 right-0 z-30 flex items-center justify-center overflow-hidden"
+      {/* MAIN CONTENT ZONE - fills space between header and bottom, no overlap */}
+      <div
+        className="absolute left-0 right-0 z-30 flex items-center justify-center"
         style={{ 
-          top: `calc(max(env(safe-area-inset-top, 12px), 12px) + ${HEADER_HEIGHT}px)`,
+          top: `calc(env(safe-area-inset-top, 12px) + ${HEADER_HEIGHT}px)`,
           bottom: `calc(env(safe-area-inset-bottom, 0px) + ${BOTTOM_HEIGHT}px)`,
-          paddingInline: 20,
-          scale: contentScale,
-          opacity: contentOpacity,
-          y: contentY,
+          paddingInline: 16,
+          overflow: 'hidden',
         }}
       >
-        {/* Card container with horizontal swipe - full templated image, no container */}
-        <motion.div 
-          className="relative w-full max-w-[400px] cursor-grab active:cursor-grabbing flex items-center justify-center"
+        <motion.div
+          className="w-full h-full flex items-center justify-center"
           style={{ 
-            maxHeight: '100%',
-            x: dragX,
-            opacity: cardOpacity,
-            rotate: cardRotate,
-            scale: cardScale,
+            scale: contentScale,
+            opacity: contentOpacity,
+            y: contentY,
           }}
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.2}
-          onDragEnd={handleHorizontalDragEnd}
-          onClick={handleTap}
         >
+        {/* Card container with horizontal swipe */}
+          <motion.div 
+            className="relative w-full max-w-[320px] cursor-grab active:cursor-grabbing flex items-center justify-center"
+            style={{ 
+              maxHeight: '100%',
+              x: dragX,
+              opacity: cardOpacity,
+              rotate: cardRotate,
+              scale: cardScale,
+            }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleHorizontalDragEnd}
+            onClick={handleTap}
+          >
           {/* Full templated image/video - with lock overlay for non-public users */}
           {(() => {
             // Show locked state for other users' content when current user hasn't shared publicly
@@ -687,8 +692,9 @@ const Reel = () => {
               </AnimatePresence>
             );
           })()}
+          </motion.div>
         </motion.div>
-      </motion.div>
+      </div>
 
       {/* FIXED BOTTOM ZONE - Reaction pill + View Progress */}
       {/* Hide reaction pill when content is locked (non-owner, user hasn't made public) */}
