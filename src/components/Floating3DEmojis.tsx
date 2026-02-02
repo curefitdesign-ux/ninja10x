@@ -51,7 +51,8 @@ export default function Floating3DEmojis({ reactions, newReaction }: Floating3DE
         const isNew = newReaction === type;
         const asset = EMOJI_ASSETS[type];
         
-        // Create unique animation delay for each emoji
+        // Create unique animation delay for each emoji - staggered entrance
+        const entranceDelay = 0.3 + i * 0.12;
         const animDelay = i * 0.5;
         
         return (
@@ -62,18 +63,19 @@ export default function Floating3DEmojis({ reactions, newReaction }: Floating3DE
               ...pos,
               filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4))',
             }}
-            initial={isNew ? { scale: 0, opacity: 0, rotate: pos.rotate - 30 } : { scale: pos.scale, opacity: 1, rotate: pos.rotate }}
+            initial={{ scale: 0, opacity: 0, rotate: pos.rotate - 30, x: pos.left ? -50 : 50 }}
             animate={{ 
               scale: isNew ? [0, pos.scale * 1.3, pos.scale] : pos.scale, 
               opacity: 1,
               rotate: pos.rotate,
               y: isNew ? [30, -15, 0] : 0,
+              x: 0,
             }}
             transition={{ 
               type: 'spring', 
-              stiffness: 350, 
-              damping: 18,
-              delay: isNew ? 0 : i * 0.08,
+              stiffness: 300, 
+              damping: 20,
+              delay: isNew ? 0 : entranceDelay,
             }}
           >
             {/* Attention-grabbing floating animation wrapper */}

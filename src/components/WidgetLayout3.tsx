@@ -174,25 +174,13 @@ const WidgetLayout3 = ({
     triggerHaptic('medium');
     handleTap(`photo-${photo.id}`);
     setTimeout(() => {
-      // Use onEditPhoto if provided, otherwise navigate
-      if (onEditPhoto) {
-        onEditPhoto(photo);
-      } else {
-        navigate('/preview', {
-          state: {
-            imageUrl: photo.storageUrl,
-            originalUrl: photo.storageUrl,
-            isVideo: photo.isVideo,
-            activity: photo.activity,
-            frame: photo.frame,
-            duration: photo.duration,
-            pr: photo.pr,
-            isReview: true,
-            photoId: photo.id,
-            dayNumber: photo.dayNumber,
-          },
-        });
-      }
+      // Navigate to reel view with the photo's user to show the same image
+      navigate('/reel', {
+        state: {
+          activityId: photo.id,
+          dayNumber: photo.dayNumber,
+        },
+      });
     }, 200);
   };
 

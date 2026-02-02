@@ -129,14 +129,25 @@ const Reel = () => {
     }
     setLocalReactions(map);
     
-    // Check if we should start at a specific user (from navigation state)
-    if (location.state?.userId && groups.length > 0) {
+    // Check if we should start at a specific user or activity (from navigation state)
+    if (location.state?.activityId && groups.length > 0) {
+      // Navigate to specific activity by ID
+      for (let gIdx = 0; gIdx < groups.length; gIdx++) {
+        const group = groups[gIdx];
+        const aIdx = group.activities.findIndex(a => a.id === location.state.activityId);
+        if (aIdx >= 0) {
+          setCurrentUserIndex(gIdx);
+          setCurrentActivityIndex(aIdx);
+          break;
+        }
+      }
+    } else if (location.state?.userId && groups.length > 0) {
       const idx = groups.findIndex(g => g.userId === location.state.userId);
       if (idx >= 0) setCurrentUserIndex(idx);
     }
     
     setLoading(false);
-  }, [location.state?.userId]);
+  }, [location.state?.userId, location.state?.activityId]);
 
   useEffect(() => {
     loadActivities();
@@ -694,11 +705,11 @@ const Reel = () => {
           </motion.div>
         </div>
 
-        {/* FIXED BOTTOM ZONE - Reaction pill + View Progress - always visible */}
+        {/* FIXED BOTTOM ZONE - Reaction pill + View Progress - compact sticky */}
         <div 
-          className="shrink-0 z-40 flex flex-col items-center"
+          className="shrink-0 z-40 flex flex-col items-center gap-2"
           style={{
-            paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 12px)',
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
           }}
         >
           {(() => {
@@ -804,7 +815,7 @@ const Reel = () => {
             );
           })()}
 
-          {/* View Progress button - always visible sticky */}
+        {/* View Progress button - sticky to bottom with translucent blur */}
           <motion.div
             className="w-full"
             style={{ y: bottomSheetY }}
@@ -813,31 +824,20 @@ const Reel = () => {
             dragElastic={{ top: 0.3, bottom: 0 }}
             onDragEnd={handleBottomSheetDragEnd}
           >
-            <div
-              className="w-full flex flex-col items-center cursor-grab active:cursor-grabbing"
+            <button
+              onClick={handleNavigateToProgress}
+              className="w-full flex items-center justify-center gap-2 py-3 cursor-grab active:cursor-grabbing active:bg-white/5 transition-colors"
               style={{
-                background: 'rgba(255, 255, 255, 0.06)',
+                background: 'rgba(255, 255, 255, 0.04)',
                 backdropFilter: 'blur(40px) saturate(180%)',
                 WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
+                borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
               }}
             >
-              <div className="pt-2 pb-1 flex justify-center">
-                <div 
-                  className="w-9 h-1 rounded-full"
-                  style={{ background: 'rgba(255, 255, 255, 0.3)' }}
-                />
-              </div>
-              
-              <button
-                onClick={handleNavigateToProgress}
-                className="w-full flex items-center justify-center gap-2 py-2.5 active:bg-white/5 transition-colors"
-              >
-                <ChevronUp className="w-5 h-5 text-white/60" />
-                <span className="text-white/80 text-sm font-medium">View Progress</span>
-              </button>
-            </div>
+              <ChevronUp className="w-5 h-5 text-white/60" />
+              <span className="text-white/80 text-sm font-medium">View Progress</span>
+            </button>
           </motion.div>
         </div>
       </div>

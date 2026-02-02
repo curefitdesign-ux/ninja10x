@@ -569,9 +569,9 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
       }
     }
     
-    // Sort by day_number ascending for proper story progression
+    // Sort by day_number descending for latest-first story progression
     const dedupedActivities = Array.from(byDayNumber.values())
-      .sort((a, b) => a.day_number - b.day_number);
+      .sort((a, b) => b.day_number - a.day_number);
     
     return {
       userId,
