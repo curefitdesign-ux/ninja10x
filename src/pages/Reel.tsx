@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
 import { fetchAllActivitiesGroupedByUser, fetchPublicFeed, UserStoryGroup, LocalActivity } from '@/hooks/use-journey-activities';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
-import DynamicBlurBackground from '@/components/DynamicBlurBackground';
+
 import Floating3DEmojis from '@/components/Floating3DEmojis';
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
 import SendReactionSheet from '@/components/SendReactionSheet';
@@ -111,6 +111,7 @@ const Reel = () => {
   
   // Track transition type for different animations
   const [transitionType, setTransitionType] = useState<'story' | 'user'>('story');
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right'>('left');
   const prevUserIndexRef = useRef(currentUserIndex);
 
   // Load public feed for progress overlay
@@ -218,6 +219,7 @@ const Reel = () => {
   const goNextUser = useCallback(() => {
     if (userGroups.length === 0) return;
     setTransitionType('user');
+    setSwipeDirection('left');
     setCurrentActivityIndex(0);
     setCurrentUserIndex(prev => (prev + 1) % userGroups.length);
   }, [userGroups.length]);
@@ -225,6 +227,7 @@ const Reel = () => {
   const goPrevUser = useCallback(() => {
     if (userGroups.length === 0) return;
     setTransitionType('user');
+    setSwipeDirection('right');
     setCurrentActivityIndex(0);
     setCurrentUserIndex(prev => (prev - 1 + userGroups.length) % userGroups.length);
   }, [userGroups.length]);
@@ -463,8 +466,11 @@ const Reel = () => {
   const HEADER_HEIGHT = 100; // Row: delete + avatars + close + user name
   const BOTTOM_HEIGHT = 100; // Reaction pill + view progress
 
+  // Unique key for AnimatePresence based on user change
+  const userTransitionKey = `${currentGroup.userId}-${currentUserIndex}`;
+
   return (
-    <DynamicBlurBackground imageUrl={mediaUrl}>
+    <div className="fixed inset-0 bg-black">
       {/* Fixed height container - no vertical scroll */}
       <div 
         className="fixed inset-0 flex flex-col"
@@ -672,23 +678,45 @@ const Reel = () => {
 
         {/* MAIN CONTENT ZONE - flexible middle section */}
         <div className="flex-1 flex items-center justify-center z-30 overflow-hidden px-4">
-          {/* Card container with horizontal swipe + shake animation */}
-          <motion.div 
-            className="relative w-full max-w-[340px] cursor-grab active:cursor-grabbing"
-            style={{ 
-              x: dragX,
-              opacity: cardOpacity,
-              rotate: cardRotate,
-              scale: cardScale,
-            }}
-            animate={shakeAnimation}
-            transition={shakeTransition}
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.2}
-            onDragEnd={handleHorizontalDragEnd}
-            onClick={handleTap}
-          >
+          <AnimatePresence mode="popLayout" initial={false}>
+            {/* Card container with horizontal swipe + shake animation */}
+            <motion.div 
+              key={userTransitionKey}
+              className="relative w-full max-w-[340px] cursor-grab active:cursor-grabbing"
+              style={{ 
+                x: dragX,
+                opacity: cardOpacity,
+                rotate: cardRotate,
+                scale: cardScale,
+              }}
+              initial={transitionType === 'user' ? { 
+                x: swipeDirection === 'left' ? 300 : -300, 
+                opacity: 0,
+                scale: 0.9,
+              } : false}
+              animate={{ 
+                x: 0, 
+                opacity: 1,
+                scale: 1,
+                ...shakeAnimation,
+              }}
+              exit={transitionType === 'user' ? { 
+                x: swipeDirection === 'left' ? -300 : 300, 
+                opacity: 0,
+                scale: 0.9,
+              } : { opacity: 0 }}
+              transition={{ 
+                type: 'spring', 
+                stiffness: 350, 
+                damping: 30,
+                ...shakeTransition,
+              }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.2}
+              onDragEnd={handleHorizontalDragEnd}
+              onClick={handleTap}
+            >
             {/* Full templated image/video - with lock overlay for non-public users */}
             {(() => {
               const shouldShowLocked = !isOwnStory && !hasPublicActivity;
@@ -791,6 +819,7 @@ const Reel = () => {
               );
             })()}
           </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* FIXED BOTTOM ZONE - Reaction pill + View Progress - compact sticky */}
@@ -1058,7 +1087,7 @@ const Reel = () => {
         }}
         onKeepPrivate={() => setShowMakePublicSheet(false)}
       />
-    </DynamicBlurBackground>
+    </div>
   );
 };
 
