@@ -533,7 +533,7 @@ const Reel = () => {
                       animate={{ scale: isActive ? 1 : 0.9 }}
                       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                     >
-                      {/* Instagram-style story ring - dim if story is locked */}
+                      {/* Instagram-style story ring with progress indicator */}
                       <svg
                         className="absolute inset-0"
                         style={{
@@ -543,12 +543,12 @@ const Reel = () => {
                         }}
                         viewBox="0 0 100 100"
                       >
+                        {/* Background segments (gray) */}
                         {Array.from({ length: activityCount }).map((_, segIdx) => {
                           const gapAngle = activityCount > 1 ? 10 : 0;
                           const totalGap = gapAngle * activityCount;
                           const segmentAngle = (360 - totalGap) / activityCount;
                           const startAngle = segIdx * (segmentAngle + gapAngle);
-                          const isSegmentViewed = segIdx <= currentIdx;
                           
                           const radius = 44;
                           const circumference = 2 * Math.PI * radius;
@@ -557,22 +557,61 @@ const Reel = () => {
                           
                           return (
                             <circle
-                              key={segIdx}
+                              key={`bg-${segIdx}`}
                               cx="50"
                               cy="50"
                               r={radius}
                               fill="none"
-                              strokeWidth="6"
-                              stroke={isStoryLocked ? 'rgba(255,255,255,0.15)' : (isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.25)')}
+                              strokeWidth="5"
+                              stroke={isStoryLocked ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.25)'}
                               strokeDasharray={`${segmentLength} ${circumference}`}
                               strokeDashoffset={-offset}
                               strokeLinecap="round"
+                            />
+                          );
+                        })}
+                        
+                        {/* Viewed/progress segments (gradient) */}
+                        {Array.from({ length: activityCount }).map((_, segIdx) => {
+                          const gapAngle = activityCount > 1 ? 10 : 0;
+                          const totalGap = gapAngle * activityCount;
+                          const segmentAngle = (360 - totalGap) / activityCount;
+                          const startAngle = segIdx * (segmentAngle + gapAngle);
+                          const isViewed = segIdx < currentIdx;
+                          const isCurrent = segIdx === currentIdx && isActive;
+                          
+                          const radius = 44;
+                          const circumference = 2 * Math.PI * radius;
+                          const fullSegmentLength = (segmentAngle / 360) * circumference;
+                          const offset = (startAngle / 360) * circumference;
+                          
+                          // For current segment, show progress
+                          const progressLength = isCurrent 
+                            ? (storyProgress / 100) * fullSegmentLength 
+                            : isViewed ? fullSegmentLength : 0;
+                          
+                          if (progressLength <= 0 || isStoryLocked) return null;
+                          
+                          return (
+                            <circle
+                              key={`progress-${segIdx}`}
+                              cx="50"
+                              cy="50"
+                              r={radius}
+                              fill="none"
+                              strokeWidth="5"
+                              stroke="url(#storyGradient)"
+                              strokeDasharray={`${progressLength} ${circumference}`}
+                              strokeDashoffset={-offset}
+                              strokeLinecap="round"
                               style={{
-                                filter: !isStoryLocked && isActive && isSegmentViewed ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
+                                filter: 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.6))',
+                                transition: isCurrent ? 'none' : 'stroke-dasharray 0.2s ease',
                               }}
                             />
                           );
                         })}
+                        
                         <defs>
                           <linearGradient id="storyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" stopColor="#FEDA75" />
@@ -667,51 +706,11 @@ const Reel = () => {
                 
                 return (
                   <div className="relative w-full flex flex-col items-center justify-center">
-                    {/* Progress bars inside card - at top */}
-                    <div 
-                      className="absolute top-3 left-3 right-3 z-20 flex items-center gap-1"
-                      style={{ height: 4 }}
-                    >
-                      {currentGroup.activities.map((_, idx) => {
-                        const isCompleted = idx < currentActivityIndex;
-                        const isCurrent = idx === currentActivityIndex;
-                        
-                        return (
-                          <div
-                            key={idx}
-                            className="flex-1 h-1 rounded-full overflow-hidden"
-                            style={{ 
-                              background: 'rgba(255,255,255,0.3)',
-                              backdropFilter: 'blur(4px)',
-                            }}
-                          >
-                            <motion.div
-                              className="h-full rounded-full"
-                              style={{
-                                background: 'rgba(255,255,255,0.95)',
-                                boxShadow: '0 0 8px rgba(255,255,255,0.5)',
-                              }}
-                              initial={false}
-                              animate={{
-                                width: isCompleted ? '100%' : isCurrent ? `${storyProgress}%` : '0%',
-                              }}
-                              transition={{ duration: 0.05, ease: 'linear' }}
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                    
-                    {/* Media with crossfade - no AnimatePresence to avoid flicker */}
-                    <motion.div
-                      key={currentActivity.id}
-                      className="relative w-full"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.15 }}
-                    >
+                    {/* Media - stable rendering without AnimatePresence */}
+                    <div className="relative w-full">
                       {isVideo ? (
                         <video
+                          key={mediaUrl}
                           src={mediaUrl}
                           className="w-full h-auto rounded-2xl"
                           style={{ 
@@ -727,6 +726,7 @@ const Reel = () => {
                         />
                       ) : (
                         <img
+                          key={mediaUrl}
                           src={mediaUrl}
                           alt={`Day ${currentActivity.dayNumber}`}
                           className="w-full h-auto rounded-2xl"
@@ -736,11 +736,9 @@ const Reel = () => {
                             boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
                             filter: shouldShowLocked ? 'blur(20px)' : 'none',
                           }}
-                          loading="eager"
-                          decoding="async"
                         />
                       )}
-                    </motion.div>
+                    </div>
                       
                     {/* Lock overlay for locked content */}
                     {shouldShowLocked && (
