@@ -383,6 +383,10 @@ const Reel = () => {
   const week = Math.ceil(currentActivity.dayNumber / 3);
   const dayInWeek = ((currentActivity.dayNumber - 1) % 3) + 1;
 
+  // Calculate fixed header height for layout
+  const HEADER_HEIGHT = 120; // Fixed header zone (safe-area + avatars + name)
+  const BOTTOM_HEIGHT = 120; // Fixed bottom zone (reaction pill + view progress)
+
   return (
     <DynamicBlurBackground imageUrl={mediaUrl}>
       {/* Floating 3D emojis around edges */}
@@ -391,162 +395,166 @@ const Reel = () => {
         newReaction={floatingReaction}
       />
 
-      {/* Header with edit and close buttons */}
-      <motion.div
-        className="absolute top-0 left-0 right-0 z-40 flex items-center justify-between px-4"
-        style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)' }}
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
+      {/* FIXED HEADER ZONE - contains delete/close buttons, avatars strip, user info */}
+      <div 
+        className="absolute top-0 left-0 right-0 z-40 flex flex-col"
+        style={{ 
+          paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
+          height: HEADER_HEIGHT,
+        }}
       >
-        {/* Left side - Delete button for owner (only within 24 hours) */}
-        <div className="w-11">
-          {canEdit && (
-            <motion.button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="p-3 -m-1 transition-colors rounded-full text-white/80 hover:text-red-400 min-w-[44px] min-h-[44px] flex items-center justify-center"
-              whileTap={{ scale: 0.9 }}
-            >
-              <Trash2 className="w-5 h-5" strokeWidth={1.5} />
-            </motion.button>
-          )}
-        </div>
-        
-        {/* Right side - Close button */}
-        <button
-          onClick={handleClose}
-          className="text-white/80 hover:text-white transition-colors p-3 -m-1 min-w-[44px] min-h-[44px] flex items-center justify-center"
+        {/* Row 1: Delete + Close buttons */}
+        <motion.div
+          className="flex items-center justify-between px-4 shrink-0"
+          style={{ height: 44 }}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
         >
-          <X className="w-6 h-6" strokeWidth={1.5} />
-        </button>
-      </motion.div>
-
-      {/* User avatars strip at top - Instagram/WhatsApp style with story rings */}
-      <motion.div
-        className="absolute z-40 left-0 right-0 flex justify-center"
-        style={{ top: 'calc(max(env(safe-area-inset-top, 12px), 12px) + 8px)' }}
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
-      >
-        <div className="flex items-center gap-3 px-4">
-          {userGroups.slice(0, 7).map((group, idx) => {
-            const isActive = idx === currentUserIndex;
-            const activityCount = group.activities.length;
-            const currentIdx = idx === currentUserIndex ? currentActivityIndex : 0;
-            const isOwnProfile = user && group.userId === user.id;
-            // Lock other users' avatars when current user hasn't shared publicly
-            const isProfileLocked = !isOwnProfile && !hasPublicActivity;
-            
-            return (
+          {/* Left side - Delete button for owner (only within 24 hours) */}
+          <div className="w-11">
+            {canEdit && (
               <motion.button
-                key={group.userId}
-                onClick={() => {
-                  setCurrentUserIndex(idx);
-                  setCurrentActivityIndex(0);
-                }}
-                className="relative"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="p-3 -m-1 transition-colors rounded-full text-white/80 hover:text-red-400 min-w-[44px] min-h-[44px] flex items-center justify-center"
                 whileTap={{ scale: 0.9 }}
-                animate={{ scale: isActive ? 1 : 0.85 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
-                {/* Instagram-style story ring - thicker and more visible */}
-                <svg
-                  className="absolute inset-0"
-                  style={{
-                    width: isActive ? 64 : 52,
-                    height: isActive ? 64 : 52,
-                    transform: 'rotate(-90deg)',
+                <Trash2 className="w-5 h-5" strokeWidth={1.5} />
+              </motion.button>
+            )}
+          </div>
+          
+          {/* Right side - Close button */}
+          <button
+            onClick={handleClose}
+            className="text-white/80 hover:text-white transition-colors p-3 -m-1 min-w-[44px] min-h-[44px] flex items-center justify-center"
+          >
+            <X className="w-6 h-6" strokeWidth={1.5} />
+          </button>
+        </motion.div>
+
+        {/* Row 2: User avatars strip - centered within header, NOT absolute */}
+        <motion.div
+          className="flex justify-center shrink-0"
+          style={{ height: 64 }}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <div className="flex items-center gap-3 px-4">
+            {userGroups.slice(0, 7).map((group, idx) => {
+              const isActive = idx === currentUserIndex;
+              const activityCount = group.activities.length;
+              const currentIdx = idx === currentUserIndex ? currentActivityIndex : 0;
+              const isOwnProfile = user && group.userId === user.id;
+              // Lock other users' avatars when current user hasn't shared publicly
+              const isProfileLocked = !isOwnProfile && !hasPublicActivity;
+              
+              return (
+                <motion.button
+                  key={group.userId}
+                  onClick={() => {
+                    setCurrentUserIndex(idx);
+                    setCurrentActivityIndex(0);
                   }}
-                  viewBox="0 0 100 100"
+                  className="relative"
+                  whileTap={{ scale: 0.9 }}
+                  animate={{ scale: isActive ? 1 : 0.85 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                 >
-                  {Array.from({ length: activityCount }).map((_, segIdx) => {
-                    const gapAngle = activityCount > 1 ? 10 : 0;
-                    const totalGap = gapAngle * activityCount;
-                    const segmentAngle = (360 - totalGap) / activityCount;
-                    const startAngle = segIdx * (segmentAngle + gapAngle);
-                    const isSegmentViewed = segIdx <= currentIdx;
-                    
-                    const radius = 44;
-                    const circumference = 2 * Math.PI * radius;
-                    const segmentLength = (segmentAngle / 360) * circumference;
-                    const offset = (startAngle / 360) * circumference;
-                    
-                    return (
-                      <circle
-                        key={segIdx}
-                        cx="50"
-                        cy="50"
-                        r={radius}
-                        fill="none"
-                        strokeWidth="7"
-                        stroke={isProfileLocked ? 'rgba(255,255,255,0.15)' : (isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.25)')}
-                        strokeDasharray={`${segmentLength} ${circumference}`}
-                        strokeDashoffset={-offset}
-                        strokeLinecap="round"
+                  {/* Instagram-style story ring - thicker and more visible */}
+                  <svg
+                    className="absolute inset-0"
+                    style={{
+                      width: isActive ? 64 : 52,
+                      height: isActive ? 64 : 52,
+                      transform: 'rotate(-90deg)',
+                    }}
+                    viewBox="0 0 100 100"
+                  >
+                    {Array.from({ length: activityCount }).map((_, segIdx) => {
+                      const gapAngle = activityCount > 1 ? 10 : 0;
+                      const totalGap = gapAngle * activityCount;
+                      const segmentAngle = (360 - totalGap) / activityCount;
+                      const startAngle = segIdx * (segmentAngle + gapAngle);
+                      const isSegmentViewed = segIdx <= currentIdx;
+                      
+                      const radius = 44;
+                      const circumference = 2 * Math.PI * radius;
+                      const segmentLength = (segmentAngle / 360) * circumference;
+                      const offset = (startAngle / 360) * circumference;
+                      
+                      return (
+                        <circle
+                          key={segIdx}
+                          cx="50"
+                          cy="50"
+                          r={radius}
+                          fill="none"
+                          strokeWidth="7"
+                          stroke={isProfileLocked ? 'rgba(255,255,255,0.15)' : (isActive && isSegmentViewed ? 'url(#storyGradient)' : 'rgba(255,255,255,0.25)')}
+                          strokeDasharray={`${segmentLength} ${circumference}`}
+                          strokeDashoffset={-offset}
+                          strokeLinecap="round"
+                          style={{
+                            filter: !isProfileLocked && isActive && isSegmentViewed ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
+                          }}
+                        />
+                      );
+                    })}
+                    <defs>
+                      <linearGradient id="storyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#FEDA75" />
+                        <stop offset="25%" stopColor="#FA7E1E" />
+                        <stop offset="50%" stopColor="#D62976" />
+                        <stop offset="75%" stopColor="#962FBF" />
+                        <stop offset="100%" stopColor="#4F5BD5" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  
+                  {/* Avatar - show clear profile photos, content stays locked */}
+                  <div
+                    className="relative"
+                    style={{
+                      width: isActive ? 64 : 52,
+                      height: isActive ? 64 : 52,
+                      padding: isActive ? 5 : 4,
+                    }}
+                  >
+                    <div className="w-full h-full rounded-full overflow-hidden">
+                      <ProfileAvatar
+                        src={group.avatarUrl}
+                        name={group.displayName}
+                        size={isActive ? 54 : 44}
                         style={{
-                          filter: !isProfileLocked && isActive && isSegmentViewed ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
+                          opacity: isActive ? 1 : 0.7,
+                          transition: 'all 0.2s ease',
                         }}
                       />
-                    );
-                  })}
-                  <defs>
-                    <linearGradient id="storyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#FEDA75" />
-                      <stop offset="25%" stopColor="#FA7E1E" />
-                      <stop offset="50%" stopColor="#D62976" />
-                      <stop offset="75%" stopColor="#962FBF" />
-                      <stop offset="100%" stopColor="#4F5BD5" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                
-                {/* Avatar - show clear profile photos, content stays locked */}
-                <div
-                  className="relative"
-                  style={{
-                    width: isActive ? 64 : 52,
-                    height: isActive ? 64 : 52,
-                    padding: isActive ? 5 : 4,
-                  }}
-                >
-                  <div className="w-full h-full rounded-full overflow-hidden">
-                    <ProfileAvatar
-                      src={group.avatarUrl}
-                      name={group.displayName}
-                      size={isActive ? 54 : 44}
-                      style={{
-                        opacity: isActive ? 1 : 0.7,
-                        transition: 'all 0.2s ease',
-                      }}
-                    />
+                    </div>
                   </div>
-                </div>
-              </motion.button>
-            );
-          })}
-        </div>
-      </motion.div>
+                </motion.button>
+              );
+            })}
+          </div>
+        </motion.div>
 
-      {/* Current user info - minimal */}
-      <div 
-        className="absolute z-40 left-0 right-0 px-4"
-        style={{ top: 'calc(max(env(safe-area-inset-top, 12px), 12px) + 72px)' }}
-      >
-        <div className="flex items-center justify-center gap-2">
+        {/* Row 3: Current user name/info */}
+        <div className="flex items-center justify-center gap-2 shrink-0 px-4" style={{ height: 24 }}>
           <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
           <span className="text-white/40">•</span>
           <span className="text-white/60 text-xs">Week {week} • Day {dayInWeek}</span>
         </div>
       </div>
 
-      {/* Main content area */}
+      {/* MAIN CONTENT ZONE - fills space between header and bottom */}
       <motion.div
-        className="absolute inset-0 flex flex-col items-center justify-center"
+        className="absolute left-0 right-0 z-30 flex items-center justify-center overflow-hidden"
         style={{ 
-          paddingTop: 'calc(max(env(safe-area-inset-top, 16px), 16px) + 100px)',
-          paddingBottom: '160px',
-          paddingInline: '20px',
+          top: `calc(max(env(safe-area-inset-top, 12px), 12px) + ${HEADER_HEIGHT}px)`,
+          bottom: `calc(env(safe-area-inset-bottom, 0px) + ${BOTTOM_HEIGHT}px)`,
+          paddingInline: 20,
           scale: contentScale,
           opacity: contentOpacity,
           y: contentY,
@@ -554,18 +562,19 @@ const Reel = () => {
       >
         {/* Card container with horizontal swipe - full templated image, no container */}
         <motion.div 
-          className="relative w-full max-w-[400px] cursor-grab active:cursor-grabbing"
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.2}
-          onDragEnd={handleHorizontalDragEnd}
-          onClick={handleTap}
+          className="relative w-full max-w-[400px] cursor-grab active:cursor-grabbing flex items-center justify-center"
           style={{ 
+            maxHeight: '100%',
             x: dragX,
             opacity: cardOpacity,
             rotate: cardRotate,
             scale: cardScale,
           }}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.2}
+          onDragEnd={handleHorizontalDragEnd}
+          onClick={handleTap}
         >
           {/* Full templated image/video - with lock overlay for non-public users */}
           {(() => {
@@ -576,7 +585,8 @@ const Reel = () => {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentActivity.id}
-                  className="relative w-full"
+                  className="relative w-full flex items-center justify-center"
+                  style={{ maxHeight: '100%' }}
                   initial={{ opacity: 0, scale: 0.92, y: 30 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
@@ -587,6 +597,8 @@ const Reel = () => {
                       src={mediaUrl}
                       className="w-full h-auto rounded-2xl"
                       style={{ 
+                        maxHeight: '100%',
+                        objectFit: 'contain',
                         boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
                         filter: shouldShowLocked ? 'blur(20px)' : 'none',
                       }}
@@ -601,6 +613,8 @@ const Reel = () => {
                       alt={`Day ${currentActivity.dayNumber}`}
                       className="w-full h-auto rounded-2xl"
                       style={{ 
+                        maxHeight: '100%',
+                        objectFit: 'contain',
                         boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
                         filter: shouldShowLocked ? 'blur(20px)' : 'none',
                       }}
@@ -676,18 +690,22 @@ const Reel = () => {
         </motion.div>
       </motion.div>
 
-      {/* Bottom area: Reaction pill + View Progress bottom sheet */}
+      {/* FIXED BOTTOM ZONE - Reaction pill + View Progress */}
       {/* Hide reaction pill when content is locked (non-owner, user hasn't made public) */}
       {(() => {
         const isContentLocked = !isOwnStory && !hasPublicActivity;
         
         return (
           <motion.div 
-            className="absolute bottom-0 left-0 right-0 z-40 flex flex-col items-center"
+            className="absolute left-0 right-0 z-40 flex flex-col items-center justify-end"
+            style={{
+              bottom: 0,
+              paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+              pointerEvents: isContentLocked ? 'none' : 'auto',
+            }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: (isTransitioning || isContentLocked) ? 0 : 1, y: isTransitioning ? -100 : 0 }}
             transition={{ delay: 0.4 }}
-            style={{ pointerEvents: isContentLocked ? 'none' : 'auto' }}
           >
         {/* Liquid glass reaction pill */}
         <motion.button
@@ -788,11 +806,8 @@ const Reel = () => {
 
         {/* Bottom sheet with grab bar - edge to edge */}
         <motion.div
-          className="w-full"
-          style={{ 
-            y: bottomSheetY,
-            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-          }}
+          className="w-full mt-auto"
+          style={{ y: bottomSheetY }}
           drag="y"
           dragConstraints={{ top: -200, bottom: 0 }}
           dragElastic={{ top: 0.3, bottom: 0 }}
