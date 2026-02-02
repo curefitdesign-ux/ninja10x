@@ -21,8 +21,8 @@ const BottomNavBar = ({ hidden = false }: BottomNavBarProps) => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("activity");
 
-  // Hide on auth and profile setup pages
-  const hiddenPaths = ["/auth", "/profile-setup", "/avatar-crop", "/camera", "/preview"];
+  // Hide on auth, profile setup, and fullscreen experience pages
+  const hiddenPaths = ["/auth", "/profile-setup", "/avatar-crop", "/camera", "/preview", "/gallery", "/reel", "/progress"];
   const shouldHide = hidden || hiddenPaths.some(path => location.pathname.startsWith(path));
 
   if (shouldHide) return null;

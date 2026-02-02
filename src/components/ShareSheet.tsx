@@ -1,8 +1,9 @@
-import { X, Download, Copy, Check, Pencil } from 'lucide-react';
+import { X, Download, Copy, Check, Pencil, Loader2 } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import ShakyFrame from '@/components/frames/ShakyFrame';
 import JournalFrame from '@/components/frames/JournalFrame';
 import VogueFrame from '@/components/frames/VogueFrame';
@@ -348,32 +349,58 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
     }
   };
 
+  const [downloadState, setDownloadState] = useState<'idle' | 'downloading' | 'success'>('idle');
+  
   const handleDownload = async () => {
-    triggerHaptic('success');
+    if (downloadState === 'downloading') return;
+    
+    triggerHaptic('medium');
+    setDownloadState('downloading');
     
     try {
+      let blob: Blob;
+      
       // For base64 or blob URLs, we need to properly handle download
       if (imageUrl.startsWith('data:') || imageUrl.startsWith('blob:')) {
         const response = await fetch(imageUrl);
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `activity-${Date.now()}.${isVideo ? 'mp4' : 'png'}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        blob = await response.blob();
       } else {
-        const link = document.createElement('a');
-        link.href = imageUrl;
-        link.download = `activity-${Date.now()}.${isVideo ? 'mp4' : 'png'}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // For remote URLs, fetch with CORS
+        const response = await fetch(imageUrl, { mode: 'cors' });
+        blob = await response.blob();
       }
+      
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `activity-${Date.now()}.${isVideo ? 'mp4' : 'png'}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Cleanup after a short delay to ensure download starts
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      
+      // Success state with haptic
+      triggerHaptic('success');
+      setDownloadState('success');
+      
+      // Show toast with back action
+      toast.success('Saved to gallery!', {
+        action: {
+          label: 'GO BACK',
+          onClick: handleCloseToHome,
+        },
+        duration: 4000,
+      });
+      
+      // Reset state after delay
+      setTimeout(() => setDownloadState('idle'), 2000);
     } catch (err) {
       console.error('Download failed:', err);
+      setDownloadState('idle');
+      triggerHaptic('error');
+      toast.error('Download failed. Try again.');
     }
   };
 
@@ -557,10 +584,27 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
                   </button>
                   <button
                     onClick={handleDownload}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                    disabled={downloadState === 'downloading'}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full backdrop-blur-sm tap-bounce transition-all active:scale-95 ${
+                      downloadState === 'success' 
+                        ? 'bg-emerald-500/20' 
+                        : downloadState === 'downloading'
+                          ? 'bg-white/5 opacity-70'
+                          : 'bg-white/10'
+                    }`}
                   >
-                    <Download className="w-4 h-4 text-white/70" />
-                    <span className="text-white/70 font-medium text-sm">Download</span>
+                    {downloadState === 'downloading' ? (
+                      <Loader2 className="w-4 h-4 text-white/70 animate-spin" />
+                    ) : downloadState === 'success' ? (
+                      <Check className="w-4 h-4 text-emerald-400" />
+                    ) : (
+                      <Download className="w-4 h-4 text-white/70" />
+                    )}
+                    <span className={`font-medium text-sm ${
+                      downloadState === 'success' ? 'text-emerald-400' : 'text-white/70'
+                    }`}>
+                      {downloadState === 'downloading' ? 'Saving...' : downloadState === 'success' ? 'Saved!' : 'Download'}
+                    </span>
                   </button>
                   <button
                     onClick={handleCopyLink}
