@@ -25,6 +25,7 @@ export default function FullScreenReel({
   const [showHeart, setShowHeart] = useState(false);
   const [localReactions, setLocalReactions] = useState<Record<string, { count: number; userReacted: boolean }>>({});
   const [dragDirection, setDragDirection] = useState<'left' | 'right' | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const isDragging = useRef(false);
   const current = activities[currentIndex];
   
@@ -46,10 +47,12 @@ export default function FullScreenReel({
   }, [activities]);
 
   const goNext = useCallback(() => {
+    setImageLoaded(false);
     setCurrentIndex(prev => (prev + 1) % activities.length);
   }, [activities.length]);
 
   const goPrev = useCallback(() => {
+    setImageLoaded(false);
     setCurrentIndex(prev => (prev - 1 + activities.length) % activities.length);
   }, [activities.length]);
 
@@ -197,18 +200,29 @@ export default function FullScreenReel({
               <video
                 src={current.storage_url}
                 className="w-full h-full object-contain"
-                style={{ filter: shouldShowLocked ? 'blur(20px)' : 'none' }}
+                style={{ 
+                  filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                  opacity: imageLoaded ? 1 : 0,
+                  transition: 'opacity 0.2s ease-in-out'
+                }}
                 autoPlay
                 loop
                 muted
                 playsInline
+                onLoadedData={() => setImageLoaded(true)}
               />
             ) : (
               <img
                 src={current.storage_url}
                 alt={`Day ${current.day_number}`}
                 className="w-full h-full object-contain"
-                style={{ filter: shouldShowLocked ? 'blur(20px)' : 'none' }}
+                style={{ 
+                  filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                  opacity: imageLoaded ? 1 : 0,
+                  transition: 'opacity 0.2s ease-in-out'
+                }}
+                onLoad={() => setImageLoaded(true)}
+                onError={() => setImageLoaded(true)}
               />
             )}
           </motion.div>
