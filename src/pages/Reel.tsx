@@ -661,7 +661,7 @@ const Reel = () => {
                 
                 return (
                   <div
-                    className="relative w-full flex items-center justify-center"
+                    className="relative w-full max-w-[340px] flex items-center justify-center"
                   >
                     {isVideo ? (
                       <video
