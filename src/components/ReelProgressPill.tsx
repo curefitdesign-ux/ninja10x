@@ -20,7 +20,6 @@ interface ReelProgressPillProps {
   progress?: number; // 0-100
   reactions?: Reaction[];
   totalReactions?: number;
-  thumbnailUrl?: string; // User's activity thumbnail for complete state
   onPlay?: () => void;
   className?: string;
   isAnimating?: boolean;
@@ -141,53 +140,40 @@ const AbstractPattern = () => (
   </div>
 );
 
-// Thumbnail with reaction badge for "complete" state
-const ThumbnailWithBadge = ({ 
-  thumbnailUrl, 
+// Reaction badge icon for "complete" state (no thumbnail - just reactions)
+const ReactionBadge = ({ 
   totalReactions 
 }: { 
-  thumbnailUrl?: string; 
   totalReactions: number;
 }) => (
-  <div className="relative w-10 h-10 flex-shrink-0">
-    {/* Thumbnail */}
+  <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
+    {/* Glassmorphic container */}
     <div 
-      className="w-10 h-10 rounded-xl overflow-hidden"
+      className="w-10 h-10 rounded-xl flex items-center justify-center"
       style={{
-        border: '2px solid rgba(255,255,255,0.25)',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+        background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        border: '1.5px solid rgba(52, 211, 153, 0.4)',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1)',
       }}
     >
-      {thumbnailUrl ? (
-        <img 
-          src={thumbnailUrl} 
-          alt="Activity" 
-          className="w-full h-full object-cover"
-        />
-      ) : (
-        <div 
-          className="w-full h-full"
-          style={{
-            background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.3) 0%, rgba(16, 185, 129, 0.2) 100%)',
-          }}
-        />
-      )}
+      <img src={fireReaction} alt="" className="w-5 h-5" />
     </div>
     
-    {/* Reaction badge - only show if there are reactions */}
+    {/* Reaction count badge - only show if there are reactions */}
     {totalReactions > 0 && (
       <motion.div
-        className="absolute -top-1.5 -right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
+        className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full"
         style={{
-          background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.9) 0%, rgba(236, 72, 153, 0.85) 100%)',
-          border: '1.5px solid rgba(255,255,255,0.4)',
-          boxShadow: '0 2px 8px rgba(239, 68, 68, 0.4)',
+          background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.95) 0%, rgba(16, 185, 129, 0.9) 100%)',
+          border: '1.5px solid rgba(255,255,255,0.5)',
+          boxShadow: '0 2px 8px rgba(52, 211, 153, 0.4)',
         }}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 400, damping: 15 }}
       >
-        <img src={fireReaction} alt="" className="w-3 h-3" />
         <span className="text-white text-[10px] font-bold">{totalReactions}</span>
       </motion.div>
     )}
@@ -316,7 +302,6 @@ const ReelProgressPill = ({
   progress = 0,
   reactions = [],
   totalReactions = 0,
-  thumbnailUrl,
   onPlay,
   className = '',
   isAnimating = false,
@@ -512,16 +497,13 @@ const ReelProgressPill = ({
             </motion.div>
           ) : (
             <motion.div
-              key="thumbnail"
+              key="reaction-badge"
               initial={{ scale: 0.8, opacity: 0, rotate: -5 }}
               animate={{ scale: 1, opacity: 1, rotate: 0 }}
               exit={{ scale: 0.8, opacity: 0, rotate: 5 }}
               transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             >
-              <ThumbnailWithBadge 
-                thumbnailUrl={thumbnailUrl} 
-                totalReactions={displayReactionCount}
-              />
+              <ReactionBadge totalReactions={displayReactionCount} />
             </motion.div>
           )}
         </AnimatePresence>

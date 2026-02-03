@@ -105,7 +105,6 @@ interface WidgetLayout3Props {
     weekNumber: number;
     state: PillState;
     progress: number;
-    thumbnailUrl?: string;
     totalReactions?: number;
     onPlay?: () => void;
   } | null;
@@ -481,7 +480,6 @@ const WidgetLayout3 = ({
               weekNumber={reelPill.weekNumber}
               state={reelPill.state}
               progress={reelPill.progress}
-              thumbnailUrl={reelPill.thumbnailUrl}
               totalReactions={reelPill.totalReactions}
               onPlay={reelPill.onPlay}
             />
