@@ -606,9 +606,9 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
                  </div>
                 </motion.div>
                 
-                {/* Single Edit button - returns to template selection */}
+                {/* Edit, Download, Copy buttons - all in one row */}
                 <motion.div 
-                  className="flex justify-center mt-3 mb-4"
+                  className="flex justify-center gap-3 mt-3 mb-4"
                   animate={isExiting ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
                 >
@@ -617,23 +617,16 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
                       triggerHaptic('light');
                       if (onEdit) onEdit();
                     }}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
                   >
                     <Pencil className="w-4 h-4 text-white/70" />
                     <span className="text-white/70 font-medium text-sm">Edit</span>
                   </button>
-                </motion.div>
-                
-                {/* Download/Copy buttons */}
-                <motion.div 
-                  className="flex gap-3 mb-4"
-                  animate={isExiting ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2, delay: 0.05 }}
-                >
+                  
                   <button
                     onClick={handleDownload}
                     disabled={downloadState === 'downloading'}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full backdrop-blur-sm tap-bounce transition-all active:scale-95 ${
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-full backdrop-blur-sm tap-bounce transition-all active:scale-95 ${
                       downloadState === 'success' 
                         ? 'bg-emerald-500/20' 
                         : downloadState === 'downloading'
@@ -654,9 +647,10 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
                       {downloadState === 'downloading' ? 'Saving...' : downloadState === 'success' ? 'Saved!' : 'Download'}
                     </span>
                   </button>
+                  
                   <button
                     onClick={handleCopyLink}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
                   >
                     {copied ? (
                       <Check className="w-4 h-4 text-emerald-400" />
