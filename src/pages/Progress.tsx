@@ -318,8 +318,8 @@ const Progress = () => {
                 // Show all users' stories - blur others if current user hasn't made anything public
                 publicFeed.map((photo, index) => {
                   const isOwnStory = user && photo.userId === user.id;
-                  // Blur OTHER users' content if current user hasn't shared publicly yet
-                  const shouldBlur = !isOwnStory && !hasPublicActivity;
+                  // Lock content if user's profile is private OR they haven't shared any public activity
+                  const shouldBlur = !isOwnStory && (!profile?.stories_public || !hasPublicActivity);
                   
                   return (
                     <motion.button

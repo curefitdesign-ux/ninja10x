@@ -654,7 +654,8 @@ const Reel = () => {
           >
               {/* Full templated image/video - with lock overlay for non-public users */}
               {(() => {
-                const shouldShowLocked = !isOwnStory && !hasPublicActivity;
+                // Lock content if user's profile is private OR they haven't shared any public activity
+                const shouldShowLocked = !isOwnStory && (!profile?.stories_public || !hasPublicActivity);
                 
                 return (
                   <div
