@@ -90,8 +90,9 @@ const fastSpring = {
 const smoothEase = [0.32, 0.72, 0, 1] as const;
 
 const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWithPhotos, onTap, onCardTap, onPlayReel }: CardClusterProps) => {
-  const baseCardWidth = 58;
-  const baseCardHeight = 78;
+  // Use 9:16 aspect ratio to match reel viewer
+  const baseCardWidth = 54;
+  const baseCardHeight = 96; // 54 * (16/9) = 96 for 9:16 aspect ratio
   const borderRadius = 14;
   
   // Check if week is complete (all 3 photos logged)
