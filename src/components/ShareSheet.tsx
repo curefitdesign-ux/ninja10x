@@ -12,6 +12,7 @@ import TicketFrame from '@/components/frames/TicketFrame';
 import ReelProgressPill from '@/components/ReelProgressPill';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 import { useFitnessReel } from '@/hooks/use-fitness-reel';
+import weekRecapVideo from '@/assets/demo-videos/week-recap.mp4';
 
 type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
 
@@ -679,11 +680,16 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
                            : 'creating'
                      }
                      progress={reelProgress}
-                     onPlay={() => {
-                       if (currentReel?.videoUrl) {
-                         window.open(currentReel.videoUrl, '_blank');
-                       }
-                     }}
+                      onPlay={() => {
+                        triggerHaptic('medium');
+                        // Navigate to reel page with the week recap video as first story
+                        navigate('/reel', {
+                          state: {
+                            weekRecapVideo: weekRecapVideo,
+                            weekNumber: currentWeekConfig?.week,
+                          },
+                        });
+                      }}
                    />
                  </motion.div>
                )}

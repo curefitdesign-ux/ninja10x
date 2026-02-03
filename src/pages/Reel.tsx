@@ -62,6 +62,11 @@ const Reel = () => {
   const { user } = useAuth();
   const { profile } = useProfile();
   
+  // Week recap video from navigation state (played as first "story")
+  const weekRecapVideo = location.state?.weekRecapVideo as string | undefined;
+  const weekRecapNumber = location.state?.weekNumber as number | undefined;
+  const [showingWeekRecap, setShowingWeekRecap] = useState(!!weekRecapVideo);
+  
   // State for user story groups
   const [userGroups, setUserGroups] = useState<UserStoryGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,6 +112,7 @@ const Reel = () => {
 
   // Story nudge animation for inactivity hint
   const { triggerShake, shakeAnimation, shakeTransition } = useStoryNudgeAnimation();
+
 
   // Load public feed for progress overlay
   useEffect(() => {
@@ -410,6 +416,95 @@ const Reel = () => {
 
   if (loading) {
     return <ReelViewerSkeleton />;
+  }
+
+  // Show Week Recap video when passed via navigation
+  if (showingWeekRecap && weekRecapVideo) {
+    return (
+      <DynamicBlurBackground imageUrl={weekRecapVideo}>
+        <div 
+          className="fixed inset-0 flex flex-col"
+          style={{ 
+            height: '100dvh',
+            minHeight: '-webkit-fill-available',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Header with close button */}
+          <div 
+            className="shrink-0 z-50 flex items-center justify-between px-4"
+            style={{ 
+              paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
+              height: 80,
+            }}
+          >
+            <div className="w-10" />
+            <div className="text-center">
+              <span className="text-white font-semibold text-base">Week {weekRecapNumber || 1} Recap</span>
+            </div>
+            <button
+              onClick={() => {
+                setShowingWeekRecap(false);
+                navigate('/', { replace: true });
+              }}
+              className="text-white/80 hover:text-white transition-colors p-2 min-w-[40px] min-h-[40px] flex items-center justify-center"
+            >
+              <X className="w-6 h-6" strokeWidth={1.5} />
+            </button>
+          </div>
+
+          {/* Video content in same reel format */}
+          <div className="flex-1 flex items-center justify-center px-4">
+            <div
+              className="relative w-full max-w-[307px] overflow-hidden rounded-2xl"
+              style={{ aspectRatio: '9/16' }}
+            >
+              <video
+                src={weekRecapVideo}
+                className="w-full h-full rounded-2xl"
+                style={{ objectFit: 'cover' }}
+                autoPlay
+                loop
+                playsInline
+                controls={false}
+              />
+              
+              {/* Glass border overlay */}
+              <div 
+                className="absolute inset-0 rounded-2xl pointer-events-none"
+                style={{
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1)',
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Bottom zone with close button */}
+          <div 
+            className="shrink-0 flex flex-col items-center pb-6 px-4 z-50"
+            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)' }}
+          >
+            <button
+              onClick={() => {
+                setShowingWeekRecap(false);
+                navigate('/', { replace: true });
+              }}
+              className="w-full max-w-[280px] py-3.5 rounded-full font-semibold text-base"
+              style={{
+                background: 'rgba(255,255,255,0.12)',
+                backdropFilter: 'blur(40px)',
+                WebkitBackdropFilter: 'blur(40px)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                color: 'white',
+              }}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </DynamicBlurBackground>
+    );
   }
 
   if (!userGroups.length || !currentGroup || !currentActivity) {
