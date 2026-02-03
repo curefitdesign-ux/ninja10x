@@ -1013,7 +1013,7 @@ const Preview = () => {
             const config = getActivityInputConfig(activity || '');
             return (
               <div 
-                className="rounded-2xl p-4 relative overflow-hidden"
+                className="rounded-2xl p-3 relative overflow-hidden"
                 style={{
                   background: 'rgba(255, 255, 255, 0.08)',
                   backdropFilter: 'blur(40px) saturate(180%)',
@@ -1024,7 +1024,7 @@ const Preview = () => {
                 {/* Primary: Duration (always shown) */}
                 <button 
                   onClick={() => { handleTap('duration'); openEditSheet('duration'); }}
-                  className={`w-full flex justify-between items-center py-3 ${config.secondaryInputType !== 'none' ? 'border-b border-white/10' : ''} tap-bounce min-h-[56px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
+                  className={`w-full flex justify-between items-center py-2 ${config.secondaryInputType !== 'none' ? 'border-b border-white/10' : ''} tap-bounce min-h-[44px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
                 >
                   <span className="text-white/70 text-base flex items-center gap-2">
                     {config.primaryMetric}
@@ -1039,7 +1039,7 @@ const Preview = () => {
                 {config.secondaryInputType !== 'none' && (
                   <button 
                     onClick={() => { handleTap('pr'); openEditSheet('pr'); }}
-                    className={`w-full flex justify-between items-center py-3 tap-bounce min-h-[56px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
+                    className={`w-full flex justify-between items-center py-2 tap-bounce min-h-[44px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
                   >
                     <span className="text-white/70 text-base flex items-center gap-2">
                       {config.secondaryMetric} <span className="text-white/40 text-xs">(Optional)</span>
