@@ -12,16 +12,24 @@ interface MediaSourceSheetProps {
   isOpen: boolean;
   onClose: () => void;
   dayNumber: number;
+  activity?: string;
+  preserveActivity?: boolean;
 }
 
-const MediaSourceSheet = ({ isOpen, onClose, dayNumber }: MediaSourceSheetProps) => {
+const MediaSourceSheet = ({ isOpen, onClose, dayNumber, activity, preserveActivity }: MediaSourceSheetProps) => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCameraSelect = () => {
     triggerHaptic('medium');
     onClose();
-    navigate('/camera', { state: { dayNumber } });
+    navigate('/camera', { 
+      state: { 
+        dayNumber,
+        activity: preserveActivity ? activity : undefined,
+        returnToPreview: preserveActivity,
+      } 
+    });
   };
 
   const handleGallerySelect = () => {
@@ -42,6 +50,7 @@ const MediaSourceSheet = ({ isOpen, onClose, dayNumber }: MediaSourceSheetProps)
           originalUrl: url,
           isVideo,
           dayNumber,
+          activity: preserveActivity ? activity : undefined,
           fromGallery: true,
           file,
         },
