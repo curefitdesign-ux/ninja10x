@@ -66,8 +66,8 @@ const Reel = () => {
   // Week recap video from navigation state (played as first "story")
   const weekRecapVideoFromNav = location.state?.weekRecapVideo as string | undefined;
   const weekRecapNumber = location.state?.weekNumber as number | undefined;
-  // hasWeekRecap is true when navigation state contains week recap video
-  const hasWeekRecap = weekRecapVideoFromNav !== undefined;
+  // hasWeekRecap is true when navigation state contains a non-empty week recap video URL
+  const hasWeekRecap = typeof weekRecapVideoFromNav === 'string' && weekRecapVideoFromNav.length > 0;
   
   // State for user story groups
   const [userGroups, setUserGroups] = useState<UserStoryGroup[]>([]);
@@ -95,6 +95,7 @@ const Reel = () => {
   const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoAdvanceStartRef = useRef<number>(0);
   const [isDeleting, setIsDeleting] = useState(false);
+  const didInitWeekRecapRef = useRef(false);
 
   // Bottom sheet states and transition animations
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -181,18 +182,32 @@ const Reel = () => {
     }
     
     setLoading(false);
-  }, [location.state?.userId, location.state?.activityId, hasWeekRecap]);
+  }, [location.state?.userId, location.state?.activityId, hasWeekRecap, user]);
 
   useEffect(() => {
     loadActivities();
   }, [loadActivities]);
 
+  // Ensure we jump to the injected week recap story once auth + groups are ready.
+  // (Auth can resolve after loadActivities runs, so we can't rely only on the initial branch.)
+  useEffect(() => {
+    if (!hasWeekRecap || didInitWeekRecapRef.current) return;
+    if (!user || userGroups.length === 0) return;
+
+    const idx = userGroups.findIndex(g => g.userId === user.id);
+    if (idx < 0) return;
+
+    setCurrentUserIndex(idx);
+    setCurrentActivityIndex(0);
+    didInitWeekRecapRef.current = true;
+  }, [hasWeekRecap, user, userGroups]);
+
   // Create the effective user groups with week recap injected as first story for current user
   const effectiveUserGroups = useMemo(() => {
     if (!hasWeekRecap || userGroups.length === 0 || !user) return userGroups;
     
-    // Use the imported week recap video asset directly
-    const weekRecapVideoUrl = weekRecapVideoAsset;
+    // Prefer nav-provided URL (if present), fallback to bundled asset
+    const weekRecapVideoUrl = weekRecapVideoFromNav ?? weekRecapVideoAsset;
     
     // Find current user's group and inject week recap as first activity
     return userGroups.map(group => {

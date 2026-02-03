@@ -13,6 +13,7 @@ import TicketFrame from '@/components/frames/TicketFrame';
 import ReelProgressPill from '@/components/ReelProgressPill';
 import { useFitnessReel } from '@/hooks/use-fitness-reel';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
+import weekRecapVideo from '@/assets/demo-videos/week-recap.mp4';
 
 interface Photo {
   id: string;
@@ -506,7 +507,12 @@ const WidgetLayout3 = ({
               progress={reelProgress}
               onPlay={() => {
                 if (currentReel?.videoUrl) {
-                  navigate('/reel');
+                  navigate('/reel', {
+                    state: {
+                      weekRecapVideo,
+                      weekNumber: completedWeeks,
+                    },
+                  });
                 }
               }}
             />
