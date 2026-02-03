@@ -168,7 +168,9 @@ const Reel = () => {
         const aIdx = group.activities.findIndex(a => a.id === location.state.activityId);
         if (aIdx >= 0) {
           setCurrentUserIndex(gIdx);
-          setCurrentActivityIndex(aIdx);
+          // Account for week recap offset: if user has ≥3 activities, week recap is at index 0
+          const hasWeekRecapInjected = group.activities.length >= 3;
+          setCurrentActivityIndex(hasWeekRecapInjected ? aIdx + 1 : aIdx);
           break;
         }
       }

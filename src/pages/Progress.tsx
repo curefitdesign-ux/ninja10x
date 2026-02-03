@@ -125,13 +125,14 @@ const Progress = () => {
     is_own: user ? p.userId === user.id : false,
   }));
 
-  const handleStoryStripTap = (index: number, userId?: string) => {
-    // Animate out then navigate to reel
+  const handleStoryStripTap = (index: number, userId?: string, activityId?: string) => {
+    // Animate out then navigate to reel with specific activity
     setIsExiting(true);
     setTimeout(() => {
       navigate('/reel', {
         state: {
           userId: userId,
+          activityId: activityId, // Open specific story, not latest
           fromProgress: true,
         }
       });
@@ -343,7 +344,8 @@ const Progress = () => {
                             setShowMakePublicSheet(true);
                           }
                         } else {
-                          handleStoryStripTap(index, photo.userId);
+                          // Pass activity ID to open this exact story
+                          handleStoryStripTap(index, photo.userId, photo.id);
                         }
                       }}
                       initial={{ opacity: 0, x: 40 }}
