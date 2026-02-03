@@ -462,21 +462,27 @@ const ReelProgressPill = ({
               </span>
               <span style={{ color: 'rgba(255,255,255,0.4)' }}>•</span>
               <span 
-                className="font-bold text-sm tracking-wide flex items-center gap-1"
+                className="font-bold text-sm tracking-wide"
                 style={{
                   color: isComplete ? '#34d399' : 'rgba(255,255,255,0.6)',
                 }}
               >
-                {isCreating ? 'Creating...' : (
-                  <>
-                    <Play className="w-3 h-3" fill="currentColor" />
-                    PLAY NOW
-                  </>
-                )}
+                {isCreating ? 'Creating...' : 'PLAY NOW'}
               </span>
             </motion.div>
           </AnimatePresence>
         </div>
+        
+        {/* Play icon at the end */}
+        {!isCreating && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="flex items-center justify-center"
+          >
+            <Play className="w-4 h-4" fill="currentColor" style={{ color: '#34d399' }} />
+          </motion.div>
+        )}
       </motion.div>
     </motion.div>
   );
