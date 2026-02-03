@@ -280,6 +280,13 @@ Style: Brutalist, gritty, underground. Think boxing gym, not Instagram fitness. 
     if (!narrationResponse.ok) {
       const errorText = await narrationResponse.text();
       console.error("Narration generation failed:", errorText);
+      
+      if (narrationResponse.status === 402) {
+        throw new Error("Lovable AI credits exhausted. Please add credits in Settings → Workspace → Usage.");
+      }
+      if (narrationResponse.status === 429) {
+        throw new Error("Rate limit exceeded. Please try again in a moment.");
+      }
       throw new Error("Failed to generate narration");
     }
 
