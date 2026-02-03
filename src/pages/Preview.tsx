@@ -10,7 +10,7 @@ import JournalFrame from '@/components/frames/JournalFrame';
 import VogueFrame from '@/components/frames/VogueFrame';
 import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
-import WheelPicker from '@/components/WheelPicker';
+import ContextualNumericKeyboard from '@/components/ContextualNumericKeyboard';
 import { getActivityConfig } from '@/lib/activity-context';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import ActivityBackgroundEffect from '@/components/ActivityBackgroundEffect';
@@ -580,30 +580,55 @@ const Preview = () => {
   const openEditSheet = (field: EditingField) => {
     if (field === 'duration') {
       const numValue = parseInt(duration.replace(/[^0-9]/g, '')) || 0;
-      setTempValue(String(numValue));
+      setTempValue(numValue > 0 ? String(numValue) : '');
     } else if (field === 'pr') {
-      setTempValue(pr);
+      const numValue = parseFloat(pr.replace(/[^0-9.]/g, '')) || 0;
+      setTempValue(numValue > 0 ? String(numValue) : '');
     }
     setEditingField(field);
   };
 
-  const handleWheelChange = (value: string | number) => {
-    const numValue = Number(value);
-    setTempValue(String(numValue));
-    setDuration(numValue > 0 ? `${numValue}hrs` : '');
-  };
-
-  const handleInputChange = (value: string) => {
-    setTempValue(value);
-    setPr(value);
-  };
-
   const confirmEdit = () => {
+    const activityConfig = getActivityInputConfig(activity || '');
+    const isDuration = editingField === 'duration';
+    const fieldUnit = isDuration ? activityConfig.primaryUnit : activityConfig.secondaryUnit;
+    
+    if (isDuration) {
+      const numValue = parseInt(tempValue) || 0;
+      setDuration(numValue > 0 ? `${numValue} ${fieldUnit}` : '');
+    } else {
+      const numValue = parseFloat(tempValue) || 0;
+      setPr(numValue > 0 ? `${numValue} ${fieldUnit}` : '');
+    }
     setEditingField(null);
   };
 
   const closeSheet = () => {
     setEditingField(null);
+  };
+
+  // Get contextual presets based on activity and field
+  const getPresets = (field: EditingField): number[] => {
+    if (field === 'duration') {
+      // Duration presets in minutes
+      return [15, 30, 45, 60, 90];
+    }
+    
+    // Secondary metric presets based on activity
+    const activityLower = activity?.toLowerCase() || '';
+    if (activityLower.includes('running') || activityLower.includes('cycling')) {
+      return [3, 5, 10, 15, 20]; // Distance in km
+    }
+    if (activityLower.includes('swimming')) {
+      return [10, 20, 30, 50]; // Laps
+    }
+    if (activityLower.includes('gym') || activityLower.includes('boxing')) {
+      return [3, 5, 8, 10, 12]; // Sets/Rounds
+    }
+    if (activityLower.includes('trekking')) {
+      return [200, 500, 800, 1000]; // Elevation in m
+    }
+    return [5, 10, 15, 20]; // Generic
   };
 
   // Calculate week from dayNumber
@@ -1088,130 +1113,33 @@ const Preview = () => {
         </div>
       )}
 
-      {/* Bottom Sheet Keyboard Overlay - iOS Liquid Glass Style */}
-      {editingField && (
-        <>
-          {/* Backdrop with heavy blur like iOS */}
-          <div 
-            className="fixed inset-0 z-40"
-            style={{
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            }}
-            onClick={closeSheet}
-          />
-          
-          {/* iOS-style bottom sheet with liquid glass */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom duration-300 focus:outline-none focus-visible:outline-none" tabIndex={-1}>
-            <div 
-              className="rounded-t-[28px] p-6 pb-10 focus:outline-none focus-visible:outline-none"
-              style={{
-                background: 'linear-gradient(180deg, rgba(60, 60, 67, 0.85) 0%, rgba(45, 45, 48, 0.92) 100%)',
-                backdropFilter: 'blur(60px) saturate(200%)',
-                WebkitBackdropFilter: 'blur(60px) saturate(200%)',
-                borderTop: '1px solid rgba(255, 255, 255, 0.12)',
-                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 -10px 40px rgba(0, 0, 0, 0.3)',
-              }}
-              tabIndex={-1}
-            >
-              {/* iOS-style drag handle */}
-              <div 
-                className="w-9 h-1 rounded-full mx-auto mb-5"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.25)' }}
+      {/* Contextual Numeric Keyboard */}
+      <AnimatePresence>
+        {editingField && (
+          (() => {
+            const activityConfig = getActivityInputConfig(activity || '');
+            const isDuration = editingField === 'duration';
+            const fieldLabel = isDuration ? activityConfig.primaryMetric : activityConfig.secondaryMetric;
+            const fieldUnit = isDuration ? activityConfig.primaryUnit : activityConfig.secondaryUnit;
+            const inputType = isDuration ? activityConfig.primaryInputType : activityConfig.secondaryInputType;
+            const useDecimal = inputType === 'decimal';
+            
+            return (
+              <ContextualNumericKeyboard
+                value={tempValue}
+                onChange={setTempValue}
+                onConfirm={confirmEdit}
+                onClose={closeSheet}
+                label={isDuration ? `Enter ${fieldLabel}` : `Enter ${fieldLabel}`}
+                unit={fieldUnit}
+                presets={getPresets(editingField)}
+                allowDecimal={useDecimal}
+                maxLength={useDecimal ? 6 : 4}
               />
-              
-              {(() => {
-                const activityConfig = getActivityInputConfig(activity || '');
-                const isDuration = editingField === 'duration';
-                const fieldLabel = isDuration ? activityConfig.primaryMetric : activityConfig.secondaryMetric;
-                const fieldUnit = isDuration ? activityConfig.primaryUnit : activityConfig.secondaryUnit;
-                const inputType = isDuration ? activityConfig.primaryInputType : activityConfig.secondaryInputType;
-                const useWheel = inputType === 'wheel';
-                const useDecimal = inputType === 'decimal';
-                
-                return (
-                  <>
-                    <p className="text-white text-lg font-semibold text-center mb-5">
-                      {isDuration ? `Select ${fieldLabel}` : `Enter ${fieldLabel}`}
-                    </p>
-                    
-                    {useWheel ? (
-                      <div className="flex items-center justify-center gap-6 mb-6">
-                        <div className="flex-1 max-w-[200px]">
-                          <WheelPicker
-                            items={Array.from({ length: 181 }, (_, i) => i)}
-                            value={parseInt(tempValue) || 0}
-                            onChange={(value) => {
-                              const numValue = Number(value);
-                              setTempValue(String(numValue));
-                              if (isDuration) {
-                                setDuration(numValue > 0 ? `${numValue} ${fieldUnit}` : '');
-                              } else {
-                                setPr(numValue > 0 ? `${numValue} ${fieldUnit}` : '');
-                              }
-                            }}
-                            itemHeight={52}
-                            visibleItems={5}
-                          />
-                        </div>
-                        <span className="text-white text-xl font-medium">{fieldUnit}</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-3 mb-6">
-                        <div 
-                          className="flex-1 flex items-center rounded-xl"
-                          style={{
-                            background: 'rgba(120, 120, 128, 0.24)',
-                            border: '1px solid rgba(255, 255, 255, 0.08)',
-                          }}
-                        >
-                          <input
-                            ref={inputRef}
-                            type="text"
-                            inputMode={useDecimal ? 'decimal' : 'numeric'}
-                            pattern={useDecimal ? '[0-9]*\\.?[0-9]*' : '[0-9]*'}
-                            value={tempValue}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setTempValue(val);
-                              if (isDuration) {
-                                setDuration(val ? `${val} ${fieldUnit}` : '');
-                              } else {
-                                setPr(val ? `${val} ${fieldUnit}` : '');
-                              }
-                            }}
-                            placeholder={`Enter ${fieldLabel.toLowerCase()}`}
-                            className="flex-1 bg-transparent text-white text-xl font-medium px-4 py-4 outline-none placeholder:text-white/40"
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                confirmEdit();
-                              }
-                            }}
-                          />
-                          {fieldUnit && <span className="pr-4 text-white/50 text-lg">{fieldUnit}</span>}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* iOS-style confirm button */}
-                    <button
-                      onClick={confirmEdit}
-                      className="mx-auto px-10 py-2.5 flex items-center justify-center rounded-full"
-                      style={{
-                        background: 'rgba(255, 255, 255, 0.95)',
-                        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.15)',
-                      }}
-                    >
-                      <span className="text-black font-semibold text-sm">Confirm</span>
-                    </button>
-                  </>
-                );
-              })()}
-            </div>
-          </div>
-        </>
-      )}
+            );
+          })()
+        )}
+      </AnimatePresence>
 
       {/* Sync Popup */}
       {showSyncPopup && (
