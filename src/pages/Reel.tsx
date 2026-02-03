@@ -662,15 +662,15 @@ const Reel = () => {
                 return (
                   <div
                     className="relative w-full max-w-[340px] flex items-center justify-center"
+                    style={{ aspectRatio: '9/16' }}
                   >
                     {isVideo ? (
                       <video
                         key={mediaUrl}
                         src={mediaUrl}
-                        className="w-full h-auto rounded-2xl"
+                        className="w-full h-full rounded-2xl"
                         style={{ 
-                          maxHeight: 'calc(100dvh - 240px)',
-                          objectFit: 'contain',
+                          objectFit: 'cover',
                           boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
                           filter: shouldShowLocked ? 'blur(20px)' : 'none',
                         }}
@@ -684,12 +684,11 @@ const Reel = () => {
                         key={mediaUrl}
                         src={mediaUrl}
                         alt={`Day ${currentActivity.dayNumber}`}
-                        className="w-full h-auto rounded-2xl"
+                        className="w-full h-full rounded-2xl"
                         loading="eager"
                         decoding="async"
                         style={{ 
-                          maxHeight: 'calc(100dvh - 240px)',
-                          objectFit: 'contain',
+                          objectFit: 'cover',
                           boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
                           filter: shouldShowLocked ? 'blur(20px)' : 'none',
                         }}
