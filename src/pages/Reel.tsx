@@ -662,7 +662,7 @@ const Reel = () => {
                 return (
                   <div
                     className="relative w-full max-w-[340px] flex items-center justify-center"
-                    style={{ aspectRatio: '9/16', maxWidth: '323px' }}
+                    style={{ aspectRatio: '9/16', maxWidth: '307px' }}
                   >
                     {isVideo ? (
                       <video
