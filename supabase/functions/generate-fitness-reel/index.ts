@@ -73,7 +73,7 @@ function validatePhoto(photo: unknown, index: number): PhotoData {
     activity: validateString(p.activity, 50, `Photo ${index} activity`),
     duration: p.duration ? validateString(p.duration, 50, `Photo ${index} duration`) : undefined,
     pr: p.pr ? validateString(p.pr, 100, `Photo ${index} pr`) : undefined,
-    uploadDate: validateString(p.uploadDate, 20, `Photo ${index} uploadDate`),
+    uploadDate: validateString(p.uploadDate, 50, `Photo ${index} uploadDate`),
     dayNumber: typeof p.dayNumber === 'number' && p.dayNumber >= 1 && p.dayNumber <= 365 
       ? p.dayNumber 
       : (() => { throw new Error(`Photo ${index} dayNumber must be between 1 and 365`); })(),
