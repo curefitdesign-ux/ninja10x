@@ -222,7 +222,13 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
         whileTap={{ scale: 0.96 }}
       >
         {/* Photo content wrapper with overflow hidden for media clipping */}
-        <div className="absolute inset-0 rounded-xl overflow-hidden" style={{ zIndex: 1 }}>
+        <div 
+          className="absolute inset-0 overflow-hidden" 
+          style={{ 
+            zIndex: 1,
+            borderRadius: (borderRadius * scale) - 1, // Match outer border radius minus border
+          }}
+        >
           {/* storageUrl is always the templated PNG - render as image */}
           {hasPhoto && (
             <>
@@ -418,12 +424,23 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
         </AnimatePresence>
         
         {/* Floating animated reactions around card edges */}
-        {hasPhoto && photo.reactionCount && photo.reactionCount > 0 && (
-          <FloatingCardReactions
-            reactions={photo.topReaction ? [photo.topReaction] : ['fire']}
-            allReactions={photo.allReactions}
-            size={shouldShowExpanded ? 'md' : 'sm'}
-          />
+        {hasPhoto && (
+          (() => {
+            // Calculate total reactions from allReactions or use reactionCount
+            const totalReactions = photo.allReactions 
+              ? photo.allReactions.reduce((sum, r) => sum + (r.count || 0), 0)
+              : (photo.reactionCount || 0);
+            
+            if (totalReactions <= 0) return null;
+            
+            return (
+              <FloatingCardReactions
+                reactions={photo.topReaction ? [photo.topReaction] : ['fire']}
+                allReactions={photo.allReactions}
+                size={shouldShowExpanded ? 'md' : 'sm'}
+              />
+            );
+          })()
         )}
       </motion.button>
     );
