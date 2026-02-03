@@ -16,6 +16,7 @@ import heartImg from '@/assets/reactions/heart-workout.png';
 interface Floating3DEmojisProps {
   reactions: ReactionType[];
   newReaction: ReactionType | null;
+  isPaused?: boolean;
 }
 
 const EMOJI_ASSETS: Record<ReactionType, string> = {
@@ -44,12 +45,11 @@ const EDGE_POSITIONS = [
   { bottom: '5%', right: '8%', rotate: -6, scale: 0.88 },
 ];
 
-export default function Floating3DEmojis({ reactions, newReaction }: Floating3DEmojisProps) {
+export default function Floating3DEmojis({ reactions, newReaction, isPaused = false }: Floating3DEmojisProps) {
   return (
     <>
       {reactions.slice(0, 8).map((type, i) => {
         const pos = EDGE_POSITIONS[i % EDGE_POSITIONS.length];
-        const isNew = newReaction === type;
         const asset = EMOJI_ASSETS[type];
         
         // Create unique animation delay for each emoji - staggered entrance
@@ -77,9 +77,9 @@ export default function Floating3DEmojis({ reactions, newReaction }: Floating3DE
               delay: entranceDelay,
             }}
           >
-            {/* Subtle floating animation */}
+            {/* Subtle floating animation - freezes when paused */}
             <motion.div
-              animate={{
+              animate={isPaused ? {} : {
                 y: [0, -4, 0],
                 rotate: [pos.rotate - 2, pos.rotate + 2, pos.rotate - 2],
               }}
