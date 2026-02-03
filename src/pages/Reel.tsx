@@ -753,6 +753,7 @@ const Reel = () => {
                       <Floating3DEmojis 
                         reactions={activeReactionTypes}
                         newReaction={floatingReaction}
+                        isPaused={isPaused}
                       />
                     )}
                     
