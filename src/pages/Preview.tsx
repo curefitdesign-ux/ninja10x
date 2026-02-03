@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil, Trash2, Bike, Footprints, Mountain, Waves, Dumbbell, Dribbble, Trophy, Swords, Music, Brain, CircleDot } from 'lucide-react';
+import { X, Check, Pencil, Trash2, Bike, Footprints, Mountain, Waves, Dumbbell, Dribbble, Trophy, Swords, Music, Brain, CircleDot, ImagePlus } from 'lucide-react';
 import ShareSheet from '@/components/ShareSheet';
+import MediaSourceSheet from '@/components/MediaSourceSheet';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -120,6 +121,7 @@ const Preview = () => {
   // Micro celebration after save
   const [showMicroCelebration, setShowMicroCelebration] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
   
   const [elementsHidden, setElementsHidden] = useState(false);
   const [isReview, setIsReview] = useState(false);
@@ -413,11 +415,11 @@ const Preview = () => {
     }, 400);
   };
 
-  // Retake - navigate to home to select new media
+  // Retake - open media source sheet to change photo
   const handleRetake = () => {
     triggerHaptic('light');
     handleTap('retake-btn');
-    navigate('/', { replace: true });
+    setShowMediaSourceSheet(true);
   };
 
   // Handle scroll to update current frame
@@ -813,7 +815,7 @@ const Preview = () => {
             onClick={handleRetake}
             className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'retake-btn' ? 'animate-liquid-tap' : ''}`}
           >
-            <Pencil className="w-5 h-5 text-white" />
+            <ImagePlus className="w-5 h-5 text-white" />
           </button>
         </div>
         
@@ -1169,38 +1171,21 @@ const Preview = () => {
             setShowShareSheet(false);
             setFramedImageUrl(null);
           }}
-          onReupload={() => {
-            // Close share sheet and go to gallery to pick new photo
-            setShowShareSheet(false);
-            setFramedImageUrl(null);
-            navigate('/gallery', { 
-              state: { 
-                dayNumber,
-                activity,
-                returnToPreview: true,
-              }, 
-              replace: true,
-            });
-          }}
-          onRecapture={() => {
-            // Close share sheet and go to camera
-            setShowShareSheet(false);
-            setFramedImageUrl(null);
-            navigate('/camera', { 
-              state: { 
-                dayNumber,
-                activity,
-                returnToPreview: true,
-              }, 
-              replace: true,
-            });
-          }}
           onSaveWithTemplate={handleFinalSave}
           dayNumber={dayNumber}
           frameType={currentFrame}
           frameProps={frameProps}
         />
       )}
+      
+      {/* Media Source Sheet for changing photo */}
+      <MediaSourceSheet
+        isOpen={showMediaSourceSheet}
+        onClose={() => setShowMediaSourceSheet(false)}
+        dayNumber={dayNumber}
+        activity={activity || undefined}
+        preserveActivity={!!activity}
+      />
     </div>
   );
 };

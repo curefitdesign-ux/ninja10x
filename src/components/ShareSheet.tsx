@@ -1,4 +1,4 @@
-import { X, Download, Copy, Check, Pencil, Loader2, ImagePlus, Camera } from 'lucide-react';
+import { X, Download, Copy, Check, Pencil, Loader2 } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,8 +34,6 @@ interface ShareSheetProps {
   isVideo?: boolean;
   onClose: () => void;
   onEdit?: () => void;
-  onReupload?: () => void;
-  onRecapture?: () => void;
   onSaveWithTemplate?: () => void;
   dayNumber?: number;
   frameType?: FrameType;
@@ -127,7 +125,7 @@ const socialApps = [
   },
 ];
 
-const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onReupload, onRecapture, onSaveWithTemplate, dayNumber, frameType, frameProps }: ShareSheetProps) => {
+const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, dayNumber, frameType, frameProps }: ShareSheetProps) => {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [dominantColor, setDominantColor] = useState('rgba(0,0,0,0.95)');
@@ -602,9 +600,9 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onReupload, onRecaptur
                  </div>
                 </motion.div>
                 
-                {/* Edit options - Edit Frame, Reupload, Recapture */}
+                {/* Single Edit button - returns to template selection */}
                 <motion.div 
-                  className="flex flex-wrap justify-center gap-2 mt-4 mb-4"
+                  className="flex justify-center mt-3 mb-4"
                   animate={isExiting ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
                 >
@@ -613,30 +611,10 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onReupload, onRecaptur
                       triggerHaptic('light');
                       if (onEdit) onEdit();
                     }}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
                   >
                     <Pencil className="w-4 h-4 text-white/70" />
-                    <span className="text-white/70 font-medium text-sm">Edit Frame</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      triggerHaptic('light');
-                      if (onReupload) onReupload();
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
-                  >
-                    <ImagePlus className="w-4 h-4 text-white/70" />
-                    <span className="text-white/70 font-medium text-sm">Reupload</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      triggerHaptic('light');
-                      if (onRecapture) onRecapture();
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm tap-bounce transition-all active:scale-95"
-                  >
-                    <Camera className="w-4 h-4 text-white/70" />
-                    <span className="text-white/70 font-medium text-sm">Recapture</span>
+                    <span className="text-white/70 font-medium text-sm">Edit</span>
                   </button>
                 </motion.div>
                 
