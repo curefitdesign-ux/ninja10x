@@ -498,12 +498,16 @@ const Progress = () => {
           )}
         </AnimatePresence>
 
-        {/* Diagonal Progress Tiles with user profiles */}
+        {/* Diagonal Progress Tiles with user profile on LATEST tile only */}
         {TILE_POSITIONS.map((pos, index) => {
           const day = getDayFromIndex(index);
           const isActive = isTileActive(day);
-          // Find activity for this day to get user profile
-          const activityForDay = myActivities.find(a => a.dayNumber === day);
+          // Find the latest (highest) day number the user has completed
+          const latestCompletedDay = myActivities.length > 0 
+            ? Math.max(...myActivities.map(a => a.dayNumber)) 
+            : 0;
+          // Only show avatar on the latest completed tile
+          const isLatestTile = day === latestCompletedDay;
 
           return (
             <motion.div
@@ -522,8 +526,8 @@ const Progress = () => {
             >
               <img src={isActive ? tileActiveImg : tileInactiveImg} alt={`Day ${day}`} className="w-full h-full object-contain relative z-10" />
               
-              {/* User profile avatar on active tiles */}
-              {isActive && profile && (
+              {/* User profile avatar ONLY on the latest completed tile */}
+              {isLatestTile && profile && (
                 <motion.div
                   className="absolute"
                   style={{
@@ -534,15 +538,15 @@ const Progress = () => {
                   }}
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.035 + 0.2, type: "spring", stiffness: 300, damping: 20 }}
+                  transition={{ delay: 0.3, type: "spring", stiffness: 300, damping: 20 }}
                 >
                   <ProfileAvatar
                     src={profile.avatar_url}
                     name={profile.display_name}
-                    size={18}
+                    size={22}
                     style={{ 
-                      border: '2px solid rgba(160, 120, 220, 0.6)',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                      border: '2px solid rgba(160, 120, 220, 0.8)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
                     }}
                   />
                 </motion.div>
