@@ -756,15 +756,17 @@ const Reel = () => {
                       />
                     )}
                     
-                    {/* Progress bar at bottom of story */}
-                    <div className="absolute bottom-2 left-3 right-3 h-1 rounded-full overflow-hidden bg-white/20">
-                      <motion.div 
-                        className="h-full bg-white rounded-full"
-                        initial={{ width: '0%' }}
-                        animate={{ width: `${autoAdvanceProgress * 100}%` }}
-                        transition={{ duration: 0.05, ease: 'linear' }}
-                      />
-                    </div>
+                    {/* Progress bar at bottom of story - hidden when sheets open */}
+                    {!isPaused && (
+                      <div className="absolute bottom-2 left-3 right-3 h-1 rounded-full overflow-hidden bg-white/20">
+                        <motion.div 
+                          className="h-full bg-white rounded-full"
+                          initial={{ width: '0%' }}
+                          animate={{ width: `${autoAdvanceProgress * 100}%` }}
+                          transition={{ duration: 0.05, ease: 'linear' }}
+                        />
+                      </div>
+                    )}
                   </div>
                 );
               })()}

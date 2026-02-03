@@ -65,58 +65,35 @@ export default function Floating3DEmojis({ reactions, newReaction }: Floating3DE
               zIndex: 50,
               filter: 'drop-shadow(0 6px 16px rgba(0, 0, 0, 0.6))',
             }}
-            initial={{ scale: 0, opacity: 0, rotate: pos.rotate - 45, y: 30 }}
+            initial={{ scale: 0, opacity: 0 }}
             animate={{ 
-              scale: isNew ? [0, pos.scale * 1.5, pos.scale] : pos.scale, 
+              scale: pos.scale, 
               opacity: 1,
-              rotate: pos.rotate,
-              y: isNew ? [30, -15, 0] : 0,
             }}
             transition={{ 
               type: 'spring', 
-              stiffness: 400, 
-              damping: 18,
-              delay: isNew ? 0 : entranceDelay,
+              stiffness: 300, 
+              damping: 20,
+              delay: entranceDelay,
             }}
           >
-            {/* Attention-grabbing floating animation wrapper with bounce */}
+            {/* Subtle floating animation */}
             <motion.div
-              initial={{ scale: 0.5, opacity: 0 }}
               animate={{
-                scale: [1, 1.15, 1, 1.08, 1],
-                opacity: 1,
-                y: [0, -6, 0, -4, 0],
-                rotate: [0, -8, 0, 5, 0],
+                y: [0, -4, 0],
+                rotate: [pos.rotate - 2, pos.rotate + 2, pos.rotate - 2],
               }}
               transition={{
-                scale: {
-                  duration: 4,
-                  repeat: Infinity,
-                  repeatDelay: animDelay + 1,
-                  ease: 'easeInOut',
-                },
-                opacity: {
-                  duration: 0.3,
-                  delay: entranceDelay,
-                },
-                y: {
-                  duration: 4,
-                  repeat: Infinity,
-                  repeatDelay: animDelay + 1,
-                  ease: 'easeInOut',
-                },
-                rotate: {
-                  duration: 4,
-                  repeat: Infinity,
-                  repeatDelay: animDelay + 1,
-                  ease: 'easeInOut',
-                },
+                duration: 3,
+                repeat: Infinity,
+                repeatDelay: animDelay,
+                ease: 'easeInOut',
               }}
             >
               <img 
                 src={asset} 
                 alt={type} 
-                className="w-14 h-14 object-contain"
+                className="w-12 h-12 object-contain"
               />
             </motion.div>
           </motion.div>
