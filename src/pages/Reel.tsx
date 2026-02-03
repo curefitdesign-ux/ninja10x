@@ -183,14 +183,17 @@ const Reel = () => {
   const effectiveUserGroups = useMemo(() => {
     if (!hasWeekRecap || userGroups.length === 0 || !user) return userGroups;
     
+    // Use the imported week recap video asset directly
+    const weekRecapVideoUrl = weekRecapVideoAsset;
+    
     // Find current user's group and inject week recap as first activity
     return userGroups.map(group => {
       if (group.userId === user.id) {
         const weekRecapActivity: LocalActivity = {
           id: 'week-recap',
           dayNumber: 0,
-          storageUrl: weekRecapVideoFromNav!,
-          originalUrl: weekRecapVideoFromNav,
+          storageUrl: weekRecapVideoUrl,
+          originalUrl: weekRecapVideoUrl,
           activity: `Week ${weekRecapNumber || 1} Recap`,
           createdAt: new Date().toISOString(),
           isVideo: true,
@@ -209,7 +212,7 @@ const Reel = () => {
       }
       return group;
     });
-  }, [userGroups, hasWeekRecap, weekRecapVideoFromNav, weekRecapNumber, user]);
+  }, [userGroups, hasWeekRecap, weekRecapNumber, user]);
 
   const currentGroup = effectiveUserGroups[currentUserIndex];
   const currentActivity = currentGroup?.activities[currentActivityIndex];
