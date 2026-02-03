@@ -361,9 +361,9 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
           </div>
         )}
         
-        {/* Day number at TOP */}
+        {/* Day number at TOP - only show for empty cards */}
         <AnimatePresence>
-          {shouldShowExpanded && (
+          {shouldShowExpanded && !hasPhoto && (
             <motion.div 
               className="absolute top-2 left-1/2"
               style={{ zIndex: 10 }}
@@ -375,9 +375,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
               <span className={`text-[10px] italic ${
                 isActiveDay 
                   ? 'text-emerald-400' 
-                  : hasPhoto 
-                    ? 'text-white/70' 
-                    : 'text-white/35'
+                  : 'text-white/35'
               }`}>
                 day {dayNumber}
               </span>
@@ -385,9 +383,9 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
           )}
         </AnimatePresence>
         
-        {/* Story label at BOTTOM */}
+        {/* Story label at BOTTOM - only show for empty cards */}
         <AnimatePresence>
-          {shouldShowExpanded && (
+          {shouldShowExpanded && !hasPhoto && (
             <motion.div 
               className="absolute bottom-2 left-1/2"
               style={{ zIndex: 10 }}
@@ -399,9 +397,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
               <span className={`text-[10px] italic ${
                 isActiveDay 
                   ? 'text-emerald-400' 
-                  : hasPhoto 
-                    ? 'text-white/70' 
-                    : 'text-white/35'
+                  : 'text-white/35'
               }`}>
                 {(() => {
                   const storyLabels = [
