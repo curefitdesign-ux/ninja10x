@@ -3,9 +3,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Play } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-// Reaction images
-import fireReaction from '@/assets/reactions/fire-3d.png';
-
 export type PillState = 'creating' | 'completing' | 'complete' | 'celebrate';
 
 interface Reaction {
@@ -140,43 +137,18 @@ const AbstractPattern = () => (
   </div>
 );
 
-// Reaction badge icon for "complete" state (no thumbnail - just reactions)
-const ReactionBadge = ({ 
-  totalReactions 
-}: { 
-  totalReactions: number;
-}) => (
-  <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
-    {/* Glassmorphic container */}
+// Play icon for complete state (no emoji)
+const PlayBadge = () => (
+  <div className="relative w-8 h-8 flex-shrink-0 flex items-center justify-center">
     <div 
-      className="w-10 h-10 rounded-xl flex items-center justify-center"
+      className="w-8 h-8 rounded-full flex items-center justify-center"
       style={{
-        background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        border: '1.5px solid rgba(52, 211, 153, 0.4)',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1)',
+        background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.25) 0%, rgba(16, 185, 129, 0.2) 100%)',
+        border: '1.5px solid rgba(52, 211, 153, 0.5)',
       }}
     >
-      <img src={fireReaction} alt="" className="w-5 h-5" />
+      <Play className="w-3.5 h-3.5 ml-0.5 text-emerald-400" fill="currentColor" />
     </div>
-    
-    {/* Reaction count badge - only show if there are reactions */}
-    {totalReactions > 0 && (
-      <motion.div
-        className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full"
-        style={{
-          background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.95) 0%, rgba(16, 185, 129, 0.9) 100%)',
-          border: '1.5px solid rgba(255,255,255,0.5)',
-          boxShadow: '0 2px 8px rgba(52, 211, 153, 0.4)',
-        }}
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-      >
-        <span className="text-white text-[10px] font-bold">{totalReactions}</span>
-      </motion.div>
-    )}
   </div>
 );
 
@@ -369,29 +341,13 @@ const ReelProgressPill = ({
   const needsAttention = justCompleted || state === 'completing';
   const isComplete = state === 'complete' || state === 'completing';
   const isCreating = state === 'creating';
-  
-  const displayReactionCount = totalReactions > 0 
-    ? totalReactions 
-    : reactions.reduce((sum, r) => sum + r.count, 0);
 
-  // Get background style based on state
+  // Get background style - transparent with subtle border
   const getBackgroundStyle = () => {
-    if (isComplete || isCelebrating) {
-      return {
-        background: 'linear-gradient(135deg, rgba(45, 55, 52, 0.85) 0%, rgba(35, 45, 42, 0.9) 100%)',
-        border: needsAttention 
-          ? '1.5px solid rgba(52, 211, 153, 0.5)'
-          : '1px solid rgba(52, 211, 153, 0.25)',
-        boxShadow: needsAttention
-          ? '0 0 24px rgba(52, 211, 153, 0.3), inset 0 1px 0 rgba(255,255,255,0.08)'
-          : '0 4px 20px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
-      };
-    }
-    // Creating state - neutral liquid glass
     return {
-      background: 'linear-gradient(135deg, rgba(60, 60, 65, 0.85) 0%, rgba(45, 45, 50, 0.9) 100%)',
-      border: '1px solid rgba(255,255,255,0.12)',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
+      background: 'transparent',
+      border: '1.5px solid rgba(255,255,255,0.15)',
+      boxShadow: 'none',
     };
   };
 
@@ -405,12 +361,9 @@ const ReelProgressPill = ({
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
     >
       <motion.div
-        className="relative flex items-center gap-3 px-3 py-2.5 rounded-[20px] cursor-pointer overflow-hidden"
+        className="relative flex items-center gap-2 px-3 py-1.5 rounded-full cursor-pointer overflow-hidden"
         style={{
           ...getBackgroundStyle(),
-          backdropFilter: 'blur(40px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-          minHeight: 56,
         }}
         onClick={(e) => {
           e.stopPropagation();
@@ -446,7 +399,7 @@ const ReelProgressPill = ({
         <AnimatePresence>
           {needsAttention && (
             <motion.div
-              className="absolute -inset-0.5 rounded-[22px] pointer-events-none"
+              className="absolute -inset-0.5 rounded-full pointer-events-none"
               initial={{ opacity: 0 }}
               animate={{ 
                 opacity: [0, 0.5, 0],
@@ -455,33 +408,13 @@ const ReelProgressPill = ({
               transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
               style={{
                 background: 'transparent',
-                border: '2px solid rgba(52, 211, 153, 0.5)',
-                boxShadow: '0 0 16px rgba(52, 211, 153, 0.4)',
+                border: '1.5px solid rgba(52, 211, 153, 0.5)',
+                boxShadow: '0 0 12px rgba(52, 211, 153, 0.4)',
               }}
             />
           )}
         </AnimatePresence>
 
-        {/* Shimmer effect for creating state */}
-        <AnimatePresence>
-          {isCreating && (
-            <motion.div
-              className="absolute inset-0 rounded-[20px] pointer-events-none overflow-hidden"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <motion.div
-                className="absolute inset-0"
-                style={{
-                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%)',
-                }}
-                animate={{ x: ['-100%', '200%'] }}
-                transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 0.5 }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Left icon based on state */}
         <AnimatePresence mode="wait">
@@ -497,13 +430,13 @@ const ReelProgressPill = ({
             </motion.div>
           ) : (
             <motion.div
-              key="reaction-badge"
+              key="play-badge"
               initial={{ scale: 0.8, opacity: 0, rotate: -5 }}
               animate={{ scale: 1, opacity: 1, rotate: 0 }}
               exit={{ scale: 0.8, opacity: 0, rotate: 5 }}
               transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             >
-              <ReactionBadge totalReactions={displayReactionCount} />
+              <PlayBadge />
             </motion.div>
           )}
         </AnimatePresence>
@@ -534,18 +467,11 @@ const ReelProgressPill = ({
                   color: isComplete ? '#34d399' : 'rgba(255,255,255,0.6)',
                 }}
               >
-                {isCreating ? 'Reel in progress' : 'PLAY NOW'}
+                {isCreating ? 'Creating...' : 'PLAY NOW'}
               </span>
             </motion.div>
           </AnimatePresence>
         </div>
-
-        {/* Progress ring with play button */}
-        <ProgressRing 
-          state={state} 
-          progress={progress}
-          needsAttention={needsAttention}
-        />
       </motion.div>
     </motion.div>
   );
