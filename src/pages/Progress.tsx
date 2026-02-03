@@ -19,25 +19,25 @@ import { isVideoUrl } from "@/lib/media";
 
 // Tile positions - optimized for mobile viewport with percentage-based layout
 const TILE_POSITIONS = [
-  { left: 34, top: 8 },
-  { left: 42, top: 13 },
-  { left: 50, top: 18 },
-  { left: 58, top: 23 },
-  { left: 50, top: 28 },
-  { left: 42, top: 33 },
-  { left: 34, top: 38 },
-  { left: 42, top: 43 },
-  { left: 50, top: 48 },
-  { left: 58, top: 53 },
-  { left: 50, top: 58 },
-  { left: 42, top: 63 },
+  { left: 38, top: 14 },
+  { left: 46, top: 19 },
+  { left: 54, top: 24 },
+  { left: 62, top: 29 },
+  { left: 54, top: 34 },
+  { left: 46, top: 39 },
+  { left: 38, top: 44 },
+  { left: 46, top: 49 },
+  { left: 54, top: 54 },
+  { left: 62, top: 59 },
+  { left: 54, top: 64 },
+  { left: 46, top: 69 },
 ];
 
 const LABELS = [
-  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 8, left: 70 },
-  { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 23, left: 6 },
-  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 38, left: 70 },
-  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 63, left: 6 },
+  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 14, left: 72 },
+  { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 29, left: 4 },
+  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 44, left: 72 },
+  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 69, left: 4 },
 ];
 
 const Progress = () => {
@@ -486,7 +486,7 @@ const Progress = () => {
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "10%", top: "-1%", width: "32%", aspectRatio: "1" }}
+              style={{ left: "8%", top: "-2%", width: "28%", aspectRatio: "1" }}
               initial={{ opacity: 0, scale: 0.6, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.4 }}
@@ -559,7 +559,7 @@ const Progress = () => {
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: 0, bottom: "2%", width: "40%", aspectRatio: "1.2" }}
+              style={{ left: "-5%", bottom: "0%", width: "32%", aspectRatio: "1.2" }}
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7 }}
