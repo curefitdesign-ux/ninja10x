@@ -45,6 +45,8 @@ export interface LoggedPhoto {
   dayNumber: number;
   reactionCount?: number;
   topReaction?: string;
+  /** All reaction types with their counts */
+  allReactions?: { type: string; count: number }[];
 }
 
 interface PhotoLoggingWidgetProps {
@@ -417,6 +419,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
         {hasPhoto && photo.reactionCount && photo.reactionCount > 0 && (
           <FloatingCardReactions
             reactions={photo.topReaction ? [photo.topReaction] : ['fire']}
+            allReactions={photo.allReactions}
             size={shouldShowExpanded ? 'md' : 'sm'}
           />
         )}

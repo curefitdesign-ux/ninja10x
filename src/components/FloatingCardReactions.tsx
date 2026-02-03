@@ -4,15 +4,26 @@ import { motion } from 'framer-motion';
 import fireImg from '@/assets/reactions/fire-new.png';
 import clapImg from '@/assets/reactions/clap-hands.png';
 import flexImg from '@/assets/reactions/flex.png';
+import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
+import wowImg from '@/assets/reactions/wow.png';
+import trophyImg from '@/assets/reactions/dumbbells.png';
+import runnerImg from '@/assets/reactions/runner.png';
+import energyImg from '@/assets/reactions/energy.png';
+import timerImg from '@/assets/reactions/stopwatch.png';
+import heartImg from '@/assets/reactions/heart-workout.png';
 
-// Only use clean assets - fallback to fire for unknown types
+// Complete reaction image mapping
 const REACTION_IMAGES: Record<string, string> = {
   fire: fireImg,
   clap: clapImg,
   flex: flexImg,
-  heart: fireImg,  // fallback
-  fistbump: flexImg, // fallback
-  wow: clapImg, // fallback
+  heart: heartImg,
+  fistbump: fistbumpImg,
+  wow: wowImg,
+  trophy: trophyImg,
+  runner: runnerImg,
+  energy: energyImg,
+  timer: timerImg,
 };
 
 // Edge positions for floating reactions - relative to card (OUTSIDE the card edges)
@@ -22,18 +33,39 @@ const EDGE_POSITIONS = [
   { top: '20%', right: '-12px', baseRotate: 8 },
   { bottom: '-10px', right: '15%', baseRotate: -5 },
   { top: '40%', left: '-12px', baseRotate: 10 },
+  { bottom: '30%', right: '-10px', baseRotate: -8 },
+  { top: '60%', left: '-10px', baseRotate: 6 },
+  { bottom: '-8px', left: '20%', baseRotate: -10 },
 ];
 
 interface FloatingCardReactionsProps {
-  reactions: string[]; // Array of reaction types
+  /** Array of reaction types (legacy) */
+  reactions?: string[];
+  /** All reactions with counts (new) */
+  allReactions?: { type: string; count: number }[];
   size?: 'sm' | 'md' | 'lg';
 }
 
 export default function FloatingCardReactions({ 
   reactions, 
+  allReactions,
   size = 'md' 
 }: FloatingCardReactionsProps) {
-  if (!reactions || reactions.length === 0) return null;
+  // Prefer allReactions if provided, otherwise use legacy reactions
+  let reactionsToShow: string[] = [];
+  
+  if (allReactions && allReactions.length > 0) {
+    // Show all reaction types that have counts > 0
+    reactionsToShow = allReactions
+      .filter(r => r.count > 0)
+      .sort((a, b) => b.count - a.count) // Sort by count descending
+      .map(r => r.type)
+      .slice(0, 8); // Show up to 8 reactions
+  } else if (reactions && reactions.length > 0) {
+    reactionsToShow = [...new Set(reactions)].slice(0, 3);
+  }
+
+  if (reactionsToShow.length === 0) return null;
 
   const sizeClasses = {
     sm: 'w-5 h-5',
@@ -41,18 +73,15 @@ export default function FloatingCardReactions({
     lg: 'w-9 h-9',
   };
 
-  // Take up to 3 unique reactions
-  const uniqueReactions = [...new Set(reactions)].slice(0, 3);
-
   return (
     <div className="absolute inset-0 pointer-events-none overflow-visible" style={{ zIndex: 25 }}>
-      {uniqueReactions.map((reactionType, index) => {
+      {reactionsToShow.map((reactionType, index) => {
         const pos = EDGE_POSITIONS[index % EDGE_POSITIONS.length];
         const imageSrc = REACTION_IMAGES[reactionType] || fireImg;
         
         // Each reaction gets unique animation timing
-        const animationDelay = index * 0.4;
-        const floatDuration = 3 + index * 0.5;
+        const animationDelay = index * 0.15;
+        const floatDuration = 3 + index * 0.3;
         
         return (
           <motion.div

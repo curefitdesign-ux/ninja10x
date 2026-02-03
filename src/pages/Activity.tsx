@@ -74,6 +74,9 @@ const Activity = () => {
     dayNumber: a.dayNumber,
     reactionCount: a.reactionCount,
     topReaction: getTopReaction(a.reactions),
+    allReactions: a.reactions ? Object.entries(a.reactions)
+      .filter(([_, data]) => data.count > 0)
+      .map(([type, data]) => ({ type, count: data.count })) : undefined,
   }));
   
   // Helper to get the top reaction type (key like "fire", "clap", etc.)
