@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronUp, Trash2, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ChevronUp, Trash2, Lock } from 'lucide-react';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
@@ -84,7 +84,7 @@ const Reel = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   // Auto-advance timer state
-  const AUTO_ADVANCE_DURATION = 8000; // 8 seconds
+  const AUTO_ADVANCE_DURATION = 5000; // 5 seconds
   const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
   const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoAdvanceStartRef = useRef<number>(0);
@@ -767,49 +767,6 @@ const Reel = () => {
                 );
               })()}
           </motion.div>
-          
-          {/* Swipe left/right arrow indicators */}
-          {userGroups.length > 1 && (
-            <>
-              {/* Left arrow - show if not first user */}
-              {currentUserIndex > 0 && (
-                <motion.button
-                  onClick={goPrevUser}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                  }}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 0.7, x: 0 }}
-                  whileHover={{ opacity: 1, scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <ChevronLeft className="w-5 h-5 text-white" />
-                </motion.button>
-              )}
-              
-              {/* Right arrow - show if not last user */}
-              {currentUserIndex < userGroups.length - 1 && (
-                <motion.button
-                  onClick={goNextUser}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                  }}
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 0.7, x: 0 }}
-                  whileHover={{ opacity: 1, scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <ChevronRight className="w-5 h-5 text-white" />
-                </motion.button>
-              )}
-            </>
-          )}
         </div>
 
         {/* FIXED BOTTOM ZONE - Reaction pill + View Progress - compact sticky */}
