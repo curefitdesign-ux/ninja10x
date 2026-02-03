@@ -822,7 +822,9 @@ const PhotoLoggingWidget = ({
     <>
       <div 
         className="relative w-full overflow-visible" 
-        style={{ height: 180, paddingTop: 20 }} 
+        // NOTE: expanded CardCluster height can exceed 180px due to reaction padding.
+        // Give the widget enough vertical room so the top of cards/reactions never clips.
+        style={{ height: 208 }} 
         data-shared-element="cult-ninja-widget"
       >
         {/* Timeline Path - SVG curved dashed line */}
@@ -845,7 +847,7 @@ const PhotoLoggingWidget = ({
         {/* Scrollable Cards Container */}
         <div 
           ref={scrollContainerRef}
-          className="absolute inset-0 flex items-center overflow-x-auto overflow-visible scrollbar-hide gap-4 px-4"
+          className="absolute inset-0 flex items-center overflow-x-auto overflow-y-hidden scrollbar-hide gap-4 px-4"
           style={{ 
             scrollSnapType: 'x mandatory',
             WebkitOverflowScrolling: 'touch',
