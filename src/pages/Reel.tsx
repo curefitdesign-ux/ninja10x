@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronUp, Trash2, Lock } from 'lucide-react';
+import { X, ChevronUp, Trash2, Lock, ChevronRight } from 'lucide-react';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
@@ -84,7 +84,7 @@ const Reel = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   // Auto-advance timer state
-  const AUTO_ADVANCE_DURATION = 5000; // 5 seconds
+  const AUTO_ADVANCE_DURATION = 10000; // 10 seconds
   const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
   const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoAdvanceStartRef = useRef<number>(0);
@@ -643,21 +643,16 @@ const Reel = () => {
 
         {/* MAIN CONTENT ZONE - flexible middle section */}
         <div
-          className="flex-1 flex items-center justify-center z-30 overflow-hidden px-4"
+          className="flex-1 flex items-center justify-center z-30 overflow-hidden px-4 relative"
         >
-          {/* Card container with horizontal swipe + shake animation - single wrapper */}
+          {/* Card container with shake animation - single wrapper */}
           <motion.div 
-            className="relative w-full max-w-[340px] cursor-grab active:cursor-grabbing flex items-center justify-center"
+            className="relative w-full max-w-[340px] flex items-center justify-center"
             style={{ 
               maxHeight: '100%',
-              x: dragX,
             }}
             animate={shakeAnimation}
             transition={shakeTransition}
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.2}
-            onDragEnd={handleHorizontalDragEnd}
             onClick={handleTap}
           >
               {/* Full templated image/video - with lock overlay for non-public users */}
@@ -767,6 +762,34 @@ const Reel = () => {
                 );
               })()}
           </motion.div>
+          
+          {/* Right arrow indicator with subtle animation */}
+          {userGroups.length > 1 && currentUserIndex < userGroups.length - 1 && (
+            <motion.button
+              onClick={goNextUser}
+              className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center"
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+              }}
+              initial={{ opacity: 0.6 }}
+              animate={{ 
+                opacity: [0.6, 1, 0.6],
+                x: [0, 4, 0],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+            >
+              <ChevronRight className="w-5 h-5 text-white/80" />
+            </motion.button>
+          )}
         </div>
 
         {/* FIXED BOTTOM ZONE - Reaction pill + View Progress - compact sticky */}
