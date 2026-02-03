@@ -210,7 +210,7 @@ const Progress = () => {
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={{ top: 0, bottom: 0.3 }}
       onDragEnd={handleDragEnd}
-      initial={transitionToProgress ? { opacity: 0 } : { opacity: 1 }}
+      initial={{ opacity: 1 }}
       animate={{ 
         opacity: isExiting ? 0 : 1, 
       }}
