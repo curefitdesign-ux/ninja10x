@@ -86,6 +86,23 @@ type FlowStep = 'camera' | 'activity' | 'template';
 // Generate hour options from 0 to 24
 const HOUR_OPTIONS = Array.from({ length: 25 }, (_, i) => i);
 
+// Session storage key for preserving state during background/foreground
+const PREVIEW_STATE_KEY = 'preview_session_state';
+
+interface PreviewSessionState {
+  imageUrl: string;
+  isVideo: boolean;
+  activity: string | null;
+  duration: string;
+  pr: string;
+  dayNumber: number;
+  currentFrame: FrameType;
+  flowStep: FlowStep;
+  framedImageUrl: string | null;
+  showShareSheet: boolean;
+  showMicroCelebration: boolean;
+}
+
 const Preview = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -189,6 +206,7 @@ const Preview = () => {
   };
 
   // Check if we're coming with existing data (review mode or from camera/gallery pages)
+  // Also restore from sessionStorage if app was backgrounded
   useEffect(() => {
     const state = location.state as {
       imageUrl?: string;
@@ -230,6 +248,8 @@ const Preview = () => {
       setPhotoId(null);
       setDayNumber(Number((state.dayNumber ?? 1) as number | string));
       setFlowStep('activity'); // Start with activity selection
+      // Clear any stale session state
+      sessionStorage.removeItem(PREVIEW_STATE_KEY);
       setTimeout(() => setIsLoaded(true), 100);
       return;
     }
@@ -250,12 +270,62 @@ const Preview = () => {
         setOriginalFrame(state.frame);
       }
       setFlowStep('template');
+      // Clear any stale session state
+      sessionStorage.removeItem(PREVIEW_STATE_KEY);
       setTimeout(() => setIsLoaded(true), 100);
-    } else {
-      // No existing data - redirect to home
-      navigate('/', { replace: true });
+      return;
     }
+    
+    // No router state - try to restore from sessionStorage (app was backgrounded)
+    try {
+      const savedState = sessionStorage.getItem(PREVIEW_STATE_KEY);
+      if (savedState) {
+        const parsed: PreviewSessionState = JSON.parse(savedState);
+        console.info('[journey-debug] Preview: restoring from session storage', parsed);
+        
+        setImageUrl(parsed.imageUrl);
+        setIsVideo(parsed.isVideo);
+        setActivity(parsed.activity);
+        setDuration(parsed.duration);
+        setPr(parsed.pr);
+        setDayNumber(parsed.dayNumber);
+        setCurrentFrame(parsed.currentFrame);
+        setFlowStep(parsed.flowStep);
+        setFramedImageUrl(parsed.framedImageUrl);
+        setShowShareSheet(parsed.showShareSheet);
+        setShowMicroCelebration(parsed.showMicroCelebration);
+        setTimeout(() => setIsLoaded(true), 100);
+        return;
+      }
+    } catch (e) {
+      console.warn('[journey-debug] Preview: failed to restore session state', e);
+    }
+    
+    // No existing data and no session state - redirect to home
+    navigate('/', { replace: true });
   }, []);
+
+  // Persist state to sessionStorage when in share sheet or celebration
+  // This ensures state survives app backgrounding
+  useEffect(() => {
+    if (imageUrl && activity && (showShareSheet || showMicroCelebration || framedImageUrl)) {
+      const stateToSave: PreviewSessionState = {
+        imageUrl,
+        isVideo,
+        activity,
+        duration,
+        pr,
+        dayNumber,
+        currentFrame,
+        flowStep,
+        framedImageUrl,
+        showShareSheet,
+        showMicroCelebration,
+      };
+      sessionStorage.setItem(PREVIEW_STATE_KEY, JSON.stringify(stateToSave));
+      console.info('[journey-debug] Preview: persisted state to session storage');
+    }
+  }, [imageUrl, isVideo, activity, duration, pr, dayNumber, currentFrame, flowStep, framedImageUrl, showShareSheet, showMicroCelebration]);
 
   // Focus input when bottom sheet opens
   useEffect(() => {
@@ -369,6 +439,9 @@ const Preview = () => {
 
     console.info('[journey-debug] Preview: navigating home after share');
 
+    // Clear session state since we're done
+    sessionStorage.removeItem(PREVIEW_STATE_KEY);
+    
     setTimeout(() => {
       navigate('/', { replace: true, state: null });
     }, 400);
@@ -409,6 +482,9 @@ const Preview = () => {
     
     // Toast removed - exit animation handles success feedback
     setIsExiting(true);
+
+    // Clear session state
+    sessionStorage.removeItem(PREVIEW_STATE_KEY);
 
     setTimeout(() => {
       navigate('/', { replace: true, state: null });
