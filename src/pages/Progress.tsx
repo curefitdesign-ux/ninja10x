@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { X, ChevronDown, Lock } from "lucide-react";
 import { useJourneyActivities, fetchPublicFeed, LocalActivity } from "@/hooks/use-journey-activities";
 import { useAuth } from "@/hooks/use-auth";
+import { useProfile } from "@/hooks/use-profile";
 import { JourneyActivity, ReactionType, ActivityReaction } from "@/services/journey-service";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import MakePublicSheet, { hasUserChosenPublic } from "@/components/MakePublicSheet";
@@ -44,11 +45,15 @@ const Progress = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const [showContent, setShowContent] = useState(false);
-  const [showTiles, setShowTiles] = useState(false);
-  const [showStories, setShowStories] = useState(false);
+  const { profile } = useProfile();
+  const [showContent, setShowContent] = useState(true);
+  const [showTiles, setShowTiles] = useState(true);
+  const [showStories, setShowStories] = useState(true);
   const [showTransitionIn, setShowTransitionIn] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
+  
+  // Track if we've already handled the transition to prevent double execution
+  const transitionHandledRef = useRef(false);
 
   // Current user's activities (for tile state)
   const { activities: myActivities, loading, hasPublicActivity, makeActivityPublic } = useJourneyActivities();
@@ -133,23 +138,27 @@ const Progress = () => {
   };
 
   // Animation sequence - instant content, no staggered delays
+  // Handle transition from share - run once only
   useEffect(() => {
-    // Show all content immediately for zero friction
-    setShowContent(true);
-    setShowStories(true);
-    setShowTiles(true);
+    // Prevent double execution
+    if (transitionHandledRef.current) return;
     
     // Show transition animation if coming from share (brief overlay)
     if (transitionToProgress && transitionImage) {
+      transitionHandledRef.current = true;
       setShowTransitionIn(true);
       setTimeout(() => setShowTransitionIn(false), 300);
       
-      // Show make public prompt if coming from share and activity is not public
+      // Skip public prompt if profile is already set to public OR user previously chose public
+      const isProfilePublic = profile?.stories_public === true;
       const currentActivity = myActivities.find(a => a.dayNumber === transitionDayNumber);
+      
       if (currentActivity && !currentActivity.isPublic) {
-        if (hasUserChosenPublic()) {
+        if (isProfilePublic || hasUserChosenPublic()) {
+          // Auto-make public without prompting
           makeActivityPublic(transitionDayNumber);
         } else {
+          // Show prompt for private profiles
           setTimeout(() => {
             setPendingDayNumber(transitionDayNumber);
             setShowMakePublicSheet(true);
@@ -157,7 +166,7 @@ const Progress = () => {
         }
       }
     }
-  }, [transitionToProgress, transitionImage, transitionDayNumber, myActivities, makeActivityPublic]);
+  }, [transitionToProgress, transitionImage, transitionDayNumber, myActivities, makeActivityPublic, profile?.stories_public]);
 
   // Handle making activity public
   const handleMakePublic = async () => {
