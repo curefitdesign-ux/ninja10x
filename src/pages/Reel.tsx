@@ -801,7 +801,8 @@ const Reel = () => {
           }}
         >
           {(() => {
-            const isContentLocked = !isOwnStory && !hasPublicActivity;
+            // Lock content if user's profile is private OR they haven't shared any public activity
+            const isContentLocked = !isOwnStory && (!profile?.stories_public || !hasPublicActivity);
             
             return (
               <div 
