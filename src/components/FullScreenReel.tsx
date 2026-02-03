@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { X, Heart, ChevronLeft, ChevronRight, Lock } from 'lucide-react';
 import { JourneyActivity, toggleReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
@@ -24,7 +24,8 @@ export default function FullScreenReel({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showHeart, setShowHeart] = useState(false);
   const [localReactions, setLocalReactions] = useState<Record<string, { count: number; userReacted: boolean }>>({});
-
+  const [dragDirection, setDragDirection] = useState<'left' | 'right' | null>(null);
+  const isDragging = useRef(false);
   const current = activities[currentIndex];
   
   // Check if current activity is from the logged-in user
@@ -52,9 +53,33 @@ export default function FullScreenReel({
     setCurrentIndex(prev => (prev - 1 + activities.length) % activities.length);
   }, [activities.length]);
 
+  // Swipe handlers
+  const handleDragEnd = useCallback((e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const swipeThreshold = 50;
+    const velocityThreshold = 300;
+    
+    if (Math.abs(info.offset.x) > swipeThreshold || Math.abs(info.velocity.x) > velocityThreshold) {
+      if (info.offset.x > 0 || info.velocity.x > velocityThreshold) {
+        // Swiped right - go to previous
+        goPrev();
+        setDragDirection('right');
+      } else {
+        // Swiped left - go to next
+        goNext();
+        setDragDirection('left');
+      }
+    }
+    
+    isDragging.current = false;
+    setTimeout(() => setDragDirection(null), 300);
+  }, [goNext, goPrev]);
+
   // Double-tap to heart
   const [lastTap, setLastTap] = useState(0);
   const handleTap = useCallback(() => {
+    // Ignore taps right after dragging
+    if (isDragging.current) return;
+    
     if (shouldShowLocked) {
       onUnlockRequest?.();
       return;
@@ -140,19 +165,33 @@ export default function FullScreenReel({
         ))}
       </div>
 
-      {/* Main content */}
-      <div
-        className="flex-1 flex items-center justify-center relative"
+      {/* Main content with swipe */}
+      <motion.div
+        className="flex-1 flex items-center justify-center relative touch-pan-y"
         onClick={handleTap}
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.2}
+        onDragStart={() => { isDragging.current = true; }}
+        onDragEnd={handleDragEnd}
+        style={{ cursor: 'grab' }}
       >
         <AnimatePresence mode="wait">
           <motion.div
             key={current.id}
-            className="absolute inset-0 flex items-center justify-center"
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            initial={{ 
+              opacity: 0, 
+              x: dragDirection === 'left' ? 100 : dragDirection === 'right' ? -100 : 0,
+              scale: 1.02 
+            }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ 
+              opacity: 0, 
+              x: dragDirection === 'left' ? -100 : dragDirection === 'right' ? 100 : 0,
+              scale: 0.98 
+            }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
           >
             {isVideo ? (
               <video
@@ -254,7 +293,7 @@ export default function FullScreenReel({
         >
           <ChevronRight className="w-8 h-8" />
         </button>
-      </div>
+      </motion.div>
 
       {/* Footer with reactions */}
       {!shouldShowLocked && (
