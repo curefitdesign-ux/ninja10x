@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronUp, Trash2, Lock, ChevronRight } from 'lucide-react';
+import { X, ChevronUp, Trash2, Lock, ChevronRight, ChevronLeft } from 'lucide-react';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
@@ -755,10 +755,43 @@ const Reel = () => {
                         newReaction={floatingReaction}
                       />
                     )}
+                    
+                    {/* Progress bar at bottom of story */}
+                    <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl overflow-hidden bg-white/20">
+                      <motion.div 
+                        className="h-full"
+                        style={{
+                          background: 'linear-gradient(90deg, #FEDA75, #FA7E1E, #D62976, #962FBF, #4F5BD5)',
+                        }}
+                        initial={{ width: '0%' }}
+                        animate={{ width: `${autoAdvanceProgress * 100}%` }}
+                        transition={{ duration: 0.05, ease: 'linear' }}
+                      />
+                    </div>
                   </div>
                 );
               })()}
           </motion.div>
+          
+          {/* Left arrow indicator with subtle animation */}
+          {userGroups.length > 1 && currentUserIndex > 0 && (
+            <motion.button
+              onClick={goPrevUser}
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+              initial={{ opacity: 0.5 }}
+              animate={{ 
+                opacity: [0.5, 0.9, 0.5],
+                x: [0, -3, 0],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+            >
+              <ChevronLeft className="w-6 h-6 text-white/70" />
+            </motion.button>
+          )}
           
           {/* Right arrow indicator with subtle animation */}
           {userGroups.length > 1 && currentUserIndex < userGroups.length - 1 && (
