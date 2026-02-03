@@ -736,46 +736,63 @@ const Reel = () => {
                 // Lock content if user's profile is private OR they haven't shared any public activity
                 const shouldShowLocked = !isOwnStory && (!profile?.stories_public || !hasPublicActivity);
                 
+                // Generate unique key for transitions
+                const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
+                
                 return (
                   <div
                     className="relative w-full max-w-[307px] overflow-hidden rounded-2xl"
                     style={{ aspectRatio: '9/16' }}
                   >
-                    {isVideo ? (
-                      <video
-                        key={mediaUrl}
-                        src={mediaUrl}
-                        className="w-full h-full rounded-2xl"
-                        style={{ 
-                          objectFit: 'cover',
-                          filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={contentKey}
+                        className="absolute inset-0"
+                        initial={{ opacity: 0, scale: 1.02 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
+                        transition={{ 
+                          duration: 0.2, 
+                          ease: [0.25, 0.46, 0.45, 0.94] 
                         }}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                      />
-                    ) : (
-                      <img
-                        key={mediaUrl}
-                        src={mediaUrl}
-                        alt={`Day ${currentActivity.dayNumber}`}
-                        className="w-full h-full rounded-2xl"
-                        loading="eager"
-                        decoding="async"
-                        style={{ 
-                          objectFit: 'cover',
-                          filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                        }}
-                        onError={(e) => {
-                          const img = e.currentTarget;
-                          if (!img.dataset.retried) {
-                            img.dataset.retried = "true";
-                            img.src = mediaUrl + "?t=" + Date.now();
-                          }
-                        }}
-                      />
-                    )}
+                      >
+                        {isVideo ? (
+                          <video
+                            key={mediaUrl}
+                            src={mediaUrl}
+                            className="w-full h-full rounded-2xl"
+                            style={{ 
+                              objectFit: 'cover',
+                              filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                            }}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                          />
+                        ) : (
+                          <img
+                            key={mediaUrl}
+                            src={mediaUrl}
+                            alt={`Day ${currentActivity.dayNumber}`}
+                            className="w-full h-full rounded-2xl"
+                            loading="eager"
+                            decoding="async"
+                            style={{ 
+                              objectFit: 'cover',
+                              filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                            }}
+                            onError={(e) => {
+                              const img = e.currentTarget;
+                              if (!img.dataset.retried) {
+                                img.dataset.retried = "true";
+                                img.src = mediaUrl + "?t=" + Date.now();
+                              }
+                            }}
+                          />
+                        )}
+                      </motion.div>
+                    </AnimatePresence>
                     
                     {/* Lock overlay for locked content */}
                     {shouldShowLocked && (
