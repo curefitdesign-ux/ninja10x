@@ -253,21 +253,27 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
     img.src = imageUrl;
   }, [imageUrl, isVideo]);
 
-  // Handle VIEW PROGRESS - navigate to progress page with instant transition
+  // Handle VIEW PROGRESS - navigate to progress page with exit animation
   const handleViewProgress = () => {
     triggerHaptic('success');
     
-    // Navigate immediately - no delay for zero friction
-    navigate('/progress', {
-      state: {
-        fromShare: true,
-        transitionImage: imageUrl,
-        transitionToProgress: true,
-        dayNumber,
-        frameType,
-        frameProps,
-      },
-    });
+    // Set exiting state for smooth animation
+    setIsExiting(true);
+    
+    // Navigate after exit animation completes
+    setTimeout(() => {
+      navigate('/progress', {
+        replace: true,
+        state: {
+          fromShare: true,
+          transitionImage: imageUrl,
+          transitionToProgress: true,
+          dayNumber,
+          frameType,
+          frameProps,
+        },
+      });
+    }, 250);
   };
 
   // Close with X - shared-element transition back to Activity page (PhotoLoggingWidget)
