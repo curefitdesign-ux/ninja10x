@@ -436,8 +436,10 @@ const Reel = () => {
     }
   };
 
-  // Auto-advance timer - pause when modals are open
-  const isPaused = showReactsSheet || showSendReactionSheet || showDeleteConfirm || showMakePublicSheet || showProgressOverlay;
+  // Auto-advance timer - pause when modals are open OR content is locked
+  // Determine if story should be locked (user's profile is private OR they haven't shared any public activity)
+  const isStoryLocked = !isOwnStory && (!profile?.stories_public || !hasPublicActivity);
+  const isPaused = showReactsSheet || showSendReactionSheet || showDeleteConfirm || showMakePublicSheet || showProgressOverlay || isStoryLocked;
   
   useEffect(() => {
     // Clear any existing timer
