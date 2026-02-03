@@ -15,6 +15,8 @@ import { useFitnessReel } from '@/hooks/use-fitness-reel';
 import { uploadToStorage } from '@/services/storage-service';
 import SharedImageTransition from '@/components/SharedImageTransition';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
+import type { PillState } from '@/components/ReelProgressPill';
+import weekRecapVideo from '@/assets/demo-videos/week-recap.mp4';
 
 import CameraUI from '@/components/CameraUI';
 import {
@@ -121,6 +123,7 @@ const Index = () => {
     isGenerating, 
     currentStep, 
     reelHistory, 
+    currentReel,
     currentReelIndex, 
     setCurrentReelIndex,
     clearHistory 
@@ -212,6 +215,62 @@ const Index = () => {
   // Calculate week and day based on photos
   const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
   const currentDay = (photos.length % 3) + 1;
+
+  // Weekly Reel Progress Pill (3 states)
+  const reelPill = (() => {
+    const completedWeeks = Math.floor(photos.length / 3);
+    if (completedWeeks <= 0) return null;
+
+    const weekStart = (completedWeeks - 1) * 3;
+    const weekPhotos = photos.slice(weekStart, weekStart + 3);
+
+    const totalReactions = weekPhotos.reduce((sum, p) => {
+      const reactions = p.reactions ? Object.values(p.reactions) : [];
+      const photoTotal = reactions.reduce((s, r) => s + (r?.count ?? 0), 0);
+      return sum + photoTotal;
+    }, 0);
+
+    const isTransitioning = !!currentReel?.videoTaskId && !currentReel?.videoUrl;
+    const isUploading = isGenerating;
+    const isReady = !isUploading && !isTransitioning;
+
+    const state: PillState = isUploading ? 'creating' : isTransitioning ? 'completing' : 'complete';
+
+    const progress = (() => {
+      if (state === 'complete') return 100;
+      if (isTransitioning) return 92;
+      switch (currentStep) {
+        case 'narration':
+          return 20;
+        case 'voiceover':
+          return 45;
+        case 'video':
+          return 70;
+        case 'complete':
+          return 88;
+        default:
+          return 10;
+      }
+    })();
+
+    return {
+      weekNumber: completedWeeks,
+      state,
+      progress,
+      thumbnailUrl: weekPhotos[weekPhotos.length - 1]?.storageUrl,
+      totalReactions,
+      onPlay: isReady
+        ? () => {
+            navigate('/reel', {
+              state: {
+                weekRecapVideo: currentReel?.videoUrl || weekRecapVideo,
+                weekNumber: completedWeeks,
+              },
+            });
+          }
+        : undefined,
+    };
+  })();
 
   // Save is now handled directly in Preview.tsx via upsertActivity - just navigate home
 
@@ -501,6 +560,7 @@ const Index = () => {
                   isGenerating={isGenerating}
                   isUploading={isUploading}
                   weekTransitionAnimation={weekTransitionAnimation}
+                  reelPill={reelPill}
                 />
               )}
             </main>

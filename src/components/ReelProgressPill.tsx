@@ -6,7 +6,7 @@ import confetti from 'canvas-confetti';
 // Reaction images
 import fireReaction from '@/assets/reactions/fire-3d.png';
 
-type PillState = 'creating' | 'completing' | 'complete' | 'celebrate';
+export type PillState = 'creating' | 'completing' | 'complete' | 'celebrate';
 
 interface Reaction {
   type: string;

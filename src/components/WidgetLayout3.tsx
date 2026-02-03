@@ -10,10 +10,8 @@ import JournalFrame from '@/components/frames/JournalFrame';
 import VogueFrame from '@/components/frames/VogueFrame';
 import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
-import ReelProgressPill from '@/components/ReelProgressPill';
-import { useFitnessReel } from '@/hooks/use-fitness-reel';
+import ReelProgressPill, { type PillState } from '@/components/ReelProgressPill';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
-import weekRecapVideo from '@/assets/demo-videos/week-recap.mp4';
 
 interface Photo {
   id: string;
@@ -103,6 +101,14 @@ interface WidgetLayout3Props {
   isGenerating?: boolean;
   isUploading?: boolean;
   weekTransitionAnimation?: boolean;
+  reelPill?: {
+    weekNumber: number;
+    state: PillState;
+    progress: number;
+    thumbnailUrl?: string;
+    totalReactions?: number;
+    onPlay?: () => void;
+  } | null;
 }
 
 const WidgetLayout3 = ({ 
@@ -115,6 +121,7 @@ const WidgetLayout3 = ({
   isGenerating = false, 
   isUploading = false,
   weekTransitionAnimation = false,
+  reelPill = null,
 }: WidgetLayout3Props) => {
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
@@ -123,36 +130,11 @@ const WidgetLayout3 = ({
   const [newPhotoIndex, setNewPhotoIndex] = useState<number | null>(null);
   const [showMediaSheet, setShowMediaSheet] = useState(false);
   
-  // Get reel state from hook
-  const { 
-    currentReel,
-    currentStep: reelStep,
-    isGenerating: isGeneratingReel,
-  } = useFitnessReel();
-  
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
   const hasThreePhotos = photos.length >= 3;
   const allPhotosUploaded = photos.every(p => p.storageUrl);
   const showPlayButton = hasThreePhotos;
   const canCreateReel = hasThreePhotos && allPhotosUploaded && !isGenerating && !isUploading;
-  
-  // Calculate reel progress based on step
-  const reelProgress = (() => {
-    if (!isGeneratingReel && !isGenerating) {
-      return currentReel?.videoUrl ? 100 : 0;
-    }
-    switch (reelStep) {
-      case 'narration': return 25;
-      case 'voiceover': return 50;
-      case 'video': return 75;
-      case 'complete': return 100;
-      default: return 0;
-    }
-  })();
-  
-  // Determine which week just completed (for showing pill)
-  const completedWeeks = Math.floor(photos.length / 3);
-  const showReelPill = completedWeeks > 0 && (isGeneratingReel || isGenerating || currentReel?.videoUrl);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 100);
@@ -493,29 +475,15 @@ const WidgetLayout3 = ({
       
       {/* Reel Progress Pill - Show below widget when a week is complete */}
       <AnimatePresence>
-        {showReelPill && (
+        {!!reelPill && (
           <div className="mt-4 px-2">
             <ReelProgressPill
-              weekNumber={completedWeeks}
-              state={
-                currentReel?.videoUrl 
-                  ? 'complete' 
-                  : reelProgress >= 90 
-                    ? 'completing' 
-                    : 'creating'
-              }
-              progress={reelProgress}
-              thumbnailUrl={photos[photos.length - 1]?.storageUrl}
-              onPlay={() => {
-                if (currentReel?.videoUrl) {
-                  navigate('/reel', {
-                    state: {
-                      weekRecapVideo,
-                      weekNumber: completedWeeks,
-                    },
-                  });
-                }
-              }}
+              weekNumber={reelPill.weekNumber}
+              state={reelPill.state}
+              progress={reelPill.progress}
+              thumbnailUrl={reelPill.thumbnailUrl}
+              totalReactions={reelPill.totalReactions}
+              onPlay={reelPill.onPlay}
             />
           </div>
         )}
