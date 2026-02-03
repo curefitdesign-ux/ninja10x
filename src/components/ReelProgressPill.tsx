@@ -461,18 +461,14 @@ const ReelProgressPill = ({
                 Week {weekNumber}
               </span>
               <span style={{ color: 'rgba(255,255,255,0.4)' }}>•</span>
+              {isComplete && <Play className="w-3 h-3 text-emerald-400" fill="currentColor" />}
               <span 
-                className="font-bold text-sm tracking-wide flex items-center gap-1"
+                className="font-bold text-sm tracking-wide"
                 style={{
                   color: isComplete ? '#34d399' : 'rgba(255,255,255,0.6)',
                 }}
               >
-                {isCreating ? 'Creating...' : (
-                  <>
-                    <Play className="w-3 h-3" fill="currentColor" />
-                    PLAY NOW
-                  </>
-                )}
+                {isCreating ? 'Creating...' : 'PLAY NOW'}
               </span>
             </motion.div>
           </AnimatePresence>
