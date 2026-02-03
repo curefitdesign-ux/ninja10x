@@ -505,6 +505,7 @@ const WidgetLayout3 = ({
                     : 'creating'
               }
               progress={reelProgress}
+              thumbnailUrl={photos[photos.length - 1]?.storageUrl}
               onPlay={() => {
                 if (currentReel?.videoUrl) {
                   navigate('/reel', {
