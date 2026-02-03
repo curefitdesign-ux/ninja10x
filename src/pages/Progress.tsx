@@ -21,25 +21,25 @@ import { isVideoUrl } from "@/lib/media";
 // Tile positions - optimized for mobile viewport with percentage-based layout
 // Shifted down so last tile aligns near bottom
 const TILE_POSITIONS = [
-  { left: 38, top: 8 },
-  { left: 46, top: 15 },
-  { left: 54, top: 22 },
-  { left: 62, top: 29 },
-  { left: 54, top: 36 },
-  { left: 46, top: 43 },
-  { left: 38, top: 50 },
-  { left: 46, top: 57 },
-  { left: 54, top: 64 },
-  { left: 62, top: 71 },
-  { left: 54, top: 78 },
-  { left: 46, top: 85 },
+  { left: 42, top: 12 },
+  { left: 50, top: 19 },
+  { left: 58, top: 26 },
+  { left: 66, top: 33 },
+  { left: 58, top: 40 },
+  { left: 50, top: 47 },
+  { left: 42, top: 54 },
+  { left: 50, top: 61 },
+  { left: 58, top: 68 },
+  { left: 66, top: 75 },
+  { left: 58, top: 82 },
+  { left: 50, top: 89 },
 ];
 
 const LABELS = [
-  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 8, left: 72 },
-  { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 29, left: 4 },
-  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 50, left: 72 },
-  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 85, left: 4 },
+  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 12, left: 76 },
+  { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 33, left: 4 },
+  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 54, left: 76 },
+  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 89, left: 4 },
 ];
 
 const Progress = () => {
@@ -589,7 +589,7 @@ const Progress = () => {
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "4%", bottom: "2%", width: "18%", aspectRatio: "1.3" }}
+              style={{ left: "2%", bottom: "0%", width: "12%", aspectRatio: "1.3" }}
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7 }}
