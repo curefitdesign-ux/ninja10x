@@ -165,27 +165,27 @@ const ContextualNumericKeyboard = ({
             </div>
           )}
           
-          {/* Numeric keypad */}
+          {/* Numeric keypad - translucent liquid glass */}
           <div className="px-3 pb-2">
             <div className="grid grid-cols-3 gap-1.5">
               {keys.map((key, index) => (
                 <motion.button
                   key={index}
-                  whileTap={{ scale: 0.95, backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                  whileTap={{ scale: 0.95, backgroundColor: 'rgba(255, 255, 255, 0.12)' }}
                   onClick={() => key && handleKeyPress(key)}
                   disabled={!key}
                   className="h-14 rounded-xl flex items-center justify-center transition-colors"
                   style={{
-                    background: key === 'delete' 
-                      ? 'rgba(255, 100, 100, 0.12)' 
-                      : key 
-                        ? 'rgba(120, 120, 128, 0.2)' 
-                        : 'transparent',
-                    border: key ? '1px solid rgba(255, 255, 255, 0.06)' : 'none',
+                    background: key 
+                      ? 'rgba(255, 255, 255, 0.06)' 
+                      : 'transparent',
+                    border: key ? '1px solid rgba(255, 255, 255, 0.08)' : 'none',
+                    backdropFilter: key ? 'blur(12px)' : 'none',
+                    WebkitBackdropFilter: key ? 'blur(12px)' : 'none',
                   }}
                 >
                   {key === 'delete' ? (
-                    <Delete className="w-6 h-6 text-red-400" />
+                    <Delete className="w-6 h-6 text-white/60" />
                   ) : (
                     <span className="text-white text-2xl font-semibold">{key}</span>
                   )}

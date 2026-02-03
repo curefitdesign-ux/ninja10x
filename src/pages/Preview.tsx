@@ -887,9 +887,9 @@ const Preview = () => {
       {/* Activity-specific background effect */}
       {activity && <ActivityBackgroundEffect activity={activity} />}
 
-      {/* Content - fixed height layout */}
+      {/* Content - scrollable layout */}
       <div 
-        className="relative z-10 flex flex-col h-full"
+        className="relative z-10 flex flex-col h-full overflow-y-auto"
         style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
       >
         {/* Offscreen capture target (unscaled) for image saves */}
@@ -922,10 +922,9 @@ const Preview = () => {
         
         {/* Frame carousel - larger templates */}
         <div 
-          className={`flex-1 flex items-center justify-center transition-all duration-700 ease-out ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''}`}
+          className={`flex-shrink-0 flex items-center justify-center transition-all duration-700 ease-out py-4 ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''}`}
           style={{ 
-            minHeight: 0,
-            maxHeight: 'calc(100dvh - 220px)', // More space for larger templates
+            minHeight: 'min(75vw * 16 / 9, 520px)',
           }}
         >
           {elementsHidden ? (
@@ -933,9 +932,8 @@ const Preview = () => {
               <div 
                 className="w-full"
                 style={{ 
-                  maxWidth: 'min(75vw, 320px)',
+                  maxWidth: 'min(80vw, 340px)',
                   aspectRatio: '9/16',
-                  maxHeight: '100%',
                 }}
               >
                 {currentFrame === 'shaky' && <ShakyFrame {...frameProps} />}
@@ -955,8 +953,8 @@ const Preview = () => {
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
                 overscrollBehaviorX: 'contain',
-                paddingLeft: 'calc((100vw - min(72vw, 320px)) / 2)',
-                paddingRight: 'calc((100vw - min(72vw, 320px)) / 2)',
+                paddingLeft: 'calc((100vw - min(80vw, 340px)) / 2)',
+                paddingRight: 'calc((100vw - min(80vw, 340px)) / 2)',
               }}
             >
               {FRAMES.map((frame, index) => {
@@ -979,9 +977,9 @@ const Preview = () => {
                       elementsHidden && isRightOfCurrent ? 'opacity-0 translate-x-full' : ''
                     }`}
                     style={{ 
-                      width: 'min(72vw, 320px)',
-                      height: 'calc(min(72vw, 320px) * 16 / 9)',
-                      maxHeight: 'calc(100dvh - 280px)',
+                      width: 'min(80vw, 340px)',
+                      height: 'calc(min(80vw, 340px) * 16 / 9)',
+                      maxHeight: '520px',
                       transform: `scale(${scale})`,
                       opacity: elementsHidden && !isActiveFrame ? 0 : opacity,
                       transition: 'transform 0.12s ease-out, opacity 0.12s ease-out',
@@ -1005,26 +1003,34 @@ const Preview = () => {
           )}
         </div>
 
-        {/* Content section - fixed, no scroll */}
+        {/* Content section - scrollable */}
         <div 
-          className={`flex-shrink-0 space-y-2 px-5 py-2 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
-          style={{ animationDelay: '0.3s' }}
+          className={`flex-shrink-0 space-y-3 px-5 py-4 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 translate-y-full pointer-events-none' : ''}`} 
+          style={{ animationDelay: '0.3s', paddingBottom: '140px' }}
         >
           {/* Editable data points - contextual to activity */}
           {(() => {
             const config = getActivityInputConfig(activity || '');
             return (
-              <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 relative overflow-hidden">
+              <div 
+                className="rounded-2xl p-4 relative overflow-hidden"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(40px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                }}
+              >
                 {/* Primary: Duration (always shown) */}
                 <button 
                   onClick={() => { handleTap('duration'); openEditSheet('duration'); }}
-                  className={`w-full flex justify-between items-center py-2 ${config.secondaryInputType !== 'none' ? 'border-b border-white/10' : ''} tap-bounce min-h-[44px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
+                  className={`w-full flex justify-between items-center py-3 ${config.secondaryInputType !== 'none' ? 'border-b border-white/10' : ''} tap-bounce min-h-[56px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
                 >
-                  <span className="text-white/80 text-sm flex items-center gap-2">
+                  <span className="text-white/70 text-base flex items-center gap-2">
                     {config.primaryMetric}
-                    <span className="text-[10px] text-white/40">tap to edit</span>
+                    <span className="text-xs text-white/40">tap to edit</span>
                   </span>
-                  <span className={`font-semibold text-sm ${duration ? 'text-white' : 'text-white/50 italic'}`}>
+                  <span className={`font-bold text-lg ${duration ? 'text-white' : 'text-white/40 italic'}`}>
                     {duration || '-'}
                   </span>
                 </button>
@@ -1033,12 +1039,12 @@ const Preview = () => {
                 {config.secondaryInputType !== 'none' && (
                   <button 
                     onClick={() => { handleTap('pr'); openEditSheet('pr'); }}
-                    className={`w-full flex justify-between items-center py-2 tap-bounce min-h-[44px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
+                    className={`w-full flex justify-between items-center py-3 tap-bounce min-h-[56px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
                   >
-                    <span className="text-white/80 text-sm flex items-center gap-2">
-                      {config.secondaryMetric} <span className="text-white/40">(Optional)</span>
+                    <span className="text-white/70 text-base flex items-center gap-2">
+                      {config.secondaryMetric} <span className="text-white/40 text-xs">(Optional)</span>
                     </span>
-                    <span className={`font-semibold text-sm ${pr ? 'text-white' : 'text-white/50'}`}>
+                    <span className={`font-bold text-lg ${pr ? 'text-white' : 'text-white/40'}`}>
                       {pr || '-'}
                     </span>
                   </button>
