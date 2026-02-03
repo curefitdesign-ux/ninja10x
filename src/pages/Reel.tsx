@@ -147,13 +147,16 @@ const Reel = () => {
         };
       }
     }
-    // Add week recap as a synthetic activity if present
-    if (hasWeekRecap) {
-      map['week-recap'] = {
-        total: 0,
-        reactions: { ...DEFAULT_REACTIONS },
-        reactorProfiles: [],
-      };
+    // Add week recap entries for all users with completed weeks
+    for (const group of groups) {
+      const completedWeekCount = Math.floor(group.activities.length / 3);
+      if (completedWeekCount > 0) {
+        map[`week-recap-${group.userId}`] = {
+          total: 0,
+          reactions: { ...DEFAULT_REACTIONS },
+          reactorProfiles: [],
+        };
+      }
     }
     setLocalReactions(map);
     
@@ -202,44 +205,52 @@ const Reel = () => {
     didInitWeekRecapRef.current = true;
   }, [hasWeekRecap, user, userGroups]);
 
-  // Create the effective user groups with week recap injected as first story for current user
+  // Create the effective user groups with week recap injected for ANY user who has completed a week
+  // This makes week recaps visible to all viewers, not just the owner
   const effectiveUserGroups = useMemo(() => {
-    if (!hasWeekRecap || userGroups.length === 0 || !user) return userGroups;
+    if (userGroups.length === 0) return userGroups;
     
-    // Prefer nav-provided URL (if present), fallback to bundled asset
-    const weekRecapVideoUrl = weekRecapVideoFromNav ?? weekRecapVideoAsset;
-    
-    // Find current user's group and inject week recap as first activity
     return userGroups.map(group => {
-      if (group.userId === user.id) {
-        const weekRecapActivity: LocalActivity = {
-          id: 'week-recap',
-          dayNumber: 0,
-          storageUrl: weekRecapVideoUrl,
-          originalUrl: weekRecapVideoUrl,
-          activity: `Week ${weekRecapNumber || 1} Recap`,
-          createdAt: new Date().toISOString(),
-          isVideo: true,
-          isPublic: true,
-          frame: null,
-          duration: null,
-          pr: null,
-          reactionCount: 0,
-          reactions: { ...DEFAULT_REACTIONS },
-          reactorProfiles: [],
-        };
-        return {
-          ...group,
-          activities: [weekRecapActivity, ...group.activities],
-        };
+      // Count completed weeks for this user (every 3 activities = 1 week)
+      const completedWeekCount = Math.floor(group.activities.length / 3);
+      
+      if (completedWeekCount === 0) {
+        return group; // No completed weeks, no recap
       }
-      return group;
+      
+      // Use nav-provided URL if viewing own recap, otherwise use bundled asset
+      const isOwnGroup = user && group.userId === user.id;
+      const weekRecapVideoUrl = (isOwnGroup && weekRecapVideoFromNav) ? weekRecapVideoFromNav : weekRecapVideoAsset;
+      const weekNum = (isOwnGroup && weekRecapNumber) ? weekRecapNumber : completedWeekCount;
+      
+      // Create week recap activity
+      const weekRecapActivity: LocalActivity = {
+        id: `week-recap-${group.userId}`,
+        dayNumber: 0,
+        storageUrl: weekRecapVideoUrl,
+        originalUrl: weekRecapVideoUrl,
+        activity: `Week ${weekNum} Recap`,
+        createdAt: new Date().toISOString(),
+        isVideo: true,
+        isPublic: true,
+        frame: null,
+        duration: null,
+        pr: null,
+        reactionCount: 0,
+        reactions: { ...DEFAULT_REACTIONS },
+        reactorProfiles: [],
+      };
+      
+      return {
+        ...group,
+        activities: [weekRecapActivity, ...group.activities],
+      };
     });
-  }, [userGroups, hasWeekRecap, weekRecapNumber, user]);
+  }, [userGroups, weekRecapVideoFromNav, weekRecapNumber, user]);
 
   const currentGroup = effectiveUserGroups[currentUserIndex];
   const currentActivity = currentGroup?.activities[currentActivityIndex];
-  const isWeekRecapStory = currentActivity?.id === 'week-recap';
+  const isWeekRecapStory = currentActivity?.id?.startsWith('week-recap');
   const isOwnStory = user && currentGroup?.userId === user.id;
   
   // Check if activity was created within the last 24 hours
