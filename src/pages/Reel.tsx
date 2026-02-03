@@ -324,7 +324,7 @@ const Reel = () => {
   };
 
   const handleClose = () => {
-    navigate(-1);
+    navigate('/', { replace: true });
   };
 
   const handleDeleteActivity = async () => {
