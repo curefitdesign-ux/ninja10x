@@ -257,7 +257,6 @@ const Index = () => {
       weekNumber: completedWeeks,
       state,
       progress,
-      thumbnailUrl: weekPhotos[weekPhotos.length - 1]?.storageUrl,
       totalReactions,
       onPlay: isReady
         ? () => {

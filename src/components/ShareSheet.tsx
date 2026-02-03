@@ -680,7 +680,6 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
                             : 'creating'
                       }
                       progress={reelProgress}
-                      thumbnailUrl={reelPhotos[reelPhotos.length - 1]?.imageUrl}
                        onPlay={() => {
                          triggerHaptic('medium');
                          // Navigate to reel page with the week recap video as first story
