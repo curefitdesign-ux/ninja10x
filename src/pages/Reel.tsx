@@ -1001,25 +1001,44 @@ const Reel = () => {
         onStoryTap={handleProgressStoryTap}
       />
 
-      {/* Delete confirmation dialog */}
+      {/* Delete confirmation dialog - Liquid glass design */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-[320px] rounded-2xl">
+        <AlertDialogContent 
+          className="text-white max-w-[320px] rounded-2xl border"
+          style={{
+            background: 'linear-gradient(145deg, rgba(60, 55, 70, 0.85), rgba(40, 38, 50, 0.9))',
+            backdropFilter: 'blur(60px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(60px) saturate(180%)',
+            borderColor: 'rgba(255, 255, 255, 0.12)',
+            boxShadow: '0 24px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          }}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Delete this activity?</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">
+            <AlertDialogDescription className="text-white/60">
               This will permanently remove Day {currentActivity?.dayNumber} from your journey. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-3 sm:justify-center">
             <AlertDialogCancel 
-              className="flex-1 m-0 bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
+              className="flex-1 m-0 text-white hover:text-white border-0"
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+              }}
               disabled={isDeleting}
             >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteActivity}
-              className="flex-1 m-0 bg-red-600 text-white hover:bg-red-700"
+              className="flex-1 m-0 text-white border-0"
+              style={{
+                background: 'rgba(239, 68, 68, 0.7)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+              }}
               disabled={isDeleting}
             >
               {isDeleting ? 'Deleting...' : 'Delete'}
