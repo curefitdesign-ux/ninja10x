@@ -19,26 +19,27 @@ import SharedImageTransition from "@/components/SharedImageTransition";
 import { isVideoUrl } from "@/lib/media";
 
 // Tile positions - optimized for mobile viewport with percentage-based layout
+// Shifted down so last tile aligns near bottom
 const TILE_POSITIONS = [
-  { left: 38, top: 14 },
-  { left: 46, top: 19 },
-  { left: 54, top: 24 },
+  { left: 38, top: 8 },
+  { left: 46, top: 15 },
+  { left: 54, top: 22 },
   { left: 62, top: 29 },
-  { left: 54, top: 34 },
-  { left: 46, top: 39 },
-  { left: 38, top: 44 },
-  { left: 46, top: 49 },
-  { left: 54, top: 54 },
-  { left: 62, top: 59 },
+  { left: 54, top: 36 },
+  { left: 46, top: 43 },
+  { left: 38, top: 50 },
+  { left: 46, top: 57 },
   { left: 54, top: 64 },
-  { left: 46, top: 69 },
+  { left: 62, top: 71 },
+  { left: 54, top: 78 },
+  { left: 46, top: 85 },
 ];
 
 const LABELS = [
-  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 14, left: 72 },
+  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 8, left: 72 },
   { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 29, left: 4 },
-  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 44, left: 72 },
-  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 69, left: 4 },
+  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 50, left: 72 },
+  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 85, left: 4 },
 ];
 
 const Progress = () => {
@@ -487,7 +488,7 @@ const Progress = () => {
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "10%", top: "6%", width: "26%", aspectRatio: "1" }}
+              style={{ left: "8%", top: "0%", width: "24%", aspectRatio: "1" }}
               initial={{ opacity: 0, scale: 0.6, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.4 }}
@@ -583,12 +584,12 @@ const Progress = () => {
           </motion.div>
         ))}
 
-        {/* Bottom Base Platform - positioned closer to last tile (bottom of path) */}
+        {/* Bottom Base Platform - positioned near last tile */}
         <AnimatePresence>
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "15%", bottom: "4%", width: "30%", aspectRatio: "1.2" }}
+              style={{ left: "4%", bottom: "2%", width: "18%", aspectRatio: "1.3" }}
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7 }}

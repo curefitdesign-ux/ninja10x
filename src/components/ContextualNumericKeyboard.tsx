@@ -89,11 +89,11 @@ const ContextualNumericKeyboard = ({
         <div 
           className="rounded-t-[28px] overflow-hidden"
           style={{
-            background: 'linear-gradient(180deg, rgba(60, 60, 67, 0.85) 0%, rgba(45, 45, 48, 0.92) 100%)',
-            backdropFilter: 'blur(60px) saturate(200%)',
-            WebkitBackdropFilter: 'blur(60px) saturate(200%)',
-            borderTop: '1px solid rgba(255, 255, 255, 0.12)',
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 -10px 40px rgba(0, 0, 0, 0.3)',
+            background: 'linear-gradient(180deg, rgba(50, 50, 55, 0.75) 0%, rgba(35, 35, 40, 0.85) 100%)',
+            backdropFilter: 'blur(80px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(80px) saturate(180%)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.4)',
           }}
         >
           {/* Drag handle */}
