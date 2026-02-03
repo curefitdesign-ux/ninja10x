@@ -66,7 +66,8 @@ const Reel = () => {
   // Week recap video from navigation state (played as first "story")
   const weekRecapVideoFromNav = location.state?.weekRecapVideo as string | undefined;
   const weekRecapNumber = location.state?.weekNumber as number | undefined;
-  const hasWeekRecap = !!weekRecapVideoFromNav;
+  // hasWeekRecap is true when navigation state contains week recap video
+  const hasWeekRecap = weekRecapVideoFromNav !== undefined;
   
   // State for user story groups
   const [userGroups, setUserGroups] = useState<UserStoryGroup[]>([]);
@@ -166,6 +167,13 @@ const Reel = () => {
           setCurrentActivityIndex(aIdx);
           break;
         }
+      }
+    } else if (hasWeekRecap && user && groups.length > 0) {
+      // When week recap is triggered, start at current user's group (index 0 because week recap is first story)
+      const idx = groups.findIndex(g => g.userId === user.id);
+      if (idx >= 0) {
+        setCurrentUserIndex(idx);
+        setCurrentActivityIndex(0); // Week recap is at index 0
       }
     } else if (location.state?.userId && groups.length > 0) {
       const idx = groups.findIndex(g => g.userId === location.state.userId);
