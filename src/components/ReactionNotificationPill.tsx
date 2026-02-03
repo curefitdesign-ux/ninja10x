@@ -278,22 +278,6 @@ export default function ReactionNotificationPill() {
                 <span className="text-white/60 text-xs">✕</span>
               </motion.div>
             </motion.div>
-
-            {/* Progress bar for auto-dismiss */}
-            <motion.div
-              className="h-0.5 rounded-full mt-2 mx-auto max-w-[200px] overflow-hidden"
-              style={{ background: 'rgba(255, 255, 255, 0.1)' }}
-            >
-              <motion.div
-                className="h-full rounded-full"
-                style={{
-                  background: 'linear-gradient(90deg, rgba(16, 185, 129, 0.8), rgba(52, 211, 153, 0.8))',
-                }}
-                initial={{ width: '100%' }}
-                animate={{ width: '0%' }}
-                transition={{ duration: 4, ease: 'linear' }}
-              />
-            </motion.div>
           </motion.div>
         </AnimatePresence>,
         document.body
