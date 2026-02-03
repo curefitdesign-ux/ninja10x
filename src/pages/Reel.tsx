@@ -662,7 +662,7 @@ const Reel = () => {
                 return (
                   <div
                     className="relative w-full max-w-[340px] flex items-center justify-center"
-                    style={{ aspectRatio: '9/16' }}
+                    style={{ aspectRatio: '9/16', maxWidth: '323px' }}
                   >
                     {isVideo ? (
                       <video
@@ -671,7 +671,6 @@ const Reel = () => {
                         className="w-full h-full rounded-2xl"
                         style={{ 
                           objectFit: 'cover',
-                          boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
                           filter: shouldShowLocked ? 'blur(20px)' : 'none',
                         }}
                         autoPlay
@@ -689,7 +688,6 @@ const Reel = () => {
                         decoding="async"
                         style={{ 
                           objectFit: 'cover',
-                          boxShadow: '0 30px 80px rgba(0, 0, 0, 0.4)',
                           filter: shouldShowLocked ? 'blur(20px)' : 'none',
                         }}
                         onError={(e) => {
@@ -766,27 +764,19 @@ const Reel = () => {
           {userGroups.length > 1 && currentUserIndex < userGroups.length - 1 && (
             <motion.button
               onClick={goNextUser}
-              className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center"
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-              }}
-              initial={{ opacity: 0.6 }}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+              initial={{ opacity: 0.5 }}
               animate={{ 
-                opacity: [0.6, 1, 0.6],
-                x: [0, 4, 0],
+                opacity: [0.5, 0.9, 0.5],
+                x: [0, 3, 0],
               }}
               transition={{
-                duration: 1.5,
+                duration: 2,
                 repeat: Infinity,
                 ease: 'easeInOut',
               }}
             >
-              <ChevronRight className="w-5 h-5 text-white/80" />
+              <ChevronRight className="w-6 h-6 text-white/70" />
             </motion.button>
           )}
         </div>
