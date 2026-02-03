@@ -933,7 +933,7 @@ const Preview = () => {
               <div 
                 className="w-full"
                 style={{ 
-                  maxWidth: 'min(65vw, 280px)',
+                  maxWidth: 'min(75vw, 320px)',
                   aspectRatio: '9/16',
                   maxHeight: '100%',
                 }}
@@ -955,8 +955,8 @@ const Preview = () => {
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
                 overscrollBehaviorX: 'contain',
-                paddingLeft: 'calc((100vw - min(60vw, 260px)) / 2)',
-                paddingRight: 'calc((100vw - min(60vw, 260px)) / 2)',
+                paddingLeft: 'calc((100vw - min(72vw, 320px)) / 2)',
+                paddingRight: 'calc((100vw - min(72vw, 320px)) / 2)',
               }}
             >
               {FRAMES.map((frame, index) => {
@@ -979,9 +979,9 @@ const Preview = () => {
                       elementsHidden && isRightOfCurrent ? 'opacity-0 translate-x-full' : ''
                     }`}
                     style={{ 
-                      width: 'min(60vw, 260px)',
-                      height: 'calc(min(60vw, 260px) * 16 / 9)',
-                      maxHeight: 'calc(100dvh - 260px)',
+                      width: 'min(72vw, 320px)',
+                      height: 'calc(min(72vw, 320px) * 16 / 9)',
+                      maxHeight: 'calc(100dvh - 280px)',
                       transform: `scale(${scale})`,
                       opacity: elementsHidden && !isActiveFrame ? 0 : opacity,
                       transition: 'transform 0.12s ease-out, opacity 0.12s ease-out',
