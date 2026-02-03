@@ -73,7 +73,6 @@ const Reel = () => {
   
   const [showReactsSheet, setShowReactsSheet] = useState(false);
   const [showSendReactionSheet, setShowSendReactionSheet] = useState(false);
-  const [floatingReaction, setFloatingReaction] = useState<ReactionType | null>(null);
   const [localReactions, setLocalReactions] = useState<Record<string, {
     total: number;
     reactions: Record<ReactionType, ActivityReaction>;
@@ -292,8 +291,6 @@ const Reel = () => {
   const handleReact = async (type: ReactionType) => {
     if (!currentActivity || isOwnStory) return; // Owners cannot react to their own activities
 
-    setFloatingReaction(type);
-    setTimeout(() => setFloatingReaction(null), 1200);
     setShowSendReactionSheet(false);
 
     setLocalReactions(prev => {
@@ -752,7 +749,7 @@ const Reel = () => {
                     {!shouldShowLocked && (
                       <Floating3DEmojis 
                         reactions={activeReactionTypes}
-                        newReaction={floatingReaction}
+                        newReaction={null}
                         isPaused={isPaused}
                       />
                     )}
