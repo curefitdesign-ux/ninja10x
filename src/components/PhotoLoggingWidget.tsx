@@ -882,6 +882,15 @@ const PhotoLoggingWidget = ({
                     : 'creating'
               }
               progress={reelProgress}
+              thumbnailUrl={(() => {
+                // Get the last photo of the completed week for thumbnail
+                const weekIndex = completedWeeks - 1;
+                const startDay = weekIndex * 3 + 1;
+                const weekPhotos = photos.filter(p => 
+                  Number(p.dayNumber) >= startDay && Number(p.dayNumber) <= startDay + 2
+                );
+                return weekPhotos[weekPhotos.length - 1]?.storageUrl;
+              })()}
               onPlay={() => {
                 // Navigate to reel page with the completed week photos
                 const weekIndex = completedWeeks - 1;
