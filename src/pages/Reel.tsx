@@ -724,9 +724,9 @@ const Reel = () => {
                       <video
                         key={mediaUrl}
                         src={mediaUrl}
-                        className="w-full h-full rounded-2xl"
+                        className="w-full h-full rounded-2xl bg-black"
                         style={{ 
-                          objectFit: 'cover',
+                          objectFit: 'contain',
                           filter: shouldShowLocked ? 'blur(20px)' : 'none',
                         }}
                         autoPlay
@@ -739,11 +739,11 @@ const Reel = () => {
                         key={mediaUrl}
                         src={mediaUrl}
                         alt={`Day ${currentActivity.dayNumber}`}
-                        className="w-full h-full rounded-2xl"
+                        className="w-full h-full rounded-2xl bg-black"
                         loading="eager"
                         decoding="async"
                         style={{ 
-                          objectFit: 'cover',
+                          objectFit: 'contain',
                           filter: shouldShowLocked ? 'blur(20px)' : 'none',
                         }}
                         onError={(e) => {
