@@ -8,6 +8,7 @@ import { isVideoUrl } from "@/lib/media";
 import ReelProgressPill from "./ReelProgressPill";
 import { useFitnessReel } from "@/hooks/use-fitness-reel";
 import FloatingCardReactions from "./FloatingCardReactions";
+import weekRecapVideo from "@/assets/demo-videos/week-recap.mp4";
 
 // Activity icons
 import footballIcon from '@/assets/activities/football.png';
@@ -767,29 +768,11 @@ const PhotoLoggingWidget = ({
   };
 
   // Handle playing week recap - navigate to /reel page
-  const handlePlayWeekRecap = (weekPhotos: LoggedPhoto[], weekIndex: number) => {
-    // Convert to JourneyActivity format for reel page
-    const activitiesForReel = weekPhotos.map(p => ({
-      id: p.id,
-      user_id: '',
-      storage_url: p.storageUrl,
-      original_url: p.originalUrl || null,
-      is_video: p.isVideo || false,
-      activity: p.activity || null,
-      frame: p.frame || null,
-      duration: p.duration || null,
-      pr: p.pr || null,
-      day_number: p.dayNumber,
-      created_at: '',
-      updated_at: '',
-      reaction_count: p.reactionCount || 0,
-      user_reacted: false,
-    }));
-    
+  const handlePlayWeekRecap = (_weekPhotos: LoggedPhoto[], weekIndex: number) => {
     navigate('/reel', {
       state: {
-        activities: activitiesForReel,
-        initialIndex: 0,
+        weekRecapVideo,
+        weekNumber: weekIndex + 1,
       },
     });
   };
@@ -908,29 +891,7 @@ const PhotoLoggingWidget = ({
                 );
                 
                 if (weekPhotos.length >= 3) {
-                  const activitiesForReel = weekPhotos.map(p => ({
-                    id: p.id,
-                    user_id: '',
-                    storage_url: p.storageUrl,
-                    original_url: p.originalUrl || null,
-                    is_video: p.isVideo || false,
-                    activity: p.activity || null,
-                    frame: p.frame || null,
-                    duration: p.duration || null,
-                    pr: p.pr || null,
-                    day_number: p.dayNumber,
-                    created_at: '',
-                    updated_at: '',
-                    reaction_count: p.reactionCount || 0,
-                    user_reacted: false,
-                  }));
-                  
-                  navigate('/reel', {
-                    state: {
-                      activities: activitiesForReel,
-                      initialIndex: 0,
-                    },
-                  });
+                  handlePlayWeekRecap(weekPhotos, weekIndex);
                 }
               }}
               className="py-1.5"
