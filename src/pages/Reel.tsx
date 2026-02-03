@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { X, ChevronUp, Trash2, Lock, ChevronRight } from 'lucide-react';
@@ -27,6 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import weekRecapVideoAsset from '@/assets/demo-videos/week-recap.mp4';
 
 // 3D reaction assets
 import fireEmoji from '@/assets/reactions/fire-3d.png';
@@ -63,9 +64,9 @@ const Reel = () => {
   const { profile } = useProfile();
   
   // Week recap video from navigation state (played as first "story")
-  const weekRecapVideo = location.state?.weekRecapVideo as string | undefined;
+  const weekRecapVideoFromNav = location.state?.weekRecapVideo as string | undefined;
   const weekRecapNumber = location.state?.weekNumber as number | undefined;
-  const [showingWeekRecap, setShowingWeekRecap] = useState(!!weekRecapVideo);
+  const hasWeekRecap = !!weekRecapVideoFromNav;
   
   // State for user story groups
   const [userGroups, setUserGroups] = useState<UserStoryGroup[]>([]);
@@ -144,6 +145,14 @@ const Reel = () => {
         };
       }
     }
+    // Add week recap as a synthetic activity if present
+    if (hasWeekRecap) {
+      map['week-recap'] = {
+        total: 0,
+        reactions: { ...DEFAULT_REACTIONS },
+        reactorProfiles: [],
+      };
+    }
     setLocalReactions(map);
     
     // Check if we should start at a specific user or activity (from navigation state)
@@ -164,14 +173,47 @@ const Reel = () => {
     }
     
     setLoading(false);
-  }, [location.state?.userId, location.state?.activityId]);
+  }, [location.state?.userId, location.state?.activityId, hasWeekRecap]);
 
   useEffect(() => {
     loadActivities();
   }, [loadActivities]);
 
-  const currentGroup = userGroups[currentUserIndex];
+  // Create the effective user groups with week recap injected as first story for current user
+  const effectiveUserGroups = useMemo(() => {
+    if (!hasWeekRecap || userGroups.length === 0 || !user) return userGroups;
+    
+    // Find current user's group and inject week recap as first activity
+    return userGroups.map(group => {
+      if (group.userId === user.id) {
+        const weekRecapActivity: LocalActivity = {
+          id: 'week-recap',
+          dayNumber: 0,
+          storageUrl: weekRecapVideoFromNav!,
+          originalUrl: weekRecapVideoFromNav,
+          activity: `Week ${weekRecapNumber || 1} Recap`,
+          createdAt: new Date().toISOString(),
+          isVideo: true,
+          isPublic: true,
+          frame: null,
+          duration: null,
+          pr: null,
+          reactionCount: 0,
+          reactions: { ...DEFAULT_REACTIONS },
+          reactorProfiles: [],
+        };
+        return {
+          ...group,
+          activities: [weekRecapActivity, ...group.activities],
+        };
+      }
+      return group;
+    });
+  }, [userGroups, hasWeekRecap, weekRecapVideoFromNav, weekRecapNumber, user]);
+
+  const currentGroup = effectiveUserGroups[currentUserIndex];
   const currentActivity = currentGroup?.activities[currentActivityIndex];
+  const isWeekRecapStory = currentActivity?.id === 'week-recap';
   const isOwnStory = user && currentGroup?.userId === user.id;
   
   // Check if activity was created within the last 24 hours
@@ -179,9 +221,10 @@ const Reel = () => {
     (Date.now() - new Date(currentActivity.createdAt).getTime()) < 24 * 60 * 60 * 1000 : false;
   
   // Only allow deletion of the latest (most recent) activity - no jumping
+  // Week recap stories cannot be deleted
   const maxDayNumber = myActivities.length > 0 ? Math.max(...myActivities.map(a => a.dayNumber)) : 0;
   const isLatestActivity = currentActivity?.dayNumber === maxDayNumber;
-  const canEdit = isOwnStory && isWithin24Hours && isLatestActivity;
+  const canEdit = isOwnStory && isWithin24Hours && isLatestActivity && !isWeekRecapStory;
 
   // Navigate between activities within current user (tap to cycle)
   const cycleActivity = useCallback(() => {
@@ -192,12 +235,12 @@ const Reel = () => {
       setCurrentActivityIndex(prev => prev + 1);
     } else {
       // Finished this user's stories, move to next user
-      if (currentUserIndex < userGroups.length - 1) {
+      if (currentUserIndex < effectiveUserGroups.length - 1) {
         setCurrentUserIndex(prev => prev + 1);
         setCurrentActivityIndex(0);
       }
     }
-  }, [currentGroup, currentActivityIndex, currentUserIndex, userGroups.length]);
+  }, [currentGroup, currentActivityIndex, currentUserIndex, effectiveUserGroups.length]);
 
   // Navigate to previous activity
   const prevActivity = useCallback(() => {
@@ -205,24 +248,24 @@ const Reel = () => {
       setCurrentActivityIndex(prev => prev - 1);
     } else if (currentUserIndex > 0) {
       // Go to previous user's last activity
-      const prevUser = userGroups[currentUserIndex - 1];
+      const prevUser = effectiveUserGroups[currentUserIndex - 1];
       setCurrentUserIndex(prev => prev - 1);
       setCurrentActivityIndex(prevUser ? prevUser.activities.length - 1 : 0);
     }
-  }, [currentActivityIndex, currentUserIndex, userGroups]);
+  }, [currentActivityIndex, currentUserIndex, effectiveUserGroups]);
 
   // Navigate between users (horizontal swipe)
   const goNextUser = useCallback(() => {
-    if (userGroups.length === 0) return;
+    if (effectiveUserGroups.length === 0) return;
     setCurrentActivityIndex(0);
-    setCurrentUserIndex(prev => (prev + 1) % userGroups.length);
-  }, [userGroups.length]);
+    setCurrentUserIndex(prev => (prev + 1) % effectiveUserGroups.length);
+  }, [effectiveUserGroups.length]);
 
   const goPrevUser = useCallback(() => {
-    if (userGroups.length === 0) return;
+    if (effectiveUserGroups.length === 0) return;
     setCurrentActivityIndex(0);
-    setCurrentUserIndex(prev => (prev - 1 + userGroups.length) % userGroups.length);
-  }, [userGroups.length]);
+    setCurrentUserIndex(prev => (prev - 1 + effectiveUserGroups.length) % effectiveUserGroups.length);
+  }, [effectiveUserGroups.length]);
 
   // Swipe gesture handling for horizontal navigation
   const dragX = useMotionValue(0);
@@ -286,7 +329,7 @@ const Reel = () => {
   const handleProgressStoryTap = (index: number, userId?: string) => {
     setShowProgressOverlay(false);
     if (userId) {
-      const idx = userGroups.findIndex(g => g.userId === userId);
+      const idx = effectiveUserGroups.findIndex(g => g.userId === userId);
       if (idx >= 0) {
         setCurrentUserIndex(idx);
         setCurrentActivityIndex(0);
@@ -418,96 +461,7 @@ const Reel = () => {
     return <ReelViewerSkeleton />;
   }
 
-  // Show Week Recap video when passed via navigation
-  if (showingWeekRecap && weekRecapVideo) {
-    return (
-      <DynamicBlurBackground imageUrl={weekRecapVideo}>
-        <div 
-          className="fixed inset-0 flex flex-col"
-          style={{ 
-            height: '100dvh',
-            minHeight: '-webkit-fill-available',
-            overflow: 'hidden',
-          }}
-        >
-          {/* Header with close button */}
-          <div 
-            className="shrink-0 z-50 flex items-center justify-between px-4"
-            style={{ 
-              paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
-              height: 80,
-            }}
-          >
-            <div className="w-10" />
-            <div className="text-center">
-              <span className="text-white font-semibold text-base">Week {weekRecapNumber || 1} Recap</span>
-            </div>
-            <button
-              onClick={() => {
-                setShowingWeekRecap(false);
-                navigate('/', { replace: true });
-              }}
-              className="text-white/80 hover:text-white transition-colors p-2 min-w-[40px] min-h-[40px] flex items-center justify-center"
-            >
-              <X className="w-6 h-6" strokeWidth={1.5} />
-            </button>
-          </div>
-
-          {/* Video content in same reel format */}
-          <div className="flex-1 flex items-center justify-center px-4">
-            <div
-              className="relative w-full max-w-[307px] overflow-hidden rounded-2xl"
-              style={{ aspectRatio: '9/16' }}
-            >
-              <video
-                src={weekRecapVideo}
-                className="w-full h-full rounded-2xl"
-                style={{ objectFit: 'cover' }}
-                autoPlay
-                loop
-                playsInline
-                controls={false}
-              />
-              
-              {/* Glass border overlay */}
-              <div 
-                className="absolute inset-0 rounded-2xl pointer-events-none"
-                style={{
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1)',
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Bottom zone with close button */}
-          <div 
-            className="shrink-0 flex flex-col items-center pb-6 px-4 z-50"
-            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)' }}
-          >
-            <button
-              onClick={() => {
-                setShowingWeekRecap(false);
-                navigate('/', { replace: true });
-              }}
-              className="w-full max-w-[280px] py-3.5 rounded-full font-semibold text-base"
-              style={{
-                background: 'rgba(255,255,255,0.12)',
-                backdropFilter: 'blur(40px)',
-                WebkitBackdropFilter: 'blur(40px)',
-                border: '1px solid rgba(255,255,255,0.15)',
-                color: 'white',
-              }}
-            >
-              Done
-            </button>
-          </div>
-        </div>
-      </DynamicBlurBackground>
-    );
-  }
-
-  if (!userGroups.length || !currentGroup || !currentActivity) {
+  if (!effectiveUserGroups.length || !currentGroup || !currentActivity) {
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center gap-4">
         <div className="text-white/60">No stories yet</div>
@@ -524,7 +478,7 @@ const Reel = () => {
   // Use templated/framed image (storageUrl) for display
   // storageUrl is always the templated PNG screenshot - check the actual URL extension
   const mediaUrl = currentActivity.storageUrl;
-  const isVideo = isVideoUrl(mediaUrl); // Only check URL, not the isVideo flag
+  const isVideo = currentActivity.isVideo || isVideoUrl(mediaUrl); // Check both flag and URL
   const currentReactions = localReactions[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS }, reactorProfiles: [] };
   
   const activeReactionTypes = Object.entries(currentReactions.reactions)
@@ -553,7 +507,7 @@ const Reel = () => {
         {/* Story Hint - one-time tutorial with shake nudge */}
         <StoryHint 
           hasMultipleStories={currentGroup?.activities.length > 1}
-          hasMultipleUsers={userGroups.length > 1}
+          hasMultipleUsers={effectiveUserGroups.length > 1}
           onNudge={triggerShake}
         />
 
@@ -584,7 +538,7 @@ const Reel = () => {
             {/* Center - User avatars strip - ALWAYS show clear profile photos */}
             <div className="flex-1 flex justify-center">
               <div className="flex items-center gap-2">
-                {userGroups.slice(0, 5).map((group, idx) => {
+                {effectiveUserGroups.slice(0, 5).map((group, idx) => {
                   const isActive = idx === currentUserIndex;
                   const activityCount = group.activities.length;
                   const currentIdx = idx === currentUserIndex ? currentActivityIndex : 0;
@@ -729,7 +683,11 @@ const Reel = () => {
           <div className="flex items-center justify-center gap-2 shrink-0 px-4 pb-2" style={{ height: 28 }}>
             <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
             <span className="text-white/40">•</span>
-            <span className="text-white/60 text-xs">Week {week} • Day {dayInWeek}</span>
+            {isWeekRecapStory ? (
+              <span className="text-white/60 text-xs">Week {weekRecapNumber || 1} Recap</span>
+            ) : (
+              <span className="text-white/60 text-xs">Week {week} • Day {dayInWeek}</span>
+            )}
           </div>
         </div>
 
@@ -867,7 +825,7 @@ const Reel = () => {
           </motion.div>
           
           {/* Right arrow indicator - only on first story */}
-          {userGroups.length > 1 && currentUserIndex === 0 && currentActivityIndex === 0 && (
+          {effectiveUserGroups.length > 1 && currentUserIndex === 0 && currentActivityIndex === 0 && (
             <motion.button
               onClick={goNextUser}
               className="absolute right-3 top-1/2 -translate-y-1/2"
