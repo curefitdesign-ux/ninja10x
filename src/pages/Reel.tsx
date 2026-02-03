@@ -62,9 +62,10 @@ const Reel = () => {
   const { user } = useAuth();
   const { profile } = useProfile();
   
-  // Week recap video from navigation state - will be injected as a story item
+  // Week recap video from navigation state (played as first "story")
   const weekRecapVideo = location.state?.weekRecapVideo as string | undefined;
   const weekRecapNumber = location.state?.weekNumber as number | undefined;
+  const [showingWeekRecap, setShowingWeekRecap] = useState(!!weekRecapVideo);
   
   // State for user story groups
   const [userGroups, setUserGroups] = useState<UserStoryGroup[]>([]);
@@ -125,48 +126,7 @@ const Reel = () => {
   // Load all activities grouped by user
   const loadActivities = useCallback(async () => {
     setLoading(true);
-    let groups = await fetchAllActivitiesGroupedByUser();
-    
-    // If we have a week recap video, inject it as the first story for the current user
-    if (weekRecapVideo && user && profile) {
-      const weekRecapActivity: LocalActivity = {
-        id: `week-recap-${weekRecapNumber || 1}`,
-        storageUrl: weekRecapVideo,
-        originalUrl: weekRecapVideo,
-        isVideo: true,
-        activity: `Week ${weekRecapNumber || 1} Recap`,
-        dayNumber: 0, // Special day number for recap
-        isPublic: true,
-        userId: user.id,
-        createdAt: new Date().toISOString(),
-        reactionCount: 0,
-        reactions: { ...DEFAULT_REACTIONS },
-        displayName: profile.display_name,
-        avatarUrl: profile.avatar_url,
-      };
-
-      // Find or create the current user's group
-      const userGroupIdx = groups.findIndex(g => g.userId === user.id);
-      if (userGroupIdx >= 0) {
-        // Add recap as first activity in user's group
-        groups[userGroupIdx].activities = [weekRecapActivity, ...groups[userGroupIdx].activities];
-      } else {
-        // Create new group for user with just the recap
-        groups = [{
-          userId: user.id,
-          displayName: profile.display_name,
-          avatarUrl: profile.avatar_url,
-          activities: [weekRecapActivity],
-        }, ...groups];
-      }
-      
-      // Move current user's group to the front so recap is shown first
-      const currentUserGroup = groups.find(g => g.userId === user.id);
-      if (currentUserGroup) {
-        groups = [currentUserGroup, ...groups.filter(g => g.userId !== user.id)];
-      }
-    }
-    
+    const groups = await fetchAllActivitiesGroupedByUser();
     setUserGroups(groups);
     
     // Initialize reactions state with reactor profiles
@@ -186,11 +146,8 @@ const Reel = () => {
     }
     setLocalReactions(map);
     
-    // If week recap video is present, start at the first activity (the recap)
-    if (weekRecapVideo) {
-      setCurrentUserIndex(0);
-      setCurrentActivityIndex(0);
-    } else if (location.state?.activityId && groups.length > 0) {
+    // Check if we should start at a specific user or activity (from navigation state)
+    if (location.state?.activityId && groups.length > 0) {
       // Navigate to specific activity by ID
       for (let gIdx = 0; gIdx < groups.length; gIdx++) {
         const group = groups[gIdx];
@@ -207,7 +164,7 @@ const Reel = () => {
     }
     
     setLoading(false);
-  }, [location.state?.userId, location.state?.activityId, weekRecapVideo, weekRecapNumber, user, profile]);
+  }, [location.state?.userId, location.state?.activityId]);
 
   useEffect(() => {
     loadActivities();
@@ -461,6 +418,95 @@ const Reel = () => {
     return <ReelViewerSkeleton />;
   }
 
+  // Show Week Recap video when passed via navigation
+  if (showingWeekRecap && weekRecapVideo) {
+    return (
+      <DynamicBlurBackground imageUrl={weekRecapVideo}>
+        <div 
+          className="fixed inset-0 flex flex-col"
+          style={{ 
+            height: '100dvh',
+            minHeight: '-webkit-fill-available',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Header with close button */}
+          <div 
+            className="shrink-0 z-50 flex items-center justify-between px-4"
+            style={{ 
+              paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
+              height: 80,
+            }}
+          >
+            <div className="w-10" />
+            <div className="text-center">
+              <span className="text-white font-semibold text-base">Week {weekRecapNumber || 1} Recap</span>
+            </div>
+            <button
+              onClick={() => {
+                setShowingWeekRecap(false);
+                navigate('/', { replace: true });
+              }}
+              className="text-white/80 hover:text-white transition-colors p-2 min-w-[40px] min-h-[40px] flex items-center justify-center"
+            >
+              <X className="w-6 h-6" strokeWidth={1.5} />
+            </button>
+          </div>
+
+          {/* Video content in same reel format */}
+          <div className="flex-1 flex items-center justify-center px-4">
+            <div
+              className="relative w-full max-w-[307px] overflow-hidden rounded-2xl"
+              style={{ aspectRatio: '9/16' }}
+            >
+              <video
+                src={weekRecapVideo}
+                className="w-full h-full rounded-2xl"
+                style={{ objectFit: 'cover' }}
+                autoPlay
+                loop
+                playsInline
+                controls={false}
+              />
+              
+              {/* Glass border overlay */}
+              <div 
+                className="absolute inset-0 rounded-2xl pointer-events-none"
+                style={{
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1)',
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Bottom zone with close button */}
+          <div 
+            className="shrink-0 flex flex-col items-center pb-6 px-4 z-50"
+            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)' }}
+          >
+            <button
+              onClick={() => {
+                setShowingWeekRecap(false);
+                navigate('/', { replace: true });
+              }}
+              className="w-full max-w-[280px] py-3.5 rounded-full font-semibold text-base"
+              style={{
+                background: 'rgba(255,255,255,0.12)',
+                backdropFilter: 'blur(40px)',
+                WebkitBackdropFilter: 'blur(40px)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                color: 'white',
+              }}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </DynamicBlurBackground>
+    );
+  }
+
   if (!userGroups.length || !currentGroup || !currentActivity) {
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center gap-4">
@@ -478,23 +524,16 @@ const Reel = () => {
   // Use templated/framed image (storageUrl) for display
   // storageUrl is always the templated PNG screenshot - check the actual URL extension
   const mediaUrl = currentActivity.storageUrl;
-  const isVideo = isVideoUrl(mediaUrl) || currentActivity.isVideo; // Check URL extension or isVideo flag
+  const isVideo = isVideoUrl(mediaUrl); // Only check URL, not the isVideo flag
   const currentReactions = localReactions[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS }, reactorProfiles: [] };
   
   const activeReactionTypes = Object.entries(currentReactions.reactions)
     .filter(([, r]) => r.count > 0)
     .map(([type]) => type as ReactionType);
 
-  // Check if this is a week recap story
-  const isWeekRecapStory = currentActivity.id.startsWith('week-recap-');
-  
-  // Calculate week and day - week recap has dayNumber 0
-  const week = isWeekRecapStory 
-    ? weekRecapNumber || 1 
-    : Math.ceil(currentActivity.dayNumber / 3);
-  const dayInWeek = isWeekRecapStory 
-    ? null 
-    : ((currentActivity.dayNumber - 1) % 3) + 1;
+  // Calculate week and day
+  const week = Math.ceil(currentActivity.dayNumber / 3);
+  const dayInWeek = ((currentActivity.dayNumber - 1) % 3) + 1;
 
   // Fixed zone heights for layout
   const HEADER_HEIGHT = 100; // Row: delete + avatars + close + user name
@@ -690,9 +729,7 @@ const Reel = () => {
           <div className="flex items-center justify-center gap-2 shrink-0 px-4 pb-2" style={{ height: 28 }}>
             <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
             <span className="text-white/40">•</span>
-            <span className="text-white/60 text-xs">
-              {isWeekRecapStory ? `Week ${week} Recap` : `Week ${week} • Day ${dayInWeek}`}
-            </span>
+            <span className="text-white/60 text-xs">Week {week} • Day {dayInWeek}</span>
           </div>
         </div>
 
@@ -724,9 +761,9 @@ const Reel = () => {
                       <video
                         key={mediaUrl}
                         src={mediaUrl}
-                        className="w-full h-full rounded-2xl bg-black"
+                        className="w-full h-full rounded-2xl"
                         style={{ 
-                          objectFit: 'contain',
+                          objectFit: 'cover',
                           filter: shouldShowLocked ? 'blur(20px)' : 'none',
                         }}
                         autoPlay
@@ -739,11 +776,11 @@ const Reel = () => {
                         key={mediaUrl}
                         src={mediaUrl}
                         alt={`Day ${currentActivity.dayNumber}`}
-                        className="w-full h-full rounded-2xl bg-black"
+                        className="w-full h-full rounded-2xl"
                         loading="eager"
                         decoding="async"
                         style={{ 
-                          objectFit: 'contain',
+                          objectFit: 'cover',
                           filter: shouldShowLocked ? 'blur(20px)' : 'none',
                         }}
                         onError={(e) => {
