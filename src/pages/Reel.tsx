@@ -739,9 +739,17 @@ const Reel = () => {
             className="relative w-full max-w-[340px] flex items-center justify-center"
             style={{ 
               maxHeight: '100%',
+              x: dragX,
+              opacity: cardOpacity,
+              rotateY: cardRotate,
+              scale: cardScale,
             }}
             animate={shakeAnimation}
             transition={shakeTransition}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.15}
+            onDragEnd={handleHorizontalDragEnd}
             onClick={handleTap}
           >
               {/* Full templated image/video - with lock overlay for non-public users */}

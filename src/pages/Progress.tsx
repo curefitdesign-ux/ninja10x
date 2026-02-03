@@ -400,15 +400,7 @@ const Progress = () => {
                         </div>
                       )}
                       
-                      {/* Activity tag at top */}
-                      {!shouldBlur && photo.activity && (
-                        <div 
-                          className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-white font-semibold text-[8px]"
-                          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
-                        >
-                          {photo.activity}
-                        </div>
-                      )}
+                      {/* Activity tag removed - keeping clean card design */}
                       
                       {/* User avatar overlay - ALWAYS clear, never locked */}
                       <div className="absolute bottom-1.5 left-1.5">
@@ -490,12 +482,12 @@ const Progress = () => {
           opacity: contentOpacity,
         }}
       >
-        {/* Engine Badge */}
+        {/* Engine Badge - positioned close to first tile */}
         <AnimatePresence>
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "8%", top: "-2%", width: "28%", aspectRatio: "1" }}
+              style={{ left: "10%", top: "6%", width: "26%", aspectRatio: "1" }}
               initial={{ opacity: 0, scale: 0.6, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.4 }}
@@ -505,10 +497,12 @@ const Progress = () => {
           )}
         </AnimatePresence>
 
-        {/* Diagonal Progress Tiles */}
+        {/* Diagonal Progress Tiles with user profiles */}
         {TILE_POSITIONS.map((pos, index) => {
           const day = getDayFromIndex(index);
           const isActive = isTileActive(day);
+          // Find activity for this day to get user profile
+          const activityForDay = myActivities.find(a => a.dayNumber === day);
 
           return (
             <motion.div
@@ -526,6 +520,32 @@ const Progress = () => {
               transition={{ type: "spring", stiffness: 200, damping: 22, delay: index * 0.035 }}
             >
               <img src={isActive ? tileActiveImg : tileInactiveImg} alt={`Day ${day}`} className="w-full h-full object-contain relative z-10" />
+              
+              {/* User profile avatar on active tiles */}
+              {isActive && profile && (
+                <motion.div
+                  className="absolute"
+                  style={{
+                    bottom: '-8px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 20,
+                  }}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.035 + 0.2, type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <ProfileAvatar
+                    src={profile.avatar_url}
+                    name={profile.display_name}
+                    size={18}
+                    style={{ 
+                      border: '2px solid rgba(160, 120, 220, 0.6)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                    }}
+                  />
+                </motion.div>
+              )}
             </motion.div>
           );
         })}
@@ -563,12 +583,12 @@ const Progress = () => {
           </motion.div>
         ))}
 
-        {/* Bottom Base Platform */}
+        {/* Bottom Base Platform - positioned closer to last tile (bottom of path) */}
         <AnimatePresence>
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "-5%", bottom: "0%", width: "32%", aspectRatio: "1.2" }}
+              style={{ left: "15%", bottom: "4%", width: "30%", aspectRatio: "1.2" }}
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7 }}
