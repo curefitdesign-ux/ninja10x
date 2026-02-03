@@ -120,15 +120,18 @@ export default function SendReactionSheet({
         onClick={onClose}
       />
 
-      {/* Bottom sheet */}
+      {/* Bottom sheet - liquid glass design */}
       <motion.div
         className="fixed bottom-0 left-0 right-0 z-50"
         style={{
           borderTopLeftRadius: 28,
           borderTopRightRadius: 28,
-          background: 'linear-gradient(180deg, rgba(45, 42, 50, 0.98) 0%, rgba(30, 28, 35, 0.98) 100%)',
-          backdropFilter: 'blur(40px)',
-          WebkitBackdropFilter: 'blur(40px)',
+          background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%)',
+          backdropFilter: 'blur(60px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(60px) saturate(180%)',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
+          borderBottom: 'none',
+          boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
           paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
         }}
         initial={{ y: '100%' }}
