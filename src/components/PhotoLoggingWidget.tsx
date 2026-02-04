@@ -705,32 +705,17 @@ const PhotoLoggingWidget = ({
     });
 
     if (photo) {
-      // Tap on existing photo - navigate to /reel page with all photos
-      const allPhotos = photos.filter(p => p.storageUrl);
-      const photoIndex = allPhotos.findIndex(p => p.id === photo.id);
-      
-      // Convert to JourneyActivity format for reel page
-      const activitiesForReel = allPhotos.map(p => ({
-        id: p.id,
-        user_id: '',
-        storage_url: p.storageUrl,
-        original_url: p.originalUrl || null,
-        is_video: p.isVideo || false,
-        activity: p.activity || null,
-        frame: p.frame || null,
-        duration: p.duration || null,
-        pr: p.pr || null,
-        day_number: p.dayNumber,
-        created_at: '',
-        updated_at: '',
-        reaction_count: p.reactionCount || 0,
-        user_reacted: false,
-      }));
-      
+      // Tap on existing photo - open THAT specific story in the Reel viewer.
+      // (We deep-link by activityId so the viewer can resolve indices even with injected weekly recaps.)
+      if (onPhotoTap) {
+        onPhotoTap(photo);
+        return;
+      }
+
       navigate('/reel', {
         state: {
-          activities: activitiesForReel,
-          initialIndex: photoIndex >= 0 ? photoIndex : 0,
+          activityId: photo.id,
+          dayNumber: photo.dayNumber,
         },
       });
     } else {
