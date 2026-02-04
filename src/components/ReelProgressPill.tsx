@@ -20,6 +20,7 @@ interface ReelProgressPillProps {
   onPlay?: () => void;
   className?: string;
   isAnimating?: boolean;
+  isActivelyGenerating?: boolean; // True when actively calling API, false when ready to generate
 }
 
 // Stacked cards icon for "creating" state - liquid glass style
@@ -277,6 +278,7 @@ const ReelProgressPill = ({
   onPlay,
   className = '',
   isAnimating = false,
+  isActivelyGenerating = false,
 }: ReelProgressPillProps) => {
   const pillRef = useRef<HTMLDivElement>(null);
   const [hasPlayedConfetti, setHasPlayedConfetti] = useState(false);
@@ -468,7 +470,7 @@ const ReelProgressPill = ({
                   color: isComplete ? '#34d399' : 'rgba(255,255,255,0.6)',
                 }}
               >
-                {isCreating ? 'Creating...' : isRendering ? 'Rendering...' : 'PLAY NOW'}
+                {isComplete ? 'PLAY NOW' : isRendering ? 'Rendering...' : isActivelyGenerating ? 'Creating...' : 'Generate'}
               </span>
             </motion.div>
           </AnimatePresence>

@@ -890,6 +890,7 @@ const PhotoLoggingWidget = ({
                     : 'creating'
               }
               progress={reelProgress}
+              isActivelyGenerating={isGeneratingReel}
               onPlay={() => {
                 // Navigate to reel page with the completed week photos
                 const weekIndex = completedWeeks - 1;
