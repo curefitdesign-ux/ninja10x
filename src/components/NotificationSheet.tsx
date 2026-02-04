@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -30,6 +30,24 @@ const REACTION_VERBS: Record<string, string> = {
   runner: 'cheered',
   energy: 'energized',
   timer: 'timed',
+};
+
+// Instagram-style relative timestamp
+const formatRelativeTime = (date: Date): string => {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+  const diffWeek = Math.floor(diffDay / 7);
+
+  if (diffSec < 60) return 'now';
+  if (diffMin < 60) return `${diffMin}m`;
+  if (diffHour < 24) return `${diffHour}h`;
+  if (diffDay < 7) return `${diffDay}d`;
+  if (diffWeek < 4) return `${diffWeek}w`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
 export interface Notification {
@@ -232,33 +250,34 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
               paddingBottom: 'env(safe-area-inset-bottom)',
             }}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 pb-4 flex-shrink-0">
-              <h2 className="text-white text-xl font-semibold">Reactions</h2>
-              <div className="flex items-center gap-3">
-                {notifications.length > 0 && (
-                  <button
-                    onClick={dismissAll}
-                    className="text-white/50 text-sm hover:text-white transition-colors"
-                  >
-                    Clear all
-                  </button>
-                )}
+            {/* Header - back arrow left, title center */}
+            <div className="flex items-center justify-between px-4 pb-4 flex-shrink-0">
+              <button
+                onClick={onClose}
+                className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{
+                  background: 'rgba(255,255,255,0.08)',
+                }}
+              >
+                <ChevronLeft className="w-5 h-5 text-white/80" />
+              </button>
+              
+              <h2 className="text-white text-lg font-semibold">Reactions</h2>
+              
+              {notifications.length > 0 ? (
                 <button
-                  onClick={onClose}
-                  className="w-9 h-9 rounded-full flex items-center justify-center"
-                  style={{
-                    background: 'rgba(255,255,255,0.1)',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                  }}
+                  onClick={dismissAll}
+                  className="text-white/50 text-xs hover:text-white transition-colors px-2"
                 >
-                  <X className="w-4 h-4 text-white/70" />
+                  Clear all
                 </button>
-              </div>
+              ) : (
+                <div className="w-10" /> // Spacer for centering
+              )}
             </div>
 
             {/* Scrollable notification list */}
-            <div className="flex-1 overflow-y-auto px-4 pb-6">
+            <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-8" style={{ WebkitOverflowScrolling: 'touch' }}>
               {notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                   <div className="flex -space-x-2 mb-4">
@@ -311,25 +330,15 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                             <span className="font-medium">{notif.reactorName}</span>
                             <span className="text-white/70"> {REACTION_VERBS[notif.reactionType] || 'reacted to'} your activity</span>
                           </p>
-                          <p className="text-white/40 text-xs mt-0.5">
-                            {notif.dayNumber ? `Day ${notif.dayNumber}` : 'Tap to view'}
-                          </p>
+                          {notif.dayNumber && (
+                            <p className="text-white/40 text-xs mt-0.5">Day {notif.dayNumber}</p>
+                          )}
                         </div>
 
-                        {/* Dismiss */}
-                        <motion.button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            dismissNotification(notif.id);
-                          }}
-                          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                          style={{
-                            background: 'rgba(255, 255, 255, 0.08)',
-                          }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          <X className="w-3.5 h-3.5 text-white/50" />
-                        </motion.button>
+                        {/* Timestamp on right */}
+                        <span className="text-white/30 text-xs flex-shrink-0">
+                          {formatRelativeTime(notif.timestamp)}
+                        </span>
                       </motion.div>
                     );
                   })}
