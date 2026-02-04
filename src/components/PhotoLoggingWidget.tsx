@@ -94,7 +94,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
   // Use 9:16 aspect ratio to match reel viewer
   const baseCardWidth = 54;
   const baseCardHeight = 96; // 54 * (16/9) = 96 for 9:16 aspect ratio
-  const borderRadius = 14;
+  const borderRadius = 10; // 10px rounded corners as per design
   
   // Check if week is complete (all 3 photos logged)
   const isWeekComplete = photos.every(p => p !== null);
@@ -235,8 +235,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
             {isDisplayVideo ? (
                 <video
                   src={displayUrl}
-                  className="absolute inset-0 w-full h-full object-contain"
-                  style={{ background: 'rgba(0,0,0,0.3)' }}
+                  className="absolute inset-0 w-full h-full object-cover"
                   muted
                   playsInline
                   loop
@@ -250,8 +249,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
                 <img
                   src={displayUrl}
                   alt={`Day ${dayNumber}`}
-                  className="absolute inset-0 w-full h-full object-contain"
-                  style={{ background: 'rgba(0,0,0,0.3)' }}
+                  className="absolute inset-0 w-full h-full object-cover"
                   onError={(e) => {
                     // Try reloading once on error
                     const img = e.currentTarget;
@@ -264,6 +262,26 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
                   }}
                 />
               )}
+              
+              {/* Activity tag overlay - top left */}
+              {photo.activity && (
+                <div 
+                  className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded"
+                  style={{
+                    background: 'rgba(0,0,0,0.5)',
+                    backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)',
+                  }}
+                >
+                  <span 
+                    className="text-white font-semibold italic uppercase"
+                    style={{ fontSize: shouldShowExpanded ? '8px' : '5px' }}
+                  >
+                    {photo.activity}
+                  </span>
+                </div>
+              )}
+              
               {/* Green glow overlay for logged photos */}
               <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/25 to-transparent pointer-events-none" />
             </>
