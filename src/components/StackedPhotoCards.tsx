@@ -84,18 +84,10 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
   };
 
   const handlePhotoTap = (photo: Photo) => {
-    navigate('/preview', {
+    // Navigate to reel with activity ID so it opens that specific story
+    navigate('/reel', {
       state: { 
-        imageUrl: photo.storageUrl, 
-        originalUrl: photo.storageUrl, 
-        isVideo: photo.isVideo, 
-        activity: photo.activity, 
-        frame: photo.frame, 
-        duration: photo.duration, 
-        pr: photo.pr, 
-        isReview: true, 
-        photoId: photo.id,
-        dayNumber: photo.dayNumber,
+        activityId: photo.id,
       },
     });
   };
