@@ -236,51 +236,39 @@ const Index = () => {
       return sum + photoTotal;
     }, 0);
 
-    const isUploading = isGenerating;
     const hasVideo = !!currentReel?.videoUrl;
     
-    // State logic: 'creating' = actively generating, 'complete' = video ready
-    const state: PillState = isUploading 
+    // State logic: 
+    // - 'creating' = actively generating OR ready to generate (shows "Generate" or "Creating...")
+    // - 'complete' = video ready (shows "PLAY NOW")
+    const state: PillState = isGenerating 
       ? 'creating' 
       : hasVideo 
         ? 'complete' 
-        : 'creating'; // No video yet = show as ready to create
+        : 'creating'; // Ready to generate
 
     const progress = (() => {
-      if (state === 'complete') return 100;
-      switch (currentStep) {
-        case 'narration':
-          return 20;
-        case 'video':
-          return 50;
-        case 'complete':
-          return 100;
-        default:
-          return 10;
-      }
+      if (state === 'complete' || currentStep === 'complete') return 100;
+      if (!isGenerating) return 0; // Ready to generate
+      return generationProgress; // Use actual progress from generator
     })();
 
-    // onPlay handler - navigate to reel page (shows generating state or plays video)
+    // onPlay handler - generate reel (stay on page, overlay shows progress)
     const handlePlay = () => {
+      console.log('[ReelPill] onPlay tapped:', { hasVideo, isGenerating, currentStep });
+      
       if (hasVideo && currentReel?.videoUrl) {
-        // AI video ready - navigate to reel viewer with the actual video URL
+        // Video ready - navigate to reel viewer
         navigate('/reel', {
           state: {
             weekRecapVideo: currentReel.videoUrl,
             weekNumber: completedWeeks,
           },
         });
-      } else if (!isUploading) {
-        // No video yet - trigger generation then navigate
+      } else if (!isGenerating) {
+        // Start generation - overlay will show progress
+        console.log('[ReelPill] Starting generation with', photos.length, 'photos');
         handleGenerateReel(photos);
-        toast.info('Generating your AI recap...');
-        // Navigate immediately to show generating state
-        navigate('/reel', {
-          state: {
-            weekRecapVideo: '', // Empty = show generating placeholder
-            weekNumber: completedWeeks,
-          },
-        });
       }
     };
 
@@ -290,7 +278,7 @@ const Index = () => {
       progress,
       totalReactions,
       onPlay: handlePlay,
-      isActivelyGenerating: isUploading,
+      isActivelyGenerating: isGenerating,
     };
   })();
 

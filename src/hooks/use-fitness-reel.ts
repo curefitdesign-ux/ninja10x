@@ -48,15 +48,20 @@ export const useFitnessReel = () => {
   }, [reelHistory]);
 
   const generateReel = useCallback(async (photos: PhotoData[]) => {
+    console.log('[useFitnessReel] generateReel called with', photos.length, 'photos');
+    
     if (photos.length < 3) {
       toast.error('Need at least 3 photos to generate a reel');
       return null;
     }
 
+    // Set generating state FIRST before any async work
     setIsGenerating(true);
     setError(null);
     setCurrentStep('narration');
-    setGenerationProgress(0);
+    setGenerationProgress(5);
+    
+    console.log('[useFitnessReel] State set: isGenerating=true, step=narration');
 
     try {
       // Convert PhotoData to RecapPhoto format
@@ -70,11 +75,13 @@ export const useFitnessReel = () => {
         isVideo: p.isVideo,
       }));
 
-      // Step 1: Preparing
-      setCurrentStep('narration');
+      // Small delay to ensure UI updates before heavy work
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Step 2: Generate video locally
       setCurrentStep('video');
+      setGenerationProgress(10);
+      console.log('[useFitnessReel] Starting local video generation');
       
       const videoUrl = await generateLocalRecap({
         photos: recapPhotos,
@@ -84,8 +91,11 @@ export const useFitnessReel = () => {
         },
       });
 
+      console.log('[useFitnessReel] Video generated:', videoUrl?.slice(0, 50) + '...');
+
       // Step 3: Complete
       setCurrentStep('complete');
+      setGenerationProgress(100);
 
       const reelId = `reel-${Date.now()}`;
       const newReel: ReelResult = {
@@ -104,13 +114,16 @@ export const useFitnessReel = () => {
       toast.success('Your recap video is ready!');
       return newReel;
     } catch (err) {
+      console.error('[useFitnessReel] Generation failed:', err);
       const message = err instanceof Error ? err.message : 'Failed to generate reel';
       setError(message);
       toast.error(message);
       return null;
     } finally {
-      setIsGenerating(false);
-      setGenerationProgress(0);
+      // Don't reset progress immediately - let complete state show
+      setTimeout(() => {
+        setIsGenerating(false);
+      }, 1500);
     }
   }, []);
 
