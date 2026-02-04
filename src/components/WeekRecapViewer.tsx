@@ -197,6 +197,15 @@ export default function WeekRecapViewer({ isOpen, onClose, photos, weekNumber }:
               muted
             />
 
+            {/* Placeholder text overlay */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="bg-black/60 backdrop-blur-sm px-6 py-4 rounded-2xl max-w-[80%] text-center">
+                <p className="text-white/90 text-sm font-medium leading-relaxed">
+                  Placeholder only — your weekly recap will come here
+                </p>
+              </div>
+            </div>
+
             {/* Loading overlay */}
             <AnimatePresence>
               {isLoading && (
