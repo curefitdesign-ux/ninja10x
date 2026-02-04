@@ -46,7 +46,7 @@ const Progress = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const { profile } = useProfile();
+  const { profile, updateProfile } = useProfile();
   const [showContent, setShowContent] = useState(true);
   const [showTiles, setShowTiles] = useState(true);
   const [showStories, setShowStories] = useState(true);
@@ -172,6 +172,15 @@ const Progress = () => {
 
   // Handle making activity public
   const handleMakePublic = async () => {
+    // Ensure profile visibility is public so the community feed unlocks.
+    try {
+      if (profile?.stories_public === false) {
+        await updateProfile({ stories_public: true });
+      }
+    } catch (e) {
+      console.error('Failed to set profile public:', e);
+    }
+
     if (pendingDayNumber) {
       await makeActivityPublic(pendingDayNumber);
     }

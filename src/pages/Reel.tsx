@@ -61,7 +61,7 @@ const Reel = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const { profile } = useProfile();
+  const { profile, updateProfile } = useProfile();
   
   // Week recap video from navigation state (played as first "story")
   const weekRecapVideoFromNav = location.state?.weekRecapVideo as string | undefined;
@@ -1174,6 +1174,15 @@ const Reel = () => {
         isOpen={showMakePublicSheet}
         onClose={() => setShowMakePublicSheet(false)}
         onMakePublic={async () => {
+          // Ensure profile visibility is public so the community feed unlocks.
+          try {
+            if (profile?.stories_public === false) {
+              await updateProfile({ stories_public: true });
+            }
+          } catch (e) {
+            console.error('Failed to set profile public:', e);
+          }
+
           const latestActivity = myActivities[myActivities.length - 1];
           if (latestActivity) {
             await makeActivityPublic(latestActivity.dayNumber);
