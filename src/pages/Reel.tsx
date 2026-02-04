@@ -62,6 +62,7 @@ const Reel = () => {
   const location = useLocation();
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
+  const deepLinkActivityId = location.state?.activityId as string | undefined;
   
   // Week recap video from navigation state (played as first "story")
   const weekRecapVideoFromNav = location.state?.weekRecapVideo as string | undefined;
@@ -96,6 +97,8 @@ const Reel = () => {
   const autoAdvanceStartRef = useRef<number>(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const didInitWeekRecapRef = useRef(false);
+  const didInitDeepLinkRef = useRef(false);
+  const lastDeepLinkActivityIdRef = useRef<string | undefined>(undefined);
 
   // Bottom sheet states and transition animations
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -160,24 +163,10 @@ const Reel = () => {
     }
     setLocalReactions(map);
     
-    // Check if we should start at a specific user or activity (from navigation state)
-    // IMPORTANT: Don't add week recap offset here - just find the activity index directly.
-    // The effectiveUserGroups will inject week recap at index 0, but when navigating to a
-    // specific activityId, we want to show that exact activity, not the week recap.
-    if (location.state?.activityId && groups.length > 0) {
-      // Navigate to specific activity by ID - find the activity and set index directly
-      for (let gIdx = 0; gIdx < groups.length; gIdx++) {
-        const group = groups[gIdx];
-        const aIdx = group.activities.findIndex(a => a.id === location.state.activityId);
-        if (aIdx >= 0) {
-          setCurrentUserIndex(gIdx);
-          // Add 1 offset because week recap is injected at index 0 for users with ≥3 activities
-          const willHaveWeekRecap = group.activities.length >= 3;
-          setCurrentActivityIndex(willHaveWeekRecap ? aIdx + 1 : aIdx);
-          break;
-        }
-      }
-    } else if (hasWeekRecap && user && groups.length > 0) {
+    // Check if we should start at a specific user (from navigation state)
+    // NOTE: Deep-linking by activityId is resolved in a separate effect AFTER week recaps
+    // are injected, so we never need to manually offset indices here.
+    if (hasWeekRecap && user && groups.length > 0) {
       // When week recap is triggered, start at current user's group (index 0 because week recap is first story)
       const idx = groups.findIndex(g => g.userId === user.id);
       if (idx >= 0) {
@@ -190,7 +179,7 @@ const Reel = () => {
     }
     
     setLoading(false);
-  }, [location.state?.userId, location.state?.activityId, hasWeekRecap, user]);
+  }, [location.state?.userId, hasWeekRecap, user]);
 
   useEffect(() => {
     loadActivities();
@@ -200,6 +189,8 @@ const Reel = () => {
   // (Auth can resolve after loadActivities runs, so we can't rely only on the initial branch.)
   useEffect(() => {
     if (!hasWeekRecap || didInitWeekRecapRef.current) return;
+    // If we deep-link to a specific story (e.g. from the home widget), don't force-jump to recap.
+    if (deepLinkActivityId) return;
     if (!user || userGroups.length === 0) return;
 
     const idx = userGroups.findIndex(g => g.userId === user.id);
@@ -208,7 +199,7 @@ const Reel = () => {
     setCurrentUserIndex(idx);
     setCurrentActivityIndex(0);
     didInitWeekRecapRef.current = true;
-  }, [hasWeekRecap, user, userGroups]);
+  }, [hasWeekRecap, deepLinkActivityId, user, userGroups]);
 
   // Create the effective user groups with week recap injected for ANY user who has completed a week
   // This makes week recaps visible to all viewers, not just the owner
@@ -252,6 +243,38 @@ const Reel = () => {
       };
     });
   }, [userGroups, weekRecapVideoFromNav, weekRecapNumber, user]);
+
+  // If we navigate to /reel again with a NEW activityId, allow deep-link init to run again.
+  useEffect(() => {
+    if (!deepLinkActivityId) {
+      lastDeepLinkActivityIdRef.current = undefined;
+      didInitDeepLinkRef.current = false;
+      return;
+    }
+
+    if (deepLinkActivityId !== lastDeepLinkActivityIdRef.current) {
+      lastDeepLinkActivityIdRef.current = deepLinkActivityId;
+      didInitDeepLinkRef.current = false;
+    }
+  }, [deepLinkActivityId]);
+
+  // Deep-link to a specific activityId (e.g. from the Cult Ninja widget).
+  // Resolve against effectiveUserGroups (week recap injected) to avoid any off-by-one.
+  useEffect(() => {
+    if (!deepLinkActivityId || didInitDeepLinkRef.current) return;
+    if (effectiveUserGroups.length === 0) return;
+
+    for (let gIdx = 0; gIdx < effectiveUserGroups.length; gIdx++) {
+      const group = effectiveUserGroups[gIdx];
+      const aIdx = group.activities.findIndex(a => a.id === deepLinkActivityId);
+      if (aIdx >= 0) {
+        setCurrentUserIndex(gIdx);
+        setCurrentActivityIndex(aIdx);
+        didInitDeepLinkRef.current = true;
+        return;
+      }
+    }
+  }, [deepLinkActivityId, effectiveUserGroups]);
 
   const currentGroup = effectiveUserGroups[currentUserIndex];
   const currentActivity = currentGroup?.activities[currentActivityIndex];
