@@ -240,7 +240,7 @@ const Index = () => {
     const isReady = !isUploading && !isTransitioning;
     const hasVideo = !!currentReel?.videoUrl;
 
-    const state: PillState = isUploading ? 'creating' : isTransitioning ? 'completing' : 'complete';
+    const state: PillState = isUploading ? 'creating' : isTransitioning ? 'rendering' : 'complete';
 
     const progress = (() => {
       if (state === 'complete') return 100;

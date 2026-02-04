@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Play } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-export type PillState = 'creating' | 'completing' | 'complete' | 'celebrate';
+export type PillState = 'creating' | 'rendering' | 'complete' | 'celebrate';
 
 interface Reaction {
   type: string;
@@ -162,8 +162,8 @@ const ProgressRing = ({
   progress: number;
   needsAttention: boolean;
 }) => {
-  const isComplete = state === 'complete' || state === 'completing';
-  const isCreating = state === 'creating';
+  const isComplete = state === 'complete';
+  const isCreating = state === 'creating' || state === 'rendering';
   
   return (
     <div className="relative flex-shrink-0 w-12 h-12">
@@ -295,16 +295,16 @@ const ReelProgressPill = ({
 
   // Trigger attention animation when reel completes
   useEffect(() => {
-    if ((state === 'complete' || state === 'completing') && prevStateRef.current === 'creating') {
+    if (state === 'complete' && (prevStateRef.current === 'creating' || prevStateRef.current === 'rendering')) {
       setJustCompleted(true);
       const timeout = setTimeout(() => setJustCompleted(false), 5000);
       return () => clearTimeout(timeout);
     }
   }, [state]);
   
-  // Fire confetti when transitioning to completing state
+  // Fire confetti when transitioning to complete state (video ready)
   useEffect(() => {
-    const shouldFireConfetti = (state === 'completing' && prevStateRef.current === 'creating') || 
+    const shouldFireConfetti = (state === 'complete' && (prevStateRef.current === 'creating' || prevStateRef.current === 'rendering')) || 
                                (state === 'celebrate');
     
     if (shouldFireConfetti && !hasPlayedConfetti && pillRef.current) {
@@ -338,9 +338,10 @@ const ReelProgressPill = ({
   }, [state]);
 
   const isCelebrating = state === 'celebrate' || showCelebration;
-  const needsAttention = justCompleted || state === 'completing';
-  const isComplete = state === 'complete' || state === 'completing';
+  const needsAttention = justCompleted && state === 'complete';
+  const isComplete = state === 'complete';
   const isCreating = state === 'creating';
+  const isRendering = state === 'rendering';
 
   // Get background style - transparent pill (as requested)
   const getBackgroundStyle = () => {
@@ -381,9 +382,9 @@ const ReelProgressPill = ({
           ease: 'easeInOut',
         }}
       >
-        {/* Abstract pattern for completing/transition state */}
+        {/* Abstract pattern for rendering/transition state */}
         <AnimatePresence>
-          {(state === 'completing' || isCelebrating) && (
+          {(isRendering || isCelebrating) && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -418,7 +419,7 @@ const ReelProgressPill = ({
 
         {/* Left icon based on state */}
         <AnimatePresence mode="wait">
-          {isCreating ? (
+          {(isCreating || isRendering) ? (
             <motion.div
               key="cards"
               initial={{ scale: 0.8, opacity: 0 }}
@@ -467,7 +468,7 @@ const ReelProgressPill = ({
                   color: isComplete ? '#34d399' : 'rgba(255,255,255,0.6)',
                 }}
               >
-                {isCreating ? 'Creating...' : 'PLAY NOW'}
+                {isCreating ? 'Creating...' : isRendering ? 'Rendering...' : 'PLAY NOW'}
               </span>
             </motion.div>
           </AnimatePresence>
