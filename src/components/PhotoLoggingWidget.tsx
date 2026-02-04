@@ -263,19 +263,20 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
                 />
               )}
               
-              {/* Activity tag overlay - top left */}
+              {/* Activity tag overlay - pill shape, top left */}
               {photo.activity && (
                 <div 
-                  className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded"
+                  className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full"
                   style={{
-                    background: 'rgba(0,0,0,0.5)',
-                    backdropFilter: 'blur(4px)',
-                    WebkitBackdropFilter: 'blur(4px)',
+                    background: 'rgba(255,255,255,0.12)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255,255,255,0.15)',
                   }}
                 >
                   <span 
-                    className="text-white font-semibold italic uppercase"
-                    style={{ fontSize: shouldShowExpanded ? '8px' : '5px' }}
+                    className="text-white font-medium"
+                    style={{ fontSize: shouldShowExpanded ? '7px' : '4px' }}
                   >
                     {photo.activity}
                   </span>
