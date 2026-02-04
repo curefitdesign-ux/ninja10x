@@ -27,7 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import weekRecapVideoAsset from '@/assets/demo-videos/week-recap.mp4';
+// Removed bundled demo video - now only uses actual RunwayML-generated videos
 
 // 3D reaction assets
 import fireEmoji from '@/assets/reactions/fire-3d.png';
@@ -199,17 +199,21 @@ const Reel = () => {
         return group; // No completed weeks, no recap
       }
       
-      // Use nav-provided URL if viewing own recap, otherwise use bundled asset
+      // Use nav-provided URL if viewing own recap
+      // IMPORTANT: Only use actual RunwayML URLs (https://...) not bundled assets
       const isOwnGroup = user && group.userId === user.id;
-      const weekRecapVideoUrl = (isOwnGroup && weekRecapVideoFromNav) ? weekRecapVideoFromNav : weekRecapVideoAsset;
+      const hasValidVideoUrl = weekRecapVideoFromNav && 
+        weekRecapVideoFromNav.startsWith('http') && 
+        !weekRecapVideoFromNav.includes('/assets/');
+      const weekRecapVideoUrl = (isOwnGroup && hasValidVideoUrl) ? weekRecapVideoFromNav : null;
       const weekNum = (isOwnGroup && weekRecapNumber) ? weekRecapNumber : completedWeekCount;
       
-      // Create week recap activity
+      // Create week recap activity - videoUrl may be null if still generating
       const weekRecapActivity: LocalActivity = {
         id: `week-recap-${group.userId}`,
         dayNumber: 0,
-        storageUrl: weekRecapVideoUrl,
-        originalUrl: weekRecapVideoUrl,
+        storageUrl: weekRecapVideoUrl || '', // Empty if still generating
+        originalUrl: weekRecapVideoUrl || '',
         activity: `Week ${weekNum} Recap`,
         createdAt: new Date().toISOString(),
         isVideo: true,
@@ -601,6 +605,9 @@ const Reel = () => {
   const isVideo = currentActivity.isVideo || isVideoUrl(mediaUrl); // Check both flag and URL
   const currentReactions = localReactions[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS }, reactorProfiles: [] };
   
+  // Week recap is generating if it's a recap story with no valid video URL
+  const isRecapGenerating = isWeekRecapStory && (!mediaUrl || mediaUrl.length === 0);
+  
   const activeReactionTypes = Object.entries(currentReactions.reactions)
     .filter(([, r]) => r.count > 0)
     .map(([type]) => type as ReactionType);
@@ -858,7 +865,48 @@ const Reel = () => {
                           ease: [0.25, 0.46, 0.45, 0.94] 
                         }}
                       >
-                        {isVideo ? (
+                        {isRecapGenerating ? (
+                          // Show generating placeholder for week recap
+                          <div 
+                            className="w-full h-full rounded-2xl flex flex-col items-center justify-center gap-6"
+                            style={{
+                              background: 'linear-gradient(135deg, hsl(var(--muted)) 0%, hsl(var(--background)) 100%)',
+                            }}
+                          >
+                            {/* Animated loading spinner */}
+                            <div className="relative w-16 h-16">
+                              <svg className="absolute inset-0 w-full h-full animate-spin" viewBox="0 0 64 64">
+                                <circle
+                                  cx="32"
+                                  cy="32"
+                                  r="28"
+                                  fill="none"
+                                  stroke="hsl(var(--foreground) / 0.1)"
+                                  strokeWidth="4"
+                                />
+                                <circle
+                                  cx="32"
+                                  cy="32"
+                                  r="28"
+                                  fill="none"
+                                  stroke="hsl(var(--primary))"
+                                  strokeWidth="4"
+                                  strokeLinecap="round"
+                                  strokeDasharray={`${2 * Math.PI * 28 * 0.3} ${2 * Math.PI * 28 * 0.7}`}
+                                />
+                              </svg>
+                            </div>
+                            
+                            <div className="text-center px-8">
+                              <p className="text-foreground font-semibold text-lg mb-2">
+                                Generating your AI recap...
+                              </p>
+                              <p className="text-muted-foreground text-sm">
+                                This usually takes 1-2 minutes
+                              </p>
+                            </div>
+                          </div>
+                        ) : isVideo ? (
                           <video
                             key={mediaUrl}
                             src={mediaUrl}

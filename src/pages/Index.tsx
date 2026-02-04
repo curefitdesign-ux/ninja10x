@@ -259,7 +259,7 @@ const Index = () => {
       }
     })();
 
-    // onPlay handler - only navigate when AI video is ready
+    // onPlay handler - navigate to reel page (shows generating state or plays video)
     const handlePlay = () => {
       if (hasVideo && currentReel?.videoUrl) {
         // AI video ready - navigate to reel viewer with the actual video URL
@@ -269,10 +269,25 @@ const Index = () => {
             weekNumber: completedWeeks,
           },
         });
-      } else if (!isUploading && !isTransitioning) {
-        // No video yet - trigger generation (user will see "Creating..." state)
+      } else if (isTransitioning) {
+        // Video is being rendered - navigate to show generating state
+        navigate('/reel', {
+          state: {
+            weekRecapVideo: '', // Empty = show generating placeholder
+            weekNumber: completedWeeks,
+          },
+        });
+      } else if (!isUploading) {
+        // No video yet - trigger generation then navigate
         handleGenerateReel(photos);
-        toast.info('Generating your AI recap... Tap again when ready!');
+        toast.info('Generating your AI recap...');
+        // Navigate immediately to show generating state
+        navigate('/reel', {
+          state: {
+            weekRecapVideo: '', // Empty = show generating placeholder
+            weekNumber: completedWeeks,
+          },
+        });
       }
     };
 
