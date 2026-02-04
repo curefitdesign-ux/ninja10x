@@ -106,6 +106,9 @@ const Reel = () => {
   const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoAdvanceStartRef = useRef<number>(0);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Media loading state - timer only starts after media loads
+  const [mediaLoaded, setMediaLoaded] = useState(false);
 
   // Bottom sheet states and transition animations
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -537,17 +540,24 @@ const Reel = () => {
   const isStoryLocked = !isOwnStory && (!profile?.stories_public || !hasPublicActivity);
   const isPaused = showReactsSheet || showSendReactionSheet || showDeleteConfirm || showMakePublicSheet || showProgressOverlay || isStoryLocked;
   
+  // Reset mediaLoaded when activity changes
+  useEffect(() => {
+    setMediaLoaded(false);
+    setAutoAdvanceProgress(0);
+  }, [currentUserIndex, currentActivityIndex]);
+  
   useEffect(() => {
     // Clear any existing timer
     if (autoAdvanceTimerRef.current) {
       clearInterval(autoAdvanceTimerRef.current);
     }
     
-    if (isPaused || loading || !currentActivity) {
+    // Don't start timer until media is loaded
+    if (isPaused || loading || !currentActivity || !mediaLoaded) {
       return;
     }
     
-    // Reset progress when activity changes
+    // Reset progress when starting timer
     setAutoAdvanceProgress(0);
     autoAdvanceStartRef.current = Date.now();
     
@@ -568,7 +578,7 @@ const Reel = () => {
         clearInterval(autoAdvanceTimerRef.current);
       }
     };
-  }, [currentUserIndex, currentActivityIndex, isPaused, loading, currentActivity, cycleActivity]);
+  }, [currentUserIndex, currentActivityIndex, isPaused, loading, currentActivity, cycleActivity, mediaLoaded]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -914,11 +924,14 @@ const Reel = () => {
                             style={{ 
                               objectFit: 'cover',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                              opacity: mediaLoaded ? 1 : 0,
+                              transition: 'opacity 0.2s ease',
                             }}
                             autoPlay
                             loop
                             muted
                             playsInline
+                            onLoadedData={() => setMediaLoaded(true)}
                           />
                         ) : (
                           <img
@@ -931,7 +944,10 @@ const Reel = () => {
                             style={{ 
                               objectFit: 'cover',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                              opacity: mediaLoaded ? 1 : 0,
+                              transition: 'opacity 0.2s ease',
                             }}
+                            onLoad={() => setMediaLoaded(true)}
                             onError={(e) => {
                               const img = e.currentTarget;
                               if (!img.dataset.retried) {
