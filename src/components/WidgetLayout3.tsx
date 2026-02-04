@@ -107,6 +107,7 @@ interface WidgetLayout3Props {
     progress: number;
     totalReactions?: number;
     onPlay?: () => void;
+    isActivelyGenerating?: boolean;
   } | null;
 }
 
@@ -482,6 +483,7 @@ const WidgetLayout3 = ({
               progress={reelPill.progress}
               totalReactions={reelPill.totalReactions}
               onPlay={reelPill.onPlay}
+              isActivelyGenerating={reelPill.isActivelyGenerating}
             />
           </div>
         )}

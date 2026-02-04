@@ -237,10 +237,17 @@ const Index = () => {
 
     const isTransitioning = !!currentReel?.videoTaskId && !currentReel?.videoUrl;
     const isUploading = isGenerating;
-    const isReady = !isUploading && !isTransitioning;
     const hasVideo = !!currentReel?.videoUrl;
-
-    const state: PillState = isUploading ? 'creating' : isTransitioning ? 'rendering' : 'complete';
+    
+    // State logic: only show 'complete' when video is actually ready
+    // 'creating' = actively generating, 'rendering' = waiting for RunwayML, 'complete' = video ready
+    const state: PillState = isUploading 
+      ? 'creating' 
+      : isTransitioning 
+        ? 'rendering' 
+        : hasVideo 
+          ? 'complete' 
+          : 'creating'; // No video yet = show as ready to create
 
     const progress = (() => {
       if (state === 'complete') return 100;
@@ -297,6 +304,7 @@ const Index = () => {
       progress,
       totalReactions,
       onPlay: handlePlay,
+      isActivelyGenerating: isUploading,
     };
   })();
 
