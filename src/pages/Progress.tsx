@@ -412,17 +412,17 @@ const Progress = () => {
                         </div>
                       )}
                       
-                      {/* Activity tag pill - top left */}
-                      {!shouldBlur && photo.activity && (
+                      {/* Activity tag pill - top left - always show if activity exists */}
+                      {photo.activity && (
                         <div 
-                          className="absolute top-1 left-1 px-1.5 py-0.5 rounded-full z-20"
+                          className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full z-30"
                           style={{
-                            background: 'rgba(0,0,0,0.5)',
+                            background: 'rgba(0,0,0,0.6)',
                             backdropFilter: 'blur(8px)',
                             WebkitBackdropFilter: 'blur(8px)',
                           }}
                         >
-                          <span className="text-white font-medium text-[9px]">
+                          <span className="text-white font-semibold text-[10px] drop-shadow-sm">
                             {photo.activity}
                           </span>
                         </div>
