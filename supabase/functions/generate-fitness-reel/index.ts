@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Input validation schemas (manual since zod isn't available in Deno edge by default)
+// Input validation
 const MAX_PHOTOS = 30;
 const MIN_PHOTOS = 3;
 const MAX_STRING_LENGTH = 200;
@@ -38,7 +38,6 @@ interface GenerateReelRequest {
   styleId?: string;
   action?: 'create' | 'status';
   taskId?: string;
-  referenceVideoUrl?: string;
 }
 
 // Validation functions
@@ -49,13 +48,11 @@ function validateString(value: unknown, maxLength: number, fieldName: string): s
   if (value.length > maxLength) {
     throw new Error(`${fieldName} exceeds maximum length of ${maxLength}`);
   }
-  // Basic sanitization - remove potential script tags
   return value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
 }
 
 function validateUrl(value: unknown, fieldName: string): string {
   const str = validateString(value, MAX_URL_LENGTH, fieldName);
-  // Allow data URIs and http(s) URLs only
   if (!str.startsWith('data:') && !str.startsWith('http://') && !str.startsWith('https://')) {
     throw new Error(`${fieldName} must be a valid URL`);
   }
@@ -92,7 +89,6 @@ function validateRequest(body: unknown): GenerateReelRequest {
   const req = body as Record<string, unknown>;
   const result: GenerateReelRequest = {};
   
-  // Validate action
   if (req.action !== undefined) {
     if (req.action !== 'create' && req.action !== 'status') {
       throw new Error('action must be "create" or "status"');
@@ -100,12 +96,10 @@ function validateRequest(body: unknown): GenerateReelRequest {
     result.action = req.action;
   }
   
-  // Validate taskId
   if (req.taskId !== undefined) {
     result.taskId = validateString(req.taskId, MAX_TASK_ID_LENGTH, 'taskId');
   }
   
-  // Validate photos array
   if (req.photos !== undefined) {
     if (!Array.isArray(req.photos)) {
       throw new Error('photos must be an array');
@@ -116,7 +110,6 @@ function validateRequest(body: unknown): GenerateReelRequest {
     result.photos = req.photos.map((p, i) => validatePhoto(p, i));
   }
   
-  // Validate style fields
   if (req.stylePrompt !== undefined) {
     result.stylePrompt = validateString(req.stylePrompt, MAX_STRING_LENGTH, 'stylePrompt');
   }
@@ -127,7 +120,7 @@ function validateRequest(body: unknown): GenerateReelRequest {
   return result;
 }
 
-// Authenticate user using JWT
+// Authenticate user
 async function authenticateRequest(req: Request): Promise<string> {
   const authHeader = req.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
@@ -140,7 +133,6 @@ async function authenticateRequest(req: Request): Promise<string> {
     { global: { headers: { Authorization: authHeader } } }
   );
 
-  // Use getUser instead of getClaims (which doesn't exist in v2)
   const { data: { user }, error } = await supabase.auth.getUser();
   
   if (error || !user) {
@@ -149,6 +141,28 @@ async function authenticateRequest(req: Request): Promise<string> {
   }
 
   return user.id;
+}
+
+// Generate simple narration locally (no external API needed)
+function generateLocalNarration(photos: PhotoData[]): string {
+  const totalDays = photos.length;
+  const activities = [...new Set(photos.map(p => p.activity))];
+  const hasPRs = photos.some(p => p.pr);
+  const hasDuration = photos.some(p => p.duration);
+  
+  const activityList = activities.length === 1 
+    ? activities[0] 
+    : activities.slice(0, -1).join(', ') + ' and ' + activities.slice(-1);
+  
+  const phrases = [
+    `${totalDays} days. ${activityList}. You showed up.`,
+    `Day by day, rep by rep. ${activityList} conquered.`,
+    `${totalDays} sessions logged. ${hasPRs ? 'Personal records crushed.' : 'Progress made.'}`,
+    `No excuses. Just ${activityList}. Pure dedication.`,
+    `Week ${Math.ceil(photos[0]?.dayNumber / 7) || 1} locked in. ${hasDuration ? 'Every minute counts.' : 'Every session counts.'}`,
+  ];
+  
+  return phrases[Math.floor(Math.random() * phrases.length)];
 }
 
 serve(async (req) => {
@@ -227,7 +241,7 @@ serve(async (req) => {
     }
 
     // ---- Create ----
-    const { photos = [], stylePrompt, styleId } = body;
+    const { photos = [] } = body;
 
     if (photos.length < MIN_PHOTOS) {
       return new Response(
@@ -238,143 +252,98 @@ serve(async (req) => {
 
     console.log(`Processing ${photos.length} photos for user ${userId}`);
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
-    if (!ELEVENLABS_API_KEY) throw new Error("ELEVENLABS_API_KEY is not configured");
     if (!RUNWAYML_API_KEY) throw new Error("RUNWAYML_API_KEY is not configured");
 
-    // Build detailed summary for AI narration with all metrics
-    const photosSummary = photos.map((p) => {
-      let details = `Day ${p.dayNumber}: ${p.activity}`;
-      if (p.duration) details += `, duration: ${p.duration}`;
-      if (p.distance) details += `, distance: ${p.distance}`;
-      if (p.pr) details += ` - Personal Record: ${p.pr}`;
-      if (p.isVideo) details += ` (video clip)`;
-      return details;
-    }).join('\n');
-
-    // Collect unique activities for prompt
-    const uniqueActivities = [...new Set(photos.map(p => p.activity))].join(', ');
-    const totalDays = photos.length;
-    const hasVideos = photos.some(p => p.isVideo);
-    const hasPRs = photos.some(p => p.pr);
-    
-    console.log("Activity summary:", { uniqueActivities, totalDays, hasVideos, hasPRs });
-
-    const narrationResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          {
-            role: "system",
-            content: `You are creating a short, punchy voiceover script for a brutalist-style fitness video reel.
-Keep it VERY SHORT (10-15 seconds when spoken, max 30 words). Raw, gritty, powerful.
-The tone should be intense and underground - like a boxing gym trainer, not a cheerful influencer.
-Use short, punchy sentences. No fluff. Just raw energy.
-Format: Just the narration text, no formatting or stage directions.`
-          },
-          {
-            role: "user",
-            content: `Create a short, intense voiceover for this fitness week:
-
-${photosSummary}
-
-Style: Brutalist, gritty, underground. Think boxing gym, not Instagram fitness. Max 30 words.`
-          }
-        ],
-      }),
-    });
-
-    if (!narrationResponse.ok) {
-      const errorText = await narrationResponse.text();
-      console.error("Narration generation failed:", errorText);
-      
-      if (narrationResponse.status === 429) {
-        throw new Error("Rate limit exceeded. Please try again in a moment.");
-      }
-      throw new Error("Failed to generate narration");
-    }
-
-    const narrationData = await narrationResponse.json();
-    const narrationText = narrationData.choices?.[0]?.message?.content || "Your incredible fitness journey this week!";
+    // Step 1: Generate narration locally (no external AI API needed)
+    console.log("Step 1: Generating narration locally...");
+    const narrationText = generateLocalNarration(photos);
     console.log("Generated narration:", narrationText);
 
-    // Step 2: Generate voiceover audio with ElevenLabs (optional - continue if it fails)
+    // Step 2: Generate voiceover audio with ElevenLabs (optional)
     console.log("Step 2: Generating voiceover with ElevenLabs...");
     
     let audioBase64: string | null = null;
     let audioSize = 0;
 
-    try {
-      const voiceId = ALLOWED_VOICE_IDS[0]; // Use first allowed voice
-      const voiceResponse = await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
-        {
-          method: "POST",
-          headers: {
-            "xi-api-key": ELEVENLABS_API_KEY,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            text: narrationText,
-            model_id: "eleven_turbo_v2_5",
-            voice_settings: {
-              stability: 0.4,
-              similarity_boost: 0.75,
-              style: 0.6,
-              use_speaker_boost: true,
-              speed: 1.1,
+    if (ELEVENLABS_API_KEY) {
+      try {
+        const voiceId = ALLOWED_VOICE_IDS[0];
+        const voiceResponse = await fetch(
+          `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
+          {
+            method: "POST",
+            headers: {
+              "xi-api-key": ELEVENLABS_API_KEY,
+              "Content-Type": "application/json",
             },
-          }),
-        }
-      );
+            body: JSON.stringify({
+              text: narrationText,
+              model_id: "eleven_turbo_v2_5",
+              voice_settings: {
+                stability: 0.4,
+                similarity_boost: 0.75,
+                style: 0.6,
+                use_speaker_boost: true,
+                speed: 1.1,
+              },
+            }),
+          }
+        );
 
-      if (voiceResponse.ok) {
-        const audioBuffer = await voiceResponse.arrayBuffer();
-        audioBase64 = btoa(String.fromCharCode(...new Uint8Array(audioBuffer).slice(0, 50000)));
-        audioSize = audioBuffer.byteLength;
-        console.log("Voiceover generated successfully, size:", audioSize);
-      } else {
-        const errorText = await voiceResponse.text();
-        console.warn("ElevenLabs error (continuing without audio):", errorText);
+        if (voiceResponse.ok) {
+          const audioBuffer = await voiceResponse.arrayBuffer();
+          audioBase64 = btoa(String.fromCharCode(...new Uint8Array(audioBuffer).slice(0, 50000)));
+          audioSize = audioBuffer.byteLength;
+          console.log("Voiceover generated successfully, size:", audioSize);
+        } else {
+          const errorText = await voiceResponse.text();
+          console.warn("ElevenLabs error (continuing without audio):", errorText);
+        }
+      } catch (voiceError) {
+        console.warn("ElevenLabs failed (continuing without audio):", voiceError);
       }
-    } catch (voiceError) {
-      console.warn("ElevenLabs failed (continuing without audio):", voiceError);
+    } else {
+      console.log("ElevenLabs API key not configured, skipping voiceover");
     }
 
-    // Step 3: Select best image for RunwayML (prefer images over videos for better gen quality)
+    // Step 3: Select best image for RunwayML
     console.log("Step 3: Selecting primary image for RunwayML...");
     
-    // Prefer static images over video frames for better quality
     const imagePhotos = photos.filter(p => !p.isVideo);
     const primaryPhoto = imagePhotos.length > 0 ? imagePhotos[0] : photos[0];
     const primaryPhotoUrl = primaryPhoto.imageUrl;
     
-    console.log("Using primary image:", primaryPhotoUrl.substring(0, 50) + "...");
+    console.log("Using primary image:", primaryPhotoUrl.substring(0, 80) + "...");
     
-    // Step 4: Generate AI video with RunwayML - include all activity details in prompt
+    // Step 4: Generate AI video with RunwayML
+    // Following user's detailed spec: minimal motion, preserve original, clean fitness recap
     console.log("Step 4: Submitting to RunwayML for AI video generation...");
     
-    // Build a rich, activity-aware prompt
-    const activityDescriptions = photos.map(p => {
-      const parts = [p.activity];
-      if (p.duration) parts.push(`${p.duration}`);
-      if (p.distance) parts.push(`${p.distance}`);
-      return parts.join(' ');
-    }).join(', then ');
+    // Build scene descriptions for each photo
+    const sceneDescriptions = photos.map((p, i) => {
+      const metrics: string[] = [];
+      if (p.duration) metrics.push(`Duration: ${p.duration}`);
+      if (p.distance) metrics.push(`Distance: ${p.distance}`);
+      if (p.pr) metrics.push(`PR: ${p.pr}`);
+      const metricsStr = metrics.length > 0 ? metrics.join(', ') : p.activity;
+      return `Day ${p.dayNumber}: ${p.activity}${metrics.length > 0 ? ' - ' + metricsStr : ''}`;
+    }).join('. ');
     
-    const runwayPrompt = `Vertical 9:16 fitness video montage. Cinematic motion graphics showing an intense workout journey: ${activityDescriptions}. 
-Visual style: ${stylePrompt || 'brutalist graphic design with high contrast, heavy film grain, split-screen collage effects, glitch transitions'}.
-The video shows dynamic athlete movement with ${photos.length} key moments. Energy builds with fast cuts, zoom punches, and shake effects. 
-${hasPRs ? 'Highlight personal record achievement moments with dramatic slow-motion.' : ''}
-Urban underground atmosphere, trending social media aesthetic. The camera tracks athletic motion with cinematic flair.`;
+    // Clean, minimal fitness recap prompt per user's spec
+    const runwayPrompt = `Create a short vertical fitness recap video. 
+Style: Clean, minimal, premium fitness recap. Very subtle motion only.
+Do NOT change faces, body, background, clothing, or environment.
+Preserve the original photo exactly. No stylization, no cinematic effects, no filters.
+
+Motion: Gentle camera push-in or slight parallax. Soft floating motion. No aggressive movement. No zoom jumps. No scene distortion.
+
+This is a weekly progress recap showing: ${sceneDescriptions}
+
+Typography style: Modern, clean, bold numbers. Minimal text. High contrast. Text must remain sharp and readable.
+Transitions: Simple fade or soft dissolve. No flashy transitions.
+Overall: Looks like a weekly progress recap. Professional product-style video. Designed for mobile apps.`;
 
     console.log("RunwayML prompt:", runwayPrompt.substring(0, 200) + "...");
 
@@ -389,14 +358,25 @@ Urban underground atmosphere, trending social media aesthetic. The camera tracks
         model: "gen4_turbo",
         promptImage: primaryPhotoUrl,
         promptText: runwayPrompt,
-        duration: 10,
-        ratio: "720:1280",
+        duration: 5, // 5 seconds per the user spec
+        ratio: "720:1280", // 9:16 vertical
       }),
     });
 
     if (!runwayResponse.ok) {
       const errorText = await runwayResponse.text();
       console.error("RunwayML submission failed:", errorText);
+      
+      // Parse error for better messaging
+      try {
+        const errorData = JSON.parse(errorText);
+        if (errorData.error?.includes('insufficient') || errorData.error?.includes('credit')) {
+          throw new Error("Generation failed - please try again later");
+        }
+      } catch (parseError) {
+        // Ignore parse errors
+      }
+      
       throw new Error("Failed to submit video to RunwayML");
     }
 
@@ -426,9 +406,7 @@ Urban underground atmosphere, trending social media aesthetic. The camera tracks
     console.error("Error generating fitness reel:", error);
     const message = error instanceof Error ? error.message : 'An error occurred while processing your request';
     return new Response(
-      JSON.stringify({ 
-        error: message,
-      }),
+      JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
