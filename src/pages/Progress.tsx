@@ -19,27 +19,27 @@ import SharedImageTransition from "@/components/SharedImageTransition";
 import { isVideoUrl } from "@/lib/media";
 
 // Tile positions - optimized for mobile viewport with percentage-based layout
-// Shifted down so last tile aligns near bottom
+// Reduced vertical spacing (5% gap instead of 7%) for tighter path
 const TILE_POSITIONS = [
-  { left: 42, top: 12 },
-  { left: 50, top: 19 },
-  { left: 58, top: 26 },
-  { left: 66, top: 33 },
-  { left: 58, top: 40 },
-  { left: 50, top: 47 },
-  { left: 42, top: 54 },
-  { left: 50, top: 61 },
-  { left: 58, top: 68 },
-  { left: 66, top: 75 },
-  { left: 58, top: 82 },
-  { left: 50, top: 89 },
+  { left: 42, top: 8 },
+  { left: 50, top: 13 },
+  { left: 58, top: 18 },
+  { left: 66, top: 23 },
+  { left: 58, top: 28 },
+  { left: 50, top: 33 },
+  { left: 42, top: 38 },
+  { left: 50, top: 43 },
+  { left: 58, top: 48 },
+  { left: 66, top: 53 },
+  { left: 58, top: 58 },
+  { left: 50, top: 63 },
 ];
 
 const LABELS = [
-  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 12, left: 76 },
-  { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 33, left: 4 },
-  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 54, left: 76 },
-  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 89, left: 4 },
+  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 8, left: 76 },
+  { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 23, left: 4 },
+  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 38, left: 76 },
+  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 63, left: 4 },
 ];
 
 const Progress = () => {
@@ -537,12 +537,12 @@ const Progress = () => {
             >
               <img src={isActive ? tileActiveImg : tileInactiveImg} alt={`Day ${day}`} className="w-full h-full object-contain relative z-10" />
               
-              {/* User profile avatar ONLY on the latest completed tile */}
+              {/* User profile avatar ONLY on the latest completed tile - positioned on TOP of tile */}
               {isLatestTile && profile && (
                 <motion.div
                   className="absolute"
                   style={{
-                    bottom: '-8px',
+                    top: '-14px',
                     left: '50%',
                     transform: 'translateX(-50%)',
                     zIndex: 20,
@@ -554,10 +554,10 @@ const Progress = () => {
                   <ProfileAvatar
                     src={profile.avatar_url}
                     name={profile.display_name}
-                    size={22}
+                    size={28}
                     style={{ 
-                      border: '2px solid rgba(160, 120, 220, 0.8)',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                      border: '2.5px solid rgba(160, 120, 220, 0.9)',
+                      boxShadow: '0 4px 16px rgba(100, 70, 180, 0.6)',
                     }}
                   />
                 </motion.div>
@@ -599,12 +599,12 @@ const Progress = () => {
           </motion.div>
         ))}
 
-        {/* Bottom Base Platform - positioned near last tile */}
+        {/* Bottom Base Platform - increased size and positioned near last tile */}
         <AnimatePresence>
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "2%", bottom: "0%", width: "12%", aspectRatio: "1.3" }}
+              style={{ left: "5%", bottom: "0%", width: "50%", aspectRatio: "2.5" }}
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7 }}
