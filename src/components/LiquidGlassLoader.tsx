@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Upload, Sparkles, Mic, Film, Check } from 'lucide-react';
 
 export type LoaderType = 'uploading' | 'generating';
-export type GenerationStep = 'narration' | 'voiceover' | 'video' | 'complete';
+export type GenerationStep = 'narration' | 'video' | 'complete';
 
 interface LiquidGlassLoaderProps {
   isVisible: boolean;
@@ -12,16 +12,14 @@ interface LiquidGlassLoaderProps {
 }
 
 const generationSteps = [
-  { id: 'narration', label: 'Writing script', icon: Sparkles },
-  { id: 'voiceover', label: 'Recording voice', icon: Mic },
+  { id: 'narration', label: 'Preparing', icon: Sparkles },
   { id: 'video', label: 'Creating video', icon: Film },
 ];
 
 const LiquidGlassLoader = ({ isVisible, type, currentStep = 'narration', uploadProgress = 0 }: LiquidGlassLoaderProps) => {
   const getCompletedSteps = () => {
-    if (currentStep === 'voiceover') return new Set(['narration']);
-    if (currentStep === 'video') return new Set(['narration', 'voiceover']);
-    if (currentStep === 'complete') return new Set(['narration', 'voiceover', 'video']);
+    if (currentStep === 'video') return new Set(['narration']);
+    if (currentStep === 'complete') return new Set(['narration', 'video']);
     return new Set<string>();
   };
 

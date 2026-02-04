@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Mic, Film, Check } from 'lucide-react';
 
-export type GenerationStep = 'narration' | 'voiceover' | 'video' | 'complete';
+export type GenerationStep = 'narration' | 'video' | 'complete';
 
 interface ReelGenerationOverlayProps {
   isVisible: boolean;
@@ -11,12 +11,11 @@ interface ReelGenerationOverlayProps {
 }
 
 const steps = [
-  { id: 'narration', label: 'WRITING SCRIPT', icon: Sparkles, duration: 8 },
-  { id: 'voiceover', label: 'RECORDING VOICE', icon: Mic, duration: 12 },
-  { id: 'video', label: 'CREATING VIDEO', icon: Film, description: 'Rendering your reel...', duration: 45 },
+  { id: 'narration', label: 'PREPARING', icon: Sparkles, duration: 2 },
+  { id: 'video', label: 'CREATING VIDEO', icon: Film, description: 'Rendering your reel...', duration: 15 },
 ];
 
-const TOTAL_ESTIMATED_TIME = 65;
+const TOTAL_ESTIMATED_TIME = 20;
 
 const ReelGenerationOverlay = ({ isVisible, currentStep }: ReelGenerationOverlayProps) => {
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
@@ -48,12 +47,10 @@ const ReelGenerationOverlay = ({ isVisible, currentStep }: ReelGenerationOverlay
   }, [isVisible]);
 
   useEffect(() => {
-    if (currentStep === 'voiceover') {
+    if (currentStep === 'video') {
       setCompletedSteps(new Set(['narration']));
-    } else if (currentStep === 'video') {
-      setCompletedSteps(new Set(['narration', 'voiceover']));
     } else if (currentStep === 'complete') {
-      setCompletedSteps(new Set(['narration', 'voiceover', 'video']));
+      setCompletedSteps(new Set(['narration', 'video']));
     } else if (currentStep === 'narration') {
       setCompletedSteps(new Set());
     }
