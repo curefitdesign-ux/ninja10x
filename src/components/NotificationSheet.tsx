@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,6 +38,7 @@ export interface Notification {
   reactorName: string;
   reactionType: string;
   timestamp: Date;
+  dayNumber?: number;
 }
 
 interface NotificationSheetProps {
@@ -48,6 +50,7 @@ interface NotificationSheetProps {
 
 export default function NotificationSheet({ isOpen, onClose, onNotificationCountChange, onLatestNotificationChange }: NotificationSheetProps) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const userActivitiesRef = useRef<Set<string>>(new Set());
 
@@ -84,6 +87,13 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
               .select('user_id, display_name')
               .in('user_id', reactorIds);
             
+            // Fetch activity day numbers
+            const { data: activityDetails } = await supabase
+              .from('journey_activities')
+              .select('id, day_number')
+              .in('id', activityIds);
+            const activityDayMap = new Map(activityDetails?.map(a => [a.id, a.day_number]) || []);
+            
             const profileMap = new Map(profiles?.map(p => [p.user_id, p.display_name]) || []);
             
             const pastNotifications: Notification[] = reactions.map(r => ({
@@ -92,6 +102,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
               reactorName: profileMap.get(r.user_id) || 'Someone',
               reactionType: r.reaction_type,
               timestamp: new Date(r.created_at),
+              dayNumber: activityDayMap.get(r.activity_id),
             }));
             
             setNotifications(pastNotifications);
@@ -176,6 +187,17 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
     onClose();
   }, [onClose]);
 
+  // Navigate to specific activity in reel viewer
+  const handleNotificationTap = useCallback((notif: Notification) => {
+    onClose();
+    navigate('/reel', {
+      state: {
+        activityId: notif.activityId,
+        dayNumber: notif.dayNumber,
+      },
+    });
+  }, [navigate, onClose]);
+
   const ui = (
     <AnimatePresence>
       {isOpen && (
@@ -258,11 +280,12 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20, height: 0 }}
                         transition={{ delay: index * 0.03 }}
-                        className="relative flex items-center gap-3 p-3.5 rounded-2xl"
+                        className="relative flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform"
                         style={{
                           background: 'rgba(255, 255, 255, 0.06)',
                           border: '1px solid rgba(255, 255, 255, 0.1)',
                         }}
+                        onClick={() => handleNotificationTap(notif)}
                       >
                         {/* Reaction icon */}
                         <div 
@@ -288,12 +311,17 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                             <span className="font-medium">{notif.reactorName}</span>
                             <span className="text-white/70"> {REACTION_VERBS[notif.reactionType] || 'reacted to'} your activity</span>
                           </p>
-                          <p className="text-white/40 text-xs mt-0.5">Just now</p>
+                          <p className="text-white/40 text-xs mt-0.5">
+                            {notif.dayNumber ? `Day ${notif.dayNumber}` : 'Tap to view'}
+                          </p>
                         </div>
 
                         {/* Dismiss */}
                         <motion.button
-                          onClick={() => dismissNotification(notif.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            dismissNotification(notif.id);
+                          }}
                           className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                           style={{
                             background: 'rgba(255, 255, 255, 0.08)',

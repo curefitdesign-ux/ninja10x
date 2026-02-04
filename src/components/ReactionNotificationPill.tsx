@@ -153,15 +153,12 @@ export default function ReactionNotificationPill() {
             setNotification(newNotif);
             setIsVisible(true);
             
-            // Clear previous timeout
+            // Clear previous timeout - pill stays visible until user taps
             if (dismissTimeoutRef.current) {
               clearTimeout(dismissTimeoutRef.current);
+              dismissTimeoutRef.current = null;
             }
-            
-            // Auto-dismiss after 4 seconds
-            dismissTimeoutRef.current = setTimeout(() => {
-              setIsVisible(false);
-            }, 4000);
+            // Pill persists until user taps and views - no auto-dismiss
           }
         }
       )
@@ -211,72 +208,50 @@ export default function ReactionNotificationPill() {
             onClick={handleTap}
           >
             <motion.div
-              className="flex items-center gap-3 p-3 rounded-2xl mx-auto max-w-sm"
+              className="flex items-center gap-2 px-3 py-2 rounded-full mx-auto"
               style={{
-                background: 'rgba(255, 255, 255, 0.1)',
+                background: 'rgba(255, 255, 255, 0.12)',
                 backdropFilter: 'blur(40px) saturate(180%)',
                 WebkitBackdropFilter: 'blur(40px) saturate(180%)',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 boxShadow: `
-                  0 12px 40px rgba(0, 0, 0, 0.4),
-                  inset 0 1px 1px rgba(255, 255, 255, 0.2),
-                  0 0 0 1px rgba(255, 255, 255, 0.05)
+                  0 8px 24px rgba(0, 0, 0, 0.3),
+                  inset 0 1px 1px rgba(255, 255, 255, 0.2)
                 `,
+                maxWidth: '280px',
               }}
               whileTap={{ scale: 0.98 }}
             >
-              {/* Reaction icon with glow */}
+              {/* Reaction icon - compact */}
               <motion.div
                 className="relative flex-shrink-0"
-                initial={{ scale: 0, rotate: -30 }}
+                initial={{ scale: 0, rotate: -20 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 20, delay: 0.1 }}
               >
-                <motion.div
-                  className="absolute inset-0 rounded-full"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(251, 191, 36, 0.4) 0%, transparent 70%)',
-                    transform: 'scale(1.8)',
-                  }}
-                  animate={{
-                    opacity: [0.4, 0.8, 0.4],
-                    scale: [1.5, 2, 1.5],
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                />
                 <img
                   src={REACTION_IMAGES[notification.reactionType] || fireImg}
                   alt={notification.reactionType}
-                  className="w-10 h-10 object-contain relative z-10"
-                  style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))' }}
+                  className="w-7 h-7 object-contain"
+                  style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}
                 />
               </motion.div>
 
-              {/* Text content */}
+              {/* Text content - compact */}
               <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-medium truncate">
+                <p className="text-white text-xs font-medium truncate">
                   <span className="font-semibold">{notification.reactorName}</span>
-                  <span className="text-white/80"> reacted to your activity</span>
-                </p>
-                <p className="text-white/50 text-xs mt-0.5">
-                  Tap to view all
+                  <span className="text-white/70"> reacted</span>
                 </p>
               </div>
 
-              {/* Close indicator */}
+              {/* Tap indicator dot */}
               <motion.div
-                className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(255, 255, 255, 0.1)' }}
-                onClick={handleDismiss}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <span className="text-white/60 text-xs">✕</span>
-              </motion.div>
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ background: 'rgba(52, 211, 153, 0.8)' }}
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              />
             </motion.div>
           </motion.div>
         </AnimatePresence>,
