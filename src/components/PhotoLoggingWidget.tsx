@@ -232,10 +232,11 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
           {/* storageUrl is always the templated PNG - render as image */}
           {hasPhoto && (
             <>
-              {isDisplayVideo ? (
+            {isDisplayVideo ? (
                 <video
                   src={displayUrl}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-contain"
+                  style={{ background: 'rgba(0,0,0,0.3)' }}
                   muted
                   playsInline
                   loop
@@ -249,7 +250,8 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
                 <img
                   src={displayUrl}
                   alt={`Day ${dayNumber}`}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-contain"
+                  style={{ background: 'rgba(0,0,0,0.3)' }}
                   onError={(e) => {
                     // Try reloading once on error
                     const img = e.currentTarget;
