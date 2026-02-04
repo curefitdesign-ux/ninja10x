@@ -103,9 +103,6 @@ export async function generateRunwayVideoFromImage(
     if (response.status === 429) {
       throw new Error('Rate limit exceeded. Please wait and try again.');
     }
-    if (response.status === 402) {
-      throw new Error('Insufficient credits');
-    }
     
     throw new Error(`API error: ${response.status}`);
   }
