@@ -25,9 +25,11 @@ interface PhotoData {
   imageUrl: string;
   activity: string;
   duration?: string;
+  distance?: string;
   pr?: string;
   uploadDate: string;
   dayNumber: number;
+  isVideo?: boolean;
 }
 
 interface GenerateReelRequest {
@@ -72,11 +74,13 @@ function validatePhoto(photo: unknown, index: number): PhotoData {
     imageUrl: validateUrl(p.imageUrl, `Photo ${index} imageUrl`),
     activity: validateString(p.activity, 50, `Photo ${index} activity`),
     duration: p.duration ? validateString(p.duration, 50, `Photo ${index} duration`) : undefined,
+    distance: p.distance ? validateString(p.distance, 50, `Photo ${index} distance`) : undefined,
     pr: p.pr ? validateString(p.pr, 100, `Photo ${index} pr`) : undefined,
     uploadDate: validateString(p.uploadDate, 50, `Photo ${index} uploadDate`),
     dayNumber: typeof p.dayNumber === 'number' && p.dayNumber >= 1 && p.dayNumber <= 365 
       ? p.dayNumber 
       : (() => { throw new Error(`Photo ${index} dayNumber must be between 1 and 365`); })(),
+    isVideo: typeof p.isVideo === 'boolean' ? p.isVideo : false,
   };
 }
 
@@ -241,12 +245,23 @@ serve(async (req) => {
     if (!ELEVENLABS_API_KEY) throw new Error("ELEVENLABS_API_KEY is not configured");
     if (!RUNWAYML_API_KEY) throw new Error("RUNWAYML_API_KEY is not configured");
 
+    // Build detailed summary for AI narration with all metrics
     const photosSummary = photos.map((p) => {
       let details = `Day ${p.dayNumber}: ${p.activity}`;
-      if (p.duration) details += ` for ${p.duration}`;
+      if (p.duration) details += `, duration: ${p.duration}`;
+      if (p.distance) details += `, distance: ${p.distance}`;
       if (p.pr) details += ` - Personal Record: ${p.pr}`;
+      if (p.isVideo) details += ` (video clip)`;
       return details;
     }).join('\n');
+
+    // Collect unique activities for prompt
+    const uniqueActivities = [...new Set(photos.map(p => p.activity))].join(', ');
+    const totalDays = photos.length;
+    const hasVideos = photos.some(p => p.isVideo);
+    const hasPRs = photos.some(p => p.pr);
+    
+    console.log("Activity summary:", { uniqueActivities, totalDays, hasVideos, hasPRs });
 
     const narrationResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -337,17 +352,34 @@ Style: Brutalist, gritty, underground. Think boxing gym, not Instagram fitness. 
       console.warn("ElevenLabs failed (continuing without audio):", voiceError);
     }
 
-    // Step 3: Create collage image from all photos for RunwayML
-    console.log("Step 3: Creating collage from all photos for RunwayML...");
+    // Step 3: Select best image for RunwayML (prefer images over videos for better gen quality)
+    console.log("Step 3: Selecting primary image for RunwayML...");
     
-    // Use first photo as the primary image for RunwayML (it will animate this with transitions)
-    // In future, we could create a proper collage on backend
-    const primaryPhotoUrl = photos[0].imageUrl;
+    // Prefer static images over video frames for better quality
+    const imagePhotos = photos.filter(p => !p.isVideo);
+    const primaryPhoto = imagePhotos.length > 0 ? imagePhotos[0] : photos[0];
+    const primaryPhotoUrl = primaryPhoto.imageUrl;
     
-    // Step 4: Generate AI video with RunwayML using brutalist style prompt
+    console.log("Using primary image:", primaryPhotoUrl.substring(0, 50) + "...");
+    
+    // Step 4: Generate AI video with RunwayML - include all activity details in prompt
     console.log("Step 4: Submitting to RunwayML for AI video generation...");
     
-    const runwayPrompt = `Vertical mobile video, brutalist graphic design style, fitness vlog aesthetic. A gritty cinematic montage showing intense athletic training. Visual style involves heavy film grain, noise textures, and high contrast black and white aesthetics with flashes of bright yellow. The composition uses split-screens and collage effects showing rapid transitions between ${photos.length} different workout moments. Fast-paced editing with glitch transitions, urban underground atmosphere. Dynamic camera movements, zoom punches, and shake effects. Each transition reveals a new powerful moment of physical achievement. 4k resolution, trending on social media, ${stylePrompt || 'raw energy and power'}.`;
+    // Build a rich, activity-aware prompt
+    const activityDescriptions = photos.map(p => {
+      const parts = [p.activity];
+      if (p.duration) parts.push(`${p.duration}`);
+      if (p.distance) parts.push(`${p.distance}`);
+      return parts.join(' ');
+    }).join(', then ');
+    
+    const runwayPrompt = `Vertical 9:16 fitness video montage. Cinematic motion graphics showing an intense workout journey: ${activityDescriptions}. 
+Visual style: ${stylePrompt || 'brutalist graphic design with high contrast, heavy film grain, split-screen collage effects, glitch transitions'}.
+The video shows dynamic athlete movement with ${photos.length} key moments. Energy builds with fast cuts, zoom punches, and shake effects. 
+${hasPRs ? 'Highlight personal record achievement moments with dramatic slow-motion.' : ''}
+Urban underground atmosphere, trending social media aesthetic. The camera tracks athletic motion with cinematic flair.`;
+
+    console.log("RunwayML prompt:", runwayPrompt.substring(0, 200) + "...");
 
     const runwayResponse = await fetch("https://api.dev.runwayml.com/v1/image_to_video", {
       method: "POST",

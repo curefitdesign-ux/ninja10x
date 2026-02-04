@@ -8,9 +8,11 @@ interface PhotoData {
   imageUrl: string;
   activity: string;
   duration?: string;
+  distance?: string;
   pr?: string;
   uploadDate: string;
   dayNumber: number;
+  isVideo?: boolean;
 }
 
 export interface ReelResult {

@@ -141,7 +141,7 @@ const Index = () => {
     }
   }, [reelHistory, isGenerating, currentStep]);
   
-  // Generate reel from latest 3 photos
+  // Generate reel from latest 3 photos - passes all activity data & metrics
   const handleGenerateReel = useCallback((photosToProcess: typeof photos) => {
     // Use latest 3 photos
     const latest3 = photosToProcess.slice(-3);
@@ -154,15 +154,20 @@ const Index = () => {
     }
 
     setLastGeneratedPhotos(latest3);
-    // Transform photos to the format expected by the API
+    // Transform photos to the format expected by the API - include all metrics
     const photoData = latest3.map((photo) => ({
       id: photo.id,
       imageUrl: photo.storageUrl,
       activity: photo.activity || 'Activity',
       duration: photo.duration,
+      // Parse distance from duration if activity is Running/Cycling/Trekking
+      distance: ['Running', 'Cycling', 'Trekking'].includes(photo.activity || '') && photo.duration
+        ? photo.duration // Duration field contains distance for these activities
+        : undefined,
       pr: photo.pr,
       uploadDate: new Date().toISOString().split('T')[0],
       dayNumber: photo.dayNumber,
+      isVideo: photo.isVideo,
     }));
     
     generateReel(photoData);
@@ -233,6 +238,7 @@ const Index = () => {
     const isTransitioning = !!currentReel?.videoTaskId && !currentReel?.videoUrl;
     const isUploading = isGenerating;
     const isReady = !isUploading && !isTransitioning;
+    const hasVideo = !!currentReel?.videoUrl;
 
     const state: PillState = isUploading ? 'creating' : isTransitioning ? 'completing' : 'complete';
 
@@ -253,21 +259,36 @@ const Index = () => {
       }
     })();
 
+    // onPlay handler - if no AI video exists yet, trigger generation first
+    const handlePlay = () => {
+      if (hasVideo) {
+        // AI video ready - navigate to reel viewer with the video URL
+        navigate('/reel', {
+          state: {
+            weekRecapVideo: currentReel.videoUrl,
+            weekNumber: completedWeeks,
+          },
+        });
+      } else if (!isUploading && !isTransitioning) {
+        // No video yet - trigger generation, then navigate with placeholder
+        handleGenerateReel(photos);
+        toast.info('Generating your AI recap... This takes 1-2 minutes');
+        // Navigate to reel with placeholder for now (will update when ready)
+        navigate('/reel', {
+          state: {
+            weekRecapVideo: weekRecapVideo,
+            weekNumber: completedWeeks,
+          },
+        });
+      }
+    };
+
     return {
       weekNumber: completedWeeks,
       state,
       progress,
       totalReactions,
-      onPlay: isReady
-        ? () => {
-            navigate('/reel', {
-              state: {
-                weekRecapVideo: currentReel?.videoUrl || weekRecapVideo,
-                weekNumber: completedWeeks,
-              },
-            });
-          }
-        : undefined,
+      onPlay: isReady || hasVideo ? handlePlay : undefined,
     };
   })();
 
