@@ -22,8 +22,7 @@ interface AIReelViewerProps {
 
 // Generation step labels
 const STEP_LABELS: Record<GenerationStep, string> = {
-  narration: 'Writing script...',
-  voiceover: 'Recording voiceover...',
+  narration: 'Preparing...',
   video: 'Creating your reel...',
   complete: 'Ready!',
 };
@@ -133,9 +132,8 @@ export default function AIReelViewer({ isOpen, onClose, photos, autoGenerate = t
   const videoUrl = localVideoUrl || existingReel?.videoUrl || currentReel?.videoUrl;
   const isLoading = (useLocalComposition && !localVideoUrl) || (!useLocalComposition && isGenerating);
   const progress = useLocalComposition ? composingProgress : (
-    currentStep === 'narration' ? 25 :
-    currentStep === 'voiceover' ? 50 :
-    currentStep === 'video' ? 75 : 100
+    currentStep === 'narration' ? 30 :
+    currentStep === 'video' ? 70 : 100
   );
   const statusText = useLocalComposition ? composingPhase : STEP_LABELS[currentStep];
 

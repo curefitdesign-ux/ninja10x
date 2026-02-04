@@ -121,7 +121,8 @@ const Index = () => {
   const { 
     generateReel, 
     isGenerating, 
-    currentStep, 
+    currentStep,
+    generationProgress,
     reelHistory, 
     currentReel,
     currentReelIndex, 
@@ -235,32 +236,25 @@ const Index = () => {
       return sum + photoTotal;
     }, 0);
 
-    const isTransitioning = !!currentReel?.videoTaskId && !currentReel?.videoUrl;
     const isUploading = isGenerating;
     const hasVideo = !!currentReel?.videoUrl;
     
-    // State logic: only show 'complete' when video is actually ready
-    // 'creating' = actively generating, 'rendering' = waiting for RunwayML, 'complete' = video ready
+    // State logic: 'creating' = actively generating, 'complete' = video ready
     const state: PillState = isUploading 
       ? 'creating' 
-      : isTransitioning 
-        ? 'rendering' 
-        : hasVideo 
-          ? 'complete' 
-          : 'creating'; // No video yet = show as ready to create
+      : hasVideo 
+        ? 'complete' 
+        : 'creating'; // No video yet = show as ready to create
 
     const progress = (() => {
       if (state === 'complete') return 100;
-      if (isTransitioning) return 92;
       switch (currentStep) {
         case 'narration':
           return 20;
-        case 'voiceover':
-          return 45;
         case 'video':
-          return 70;
+          return 50;
         case 'complete':
-          return 88;
+          return 100;
         default:
           return 10;
       }
@@ -273,14 +267,6 @@ const Index = () => {
         navigate('/reel', {
           state: {
             weekRecapVideo: currentReel.videoUrl,
-            weekNumber: completedWeeks,
-          },
-        });
-      } else if (isTransitioning) {
-        // Video is being rendered - navigate to show generating state
-        navigate('/reel', {
-          state: {
-            weekRecapVideo: '', // Empty = show generating placeholder
             weekNumber: completedWeeks,
           },
         });

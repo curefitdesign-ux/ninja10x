@@ -618,9 +618,8 @@ const PhotoLoggingWidget = ({
       return currentReel?.videoUrl ? 100 : 0;
     }
     switch (reelStep) {
-      case 'narration': return 25;
-      case 'voiceover': return 50;
-      case 'video': return 75;
+      case 'narration': return 30;
+      case 'video': return 70;
       case 'complete': return 100;
       default: return 0;
     }
@@ -885,9 +884,7 @@ const PhotoLoggingWidget = ({
               state={
                 currentReel?.videoUrl 
                   ? 'complete' 
-                  : currentReel?.videoTaskId
-                    ? 'rendering' 
-                    : 'creating'
+                  : 'creating'
               }
               progress={reelProgress}
               isActivelyGenerating={isGeneratingReel}

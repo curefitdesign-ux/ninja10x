@@ -130,9 +130,8 @@ const ReelProgressWidget = ({
   const statusText = (() => {
     if (reelReady) return 'Your reel is ready!';
     switch (currentStep) {
-      case 'narration': return 'Creating narration...';
-      case 'voiceover': return 'Generating voiceover...';
-      case 'video': return 'Stitching your week activity...';
+      case 'narration': return 'Preparing...';
+      case 'video': return 'Creating your recap...';
       case 'complete': return 'Your reel is ready!';
       default: return 'Preparing your reel...';
     }

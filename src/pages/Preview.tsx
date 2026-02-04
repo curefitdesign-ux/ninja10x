@@ -173,11 +173,9 @@ const Preview = () => {
     
     switch (reelStep) {
       case 'narration':
-        setReelProgress(25);
+        setReelProgress(30);
         break;
-      case 'voiceover':
-        setReelProgress(50);
-        break;
+      case 'video':
       case 'video':
         setReelProgress(75);
         break;
