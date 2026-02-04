@@ -88,6 +88,7 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
     navigate('/reel', {
       state: { 
         activityId: photo.id,
+        dayNumber: photo.dayNumber,
       },
     });
   };
