@@ -895,23 +895,6 @@ const Reel = () => {
                         )}
                       </motion.div>
                     </AnimatePresence>
-                    
-                    {/* Activity tag pill overlay - only on other users' stories, not recap */}
-                    {!isOwnStory && !isWeekRecapStory && currentActivity?.activity && !shouldShowLocked && (
-                      <div 
-                        className="absolute top-3 left-3 px-2.5 py-1 rounded-full z-10"
-                        style={{
-                          background: 'rgba(255,255,255,0.15)',
-                          backdropFilter: 'blur(12px)',
-                          WebkitBackdropFilter: 'blur(12px)',
-                          border: '1px solid rgba(255,255,255,0.2)',
-                        }}
-                      >
-                        <span className="text-white font-medium text-xs">
-                          {currentActivity.activity}
-                        </span>
-                      </div>
-                    )}
                     {/* Lock overlay for locked content */}
                     {shouldShowLocked && (
                       <div
