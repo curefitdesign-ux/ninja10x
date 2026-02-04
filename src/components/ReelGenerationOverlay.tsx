@@ -48,6 +48,11 @@ const ReelGenerationOverlay = ({ isVisible, currentStep, progress = 0 }: ReelGen
   const lottieRef = useRef<any>(null);
   const [lottieData, setLottieData] = useState<object | null>(null);
   
+  // Debug logging
+  useEffect(() => {
+    console.log('[ReelGenerationOverlay] visibility changed:', { isVisible, currentStep, progress });
+  }, [isVisible, currentStep, progress]);
+  
   // Load Lottie animation
   useEffect(() => {
     fetch('/lottie/ai-star.json')
