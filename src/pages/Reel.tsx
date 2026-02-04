@@ -161,16 +161,19 @@ const Reel = () => {
     setLocalReactions(map);
     
     // Check if we should start at a specific user or activity (from navigation state)
+    // IMPORTANT: Don't add week recap offset here - just find the activity index directly.
+    // The effectiveUserGroups will inject week recap at index 0, but when navigating to a
+    // specific activityId, we want to show that exact activity, not the week recap.
     if (location.state?.activityId && groups.length > 0) {
-      // Navigate to specific activity by ID
+      // Navigate to specific activity by ID - find the activity and set index directly
       for (let gIdx = 0; gIdx < groups.length; gIdx++) {
         const group = groups[gIdx];
         const aIdx = group.activities.findIndex(a => a.id === location.state.activityId);
         if (aIdx >= 0) {
           setCurrentUserIndex(gIdx);
-          // Account for week recap offset: if user has ≥3 activities, week recap is at index 0
-          const hasWeekRecapInjected = group.activities.length >= 3;
-          setCurrentActivityIndex(hasWeekRecapInjected ? aIdx + 1 : aIdx);
+          // Add 1 offset because week recap is injected at index 0 for users with ≥3 activities
+          const willHaveWeekRecap = group.activities.length >= 3;
+          setCurrentActivityIndex(willHaveWeekRecap ? aIdx + 1 : aIdx);
           break;
         }
       }

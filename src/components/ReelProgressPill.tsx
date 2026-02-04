@@ -342,12 +342,14 @@ const ReelProgressPill = ({
   const isComplete = state === 'complete' || state === 'completing';
   const isCreating = state === 'creating';
 
-  // Get background style - transparent with subtle border
+  // Get background style - semi-transparent with visible border
   const getBackgroundStyle = () => {
     return {
-      background: 'transparent',
-      border: '1.5px solid rgba(255,255,255,0.15)',
-      boxShadow: 'none',
+      background: 'rgba(0, 0, 0, 0.4)',
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
+      border: '1.5px solid rgba(255,255,255,0.2)',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
     };
   };
 
