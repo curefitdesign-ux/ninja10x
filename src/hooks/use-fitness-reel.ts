@@ -181,7 +181,6 @@ export const useFitnessReel = () => {
       if (!response.ok) {
         if (response.status === 401) throw new Error('Session expired. Please sign in again.');
         if (response.status === 429) throw new Error('Rate limit exceeded. Please try again later.');
-        if (response.status === 402) throw new Error('Please add credits to continue using AI features.');
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to generate reel');
       }
