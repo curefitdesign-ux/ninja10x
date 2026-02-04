@@ -27,10 +27,11 @@ const queryClient = new QueryClient();
 
 // Protected route wrapper that also checks for profile
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, session } = useAuth();
   const { needsSetup, loading: profileLoading } = useProfile();
   
-  if (authLoading || profileLoading) {
+  // Wait for auth to fully initialize before making any decisions
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-white/60">Loading...</div>
@@ -38,8 +39,18 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  if (!user) {
+  // Only redirect if we're certain there's no session (auth is done loading)
+  if (!session && !user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  // Wait for profile check if we have a user
+  if (user && profileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-white/60">Loading...</div>
+      </div>
+    );
   }
 
   if (needsSetup) {
