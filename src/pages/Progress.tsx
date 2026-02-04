@@ -415,15 +415,14 @@ const Progress = () => {
                       {/* Activity tag pill - top left */}
                       {!shouldBlur && photo.activity && (
                         <div 
-                          className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full z-10"
+                          className="absolute top-1 left-1 px-1.5 py-0.5 rounded-full z-20"
                           style={{
-                            background: 'rgba(255,255,255,0.15)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
-                            border: '1px solid rgba(255,255,255,0.2)',
+                            background: 'rgba(0,0,0,0.5)',
+                            backdropFilter: 'blur(8px)',
+                            WebkitBackdropFilter: 'blur(8px)',
                           }}
                         >
-                          <span className="text-white font-medium text-[8px]">
+                          <span className="text-white font-medium text-[9px]">
                             {photo.activity}
                           </span>
                         </div>
