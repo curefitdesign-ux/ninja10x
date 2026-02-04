@@ -412,7 +412,22 @@ const Progress = () => {
                         </div>
                       )}
                       
-                      {/* Activity tag removed - keeping clean card design */}
+                      {/* Activity tag pill - top left */}
+                      {!shouldBlur && photo.activity && (
+                        <div 
+                          className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full z-10"
+                          style={{
+                            background: 'rgba(255,255,255,0.15)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                          }}
+                        >
+                          <span className="text-white font-medium text-[8px]">
+                            {photo.activity}
+                          </span>
+                        </div>
+                      )}
                       
                       {/* User avatar overlay - ALWAYS clear, never locked */}
                       <div className="absolute bottom-1.5 left-1.5">
