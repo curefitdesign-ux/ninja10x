@@ -63,6 +63,7 @@ const Reel = () => {
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
   const deepLinkActivityId = location.state?.activityId as string | undefined;
+  const deepLinkDayNumber = location.state?.dayNumber as number | undefined;
   
   // Week recap video from navigation state (played as first "story")
   const weekRecapVideoFromNav = location.state?.weekRecapVideo as string | undefined;
@@ -261,20 +262,59 @@ const Reel = () => {
   // Deep-link to a specific activityId (e.g. from the Cult Ninja widget).
   // Resolve against effectiveUserGroups (week recap injected) to avoid any off-by-one.
   useEffect(() => {
-    if (!deepLinkActivityId || didInitDeepLinkRef.current) return;
+    // Some entry points only pass activityId; others may also pass dayNumber.
+    // We support both so card taps never fall back to the injected week recap.
+    if ((!deepLinkActivityId && typeof deepLinkDayNumber !== 'number') || didInitDeepLinkRef.current) return;
     if (effectiveUserGroups.length === 0) return;
 
-    for (let gIdx = 0; gIdx < effectiveUserGroups.length; gIdx++) {
-      const group = effectiveUserGroups[gIdx];
-      const aIdx = group.activities.findIndex(a => a.id === deepLinkActivityId);
-      if (aIdx >= 0) {
-        setCurrentUserIndex(gIdx);
-        setCurrentActivityIndex(aIdx);
-        didInitDeepLinkRef.current = true;
-        return;
+    // 1) Try exact id match first.
+    if (deepLinkActivityId) {
+      for (let gIdx = 0; gIdx < effectiveUserGroups.length; gIdx++) {
+        const group = effectiveUserGroups[gIdx];
+        const aIdx = group.activities.findIndex(a => a.id === deepLinkActivityId);
+        if (aIdx >= 0) {
+          setCurrentUserIndex(gIdx);
+          setCurrentActivityIndex(aIdx);
+          didInitDeepLinkRef.current = true;
+          return;
+        }
       }
     }
-  }, [deepLinkActivityId, effectiveUserGroups]);
+
+    // 2) Fallback: find by dayNumber (covers any mismatches between lists / injected stories).
+    const day = typeof deepLinkDayNumber === 'number' && deepLinkDayNumber > 0 ? deepLinkDayNumber : undefined;
+    if (day !== undefined) {
+      const groupOrder: number[] = [];
+      const myIdx = user ? effectiveUserGroups.findIndex(g => g.userId === user.id) : -1;
+      if (myIdx >= 0) groupOrder.push(myIdx);
+      for (let i = 0; i < effectiveUserGroups.length; i++) {
+        if (i !== myIdx) groupOrder.push(i);
+      }
+
+      for (const gIdx of groupOrder) {
+        const group = effectiveUserGroups[gIdx];
+        const aIdx = group.activities.findIndex(a => a.dayNumber === day && !a.id.startsWith('week-recap'));
+        if (aIdx >= 0) {
+          setCurrentUserIndex(gIdx);
+          setCurrentActivityIndex(aIdx);
+          didInitDeepLinkRef.current = true;
+          return;
+        }
+      }
+    }
+
+    // 3) Last resort: if this navigation attempted a deep-link, ensure we don't land on recap.
+    if (user) {
+      const myIdx = effectiveUserGroups.findIndex(g => g.userId === user.id);
+      const group = myIdx >= 0 ? effectiveUserGroups[myIdx] : undefined;
+      const firstRealIdx = group?.activities.findIndex(a => !a.id.startsWith('week-recap')) ?? -1;
+      if (myIdx >= 0 && firstRealIdx >= 0) {
+        setCurrentUserIndex(myIdx);
+        setCurrentActivityIndex(firstRealIdx);
+        didInitDeepLinkRef.current = true;
+      }
+    }
+  }, [deepLinkActivityId, deepLinkDayNumber, effectiveUserGroups, user]);
 
   const currentGroup = effectiveUserGroups[currentUserIndex];
   const currentActivity = currentGroup?.activities[currentActivityIndex];
