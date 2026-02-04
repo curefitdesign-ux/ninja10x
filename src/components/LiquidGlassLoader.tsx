@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, Check } from 'lucide-react';
+import { Upload, Check, Clock } from 'lucide-react';
 import Lottie from 'lottie-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export type LoaderType = 'uploading' | 'generating';
 export type GenerationStep = 'narration' | 'video' | 'complete';
@@ -21,11 +21,45 @@ const useLottieData = () => {
   useEffect(() => {
     fetch('/lottie/ai-star.json')
       .then(res => res.json())
-      .then(setData)
-      .catch(console.error);
+      .then(data => {
+        console.log('[Lottie] LiquidGlass animation loaded');
+        setData(data);
+      })
+      .catch(err => console.error('[Lottie] Failed:', err));
   }, []);
   
   return data;
+};
+
+// Elapsed time hook
+const useElapsedTime = (isRunning: boolean) => {
+  const [elapsed, setElapsed] = useState(0);
+  const startTimeRef = useRef<number | null>(null);
+  
+  useEffect(() => {
+    if (isRunning) {
+      startTimeRef.current = Date.now();
+      setElapsed(0);
+      
+      const interval = setInterval(() => {
+        if (startTimeRef.current) {
+          setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000));
+        }
+      }, 1000);
+      
+      return () => clearInterval(interval);
+    } else {
+      startTimeRef.current = null;
+    }
+  }, [isRunning]);
+  
+  return elapsed;
+};
+
+const formatTime = (seconds: number) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
 const LiquidGlassLoader = ({ 
@@ -36,6 +70,8 @@ const LiquidGlassLoader = ({
   generationProgress = 0 
 }: LiquidGlassLoaderProps) => {
   const lottieData = useLottieData();
+  const lottieRef = useRef<any>(null);
+  const elapsedTime = useElapsedTime(isVisible && type === 'generating' && currentStep !== 'complete');
   
   const getStepLabel = () => {
     switch (currentStep) {
@@ -182,13 +218,23 @@ const LiquidGlassLoader = ({
                     />
                     
                     {/* Lottie animation */}
-                    {lottieData && (
+                    {lottieData ? (
                       <Lottie 
+                        lottieRef={lottieRef}
                         animationData={lottieData}
-                        loop
+                        loop={true}
+                        autoplay={true}
                         className="w-full h-full relative z-10"
                         style={{ filter: 'drop-shadow(0 0 20px rgba(255, 255, 255, 0.3))' }}
                       />
+                    ) : (
+                      <motion.div 
+                        className="w-full h-full flex items-center justify-center"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+                      >
+                        <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-white/80" />
+                      </motion.div>
                     )}
                   </div>
                   
@@ -211,7 +257,7 @@ const LiquidGlassLoader = ({
                   
                   {/* Step label */}
                   <motion.p 
-                    className="text-sm text-white/60 text-center mb-6"
+                    className="text-sm text-white/60 text-center mb-2"
                     key={currentStep}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -219,6 +265,19 @@ const LiquidGlassLoader = ({
                   >
                     {getStepLabel()}
                   </motion.p>
+                  
+                  {/* Elapsed time display */}
+                  <motion.div 
+                    className="flex items-center justify-center gap-1.5 mb-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <Clock className="w-3.5 h-3.5 text-white/40" />
+                    <span className="text-xs font-mono text-white/50 tabular-nums">
+                      {formatTime(elapsedTime)}
+                    </span>
+                  </motion.div>
                   
                   {/* Circular progress ring */}
                   <div className="relative w-full h-1.5 rounded-full overflow-hidden mb-2"
