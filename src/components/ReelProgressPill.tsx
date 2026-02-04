@@ -342,21 +342,19 @@ const ReelProgressPill = ({
   const isComplete = state === 'complete' || state === 'completing';
   const isCreating = state === 'creating';
 
-  // Get background style - semi-transparent with visible border
+  // Get background style - transparent pill (as requested)
   const getBackgroundStyle = () => {
     return {
-      background: 'rgba(0, 0, 0, 0.4)',
-      backdropFilter: 'blur(12px)',
-      WebkitBackdropFilter: 'blur(12px)',
-      border: '1.5px solid rgba(255,255,255,0.2)',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+      background: 'transparent',
+      border: '1.5px solid hsl(var(--foreground) / 0.18)',
+      boxShadow: 'none',
     };
   };
 
   return (
     <motion.div
       ref={pillRef}
-      className={`relative ${className}`}
+      className={`relative z-50 ${className}`}
       initial={{ opacity: 0, y: 20, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 10, scale: 0.95 }}
