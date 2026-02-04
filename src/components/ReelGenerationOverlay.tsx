@@ -1,90 +1,41 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Mic, Film, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
+import Lottie from 'lottie-react';
 
 export type GenerationStep = 'narration' | 'video' | 'complete';
 
 interface ReelGenerationOverlayProps {
   isVisible: boolean;
   currentStep: GenerationStep;
+  progress?: number; // 0-100 real progress
   onClose?: () => void;
 }
 
-const steps = [
-  { id: 'narration', label: 'PREPARING', icon: Sparkles, duration: 2 },
-  { id: 'video', label: 'CREATING VIDEO', icon: Film, description: 'Rendering your reel...', duration: 15 },
-];
-
-const TOTAL_ESTIMATED_TIME = 20;
-
-const ReelGenerationOverlay = ({ isVisible, currentStep }: ReelGenerationOverlayProps) => {
-  const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const startTimeRef = useRef<number | null>(null);
-
+// Lazy load lottie data
+const useLottieData = () => {
+  const [data, setData] = useState<object | null>(null);
+  
   useEffect(() => {
-    if (isVisible && !startTimeRef.current) {
-      startTimeRef.current = Date.now();
-      setElapsedTime(0);
-      setCompletedSteps(new Set());
-    } else if (!isVisible) {
-      startTimeRef.current = null;
-      setElapsedTime(0);
-      setCompletedSteps(new Set());
-    }
-  }, [isVisible]);
+    fetch('/lottie/ai-star.json')
+      .then(res => res.json())
+      .then(setData)
+      .catch(console.error);
+  }, []);
+  
+  return data;
+};
 
-  useEffect(() => {
-    if (!isVisible) return;
-    
-    const interval = setInterval(() => {
-      if (startTimeRef.current) {
-        setElapsedTime(Math.floor((Date.now() - startTimeRef.current) / 1000));
-      }
-    }, 1000);
-    
-    return () => clearInterval(interval);
-  }, [isVisible]);
+const ReelGenerationOverlay = ({ isVisible, currentStep, progress = 0 }: ReelGenerationOverlayProps) => {
+  const lottieData = useLottieData();
 
-  useEffect(() => {
-    if (currentStep === 'video') {
-      setCompletedSteps(new Set(['narration']));
-    } else if (currentStep === 'complete') {
-      setCompletedSteps(new Set(['narration', 'video']));
-    } else if (currentStep === 'narration') {
-      setCompletedSteps(new Set());
-    }
-  }, [currentStep]);
-
-  const getStepStatus = (stepId: string) => {
-    if (completedSteps.has(stepId)) return 'completed';
-    if (stepId === currentStep) return 'active';
-    return 'pending';
+  const getStepLabel = () => {
+    if (progress >= 100) return 'Finishing up...';
+    if (currentStep === 'video') return 'Creating your recap...';
+    return 'Preparing media...';
   };
 
-  const getProgressPercentage = () => {
-    if (currentStep === 'complete') return 100;
-    
-    const stepIndex = steps.findIndex(s => s.id === currentStep);
-    if (stepIndex === -1) return 0;
-    
-    let baseProgress = 0;
-    for (let i = 0; i < stepIndex; i++) {
-      baseProgress += (steps[i].duration / TOTAL_ESTIMATED_TIME) * 100;
-    }
-    
-    const currentStepData = steps[stepIndex];
-    const stepProgress = Math.min(elapsedTime / currentStepData.duration, 0.9) * (currentStepData.duration / TOTAL_ESTIMATED_TIME) * 100;
-    
-    return Math.min(Math.round(baseProgress + stepProgress), 95);
-  };
-
-  const getETA = () => {
-    const remaining = Math.max(TOTAL_ESTIMATED_TIME - elapsedTime, 5);
-    return `~${remaining}s`;
-  };
-
-  const progress = getProgressPercentage();
+  const displayProgress = currentStep === 'complete' ? 100 : progress;
 
   return (
     <AnimatePresence>
@@ -93,189 +44,226 @@ const ReelGenerationOverlay = ({ isVisible, currentStep }: ReelGenerationOverlay
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
           className="fixed inset-0 z-[100] flex items-center justify-center"
         >
-          {/* Liquid Glass Background */}
-          <div className="absolute inset-0 bg-black/95 backdrop-blur-xl">
-            {/* Subtle gradient overlay */}
-            <div 
+          {/* Liquid Glass Background with animated glow */}
+          <div className="absolute inset-0 bg-black/95 backdrop-blur-3xl">
+            {/* Animated glow orbs */}
+            <motion.div 
               className="absolute inset-0"
               style={{
-                background: 'radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.03) 0%, transparent 60%)'
+                background: 'radial-gradient(ellipse at 50% 35%, rgba(139, 92, 246, 0.2) 0%, transparent 50%)'
               }}
+              animate={{
+                opacity: [0.4, 0.8, 0.4],
+                scale: [1, 1.15, 1],
+              }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             />
-            {/* Top accent line */}
-            <motion.div
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-yellow-400 to-transparent origin-center"
+            <motion.div 
+              className="absolute inset-0"
+              style={{
+                background: 'radial-gradient(ellipse at 30% 55%, rgba(59, 130, 246, 0.12) 0%, transparent 45%)'
+              }}
+              animate={{
+                opacity: [0.3, 0.6, 0.3],
+                scale: [1.1, 0.95, 1.1],
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+            />
+            <motion.div 
+              className="absolute inset-0"
+              style={{
+                background: 'radial-gradient(ellipse at 70% 45%, rgba(236, 72, 153, 0.1) 0%, transparent 40%)'
+              }}
+              animate={{
+                opacity: [0.3, 0.7, 0.3],
+              }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
             />
           </div>
 
           {/* Content */}
-          <div className="relative z-10 w-full max-w-sm mx-6 px-2">
-            {/* Header */}
-            <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="text-center mb-10"
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="relative z-10 w-full max-w-xs mx-6"
+          >
+            {/* Liquid Glass Card */}
+            <div
+              className="p-8 rounded-[32px] relative overflow-hidden"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+                backdropFilter: 'blur(60px) saturate(200%)',
+                WebkitBackdropFilter: 'blur(60px) saturate(200%)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                boxShadow: `
+                  0 40px 80px rgba(0,0,0,0.5), 
+                  inset 0 1px 0 rgba(255,255,255,0.15),
+                  inset 0 -1px 0 rgba(255,255,255,0.05)
+                `
+              }}
             >
-              <h2 className="text-2xl font-bold uppercase tracking-tight text-white">
-                Creating
-              </h2>
-              <h2 className="text-2xl font-bold uppercase tracking-tight text-yellow-400">
-                Your Reel
-              </h2>
+              {/* Inner glow effect */}
+              <div 
+                className="absolute inset-0 rounded-[32px] pointer-events-none"
+                style={{
+                  background: 'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.08) 0%, transparent 50%)',
+                }}
+              />
+
+              {/* AI Star Animation */}
+              <div className="relative w-28 h-28 mx-auto mb-2">
+                {/* Outer glow ring */}
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background: 'radial-gradient(circle, rgba(139, 92, 246, 0.35) 0%, transparent 70%)',
+                  }}
+                  animate={{
+                    scale: [1, 1.4, 1],
+                    opacity: [0.4, 0.7, 0.4],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                />
+                
+                {/* Lottie animation */}
+                {lottieData && (
+                  <Lottie 
+                    animationData={lottieData}
+                    loop
+                    className="w-full h-full relative z-10"
+                    style={{ filter: 'drop-shadow(0 0 24px rgba(255, 255, 255, 0.4))' }}
+                  />
+                )}
+              </div>
               
-              {/* Progress percentage and ETA */}
-              <motion.div
+              {/* Progress percentage */}
+              <motion.div 
+                className="text-center mb-2"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="mt-6 flex items-center justify-center gap-4"
               >
-                <span className="text-5xl font-black text-yellow-400">{progress}%</span>
-                <div className="text-left">
-                  <p className="text-[10px] text-white/40 uppercase tracking-widest">Time left</p>
-                  <p className="text-base font-semibold text-white/80">{getETA()}</p>
-                </div>
+                <motion.span 
+                  className="text-5xl font-bold bg-clip-text text-transparent"
+                  style={{
+                    backgroundImage: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)',
+                  }}
+                  key={Math.floor(displayProgress)}
+                >
+                  {Math.round(displayProgress)}%
+                </motion.span>
               </motion.div>
-            </motion.div>
-
-            {/* Steps - Liquid Glass Cards */}
-            <div className="space-y-3">
-              {steps.map((step, index) => {
-                const status = getStepStatus(step.id);
-                const Icon = step.icon;
-                const isActive = status === 'active';
-                const isCompleted = status === 'completed';
-
-                return (
-                  <motion.div
-                    key={step.id}
-                    initial={{ x: -30, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                    className="relative"
-                  >
-                    <div 
-                      className="flex items-center gap-4 p-4 rounded-2xl transition-all duration-300"
-                      style={{
-                        background: isActive 
-                          ? 'linear-gradient(135deg, rgba(250,204,21,0.15) 0%, rgba(250,204,21,0.05) 100%)'
-                          : 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
-                        backdropFilter: 'blur(20px)',
-                        WebkitBackdropFilter: 'blur(20px)',
-                        border: isActive 
-                          ? '1px solid rgba(250,204,21,0.4)' 
-                          : '1px solid rgba(255,255,255,0.08)',
-                        boxShadow: isActive 
-                          ? '0 8px 32px rgba(250,204,21,0.15), inset 0 1px 0 rgba(255,255,255,0.1)'
-                          : 'inset 0 1px 0 rgba(255,255,255,0.05)'
-                      }}
-                    >
-                      {/* Icon container */}
-                      <div 
-                        className="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300"
-                        style={{
-                          background: isCompleted 
-                            ? 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.9) 100%)'
-                            : isActive 
-                              ? 'linear-gradient(135deg, rgba(250,204,21,0.9) 0%, rgba(234,179,8,0.9) 100%)'
-                              : 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
-                          boxShadow: isActive || isCompleted
-                            ? '0 4px 12px rgba(0,0,0,0.2)'
-                            : 'none'
-                        }}
-                      >
-                        {isCompleted ? (
-                          <Check className="w-5 h-5 text-black" strokeWidth={3} />
-                        ) : (
-                          <Icon className={`w-5 h-5 ${isActive ? 'text-black' : 'text-white/30'}`} />
-                        )}
-                      </div>
-
-                      {/* Text */}
-                      <div className="flex-1">
-                        <p className={`font-semibold uppercase tracking-wider text-xs transition-colors duration-300 ${
-                          isActive ? 'text-yellow-400' : isCompleted ? 'text-white/80' : 'text-white/30'
-                        }`}>
-                          {step.label}
-                        </p>
-                        {isActive && step.description && (
-                          <motion.p
-                            initial={{ opacity: 0, y: -5 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="text-[11px] text-white/50 mt-0.5"
-                          >
-                            {step.description}
-                          </motion.p>
-                        )}
-                      </div>
-
-                      {/* Active indicator */}
-                      {isActive && (
-                        <motion.div
-                          animate={{ opacity: [0.4, 1, 0.4] }}
-                          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                          className="w-2.5 h-2.5 bg-yellow-400 rounded-sm"
-                        />
-                      )}
-                    </div>
-
-                    {/* Connector line */}
-                    {index < steps.length - 1 && (
-                      <div 
-                        className="absolute left-[30px] top-full w-px h-3 transition-colors duration-300"
-                        style={{
-                          background: isCompleted 
-                            ? 'linear-gradient(to bottom, rgba(255,255,255,0.3), rgba(255,255,255,0.1))'
-                            : 'linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.05))'
-                        }}
-                      />
-                    )}
-                  </motion.div>
-                );
-              })}
-            </div>
-
-            {/* Progress bar - Liquid Glass Style */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="mt-10"
-            >
-              <div 
-                className="h-1.5 rounded-full overflow-hidden"
+              
+              {/* Step label */}
+              <motion.p 
+                className="text-sm text-white/60 text-center mb-6"
+                key={currentStep}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {getStepLabel()}
+              </motion.p>
+              
+              {/* Progress bar */}
+              <div className="relative w-full h-2 rounded-full overflow-hidden mb-4"
                 style={{
-                  background: 'linear-gradient(90deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
-                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.3)'
+                  background: 'rgba(255,255,255,0.06)',
                 }}
               >
+                {/* Animated shimmer background */}
                 <motion.div
-                  className="h-full rounded-full"
+                  className="absolute inset-0"
                   style={{
-                    background: 'linear-gradient(90deg, rgba(250,204,21,0.9) 0%, rgba(234,179,8,1) 100%)',
-                    boxShadow: '0 0 12px rgba(250,204,21,0.5)'
+                    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%)',
+                  }}
+                  animate={{
+                    x: ['-100%', '200%'],
+                  }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+                />
+                
+                {/* Progress fill */}
+                <motion.div
+                  className="h-full rounded-full relative"
+                  style={{
+                    background: 'linear-gradient(90deg, rgba(139, 92, 246, 1) 0%, rgba(59, 130, 246, 1) 50%, rgba(236, 72, 153, 1) 100%)',
+                    boxShadow: '0 0 20px rgba(139, 92, 246, 0.6), 0 0 8px rgba(59, 130, 246, 0.4)',
                   }}
                   initial={{ width: '0%' }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                />
+                  animate={{ width: `${displayProgress}%` }}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                >
+                  {/* Glowing tip */}
+                  {displayProgress > 0 && displayProgress < 100 && (
+                    <motion.div
+                      className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full"
+                      style={{
+                        background: 'white',
+                        boxShadow: '0 0 12px rgba(255,255,255,0.9), 0 0 24px rgba(139, 92, 246, 0.6)',
+                      }}
+                      animate={{
+                        scale: [1, 1.3, 1],
+                        opacity: [0.8, 1, 0.8],
+                      }}
+                      transition={{ duration: 0.6, repeat: Infinity }}
+                    />
+                  )}
+                </motion.div>
               </div>
-              <div className="flex justify-between mt-3">
-                <p className="text-[10px] text-white/30 uppercase tracking-widest font-medium">
-                  ~15 sec reel
-                </p>
-                <p className="text-[10px] text-white/40 font-medium">
-                  {elapsedTime}s elapsed
-                </p>
+              
+              {/* Step indicators */}
+              <div className="flex justify-between items-center px-1">
+                {['Prepare', 'Create', 'Done'].map((label, idx) => {
+                  const stepThresholds = [0, 20, 100];
+                  const isComplete = displayProgress >= stepThresholds[idx];
+                  const isActive = idx === 0 ? displayProgress > 0 && displayProgress < 20 : 
+                                   idx === 1 ? displayProgress >= 20 && displayProgress < 100 :
+                                   displayProgress >= 100;
+                  
+                  return (
+                    <motion.div 
+                      key={label}
+                      className="flex flex-col items-center gap-1.5"
+                      animate={{
+                        opacity: isComplete || isActive ? 1 : 0.4,
+                      }}
+                    >
+                      <motion.div
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-xs"
+                        style={{
+                          background: isComplete && displayProgress >= stepThresholds[idx]
+                            ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(59, 130, 246, 0.9) 100%)'
+                            : isActive
+                              ? 'rgba(255,255,255,0.15)'
+                              : 'rgba(255,255,255,0.05)',
+                          border: isActive && !isComplete ? '1px solid rgba(139, 92, 246, 0.5)' : 'none',
+                          boxShadow: isComplete ? '0 0 14px rgba(139, 92, 246, 0.5)' : 'none',
+                        }}
+                        animate={isActive && !isComplete ? {
+                          boxShadow: ['0 0 0px rgba(139, 92, 246, 0)', '0 0 14px rgba(139, 92, 246, 0.5)', '0 0 0px rgba(139, 92, 246, 0)'],
+                        } : {}}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      >
+                        {isComplete && displayProgress >= stepThresholds[idx] ? (
+                          <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                        ) : (
+                          <span className="text-white/60">{idx + 1}</span>
+                        )}
+                      </motion.div>
+                      <span className={`text-[10px] font-medium ${isComplete || isActive ? 'text-white/80' : 'text-white/30'}`}>
+                        {label}
+                      </span>
+                    </motion.div>
+                  );
+                })}
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

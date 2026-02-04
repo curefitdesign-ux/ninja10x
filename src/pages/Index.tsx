@@ -736,6 +736,7 @@ const Index = () => {
       <ReelGenerationOverlay 
         isVisible={isGenerating} 
         currentStep={currentStep}
+        progress={generationProgress}
       />
 
       <ReelPreviewScreen
