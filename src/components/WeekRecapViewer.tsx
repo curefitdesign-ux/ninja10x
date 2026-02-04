@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Play, Loader2 } from 'lucide-react';
+import { X, Play, Loader2, RefreshCw } from 'lucide-react';
 import { isVideoUrl } from '@/lib/media';
-import weekRecapVideo from '@/assets/demo-videos/week-recap-sample.mp4';
+import weekRecapPlaceholder from '@/assets/demo-videos/week-recap-sample.mp4';
 
 // Reaction badge emojis and counts (mock data)
 const REACTION_BADGES = [
@@ -23,6 +23,10 @@ interface WeekRecapViewerProps {
     isVideo?: boolean;
   }>;
   weekNumber: number;
+  videoUrl?: string | null; // AI-generated video URL from RunwayML
+  isGenerating?: boolean;
+  generationProgress?: string;
+  onRegenerate?: () => void;
 }
 
 // Photo card with reaction badge
@@ -89,25 +93,42 @@ const PhotoCardWithBadge = ({
   );
 };
 
-export default function WeekRecapViewer({ isOpen, onClose, photos, weekNumber }: WeekRecapViewerProps) {
+export default function WeekRecapViewer({ 
+  isOpen, 
+  onClose, 
+  photos, 
+  weekNumber,
+  videoUrl,
+  isGenerating = false,
+  generationProgress,
+  onRegenerate,
+}: WeekRecapViewerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [videoError, setVideoError] = useState(false);
+
+  // Determine which video to play - prefer AI-generated, fallback to placeholder
+  const actualVideoUrl = videoUrl || weekRecapPlaceholder;
+  const isAIVideo = !!videoUrl;
 
   // Auto-play video on open
   useEffect(() => {
-    if (isOpen && videoRef.current) {
+    if (isOpen && videoRef.current && !isGenerating) {
       setIsLoading(true);
+      setVideoError(false);
       videoRef.current.currentTime = 0;
       videoRef.current.play().then(() => {
         setIsPlaying(true);
         setIsLoading(false);
-      }).catch(() => {
+      }).catch((e) => {
+        console.error('Video play error:', e);
         setIsLoading(false);
+        setVideoError(true);
       });
     }
-  }, [isOpen]);
+  }, [isOpen, actualVideoUrl, isGenerating]);
 
   // Track video progress
   useEffect(() => {
@@ -122,14 +143,22 @@ export default function WeekRecapViewer({ isOpen, onClose, photos, weekNumber }:
 
     const handleLoadedData = () => {
       setIsLoading(false);
+      setVideoError(false);
+    };
+
+    const handleError = () => {
+      setIsLoading(false);
+      setVideoError(true);
     };
 
     video.addEventListener('timeupdate', handleTimeUpdate);
     video.addEventListener('loadeddata', handleLoadedData);
+    video.addEventListener('error', handleError);
 
     return () => {
       video.removeEventListener('timeupdate', handleTimeUpdate);
       video.removeEventListener('loadeddata', handleLoadedData);
+      video.removeEventListener('error', handleError);
     };
   }, []);
 
@@ -191,20 +220,66 @@ export default function WeekRecapViewer({ isOpen, onClose, photos, weekNumber }:
             <video
               ref={videoRef}
               className="w-full h-full object-cover"
-              src={weekRecapVideo}
+              src={actualVideoUrl}
               loop
               playsInline
               muted
             />
 
-            {/* Placeholder text overlay */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="bg-black/60 backdrop-blur-sm px-6 py-4 rounded-2xl max-w-[80%] text-center">
-                <p className="text-white/90 text-sm font-medium leading-relaxed">
-                  Placeholder only — your weekly recap will come here
-                </p>
+            {/* Generation in progress overlay */}
+            <AnimatePresence>
+              {isGenerating && (
+                <motion.div
+                  className="absolute inset-0 flex flex-col items-center justify-center bg-black/80"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <Loader2 className="w-12 h-12 text-emerald-400 animate-spin mb-4" />
+                  <p className="text-white/90 text-sm font-medium">
+                    {generationProgress || 'Generating your AI recap...'}
+                  </p>
+                  <p className="text-white/60 text-xs mt-2">This takes 1-2 minutes</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Placeholder overlay - only show when no AI video */}
+            {!isAIVideo && !isGenerating && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="bg-black/60 backdrop-blur-sm px-6 py-4 rounded-2xl max-w-[80%] text-center">
+                  <p className="text-white/90 text-sm font-medium leading-relaxed">
+                    Placeholder only — your weekly recap will come here
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Video error state with regenerate option */}
+            <AnimatePresence>
+              {videoError && !isGenerating && (
+                <motion.div
+                  className="absolute inset-0 flex flex-col items-center justify-center bg-black/80"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <p className="text-white/80 text-sm mb-4">Failed to load video</p>
+                  {onRegenerate && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRegenerate();
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 border border-emerald-500/50 rounded-full text-emerald-400 text-sm"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      Regenerate
+                    </button>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Loading overlay */}
             <AnimatePresence>
