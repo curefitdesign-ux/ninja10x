@@ -675,8 +675,8 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
                       state={
                         currentReel?.videoUrl 
                           ? 'complete' 
-                          : reelProgress >= 90 
-                            ? 'completing' 
+                          : currentReel?.videoTaskId
+                            ? 'rendering' 
                             : 'creating'
                       }
                       progress={reelProgress}

@@ -885,8 +885,8 @@ const PhotoLoggingWidget = ({
               state={
                 currentReel?.videoUrl 
                   ? 'complete' 
-                  : reelProgress >= 90 
-                    ? 'completing' 
+                  : currentReel?.videoTaskId
+                    ? 'rendering' 
                     : 'creating'
               }
               progress={reelProgress}
