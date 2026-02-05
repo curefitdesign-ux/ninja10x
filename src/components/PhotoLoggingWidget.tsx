@@ -8,7 +8,7 @@ import { isVideoUrl } from "@/lib/media";
 import ReelProgressPill from "./ReelProgressPill";
 import { useFitnessReel } from "@/hooks/use-fitness-reel";
 import FloatingCardReactions from "./FloatingCardReactions";
-import weekRecapVideo from "@/assets/demo-videos/week-recap.mp4";
+// Removed unused weekRecapVideo import - now using generated videos only
 
 // Activity icons
 import footballIcon from '@/assets/activities/football.png';
@@ -773,14 +773,25 @@ const PhotoLoggingWidget = ({
     setPendingUpload(null);
   };
 
-  // Handle playing week recap - navigate to /reel page
-  const handlePlayWeekRecap = (_weekPhotos: LoggedPhoto[], weekIndex: number) => {
-    navigate('/reel', {
-      state: {
-        weekRecapVideo,
-        weekNumber: weekIndex + 1,
-      },
-    });
+  // Handle playing week recap - only navigate if video is ready, otherwise trigger callback
+  const handlePlayWeekRecap = (weekPhotos: LoggedPhoto[], weekIndex: number) => {
+    // Check if a valid video URL exists (must be a real URL, not empty/undefined)
+    const hasValidVideo = currentReel?.videoUrl && 
+      currentReel.videoUrl.startsWith('blob:') || 
+      (currentReel?.videoUrl?.startsWith('http') && !currentReel?.videoUrl?.includes('/assets/'));
+    
+    if (hasValidVideo) {
+      // Video ready - navigate to reel viewer
+      navigate('/reel', {
+        state: {
+          weekRecapVideo: currentReel.videoUrl,
+          weekNumber: weekIndex + 1,
+        },
+      });
+    } else if (onPlayReel) {
+      // No video ready - trigger parent's generation handler
+      onPlayReel(weekPhotos);
+    }
   };
   
   // 4 clusters representing 4 weeks (fixed order, no shuffling)

@@ -16,7 +16,7 @@ import { uploadToStorage } from '@/services/storage-service';
 import SharedImageTransition from '@/components/SharedImageTransition';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 import type { PillState } from '@/components/ReelProgressPill';
-import weekRecapVideo from '@/assets/demo-videos/week-recap.mp4';
+// Removed unused weekRecapVideo import - now using generated videos only
 
 import CameraUI from '@/components/CameraUI';
 import {
@@ -135,12 +135,19 @@ const Index = () => {
   const [weekTransitionAnimation, setWeekTransitionAnimation] = useState(false);
   const [previousPhotoCount, setPreviousPhotoCount] = useState(photos.length);
   
-  // Show preview when reel is ready
+  // Navigate to reel viewer when video is ready (after generation completes)
   useEffect(() => {
-    if (reelHistory.length > 0 && !isGenerating && currentStep === 'complete') {
-      setShowReelPreview(true);
+    if (reelHistory.length > 0 && !isGenerating && currentStep === 'complete' && currentReel?.videoUrl) {
+      const completedWeeks = Math.floor(photos.length / 3);
+      // Navigate to /reel with the generated video
+      navigate('/reel', {
+        state: {
+          weekRecapVideo: currentReel.videoUrl,
+          weekNumber: completedWeeks,
+        },
+      });
     }
-  }, [reelHistory, isGenerating, currentStep]);
+  }, [reelHistory, isGenerating, currentStep, currentReel?.videoUrl, photos.length, navigate]);
   
   // Generate reel from latest 3 photos - passes all activity data & metrics
   const handleGenerateReel = useCallback((photosToProcess: typeof photos) => {

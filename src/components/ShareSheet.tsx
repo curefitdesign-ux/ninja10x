@@ -12,7 +12,7 @@ import TicketFrame from '@/components/frames/TicketFrame';
 import ReelProgressPill from '@/components/ReelProgressPill';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 import { useFitnessReel } from '@/hooks/use-fitness-reel';
-import weekRecapVideo from '@/assets/demo-videos/week-recap.mp4';
+// Removed unused weekRecapVideo import - now using generated videos only
 
 type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
 
@@ -680,13 +680,15 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
                       isActivelyGenerating={isGeneratingReel}
                        onPlay={() => {
                          triggerHaptic('medium');
-                         // Navigate to reel page with the week recap video as first story
-                         navigate('/reel', {
-                           state: {
-                             weekRecapVideo: weekRecapVideo,
-                             weekNumber: currentWeekConfig?.week,
-                           },
-                         });
+                         // Only navigate if we have a real generated video
+                         if (currentReel?.videoUrl) {
+                           navigate('/reel', {
+                             state: {
+                               weekRecapVideo: currentReel.videoUrl,
+                               weekNumber: currentWeekConfig?.week,
+                             },
+                           });
+                         }
                        }}
                    />
                  </motion.div>
