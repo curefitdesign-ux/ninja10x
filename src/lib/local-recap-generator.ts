@@ -557,6 +557,6 @@ export async function generateLocalRecap(options: RecapOptions): Promise<string>
        renderNextFrame();
      }, 100);
    });
-      }
+  }
 
 export { WIDTH, HEIGHT, FPS };
