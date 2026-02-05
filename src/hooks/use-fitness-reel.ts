@@ -55,13 +55,17 @@ export const useFitnessReel = () => {
       return null;
     }
 
+     // CRITICAL: Set all state synchronously before any async work
+     console.log('[useFitnessReel] Setting isGenerating=true IMMEDIATELY');
     // Set generating state FIRST before any async work
     setIsGenerating(true);
     setError(null);
     setCurrentStep('narration');
     setGenerationProgress(5);
     
-    console.log('[useFitnessReel] State set: isGenerating=true, step=narration');
+     // Force a re-render by using a microtask
+     await Promise.resolve();
+     console.log('[useFitnessReel] State should now be: isGenerating=true');
 
     try {
       // Convert PhotoData to RecapPhoto format
@@ -75,8 +79,8 @@ export const useFitnessReel = () => {
         isVideo: p.isVideo,
       }));
 
-      // Small delay to ensure UI updates before heavy work
-      await new Promise(resolve => setTimeout(resolve, 100));
+       // Small delay to ensure React has rendered the overlay
+       await new Promise(resolve => setTimeout(resolve, 200));
       
       // Step 2: Generate video locally
       setCurrentStep('video');
@@ -118,12 +122,14 @@ export const useFitnessReel = () => {
       const message = err instanceof Error ? err.message : 'Failed to generate reel';
       setError(message);
       toast.error(message);
+       setIsGenerating(false);
       return null;
     } finally {
       // Don't reset progress immediately - let complete state show
       setTimeout(() => {
+         console.log('[useFitnessReel] Resetting isGenerating to false');
         setIsGenerating(false);
-      }, 1500);
+       }, 2000);
     }
   }, []);
 

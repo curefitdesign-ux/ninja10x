@@ -1,7 +1,7 @@
 /**
  * Local Recap Video Generator
- * Creates smooth animated fitness recap videos with data visualization cards
- * Transitions seamlessly between data cards and actual photos/videos
+  * Creates animated fitness recap videos with day cards and transitions
+  * Uses WebM encoding via MediaRecorder with frame-by-frame rendering
  */
 
 export interface RecapPhoto {
@@ -29,7 +29,7 @@ interface AnimationKeyframe {
 const DATA_CARD_DURATION = 1.5;
 const TRANSITION_DURATION = 0.8;
 const MEDIA_DURATION = 2.5;
-const FPS = 30;
+ const FPS = 24; // Lower FPS for better browser compatibility
 const WIDTH = 720;
 const HEIGHT = 1280;
 
@@ -393,10 +393,12 @@ export async function generateLocalRecap(options: RecapOptions): Promise<string>
 
   if (photos.length === 0) throw new Error('No photos provided');
 
+   console.log('[LocalRecap] Starting generation with', photos.length, 'photos');
   onProgress?.(0, 'Loading images...');
 
   // Load all images
   const images = await loadImages(photos);
+   console.log('[LocalRecap] Images loaded:', images.length);
 
   onProgress?.(10, 'Preparing animation...');
 
@@ -413,14 +415,78 @@ export async function generateLocalRecap(options: RecapOptions): Promise<string>
   const mediaFrames = Math.floor(MEDIA_DURATION * FPS);
   const framesPerPhoto = dataCardFrames + transitionFrames + mediaFrames;
   const totalFrames = photos.length * framesPerPhoto;
+   
+   console.log('[LocalRecap] Total frames to render:', totalFrames);
 
   onProgress?.(15, 'Rendering frames...');
 
-  // Use MediaRecorder to capture frames
+   // Collect all rendered frames as image data first
+   const frameDataUrls: string[] = [];
+   
+   // Render all frames synchronously to avoid timing issues
+   for (let frameIndex = 0; frameIndex < totalFrames; frameIndex++) {
+     const keyframe = getKeyframe(frameIndex, photos.length, FPS);
+     const photo = photos[keyframe.photoIndex];
+     const img = images[keyframe.photoIndex];
+ 
+     // Clear canvas
+     ctx.clearRect(0, 0, WIDTH, HEIGHT);
+ 
+     // Render based on keyframe type
+     switch (keyframe.type) {
+       case 'data-card':
+         drawDataCard(ctx, photo, keyframe.progress, WIDTH, HEIGHT);
+         break;
+       case 'transition':
+         drawTransition(ctx, photo, img, keyframe.progress, WIDTH, HEIGHT);
+         break;
+       case 'media':
+         drawMedia(ctx, photo, img, keyframe.progress, WIDTH, HEIGHT);
+         break;
+     }
+ 
+     // Store frame as data URL
+     frameDataUrls.push(canvas.toDataURL('image/webp', 0.85));
+ 
+     // Progress update
+     if (frameIndex % 5 === 0) {
+       const progress = 15 + (frameIndex / totalFrames) * 60;
+       const currentDay = keyframe.photoIndex + 1;
+       onProgress?.(Math.floor(progress), `Rendering Day ${currentDay}...`);
+     }
+   }
+ 
+   console.log('[LocalRecap] All frames rendered:', frameDataUrls.length);
+   onProgress?.(75, 'Encoding video...');
+ 
+   // Now use MediaRecorder to encode video by playing back frames
   const stream = canvas.captureStream(FPS);
+   
+   // Check for supported mimeTypes
+   const mimeTypes = [
+     'video/webm;codecs=vp9',
+     'video/webm;codecs=vp8',
+     'video/webm',
+     'video/mp4',
+   ];
+   
+   let selectedMimeType = '';
+   for (const mimeType of mimeTypes) {
+     if (MediaRecorder.isTypeSupported(mimeType)) {
+       selectedMimeType = mimeType;
+       console.log('[LocalRecap] Using mimeType:', mimeType);
+       break;
+     }
+   }
+   
+   if (!selectedMimeType) {
+     console.warn('[LocalRecap] No supported video mimeType found, using default');
+     selectedMimeType = 'video/webm';
+   }
+ 
   const mediaRecorder = new MediaRecorder(stream, {
-    mimeType: 'video/webm;codecs=vp9',
-    videoBitsPerSecond: 8000000,
+     mimeType: selectedMimeType,
+     videoBitsPerSecond: 5000000,
   });
 
   const chunks: Blob[] = [];
@@ -431,59 +497,66 @@ export async function generateLocalRecap(options: RecapOptions): Promise<string>
     };
 
     mediaRecorder.onstop = () => {
-      const videoBlob = new Blob(chunks, { type: 'video/webm' });
+       console.log('[LocalRecap] MediaRecorder stopped, chunks:', chunks.length);
+       const videoBlob = new Blob(chunks, { type: selectedMimeType.split(';')[0] });
       const url = URL.createObjectURL(videoBlob);
+       console.log('[LocalRecap] Video URL created:', url);
       onProgress?.(100, 'Complete!');
       resolve(url);
     };
 
-    mediaRecorder.onerror = (e) => reject(e);
+     mediaRecorder.onerror = (e) => {
+       console.error('[LocalRecap] MediaRecorder error:', e);
+       reject(e);
+     };
 
-    mediaRecorder.start();
+     // Start recording with timeslice to get data periodically
+     mediaRecorder.start(100);
 
-    // Render frames
+     // Play back pre-rendered frames
     let frameIndex = 0;
     const frameInterval = 1000 / FPS;
 
     const renderNextFrame = () => {
-      if (frameIndex >= totalFrames) {
+       if (frameIndex >= frameDataUrls.length) {
+         // Add a small delay before stopping to ensure all frames are captured
+         setTimeout(() => {
+           console.log('[LocalRecap] Stopping MediaRecorder');
         mediaRecorder.stop();
+         }, 200);
         return;
       }
 
-      const keyframe = getKeyframe(frameIndex, photos.length, FPS);
-      const photo = photos[keyframe.photoIndex];
-      const img = images[keyframe.photoIndex];
-
-      // Clear canvas
-      ctx.clearRect(0, 0, WIDTH, HEIGHT);
-
-      // Render based on keyframe type
-      switch (keyframe.type) {
-        case 'data-card':
-          drawDataCard(ctx, photo, keyframe.progress, WIDTH, HEIGHT);
-          break;
-        case 'transition':
-          drawTransition(ctx, photo, img, keyframe.progress, WIDTH, HEIGHT);
-          break;
-        case 'media':
-          drawMedia(ctx, photo, img, keyframe.progress, WIDTH, HEIGHT);
-          break;
+       // Draw frame from pre-rendered data URL
+       const img = new Image();
+       img.onload = () => {
+         ctx.clearRect(0, 0, WIDTH, HEIGHT);
+         ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
+         
+         frameIndex++;
+         
+         // Progress update during playback
+         if (frameIndex % 10 === 0) {
+           const progress = 75 + (frameIndex / frameDataUrls.length) * 20;
+           onProgress?.(Math.floor(progress), 'Encoding video...');
+         }
+         
+         setTimeout(renderNextFrame, frameInterval);
+       };
+       img.onerror = () => {
+         console.error('[LocalRecap] Failed to load frame', frameIndex);
+         frameIndex++;
+         setTimeout(renderNextFrame, frameInterval);
+       };
+       img.src = frameDataUrls[frameIndex];
+     };
+ 
+     // Small delay to ensure MediaRecorder is ready
+     setTimeout(() => {
+       console.log('[LocalRecap] Starting frame playback');
+       renderNextFrame();
+     }, 100);
+   });
       }
-
-      // Progress update
-      if (frameIndex % 10 === 0) {
-        const progress = 15 + (frameIndex / totalFrames) * 80;
-        const currentDay = keyframe.photoIndex + 1;
-        onProgress?.(progress, `Rendering Day ${currentDay}...`);
-      }
-
-      frameIndex++;
-      setTimeout(renderNextFrame, frameInterval);
-    };
-
-    renderNextFrame();
-  });
-}
 
 export { WIDTH, HEIGHT, FPS };
