@@ -1,35 +1,20 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Lottie from 'lottie-react';
 
 export type GenerationStep = 'narration' | 'video' | 'complete';
 
 interface ReelGenerationOverlayProps {
   isVisible: boolean;
   currentStep: GenerationStep;
-  progress?: number; // 0-100 real progress
+  progress?: number;
   onClose?: () => void;
 }
 
 const ReelGenerationOverlay = ({ isVisible, currentStep }: ReelGenerationOverlayProps) => {
-  const lottieRef = useRef<any>(null);
-  const [lottieData, setLottieData] = useState<object | null>(null);
-  
   // Debug logging
   useEffect(() => {
     console.log('[ReelGenerationOverlay] visibility changed:', { isVisible, currentStep });
   }, [isVisible, currentStep]);
-  
-  // Load Lottie animation
-  useEffect(() => {
-    fetch('/lottie/ai-star-loader.json')
-      .then(res => res.json())
-      .then(data => {
-        console.log('[Lottie] Animation loaded successfully');
-        setLottieData(data);
-      })
-      .catch(err => console.error('[Lottie] Failed to load:', err));
-  }, []);
 
   return (
     <AnimatePresence>
@@ -86,50 +71,20 @@ const ReelGenerationOverlay = ({ isVisible, currentStep }: ReelGenerationOverlay
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="relative z-10 w-full max-w-xs mx-6 flex flex-col items-center"
           >
-            {/* Lottie Animation */}
-            <div className="relative w-32 h-32 mb-8">
-              {lottieData ? (
-                <Lottie 
-                  lottieRef={lottieRef}
-                  animationData={lottieData}
-                  loop={true}
-                  autoplay={true}
-                  className="w-full h-full"
-                  style={{ filter: 'drop-shadow(0 0 20px rgba(59, 130, 246, 0.4))' }}
-                />
-              ) : (
-                /* Circular loader fallback while Lottie loads */
-                <svg className="w-full h-full" viewBox="0 0 100 100">
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    fill="none"
-                    stroke="rgba(255,255,255,0.1)"
-                    strokeWidth="4"
-                  />
-                  <motion.circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    fill="none"
-                    stroke="url(#loaderGradient)"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    strokeDasharray="80 200"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
-                    style={{ transformOrigin: 'center' }}
-                  />
-                  <defs>
-                    <linearGradient id="loaderGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#3B82F6" />
-                      <stop offset="100%" stopColor="#60A5FA" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-              )}
-            </div>
+            {/* GIF Animation */}
+            <motion.div 
+              className="relative w-32 h-32 mb-8"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+            >
+              <img 
+                src="/images/ai-star-loader.gif" 
+                alt="AI generating"
+                className="w-full h-full object-contain"
+                style={{ filter: 'drop-shadow(0 0 24px rgba(139, 92, 246, 0.5))' }}
+              />
+            </motion.div>
             
             {/* Main title */}
             <motion.h2 
@@ -138,7 +93,7 @@ const ReelGenerationOverlay = ({ isVisible, currentStep }: ReelGenerationOverlay
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              Generating your weekly recap...
+              Generating your ai recap
             </motion.h2>
             
             {/* Subtitle */}
