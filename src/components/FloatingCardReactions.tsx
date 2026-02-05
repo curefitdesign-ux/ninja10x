@@ -53,19 +53,20 @@ export default function FloatingCardReactions({
 }: FloatingCardReactionsProps) {
   // Prefer allReactions if provided, otherwise use legacy reactions
   let reactionsToShow: string[] = [];
+  let totalCount = 0;
   
   if (allReactions && allReactions.length > 0) {
-    // Show all reaction types that have counts > 0
-    reactionsToShow = allReactions
-      .filter(r => r.count > 0)
-      .sort((a, b) => b.count - a.count) // Sort by count descending
-      .map(r => r.type)
-      .slice(0, 8); // Show up to 8 reactions
+    const activeReactions = allReactions.filter(r => r.count > 0).sort((a, b) => b.count - a.count);
+    reactionsToShow = activeReactions.map(r => r.type).slice(0, 3); // Show only top 3
+    totalCount = activeReactions.reduce((sum, r) => sum + r.count, 0);
   } else if (reactions && reactions.length > 0) {
     reactionsToShow = [...new Set(reactions)].slice(0, 3);
+    totalCount = reactions.length;
   }
 
   if (reactionsToShow.length === 0) return null;
+
+  const remainingCount = totalCount > 3 ? totalCount - 3 : 0;
 
   const sizeClasses = {
     sm: 'w-5 h-5',
@@ -143,6 +144,23 @@ export default function FloatingCardReactions({
           </motion.div>
         );
       })}
+      
+      {/* Subtle total count badge */}
+      {remainingCount > 0 && (
+        <motion.div
+          className="absolute bottom-1 right-1 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
+          style={{
+            background: 'rgba(0, 0, 0, 0.5)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+          }}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.4, type: 'spring', stiffness: 300 }}
+        >
+          <span className="text-white/70 text-[10px] font-medium">+{remainingCount}</span>
+        </motion.div>
+      )}
     </div>
   );
 }
