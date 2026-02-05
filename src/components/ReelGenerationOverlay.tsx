@@ -55,7 +55,7 @@ const ReelGenerationOverlay = ({ isVisible, currentStep, progress = 0 }: ReelGen
   
   // Load Lottie animation
   useEffect(() => {
-    fetch('/lottie/ai-star.json')
+    fetch('/lottie/ai-star-v2.json')
       .then(res => res.json())
       .then(data => {
         console.log('[Lottie] Animation loaded successfully');
@@ -65,9 +65,9 @@ const ReelGenerationOverlay = ({ isVisible, currentStep, progress = 0 }: ReelGen
   }, []);
 
   const getStepLabel = () => {
-    if (progress >= 100) return 'Finishing up...';
-    if (currentStep === 'video') return 'Creating your recap...';
-    return 'Preparing media...';
+    if (progress >= 100) return 'Almost ready...';
+    if (currentStep === 'video') return 'This usually takes 1-2 minutes';
+    return 'This usually takes 1-2 minutes';
   };
 
   const displayProgress = currentStep === 'complete' ? 100 : progress;
@@ -186,18 +186,33 @@ const ReelGenerationOverlay = ({ isVisible, currentStep, progress = 0 }: ReelGen
                 )}
               </div>
               
-              {/* Progress percentage */}
+              {/* Main title with emoji */}
               <motion.div 
                 className="text-center mb-2"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               >
                 <motion.span 
-                  className="text-5xl font-bold bg-clip-text text-transparent"
+                  className="text-xl font-semibold text-white flex items-center justify-center gap-2"
+                  key={Math.floor(displayProgress)}
+                >
+                  <span className="text-2xl">✨</span>
+                  <span>Generating your week 1 recap</span>
+                </motion.span>
+              </motion.div>
+              
+              {/* Progress percentage */}
+              <motion.div 
+                className="text-center mb-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <motion.span 
+                  className="text-3xl font-bold bg-clip-text text-transparent"
                   style={{
                     backgroundImage: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)',
                   }}
-                  key={Math.floor(displayProgress)}
+                  key={`progress-${Math.floor(displayProgress)}`}
                 >
                   {Math.round(displayProgress)}%
                 </motion.span>
@@ -205,7 +220,7 @@ const ReelGenerationOverlay = ({ isVisible, currentStep, progress = 0 }: ReelGen
               
               {/* Step label */}
               <motion.p 
-                className="text-sm text-white/60 text-center mb-2"
+                className="text-sm text-white/50 text-center mb-2"
                 key={currentStep}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
