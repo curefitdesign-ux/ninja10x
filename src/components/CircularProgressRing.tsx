@@ -68,37 +68,87 @@ const CircularProgressRing = ({
       const weekStartAngle = currentAngle;
       const weekEndAngle = currentAngle + (barAngle * 3) + (barGap * 2);
       const isActiveWeek = week === activeWeekIndex;
+      const midAngleWeek = toRad((weekStartAngle + weekEndAngle) / 2);
       
-      // Draw translucent liquid glass background behind each group of 3 bars
-      // Simple glass layer without glow effects
+      // === LIQUID GLASS CONTAINER EFFECT ===
+      
+      // Layer 1: Outer soft glow (ambient light)
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, ringRadius, toRad(weekStartAngle - 3), toRad(weekEndAngle + 3));
+      ctx.lineCap = "round";
+      ctx.lineWidth = strokeWidth + 20;
+      ctx.strokeStyle = isActiveWeek 
+        ? "rgba(57, 255, 133, 0.08)" 
+        : "rgba(255, 255, 255, 0.04)";
+      ctx.shadowColor = isActiveWeek 
+        ? "rgba(57, 255, 133, 0.15)" 
+        : "rgba(255, 255, 255, 0.08)";
+      ctx.shadowBlur = 25;
+      ctx.stroke();
+      ctx.restore();
+      
+      // Layer 2: Glass container with gradient
       ctx.save();
       ctx.beginPath();
       ctx.arc(centerX, centerY, ringRadius, toRad(weekStartAngle - 2), toRad(weekEndAngle + 2));
       ctx.lineCap = "round";
-      ctx.lineWidth = strokeWidth + 10;
+      ctx.lineWidth = strokeWidth + 12;
       
-      // Create gradient for liquid glass effect
-      const midAngleWeek = toRad((weekStartAngle + weekEndAngle) / 2);
+      // Multi-stop gradient for liquid glass depth
       const glassGradient = ctx.createLinearGradient(
-        centerX + Math.cos(midAngleWeek) * (ringRadius - 25),
-        centerY + Math.sin(midAngleWeek) * (ringRadius - 25),
-        centerX + Math.cos(midAngleWeek) * (ringRadius + 25),
-        centerY + Math.sin(midAngleWeek) * (ringRadius + 25)
+        centerX + Math.cos(midAngleWeek - Math.PI/2) * (ringRadius),
+        centerY + Math.sin(midAngleWeek - Math.PI/2) * (ringRadius),
+        centerX + Math.cos(midAngleWeek + Math.PI/2) * (ringRadius),
+        centerY + Math.sin(midAngleWeek + Math.PI/2) * (ringRadius)
       );
       
       if (isActiveWeek) {
-        // Active week: green-tinted glass
-        glassGradient.addColorStop(0, "rgba(57, 255, 133, 0.15)");
-        glassGradient.addColorStop(0.5, "rgba(57, 255, 133, 0.06)");
-        glassGradient.addColorStop(1, "rgba(57, 255, 133, 0.10)");
+        // Active week: green-tinted liquid glass
+        glassGradient.addColorStop(0, "rgba(57, 255, 133, 0.20)");
+        glassGradient.addColorStop(0.3, "rgba(57, 255, 133, 0.08)");
+        glassGradient.addColorStop(0.5, "rgba(57, 255, 133, 0.04)");
+        glassGradient.addColorStop(0.7, "rgba(57, 255, 133, 0.08)");
+        glassGradient.addColorStop(1, "rgba(57, 255, 133, 0.15)");
       } else {
         // Inactive weeks: frosted glass effect
-        glassGradient.addColorStop(0, "rgba(255, 255, 255, 0.12)");
-        glassGradient.addColorStop(0.5, "rgba(255, 255, 255, 0.05)");
-        glassGradient.addColorStop(1, "rgba(255, 255, 255, 0.08)");
+        glassGradient.addColorStop(0, "rgba(255, 255, 255, 0.15)");
+        glassGradient.addColorStop(0.3, "rgba(255, 255, 255, 0.06)");
+        glassGradient.addColorStop(0.5, "rgba(255, 255, 255, 0.03)");
+        glassGradient.addColorStop(0.7, "rgba(255, 255, 255, 0.06)");
+        glassGradient.addColorStop(1, "rgba(255, 255, 255, 0.12)");
       }
       
       ctx.strokeStyle = glassGradient;
+      ctx.stroke();
+      ctx.restore();
+      
+      // Layer 3: Inner highlight (top edge reflection)
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, ringRadius - (strokeWidth / 2) - 2, toRad(weekStartAngle), toRad(weekEndAngle));
+      ctx.lineCap = "round";
+      ctx.lineWidth = 2;
+      const highlightGradient = ctx.createLinearGradient(
+        centerX + Math.cos(midAngleWeek) * (ringRadius - 15),
+        centerY + Math.sin(midAngleWeek) * (ringRadius - 15),
+        centerX + Math.cos(midAngleWeek) * (ringRadius + 15),
+        centerY + Math.sin(midAngleWeek) * (ringRadius + 15)
+      );
+      highlightGradient.addColorStop(0, "rgba(255, 255, 255, 0.25)");
+      highlightGradient.addColorStop(0.5, "rgba(255, 255, 255, 0.05)");
+      highlightGradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+      ctx.strokeStyle = highlightGradient;
+      ctx.stroke();
+      ctx.restore();
+      
+      // Layer 4: Subtle border for glass edge definition
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, ringRadius, toRad(weekStartAngle - 2), toRad(weekEndAngle + 2));
+      ctx.lineCap = "round";
+      ctx.lineWidth = strokeWidth + 14;
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
       ctx.stroke();
       ctx.restore();
       
