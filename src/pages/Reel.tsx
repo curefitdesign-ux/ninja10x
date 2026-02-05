@@ -189,52 +189,11 @@ const Reel = () => {
     loadActivities();
   }, [loadActivities]);
 
-  // Create the effective user groups with week recap injected for ANY user who has completed a week
-  // This makes week recaps visible to all viewers, not just the owner
+  // No longer auto-inject week recaps into stories
+  // User must explicitly share/upload their recap before it appears in stories
   const effectiveUserGroups = useMemo(() => {
-    if (userGroups.length === 0) return userGroups;
-    
-    return userGroups.map(group => {
-      // Count completed weeks for this user (every 3 activities = 1 week)
-      const completedWeekCount = Math.floor(group.activities.length / 3);
-      
-      if (completedWeekCount === 0) {
-        return group; // No completed weeks, no recap
-      }
-      
-      // Use nav-provided URL if viewing own recap
-      // IMPORTANT: Only use actual RunwayML URLs (https://...) not bundled assets
-      const isOwnGroup = user && group.userId === user.id;
-      const hasValidVideoUrl = weekRecapVideoFromNav && 
-        weekRecapVideoFromNav.startsWith('http') && 
-        !weekRecapVideoFromNav.includes('/assets/');
-      const weekRecapVideoUrl = (isOwnGroup && hasValidVideoUrl) ? weekRecapVideoFromNav : null;
-      const weekNum = (isOwnGroup && weekRecapNumber) ? weekRecapNumber : completedWeekCount;
-      
-      // Create week recap activity - videoUrl may be null if still generating
-      const weekRecapActivity: LocalActivity = {
-        id: `week-recap-${group.userId}`,
-        dayNumber: 0,
-        storageUrl: weekRecapVideoUrl || '', // Empty if still generating
-        originalUrl: weekRecapVideoUrl || '',
-        activity: `Week ${weekNum} Recap`,
-        createdAt: new Date().toISOString(),
-        isVideo: true,
-        isPublic: true,
-        frame: null,
-        duration: null,
-        pr: null,
-        reactionCount: 0,
-        reactions: { ...DEFAULT_REACTIONS },
-        reactorProfiles: [],
-      };
-      
-      return {
-        ...group,
-        activities: [weekRecapActivity, ...group.activities],
-      };
-    });
-  }, [userGroups, weekRecapVideoFromNav, weekRecapNumber, user]);
+    return userGroups;
+  }, [userGroups]);
 
   // MAIN NAVIGATION EFFECT: Determine where to land based on navigation intent
   // This runs once per navigation after data is loaded
@@ -308,33 +267,17 @@ const Reel = () => {
       return;
     }
     
-    // CASE 2: Week recap playback (from PLAY NOW pill)
-    if (hasWeekRecap && user) {
-      const myIdx = effectiveUserGroups.findIndex(g => g.userId === user.id);
-      if (myIdx >= 0) {
-        console.log('[Reel] Opening week recap:', { myIdx });
-        setCurrentUserIndex(myIdx);
-        setCurrentActivityIndex(0); // Week recap is at index 0
-      }
-      setNavigationInitialized(true);
-      return;
-    }
-    
-    // CASE 3: Default navigation (no specific intent) - go to current user's first story
+    // CASE 2: Default navigation - go to current user's first story
     if (user) {
       const myIdx = effectiveUserGroups.findIndex(g => g.userId === user.id);
       if (myIdx >= 0) {
-        // Skip week recap if present, go to first real story
-        const group = effectiveUserGroups[myIdx];
-        const hasRecap = group.activities[0]?.id.startsWith('week-recap');
-        const startIdx = hasRecap && group.activities.length > 1 ? 1 : 0;
         setCurrentUserIndex(myIdx);
-        setCurrentActivityIndex(startIdx);
+        setCurrentActivityIndex(0);
       }
     }
     
     setNavigationInitialized(true);
-  }, [loading, effectiveUserGroups, navigationInitialized, hasDeepLink, hasWeekRecap, deepLinkActivityId, deepLinkDayNumber, user]);
+  }, [loading, effectiveUserGroups, navigationInitialized, hasDeepLink, deepLinkActivityId, deepLinkDayNumber, user]);
 
   const currentGroup = effectiveUserGroups[currentUserIndex];
   const currentActivity = currentGroup?.activities[currentActivityIndex];

@@ -135,19 +135,8 @@ const Index = () => {
   const [weekTransitionAnimation, setWeekTransitionAnimation] = useState(false);
   const [previousPhotoCount, setPreviousPhotoCount] = useState(photos.length);
   
-  // Navigate to reel viewer when video is ready (after generation completes)
-  useEffect(() => {
-    if (reelHistory.length > 0 && !isGenerating && currentStep === 'complete' && currentReel?.videoUrl) {
-      const completedWeeks = Math.floor(photos.length / 3);
-      // Navigate to /reel with the generated video
-      navigate('/reel', {
-        state: {
-          weekRecapVideo: currentReel.videoUrl,
-          weekNumber: completedWeeks,
-        },
-      });
-    }
-  }, [reelHistory, isGenerating, currentStep, currentReel?.videoUrl, photos.length, navigate]);
+  // Removed auto-navigation after generation - user must explicitly share/upload recap first
+  // The generation overlay will show until complete, then user can tap "PLAY NOW" to preview locally
   
   // Generate reel from latest 3 photos - passes all activity data & metrics
   const handleGenerateReel = useCallback((photosToProcess: typeof photos) => {
