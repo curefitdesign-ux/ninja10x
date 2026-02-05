@@ -80,7 +80,7 @@ const FRAME_COLORS: Record<FrameType, { bg: string; gradient: string }> = {
   },
 };
 
-type EditingField = 'duration' | 'pr' | null;
+type EditingField = 'duration' | 'pr' | 'activity' | null;
 type FlowStep = 'camera' | 'activity' | 'template';
 
 // Generate hour options from 0 to 24
@@ -945,14 +945,15 @@ const Preview = () => {
             <div 
               ref={containerRef}
               onScroll={handleScroll}
-              className="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center touch-pan-x"
+              className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center touch-pan-x"
               style={{ 
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
                 overscrollBehaviorX: 'contain',
-                paddingLeft: 'calc((100vw - min(80vw, 340px)) / 2)',
-                paddingRight: 'calc((100vw - min(80vw, 340px)) / 2)',
+                // Reduced padding so ~5% of next template is visible
+                paddingLeft: 'calc((100vw - min(80vw, 340px)) / 2 - 16px)',
+                paddingRight: 'calc((100vw - min(80vw, 340px)) / 2 - 16px)',
               }}
             >
               {FRAMES.map((frame, index) => {
@@ -1009,6 +1010,9 @@ const Preview = () => {
           {/* Editable data points - contextual to activity */}
           {(() => {
             const config = getActivityInputConfig(activity || '');
+            const activityOption = activityOptions.find(a => a.name === activity);
+            const ActivityIcon = activityOption?.icon || Dumbbell;
+            
             return (
               <div 
                 className="rounded-2xl p-3 relative overflow-hidden"
@@ -1019,6 +1023,21 @@ const Preview = () => {
                   border: '1px solid rgba(255, 255, 255, 0.1)',
                 }}
               >
+                {/* Activity selector - editable */}
+                <button 
+                  onClick={() => { handleTap('activity'); setEditingField('activity'); }}
+                  className={`w-full flex justify-between items-center py-2 border-b border-white/10 tap-bounce min-h-[44px] ${tappedElement === 'activity' ? 'animate-liquid-tap' : ''}`}
+                >
+                  <span className="text-white/70 text-base flex items-center gap-2">
+                    Activity
+                    <span className="text-xs text-white/40">tap to change</span>
+                  </span>
+                  <span className="font-bold text-lg text-white flex items-center gap-2">
+                    <ActivityIcon className="w-4 h-4 text-white/70" strokeWidth={2} />
+                    {activity || 'Select'}
+                  </span>
+                </button>
+
                 {/* Primary: Duration (always shown) */}
                 <button 
                   onClick={() => { handleTap('duration'); openEditSheet('duration'); }}
@@ -1119,7 +1138,7 @@ const Preview = () => {
 
       {/* Contextual Numeric Keyboard */}
       <AnimatePresence>
-        {editingField && (
+        {editingField && editingField !== 'activity' && (
           (() => {
             const activityConfig = getActivityInputConfig(activity || '');
             const isDuration = editingField === 'duration';
@@ -1142,6 +1161,90 @@ const Preview = () => {
               />
             );
           })()
+        )}
+      </AnimatePresence>
+
+      {/* Activity Selection Bottom Sheet */}
+      <AnimatePresence>
+        {editingField === 'activity' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50"
+            onClick={() => setEditingField(null)}
+          >
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+            
+            {/* Bottom Sheet */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="absolute bottom-0 left-0 right-0"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div 
+                className="rounded-t-3xl px-5 pt-4"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%)',
+                  backdropFilter: 'blur(40px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+                  boxShadow: '0 -10px 50px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.15)',
+                  paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
+                }}
+              >
+                {/* Handle */}
+                <div className="w-12 h-1.5 bg-white/30 rounded-full mx-auto mb-4" />
+                
+                {/* Title */}
+                <h2 className="text-white text-xl font-bold text-center mb-5">Change activity</h2>
+                
+                {/* Activity Grid - 4 columns */}
+                <div className="grid grid-cols-4 gap-x-3 gap-y-4">
+                  {activityOptions.map((activityOption, index) => {
+                    const IconComponent = activityOption.icon;
+                    const isSelected = activity === activityOption.name;
+                    return (
+                      <motion.button
+                        key={activityOption.name}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.02 }}
+                        whileTap={{ scale: 0.92 }}
+                        onClick={() => {
+                          triggerHaptic('medium');
+                          setActivity(activityOption.name);
+                          setEditingField(null);
+                        }}
+                        className="flex flex-col items-center gap-2"
+                      >
+                        <div 
+                          className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                          style={{ 
+                            background: isSelected 
+                              ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.15) 100%)'
+                              : 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
+                            backdropFilter: 'blur(10px)',
+                            border: isSelected ? '2px solid rgba(255, 255, 255, 0.5)' : '1px solid rgba(255, 255, 255, 0.15)',
+                            boxShadow: isSelected ? '0 4px 20px rgba(255,255,255,0.2), inset 0 1px 0 rgba(255,255,255,0.2)' : 'inset 0 1px 0 rgba(255,255,255,0.1)',
+                          }}
+                        >
+                          <IconComponent className={`w-7 h-7 ${isSelected ? 'text-white' : 'text-white/80'}`} strokeWidth={1.8} />
+                        </div>
+                        <span className={`text-[11px] font-semibold text-center leading-tight ${isSelected ? 'text-white' : 'text-white/90'}`}>
+                          {activityOption.name}
+                        </span>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
