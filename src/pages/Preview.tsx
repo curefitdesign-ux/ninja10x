@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil, Trash2, Bike, Footprints, Mountain, Waves, Dumbbell, Dribbble, Trophy, Swords, Music, Brain, CircleDot, ImagePlus } from 'lucide-react';
+import { X, Check, Pencil, Trash2, Bike, Footprints, Mountain, Waves, Dumbbell, Dribbble, Trophy, Swords, Music, Brain, CircleDot, ImagePlus, MoreHorizontal } from 'lucide-react';
 import ShareSheet from '@/components/ShareSheet';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -37,6 +37,7 @@ const activityOptions = [
   { name: 'Meditation', icon: Brain, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
   { name: 'Boxing', icon: Swords, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Rounds', secondaryUnit: 'rounds', secondaryInputType: 'number' as const },
   { name: 'Dance', icon: Music, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
+  { name: 'Other', icon: MoreHorizontal, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const, isCustom: true },
 ];
 
 // Get activity-specific input config from centralized utility
@@ -139,6 +140,8 @@ const Preview = () => {
   const [showMicroCelebration, setShowMicroCelebration] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
+  const [showCustomActivityInput, setShowCustomActivityInput] = useState(false);
+  const [customActivityName, setCustomActivityName] = useState('');
   
   const [elementsHidden, setElementsHidden] = useState(false);
   const [isReview, setIsReview] = useState(false);
@@ -746,6 +749,7 @@ const Preview = () => {
             <div className="grid grid-cols-4 gap-x-3 gap-y-4">
               {activityOptions.map((activityOption, index) => {
                 const IconComponent = activityOption.icon;
+                const isOther = 'isCustom' in activityOption && activityOption.isCustom;
                 return (
                   <motion.button
                     key={activityOption.name}
@@ -753,7 +757,15 @@ const Preview = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.02 }}
                     whileTap={{ scale: 0.92 }}
-                    onClick={() => handleActivitySelection(activityOption.name)}
+                    onClick={() => {
+                      if (isOther) {
+                        triggerHaptic('medium');
+                        setShowCustomActivityInput(true);
+                        setCustomActivityName('');
+                      } else {
+                        handleActivitySelection(activityOption.name);
+                      }
+                    }}
                     className="flex flex-col items-center gap-2"
                   >
                     <div 
@@ -774,6 +786,48 @@ const Preview = () => {
                 );
               })}
             </div>
+
+            {/* Custom Activity Name Input */}
+            <AnimatePresence>
+              {showCustomActivityInput && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-4 overflow-hidden"
+                >
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={customActivityName}
+                      onChange={(e) => setCustomActivityName(e.target.value)}
+                      placeholder="Enter activity name..."
+                      autoFocus
+                      className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/40 text-base focus:outline-none focus:border-white/40"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && customActivityName.trim()) {
+                          handleActivitySelection(customActivityName.trim());
+                          setShowCustomActivityInput(false);
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        if (customActivityName.trim()) {
+                          triggerHaptic('medium');
+                          handleActivitySelection(customActivityName.trim());
+                          setShowCustomActivityInput(false);
+                        }
+                      }}
+                      disabled={!customActivityName.trim()}
+                      className="bg-white/20 hover:bg-white/30 disabled:opacity-40 px-4 rounded-xl flex items-center justify-center transition-colors"
+                    >
+                      <Check className="w-5 h-5 text-white" />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </motion.div>
       </div>
@@ -923,9 +977,9 @@ const Preview = () => {
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
                 overscrollBehaviorX: 'contain',
-                // Reduced padding so ~5% of next template is visible
-                paddingLeft: 'calc((100vw - min(80vw, 340px)) / 2 - 16px)',
-                paddingRight: 'calc((100vw - min(80vw, 340px)) / 2 - 16px)',
+                // First frame centered, with ~5% peek of next template visible
+                paddingLeft: 'calc((100vw - min(80vw, 340px)) / 2)',
+                paddingRight: 'calc((100vw - min(80vw, 340px)) / 2 - 24px)',
               }}
             >
               {FRAMES.map((frame, index) => {
@@ -1004,8 +1058,7 @@ const Preview = () => {
                     Activity
                     <span className="text-xs text-white/40">tap to change</span>
                   </span>
-                  <span className="font-bold text-lg text-white flex items-center gap-2">
-                    <ActivityIcon className="w-4 h-4 text-white/70" strokeWidth={2} />
+                  <span className="font-bold text-lg text-white">
                     {activity || 'Select'}
                   </span>
                 </button>
@@ -1179,7 +1232,8 @@ const Preview = () => {
                 <div className="grid grid-cols-4 gap-x-3 gap-y-4">
                   {activityOptions.map((activityOption, index) => {
                     const IconComponent = activityOption.icon;
-                    const isSelected = activity === activityOption.name;
+                    const isSelected = activity === activityOption.name || (activityOption.name === 'Other' && !activityOptions.slice(0, -1).some(a => a.name === activity) && activity);
+                    const isOther = 'isCustom' in activityOption && activityOption.isCustom;
                     return (
                       <motion.button
                         key={activityOption.name}
@@ -1189,8 +1243,14 @@ const Preview = () => {
                         whileTap={{ scale: 0.92 }}
                         onClick={() => {
                           triggerHaptic('medium');
-                          setActivity(activityOption.name);
-                          setEditingField(null);
+                          if (isOther) {
+                            // Show custom activity input
+                            setShowCustomActivityInput(true);
+                            setCustomActivityName('');
+                          } else {
+                            setActivity(activityOption.name);
+                            setEditingField(null);
+                          }
                         }}
                         className="flex flex-col items-center gap-2"
                       >
@@ -1214,6 +1274,50 @@ const Preview = () => {
                     );
                   })}
                 </div>
+
+                {/* Custom Activity Name Input */}
+                <AnimatePresence>
+                  {showCustomActivityInput && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-4 overflow-hidden"
+                    >
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={customActivityName}
+                          onChange={(e) => setCustomActivityName(e.target.value)}
+                          placeholder="Enter activity name..."
+                          autoFocus
+                          className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/40 text-base focus:outline-none focus:border-white/40"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && customActivityName.trim()) {
+                              setActivity(customActivityName.trim());
+                              setShowCustomActivityInput(false);
+                              setEditingField(null);
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={() => {
+                            if (customActivityName.trim()) {
+                              triggerHaptic('medium');
+                              setActivity(customActivityName.trim());
+                              setShowCustomActivityInput(false);
+                              setEditingField(null);
+                            }
+                          }}
+                          disabled={!customActivityName.trim()}
+                          className="bg-white/20 hover:bg-white/30 disabled:opacity-40 px-4 rounded-xl flex items-center justify-center transition-colors"
+                        >
+                          <Check className="w-5 h-5 text-white" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
           </motion.div>
