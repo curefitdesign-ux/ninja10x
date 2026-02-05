@@ -971,15 +971,15 @@ const Preview = () => {
             <div 
               ref={containerRef}
               onScroll={handleScroll}
-              className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center touch-pan-x"
+              className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center touch-pan-x"
               style={{ 
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
                 overscrollBehaviorX: 'contain',
-                // First frame centered, with ~5% peek of next template visible
-                paddingLeft: 'calc((100vw - min(80vw, 340px)) / 2)',
-                paddingRight: 'calc((100vw - min(80vw, 340px)) / 2 - 24px)',
+                // Each card centered with 10% of adjacent templates visible on both sides
+                paddingLeft: 'calc((100vw - min(75vw, 320px)) / 2)',
+                paddingRight: 'calc((100vw - min(75vw, 320px)) / 2)',
               }}
             >
               {FRAMES.map((frame, index) => {
@@ -1002,9 +1002,10 @@ const Preview = () => {
                       elementsHidden && isRightOfCurrent ? 'opacity-0 translate-x-full' : ''
                     }`}
                     style={{ 
-                      width: 'min(80vw, 340px)',
-                      height: 'calc(min(80vw, 340px) * 16 / 9)',
-                      maxHeight: '520px',
+                      // Card takes ~80% width, leaving 10% visible on each side for adjacent cards
+                      width: 'min(75vw, 320px)',
+                      height: 'calc(min(75vw, 320px) * 16 / 9)',
+                      maxHeight: '500px',
                       transform: `scale(${scale})`,
                       opacity: elementsHidden && !isActiveFrame ? 0 : opacity,
                       transition: 'transform 0.12s ease-out, opacity 0.12s ease-out',
