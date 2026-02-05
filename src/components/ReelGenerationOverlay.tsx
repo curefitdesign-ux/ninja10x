@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export type GenerationStep = 'narration' | 'video' | 'complete';
@@ -11,6 +11,14 @@ interface ReelGenerationOverlayProps {
 }
 
 const ReelGenerationOverlay = ({ isVisible, currentStep }: ReelGenerationOverlayProps) => {
+  const [deviceHeight, setDeviceHeight] = useState<number>(0);
+
+  // Calculate and set fixed device height
+  useEffect(() => {
+    const height = window.visualViewport?.height || window.innerHeight;
+    setDeviceHeight(height);
+  }, []);
+
   // Debug logging
   useEffect(() => {
     console.log('[ReelGenerationOverlay] visibility changed:', { isVisible, currentStep });
@@ -25,7 +33,7 @@ const ReelGenerationOverlay = ({ isVisible, currentStep }: ReelGenerationOverlay
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
           className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden"
-          style={{ height: '100dvh', minHeight: '-webkit-fill-available' }}
+          style={{ height: deviceHeight > 0 ? `${deviceHeight}px` : '100dvh', minHeight: '-webkit-fill-available' }}
         >
           {/* Liquid Glass Background with animated glow */}
           <div className="absolute inset-0 bg-black/95 backdrop-blur-3xl">
