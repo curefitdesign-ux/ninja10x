@@ -86,8 +86,8 @@ const ReelGenerationOverlay = ({ isVisible, currentStep }: ReelGenerationOverlay
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="relative z-10 w-full max-w-xs mx-6 flex flex-col items-center"
           >
-            {/* Lottie Animation - Circular loader style */}
-            <div className="relative w-24 h-24 mb-8">
+            {/* Lottie Animation */}
+            <div className="relative w-32 h-32 mb-8">
               {lottieData ? (
                 <Lottie 
                   lottieRef={lottieRef}
@@ -98,11 +98,36 @@ const ReelGenerationOverlay = ({ isVisible, currentStep }: ReelGenerationOverlay
                   style={{ filter: 'drop-shadow(0 0 20px rgba(59, 130, 246, 0.4))' }}
                 />
               ) : (
-                <motion.div 
-                  className="w-full h-full rounded-full border-[3px] border-white/10 border-t-blue-400"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
-                />
+                /* Circular loader fallback while Lottie loads */
+                <svg className="w-full h-full" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.1)"
+                    strokeWidth="4"
+                  />
+                  <motion.circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke="url(#loaderGradient)"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray="80 200"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
+                    style={{ transformOrigin: 'center' }}
+                  />
+                  <defs>
+                    <linearGradient id="loaderGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#3B82F6" />
+                      <stop offset="100%" stopColor="#60A5FA" />
+                    </linearGradient>
+                  </defs>
+                </svg>
               )}
             </div>
             
