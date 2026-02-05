@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './use-auth';
 
@@ -13,16 +13,29 @@ export interface Profile {
 }
 
 export const useProfile = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [needsSetup, setNeedsSetup] = useState(false);
+  const fetchedForUserId = useRef<string | null>(null);
 
   useEffect(() => {
+    // Wait for auth to finish loading before making profile decisions
+    if (authLoading) {
+      return;
+    }
+
     if (!user) {
       setProfile(null);
       setLoading(false);
       setNeedsSetup(false);
+      fetchedForUserId.current = null;
+      return;
+    }
+
+    // Prevent duplicate fetches for the same user
+    if (fetchedForUserId.current === user.id && profile !== null) {
+      setLoading(false);
       return;
     }
 
@@ -40,6 +53,8 @@ export const useProfile = () => {
         return;
       }
 
+      fetchedForUserId.current = user.id;
+      
       if (data) {
         setProfile(data as Profile);
         setNeedsSetup(false);
@@ -50,7 +65,7 @@ export const useProfile = () => {
     };
 
     fetchProfile();
-  }, [user]);
+  }, [user, authLoading]);
 
   const createProfile = async (displayName: string, avatarUrl: string) => {
     if (!user) throw new Error('No user logged in');
