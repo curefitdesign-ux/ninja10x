@@ -773,12 +773,13 @@ const PhotoLoggingWidget = ({
     setPendingUpload(null);
   };
 
-  // Handle playing week recap - only navigate if video is ready, otherwise trigger callback
+  // Handle playing week recap - only navigate if video is ready, otherwise navigate to generation page
   const handlePlayWeekRecap = (weekPhotos: LoggedPhoto[], weekIndex: number) => {
     // Check if a valid video URL exists (must be a real URL, not empty/undefined)
-    const hasValidVideo = currentReel?.videoUrl && 
+    const hasValidVideo = currentReel?.videoUrl && (
       currentReel.videoUrl.startsWith('blob:') || 
-      (currentReel?.videoUrl?.startsWith('http') && !currentReel?.videoUrl?.includes('/assets/'));
+      (currentReel.videoUrl.startsWith('http') && !currentReel.videoUrl.includes('/assets/'))
+    );
     
     if (hasValidVideo) {
       // Video ready - navigate to reel viewer
@@ -788,9 +789,14 @@ const PhotoLoggingWidget = ({
           weekNumber: weekIndex + 1,
         },
       });
-    } else if (onPlayReel) {
-      // No video ready - trigger parent's generation handler
-      onPlayReel(weekPhotos);
+    } else {
+      // No video ready - navigate to reel generation page
+      navigate('/reel-generation', {
+        state: {
+          weekPhotos,
+          weekNumber: weekIndex + 1,
+        },
+      });
     }
   };
   
