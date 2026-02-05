@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
-import { generateLocalRecap, type RecapPhoto } from '@/lib/local-recap-generator';
+ import { generateMotionRecap, photosToDAyStates, type DayState } from '@/lib/motion-recap-generator';
 import type { GenerationStep } from '@/components/ReelGenerationOverlay';
 
 interface PhotoData {
@@ -68,16 +68,16 @@ export const useFitnessReel = () => {
      console.log('[useFitnessReel] State should now be: isGenerating=true');
 
     try {
-      // Convert PhotoData to RecapPhoto format
-      const recapPhotos: RecapPhoto[] = photos.map(p => ({
-        imageUrl: p.imageUrl,
-        activity: p.activity || 'Workout',
-        duration: p.duration,
-        distance: p.distance,
-        pr: p.pr,
-        dayNumber: p.dayNumber,
-        isVideo: p.isVideo,
-      }));
+       // Convert PhotoData to DayState format for premium motion generator
+       const dayStates: DayState[] = photosToDAyStates(photos.map(p => ({
+         imageUrl: p.imageUrl,
+         activity: p.activity || 'Workout',
+         duration: p.duration,
+         distance: p.distance,
+         pr: p.pr,
+         dayNumber: p.dayNumber,
+         isVideo: p.isVideo,
+       })));
 
        // Small delay to ensure React has rendered the overlay
        await new Promise(resolve => setTimeout(resolve, 200));
@@ -85,13 +85,13 @@ export const useFitnessReel = () => {
       // Step 2: Generate video locally
       setCurrentStep('video');
       setGenerationProgress(10);
-      console.log('[useFitnessReel] Starting local video generation');
+       console.log('[useFitnessReel] Starting premium motion generation');
       
-      const videoUrl = await generateLocalRecap({
-        photos: recapPhotos,
+       const videoUrl = await generateMotionRecap({
+         dayStates,
         onProgress: (percent, phase) => {
           setGenerationProgress(percent);
-          console.log(`[LocalRecap] ${phase}: ${percent}%`);
+           console.log(`[MotionRecap] ${phase}: ${percent}%`);
         },
       });
 
