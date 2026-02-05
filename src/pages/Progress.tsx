@@ -412,22 +412,20 @@ const Progress = () => {
                         </div>
                       )}
                       
-                      {/* Activity tag pill - top left - always show if activity exists */}
-                      {photo.activity && (
-                        <div 
-                          className="absolute top-1.5 left-1.5 px-2 py-px rounded-full z-30 flex items-center justify-center"
-                          style={{
-                            background: 'rgba(0,0,0,0.6)',
-                            backdropFilter: 'blur(8px)',
-                            WebkitBackdropFilter: 'blur(8px)',
-                            lineHeight: 1,
-                          }}
-                        >
-                          <span className="text-white font-semibold text-[10px] drop-shadow-sm leading-none">
-                            {photo.activity}
-                          </span>
-                        </div>
-                      )}
+                      {/* Activity tag pill - top left - always show with fallback */}
+                      <div 
+                        className="absolute top-1.5 left-1.5 px-2 py-px rounded-full z-30 flex items-center justify-center"
+                        style={{
+                          background: 'rgba(0,0,0,0.6)',
+                          backdropFilter: 'blur(8px)',
+                          WebkitBackdropFilter: 'blur(8px)',
+                          lineHeight: 1,
+                        }}
+                      >
+                        <span className="text-white font-semibold text-[10px] drop-shadow-sm leading-none">
+                          {photo.activity || 'Workout'}
+                        </span>
+                      </div>
                       
                       {/* User avatar overlay - ALWAYS clear, never locked */}
                       <div className="absolute bottom-1.5 left-1.5">
