@@ -303,10 +303,10 @@ const Preview = () => {
     navigate('/', { replace: true });
   }, []);
 
-  // Persist state to sessionStorage when in share sheet or celebration
-  // This ensures state survives app backgrounding
+  // Persist state to sessionStorage ALWAYS when we have image and activity
+  // This ensures state survives app backgrounding at any step
   useEffect(() => {
-    if (imageUrl && activity && (showShareSheet || showMicroCelebration || framedImageUrl)) {
+    if (imageUrl && activity && flowStep === 'template') {
       const stateToSave: PreviewSessionState = {
         imageUrl,
         isVideo,
@@ -445,45 +445,17 @@ const Preview = () => {
     }, 400);
   };
 
-  // Save without template (cross button) - save to backend first
-  const handleSaveWithoutTemplate = async () => {
-    if (!imageUrl || !activity) return;
-
+  // Close without saving (cross button) - just discard and go home
+  const handleCloseWithoutSaving = () => {
     triggerHaptic('light');
     handleTap('close-btn');
-    setIsSaving(true);
-
-    // Save to backend
-    console.info('[journey-debug] Preview: saving without template to backend', {
-      dayNumber,
-      isVideo,
-      activity,
-    });
     
-    const saved = await upsertActivity({
-      displayUrl: imageUrl,
-      originalUrl: imageUrl,
-      isVideo,
-      activity,
-      frame: undefined,
-      duration,
-      pr,
-      dayNumber,
-    });
+    console.info('[journey-debug] Preview: discarding without save');
     
-    setIsSaving(false);
-    
-    if (!saved) {
-      toast.error('Failed to save. Please try again.');
-      return;
-    }
-    
-    // Toast removed - exit animation handles success feedback
-    setIsExiting(true);
-
     // Clear session state
     sessionStorage.removeItem(PREVIEW_STATE_KEY);
-
+    
+    setIsExiting(true);
     setTimeout(() => {
       navigate('/', { replace: true, state: null });
     }, 400);
@@ -904,7 +876,7 @@ const Preview = () => {
           className={`flex-shrink-0 flex items-center justify-between py-3 px-5 transition-all duration-500 ${isLoaded ? 'animate-content-stagger' : 'opacity-0'} ${elementsHidden ? 'opacity-0 -translate-y-8 pointer-events-none' : ''}`}
         >
           <button 
-            onClick={handleSaveWithoutTemplate}
+            onClick={handleCloseWithoutSaving}
             className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'close-btn' ? 'animate-liquid-tap' : ''}`}
           >
             <X className="w-5 h-5 text-white" />
