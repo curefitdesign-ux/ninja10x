@@ -19,6 +19,7 @@ import Camera from "./pages/Camera";
 import Gallery from "./pages/Gallery";
 
 import Reel from "./pages/Reel";
+import ReelGeneration from "./pages/ReelGeneration";
 import ProfileSetupPage from "./pages/ProfileSetupPage";
 import AvatarCrop from "./pages/AvatarCrop";
 import PageTransition from "./components/PageTransition";
@@ -104,6 +105,7 @@ const AnimatedRoutes = () => {
         <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
         
         <Route path="/reel" element={<ProtectedRoute><Reel /></ProtectedRoute>} />
+        <Route path="/reel-generation" element={<ProtectedRoute><ReelGeneration /></ProtectedRoute>} />
         <Route path="/brutalist" element={<BrutalistGenerator />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
