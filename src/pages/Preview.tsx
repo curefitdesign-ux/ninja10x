@@ -1,16 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil, Trash2, ImagePlus, MoreHorizontal } from 'lucide-react';
-
-// Activity icon images
-import runningIcon from '@/assets/activities/running.png';
-import cyclingIcon from '@/assets/activities/cycling.png';
-import trekkingIcon from '@/assets/activities/trekking.png';
-import yogaIcon from '@/assets/activities/yoga.png';
-import cricketIcon from '@/assets/activities/cricket.png';
-import boxingIcon from '@/assets/activities/boxing.png';
-import basketballIcon from '@/assets/activities/basketball.png';
-import racquetIcon from '@/assets/activities/racquet.png';
-import footballIcon from '@/assets/activities/football.png';
+import { X, Check, Pencil, Trash2, ImagePlus, MoreHorizontal, Activity, Bike, Mountain, Sparkles, Dumbbell, CircleDot, Volleyball, Swords, Goal } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import ShareSheet from '@/components/ShareSheet';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -34,20 +24,30 @@ import { toast } from 'sonner';
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
 
-// Activity options with contextual PNG icons
-const activityOptions = [
-  { name: 'Running', image: runningIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' as const },
-  { name: 'Cycling', image: cyclingIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' as const },
-  { name: 'Trekking', image: trekkingIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Elevation', secondaryUnit: 'm', secondaryInputType: 'number' as const },
-  { name: 'Yoga', image: yogaIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
-  { name: 'GYM', image: null, emoji: '🏋️', primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' as const },
-  { name: 'Cricket', image: cricketIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Runs', secondaryUnit: 'runs', secondaryInputType: 'number' as const },
-  { name: 'Badminton', image: racquetIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Games', secondaryUnit: 'games', secondaryInputType: 'number' as const },
-  { name: 'Tennis', image: racquetIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' as const },
-  { name: 'Boxing', image: boxingIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Rounds', secondaryUnit: 'rounds', secondaryInputType: 'number' as const },
-  { name: 'Football', image: footballIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
-  { name: 'Basketball', image: basketballIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
-  { name: 'Other', image: null, isCustom: true, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
+// Activity options with minimal line icons
+const activityOptions: Array<{
+  name: string;
+  icon: LucideIcon;
+  isCustom?: boolean;
+  primaryMetric: string;
+  primaryUnit: string;
+  primaryInputType: 'wheel' | 'number' | 'decimal' | 'none';
+  secondaryMetric: string;
+  secondaryUnit: string;
+  secondaryInputType: 'wheel' | 'number' | 'decimal' | 'none';
+}> = [
+  { name: 'Running', icon: Activity, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' },
+  { name: 'Cycling', icon: Bike, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' },
+  { name: 'Trekking', icon: Mountain, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Elevation', secondaryUnit: 'm', secondaryInputType: 'number' },
+  { name: 'Yoga', icon: Sparkles, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
+  { name: 'GYM', icon: Dumbbell, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' },
+  { name: 'Cricket', icon: CircleDot, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Runs', secondaryUnit: 'runs', secondaryInputType: 'number' },
+  { name: 'Badminton', icon: Volleyball, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Games', secondaryUnit: 'games', secondaryInputType: 'number' },
+  { name: 'Tennis', icon: Volleyball, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' },
+  { name: 'Boxing', icon: Swords, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Rounds', secondaryUnit: 'rounds', secondaryInputType: 'number' },
+  { name: 'Football', icon: Goal, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
+  { name: 'Basketball', icon: CircleDot, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
+  { name: 'Other', icon: MoreHorizontal, isCustom: true, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
 ];
 
 // Get activity-specific input config from centralized utility
@@ -786,13 +786,10 @@ const Preview = () => {
                         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 16px rgba(0,0,0,0.15)',
                       }}
                     >
-                      {activityOption.image ? (
-                        <img src={activityOption.image} alt={activityOption.name} className="w-10 h-10 object-contain" />
-                      ) : 'emoji' in activityOption && activityOption.emoji ? (
-                        <span className="text-3xl">{activityOption.emoji}</span>
-                      ) : (
-                        <MoreHorizontal className="w-7 h-7 text-white/70" strokeWidth={1.8} />
-                      )}
+                      {(() => {
+                        const IconComp = activityOption.icon;
+                        return <IconComp className="w-7 h-7 text-white/80" strokeWidth={1.5} />;
+                      })()}
                     </div>
                     <span className="text-white/90 text-xs font-semibold text-center leading-tight">
                       {activityOption.name}
@@ -1288,13 +1285,10 @@ const Preview = () => {
                             boxShadow: isSelected ? '0 4px 20px rgba(255,255,255,0.2), inset 0 1px 0 rgba(255,255,255,0.2)' : 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 16px rgba(0,0,0,0.15)',
                           }}
                         >
-                          {activityOption.image ? (
-                            <img src={activityOption.image} alt={activityOption.name} className="w-10 h-10 object-contain" />
-                          ) : 'emoji' in activityOption && activityOption.emoji ? (
-                            <span className="text-3xl">{activityOption.emoji}</span>
-                          ) : (
-                            <MoreHorizontal className={`w-7 h-7 ${isSelected ? 'text-white' : 'text-white/70'}`} strokeWidth={1.8} />
-                          )}
+                          {(() => {
+                            const IconComp = activityOption.icon;
+                            return <IconComp className={`w-7 h-7 ${isSelected ? 'text-white' : 'text-white/80'}`} strokeWidth={1.5} />;
+                          })()}
                         </div>
                         <span className={`text-xs font-semibold text-center leading-tight ${isSelected ? 'text-white' : 'text-white/90'}`}>
                           {activityOption.name}
