@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, Lock, Sparkles, Eye } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
+import { supabase } from '@/integrations/supabase/client';
 
 const PUBLIC_PREFERENCE_KEY = 'user_public_preference';
 
@@ -34,9 +35,19 @@ export default function MakePublicSheet({
 }: MakePublicSheetProps) {
   if (!isOpen) return null;
 
-  const handleMakePublic = () => {
+  const handleMakePublic = async () => {
     triggerHaptic('success');
     savePublicPreference(true);
+    
+    // Also update stories_public in the database
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase
+        .from('profiles')
+        .update({ stories_public: true })
+        .eq('user_id', user.id);
+    }
+    
     onMakePublic();
   };
 
@@ -54,9 +65,9 @@ export default function MakePublicSheet({
           <motion.div
             className="fixed inset-0 z-50"
             style={{
-              background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.85) 100%)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
+              background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.8) 100%)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -70,12 +81,12 @@ export default function MakePublicSheet({
             style={{
               borderTopLeftRadius: 32,
               borderTopRightRadius: 32,
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)',
-              backdropFilter: 'blur(60px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(60px) saturate(180%)',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
+              backdropFilter: 'blur(80px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(80px) saturate(200%)',
               paddingBottom: 'max(env(safe-area-inset-bottom, 28px), 28px)',
-              boxShadow: '0 -8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)',
-              borderTop: '1px solid rgba(255,255,255,0.12)',
+              boxShadow: '0 -8px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12)',
+              borderTop: '1px solid rgba(255,255,255,0.1)',
             }}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
@@ -86,7 +97,7 @@ export default function MakePublicSheet({
             <div 
               className="absolute inset-x-0 top-0 h-px"
               style={{
-                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
               }}
             />
 
@@ -95,7 +106,7 @@ export default function MakePublicSheet({
               <div 
                 className="w-10 h-1 rounded-full"
                 style={{
-                  background: 'rgba(255,255,255,0.25)',
+                  background: 'rgba(255,255,255,0.2)',
                 }}
               />
             </div>
@@ -109,7 +120,7 @@ export default function MakePublicSheet({
                       className="w-20 h-20 rounded-2xl overflow-hidden"
                       style={{
                         boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
-                        border: '2px solid rgba(255,255,255,0.15)',
+                        border: '2px solid rgba(255,255,255,0.12)',
                       }}
                     >
                       <img 
@@ -122,12 +133,12 @@ export default function MakePublicSheet({
                     <div 
                       className="w-20 h-20 rounded-2xl flex items-center justify-center"
                       style={{
-                        background: 'linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(99,102,241,0.2) 100%)',
+                        background: 'linear-gradient(135deg, rgba(139,92,246,0.2) 0%, rgba(99,102,241,0.15) 100%)',
                         boxShadow: '0 8px 32px rgba(139,92,246,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
-                        border: '2px solid rgba(255,255,255,0.12)',
+                        border: '2px solid rgba(255,255,255,0.1)',
                       }}
                     >
-                      <Eye className="w-8 h-8 text-white/80" />
+                      <Eye className="w-8 h-8 text-white/70" />
                     </div>
                   )}
                   
@@ -150,40 +161,30 @@ export default function MakePublicSheet({
                 Share with Community?
               </h2>
 
-              {/* Benefits - Non-clickable info cards */}
-              <div className="space-y-2 mb-5">
-                <div 
-                  className="flex items-center gap-3 p-3 rounded-xl"
-                  style={{
-                    background: 'rgba(255,255,255,0.04)',
-                  }}
-                >
+              {/* Benefits - Clean borderless items */}
+              <div className="space-y-3 mb-5">
+                <div className="flex items-center gap-3 px-1">
                   <div 
                     className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{
-                      background: 'rgba(52,211,153,0.15)',
+                      background: 'rgba(52,211,153,0.12)',
                     }}
                   >
                     <Sparkles className="w-4 h-4 text-emerald-400" />
                   </div>
-                  <span className="text-white/70 text-sm">Get reactions from friends</span>
+                  <span className="text-white/60 text-sm">Get reactions from friends</span>
                 </div>
                 
-                <div 
-                  className="flex items-center gap-3 p-3 rounded-xl"
-                  style={{
-                    background: 'rgba(255,255,255,0.04)',
-                  }}
-                >
+                <div className="flex items-center gap-3 px-1">
                   <div 
                     className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{
-                      background: 'rgba(59,130,246,0.15)',
+                      background: 'rgba(59,130,246,0.12)',
                     }}
                   >
                     <Eye className="w-4 h-4 text-blue-400" />
                   </div>
-                  <span className="text-white/70 text-sm">See others' progress</span>
+                  <span className="text-white/60 text-sm">See others' progress</span>
                 </div>
               </div>
 
@@ -205,10 +206,10 @@ export default function MakePublicSheet({
 
                 <button
                   onClick={handleKeepPrivate}
-                  className="w-full py-3.5 rounded-2xl font-medium text-white/60 text-base active:scale-[0.98] transition-all duration-200"
+                  className="w-full py-3.5 rounded-2xl font-medium text-white/50 text-base active:scale-[0.98] transition-all duration-200"
                   style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.06)',
                   }}
                 >
                   <div className="flex items-center justify-center gap-2">
@@ -218,7 +219,7 @@ export default function MakePublicSheet({
                 </button>
               </div>
 
-              <p className="text-white/25 text-xs text-center mt-3">
+              <p className="text-white/20 text-xs text-center mt-3">
                 Change anytime in settings
               </p>
             </div>
