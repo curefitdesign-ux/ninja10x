@@ -627,68 +627,118 @@
      videoBitsPerSecond: 8000000, // 8 Mbps for quality
    });
    
-   const chunks: Blob[] = [];
-   
-   return new Promise((resolve, reject) => {
-     mediaRecorder.ondataavailable = (e) => {
-       if (e.data.size > 0) chunks.push(e.data);
-     };
-     
-     mediaRecorder.onstop = () => {
-       console.log('[MotionRecap] Encoding complete, chunks:', chunks.length);
-       const videoBlob = new Blob(chunks, { type: selectedMimeType.split(';')[0] });
-       const url = URL.createObjectURL(videoBlob);
-       console.log('[MotionRecap] Video URL:', url);
-       onProgress?.(100, 'Complete!');
-       resolve(url);
-     };
-     
-     mediaRecorder.onerror = (e) => {
-       console.error('[MotionRecap] MediaRecorder error:', e);
-       reject(e);
-     };
-     
-     mediaRecorder.start(100);
-     
-     // Play back pre-rendered frames
-     let frameIndex = 0;
-     const frameInterval = 1000 / FPS;
-     
-     const renderNextFrame = () => {
-       if (frameIndex >= frameDataUrls.length) {
-         setTimeout(() => {
-           console.log('[MotionRecap] Stopping encoder');
-           mediaRecorder.stop();
-         }, 200);
-         return;
-       }
-       
-       const img = new Image();
-       img.onload = () => {
-         ctx.clearRect(0, 0, WIDTH, HEIGHT);
-         ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
-         
-         frameIndex++;
-         
-         if (frameIndex % 15 === 0) {
-           const progress = 70 + (frameIndex / frameDataUrls.length) * 25;
-           onProgress?.(Math.floor(progress), 'Encoding video...');
-         }
-         
-         setTimeout(renderNextFrame, frameInterval);
-       };
-       img.onerror = () => {
-         frameIndex++;
-         setTimeout(renderNextFrame, frameInterval);
-       };
-       img.src = frameDataUrls[frameIndex];
-     };
-     
-     setTimeout(() => {
-       console.log('[MotionRecap] Starting playback');
-       renderNextFrame();
-     }, 100);
-   });
+  const chunks: Blob[] = [];
+  let isComplete = false;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  
+  return new Promise((resolve, reject) => {
+    // Safety timeout - if encoding takes more than 60 seconds, force complete
+    const safetyTimeout = setTimeout(() => {
+      if (!isComplete) {
+        console.warn('[MotionRecap] Safety timeout reached, forcing completion');
+        try {
+          if (mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+          }
+        } catch (e) {
+          console.error('[MotionRecap] Error stopping recorder:', e);
+        }
+      }
+    }, 60000);
+    
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.push(e.data);
+    };
+    
+    mediaRecorder.onstop = () => {
+      isComplete = true;
+      clearTimeout(safetyTimeout);
+      console.log('[MotionRecap] Encoding complete, chunks:', chunks.length);
+      const videoBlob = new Blob(chunks, { type: selectedMimeType.split(';')[0] });
+      const url = URL.createObjectURL(videoBlob);
+      console.log('[MotionRecap] Video URL:', url);
+      onProgress?.(100, 'Complete!');
+      resolve(url);
+    };
+    
+    mediaRecorder.onerror = (e) => {
+      isComplete = true;
+      clearTimeout(safetyTimeout);
+      console.error('[MotionRecap] MediaRecorder error:', e);
+      reject(e);
+    };
+    
+    mediaRecorder.start(100);
+    
+    // Play back pre-rendered frames
+    let frameIndex = 0;
+    const frameInterval = 1000 / FPS;
+    
+    const renderNextFrame = () => {
+      if (isComplete) return; // Abort if already complete
+      
+      if (frameIndex >= frameDataUrls.length) {
+        console.log('[MotionRecap] All frames played, stopping encoder');
+        onProgress?.(98, 'Finalizing...');
+        
+        setTimeout(() => {
+          if (!isComplete && mediaRecorder.state !== 'inactive') {
+            console.log('[MotionRecap] Stopping encoder');
+            try {
+              mediaRecorder.stop();
+            } catch (e) {
+              console.error('[MotionRecap] Error stopping recorder:', e);
+              // Force resolve if stop fails
+              isComplete = true;
+              clearTimeout(safetyTimeout);
+              const videoBlob = new Blob(chunks, { type: selectedMimeType.split(';')[0] });
+              resolve(URL.createObjectURL(videoBlob));
+            }
+          }
+        }, 300);
+        return;
+      }
+      
+      const img = new Image();
+      
+      // Timeout for individual frame loading
+      const frameTimeout = setTimeout(() => {
+        console.warn('[MotionRecap] Frame load timeout, skipping frame:', frameIndex);
+        frameIndex++;
+        renderNextFrame();
+      }, 500);
+      
+      img.onload = () => {
+        clearTimeout(frameTimeout);
+        ctx.clearRect(0, 0, WIDTH, HEIGHT);
+        ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
+        
+        frameIndex++;
+        
+        if (frameIndex % 15 === 0) {
+          const progress = 70 + (frameIndex / frameDataUrls.length) * 25;
+          onProgress?.(Math.floor(progress), 'Encoding video...');
+        }
+        
+        // Use requestAnimationFrame for smoother playback
+        timeoutId = setTimeout(renderNextFrame, frameInterval);
+      };
+      
+      img.onerror = () => {
+        clearTimeout(frameTimeout);
+        console.warn('[MotionRecap] Frame load error, skipping:', frameIndex);
+        frameIndex++;
+        timeoutId = setTimeout(renderNextFrame, frameInterval);
+      };
+      
+      img.src = frameDataUrls[frameIndex];
+    };
+    
+    setTimeout(() => {
+      console.log('[MotionRecap] Starting playback');
+      renderNextFrame();
+    }, 100);
+  });
  }
  
  // ============ HELPER TO CONVERT PHOTO DATA ============
