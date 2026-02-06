@@ -1,11 +1,12 @@
 /**
- * Premium Motion Recap Generator — Metric Transition + Photo Style
+ * Premium Motion Recap Generator — AI-Powered Metric Transitions + Photo
  * 
  * For each day:
- *   1. Metric Transition (1s) — Abstract data visualization with bold numbers,
- *      count-up animation, dark background with grain, slide/scale motion
+ *   1. AI Metric Transition (1.2s) — AI-generated abstract data visualization card
+ *      from Lovable AI (Gemini image gen), with smooth entrance/exit
  *   2. Original Photo/Video (3s) — Ken Burns with subtle overlays
  * 
+ * Falls back to canvas-drawn metric cards if AI generation fails.
  * 9:16 ratio (720×1280), 24fps, canvas-based direct-to-stream.
  */
 
@@ -40,7 +41,7 @@ const WIDTH = 720;
 const HEIGHT = 1280;
 
 const TIMING = {
-  METRIC_DURATION: 1.0,   // 1s metric transition card
+  METRIC_DURATION: 1.2,   // 1.2s AI metric transition card
   PHOTO_DURATION: 3.0,    // 3s photo/video hold
   CROSSFADE: 0.4,         // crossfade between metric→photo and photo→next metric
   INTRO_FADE: 0.5,        // initial fade in
@@ -48,16 +49,13 @@ const TIMING = {
   KEN_BURNS_SCALE: 0.035, // subtle zoom
 };
 
-// Day slot = metric + photo
-const DAY_SLOT = TIMING.METRIC_DURATION + TIMING.PHOTO_DURATION; // 4s per day
+const DAY_SLOT = TIMING.METRIC_DURATION + TIMING.PHOTO_DURATION;
 
 const FONTS = {
   DAY_TAG: '600 14px -apple-system, "SF Pro Text", system-ui, sans-serif',
   ACTIVITY: 'bold 28px -apple-system, "SF Pro Display", system-ui, sans-serif',
   METRIC_LABEL: '500 13px -apple-system, "SF Pro Text", system-ui, sans-serif',
   METRIC_VALUE: 'bold 72px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  METRIC_UNIT: '300 20px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  BRANDING: '500 12px -apple-system, "SF Pro Text", system-ui, sans-serif',
 };
 
 // ============ EASING ============
@@ -76,44 +74,111 @@ function lerp(a: number, b: number, t: number): number {
 
 // ============ IMAGE LOADING ============
 
+async function loadImage(src: string, timeoutMs = 8000): Promise<HTMLImageElement> {
+  return new Promise<HTMLImageElement>((resolve) => {
+    const el = new Image();
+    el.crossOrigin = 'anonymous';
+
+    const timeout = setTimeout(() => {
+      console.warn('[MotionRecap] Image load timeout:', src?.slice(0, 60));
+      resolve(createBlackPlaceholder());
+    }, timeoutMs);
+
+    el.onload = () => { clearTimeout(timeout); resolve(el); };
+    el.onerror = () => { clearTimeout(timeout); resolve(createBlackPlaceholder()); };
+    el.src = src;
+  });
+}
+
+function createBlackPlaceholder(): HTMLImageElement {
+  const c = document.createElement('canvas');
+  c.width = WIDTH; c.height = HEIGHT;
+  const cx = c.getContext('2d')!;
+  cx.fillStyle = '#0a0a0f';
+  cx.fillRect(0, 0, WIDTH, HEIGHT);
+  const img = new Image();
+  img.src = c.toDataURL('image/jpeg');
+  return img;
+}
+
 async function loadImages(dayStates: DayState[]): Promise<HTMLImageElement[]> {
   const results: HTMLImageElement[] = [];
-  
   for (const state of dayStates) {
-    const img = await new Promise<HTMLImageElement>((resolve) => {
-      const el = new Image();
-      el.crossOrigin = 'anonymous';
-      
-      const timeout = setTimeout(() => {
-        console.warn('[MotionRecap] Image load timeout:', state.asset.src?.slice(0, 60));
-        const c = document.createElement('canvas');
-        c.width = WIDTH; c.height = HEIGHT;
-        const cx = c.getContext('2d')!;
-        cx.fillStyle = '#111';
-        cx.fillRect(0, 0, WIDTH, HEIGHT);
-        const placeholder = new Image();
-        placeholder.src = c.toDataURL('image/jpeg');
-        placeholder.onload = () => resolve(placeholder);
-      }, 8000);
-      
-      el.onload = () => { clearTimeout(timeout); resolve(el); };
-      el.onerror = () => {
-        clearTimeout(timeout);
-        const c = document.createElement('canvas');
-        c.width = WIDTH; c.height = HEIGHT;
-        const cx = c.getContext('2d')!;
-        cx.fillStyle = '#111';
-        cx.fillRect(0, 0, WIDTH, HEIGHT);
-        const placeholder = new Image();
-        placeholder.src = c.toDataURL('image/jpeg');
-        placeholder.onload = () => resolve(placeholder);
-      };
-      el.src = state.asset.src;
-    });
-    results.push(img);
+    results.push(await loadImage(state.asset.src));
   }
-  
   return results;
+}
+
+// ============ AI METRIC CARD GENERATION ============
+
+async function generateAIMetricCards(
+  dayStates: DayState[],
+  onProgress?: (percent: number, phase: string) => void,
+): Promise<(HTMLImageElement | null)[]> {
+  try {
+    const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL;
+    if (!supabaseUrl) {
+      console.warn('[MotionRecap] No SUPABASE_URL — skipping AI cards');
+      return dayStates.map(() => null);
+    }
+
+    const supabaseKey = (import.meta as any).env?.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+    onProgress?.(5, 'Creating AI metric cards...');
+
+    const days = dayStates.map(s => ({
+      dayNumber: s.dayNumber,
+      activity: s.activityType,
+      metricLabel: s.metricA.label,
+      metricValue: s.metricA.value,
+    }));
+
+    console.log('[MotionRecap] Requesting AI metric cards for', days.length, 'days');
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/generate-metric-cards`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(supabaseKey ? { Authorization: `Bearer ${supabaseKey}` } : {}),
+      },
+      body: JSON.stringify({ days }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('[MotionRecap] AI metric cards failed:', response.status, errText);
+      return dayStates.map(() => null);
+    }
+
+    const data = await response.json();
+    const cards: { dayNumber: number; imageUrl: string | null }[] = data.cards || [];
+
+    onProgress?.(12, 'Loading AI cards...');
+
+    // Load each base64 image
+    const images: (HTMLImageElement | null)[] = [];
+    for (let i = 0; i < dayStates.length; i++) {
+      const card = cards.find(c => c.dayNumber === dayStates[i].dayNumber);
+      if (card?.imageUrl) {
+        try {
+          const img = await loadImage(card.imageUrl, 10000);
+          images.push(img);
+          console.log(`[MotionRecap] AI card Day ${dayStates[i].dayNumber} loaded`);
+        } catch {
+          images.push(null);
+        }
+      } else {
+        images.push(null);
+      }
+    }
+
+    const successCount = images.filter(Boolean).length;
+    console.log(`[MotionRecap] AI cards: ${successCount}/${dayStates.length} loaded`);
+    return images;
+  } catch (err) {
+    console.error('[MotionRecap] AI card generation failed:', err);
+    return dayStates.map(() => null);
+  }
 }
 
 // ============ GRAIN TEXTURE ============
@@ -132,24 +197,24 @@ function getGrainTexture(): HTMLCanvasElement {
     imageData.data[i] = v;
     imageData.data[i + 1] = v;
     imageData.data[i + 2] = v;
-    imageData.data[i + 3] = 12; // very subtle
+    imageData.data[i + 3] = 12;
   }
   gCtx.putImageData(imageData, 0, 0);
   return grainCanvas;
 }
 
-// ============ DRAWING: METRIC TRANSITION ============
+// ============ FALLBACK: CANVAS METRIC TRANSITION ============
 
-function drawMetricTransition(
+function drawFallbackMetricTransition(
   ctx: CanvasRenderingContext2D,
   state: DayState,
-  progress: number, // 0→1 through the 1s metric phase
+  progress: number,
   globalAlpha: number
 ) {
   ctx.save();
   ctx.globalAlpha = globalAlpha;
 
-  // Dark background with subtle gradient
+  // Dark background
   const bgGrad = ctx.createLinearGradient(0, 0, 0, HEIGHT);
   bgGrad.addColorStop(0, '#0a0a0f');
   bgGrad.addColorStop(0.5, '#0d0d14');
@@ -157,7 +222,7 @@ function drawMetricTransition(
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-  // Subtle accent glow
+  // Accent glow
   const accentProgress = easeOutCubic(Math.min(progress * 1.5, 1));
   ctx.save();
   ctx.globalAlpha = 0.12 * accentProgress;
@@ -169,7 +234,7 @@ function drawMetricTransition(
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
   ctx.restore();
 
-  // Grain overlay
+  // Grain
   ctx.save();
   ctx.globalAlpha = 0.04;
   const grain = getGrainTexture();
@@ -180,33 +245,26 @@ function drawMetricTransition(
   }
   ctx.restore();
 
-  // Animated elements with staggered timing
-  const dayTagProgress = easeOutCubic(Math.min(progress * 3, 1));       // 0–0.33s
-  const metricProgress = easeOutCubic(Math.min((progress - 0.15) * 2.5, 1)); // 0.15–0.55s
-  const labelProgress = easeOutCubic(Math.min((progress - 0.3) * 2.5, 1));   // 0.3–0.7s
-
-  // Center Y for the whole block
   const centerY = HEIGHT * 0.42;
+  const dayTagProgress = easeOutCubic(Math.min(progress * 3, 1));
+  const metricProgress = easeOutCubic(Math.min((progress - 0.15) * 2.5, 1));
+  const labelProgress = easeOutCubic(Math.min((progress - 0.3) * 2.5, 1));
 
-  // DAY tag — slides down from above
+  // DAY tag
   if (dayTagProgress > 0) {
     ctx.save();
     ctx.globalAlpha = dayTagProgress * globalAlpha;
     const tagY = lerp(centerY - 100, centerY - 70, dayTagProgress);
-    
-    // Pill background
     ctx.font = FONTS.DAY_TAG;
     const dayText = `DAY ${state.dayNumber}`;
     const textW = ctx.measureText(dayText).width;
     const pillW = textW + 28;
     const pillH = 28;
     const pillX = (WIDTH - pillW) / 2;
-    
     ctx.fillStyle = 'rgba(139, 92, 246, 0.2)';
     ctx.beginPath();
     ctx.roundRect(pillX, tagY - pillH / 2, pillW, pillH, 14);
     ctx.fill();
-    
     ctx.fillStyle = 'rgba(139, 92, 246, 0.9)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -214,19 +272,14 @@ function drawMetricTransition(
     ctx.restore();
   }
 
-  // Main metric value — count-up + scale in
+  // Metric value with count-up
   if (metricProgress > 0) {
     ctx.save();
     ctx.globalAlpha = metricProgress * globalAlpha;
-    
-    const metricY = centerY;
     const scale = lerp(0.7, 1, metricProgress);
     const slideY = lerp(20, 0, metricProgress);
-    
-    ctx.translate(WIDTH / 2, metricY + slideY);
+    ctx.translate(WIDTH / 2, centerY + slideY);
     ctx.scale(scale, scale);
-    
-    // Animated count-up for numeric values
     const rawValue = state.metricA.value;
     const numericMatch = rawValue.match(/^(\d+)/);
     let displayValue = rawValue;
@@ -235,22 +288,19 @@ function drawMetricTransition(
       const currentNum = Math.round(targetNum * Math.min(metricProgress / 0.85, 1));
       displayValue = rawValue.replace(/^\d+/, String(currentNum));
     }
-    
     ctx.font = FONTS.METRIC_VALUE;
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(displayValue, 0, 0);
-    
     ctx.restore();
   }
 
-  // Metric label — slides up
+  // Label
   if (labelProgress > 0) {
     ctx.save();
     ctx.globalAlpha = labelProgress * globalAlpha * 0.5;
     const labelY = lerp(centerY + 55, centerY + 45, labelProgress);
-    
     ctx.font = FONTS.METRIC_LABEL;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.textAlign = 'center';
@@ -259,12 +309,11 @@ function drawMetricTransition(
     ctx.restore();
   }
 
-  // Activity name — bottom area
+  // Activity
   if (labelProgress > 0) {
     ctx.save();
     ctx.globalAlpha = labelProgress * globalAlpha * 0.4;
     const actY = lerp(centerY + 100, centerY + 90, labelProgress);
-    
     ctx.font = FONTS.ACTIVITY;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
     ctx.textAlign = 'center';
@@ -273,14 +322,61 @@ function drawMetricTransition(
     ctx.restore();
   }
 
-  // Exit animation — soft opacity fade + slight scale for last 20% of the metric phase
+  // Exit fade
   if (progress > 0.8) {
     const exitT = (progress - 0.8) / 0.2;
-    const fadeOut = 1 - easeInOutCubic(exitT);
-    // Apply as overlay black
-    ctx.fillStyle = `rgba(0, 0, 0, ${(1 - fadeOut) * 0.6})`;
+    ctx.fillStyle = `rgba(0, 0, 0, ${easeInOutCubic(exitT) * 0.6})`;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
   }
+
+  ctx.restore();
+}
+
+// ============ DRAWING: AI METRIC CARD ============
+
+function drawAIMetricCard(
+  ctx: CanvasRenderingContext2D,
+  aiImage: HTMLImageElement,
+  progress: number,
+  globalAlpha: number
+) {
+  ctx.save();
+
+  // Entrance: scale up + fade in (first 30%)
+  const entranceT = Math.min(progress / 0.3, 1);
+  const entranceAlpha = easeOutCubic(entranceT);
+  const entranceScale = lerp(0.92, 1.0, easeOutCubic(entranceT));
+
+  // Exit: fade out + slight scale down (last 20%)
+  let exitAlpha = 1;
+  let exitScale = 1;
+  if (progress > 0.8) {
+    const exitT = (progress - 0.8) / 0.2;
+    exitAlpha = 1 - easeInOutCubic(exitT);
+    exitScale = lerp(1.0, 0.96, easeInOutCubic(exitT));
+  }
+
+  const alpha = globalAlpha * entranceAlpha * exitAlpha;
+  const scale = entranceScale * exitScale;
+
+  ctx.globalAlpha = alpha;
+
+  // Draw AI image cover
+  const imgRatio = aiImage.width / aiImage.height;
+  const canvasRatio = WIDTH / HEIGHT;
+  let sx = 0, sy = 0, sw = aiImage.width, sh = aiImage.height;
+
+  if (imgRatio > canvasRatio) {
+    sw = aiImage.height * canvasRatio;
+    sx = (aiImage.width - sw) / 2;
+  } else {
+    sh = aiImage.width / canvasRatio;
+    sy = (aiImage.height - sh) / 2;
+  }
+
+  ctx.translate(WIDTH / 2, HEIGHT / 2);
+  ctx.scale(scale, scale);
+  ctx.drawImage(aiImage, sx, sy, sw, sh, -WIDTH / 2, -HEIGHT / 2, WIDTH, HEIGHT);
 
   ctx.restore();
 }
@@ -314,14 +410,12 @@ function drawImageCover(
 }
 
 function drawPhotoOverlays(ctx: CanvasRenderingContext2D, state: DayState, textOpacity: number) {
-  // Subtle bottom gradient only
   const bottomGrad = ctx.createLinearGradient(0, HEIGHT - 300, 0, HEIGHT);
   bottomGrad.addColorStop(0, 'transparent');
   bottomGrad.addColorStop(1, 'rgba(0,0,0,0.55)');
   ctx.fillStyle = bottomGrad;
   ctx.fillRect(0, HEIGHT - 300, WIDTH, 300);
 
-  // Top subtle gradient
   const topGrad = ctx.createLinearGradient(0, 0, 0, 180);
   topGrad.addColorStop(0, 'rgba(0,0,0,0.3)');
   topGrad.addColorStop(1, 'transparent');
@@ -335,21 +429,18 @@ function drawPhotoOverlays(ctx: CanvasRenderingContext2D, state: DayState, textO
   ctx.shadowColor = 'rgba(0,0,0,0.5)';
   ctx.shadowBlur = 8;
 
-  // Day indicator — top right
   ctx.font = FONTS.DAY_TAG;
   ctx.fillStyle = 'rgba(255,255,255,0.5)';
   ctx.textAlign = 'right';
   ctx.textBaseline = 'top';
   ctx.fillText(`DAY ${state.dayNumber}`, WIDTH - 48, 54);
 
-  // Activity — bottom left
   ctx.font = FONTS.ACTIVITY;
   ctx.fillStyle = '#fff';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'bottom';
   ctx.fillText(state.activityType.toUpperCase(), 48, HEIGHT - 100);
 
-  // Metric under activity
   ctx.font = FONTS.METRIC_LABEL;
   ctx.fillStyle = 'rgba(255,255,255,0.55)';
   ctx.textBaseline = 'bottom';
@@ -366,19 +457,28 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
   if (dayStates.length < 3) throw new Error('Need at least 3 days for recap');
 
   console.log('[MotionRecap] Starting with', dayStates.length, 'days');
-  onProgress?.(2, 'Loading photos...');
+  onProgress?.(2, 'Generating AI visuals...');
 
-  const images = await loadImages(dayStates);
-  console.log('[MotionRecap] All images loaded');
+  // Step 1: Generate AI metric cards (parallel with photo loading)
+  const [aiCards, images] = await Promise.all([
+    generateAIMetricCards(dayStates, onProgress),
+    loadImages(dayStates).then(imgs => {
+      console.log('[MotionRecap] All photos loaded');
+      return imgs;
+    }),
+  ]);
+
+  const aiCardCount = aiCards.filter(Boolean).length;
+  console.log(`[MotionRecap] AI cards: ${aiCardCount}/${dayStates.length}, Photos: ${images.length}`);
   onProgress?.(15, 'Preparing video...');
 
+  // Step 2: Create canvas and setup recorder
   const canvas = document.createElement('canvas');
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
   const ctx = canvas.getContext('2d')!;
   if (!ctx) throw new Error('Canvas context failed');
 
-  // Total duration: intro + (metric + photo) per day + outro
   const totalDuration = TIMING.INTRO_FADE +
     dayStates.length * DAY_SLOT +
     TIMING.OUTRO_FADE;
@@ -411,7 +511,7 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
         console.warn('[MotionRecap] Safety timeout — forcing completion');
         try { if (mediaRecorder.state !== 'inactive') mediaRecorder.stop(); } catch {}
       }
-    }, 90_000);
+    }, 120_000); // 2 min safety for AI generation
 
     mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) chunks.push(e.data);
@@ -474,14 +574,9 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
       const outroOpacity = time > outroStart ? Math.max(0, 1 - (time - outroStart) / TIMING.OUTRO_FADE) : 1;
       const globalOpacity = Math.min(introOpacity, outroOpacity);
 
-      // Content time (after intro)
       const contentTime = Math.max(0, time - TIMING.INTRO_FADE);
-
-      // Which day and phase?
       const dayIndex = Math.min(Math.floor(contentTime / DAY_SLOT), dayStates.length - 1);
       const timeInSlot = contentTime - dayIndex * DAY_SLOT;
-
-      // Phase: metric (0 → METRIC_DURATION) or photo (METRIC_DURATION → DAY_SLOT)
       const inMetricPhase = timeInSlot < TIMING.METRIC_DURATION;
 
       // Clear
@@ -489,21 +584,24 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
       ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
       if (inMetricPhase) {
-        // ---- METRIC TRANSITION ----
-        const metricProgress = timeInSlot / TIMING.METRIC_DURATION; // 0→1
-        drawMetricTransition(ctx, dayStates[dayIndex], metricProgress, globalOpacity);
-      } else {
-        // ---- PHOTO PHASE ----
-        const photoTime = timeInSlot - TIMING.METRIC_DURATION;
-        const photoProgress = photoTime / TIMING.PHOTO_DURATION; // 0→1
+        const metricProgress = timeInSlot / TIMING.METRIC_DURATION;
+        const aiCard = aiCards[dayIndex];
 
-        // Ken Burns
+        if (aiCard) {
+          // Use AI-generated card
+          drawAIMetricCard(ctx, aiCard, metricProgress, globalOpacity);
+        } else {
+          // Fallback to canvas-drawn card
+          drawFallbackMetricTransition(ctx, dayStates[dayIndex], metricProgress, globalOpacity);
+        }
+      } else {
+        const photoTime = timeInSlot - TIMING.METRIC_DURATION;
+        const photoProgress = photoTime / TIMING.PHOTO_DURATION;
+
         const kbScale = lerp(1.0, 1.0 + TIMING.KEN_BURNS_SCALE, photoProgress);
         const kbPanY = lerp(-3, 3, photoProgress);
 
-        // Fade in from metric
         const photoFadeIn = Math.min(1, photoTime / TIMING.CROSSFADE);
-        // Fade out to next metric (or outro)
         const timeToEnd = TIMING.PHOTO_DURATION - photoTime;
         const photoFadeOut = Math.min(1, timeToEnd / TIMING.CROSSFADE);
         const photoAlpha = globalOpacity * easeOutCubic(photoFadeIn) * photoFadeOut;
@@ -520,7 +618,7 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
       if (frameIndex % 6 === 0) {
         const pct = 15 + Math.floor((frameIndex / totalFrames) * 80);
         const currentDay = Math.min(dayIndex + 1, dayStates.length);
-        const phase = inMetricPhase ? 'Metric' : 'Photo';
+        const phase = inMetricPhase ? 'AI Metric' : 'Photo';
         onProgress?.(Math.min(pct, 94), `Day ${currentDay} — ${phase}`);
       }
 
