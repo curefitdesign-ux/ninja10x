@@ -1,6 +1,49 @@
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
+// Import preset avatars to create a mapping for Vite-hashed paths
+import avatarRed from '@/assets/avatars/avatar-red.png';
+import avatarBlue from '@/assets/avatars/avatar-blue.png';
+import avatarPurple from '@/assets/avatars/avatar-purple.png';
+import avatarGreen from '@/assets/avatars/avatar-green.png';
+import avatarOrange from '@/assets/avatars/avatar-orange.png';
+import avatarTeal from '@/assets/avatars/avatar-teal.png';
+import avatarPink from '@/assets/avatars/avatar-pink.png';
+import avatarYellow from '@/assets/avatars/avatar-yellow.png';
+
+// Map avatar color names to their imported paths
+const AVATAR_MAP: Record<string, string> = {
+  'avatar-red': avatarRed,
+  'avatar-blue': avatarBlue,
+  'avatar-purple': avatarPurple,
+  'avatar-green': avatarGreen,
+  'avatar-orange': avatarOrange,
+  'avatar-teal': avatarTeal,
+  'avatar-pink': avatarPink,
+  'avatar-yellow': avatarYellow,
+};
+
+// Resolve avatar URL - handles Vite-hashed paths stored in DB
+const resolveAvatarUrl = (src: string | null | undefined): string | null => {
+  if (!src) return null;
+  
+  // If it's a full URL (Supabase storage, http, https), use as-is
+  if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('blob:')) {
+    return src;
+  }
+  
+  // Check if this is a Vite-hashed preset avatar path
+  // These look like: /assets/avatar-blue-D18a8su-.png
+  for (const [key, importedPath] of Object.entries(AVATAR_MAP)) {
+    if (src.includes(key)) {
+      return importedPath;
+    }
+  }
+  
+  // Return original path for other cases
+  return src;
+};
+
 interface ProfileAvatarProps {
   src?: string | null;
   name?: string | null;
@@ -39,8 +82,11 @@ const ProfileAvatar = ({ src, name, size = 40, className, style }: ProfileAvatar
   const initials = useMemo(() => getInitials(name), [name]);
   const gradient = useMemo(() => getGradient(name), [name]);
   
+  // Resolve the avatar URL to handle Vite-hashed paths
+  const resolvedSrc = useMemo(() => resolveAvatarUrl(src), [src]);
+  
   const handleError = () => {
-    if (!retried && src) {
+    if (!retried && resolvedSrc) {
       // Retry with cache-busting query
       setRetried(true);
     } else {
@@ -48,7 +94,7 @@ const ProfileAvatar = ({ src, name, size = 40, className, style }: ProfileAvatar
     }
   };
 
-  const showFallback = !src || imageError;
+  const showFallback = !resolvedSrc || imageError;
   
   return (
     <div
@@ -77,7 +123,7 @@ const ProfileAvatar = ({ src, name, size = 40, className, style }: ProfileAvatar
         </span>
       ) : (
         <img
-          src={retried ? `${src}?t=${Date.now()}` : src}
+          src={retried ? `${resolvedSrc}?t=${Date.now()}` : resolvedSrc}
           alt={name || 'User avatar'}
           className="w-full h-full object-cover"
           onError={handleError}
