@@ -1,9 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { X } from 'lucide-react';
 
 const ReelGeneration = () => {
   const [deviceHeight, setDeviceHeight] = useState<number>(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -23,13 +27,50 @@ const ReelGeneration = () => {
     };
   }, []);
 
+  // Timer and progress animation
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+    }, 1000);
+
+    // Simulate progress - faster at start, slower as it approaches 95%
+    const progressInterval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 95) return prev;
+        const remaining = 95 - prev;
+        const increment = Math.max(0.5, remaining * 0.02);
+        return Math.min(95, prev + increment);
+      });
+    }, 500);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      clearInterval(progressInterval);
+    };
+  }, []);
+
   // Check if generation is complete and navigate back
   useEffect(() => {
     const state = location.state as { isComplete?: boolean } | null;
     if (state?.isComplete) {
-      navigate('/', { replace: true });
+      setProgress(100);
+      setTimeout(() => {
+        navigate('/', { replace: true });
+      }, 500);
     }
   }, [location.state, navigate]);
+
+  // Format elapsed time as MM:SS
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Handle close button
+  const handleClose = () => {
+    navigate(-1);
+  };
 
   return (
     <motion.div
@@ -80,6 +121,18 @@ const ReelGeneration = () => {
         />
       </div>
 
+      {/* Close Button */}
+      <motion.button
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.2 }}
+        onClick={handleClose}
+        className="absolute top-4 right-4 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/70 hover:text-white hover:bg-white/20 transition-all"
+        style={{ marginTop: 'env(safe-area-inset-top)' }}
+      >
+        <X className="w-5 h-5" />
+      </motion.button>
+
       {/* Content */}
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -115,13 +168,44 @@ const ReelGeneration = () => {
         
         {/* Subtitle */}
         <motion.p 
-          className="text-base text-white/40 text-center"
+          className="text-base text-white/40 text-center mb-8"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
           This usually takes 1-2 minutes
         </motion.p>
+
+        {/* Progress Section */}
+        <motion.div
+          className="w-full"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          {/* Progress Bar */}
+          <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm mb-3">
+            <motion.div
+              className="h-full rounded-full"
+              style={{
+                background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.8), rgba(236, 72, 153, 0.8))',
+              }}
+              initial={{ width: '0%' }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
+            />
+          </div>
+
+          {/* Timer and Percentage */}
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-white/50 font-medium tabular-nums">
+              {formatTime(elapsedSeconds)}
+            </span>
+            <span className="text-white/50 font-medium tabular-nums">
+              {Math.round(progress)}%
+            </span>
+          </div>
+        </motion.div>
       </motion.div>
     </motion.div>
   );
