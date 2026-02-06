@@ -61,12 +61,24 @@ const ReelGeneration = () => {
 
   // Trigger actual generation once
   useEffect(() => {
+    console.log('[ReelGeneration] Effect fired:', { 
+      hasTriggered: hasTriggered.current, 
+      hasPhotos: !!locationState?.weekPhotos,
+      photoCount: locationState?.weekPhotos?.length,
+      firstPhotoUrl: locationState?.weekPhotos?.[0]?.imageUrl?.slice(0, 60),
+    });
     if (hasTriggered.current) return;
     const photos = locationState?.weekPhotos;
     if (photos && photos.length >= 3) {
       hasTriggered.current = true;
       console.log('[ReelGeneration] Triggering generateReel with', photos.length, 'photos');
-      generateReel(photos);
+      generateReel(photos).then(result => {
+        console.log('[ReelGeneration] generateReel resolved:', !!result);
+      }).catch(err => {
+        console.error('[ReelGeneration] generateReel error:', err);
+      });
+    } else {
+      console.warn('[ReelGeneration] Not enough photos or missing state:', { photos: photos?.length });
     }
   }, [locationState, generateReel]);
 
