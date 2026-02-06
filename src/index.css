@@ -108,11 +108,22 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 100% / 0.4;
-    --input: 0 0% 100% / 0.2;
+    --border: 0 0% 100% / 0.12;
+    --input: 0 0% 100% / 0.08;
     --ring: 195 100% 50%;
 
     --radius: 1.5rem;
+
+    /* Liquid Glass Tokens */
+    --glass-bg: rgba(255, 255, 255, 0.06);
+    --glass-bg-hover: rgba(255, 255, 255, 0.1);
+    --glass-bg-active: rgba(255, 255, 255, 0.14);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-border-focus: rgba(255, 255, 255, 0.25);
+    --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --glass-blur: 40px;
+    --glass-saturate: 180%;
 
     /* Aurora Colors */
     --aurora-cyan: 195 100% 50%;

@@ -197,10 +197,11 @@ const Auth = () => {
         <div 
           className="rounded-3xl p-6 mb-4"
           style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            background: 'var(--glass-bg)',
+            backdropFilter: 'blur(40px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+            border: '1px solid var(--glass-border)',
+            boxShadow: 'var(--glass-highlight), var(--glass-shadow)',
           }}
         >
           {/* Form fields */}
@@ -216,7 +217,6 @@ const Auth = () => {
                   if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
                 }}
                 placeholder="you@example.com"
-                className="h-12 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 rounded-xl focus:border-teal-400/40 focus:ring-0 focus:bg-white/[0.06] transition-all"
                 disabled={loading}
                 autoComplete="email"
               />
@@ -238,7 +238,6 @@ const Auth = () => {
                   if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
                 }}
                 placeholder="••••••••"
-                className="h-12 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 rounded-xl focus:border-teal-400/40 focus:ring-0 focus:bg-white/[0.06] transition-all"
                 disabled={loading}
                 autoComplete={isLogin ? 'current-password' : 'new-password'}
               />
