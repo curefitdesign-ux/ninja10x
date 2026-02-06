@@ -88,17 +88,21 @@ export default function SendReactionSheet({
         // Update local state to remove user's reaction
         setLocalReactorProfiles(prev => prev.filter(r => r.userId !== currentUserId));
         
-        // Notify parent to update its local state
+        // Notify parent to update its local state without page refresh
         onReactionRemoved?.(reactionType);
         
-        // Show toast and close
-        toast.success('Reaction removed', {
-          duration: 2000,
+        // Show subtle liquid glass toast
+        toast('Reaction removed', {
+          duration: 1800,
+          icon: '✕',
           style: {
-            background: 'rgba(30, 30, 40, 0.95)',
-            backdropFilter: 'blur(40px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            color: 'white',
+            background: 'rgba(30, 30, 40, 0.9)',
+            backdropFilter: 'blur(40px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            color: 'rgba(255,255,255,0.7)',
+            fontSize: '13px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
           },
         });
         
