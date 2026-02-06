@@ -919,12 +919,13 @@ const Reel = () => {
                         )}
                       </motion.div>
                     </AnimatePresence>
-                    {/* Segmented progress bar at top of card */}
+                    {/* Segmented progress bar at top of card - GPU accelerated */}
                     {currentGroup && currentGroup.activities.length > 0 && (
                       <div className="absolute top-2 left-2 right-2 flex gap-1 z-20">
                         {currentGroup.activities.map((_, idx) => {
                           const isCurrentSegment = idx === currentActivityIndex;
                           const isViewed = idx < currentActivityIndex;
+                          const progress = isViewed ? 1 : isCurrentSegment ? autoAdvanceProgress : 0;
                           
                           return (
                             <div
@@ -934,18 +935,14 @@ const Reel = () => {
                                 background: 'rgba(255,255,255,0.25)',
                               }}
                             >
-                              <motion.div
-                                className="h-full rounded-full"
+                              <div
+                                className="h-full w-full rounded-full"
                                 style={{
                                   background: 'rgba(255,255,255,0.9)',
-                                }}
-                                initial={false}
-                                animate={{
-                                  width: isViewed ? '100%' : isCurrentSegment ? `${autoAdvanceProgress * 100}%` : '0%',
-                                }}
-                                transition={{
-                                  duration: isCurrentSegment ? 0.1 : 0.3,
-                                  ease: 'linear',
+                                  transform: `scaleX(${progress})`,
+                                  transformOrigin: 'left',
+                                  transition: isCurrentSegment ? 'none' : 'transform 0.3s ease',
+                                  willChange: 'transform',
                                 }}
                               />
                             </div>
