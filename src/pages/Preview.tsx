@@ -948,7 +948,7 @@ const Preview = () => {
         <div 
           className={`flex-shrink-0 flex items-center justify-center transition-all duration-700 ease-out py-4 ${isLoaded ? 'animate-frame-entrance' : 'opacity-0'} ${isExiting ? 'animate-template-transition' : ''}`}
           style={{ 
-            minHeight: 'min(75vw * 16 / 9, 520px)',
+            minHeight: 'min(65vw * 16 / 9, 480px)',
           }}
         >
           {elementsHidden ? (
@@ -956,7 +956,7 @@ const Preview = () => {
               <div 
                 className="w-full"
                 style={{ 
-                  maxWidth: 'min(80vw, 340px)',
+                  maxWidth: 'min(70vw, 300px)',
                   aspectRatio: '9/16',
                 }}
               >
@@ -971,15 +971,15 @@ const Preview = () => {
             <div 
               ref={containerRef}
               onScroll={handleScroll}
-              className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center touch-pan-x"
+              className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center touch-pan-x"
               style={{ 
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
                 overscrollBehaviorX: 'contain',
-                // Each card centered with 10% of adjacent templates visible on both sides
-                paddingLeft: 'calc((100vw - min(75vw, 320px)) / 2)',
-                paddingRight: 'calc((100vw - min(75vw, 320px)) / 2)',
+                // Reduced card width to show ~20% of adjacent templates on each side
+                paddingLeft: 'calc((100vw - min(65vw, 280px)) / 2)',
+                paddingRight: 'calc((100vw - min(65vw, 280px)) / 2)',
               }}
             >
               {FRAMES.map((frame, index) => {
@@ -1002,10 +1002,10 @@ const Preview = () => {
                       elementsHidden && isRightOfCurrent ? 'opacity-0 translate-x-full' : ''
                     }`}
                     style={{ 
-                      // Card takes ~80% width, leaving 10% visible on each side for adjacent cards
-                      width: 'min(75vw, 320px)',
-                      height: 'calc(min(75vw, 320px) * 16 / 9)',
-                      maxHeight: '500px',
+                      // Card takes ~65% width, leaving ~17.5% visible on each side for adjacent cards
+                      width: 'min(65vw, 280px)',
+                      height: 'calc(min(65vw, 280px) * 16 / 9)',
+                      maxHeight: '480px',
                       transform: `scale(${scale})`,
                       opacity: elementsHidden && !isActiveFrame ? 0 : opacity,
                       transition: 'transform 0.12s ease-out, opacity 0.12s ease-out',
