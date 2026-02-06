@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil, Trash2, Bike, Footprints, Mountain, Waves, Dumbbell, Dribbble, Trophy, Swords, Music, Brain, CircleDot, ImagePlus, MoreHorizontal } from 'lucide-react';
+import { X, Check, Pencil, Trash2, Dumbbell, Trophy, Swords, Music, Brain, CircleDot, ImagePlus, MoreHorizontal, Activity, Timer, MountainSnow, Droplets } from 'lucide-react';
 import ShareSheet from '@/components/ShareSheet';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -25,10 +25,10 @@ type FrameType = typeof FRAMES[number];
 
 // Activity options with Lucide icons and contextual data inputs
 const activityOptions = [
-  { name: 'Running', icon: Footprints, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' as const },
-  { name: 'Cycling', icon: Bike, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' as const },
-  { name: 'Trekking', icon: Mountain, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Elevation', secondaryUnit: 'm', secondaryInputType: 'number' as const },
-  { name: 'Swimming', icon: Waves, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Laps', secondaryUnit: 'laps', secondaryInputType: 'number' as const },
+  { name: 'Running', icon: Activity, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' as const },
+  { name: 'Cycling', icon: Timer, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' as const },
+  { name: 'Trekking', icon: MountainSnow, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Elevation', secondaryUnit: 'm', secondaryInputType: 'number' as const },
+  { name: 'Swimming', icon: Droplets, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Laps', secondaryUnit: 'laps', secondaryInputType: 'number' as const },
   { name: 'Yoga', icon: Brain, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
   { name: 'GYM', icon: Dumbbell, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' as const },
   { name: 'Cricket', icon: Trophy, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Runs', secondaryUnit: 'runs', secondaryInputType: 'number' as const },
@@ -838,11 +838,12 @@ const Preview = () => {
   // Template Selection Step (confirmation is now a popup on ShareSheet)
   return (
     <div 
-      className="fixed inset-0 w-full touch-manipulation overflow-hidden" 
+      className="fixed inset-0 w-full touch-manipulation" 
       style={{ 
         height: '100dvh',
         minHeight: '-webkit-fill-available',
         backgroundColor: '#252535',
+        overflow: 'hidden',
       }}
     >
       {/* Blurred background — screenshot of the captured media */}
@@ -921,8 +922,8 @@ const Preview = () => {
 
       {/* Content - scrollable layout */}
       <div 
-        className="relative z-10 flex flex-col h-full overflow-y-auto"
-        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+        className="relative z-10 flex flex-col h-full overflow-y-auto overscroll-y-contain"
+        style={{ paddingTop: 'env(safe-area-inset-top, 0px)', WebkitOverflowScrolling: 'touch' }}
       >
         {/* Offscreen capture target (unscaled) for image saves */}
         <div
