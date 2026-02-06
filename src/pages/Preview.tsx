@@ -1,5 +1,16 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil, Trash2, Dumbbell, Trophy, Swords, Music, Brain, CircleDot, ImagePlus, MoreHorizontal, Activity, Timer, MountainSnow, Droplets } from 'lucide-react';
+import { X, Check, Pencil, Trash2, ImagePlus, MoreHorizontal } from 'lucide-react';
+
+// Activity icon images
+import runningIcon from '@/assets/activities/running.png';
+import cyclingIcon from '@/assets/activities/cycling.png';
+import trekkingIcon from '@/assets/activities/trekking.png';
+import yogaIcon from '@/assets/activities/yoga.png';
+import cricketIcon from '@/assets/activities/cricket.png';
+import boxingIcon from '@/assets/activities/boxing.png';
+import basketballIcon from '@/assets/activities/basketball.png';
+import racquetIcon from '@/assets/activities/racquet.png';
+import footballIcon from '@/assets/activities/football.png';
 import ShareSheet from '@/components/ShareSheet';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -23,21 +34,20 @@ import { toast } from 'sonner';
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
 
-// Activity options with Lucide icons and contextual data inputs
+// Activity options with contextual PNG icons
 const activityOptions = [
-  { name: 'Running', icon: Activity, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' as const },
-  { name: 'Cycling', icon: Timer, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' as const },
-  { name: 'Trekking', icon: MountainSnow, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Elevation', secondaryUnit: 'm', secondaryInputType: 'number' as const },
-  { name: 'Swimming', icon: Droplets, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Laps', secondaryUnit: 'laps', secondaryInputType: 'number' as const },
-  { name: 'Yoga', icon: Brain, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
-  { name: 'GYM', icon: Dumbbell, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' as const },
-  { name: 'Cricket', icon: Trophy, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Runs', secondaryUnit: 'runs', secondaryInputType: 'number' as const },
-  { name: 'Badminton', icon: CircleDot, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Games', secondaryUnit: 'games', secondaryInputType: 'number' as const },
-  { name: 'Tennis', icon: CircleDot, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' as const },
-  { name: 'Meditation', icon: Brain, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
-  { name: 'Boxing', icon: Swords, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Rounds', secondaryUnit: 'rounds', secondaryInputType: 'number' as const },
-  { name: 'Dance', icon: Music, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
-  { name: 'Other', icon: MoreHorizontal, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const, isCustom: true },
+  { name: 'Running', image: runningIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' as const },
+  { name: 'Cycling', image: cyclingIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' as const },
+  { name: 'Trekking', image: trekkingIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Elevation', secondaryUnit: 'm', secondaryInputType: 'number' as const },
+  { name: 'Yoga', image: yogaIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
+  { name: 'GYM', image: null, emoji: '🏋️', primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' as const },
+  { name: 'Cricket', image: cricketIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Runs', secondaryUnit: 'runs', secondaryInputType: 'number' as const },
+  { name: 'Badminton', image: racquetIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Games', secondaryUnit: 'games', secondaryInputType: 'number' as const },
+  { name: 'Tennis', image: racquetIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' as const },
+  { name: 'Boxing', image: boxingIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Rounds', secondaryUnit: 'rounds', secondaryInputType: 'number' as const },
+  { name: 'Football', image: footballIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
+  { name: 'Basketball', image: basketballIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
+  { name: 'Other', image: null, isCustom: true, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel' as const, secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' as const },
 ];
 
 // Get activity-specific input config from centralized utility
@@ -746,9 +756,8 @@ const Preview = () => {
             <h2 className="text-white text-xl font-bold text-center mb-5">Choose your activity</h2>
             
             {/* Activity Grid - 4 columns, larger icons */}
-            <div className="grid grid-cols-4 gap-x-3 gap-y-4">
+            <div className="grid grid-cols-4 gap-x-4 gap-y-5">
               {activityOptions.map((activityOption, index) => {
-                const IconComponent = activityOption.icon;
                 const isOther = 'isCustom' in activityOption && activityOption.isCustom;
                 return (
                   <motion.button
@@ -766,20 +775,26 @@ const Preview = () => {
                         handleActivitySelection(activityOption.name);
                       }
                     }}
-                    className="flex flex-col items-center gap-2"
+                    className="flex flex-col items-center gap-2.5"
                   >
                     <div 
-                      className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                      className="w-[68px] h-[68px] rounded-[20px] flex items-center justify-center overflow-hidden"
                       style={{ 
-                        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1)',
+                        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 100%)',
+                        backdropFilter: 'blur(16px)',
+                        border: '1px solid rgba(255, 255, 255, 0.18)',
+                        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 16px rgba(0,0,0,0.15)',
                       }}
                     >
-                      <IconComponent className="w-7 h-7 text-white" strokeWidth={1.8} />
+                      {activityOption.image ? (
+                        <img src={activityOption.image} alt={activityOption.name} className="w-10 h-10 object-contain" />
+                      ) : 'emoji' in activityOption && activityOption.emoji ? (
+                        <span className="text-3xl">{activityOption.emoji}</span>
+                      ) : (
+                        <MoreHorizontal className="w-7 h-7 text-white/70" strokeWidth={1.8} />
+                      )}
                     </div>
-                    <span className="text-white/90 text-[11px] font-semibold text-center leading-tight">
+                    <span className="text-white/90 text-xs font-semibold text-center leading-tight">
                       {activityOption.name}
                     </span>
                   </motion.button>
@@ -1047,7 +1062,6 @@ const Preview = () => {
           {(() => {
             const config = getActivityInputConfig(activity || '');
             const activityOption = activityOptions.find(a => a.name === activity);
-            const ActivityIcon = activityOption?.icon || Dumbbell;
             
             return (
               <div 
@@ -1240,9 +1254,8 @@ const Preview = () => {
                 <h2 className="text-white text-xl font-bold text-center mb-5">Change activity</h2>
                 
                 {/* Activity Grid - 4 columns */}
-                <div className="grid grid-cols-4 gap-x-3 gap-y-4">
+                <div className="grid grid-cols-4 gap-x-4 gap-y-5">
                   {activityOptions.map((activityOption, index) => {
-                    const IconComponent = activityOption.icon;
                     const isSelected = activity === activityOption.name || (activityOption.name === 'Other' && !activityOptions.slice(0, -1).some(a => a.name === activity) && activity);
                     const isOther = 'isCustom' in activityOption && activityOption.isCustom;
                     return (
@@ -1255,7 +1268,6 @@ const Preview = () => {
                         onClick={() => {
                           triggerHaptic('medium');
                           if (isOther) {
-                            // Show custom activity input
                             setShowCustomActivityInput(true);
                             setCustomActivityName('');
                           } else {
@@ -1263,22 +1275,28 @@ const Preview = () => {
                             setEditingField(null);
                           }
                         }}
-                        className="flex flex-col items-center gap-2"
+                        className="flex flex-col items-center gap-2.5"
                       >
                         <div 
-                          className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                          className="w-[68px] h-[68px] rounded-[20px] flex items-center justify-center overflow-hidden"
                           style={{ 
                             background: isSelected 
                               ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.15) 100%)'
-                              : 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
-                            backdropFilter: 'blur(10px)',
-                            border: isSelected ? '2px solid rgba(255, 255, 255, 0.5)' : '1px solid rgba(255, 255, 255, 0.15)',
-                            boxShadow: isSelected ? '0 4px 20px rgba(255,255,255,0.2), inset 0 1px 0 rgba(255,255,255,0.2)' : 'inset 0 1px 0 rgba(255,255,255,0.1)',
+                              : 'linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 100%)',
+                            backdropFilter: 'blur(16px)',
+                            border: isSelected ? '2px solid rgba(255, 255, 255, 0.5)' : '1px solid rgba(255, 255, 255, 0.18)',
+                            boxShadow: isSelected ? '0 4px 20px rgba(255,255,255,0.2), inset 0 1px 0 rgba(255,255,255,0.2)' : 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 16px rgba(0,0,0,0.15)',
                           }}
                         >
-                          <IconComponent className={`w-7 h-7 ${isSelected ? 'text-white' : 'text-white/80'}`} strokeWidth={1.8} />
+                          {activityOption.image ? (
+                            <img src={activityOption.image} alt={activityOption.name} className="w-10 h-10 object-contain" />
+                          ) : 'emoji' in activityOption && activityOption.emoji ? (
+                            <span className="text-3xl">{activityOption.emoji}</span>
+                          ) : (
+                            <MoreHorizontal className={`w-7 h-7 ${isSelected ? 'text-white' : 'text-white/70'}`} strokeWidth={1.8} />
+                          )}
                         </div>
-                        <span className={`text-[11px] font-semibold text-center leading-tight ${isSelected ? 'text-white' : 'text-white/90'}`}>
+                        <span className={`text-xs font-semibold text-center leading-tight ${isSelected ? 'text-white' : 'text-white/90'}`}>
                           {activityOption.name}
                         </span>
                       </motion.button>

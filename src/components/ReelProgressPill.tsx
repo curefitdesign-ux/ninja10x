@@ -345,12 +345,14 @@ const ReelProgressPill = ({
   const isCreating = state === 'creating';
   const isRendering = state === 'rendering';
 
-  // Get background style - transparent pill (as requested)
+  // Get background style - liquid glass
   const getBackgroundStyle = () => {
     return {
-      background: 'transparent',
-      border: '1.5px solid hsl(var(--foreground) / 0.18)',
-      boxShadow: 'none',
+      background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.04) 100%)',
+      backdropFilter: 'blur(40px) saturate(180%)',
+      WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+      border: '1px solid rgba(255,255,255,0.15)',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.12)',
     };
   };
 
@@ -439,13 +441,19 @@ const ReelProgressPill = ({
             </motion.div>
           ) : (isCreating || isRendering) ? (
             <motion.div
-              key="cards"
+              key="cards-with-ai"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center"
             >
-              <StackedCardsIcon />
+              <img 
+                src="/images/ai-star-loader.gif" 
+                alt="AI generating"
+                className="w-8 h-8 object-contain"
+                style={{ filter: 'drop-shadow(0 0 6px rgba(139, 92, 246, 0.4))' }}
+              />
             </motion.div>
           ) : (
             <motion.div

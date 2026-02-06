@@ -283,16 +283,22 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
       if (e.data.size > 0) chunks.push(e.data);
     };
 
-    mediaRecorder.onstop = () => {
+    const finalize = () => {
       if (resolved) return;
       resolved = true;
       clearTimeout(safetyTimeout);
+      clearTimeout(stopFallback);
       const blob = new Blob(chunks, { type: selectedMimeType.split(';')[0] });
       const url = URL.createObjectURL(blob);
       console.log('[MotionRecap] Done! Blob size:', (blob.size / 1024).toFixed(0), 'KB');
       onProgress?.(100, 'Complete!');
       resolve(url);
     };
+
+    // Fallback: if onstop never fires after stop() is called, finalize after 3s
+    let stopFallback: ReturnType<typeof setTimeout>;
+
+    mediaRecorder.onstop = finalize;
 
     mediaRecorder.onerror = (e) => {
       if (resolved) return;
@@ -313,7 +319,21 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
         // Finished all frames — stop recording after a brief flush
         onProgress?.(95, 'Finalizing...');
         setTimeout(() => {
-          try { if (mediaRecorder.state !== 'inactive') mediaRecorder.stop(); } catch {}
+          try {
+            if (mediaRecorder.state !== 'inactive') {
+              mediaRecorder.stop();
+              // If onstop doesn't fire within 3s, force finalize
+              stopFallback = setTimeout(() => {
+                console.warn('[MotionRecap] onstop never fired — forcing finalize');
+                finalize();
+              }, 3000);
+            } else {
+              // Already inactive, finalize directly
+              finalize();
+            }
+          } catch {
+            finalize();
+          }
         }, 400);
         return;
       }
