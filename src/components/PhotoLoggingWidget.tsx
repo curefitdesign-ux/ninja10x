@@ -791,9 +791,20 @@ const PhotoLoggingWidget = ({
       });
     } else {
       // No video ready - navigate to reel generation page
+      // Map LoggedPhoto to the PhotoData format expected by useFitnessReel
+      const mappedPhotos = weekPhotos.map(p => ({
+        id: p.id,
+        imageUrl: p.originalUrl || p.storageUrl,
+        activity: p.activity || 'Workout',
+        duration: p.duration,
+        pr: p.pr,
+        uploadDate: '',
+        dayNumber: p.dayNumber,
+        isVideo: p.isVideo,
+      }));
       navigate('/reel-generation', {
         state: {
-          weekPhotos,
+          weekPhotos: mappedPhotos,
           weekNumber: weekIndex + 1,
         },
       });
