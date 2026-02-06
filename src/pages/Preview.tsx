@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil, Trash2, ImagePlus, MoreHorizontal, Activity, Bike, Mountain, Sparkles, Dumbbell, CircleDot, Volleyball, Swords, Goal } from 'lucide-react';
+import { X, Check, Pencil, Trash2, ImagePlus, MoreHorizontal, Footprints, Bike, MountainSnow, Flower2, Dumbbell, Trophy, Disc, Zap, Hand, Dribbble, CircleDot } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import ShareSheet from '@/components/ShareSheet';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
@@ -36,16 +36,16 @@ const activityOptions: Array<{
   secondaryUnit: string;
   secondaryInputType: 'wheel' | 'number' | 'decimal' | 'none';
 }> = [
-  { name: 'Running', icon: Activity, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' },
+  { name: 'Running', icon: Footprints, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' },
   { name: 'Cycling', icon: Bike, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' },
-  { name: 'Trekking', icon: Mountain, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Elevation', secondaryUnit: 'm', secondaryInputType: 'number' },
-  { name: 'Yoga', icon: Sparkles, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
+  { name: 'Trekking', icon: MountainSnow, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Elevation', secondaryUnit: 'm', secondaryInputType: 'number' },
+  { name: 'Yoga', icon: Flower2, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
   { name: 'GYM', icon: Dumbbell, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' },
-  { name: 'Cricket', icon: CircleDot, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Runs', secondaryUnit: 'runs', secondaryInputType: 'number' },
-  { name: 'Badminton', icon: Volleyball, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Games', secondaryUnit: 'games', secondaryInputType: 'number' },
-  { name: 'Tennis', icon: Volleyball, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' },
-  { name: 'Boxing', icon: Swords, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Rounds', secondaryUnit: 'rounds', secondaryInputType: 'number' },
-  { name: 'Football', icon: Goal, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
+  { name: 'Cricket', icon: Trophy, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Runs', secondaryUnit: 'runs', secondaryInputType: 'number' },
+  { name: 'Badminton', icon: Disc, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Games', secondaryUnit: 'games', secondaryInputType: 'number' },
+  { name: 'Tennis', icon: Zap, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' },
+  { name: 'Boxing', icon: Hand, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Rounds', secondaryUnit: 'rounds', secondaryInputType: 'number' },
+  { name: 'Football', icon: Dribbble, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
   { name: 'Basketball', icon: CircleDot, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
   { name: 'Other', icon: MoreHorizontal, isCustom: true, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
 ];
