@@ -845,16 +845,24 @@ const Preview = () => {
         backgroundColor: '#252535',
       }}
     >
-      {/* Blurred background image with dynamic color overlay - edge to edge */}
-      <div 
-        className="fixed inset-0 scale-150 transition-all duration-500 animate-bg-drift pointer-events-none"
-        style={{
-          backgroundImage: `url("${imageUrl}")`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          filter: 'blur(80px) brightness(0.7)',
-        }}
-      />
+      {/* Blurred background — screenshot of the captured media */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {isVideo ? (
+          <video
+            src={imageUrl || ''}
+            autoPlay muted loop playsInline
+            className="absolute inset-0 w-full h-full object-cover scale-[1.3]"
+            style={{ filter: 'blur(60px) brightness(0.45) saturate(1.4)' }}
+          />
+        ) : (
+          <img
+            src={imageUrl || ''}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover scale-[1.3]"
+            style={{ filter: 'blur(60px) brightness(0.45) saturate(1.4)' }}
+          />
+        )}
+      </div>
       
       {/* Subtle particle/dust animation */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -1042,7 +1050,7 @@ const Preview = () => {
             
             return (
               <div 
-                className="rounded-2xl p-3 relative overflow-hidden"
+                className="rounded-2xl px-5 py-1 relative overflow-hidden"
                 style={{
                   background: 'rgba(255, 255, 255, 0.08)',
                   backdropFilter: 'blur(40px) saturate(180%)',
@@ -1050,44 +1058,45 @@ const Preview = () => {
                   border: '1px solid rgba(255, 255, 255, 0.1)',
                 }}
               >
-                {/* Activity selector - editable */}
+                {/* Activity selector row */}
                 <button 
                   onClick={() => { handleTap('activity'); setEditingField('activity'); }}
-                  className={`w-full flex justify-between items-center py-2 border-b border-white/10 tap-bounce min-h-[44px] ${tappedElement === 'activity' ? 'animate-liquid-tap' : ''}`}
+                  className={`w-full flex justify-between items-center py-3.5 border-b border-white/[0.08] tap-bounce min-h-[52px] ${tappedElement === 'activity' ? 'animate-liquid-tap' : ''}`}
                 >
-                  <span className="text-white/70 text-base flex items-center gap-2">
-                    Activity
-                    <span className="text-xs text-white/40">tap to change</span>
-                  </span>
-                  <span className="font-bold text-lg text-white">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-white/60 text-[15px] font-medium">Activity</span>
+                    <span className="text-[11px] text-white/30">tap to change</span>
+                  </div>
+                  <span className="font-bold text-[17px] text-white">
                     {activity || 'Select'}
                   </span>
                 </button>
 
-                {/* Primary: Duration (always shown) */}
+                {/* Duration row */}
                 <button 
                   onClick={() => { handleTap('duration'); openEditSheet('duration'); }}
-                  className={`w-full flex justify-between items-center py-2 ${config.secondaryInputType !== 'none' ? 'border-b border-white/10' : ''} tap-bounce min-h-[44px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
+                  className={`w-full flex justify-between items-center py-3.5 ${config.secondaryInputType !== 'none' ? 'border-b border-white/[0.08]' : ''} tap-bounce min-h-[52px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
                 >
-                  <span className="text-white/70 text-base flex items-center gap-2">
-                    {config.primaryMetric}
-                    <span className="text-xs text-white/40">tap to edit</span>
-                  </span>
-                  <span className={`font-bold text-lg ${duration ? 'text-white' : 'text-white/40 italic'}`}>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-white/60 text-[15px] font-medium">{config.primaryMetric}</span>
+                    <span className="text-[11px] text-white/30">tap to edit</span>
+                  </div>
+                  <span className={`font-bold text-[17px] ${duration ? 'text-white' : 'text-white/30'}`}>
                     {duration || '-'}
                   </span>
                 </button>
                 
-                {/* Secondary: Contextual metric (only if activity has one) */}
+                {/* Secondary metric row */}
                 {config.secondaryInputType !== 'none' && (
                   <button 
                     onClick={() => { handleTap('pr'); openEditSheet('pr'); }}
-                    className={`w-full flex justify-between items-center py-2 tap-bounce min-h-[44px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
+                    className={`w-full flex justify-between items-center py-3.5 tap-bounce min-h-[52px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
                   >
-                    <span className="text-white/70 text-base flex items-center gap-2">
-                      {config.secondaryMetric} <span className="text-white/40 text-xs">(Optional)</span>
-                    </span>
-                    <span className={`font-bold text-lg ${pr ? 'text-white' : 'text-white/40'}`}>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-white/60 text-[15px] font-medium">{config.secondaryMetric}</span>
+                      <span className="text-[11px] text-white/30">(Optional)</span>
+                    </div>
+                    <span className={`font-bold text-[17px] ${pr ? 'text-white' : 'text-white/30'}`}>
                       {pr || '-'}
                     </span>
                   </button>
