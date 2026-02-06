@@ -1,9 +1,12 @@
 /**
- * Premium Motion Recap Generator — "Apple Memories" style
+ * Premium Motion Recap Generator — Metric Transition + Photo Style
  * 
- * Renders directly to a canvas stream (no pre-rendered data URLs).
- * Uses smooth crossfades, Ken Burns, and clean typography overlays.
- * Optimized for mobile: 720x1280 @ 24fps for fast, flicker-free encoding.
+ * For each day:
+ *   1. Metric Transition (1s) — Abstract data visualization with bold numbers,
+ *      count-up animation, dark background with grain, slide/scale motion
+ *   2. Original Photo/Video (3s) — Ken Burns with subtle overlays
+ * 
+ * 9:16 ratio (720×1280), 24fps, canvas-based direct-to-stream.
  */
 
 // ============ TYPES ============
@@ -36,34 +39,32 @@ const FPS = 24;
 const WIDTH = 720;
 const HEIGHT = 1280;
 
-// Timing in seconds (easier to reason about)
 const TIMING = {
-  FADE_DURATION: 0.6,     // crossfade between days
-  HOLD_DURATION: 2.2,     // how long each day is shown
-  INTRO_FADE: 0.8,        // initial fade in
-  OUTRO_FADE: 0.8,        // final fade out
-  KEN_BURNS_SCALE: 0.04,  // subtle zoom range (1.0 → 1.04)
+  METRIC_DURATION: 1.0,   // 1s metric transition card
+  PHOTO_DURATION: 3.0,    // 3s photo/video hold
+  CROSSFADE: 0.4,         // crossfade between metric→photo and photo→next metric
+  INTRO_FADE: 0.5,        // initial fade in
+  OUTRO_FADE: 0.6,        // final fade out
+  KEN_BURNS_SCALE: 0.035, // subtle zoom
 };
 
-// Layout
-const LAYOUT = {
-  MARGIN_X: 48,
-  ACTIVITY_Y: 120,
-  METRICS_Y: HEIGHT - 280,
-  METRIC_ROW_GAP: 64,
-  DAY_INDICATOR_Y: 130,
-};
+// Day slot = metric + photo
+const DAY_SLOT = TIMING.METRIC_DURATION + TIMING.PHOTO_DURATION; // 4s per day
 
-// Fonts
 const FONTS = {
-  ACTIVITY: 'bold 32px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  METRIC_LABEL: '500 16px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  METRIC_VALUE: 'bold 42px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  DAY_LABEL: '600 15px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  DAY_NUMBER: 'bold 22px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  DAY_TAG: '600 14px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  ACTIVITY: 'bold 28px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  METRIC_LABEL: '500 13px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  METRIC_VALUE: 'bold 72px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  METRIC_UNIT: '300 20px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  BRANDING: '500 12px -apple-system, "SF Pro Text", system-ui, sans-serif',
 };
 
 // ============ EASING ============
+
+function easeOutCubic(t: number): number {
+  return 1 - Math.pow(1 - t, 3);
+}
 
 function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -85,7 +86,6 @@ async function loadImages(dayStates: DayState[]): Promise<HTMLImageElement[]> {
       
       const timeout = setTimeout(() => {
         console.warn('[MotionRecap] Image load timeout:', state.asset.src?.slice(0, 60));
-        // Create black placeholder
         const c = document.createElement('canvas');
         c.width = WIDTH; c.height = HEIGHT;
         const cx = c.getContext('2d')!;
@@ -116,7 +116,176 @@ async function loadImages(dayStates: DayState[]): Promise<HTMLImageElement[]> {
   return results;
 }
 
-// ============ DRAWING HELPERS ============
+// ============ GRAIN TEXTURE ============
+
+let grainCanvas: HTMLCanvasElement | null = null;
+
+function getGrainTexture(): HTMLCanvasElement {
+  if (grainCanvas) return grainCanvas;
+  grainCanvas = document.createElement('canvas');
+  grainCanvas.width = 256;
+  grainCanvas.height = 256;
+  const gCtx = grainCanvas.getContext('2d')!;
+  const imageData = gCtx.createImageData(256, 256);
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    const v = Math.random() * 255;
+    imageData.data[i] = v;
+    imageData.data[i + 1] = v;
+    imageData.data[i + 2] = v;
+    imageData.data[i + 3] = 12; // very subtle
+  }
+  gCtx.putImageData(imageData, 0, 0);
+  return grainCanvas;
+}
+
+// ============ DRAWING: METRIC TRANSITION ============
+
+function drawMetricTransition(
+  ctx: CanvasRenderingContext2D,
+  state: DayState,
+  progress: number, // 0→1 through the 1s metric phase
+  globalAlpha: number
+) {
+  ctx.save();
+  ctx.globalAlpha = globalAlpha;
+
+  // Dark background with subtle gradient
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, HEIGHT);
+  bgGrad.addColorStop(0, '#0a0a0f');
+  bgGrad.addColorStop(0.5, '#0d0d14');
+  bgGrad.addColorStop(1, '#08080c');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+  // Subtle accent glow
+  const accentProgress = easeOutCubic(Math.min(progress * 1.5, 1));
+  ctx.save();
+  ctx.globalAlpha = 0.12 * accentProgress;
+  const glowGrad = ctx.createRadialGradient(WIDTH / 2, HEIGHT * 0.4, 0, WIDTH / 2, HEIGHT * 0.4, 350);
+  glowGrad.addColorStop(0, 'rgba(139, 92, 246, 0.6)');
+  glowGrad.addColorStop(0.5, 'rgba(139, 92, 246, 0.15)');
+  glowGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = glowGrad;
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  ctx.restore();
+
+  // Grain overlay
+  ctx.save();
+  ctx.globalAlpha = 0.04;
+  const grain = getGrainTexture();
+  for (let y = 0; y < HEIGHT; y += 256) {
+    for (let x = 0; x < WIDTH; x += 256) {
+      ctx.drawImage(grain, x, y);
+    }
+  }
+  ctx.restore();
+
+  // Animated elements with staggered timing
+  const dayTagProgress = easeOutCubic(Math.min(progress * 3, 1));       // 0–0.33s
+  const metricProgress = easeOutCubic(Math.min((progress - 0.15) * 2.5, 1)); // 0.15–0.55s
+  const labelProgress = easeOutCubic(Math.min((progress - 0.3) * 2.5, 1));   // 0.3–0.7s
+
+  // Center Y for the whole block
+  const centerY = HEIGHT * 0.42;
+
+  // DAY tag — slides down from above
+  if (dayTagProgress > 0) {
+    ctx.save();
+    ctx.globalAlpha = dayTagProgress * globalAlpha;
+    const tagY = lerp(centerY - 100, centerY - 70, dayTagProgress);
+    
+    // Pill background
+    ctx.font = FONTS.DAY_TAG;
+    const dayText = `DAY ${state.dayNumber}`;
+    const textW = ctx.measureText(dayText).width;
+    const pillW = textW + 28;
+    const pillH = 28;
+    const pillX = (WIDTH - pillW) / 2;
+    
+    ctx.fillStyle = 'rgba(139, 92, 246, 0.2)';
+    ctx.beginPath();
+    ctx.roundRect(pillX, tagY - pillH / 2, pillW, pillH, 14);
+    ctx.fill();
+    
+    ctx.fillStyle = 'rgba(139, 92, 246, 0.9)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(dayText, WIDTH / 2, tagY);
+    ctx.restore();
+  }
+
+  // Main metric value — count-up + scale in
+  if (metricProgress > 0) {
+    ctx.save();
+    ctx.globalAlpha = metricProgress * globalAlpha;
+    
+    const metricY = centerY;
+    const scale = lerp(0.7, 1, metricProgress);
+    const slideY = lerp(20, 0, metricProgress);
+    
+    ctx.translate(WIDTH / 2, metricY + slideY);
+    ctx.scale(scale, scale);
+    
+    // Animated count-up for numeric values
+    const rawValue = state.metricA.value;
+    const numericMatch = rawValue.match(/^(\d+)/);
+    let displayValue = rawValue;
+    if (numericMatch && metricProgress < 0.9) {
+      const targetNum = parseInt(numericMatch[1]);
+      const currentNum = Math.round(targetNum * Math.min(metricProgress / 0.85, 1));
+      displayValue = rawValue.replace(/^\d+/, String(currentNum));
+    }
+    
+    ctx.font = FONTS.METRIC_VALUE;
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(displayValue, 0, 0);
+    
+    ctx.restore();
+  }
+
+  // Metric label — slides up
+  if (labelProgress > 0) {
+    ctx.save();
+    ctx.globalAlpha = labelProgress * globalAlpha * 0.5;
+    const labelY = lerp(centerY + 55, centerY + 45, labelProgress);
+    
+    ctx.font = FONTS.METRIC_LABEL;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(state.metricA.label.toUpperCase(), WIDTH / 2, labelY);
+    ctx.restore();
+  }
+
+  // Activity name — bottom area
+  if (labelProgress > 0) {
+    ctx.save();
+    ctx.globalAlpha = labelProgress * globalAlpha * 0.4;
+    const actY = lerp(centerY + 100, centerY + 90, labelProgress);
+    
+    ctx.font = FONTS.ACTIVITY;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, actY);
+    ctx.restore();
+  }
+
+  // Exit animation — soft opacity fade + slight scale for last 20% of the metric phase
+  if (progress > 0.8) {
+    const exitT = (progress - 0.8) / 0.2;
+    const fadeOut = 1 - easeInOutCubic(exitT);
+    // Apply as overlay black
+    ctx.fillStyle = `rgba(0, 0, 0, ${(1 - fadeOut) * 0.6})`;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  }
+
+  ctx.restore();
+}
+
+// ============ DRAWING: PHOTO PHASE ============
 
 function drawImageCover(
   ctx: CanvasRenderingContext2D,
@@ -144,78 +313,48 @@ function drawImageCover(
   ctx.restore();
 }
 
-function drawOverlays(ctx: CanvasRenderingContext2D) {
-  // Top gradient
-  const topGrad = ctx.createLinearGradient(0, 0, 0, 300);
-  topGrad.addColorStop(0, 'rgba(0,0,0,0.5)');
+function drawPhotoOverlays(ctx: CanvasRenderingContext2D, state: DayState, textOpacity: number) {
+  // Subtle bottom gradient only
+  const bottomGrad = ctx.createLinearGradient(0, HEIGHT - 300, 0, HEIGHT);
+  bottomGrad.addColorStop(0, 'transparent');
+  bottomGrad.addColorStop(1, 'rgba(0,0,0,0.55)');
+  ctx.fillStyle = bottomGrad;
+  ctx.fillRect(0, HEIGHT - 300, WIDTH, 300);
+
+  // Top subtle gradient
+  const topGrad = ctx.createLinearGradient(0, 0, 0, 180);
+  topGrad.addColorStop(0, 'rgba(0,0,0,0.3)');
   topGrad.addColorStop(1, 'transparent');
   ctx.fillStyle = topGrad;
-  ctx.fillRect(0, 0, WIDTH, 300);
+  ctx.fillRect(0, 0, WIDTH, 180);
 
-  // Bottom gradient
-  const bottomGrad = ctx.createLinearGradient(0, HEIGHT - 380, 0, HEIGHT);
-  bottomGrad.addColorStop(0, 'transparent');
-  bottomGrad.addColorStop(1, 'rgba(0,0,0,0.7)');
-  ctx.fillStyle = bottomGrad;
-  ctx.fillRect(0, HEIGHT - 380, WIDTH, 380);
-}
+  if (textOpacity <= 0) return;
 
-function drawActivityLabel(ctx: CanvasRenderingContext2D, text: string, opacity: number) {
-  if (opacity <= 0) return;
   ctx.save();
-  ctx.globalAlpha = opacity;
-  ctx.font = FONTS.ACTIVITY;
-  ctx.fillStyle = '#fff';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
-  ctx.shadowColor = 'rgba(0,0,0,0.4)';
+  ctx.globalAlpha = textOpacity;
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
   ctx.shadowBlur = 8;
-  ctx.fillText(text.toUpperCase(), LAYOUT.MARGIN_X, LAYOUT.ACTIVITY_Y);
-  ctx.restore();
-}
 
-function drawMetrics(ctx: CanvasRenderingContext2D, metricA: DayMetric, metricB: DayMetric, opacity: number) {
-  if (opacity <= 0) return;
-  ctx.save();
-  ctx.globalAlpha = opacity;
-  ctx.shadowColor = 'rgba(0,0,0,0.3)';
-  ctx.shadowBlur = 6;
-
-  // Metric A
-  ctx.font = FONTS.METRIC_LABEL;
-  ctx.fillStyle = 'rgba(255,255,255,0.6)';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
-  ctx.fillText(metricA.label.toUpperCase(), LAYOUT.MARGIN_X, LAYOUT.METRICS_Y);
-  ctx.font = FONTS.METRIC_VALUE;
-  ctx.fillStyle = '#fff';
-  ctx.fillText(metricA.value, LAYOUT.MARGIN_X, LAYOUT.METRICS_Y + 22);
-
-  // Metric B
-  const metricBY = LAYOUT.METRICS_Y + LAYOUT.METRIC_ROW_GAP;
-  ctx.font = FONTS.METRIC_LABEL;
-  ctx.fillStyle = 'rgba(255,255,255,0.6)';
-  ctx.fillText(metricB.label.toUpperCase(), LAYOUT.MARGIN_X, metricBY);
-  ctx.font = FONTS.METRIC_VALUE;
-  ctx.fillStyle = '#fff';
-  ctx.fillText(metricB.value, LAYOUT.MARGIN_X, metricBY + 22);
-
-  ctx.restore();
-}
-
-function drawDayIndicator(ctx: CanvasRenderingContext2D, dayNumber: number, opacity: number) {
-  if (opacity <= 0) return;
-  ctx.save();
-  ctx.globalAlpha = opacity;
-  const x = WIDTH - LAYOUT.MARGIN_X;
-  ctx.font = FONTS.DAY_LABEL;
+  // Day indicator — top right
+  ctx.font = FONTS.DAY_TAG;
   ctx.fillStyle = 'rgba(255,255,255,0.5)';
   ctx.textAlign = 'right';
   ctx.textBaseline = 'top';
-  ctx.fillText('DAY', x, LAYOUT.DAY_INDICATOR_Y);
-  ctx.font = FONTS.DAY_NUMBER;
-  ctx.fillStyle = '#22C55E';
-  ctx.fillText(String(dayNumber), x, LAYOUT.DAY_INDICATOR_Y + 22);
+  ctx.fillText(`DAY ${state.dayNumber}`, WIDTH - 48, 54);
+
+  // Activity — bottom left
+  ctx.font = FONTS.ACTIVITY;
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(state.activityType.toUpperCase(), 48, HEIGHT - 100);
+
+  // Metric under activity
+  ctx.font = FONTS.METRIC_LABEL;
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(`${state.metricA.label}: ${state.metricA.value}`, 48, HEIGHT - 68);
+
   ctx.restore();
 }
 
@@ -229,28 +368,24 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
   console.log('[MotionRecap] Starting with', dayStates.length, 'days');
   onProgress?.(2, 'Loading photos...');
 
-  // Load all images
   const images = await loadImages(dayStates);
   console.log('[MotionRecap] All images loaded');
   onProgress?.(15, 'Preparing video...');
 
-  // Create canvas
   const canvas = document.createElement('canvas');
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
   const ctx = canvas.getContext('2d')!;
   if (!ctx) throw new Error('Canvas context failed');
 
-  // Calculate total duration
-  const totalDuration = TIMING.INTRO_FADE + 
-    dayStates.length * TIMING.HOLD_DURATION + 
-    (dayStates.length - 1) * TIMING.FADE_DURATION + 
+  // Total duration: intro + (metric + photo) per day + outro
+  const totalDuration = TIMING.INTRO_FADE +
+    dayStates.length * DAY_SLOT +
     TIMING.OUTRO_FADE;
   const totalFrames = Math.ceil(totalDuration * FPS);
 
   console.log('[MotionRecap] Duration:', totalDuration.toFixed(1), 's, Frames:', totalFrames);
 
-  // Setup MediaRecorder on canvas stream
   const stream = canvas.captureStream(FPS);
   const mimeTypes = [
     'video/webm;codecs=vp9',
@@ -271,7 +406,6 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
   return new Promise<string>((resolve, reject) => {
     let resolved = false;
 
-    // Safety timeout
     const safetyTimeout = setTimeout(() => {
       if (!resolved) {
         console.warn('[MotionRecap] Safety timeout — forcing completion');
@@ -282,6 +416,8 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
     mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) chunks.push(e.data);
     };
+
+    let stopFallback: ReturnType<typeof setTimeout>;
 
     const finalize = () => {
       if (resolved) return;
@@ -295,9 +431,6 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
       resolve(url);
     };
 
-    // Fallback: if onstop never fires after stop() is called, finalize after 3s
-    let stopFallback: ReturnType<typeof setTimeout>;
-
     mediaRecorder.onstop = finalize;
 
     mediaRecorder.onerror = (e) => {
@@ -308,27 +441,22 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
       reject(new Error('Video encoding failed'));
     };
 
-    // Start recording
-    mediaRecorder.start(200); // collect data every 200ms
+    mediaRecorder.start(200);
 
-    // Render loop — directly paint to canvas at FPS interval
     let frameIndex = 0;
 
     const renderLoop = () => {
       if (resolved || frameIndex >= totalFrames) {
-        // Finished all frames — stop recording after a brief flush
         onProgress?.(95, 'Finalizing...');
         setTimeout(() => {
           try {
             if (mediaRecorder.state !== 'inactive') {
               mediaRecorder.stop();
-              // If onstop doesn't fire within 3s, force finalize
               stopFallback = setTimeout(() => {
                 console.warn('[MotionRecap] onstop never fired — forcing finalize');
                 finalize();
               }, 3000);
             } else {
-              // Already inactive, finalize directly
               finalize();
             }
           } catch {
@@ -338,89 +466,67 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
         return;
       }
 
-      const time = frameIndex / FPS; // current time in seconds
+      const time = frameIndex / FPS;
 
-      // === Determine which day(s) to show ===
-      // Each day occupies HOLD_DURATION, with FADE_DURATION crossfade between them
-      const daySlotDuration = TIMING.HOLD_DURATION; // time per slot (overlapping fade)
-      
-      // Effective time (after intro fade)
-      const contentTime = time - TIMING.INTRO_FADE;
-      
-      // Calculate intro/outro opacity
+      // Global intro/outro opacity
       const introOpacity = Math.min(1, time / TIMING.INTRO_FADE);
       const outroStart = totalDuration - TIMING.OUTRO_FADE;
       const outroOpacity = time > outroStart ? Math.max(0, 1 - (time - outroStart) / TIMING.OUTRO_FADE) : 1;
       const globalOpacity = Math.min(introOpacity, outroOpacity);
 
-      // Calculate current day index and crossfade progress
-      const dayProgress = Math.max(0, contentTime) / daySlotDuration;
-      const currentDayIdx = Math.min(Math.floor(dayProgress), dayStates.length - 1);
-      const nextDayIdx = Math.min(currentDayIdx + 1, dayStates.length - 1);
-      const fractional = dayProgress - currentDayIdx;
+      // Content time (after intro)
+      const contentTime = Math.max(0, time - TIMING.INTRO_FADE);
 
-      // Crossfade: last FADE_DURATION/HOLD_DURATION fraction of each slot
-      const fadeStart = 1 - (TIMING.FADE_DURATION / TIMING.HOLD_DURATION);
-      const isCrossfading = fractional > fadeStart && currentDayIdx < dayStates.length - 1;
-      const crossfadeT = isCrossfading
-        ? easeInOutCubic((fractional - fadeStart) / (1 - fadeStart))
-        : 0;
+      // Which day and phase?
+      const dayIndex = Math.min(Math.floor(contentTime / DAY_SLOT), dayStates.length - 1);
+      const timeInSlot = contentTime - dayIndex * DAY_SLOT;
+
+      // Phase: metric (0 → METRIC_DURATION) or photo (METRIC_DURATION → DAY_SLOT)
+      const inMetricPhase = timeInSlot < TIMING.METRIC_DURATION;
 
       // Clear
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-      // Ken Burns parameters
-      const kenBurnsProgress = fractional; // 0-1 within current day
-      const scale1 = lerp(1.0, 1.0 + TIMING.KEN_BURNS_SCALE, kenBurnsProgress);
-      const panY1 = lerp(-5, 5, kenBurnsProgress);
+      if (inMetricPhase) {
+        // ---- METRIC TRANSITION ----
+        const metricProgress = timeInSlot / TIMING.METRIC_DURATION; // 0→1
+        drawMetricTransition(ctx, dayStates[dayIndex], metricProgress, globalOpacity);
+      } else {
+        // ---- PHOTO PHASE ----
+        const photoTime = timeInSlot - TIMING.METRIC_DURATION;
+        const photoProgress = photoTime / TIMING.PHOTO_DURATION; // 0→1
 
-      // Draw current day (or outgoing day during crossfade)
-      ctx.save();
-      ctx.globalAlpha = globalOpacity * (isCrossfading ? (1 - crossfadeT) : 1);
-      drawImageCover(ctx, images[currentDayIdx], scale1, 0, panY1);
-      ctx.restore();
+        // Ken Burns
+        const kbScale = lerp(1.0, 1.0 + TIMING.KEN_BURNS_SCALE, photoProgress);
+        const kbPanY = lerp(-3, 3, photoProgress);
 
-      // Draw incoming day during crossfade
-      if (isCrossfading && nextDayIdx !== currentDayIdx) {
-        const scale2 = lerp(1.0 + TIMING.KEN_BURNS_SCALE * 0.5, 1.0, crossfadeT);
+        // Fade in from metric
+        const photoFadeIn = Math.min(1, photoTime / TIMING.CROSSFADE);
+        // Fade out to next metric (or outro)
+        const timeToEnd = TIMING.PHOTO_DURATION - photoTime;
+        const photoFadeOut = Math.min(1, timeToEnd / TIMING.CROSSFADE);
+        const photoAlpha = globalOpacity * easeOutCubic(photoFadeIn) * photoFadeOut;
+
         ctx.save();
-        ctx.globalAlpha = globalOpacity * crossfadeT;
-        drawImageCover(ctx, images[nextDayIdx], scale2, 0, 0);
+        ctx.globalAlpha = photoAlpha;
+        drawImageCover(ctx, images[dayIndex], kbScale, 0, kbPanY);
+        drawPhotoOverlays(ctx, dayStates[dayIndex], easeOutCubic(Math.min(photoTime / 0.5, 1)));
         ctx.restore();
       }
 
-      // Overlays
-      ctx.save();
-      ctx.globalAlpha = globalOpacity;
-      drawOverlays(ctx);
-
-      // Text overlays (use the dominant day during crossfade)
-      const textDayIdx = crossfadeT > 0.5 ? nextDayIdx : currentDayIdx;
-      const textOpacity = isCrossfading
-        ? (crossfadeT > 0.5 ? easeInOutCubic((crossfadeT - 0.5) * 2) : easeInOutCubic(1 - crossfadeT * 2))
-        : 1;
-      const state = dayStates[textDayIdx];
-
-      drawActivityLabel(ctx, state.activityType, textOpacity);
-      drawMetrics(ctx, state.metricA, state.metricB, textOpacity);
-      drawDayIndicator(ctx, state.dayNumber, textOpacity);
-      ctx.restore();
-
       frameIndex++;
 
-      // Progress update
       if (frameIndex % 6 === 0) {
         const pct = 15 + Math.floor((frameIndex / totalFrames) * 80);
-        const currentDay = Math.min(currentDayIdx + 1, dayStates.length);
-        onProgress?.(Math.min(pct, 94), `Rendering Day ${currentDay}...`);
+        const currentDay = Math.min(dayIndex + 1, dayStates.length);
+        const phase = inMetricPhase ? 'Metric' : 'Photo';
+        onProgress?.(Math.min(pct, 94), `Day ${currentDay} — ${phase}`);
       }
 
-      // Schedule next frame at FPS interval
       setTimeout(renderLoop, 1000 / FPS);
     };
 
-    // Kick off rendering after a brief settle
     setTimeout(renderLoop, 150);
   });
 }
@@ -463,4 +569,4 @@ export function photosToDAyStates(photos: Array<{
 }
 
 export { WIDTH, HEIGHT, FPS };
-export const FRAMES = { DAY_HOLD: Math.ceil(TIMING.HOLD_DURATION * FPS) };
+export const FRAMES = { DAY_HOLD: Math.ceil(TIMING.PHOTO_DURATION * FPS) };
