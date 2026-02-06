@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronUp, Trash2, Lock, ChevronRight } from 'lucide-react';
+import { X, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX } from 'lucide-react';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
@@ -109,6 +109,10 @@ const Reel = () => {
   
   // Media loading state - timer only starts after media loads
   const [mediaLoaded, setMediaLoaded] = useState(false);
+  
+  // Audio state for video playback
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Bottom sheet states and transition animations
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -768,43 +772,8 @@ const Reel = () => {
             </div>
           </div>
 
-          {/* Row 2: Story segment indicators + current user name/info */}
+          {/* Row 2: Current user name/info */}
           <div className="shrink-0 px-4 pb-2">
-            {/* Segment indicators - subtle bars showing position in user's stories */}
-            {currentGroup && currentGroup.activities.length > 1 && (
-              <div className="flex gap-1 mb-2">
-                {currentGroup.activities.map((_, idx) => {
-                  const isCurrentSegment = idx === currentActivityIndex;
-                  const isViewed = idx < currentActivityIndex;
-                  
-                  return (
-                    <div
-                      key={idx}
-                      className="flex-1 h-[2px] rounded-full overflow-hidden"
-                      style={{
-                        background: 'rgba(255,255,255,0.15)',
-                      }}
-                    >
-                      <motion.div
-                        className="h-full rounded-full"
-                        style={{
-                          background: 'linear-gradient(90deg, rgba(254,218,117,0.9) 0%, rgba(236,72,153,0.9) 100%)',
-                        }}
-                        initial={false}
-                        animate={{
-                          width: isViewed ? '100%' : isCurrentSegment ? `${autoAdvanceProgress * 100}%` : '0%',
-                        }}
-                        transition={{
-                          duration: isCurrentSegment ? 0.1 : 0.3,
-                          ease: 'linear',
-                        }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-            
             {/* User name and info */}
             <div className="flex items-center justify-center gap-2" style={{ height: 20 }}>
               <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
@@ -908,6 +877,7 @@ const Reel = () => {
                           </div>
                         ) : isVideo ? (
                           <video
+                            ref={videoRef}
                             key={mediaUrl}
                             src={mediaUrl}
                             className="w-full h-full rounded-2xl"
@@ -919,7 +889,7 @@ const Reel = () => {
                             }}
                             autoPlay
                             loop
-                            muted
+                            muted={isMuted}
                             playsInline
                             onLoadedData={() => setMediaLoaded(true)}
                           />
@@ -949,6 +919,65 @@ const Reel = () => {
                         )}
                       </motion.div>
                     </AnimatePresence>
+                    {/* Segmented progress bar at top of card */}
+                    {currentGroup && currentGroup.activities.length > 0 && (
+                      <div className="absolute top-2 left-2 right-2 flex gap-1 z-20">
+                        {currentGroup.activities.map((_, idx) => {
+                          const isCurrentSegment = idx === currentActivityIndex;
+                          const isViewed = idx < currentActivityIndex;
+                          
+                          return (
+                            <div
+                              key={idx}
+                              className="flex-1 h-[3px] rounded-full overflow-hidden"
+                              style={{
+                                background: 'rgba(255,255,255,0.25)',
+                              }}
+                            >
+                              <motion.div
+                                className="h-full rounded-full"
+                                style={{
+                                  background: 'rgba(255,255,255,0.9)',
+                                }}
+                                initial={false}
+                                animate={{
+                                  width: isViewed ? '100%' : isCurrentSegment ? `${autoAdvanceProgress * 100}%` : '0%',
+                                }}
+                                transition={{
+                                  duration: isCurrentSegment ? 0.1 : 0.3,
+                                  ease: 'linear',
+                                }}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    
+                    {/* Audio toggle button for videos */}
+                    {isVideo && !shouldShowLocked && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsMuted(!isMuted);
+                          if (videoRef.current) {
+                            videoRef.current.muted = !isMuted;
+                          }
+                        }}
+                        className="absolute bottom-3 right-3 z-20 p-2.5 rounded-full active:scale-95 transition-transform"
+                        style={{
+                          background: 'rgba(0,0,0,0.5)',
+                          backdropFilter: 'blur(8px)',
+                        }}
+                      >
+                        {isMuted ? (
+                          <VolumeX className="w-5 h-5 text-white" />
+                        ) : (
+                          <Volume2 className="w-5 h-5 text-white" />
+                        )}
+                      </button>
+                    )}
+                    
                     {/* Lock overlay for locked content */}
                     {shouldShowLocked && (
                       <div
