@@ -10,6 +10,7 @@ import { fetchAllActivitiesGroupedByUser, fetchPublicFeed, UserStoryGroup, Local
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 import DynamicBlurBackground from '@/components/DynamicBlurBackground';
 import Floating3DEmojis from '@/components/Floating3DEmojis';
+import StoryEmojiRain from '@/components/StoryEmojiRain';
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
 import SendReactionSheet from '@/components/SendReactionSheet';
 import ProfileAvatar from '@/components/ProfileAvatar';
@@ -1028,6 +1029,15 @@ const Reel = () => {
                         reactions={activeReactionTypes}
                         newReaction={null}
                         isPaused={isPaused}
+                      />
+                    )}
+                    
+                    {/* iMessage-style emoji rain on story load */}
+                    {!shouldShowLocked && (
+                      <StoryEmojiRain
+                        triggerKey={contentKey}
+                        reactions={activeReactionTypes}
+                        active={mediaLoaded && activeReactionTypes.length > 0}
                       />
                     )}
                     
