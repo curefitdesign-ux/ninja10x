@@ -421,7 +421,23 @@ const ReelProgressPill = ({
 
         {/* Left icon based on state */}
         <AnimatePresence mode="wait">
-          {(isCreating || isRendering) ? (
+          {isActivelyGenerating ? (
+            <motion.div
+              key="ai-loader"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center"
+            >
+              <img 
+                src="/images/ai-star-loader.gif" 
+                alt="AI generating"
+                className="w-10 h-10 object-contain"
+                style={{ filter: 'drop-shadow(0 0 8px rgba(139, 92, 246, 0.5))' }}
+              />
+            </motion.div>
+          ) : (isCreating || isRendering) ? (
             <motion.div
               key="cards"
               initial={{ scale: 0.8, opacity: 0 }}
