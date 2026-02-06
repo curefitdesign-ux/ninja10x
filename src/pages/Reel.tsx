@@ -615,136 +615,145 @@ const Reel = () => {
               )}
             </div>
 
-            {/* Center - User avatars strip - ALWAYS show clear profile photos */}
-            <div className="flex-1 flex justify-center">
-              <div className="flex items-center gap-2">
-                {effectiveUserGroups.slice(0, 5).map((group, idx) => {
-                  const isActive = idx === currentUserIndex;
-                  const activityCount = group.activities.length;
-                  const currentIdx = idx === currentUserIndex ? currentActivityIndex : 0;
-                  const isOwnProfile = user && group.userId === user.id;
-                  // Stories are locked, but profile photos are ALWAYS visible
-                  const isStoryLocked = !isOwnProfile && !hasPublicActivity;
-                  const avatarSize = isActive ? 48 : 40;
-                  
-                    return (
-                    <button
-                      key={group.userId}
-                      onClick={() => {
-                        setCurrentUserIndex(idx);
-                        setCurrentActivityIndex(0);
-                      }}
-                      className="relative active:scale-95 transition-transform"
-                      style={{ transform: isActive ? 'scale(1)' : 'scale(0.9)' }}
-                    >
-                      {/* Instagram-style story ring with auto-advance progress */}
-                      <svg
-                        className="absolute inset-0"
-                        style={{
-                          width: avatarSize,
-                          height: avatarSize,
-                          transform: 'rotate(-90deg)',
+            {/* Center - User avatars strip - SCROLLABLE horizontally */}
+            <div className="flex-1 overflow-hidden mx-2">
+              <div 
+                className="flex items-center gap-2 overflow-x-auto scrollbar-hide"
+                style={{ 
+                  WebkitOverflowScrolling: 'touch',
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                }}
+              >
+                <div className="flex items-center gap-2 px-1">
+                  {effectiveUserGroups.map((group, idx) => {
+                    const isActive = idx === currentUserIndex;
+                    const activityCount = group.activities.length;
+                    const currentIdx = idx === currentUserIndex ? currentActivityIndex : 0;
+                    const isOwnProfile = user && group.userId === user.id;
+                    // Stories are locked, but profile photos are ALWAYS visible
+                    const isStoryLocked = !isOwnProfile && !hasPublicActivity;
+                    const avatarSize = isActive ? 48 : 40;
+                    
+                      return (
+                      <button
+                        key={group.userId}
+                        onClick={() => {
+                          setCurrentUserIndex(idx);
+                          setCurrentActivityIndex(0);
                         }}
-                        viewBox="0 0 100 100"
+                        className="relative active:scale-95 transition-transform flex-shrink-0"
+                        style={{ transform: isActive ? 'scale(1)' : 'scale(0.9)' }}
                       >
-                        {Array.from({ length: activityCount }).map((_, segIdx) => {
-                          const gapAngle = activityCount > 1 ? 10 : 0;
-                          const totalGap = gapAngle * activityCount;
-                          const segmentAngle = (360 - totalGap) / activityCount;
-                          const startAngle = segIdx * (segmentAngle + gapAngle);
-                          const isCurrentSegment = isActive && segIdx === currentIdx;
-                          const isSegmentViewed = segIdx < currentIdx;
-                          const isSegmentUnviewed = segIdx > currentIdx;
-                          
-                          const radius = 44;
-                          const circumference = 2 * Math.PI * radius;
-                          const segmentLength = (segmentAngle / 360) * circumference;
-                          const offset = (startAngle / 360) * circumference;
-                          
-                          // For the current segment, show progress animation
-                          const progressLength = isCurrentSegment 
-                            ? segmentLength * autoAdvanceProgress 
-                            : segmentLength;
-                          
-                          return (
-                            <g key={segIdx}>
-                              {/* Background track for current segment */}
-                              {isCurrentSegment && (
+                        {/* Instagram-style story ring with auto-advance progress */}
+                        <svg
+                          className="absolute inset-0"
+                          style={{
+                            width: avatarSize,
+                            height: avatarSize,
+                            transform: 'rotate(-90deg)',
+                          }}
+                          viewBox="0 0 100 100"
+                        >
+                          {Array.from({ length: activityCount }).map((_, segIdx) => {
+                            const gapAngle = activityCount > 1 ? 10 : 0;
+                            const totalGap = gapAngle * activityCount;
+                            const segmentAngle = (360 - totalGap) / activityCount;
+                            const startAngle = segIdx * (segmentAngle + gapAngle);
+                            const isCurrentSegment = isActive && segIdx === currentIdx;
+                            const isSegmentViewed = segIdx < currentIdx;
+                            const isSegmentUnviewed = segIdx > currentIdx;
+                            
+                            const radius = 44;
+                            const circumference = 2 * Math.PI * radius;
+                            const segmentLength = (segmentAngle / 360) * circumference;
+                            const offset = (startAngle / 360) * circumference;
+                            
+                            // For the current segment, show progress animation
+                            const progressLength = isCurrentSegment 
+                              ? segmentLength * autoAdvanceProgress 
+                              : segmentLength;
+                            
+                            return (
+                              <g key={segIdx}>
+                                {/* Background track for current segment */}
+                                {isCurrentSegment && (
+                                  <circle
+                                    cx="50"
+                                    cy="50"
+                                    r={radius}
+                                    fill="none"
+                                    strokeWidth="6"
+                                    stroke="rgba(255,255,255,0.15)"
+                                    strokeDasharray={`${segmentLength} ${circumference}`}
+                                    strokeDashoffset={-offset}
+                                    strokeLinecap="round"
+                                  />
+                                )}
+                                {/* Segment fill */}
                                 <circle
                                   cx="50"
                                   cy="50"
                                   r={radius}
                                   fill="none"
                                   strokeWidth="6"
-                                  stroke="rgba(255,255,255,0.15)"
-                                  strokeDasharray={`${segmentLength} ${circumference}`}
+                                  stroke={
+                                    isStoryLocked 
+                                      ? 'rgba(255,255,255,0.15)' 
+                                      : isSegmentUnviewed 
+                                        ? 'rgba(255,255,255,0.25)'
+                                        : 'url(#storyGradient)'
+                                  }
+                                  strokeDasharray={`${isCurrentSegment ? progressLength : segmentLength} ${circumference}`}
                                   strokeDashoffset={-offset}
                                   strokeLinecap="round"
+                                  style={{
+                                    filter: !isStoryLocked && (isSegmentViewed || isCurrentSegment) 
+                                      ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' 
+                                      : 'none',
+                                    transition: isCurrentSegment ? 'none' : 'stroke-dasharray 0.3s ease',
+                                  }}
                                 />
-                              )}
-                              {/* Segment fill */}
-                              <circle
-                                cx="50"
-                                cy="50"
-                                r={radius}
-                                fill="none"
-                                strokeWidth="6"
-                                stroke={
-                                  isStoryLocked 
-                                    ? 'rgba(255,255,255,0.15)' 
-                                    : isSegmentUnviewed 
-                                      ? 'rgba(255,255,255,0.25)'
-                                      : 'url(#storyGradient)'
-                                }
-                                strokeDasharray={`${isCurrentSegment ? progressLength : segmentLength} ${circumference}`}
-                                strokeDashoffset={-offset}
-                                strokeLinecap="round"
-                                style={{
-                                  filter: !isStoryLocked && (isSegmentViewed || isCurrentSegment) 
-                                    ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' 
-                                    : 'none',
-                                  transition: isCurrentSegment ? 'none' : 'stroke-dasharray 0.3s ease',
-                                }}
-                              />
-                            </g>
-                          );
-                        })}
-                        <defs>
-                          <linearGradient id="storyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#FEDA75" />
-                            <stop offset="25%" stopColor="#FA7E1E" />
-                            <stop offset="50%" stopColor="#D62976" />
-                            <stop offset="75%" stopColor="#962FBF" />
-                            <stop offset="100%" stopColor="#4F5BD5" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
-                      
-                      {/* Avatar - ALWAYS visible and clear (never locked/blurred) */}
-                      <div
-                        className="relative"
-                        style={{
-                          width: avatarSize,
-                          height: avatarSize,
-                          padding: 4,
-                        }}
-                      >
-                        <div className="w-full h-full rounded-full overflow-hidden">
-                          <ProfileAvatar
-                            src={group.avatarUrl}
-                            name={group.displayName}
-                            size={avatarSize - 8}
-                            style={{
-                              opacity: isActive ? 1 : 0.7,
-                              transition: 'all 0.2s ease',
-                              // Profile photos are NEVER blurred - only stories are locked
-                            }}
-                          />
+                              </g>
+                            );
+                          })}
+                          <defs>
+                            <linearGradient id="storyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#FEDA75" />
+                              <stop offset="25%" stopColor="#FA7E1E" />
+                              <stop offset="50%" stopColor="#D62976" />
+                              <stop offset="75%" stopColor="#962FBF" />
+                              <stop offset="100%" stopColor="#4F5BD5" />
+                            </linearGradient>
+                          </defs>
+                        </svg>
+                        
+                        {/* Avatar - ALWAYS visible and clear (never locked/blurred) */}
+                        <div
+                          className="relative"
+                          style={{
+                            width: avatarSize,
+                            height: avatarSize,
+                            padding: 4,
+                          }}
+                        >
+                          <div className="w-full h-full rounded-full overflow-hidden">
+                            <ProfileAvatar
+                              src={group.avatarUrl}
+                              name={group.displayName}
+                              size={avatarSize - 8}
+                              style={{
+                                opacity: isActive ? 1 : 0.7,
+                                transition: 'all 0.2s ease',
+                                // Profile photos are NEVER blurred - only stories are locked
+                              }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  );
-                })}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
             
@@ -759,15 +768,53 @@ const Reel = () => {
             </div>
           </div>
 
-          {/* Row 2: Current user name/info */}
-          <div className="flex items-center justify-center gap-2 shrink-0 px-4 pb-2" style={{ height: 28 }}>
-            <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
-            <span className="text-white/40">•</span>
-            {isWeekRecapStory ? (
-              <span className="text-white/60 text-xs">Week {weekRecapNumber || 1} Recap</span>
-            ) : (
-              <span className="text-white/60 text-xs">Week {week} • Day {dayInWeek}</span>
+          {/* Row 2: Story segment indicators + current user name/info */}
+          <div className="shrink-0 px-4 pb-2">
+            {/* Segment indicators - subtle bars showing position in user's stories */}
+            {currentGroup && currentGroup.activities.length > 1 && (
+              <div className="flex gap-1 mb-2">
+                {currentGroup.activities.map((_, idx) => {
+                  const isCurrentSegment = idx === currentActivityIndex;
+                  const isViewed = idx < currentActivityIndex;
+                  
+                  return (
+                    <div
+                      key={idx}
+                      className="flex-1 h-[2px] rounded-full overflow-hidden"
+                      style={{
+                        background: 'rgba(255,255,255,0.15)',
+                      }}
+                    >
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{
+                          background: 'linear-gradient(90deg, rgba(254,218,117,0.9) 0%, rgba(236,72,153,0.9) 100%)',
+                        }}
+                        initial={false}
+                        animate={{
+                          width: isViewed ? '100%' : isCurrentSegment ? `${autoAdvanceProgress * 100}%` : '0%',
+                        }}
+                        transition={{
+                          duration: isCurrentSegment ? 0.1 : 0.3,
+                          ease: 'linear',
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             )}
+            
+            {/* User name and info */}
+            <div className="flex items-center justify-center gap-2" style={{ height: 20 }}>
+              <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
+              <span className="text-white/40">•</span>
+              {isWeekRecapStory ? (
+                <span className="text-white/60 text-xs">Week {weekRecapNumber || 1} Recap</span>
+              ) : (
+                <span className="text-white/60 text-xs">Week {week} • Day {dayInWeek}</span>
+              )}
+            </div>
           </div>
         </div>
 
