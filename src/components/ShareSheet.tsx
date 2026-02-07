@@ -11,8 +11,6 @@ import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
 import ReelProgressPill from '@/components/ReelProgressPill';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
-import { useFitnessReel } from '@/hooks/use-fitness-reel';
-// Removed unused weekRecapVideo import - now using generated videos only
 
 type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
 
@@ -133,14 +131,8 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
   const [isExiting, setIsExiting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
-  // Get activities and reel hooks
+  // Get activities for week pill
   const { activities } = useJourneyActivities();
-  const { 
-    generateReel, 
-    isGenerating: isGeneratingReel, 
-    currentStep: reelStep,
-    currentReel,
-  } = useFitnessReel();
 
   // Week-specific configuration
   const weekConfig: Record<number, { week: number; title: string; startDay: number; endDay: number }> = {
@@ -153,48 +145,6 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
   // Check if current day is a week-end day (3, 6, 9, 12)
   const isWeekEnd = dayNumber ? [3, 6, 9, 12].includes(dayNumber) : false;
   const currentWeekConfig = dayNumber ? weekConfig[dayNumber] : null;
-
-  // Auto-trigger reel generation at week ends
-  const [reelTriggered, setReelTriggered] = useState(false);
-  
-  useEffect(() => {
-    // Trigger reel generation on week-end uploads (3, 6, 9, 12)
-    if (isWeekEnd && currentWeekConfig && !reelTriggered && !isGeneratingReel && !currentReel) {
-      const weekActivities = activities.filter(
-        a => a.dayNumber >= currentWeekConfig.startDay && a.dayNumber <= currentWeekConfig.endDay
-      );
-      
-      if (weekActivities.length >= 3) {
-        setReelTriggered(true);
-        
-        // Prepare photo data for reel generation
-        const photoData = weekActivities.map(a => ({
-          id: a.id,
-          imageUrl: a.storageUrl,
-          activity: a.activity || 'Activity',
-          duration: a.duration || '',
-          pr: a.pr || '',
-          uploadDate: new Date().toISOString(),
-          dayNumber: a.dayNumber,
-        }));
-        
-        generateReel(photoData);
-      }
-    }
-  }, [dayNumber, activities, reelTriggered, isGeneratingReel, currentReel, generateReel, isWeekEnd, currentWeekConfig]);
-
-  // Calculate reel progress
-  const reelProgress = (() => {
-    if (!isGeneratingReel) {
-      return currentReel?.videoUrl ? 100 : 0;
-    }
-    switch (reelStep) {
-      case 'narration': return 30;
-      case 'video': return 70;
-      case 'complete': return 100;
-      default: return 0;
-    }
-  })();
 
   // Prepare photos for widget display - show current week's photos only
   const reelPhotos = currentWeekConfig 
@@ -662,7 +612,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
                 </motion.div>
               
                {/* Reel Progress Pill - Show only at week ends (day 3, 6, 9, 12) */}
-               {isWeekEnd && currentWeekConfig && (reelPhotos.length >= 3 || isGeneratingReel) && (
+               {isWeekEnd && currentWeekConfig && reelPhotos.length >= 3 && (
                  <motion.div
                    className="w-full mb-4 px-4"
                    initial={{ opacity: 0, y: 20 }}
@@ -671,24 +621,27 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
                  >
                    <ReelProgressPill
                       weekNumber={currentWeekConfig.week}
-                      state={
-                        currentReel?.videoUrl 
-                          ? 'complete' 
-                          : 'creating'
-                      }
-                      progress={reelProgress}
-                      isActivelyGenerating={isGeneratingReel}
+                      state={'creating'}
+                      progress={0}
+                      isActivelyGenerating={false}
                        onPlay={() => {
                          triggerHaptic('medium');
-                         // Only navigate if we have a real generated video
-                         if (currentReel?.videoUrl) {
-                           navigate('/reel', {
-                             state: {
-                               weekRecapVideo: currentReel.videoUrl,
-                               weekNumber: currentWeekConfig?.week,
-                             },
-                           });
-                         }
+                         const weekActivities = activities.filter(
+                           a => a.dayNumber >= currentWeekConfig!.startDay && a.dayNumber <= currentWeekConfig!.endDay
+                         );
+                         const weekPhotos = weekActivities.map(a => ({
+                           id: a.id,
+                           imageUrl: a.originalUrl || a.storageUrl,
+                           activity: a.activity || 'Workout',
+                           duration: a.duration,
+                           pr: a.pr,
+                           uploadDate: new Date().toISOString().split('T')[0],
+                           dayNumber: a.dayNumber,
+                           isVideo: a.isVideo,
+                         }));
+                         navigate('/reel-generation', {
+                           state: { weekPhotos, weekNumber: currentWeekConfig!.week },
+                         });
                        }}
                    />
                  </motion.div>

@@ -7,7 +7,7 @@ import CircularProgressRing from "@/components/CircularProgressRing";
 import GradientMeshBackground from "@/components/GradientMeshBackground";
 import PullToRefresh from "@/components/PullToRefresh";
 import PhotoLoggingWidget, { LoggedPhoto } from "@/components/PhotoLoggingWidget";
-import AIReelViewer from "@/components/AIReelViewer";
+
 import CuroSpeechBubble from "@/components/CuroSpeechBubble";
 import ProfileMenu from "@/components/ProfileMenu";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
@@ -98,12 +98,8 @@ const Activity = () => {
   
   // Success animation states
   const [celebrateSuccess, setCelebrateSuccess] = useState(false);
-  
-  // Reel viewer state
-  const [showReelViewer, setShowReelViewer] = useState(false);
-  const [reelPhotos, setReelPhotos] = useState<LoggedPhoto[]>([]);
-  
-  
+
+
   // Transition states
   const [transitionFromProgress, setTransitionFromProgress] = useState(false);
   const [transitionFromShare, setTransitionFromShare] = useState(false);
@@ -226,12 +222,24 @@ const Activity = () => {
 
   const handlePlayReel = useCallback((weekPhotos: LoggedPhoto[]) => {
     if (weekPhotos.length >= 3) {
-      setReelPhotos(weekPhotos);
-      setShowReelViewer(true);
+      const mappedPhotos = weekPhotos.map(p => ({
+        id: p.id,
+        imageUrl: p.originalUrl || p.storageUrl,
+        activity: p.activity || 'Workout',
+        duration: p.duration,
+        pr: p.pr,
+        uploadDate: new Date().toISOString().split('T')[0],
+        dayNumber: p.dayNumber,
+        isVideo: p.isVideo,
+      }));
+      const weekNumber = Math.ceil(Math.max(...weekPhotos.map(p => p.dayNumber)) / 3);
+      navigate('/reel-generation', {
+        state: { weekPhotos: mappedPhotos, weekNumber },
+      });
     } else {
       toast.info('Complete 3 days to create an AI reel!');
     }
-  }, []);
+  }, [navigate]);
 
   const handleMascotTap = useCallback(() => {
     // If we have any photos, navigate to /reel - otherwise navigate to progress
@@ -593,20 +601,6 @@ const Activity = () => {
       </PullToRefresh>
       {/* Bottom Navigation is now rendered globally in App.tsx */}
       
-      {/* AI Reel Viewer */}
-      <AIReelViewer
-        isOpen={showReelViewer}
-        onClose={() => setShowReelViewer(false)}
-        photos={reelPhotos.map(p => ({
-          id: p.id,
-          storageUrl: p.storageUrl,
-          originalUrl: p.originalUrl,
-          activity: p.activity,
-          dayNumber: p.dayNumber,
-          duration: p.duration,
-          pr: p.pr,
-        }))}
-      />
       
       {/* MediaSourceSheet for upload */}
       <MediaSourceSheet
