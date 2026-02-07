@@ -6,9 +6,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { isVideoUrl } from "@/lib/media";
 import ReelProgressPill from "./ReelProgressPill";
-import { useFitnessReel } from "@/hooks/use-fitness-reel";
 import FloatingCardReactions from "./FloatingCardReactions";
-// Removed unused weekRecapVideo import - now using generated videos only
 
 // Activity icons
 import footballIcon from '@/assets/activities/football.png';
@@ -605,26 +603,6 @@ const PhotoLoggingWidget = ({
   const [pendingUpload, setPendingUpload] = useState<{ weekIndex: number; dayIndex: number } | null>(null);
   const [showUploadOptions, setShowUploadOptions] = useState(false);
   
-  // Reel generation state
-  const { 
-    currentReel,
-    currentStep: reelStep,
-    isGenerating: isGeneratingReel,
-  } = useFitnessReel();
-  
-  // Calculate reel progress based on step
-  const reelProgress = (() => {
-    if (!isGeneratingReel) {
-      return currentReel?.videoUrl ? 100 : 0;
-    }
-    switch (reelStep) {
-      case 'narration': return 30;
-      case 'video': return 70;
-      case 'complete': return 100;
-      default: return 0;
-    }
-  })();
-  
   // Calculate completed weeks and current active week for pill display
   const getCompletedWeekCount = () => {
     let count = 0;
@@ -773,26 +751,9 @@ const PhotoLoggingWidget = ({
     setPendingUpload(null);
   };
 
-  // Handle playing week recap - only navigate if video is ready, otherwise navigate to generation page
+  // Handle playing week recap - always navigate to generation page
   const handlePlayWeekRecap = (weekPhotos: LoggedPhoto[], weekIndex: number) => {
-    // Check if a valid video URL exists (must be a real URL, not empty/undefined)
-    const hasValidVideo = currentReel?.videoUrl && (
-      currentReel.videoUrl.startsWith('blob:') || 
-      (currentReel.videoUrl.startsWith('http') && !currentReel.videoUrl.includes('/assets/'))
-    );
-    
-    if (hasValidVideo) {
-      // Video ready - navigate to reel viewer
-      navigate('/reel', {
-        state: {
-          weekRecapVideo: currentReel.videoUrl,
-          weekNumber: weekIndex + 1,
-        },
-      });
-    } else {
-      // No video ready - navigate to reel generation page
-      // Map LoggedPhoto to the PhotoData format expected by useFitnessReel
-      const mappedPhotos = weekPhotos.map(p => ({
+    const mappedPhotos = weekPhotos.map(p => ({
         id: p.id,
         imageUrl: p.originalUrl || p.storageUrl,
         activity: p.activity || 'Workout',
@@ -807,8 +768,7 @@ const PhotoLoggingWidget = ({
           weekPhotos: mappedPhotos,
           weekNumber: weekIndex + 1,
         },
-      });
-    }
+    });
   };
   
   // 4 clusters representing 4 weeks (fixed order, no shuffling)
@@ -909,15 +869,10 @@ const PhotoLoggingWidget = ({
           <div className="w-full flex justify-center -mt-1 px-6">
             <ReelProgressPill
               weekNumber={completedWeeks}
-              state={
-                currentReel?.videoUrl 
-                  ? 'complete' 
-                  : 'creating'
-              }
-              progress={reelProgress}
-              isActivelyGenerating={isGeneratingReel}
+              state={'creating'}
+              progress={0}
+              isActivelyGenerating={false}
               onPlay={() => {
-                // Navigate to reel page with the completed week photos
                 const weekIndex = completedWeeks - 1;
                 const startDay = weekIndex * 3 + 1;
                 const weekPhotos = photos.filter(p => 

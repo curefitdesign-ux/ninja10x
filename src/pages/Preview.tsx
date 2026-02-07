@@ -18,7 +18,7 @@ import ActivityBackgroundEffect from '@/components/ActivityBackgroundEffect';
 import SyncHealthPopup from '@/components/SyncHealthPopup';
 import ActivityLoggedCelebration from '@/components/ActivityLoggedCelebration';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
-import { useFitnessReel } from '@/hooks/use-fitness-reel';
+
 import { toast } from 'sonner';
 
 const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
@@ -163,42 +163,6 @@ const Preview = () => {
   // Get delete and upsert functions from hook
   const { deleteActivity, upsertActivity, refresh, activities } = useJourneyActivities();
 
-  // Reel generation hook
-  const { 
-    generateReel, 
-    isGenerating: isGeneratingReel, 
-    currentStep: reelStep,
-    currentReel,
-    reelHistory,
-  } = useFitnessReel();
-
-  // Track reel generation progress
-  const [reelProgress, setReelProgress] = useState(0);
-
-  // Calculate progress based on reel step
-  useEffect(() => {
-    if (!isGeneratingReel) {
-      if (currentReel?.videoUrl) {
-        setReelProgress(100);
-      }
-      return;
-    }
-    
-    switch (reelStep) {
-      case 'narration':
-        setReelProgress(30);
-        break;
-      case 'video':
-      case 'video':
-        setReelProgress(75);
-        break;
-      case 'complete':
-        setReelProgress(100);
-        break;
-      default:
-        setReelProgress(0);
-    }
-  }, [reelStep, isGeneratingReel, currentReel]);
 
   const frameItemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scrollRaf = useRef<number | null>(null);

@@ -13,7 +13,7 @@ import Preview from "./pages/Preview";
 import Activity from "./pages/Activity";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import BrutalistGenerator from "./pages/BrutalistGenerator";
+
 import Progress from "./pages/Progress";
 import Camera from "./pages/Camera";
 import Gallery from "./pages/Gallery";
@@ -106,7 +106,7 @@ const AnimatedRoutes = () => {
         
         <Route path="/reel" element={<ProtectedRoute><Reel /></ProtectedRoute>} />
         <Route path="/reel-generation" element={<ProtectedRoute><ReelGeneration /></ProtectedRoute>} />
-        <Route path="/brutalist" element={<BrutalistGenerator />} />
+        
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
