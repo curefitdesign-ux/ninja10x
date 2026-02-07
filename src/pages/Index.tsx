@@ -1,22 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { ChevronDown, Film } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import AuroraBackground from '@/components/AuroraBackground';
 import PhotoUploadCard from '@/components/PhotoUploadCard';
 import WidgetLayout2 from '@/components/WidgetLayout2';
 import WidgetLayout3 from '@/components/WidgetLayout3';
-import ReelGenerationOverlay from '@/components/ReelGenerationOverlay';
-import ReelPreviewScreen from '@/components/ReelPreviewScreen';
-import ReelHistoryGallery from '@/components/ReelHistoryGallery';
 import PullToRefresh from '@/components/PullToRefresh';
-import { useFitnessReel } from '@/hooks/use-fitness-reel';
 import { uploadToStorage } from '@/services/storage-service';
 import SharedImageTransition from '@/components/SharedImageTransition';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 import type { PillState } from '@/components/ReelProgressPill';
-// Removed unused weekRecapVideo import - now using generated videos only
 
 import CameraUI from '@/components/CameraUI';
 import {
@@ -43,6 +38,7 @@ import { ReactionType, ActivityReaction } from '@/services/journey-service';
 export interface Photo {
   id: string;
   storageUrl: string; // Public URL from Supabase Storage (required for persistence)
+  originalUrl?: string; // Raw source URL
   isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
@@ -79,6 +75,7 @@ const Index = () => {
   const photos: Photo[] = activities.map(a => ({
     id: a.id,
     storageUrl: a.storageUrl,
+    originalUrl: a.originalUrl,
     isVideo: a.isVideo,
     activity: a.activity,
     frame: a.frame as Photo['frame'],
@@ -95,10 +92,7 @@ const Index = () => {
   useEffect(() => {
     if (location.state?.fromShare && location.state?.transitionToWidget) {
       setShareTransitionImage(location.state.transitionImage || null);
-
-      // Clear navigation state without leaving the page
       navigate('/create', { replace: true, state: null });
-
       const t = setTimeout(() => setShareTransitionImage(null), 900);
       return () => clearTimeout(t);
     }
@@ -113,34 +107,14 @@ const Index = () => {
   const [simulatedDate, setSimulatedDate] = useState<string | null>(null);
   const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout3');
   const [initialCaptureMode, setInitialCaptureMode] = useState<'photo' | 'video'>('photo');
-  const [showReelHistoryGallery, setShowReelHistoryGallery] = useState(false);
   const [pendingMedia, setPendingMedia] = useState<{ url: string; isVideo: boolean } | null>(null);
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
-  
-  // Fitness reel generation
-  const { 
-    generateReel, 
-    isGenerating, 
-    currentStep,
-    generationProgress,
-    reelHistory, 
-    currentReel,
-    currentReelIndex, 
-    setCurrentReelIndex,
-    clearHistory 
-  } = useFitnessReel();
-  const [showReelPreview, setShowReelPreview] = useState(false);
-  const [lastGeneratedPhotos, setLastGeneratedPhotos] = useState<typeof photos>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [weekTransitionAnimation, setWeekTransitionAnimation] = useState(false);
   const [previousPhotoCount, setPreviousPhotoCount] = useState(photos.length);
   
-  // Removed auto-navigation after generation - user must explicitly share/upload recap first
-  // The generation overlay will show until complete, then user can tap "PLAY NOW" to preview locally
-  
-  // Generate reel from latest 3 photos - passes all activity data & metrics
-  const handleGenerateReel = useCallback((photosToProcess: typeof photos) => {
-    // Use latest 3 photos
+  // Navigate to /reel-generation with properly mapped photo data
+  const handleGenerateReel = useCallback((photosToProcess: Photo[]) => {
     const latest3 = photosToProcess.slice(-3);
     
     // Check if all photos have storage URLs
@@ -150,75 +124,35 @@ const Index = () => {
       return;
     }
 
-    setLastGeneratedPhotos(latest3);
-    // Transform photos to the format expected by the API - include all metrics
-    const photoData = latest3.map((photo) => ({
+    if (latest3.length < 3) {
+      toast.error('Need at least 3 photos to generate a reel');
+      return;
+    }
+
+    // Map to the format expected by ReelGeneration page
+    const weekPhotos = latest3.map(photo => ({
       id: photo.id,
-      imageUrl: photo.storageUrl,
-      activity: photo.activity || 'Activity',
+      imageUrl: photo.originalUrl || photo.storageUrl,
+      activity: photo.activity || 'Workout',
       duration: photo.duration,
-      // Parse distance from duration if activity is Running/Cycling/Trekking
-      distance: ['Running', 'Cycling', 'Trekking'].includes(photo.activity || '') && photo.duration
-        ? photo.duration // Duration field contains distance for these activities
-        : undefined,
       pr: photo.pr,
       uploadDate: new Date().toISOString().split('T')[0],
       dayNumber: photo.dayNumber,
       isVideo: photo.isVideo,
     }));
-    
-    generateReel(photoData);
-  }, [generateReel]);
 
-  const handleCloseReelPreview = useCallback(() => {
-    setShowReelPreview(false);
-  }, []);
+    const weekNumber = Math.ceil(Math.max(...latest3.map(p => p.dayNumber)) / 3);
 
-  const handleRecreateReel = useCallback(() => {
-    if (lastGeneratedPhotos.length >= 3) {
-      handleGenerateReel(lastGeneratedPhotos);
-    }
-  }, [lastGeneratedPhotos, handleGenerateReel]);
+    console.log('[Index] Navigating to reel-generation with', weekPhotos.length, 'photos');
+    navigate('/reel-generation', {
+      state: {
+        weekPhotos,
+        weekNumber,
+      },
+    });
+  }, [navigate]);
 
-  const handleSelectReelFromGallery = useCallback((index: number) => {
-    setCurrentReelIndex(index);
-    setShowReelHistoryGallery(false);
-    setShowReelPreview(true);
-  }, [setCurrentReelIndex]);
-
-  // Photos are now loaded from backend - no localStorage persistence needed
-
-  // Detect week completion and trigger animation
-  useEffect(() => {
-    const previousWeek = Math.ceil(previousPhotoCount / 3);
-    const newWeek = Math.ceil(photos.length / 3);
-    
-    // If we just completed a week (photo count crossed a multiple of 3)
-    if (photos.length > previousPhotoCount && photos.length % 3 === 0 && photos.length > 0) {
-      setWeekTransitionAnimation(true);
-      setTimeout(() => setWeekTransitionAnimation(false), 2000);
-    }
-    
-    setPreviousPhotoCount(photos.length);
-  }, [photos.length, previousPhotoCount]);
-
-  // Get current date (or simulated date for testing)
-  const getCurrentDate = () => {
-    if (simulatedDate) return simulatedDate;
-    return new Date().toISOString().split('T')[0];
-  };
-
-  // Get next available day number (1-12)
-  const getNextDayNumber = () => {
-    if (photos.length >= MAX_DAYS) return MAX_DAYS;
-    return photos.length + 1;
-  };
-
-  // Calculate week and day based on photos
-  const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
-  const currentDay = (photos.length % 3) + 1;
-
-  // Weekly Reel Progress Pill (3 states)
+  // Reel pill for WidgetLayout3
   const reelPill = (() => {
     const completedWeeks = Math.floor(photos.length / 3);
     if (completedWeeks <= 0) return null;
@@ -232,53 +166,22 @@ const Index = () => {
       return sum + photoTotal;
     }, 0);
 
-    const hasVideo = !!currentReel?.videoUrl;
-    
-    // State logic: 
-    // - 'creating' = actively generating OR ready to generate (shows "Generate" or "Creating...")
-    // - 'complete' = video ready (shows "PLAY NOW")
-    const state: PillState = isGenerating 
-      ? 'creating' 
-      : hasVideo 
-        ? 'complete' 
-        : 'creating'; // Ready to generate
+    const state: PillState = 'creating'; // Always "Generate" — generation happens on dedicated page
 
-    const progress = (() => {
-      if (state === 'complete' || currentStep === 'complete') return 100;
-      if (!isGenerating) return 0; // Ready to generate
-      return generationProgress; // Use actual progress from generator
-    })();
-
-    // onPlay handler - generate reel (stay on page, overlay shows progress)
     const handlePlay = () => {
-      console.log('[ReelPill] onPlay tapped:', { hasVideo, isGenerating, currentStep });
-      
-      if (hasVideo && currentReel?.videoUrl) {
-        // Video ready - navigate to reel viewer
-        navigate('/reel', {
-          state: {
-            weekRecapVideo: currentReel.videoUrl,
-            weekNumber: completedWeeks,
-          },
-        });
-      } else if (!isGenerating) {
-        // Start generation - overlay will show progress
-        console.log('[ReelPill] Starting generation with', photos.length, 'photos');
-        handleGenerateReel(photos);
-      }
+      console.log('[ReelPill] onPlay tapped — navigating to reel-generation');
+      handleGenerateReel(photos);
     };
 
     return {
       weekNumber: completedWeeks,
       state,
-      progress,
+      progress: 0,
       totalReactions,
       onPlay: handlePlay,
-      isActivelyGenerating: isGenerating,
+      isActivelyGenerating: false,
     };
   })();
-
-  // Save is now handled directly in Preview.tsx via upsertActivity - just navigate home
 
   // Handle retake from preview
   const [instantCamera, setInstantCamera] = useState(() => {
@@ -306,13 +209,35 @@ const Index = () => {
     }
   }, [location.state?.openCameraWithActivity, location.state?.captureMode, location.state?.instantCamera, navigate]);
 
+  // Detect week completion and trigger animation
+  useEffect(() => {
+    if (photos.length > previousPhotoCount && photos.length % 3 === 0 && photos.length > 0) {
+      setWeekTransitionAnimation(true);
+      setTimeout(() => setWeekTransitionAnimation(false), 2000);
+    }
+    setPreviousPhotoCount(photos.length);
+  }, [photos.length, previousPhotoCount]);
+
+  // Get current date (or simulated date for testing)
+  const getCurrentDate = () => {
+    if (simulatedDate) return simulatedDate;
+    return new Date().toISOString().split('T')[0];
+  };
+
+  const getNextDayNumber = () => {
+    if (photos.length >= MAX_DAYS) return MAX_DAYS;
+    return photos.length + 1;
+  };
+
+  const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
+  const currentDay = (photos.length % 3) + 1;
+
   const handleCardClick = () => {
     setShowActivitySheet(true);
   };
 
   const handleAddPhoto = () => {
     setEditingPhotoId(null);
-    // Open dedicated Gallery page (no overlay)
     navigate('/gallery', {
       state: { dayNumber: getNextDayNumber() },
     });
@@ -344,7 +269,6 @@ const Index = () => {
       setAcknowledgedActivity(null);
       
       if (pendingMedia) {
-        // For new uploads, calculate next day; for edits, use existing photo's day
         const editingPhoto = editingPhotoId ? photos.find(p => p.id === editingPhotoId) : null;
         const targetDayNumber = editingPhoto ? editingPhoto.dayNumber : getNextDayNumber();
         
@@ -396,18 +320,13 @@ const Index = () => {
   };
 
   const clearAllPhotos = () => {
-    // Clear photos is now a no-op since photos come from backend
-    // User should use the delete functionality instead
     toast.info('Use the delete function to remove individual photos');
   };
 
   const handleRemovePhoto = (photoId: string) => {
-    // This would need to call deleteActivity from the hook
-    // For now, navigate to preview for editing
     toast.info('Navigate to photo to delete');
   };
 
-  // Handle edit photo - opens preview to re-edit same day
   const handleEditPhoto = (photo: Photo) => {
     setEditingPhotoId(photo.id);
     navigate('/preview', {
@@ -430,7 +349,6 @@ const Index = () => {
     await refreshActivities();
   }, [refreshActivities]);
 
-  // Calculate hours left until midnight
   const getHoursUntilMidnight = () => {
     const now = new Date();
     const midnight = new Date();
@@ -439,7 +357,7 @@ const Index = () => {
     return Math.ceil(diff / (1000 * 60 * 60));
   };
 
-  const hasUploadedToday = () => false; // Not used in new logic
+  const hasUploadedToday = () => false;
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
@@ -495,18 +413,6 @@ const Index = () => {
               </DropdownMenu>
 
               <div className="flex flex-col gap-2 items-end">
-                {reelHistory.length > 0 && (
-                  <button
-                    onClick={() => setShowReelHistoryGallery(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-white/15 backdrop-blur-sm rounded-full text-white/80 hover:bg-white/25 transition-colors"
-                    style={{
-                      border: '1px solid rgba(255,255,255,0.2)',
-                    }}
-                  >
-                    <Film className="w-3 h-3" />
-                    Reels ({reelHistory.length})
-                  </button>
-                )}
                 <button
                   onClick={simulateNextDay}
                   className="px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors"
@@ -563,7 +469,7 @@ const Index = () => {
                   onGenerateReel={handleGenerateReel}
                   onRemovePhoto={handleRemovePhoto}
                   onEditPhoto={handleEditPhoto}
-                  isGenerating={isGenerating}
+                  isGenerating={false}
                   isUploading={isUploading}
                   weekTransitionAnimation={weekTransitionAnimation}
                   reelPill={reelPill}
@@ -578,125 +484,51 @@ const Index = () => {
 
       {/* Activity Selection Bottom Sheet */}
       {showActivitySheet && (
-        <>
-          <div 
-            className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-500 ${
-              sheetPhase === 'exit' ? 'opacity-0' : 'opacity-100'
-            }`}
-            onClick={sheetPhase === 'select' ? handleOverlayClick : undefined}
-          />
-          <div 
-            className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
-              sheetPhase === 'exit' 
-                ? 'translate-y-full opacity-0' 
-                : 'animate-slide-up'
-            }`} 
-            style={{ 
-              height: sheetPhase === 'acknowledge' ? '50vh' : '90vh',
-              transition: 'height 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s ease-out, opacity 0.5s ease-out',
-            }}
-          >
-            <div className="bg-black rounded-t-3xl border-t border-white/10 h-full overflow-hidden">
-              <div 
-                className={`absolute inset-0 p-6 pb-10 transition-all duration-500 ${
-                  sheetPhase === 'select' 
-                    ? 'opacity-100 translate-y-0' 
-                    : 'opacity-0 -translate-y-8 pointer-events-none'
-                }`}
-              >
-                <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
-                <h3 className="text-xl font-bold italic text-foreground text-center mb-8">Choose your activity</h3>
-                <div className="grid grid-cols-3 gap-4 px-2">
-                  {ACTIVITY_OPTIONS.map((activityOption) => (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleOverlayClick} />
+          
+          <AnimatePresence mode="wait">
+            {sheetPhase === 'select' && (
+              <div className="relative bg-[#1a1a1f] rounded-t-3xl p-6 pb-10 animate-slide-up">
+                <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-6" />
+                <h3 className="text-white font-semibold text-lg mb-4">What did you do?</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  {ACTIVITY_OPTIONS.map((activity) => (
                     <button
-                      key={activityOption.name}
-                      onClick={() => handleActivitySelect(activityOption.name)}
-                      className="flex flex-col items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors"
+                      key={activity.name}
+                      onClick={() => handleActivitySelect(activity.name)}
+                      className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${
+                        selectedActivity === activity.name
+                          ? 'bg-white/20 scale-95'
+                          : 'bg-white/5 hover:bg-white/10'
+                      }`}
                     >
-                      <div className="w-20 h-20 rounded-full overflow-hidden">
-                        <img 
-                          src={activityOption.icon} 
-                          alt={activityOption.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <span className="text-sm font-semibold text-foreground">{activityOption.name}</span>
+                      <img src={activity.icon} alt={activity.name} className="w-10 h-10 object-contain" />
+                      <span className="text-white/80 text-xs">{activity.name}</span>
                     </button>
                   ))}
                 </div>
               </div>
-              
-              <div 
-                className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 ${
-                  sheetPhase === 'acknowledge' 
-                    ? 'opacity-100 scale-100' 
-                    : sheetPhase === 'exit'
-                    ? 'opacity-0 scale-110'
-                    : 'opacity-0 scale-90 pointer-events-none'
-                }`}
-              >
-                {acknowledgedActivity && (
-                  <div className="flex flex-col items-center">
-                    <div className="relative animate-acknowledge-icon">
-                      <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white/20 shadow-2xl">
-                        <img 
-                          src={acknowledgedActivity.icon} 
-                          alt={acknowledgedActivity.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      
-                      <div 
-                        className="absolute bottom-0 right-0 w-11 h-11 rounded-full flex items-center justify-center animate-check-pop shadow-lg"
-                        style={{
-                          background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
-                          boxShadow: '0 4px 20px rgba(74, 222, 128, 0.5)',
-                          transform: 'translate(4px, 4px)',
-                        }}
-                      >
-                        <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-8 text-center animate-acknowledge-text">
-                      <p className="text-white text-2xl font-bold tracking-tight">
-                        {acknowledgedActivity.name} activity logged
-                      </p>
-                      <p className="text-white/70 text-base mt-3">
-                        Capture your moment
-                      </p>
-                      <div className="flex items-center justify-center gap-2 mt-2 text-white/50 text-sm">
-                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                        <span>Camera opening...</span>
-                      </div>
-                    </div>
-                    
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" style={{ marginTop: '-24px' }}>
-                      <div 
-                        className="w-48 h-48 rounded-full border-2 border-green-400/30 animate-ripple-out"
-                        style={{ animationDelay: '0.3s' }}
-                      />
-                    </div>
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" style={{ marginTop: '-24px' }}>
-                      <div 
-                        className="w-48 h-48 rounded-full border-2 border-green-400/20 animate-ripple-out"
-                        style={{ animationDelay: '0.6s' }}
-                      />
-                    </div>
-                  </div>
-                )}
+            )}
+            
+            {sheetPhase === 'acknowledge' && acknowledgedActivity && (
+              <div className="relative bg-[#1a1a1f] rounded-t-3xl p-8 pb-12 flex flex-col items-center animate-slide-up">
+                <img 
+                  src={acknowledgedActivity.icon} 
+                  alt={acknowledgedActivity.name} 
+                  className="w-16 h-16 object-contain mb-4 animate-bounce-in"
+                />
+                <h3 className="text-white font-bold text-xl">{acknowledgedActivity.name}</h3>
+                <p className="text-white/40 text-sm mt-1">Let's capture your moment!</p>
               </div>
-            </div>
-          </div>
-        </>
+            )}
+          </AnimatePresence>
+        </div>
       )}
 
-      {/* Gallery selection uses /gallery route (no overlay) */}
-
+      {/* Camera */}
       {showCamera && (
-        <div className={`transition-all duration-500 ease-out ${
+        <div className={`fixed inset-0 z-50 bg-black ${
           cameraEntering && !instantCamera ? 'animate-camera-enter' : ''
         }`}>
           <CameraUI
@@ -715,30 +547,6 @@ const Index = () => {
           />
         </div>
       )}
-
-      {/* Reel Generation Overlay - shows on play button tap */}
-      <ReelGenerationOverlay 
-        isVisible={isGenerating} 
-        currentStep={currentStep}
-        progress={generationProgress}
-      />
-
-      <ReelPreviewScreen
-        isVisible={showReelPreview}
-        reelHistory={reelHistory}
-        currentIndex={currentReelIndex}
-        onIndexChange={setCurrentReelIndex}
-        onClose={handleCloseReelPreview}
-        onRecreate={handleRecreateReel}
-      />
-
-      <ReelHistoryGallery
-        isOpen={showReelHistoryGallery}
-        reelHistory={reelHistory}
-        onClose={() => setShowReelHistoryGallery(false)}
-        onSelectReel={handleSelectReelFromGallery}
-        onClearHistory={clearHistory}
-      />
     </div>
   );
 };
