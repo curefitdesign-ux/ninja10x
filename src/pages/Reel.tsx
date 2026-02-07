@@ -543,6 +543,104 @@ const Reel = () => {
     return <ReelViewerSkeleton />;
   }
 
+  // WEEK RECAP VIDEO PLAYER — show generated recap video instead of stories
+  if (hasWeekRecap && weekRecapVideoFromNav) {
+    return (
+      <div 
+        className="fixed inset-0 bg-black flex flex-col"
+        style={{ 
+          height: '100dvh',
+          minHeight: '-webkit-fill-available',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Close button */}
+        <div 
+          className="absolute top-0 right-0 z-50 p-3"
+          style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)' }}
+        >
+          <button
+            onClick={handleClose}
+            className="w-10 h-10 flex items-center justify-center rounded-full text-white/80 hover:text-white transition-colors"
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+            }}
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Week label */}
+        <div 
+          className="absolute top-0 left-0 z-50 p-3 flex items-center gap-2"
+          style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)' }}
+        >
+          <span className="text-white/90 font-semibold text-sm px-3 py-1.5 rounded-full"
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+            }}
+          >
+            Week {weekRecapNumber || 1} Recap
+          </span>
+        </div>
+
+        {/* Video Player - full screen */}
+        <div className="flex-1 flex items-center justify-center">
+          <video
+            src={weekRecapVideoFromNav}
+            className="w-full h-full object-contain"
+            autoPlay
+            playsInline
+            controls={false}
+            loop
+            muted={isMuted}
+            onClick={() => setIsMuted(prev => !prev)}
+          />
+        </div>
+
+        {/* Bottom controls */}
+        <div 
+          className="absolute bottom-0 inset-x-0 z-50 p-4 flex items-center justify-between"
+          style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}
+        >
+          {/* Mute toggle */}
+          <button
+            onClick={() => setIsMuted(prev => !prev)}
+            className="w-10 h-10 flex items-center justify-center rounded-full text-white/80"
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+            }}
+          >
+            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          </button>
+
+          {/* View Stories button */}
+          <button
+            onClick={() => {
+              // Clear recap state and show regular stories
+              navigate('/reel', { replace: true, state: {} });
+            }}
+            className="px-4 py-2 rounded-full text-white/90 text-sm font-medium"
+            style={{
+              background: 'rgba(255,255,255,0.15)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.2)',
+            }}
+          >
+            View Stories →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!effectiveUserGroups.length || !currentGroup || !currentActivity) {
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center gap-4">
