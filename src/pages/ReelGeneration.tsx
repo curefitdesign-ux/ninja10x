@@ -1,40 +1,37 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { X } from 'lucide-react';
-import { useFitnessReel } from '@/hooks/use-fitness-reel';
+import { toast } from 'sonner';
+import { generateMotionRecap, photosToDAyStates, type DayState } from '@/lib/motion-recap-generator';
+
+interface PhotoData {
+  id: string;
+  imageUrl: string;
+  activity: string;
+  duration?: string;
+  distance?: string;
+  pr?: string;
+  uploadDate: string;
+  dayNumber: number;
+  isVideo?: boolean;
+}
 
 interface LocationState {
-  weekPhotos?: Array<{
-    id: string;
-    imageUrl: string;
-    activity: string;
-    duration?: string;
-    distance?: string;
-    pr?: string;
-    uploadDate: string;
-    dayNumber: number;
-    isVideo?: boolean;
-  }>;
+  weekPhotos?: PhotoData[];
   weekNumber?: number;
-  isComplete?: boolean;
 }
 
 const ReelGeneration = () => {
   const [deviceHeight, setDeviceHeight] = useState<number>(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [phase, setPhase] = useState('Preparing...');
+  const [error, setError] = useState<string | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const hasTriggered = useRef(false);
   const navigate = useNavigate();
   const location = useLocation();
   const locationState = location.state as LocationState | null;
-
-  const {
-    generateReel,
-    isGenerating,
-    generationProgress,
-    currentReel,
-  } = useFitnessReel();
 
   // Calculate and set fixed device height
   useEffect(() => {
@@ -59,44 +56,67 @@ const ReelGeneration = () => {
     };
   }, []);
 
-  // Trigger actual generation once
+  // Trigger generation once
   useEffect(() => {
-    console.log('[ReelGeneration] Effect fired:', { 
-      hasTriggered: hasTriggered.current, 
-      hasPhotos: !!locationState?.weekPhotos,
-      photoCount: locationState?.weekPhotos?.length,
-      firstPhotoUrl: locationState?.weekPhotos?.[0]?.imageUrl?.slice(0, 60),
-    });
     if (hasTriggered.current) return;
+    
     const photos = locationState?.weekPhotos;
-    if (photos && photos.length >= 3) {
-      hasTriggered.current = true;
-      console.log('[ReelGeneration] Triggering generateReel with', photos.length, 'photos');
-      generateReel(photos).then(result => {
-        console.log('[ReelGeneration] generateReel resolved:', !!result);
-      }).catch(err => {
-        console.error('[ReelGeneration] generateReel error:', err);
-      });
-    } else {
-      console.warn('[ReelGeneration] Not enough photos or missing state:', { photos: photos?.length });
+    if (!photos || photos.length < 3) {
+      console.warn('[ReelGeneration] Not enough photos:', photos?.length);
+      setError('Need at least 3 photos to generate a reel');
+      return;
     }
-  }, [locationState, generateReel]);
 
-  // When generation completes, navigate to reel viewer
-  useEffect(() => {
-    if (!isGenerating && currentReel?.videoUrl && hasTriggered.current && generationProgress >= 100) {
-      const timer = setTimeout(() => {
-        navigate('/reel', {
-          replace: true,
-          state: {
-            weekRecapVideo: currentReel.videoUrl,
-            weekNumber: locationState?.weekNumber || 1,
-          },
-        });
-      }, 600);
-      return () => clearTimeout(timer);
-    }
-  }, [isGenerating, currentReel, generationProgress, navigate, locationState]);
+    hasTriggered.current = true;
+    console.log('[ReelGeneration] Starting generation with', photos.length, 'photos');
+    console.log('[ReelGeneration] Photo URLs:', photos.map(p => p.imageUrl?.slice(0, 80)));
+
+    // Convert to DayState format
+    const dayStates: DayState[] = photosToDAyStates(photos.map(p => ({
+      imageUrl: p.imageUrl,
+      activity: p.activity || 'Workout',
+      duration: p.duration,
+      distance: p.distance,
+      pr: p.pr,
+      dayNumber: p.dayNumber,
+      isVideo: p.isVideo,
+    })));
+
+    setProgress(5);
+    setPhase('Loading photos...');
+
+    generateMotionRecap({
+      dayStates,
+      onProgress: (percent, phaseName) => {
+        setProgress(percent);
+        setPhase(phaseName);
+        console.log(`[ReelGeneration] ${phaseName}: ${percent}%`);
+      },
+    })
+      .then((videoUrl) => {
+        console.log('[ReelGeneration] Video generated successfully');
+        setProgress(100);
+        setPhase('Complete!');
+        toast.success('Your recap video is ready!');
+
+        // Navigate to reel viewer after a brief pause
+        setTimeout(() => {
+          navigate('/reel', {
+            replace: true,
+            state: {
+              weekRecapVideo: videoUrl,
+              weekNumber: locationState?.weekNumber || 1,
+            },
+          });
+        }, 800);
+      })
+      .catch((err) => {
+        console.error('[ReelGeneration] Generation failed:', err);
+        const message = err instanceof Error ? err.message : 'Failed to generate reel';
+        setError(message);
+        toast.error(message);
+      });
+  }, [locationState, navigate]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -108,9 +128,6 @@ const ReelGeneration = () => {
     navigate(-1);
   }, [navigate]);
 
-  // Use real progress from the generator
-  const displayProgress = Math.round(generationProgress);
-
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-black"
@@ -119,7 +136,7 @@ const ReelGeneration = () => {
         minHeight: '-webkit-fill-available',
       }}
     >
-      {/* Static background — no animated scale to prevent flickering */}
+      {/* Background glows */}
       <div className="absolute inset-0">
         <div
           className="absolute inset-0"
@@ -164,39 +181,49 @@ const ReelGeneration = () => {
 
         {/* Main title */}
         <h2 className="text-2xl font-semibold text-white text-center mb-3">
-          Generating your ai recap
+          {error ? 'Generation failed' : 'Generating your ai recap'}
         </h2>
 
         {/* Subtitle */}
         <p className="text-base text-white/40 text-center mb-8">
-          This usually takes 1-2 minutes
+          {error || phase}
         </p>
 
         {/* Progress Section */}
-        <div className="w-full">
-          {/* Progress Bar — GPU-accelerated scaleX */}
-          <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-3">
-            <div
-              className="h-full rounded-full origin-left"
-              style={{
-                background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.8), rgba(236, 72, 153, 0.8))',
-                transform: `scaleX(${displayProgress / 100})`,
-                transition: 'transform 0.4s ease-out',
-                willChange: 'transform',
-              }}
-            />
-          </div>
+        {!error && (
+          <div className="w-full">
+            <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-3">
+              <div
+                className="h-full rounded-full origin-left"
+                style={{
+                  background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.8), rgba(236, 72, 153, 0.8))',
+                  transform: `scaleX(${progress / 100})`,
+                  transition: 'transform 0.4s ease-out',
+                  willChange: 'transform',
+                }}
+              />
+            </div>
 
-          {/* Timer and Percentage */}
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-white/50 font-medium tabular-nums">
-              {formatTime(elapsedSeconds)}
-            </span>
-            <span className="text-white/50 font-medium tabular-nums">
-              {displayProgress}%
-            </span>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-white/50 font-medium tabular-nums">
+                {formatTime(elapsedSeconds)}
+              </span>
+              <span className="text-white/50 font-medium tabular-nums">
+                {Math.round(progress)}%
+              </span>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Retry button on error */}
+        {error && (
+          <button
+            onClick={handleClose}
+            className="mt-4 px-6 py-2 rounded-full bg-white/10 text-white/80 text-sm font-medium hover:bg-white/20 transition-colors"
+          >
+            Go Back
+          </button>
+        )}
       </div>
     </div>
   );
