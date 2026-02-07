@@ -79,7 +79,7 @@ export default function FullScreenReel({
 
   // Double-tap to heart
   const [lastTap, setLastTap] = useState(0);
-  const handleTap = useCallback(() => {
+  const handleTap = useCallback((e: React.MouseEvent) => {
     // Ignore taps right after dragging
     if (isDragging.current) return;
     
@@ -93,11 +93,20 @@ export default function FullScreenReel({
       // Double tap - toggle heart
       handleHeart();
     } else {
-      // Single tap - advance
-      goNext();
+      // Single tap — left half = prev, right half = next
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const tapX = e.clientX - rect.left;
+      if (tapX < rect.width / 2) {
+        setDragDirection('right');
+        goPrev();
+      } else {
+        setDragDirection('left');
+        goNext();
+      }
+      setTimeout(() => setDragDirection(null), 300);
     }
     setLastTap(now);
-  }, [lastTap, goNext, shouldShowLocked, onUnlockRequest]);
+  }, [lastTap, goNext, goPrev, shouldShowLocked, onUnlockRequest]);
 
   const handleHeart = async () => {
     if (!current || shouldShowLocked) return;
@@ -171,7 +180,7 @@ export default function FullScreenReel({
       {/* Main content with swipe */}
       <motion.div
         className="flex-1 flex items-center justify-center relative touch-pan-y"
-        onClick={handleTap}
+        onClick={(e) => handleTap(e)}
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.2}
