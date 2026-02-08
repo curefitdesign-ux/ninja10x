@@ -131,77 +131,108 @@ function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * Math.max(0, Math.min(1, t));
 }
 
-// ============ RICH CONTEXTUAL MUSIC SYNTHESIS ============
+// ============ HIGH-ENERGY MUSIC ENGINE ============
+// EDM/Workout-style: punchy kicks, sidechained bass, risers,
+// drop sections, supersaw pads, pluck melodies, driving percussion
 
-// Note frequencies for musical scales
-const NOTE_FREQ: Record<string, number> = {
+const N: Record<string, number> = {
+  C2: 65.41, D2: 73.42, E2: 82.41, F2: 87.31, G2: 98.00, A2: 110.00, B2: 123.47,
   C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196.00, A3: 220.00, B3: 246.94,
   C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00, A4: 440.00, B4: 493.88,
-  C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99,
+  C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880.00,
 };
 
-interface ChordProgression {
-  chords: number[][];    // Array of chords, each chord = array of frequencies
-  melody: number[];       // Melody note frequencies
-  bassLine: number[];     // Bass note frequencies
+interface TrackConfig {
   bpm: number;
+  chords: number[][];
+  bass: number[];
+  lead: number[];
+  dropIntensity: number; // 0-1 how hard the drop hits
 }
 
-function getChordProgression(mood: MusicMood): ChordProgression {
+function getTrackConfig(mood: MusicMood): TrackConfig {
   switch (mood) {
     case 'energetic':
       return {
-        // Am - F - C - G (epic pop progression)
+        bpm: 128, // Classic EDM tempo
+        // Am - F - C - G (Avicii/Chainsmokers-style progression)
         chords: [
-          [NOTE_FREQ.A3, NOTE_FREQ.C4, NOTE_FREQ.E4],
-          [NOTE_FREQ.F3, NOTE_FREQ.A3, NOTE_FREQ.C4],
-          [NOTE_FREQ.C4, NOTE_FREQ.E4, NOTE_FREQ.G4],
-          [NOTE_FREQ.G3, NOTE_FREQ.B3, NOTE_FREQ.D4],
+          [N.A3, N.C4, N.E4, N.A4],
+          [N.F3, N.A3, N.C4, N.F4],
+          [N.C4, N.E4, N.G4, N.C5],
+          [N.G3, N.B3, N.D4, N.G4],
         ],
-        melody: [NOTE_FREQ.E5, NOTE_FREQ.D5, NOTE_FREQ.C5, NOTE_FREQ.E5, NOTE_FREQ.G5, NOTE_FREQ.E5, NOTE_FREQ.D5, NOTE_FREQ.C5],
-        bassLine: [NOTE_FREQ.A3, NOTE_FREQ.A3, NOTE_FREQ.F3, NOTE_FREQ.F3, NOTE_FREQ.C3, NOTE_FREQ.C3, NOTE_FREQ.G3, NOTE_FREQ.G3],
-        bpm: 118,
+        bass: [N.A2, N.A2, N.F2, N.F2, N.C3, N.C3, N.G2, N.G2],
+        lead: [N.E5, N.E5, N.D5, N.C5, N.C5, N.D5, N.E5, N.G5],
+        dropIntensity: 1.0,
       };
     case 'rhythmic':
       return {
-        // C - Am - F - G (classic motivational)
+        bpm: 120,
+        // Em - C - G - D (uplifting workout)
         chords: [
-          [NOTE_FREQ.C4, NOTE_FREQ.E4, NOTE_FREQ.G4],
-          [NOTE_FREQ.A3, NOTE_FREQ.C4, NOTE_FREQ.E4],
-          [NOTE_FREQ.F3, NOTE_FREQ.A3, NOTE_FREQ.C4],
-          [NOTE_FREQ.G3, NOTE_FREQ.B3, NOTE_FREQ.D4],
+          [N.E3, N.G3, N.B3, N.E4],
+          [N.C4, N.E4, N.G4, N.C5],
+          [N.G3, N.B3, N.D4, N.G4],
+          [N.D4, N.F4, N.A4, N.D5],
         ],
-        melody: [NOTE_FREQ.C5, NOTE_FREQ.E5, NOTE_FREQ.G5, NOTE_FREQ.E5, NOTE_FREQ.D5, NOTE_FREQ.C5, NOTE_FREQ.D5, NOTE_FREQ.E5],
-        bassLine: [NOTE_FREQ.C3, NOTE_FREQ.C3, NOTE_FREQ.A3, NOTE_FREQ.A3, NOTE_FREQ.F3, NOTE_FREQ.F3, NOTE_FREQ.G3, NOTE_FREQ.G3],
-        bpm: 104,
+        bass: [N.E2, N.E2, N.C3, N.C3, N.G2, N.G2, N.D3, N.D3],
+        lead: [N.B4, N.E5, N.D5, N.B4, N.G5, N.E5, N.D5, N.E5],
+        dropIntensity: 0.85,
       };
     case 'calm':
       return {
-        // Cmaj7 - Fmaj7 - Dm7 - G7 (jazzy calm)
+        bpm: 100,
         chords: [
-          [NOTE_FREQ.C4, NOTE_FREQ.E4, NOTE_FREQ.G4, NOTE_FREQ.B4],
-          [NOTE_FREQ.F3, NOTE_FREQ.A3, NOTE_FREQ.C4, NOTE_FREQ.E4],
-          [NOTE_FREQ.D4, NOTE_FREQ.F4, NOTE_FREQ.A4],
-          [NOTE_FREQ.G3, NOTE_FREQ.B3, NOTE_FREQ.D4, NOTE_FREQ.F4],
+          [N.C4, N.E4, N.G4, N.B4],
+          [N.A3, N.C4, N.E4, N.A4],
+          [N.F3, N.A3, N.C4, N.F4],
+          [N.G3, N.B3, N.D4, N.G4],
         ],
-        melody: [NOTE_FREQ.E5, NOTE_FREQ.D5, NOTE_FREQ.C5, NOTE_FREQ.D5, NOTE_FREQ.E5, NOTE_FREQ.G5, NOTE_FREQ.E5, NOTE_FREQ.C5],
-        bassLine: [NOTE_FREQ.C3, NOTE_FREQ.C3, NOTE_FREQ.F3, NOTE_FREQ.F3, NOTE_FREQ.D3, NOTE_FREQ.D3, NOTE_FREQ.G3, NOTE_FREQ.G3],
-        bpm: 76,
+        bass: [N.C2, N.C2, N.A2, N.A2, N.F2, N.F2, N.G2, N.G2],
+        lead: [N.G4, N.E5, N.D5, N.C5, N.E5, N.D5, N.C5, N.B4],
+        dropIntensity: 0.4,
       };
     case 'ambient':
       return {
-        // Em - C - G - D (atmospheric)
+        bpm: 110,
         chords: [
-          [NOTE_FREQ.E4, NOTE_FREQ.G4, NOTE_FREQ.B4],
-          [NOTE_FREQ.C4, NOTE_FREQ.E4, NOTE_FREQ.G4],
-          [NOTE_FREQ.G3, NOTE_FREQ.B3, NOTE_FREQ.D4],
-          [NOTE_FREQ.D4, NOTE_FREQ.F4, NOTE_FREQ.A4],
+          [N.E3, N.G3, N.B3, N.D4],
+          [N.C4, N.E4, N.G4, N.B4],
+          [N.A3, N.C4, N.E4, N.A4],
+          [N.F3, N.A3, N.C4, N.E4],
         ],
-        melody: [NOTE_FREQ.B4, NOTE_FREQ.G4, NOTE_FREQ.E5, NOTE_FREQ.D5, NOTE_FREQ.G5, NOTE_FREQ.E5, NOTE_FREQ.B4, NOTE_FREQ.D5],
-        bassLine: [NOTE_FREQ.E3, NOTE_FREQ.E3, NOTE_FREQ.C3, NOTE_FREQ.C3, NOTE_FREQ.G3, NOTE_FREQ.G3, NOTE_FREQ.D3, NOTE_FREQ.D3],
-        bpm: 84,
+        bass: [N.E2, N.E2, N.C3, N.C3, N.A2, N.A2, N.F2, N.F2],
+        lead: [N.E5, N.D5, N.B4, N.G4, N.D5, N.E5, N.G5, N.E5],
+        dropIntensity: 0.55,
       };
   }
+}
+
+// Deterministic pseudo-random for consistent noise patterns
+function seededRand(seed: number): number {
+  const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+// Soft clipping for warmer saturation
+function softClip(x: number): number {
+  if (x > 1) return 1 - Math.exp(-(x - 1));
+  if (x < -1) return -(1 - Math.exp(-(-x - 1)));
+  return x;
+}
+
+// Supersaw: multiple detuned saws for thick EDM pad
+function supersaw(freq: number, t: number, numVoices = 7): number {
+  const detunes = [-0.012, -0.008, -0.004, 0, 0.004, 0.008, 0.012];
+  let sum = 0;
+  const voices = Math.min(numVoices, detunes.length);
+  for (let v = 0; v < voices; v++) {
+    const f = freq * (1 + detunes[v]);
+    const phase = (f * t) % 1;
+    sum += phase * 2 - 1; // Sawtooth wave
+  }
+  return sum / voices;
 }
 
 function generateContextualAudio(durationSec: number, mood: MusicMood): AudioBuffer {
@@ -211,19 +242,23 @@ function generateContextualAudio(durationSec: number, mood: MusicMood): AudioBuf
   const left = buffer.getChannelData(0);
   const right = buffer.getChannelData(1);
 
-  const prog = getChordProgression(mood);
-  const beatDur = 60 / prog.bpm;
-  const barDur = beatDur * 4; // 4 beats per bar
-  const chordCount = prog.chords.length;
+  const cfg = getTrackConfig(mood);
+  const beatDur = 60 / cfg.bpm;
+  const barDur = beatDur * 4;
+  const totalBars = Math.ceil(durationSec / barDur);
+  const chordCount = cfg.chords.length;
+  const di = cfg.dropIntensity;
 
-  // Volume profiles per mood
-  const vol = mood === 'calm'
-    ? { kick: 0.08, snare: 0.04, hihat: 0.025, pad: 0.035, bass: 0.12, melody: 0.04, arp: 0.025 }
-    : mood === 'ambient'
-    ? { kick: 0.10, snare: 0.03, hihat: 0.02, pad: 0.045, bass: 0.10, melody: 0.035, arp: 0.03 }
-    : mood === 'energetic'
-    ? { kick: 0.30, snare: 0.12, hihat: 0.06, pad: 0.02, bass: 0.18, melody: 0.05, arp: 0.04 }
-    : { kick: 0.22, snare: 0.08, hihat: 0.045, pad: 0.03, bass: 0.15, melody: 0.045, arp: 0.035 };
+  // Arrangement: intro → buildup → drop → sustain → breakdown → outro
+  const getSection = (bar: number): 'intro' | 'buildup' | 'drop' | 'sustain' | 'breakdown' | 'outro' => {
+    const pct = bar / totalBars;
+    if (pct < 0.08) return 'intro';
+    if (pct < 0.18) return 'buildup';
+    if (pct < 0.5) return 'drop';
+    if (pct < 0.7) return 'sustain';
+    if (pct < 0.82) return 'breakdown';
+    return 'outro';
+  };
 
   for (let i = 0; i < length; i++) {
     const t = i / sampleRate;
@@ -231,90 +266,210 @@ function generateContextualAudio(durationSec: number, mood: MusicMood): AudioBuf
     const currentBar = Math.floor(barPos);
     const posInBar = barPos - currentBar;
     const chordIdx = currentBar % chordCount;
-    const chord = prog.chords[chordIdx];
+    const chord = cfg.chords[chordIdx];
     const beatPhase = (t % beatDur) / beatDur;
-    const beatNum = Math.floor(posInBar * 4); // 0-3
+    const beatNum = Math.floor(posInBar * 4);
+    const section = getSection(currentBar);
 
     let sample = 0;
 
-    // ── 1. Kick drum — on beats 1 and 3 (or every beat for energetic) ──
-    const kickOnBeat = mood === 'energetic' ? true : (beatNum === 0 || beatNum === 2);
-    if (kickOnBeat) {
-      const kickEnv = Math.exp(-beatPhase * 18);
-      const kickFreq = 55 * (1 + 3 * Math.exp(-beatPhase * 12));
-      sample += Math.sin(2 * Math.PI * kickFreq * t) * kickEnv * vol.kick;
+    // Section-based intensity multipliers
+    const isDropOrSustain = section === 'drop' || section === 'sustain';
+    const isBuild = section === 'buildup';
+    const isBreakdown = section === 'breakdown';
+    const isIntro = section === 'intro';
+    const isOutro = section === 'outro';
+
+    const buildProgress = isBuild ? (barPos - totalBars * 0.08) / (totalBars * 0.1) : 0;
+
+    // ── 1. KICK — punchy 808-style ──
+    const kickActive = isDropOrSustain || isBuild || isOutro;
+    const kickPattern = isDropOrSustain
+      ? (beatNum === 0 || beatNum === 2 || (di > 0.7 && beatPhase < 0.1)) // four-on-floor for high energy
+      : (beatNum === 0 || beatNum === 2);
+    
+    if (kickActive && kickPattern) {
+      const kickEnv = Math.exp(-beatPhase * 25);
+      const kickSweep = 50 * (1 + 5 * Math.exp(-beatPhase * 15)); // pitch sweep down
+      const kickBody = Math.sin(2 * Math.PI * kickSweep * t) * kickEnv;
+      const kickClick = Math.exp(-beatPhase * 80) * 0.3; // transient click
+      sample += (kickBody + kickClick) * 0.38 * di;
     }
 
-    // ── 2. Snare — on beats 2 and 4 ──
-    if (beatNum === 1 || beatNum === 3) {
-      const snareEnv = Math.exp(-beatPhase * 22);
-      const snareNoise = (Math.random() * 2 - 1) * snareEnv;
-      const snareTone = Math.sin(2 * Math.PI * 185 * t) * snareEnv * 0.4;
-      sample += (snareNoise + snareTone) * vol.snare;
+    // ── 2. SNARE / CLAP — layered ──
+    const snareActive = isDropOrSustain || (isBuild && buildProgress > 0.3);
+    if (snareActive && (beatNum === 1 || beatNum === 3)) {
+      const snareEnv = Math.exp(-beatPhase * 18);
+      const snareBody = Math.sin(2 * Math.PI * 200 * t) * snareEnv * 0.35;
+      const snareNoise = seededRand(i) * 2 - 1;
+      const snareRattle = snareNoise * Math.exp(-beatPhase * 25) * 0.5;
+      // Clap layer — slightly delayed
+      const clapDelay = beatPhase - 0.01;
+      const clapEnv = clapDelay > 0 ? Math.exp(-clapDelay * 30) : 0;
+      const clap = (seededRand(i + 7777) * 2 - 1) * clapEnv * 0.25;
+      sample += (snareBody + snareRattle + clap) * 0.22 * di;
     }
 
-    // ── 3. Hi-hat — 8th notes (every half beat) ──
-    const eighthPhase = (t % (beatDur / 2)) / (beatDur / 2);
-    const hihatEnv = Math.exp(-eighthPhase * 35);
-    const openHat = (beatNum === 2 && eighthPhase < 0.5);
-    const hatDecay = openHat ? Math.exp(-eighthPhase * 8) : hihatEnv;
-    sample += (Math.random() * 2 - 1) * hatDecay * vol.hihat;
-
-    // ── 4. Chord pad — warm detuned oscillators ──
-    let padSum = 0;
-    for (const freq of chord) {
-      padSum += Math.sin(2 * Math.PI * freq * t);
-      padSum += Math.sin(2 * Math.PI * freq * 1.003 * t) * 0.7; // detune warmth
-    }
-    const padEnv = 0.6 + 0.4 * Math.sin(2 * Math.PI * 0.15 * t);
-    sample += (padSum / chord.length) * vol.pad * padEnv;
-
-    // ── 5. Bass line — follows chord root, octave lower ──
-    const bassIdx = Math.floor(posInBar * prog.bassLine.length / 1) % prog.bassLine.length;
-    const bassFreq = prog.bassLine[Math.floor(posInBar * 2) % prog.bassLine.length] * 0.5;
-    const bassOsc = Math.sin(2 * Math.PI * bassFreq * t) + 
-                    Math.sin(2 * Math.PI * bassFreq * 2 * t) * 0.3;
-    // Slight sidechain feel — duck bass on kick
-    const sidechainDuck = kickOnBeat ? Math.min(1, beatPhase * 6) : 1;
-    sample += bassOsc * vol.bass * sidechainDuck;
-
-    // ── 6. Melody — plays on certain beats, short plucky notes ──
-    const melodyBeatGlobal = Math.floor(t / (beatDur * 0.5));
-    const melodyIdx = melodyBeatGlobal % prog.melody.length;
-    const melodyPhase = (t % (beatDur * 0.5)) / (beatDur * 0.5);
-    // Only play melody on some beats for breathing room
-    const melodyPlay = (melodyBeatGlobal % 4 !== 3); // skip every 4th
-    if (melodyPlay) {
-      const melodyEnv = Math.exp(-melodyPhase * 6); // plucky decay
-      const melodyFreq = prog.melody[melodyIdx];
-      const melodyOsc = Math.sin(2 * Math.PI * melodyFreq * t) * 0.7 +
-                        Math.sin(2 * Math.PI * melodyFreq * 2 * t) * 0.2 + // harmonic
-                        Math.sin(2 * Math.PI * melodyFreq * 3 * t) * 0.1;  // shimmer
-      sample += melodyOsc * melodyEnv * vol.melody;
+    // Build snare roll (fills) — accelerating hits
+    if (isBuild && buildProgress > 0.6) {
+      const rollSpeed = lerp(4, 16, (buildProgress - 0.6) / 0.4); // accelerates
+      const rollPhase = (t * rollSpeed / beatDur) % 1;
+      if (rollPhase < 0.3) {
+        sample += (seededRand(i + 3333) * 2 - 1) * Math.exp(-rollPhase * 15) * 0.12 * di;
+      }
     }
 
-    // ── 7. Arpeggio — 16th note pattern cycling through chord tones ──
-    const sixteenthDur = beatDur / 4;
-    const arpPhase = (t % sixteenthDur) / sixteenthDur;
-    const arpIdx = Math.floor(t / sixteenthDur) % chord.length;
-    const arpFreq = chord[arpIdx] * 2; // one octave up
-    const arpEnv = Math.exp(-arpPhase * 10);
-    sample += Math.sin(2 * Math.PI * arpFreq * t) * arpEnv * vol.arp;
+    // ── 3. HI-HATS — 16th note groove ──
+    const hatActive = isDropOrSustain || (isBuild && buildProgress > 0.2) || isBreakdown;
+    if (hatActive) {
+      const sixteenthDur = beatDur / 4;
+      const hatPhase = (t % sixteenthDur) / sixteenthDur;
+      const sixteenthIdx = Math.floor(posInBar * 16) % 16;
+      // Accent pattern: louder on off-beats for groove
+      const accent = (sixteenthIdx % 4 === 2) ? 1.3 : (sixteenthIdx % 2 === 0 ? 0.7 : 1.0);
+      const hatEnv = Math.exp(-hatPhase * (sixteenthIdx % 4 === 0 ? 15 : 40)); // open hat on beats
+      const hat = (seededRand(i + sixteenthIdx * 1000) * 2 - 1) * hatEnv * accent;
+      const hatVol = isBreakdown ? 0.03 : 0.055;
+      sample += hat * hatVol * di;
+    }
 
-    // ── 8. Atmospheric shimmer ──
-    const shimmer = Math.sin(2 * Math.PI * 1760 * t + Math.sin(2 * Math.PI * 0.25 * t) * 5)
-      * 0.006 * (0.5 + 0.5 * Math.sin(2 * Math.PI * 0.08 * t));
+    // ── 4. SUPERSAW PAD — thick EDM chords ──
+    const padActive = isDropOrSustain || isBreakdown || isOutro;
+    if (padActive) {
+      let padSum = 0;
+      for (const freq of chord) {
+        padSum += supersaw(freq, t, isDropOrSustain ? 7 : 5);
+      }
+      padSum /= chord.length;
+      
+      // Sidechain compression feel — pump effect
+      const pumpPhase = (t % beatDur) / beatDur;
+      const sidechain = isDropOrSustain
+        ? 0.15 + 0.85 * Math.min(1, pumpPhase * 4) // aggressive pump
+        : 0.5 + 0.5 * Math.min(1, pumpPhase * 3);
+      
+      const padVol = isDropOrSustain ? 0.045 : (isBreakdown ? 0.06 : 0.03);
+      sample += softClip(padSum * 1.5) * padVol * sidechain * di;
+    }
+
+    // Intro/buildup pad — filtered, slowly opening
+    if (isIntro || isBuild) {
+      let filteredPad = 0;
+      for (const freq of chord) {
+        // Simple low-pass effect: fewer harmonics
+        filteredPad += Math.sin(2 * Math.PI * freq * t);
+        filteredPad += Math.sin(2 * Math.PI * freq * 1.005 * t) * 0.5;
+      }
+      filteredPad /= chord.length;
+      const filterOpen = isBuild ? buildProgress : 0.3;
+      sample += filteredPad * 0.04 * filterOpen;
+    }
+
+    // ── 5. BASS — sub + mid-bass, sidechained ──
+    const bassActive = isDropOrSustain || (isBuild && buildProgress > 0.5) || isOutro;
+    if (bassActive) {
+      const bassIdx = Math.floor(posInBar * 2) % cfg.bass.length;
+      const bassFreq = cfg.bass[bassIdx];
+      
+      // Sub bass (sine)
+      const sub = Math.sin(2 * Math.PI * bassFreq * t);
+      // Mid-bass (slightly distorted saw for presence)
+      const midBassPhase = (bassFreq * t) % 1;
+      const midBass = softClip((midBassPhase * 2 - 1) * 2) * 0.4;
+      
+      // Sidechain duck on kick
+      const bassPump = (beatNum === 0 || beatNum === 2) 
+        ? Math.min(1, beatPhase * 5) 
+        : 1;
+      
+      sample += (sub * 0.20 + midBass * 0.08) * bassPump * di;
+    }
+
+    // ── 6. LEAD MELODY — plucky synth ──
+    const leadActive = isDropOrSustain || isBreakdown;
+    if (leadActive) {
+      const eighthDur = beatDur / 2;
+      const leadBeat = Math.floor(t / eighthDur);
+      const leadPhase = (t % eighthDur) / eighthDur;
+      const leadIdx = leadBeat % cfg.lead.length;
+      // Play on select beats for musicality
+      const shouldPlay = (leadBeat % 3 !== 2); // skip every 3rd for breathing
+      
+      if (shouldPlay) {
+        const freq = cfg.lead[leadIdx];
+        const pluckEnv = Math.exp(-leadPhase * 8); // sharp pluck
+        // Two oscillators for richness
+        const osc1 = Math.sin(2 * Math.PI * freq * t);
+        const osc2 = Math.sin(2 * Math.PI * freq * 2.01 * t) * 0.3; // octave shimmer
+        const osc3 = Math.sin(2 * Math.PI * freq * 3 * t) * 0.1; // brightness
+        const leadSig = (osc1 + osc2 + osc3) * pluckEnv;
+        const leadVol = isBreakdown ? 0.05 : 0.04;
+        sample += leadSig * leadVol * di;
+      }
+    }
+
+    // ── 7. ARPEGGIOS — 16th note patterns on drop ──
+    if (isDropOrSustain) {
+      const sixteenthDur = beatDur / 4;
+      const arpPhase = (t % sixteenthDur) / sixteenthDur;
+      const arpBeat = Math.floor(t / sixteenthDur);
+      const arpIdx = arpBeat % chord.length;
+      const arpFreq = chord[arpIdx] * 2; // octave up
+      const arpEnv = Math.exp(-arpPhase * 12);
+      const arpOsc = Math.sin(2 * Math.PI * arpFreq * t) * 0.6 +
+                     Math.sin(2 * Math.PI * arpFreq * 1.5 * t) * 0.3;
+      // Pan arps slightly for width
+      const arpVol = 0.025 * di;
+      const arpPan = Math.sin(arpBeat * 0.7) * 0.3;
+      left[i] += arpOsc * arpEnv * arpVol * (1 + arpPan);
+      right[i] += arpOsc * arpEnv * arpVol * (1 - arpPan);
+    }
+
+    // ── 8. RISER / BUILD FX ──
+    if (isBuild) {
+      // White noise riser — gets louder toward drop
+      const riserVol = buildProgress * buildProgress * 0.08 * di;
+      sample += (seededRand(i + 5555) * 2 - 1) * riserVol;
+      
+      // Pitch-rising sine sweep
+      const sweepFreq = lerp(200, 2000, buildProgress * buildProgress);
+      sample += Math.sin(2 * Math.PI * sweepFreq * t) * buildProgress * 0.02 * di;
+    }
+
+    // ── 9. DROP IMPACT ──
+    if (section === 'drop' && currentBar === Math.floor(totalBars * 0.18)) {
+      const dropTime = posInBar * barDur;
+      if (dropTime < 0.3) {
+        // Impact: low boom + noise burst
+        const impactEnv = Math.exp(-dropTime * 12);
+        sample += Math.sin(2 * Math.PI * 40 * t) * impactEnv * 0.3 * di;
+        sample += (seededRand(i + 9999) * 2 - 1) * Math.exp(-dropTime * 20) * 0.15 * di;
+      }
+    }
+
+    // ── 10. HIGH SHIMMER / ATMOSPHERE ──
+    const shimmerVol = isBreakdown ? 0.012 : (isDropOrSustain ? 0.005 : 0.008);
+    const shimmer = Math.sin(2 * Math.PI * 2200 * t + Math.sin(2 * Math.PI * 0.2 * t) * 6)
+      * shimmerVol * (0.5 + 0.5 * Math.sin(2 * Math.PI * 0.06 * t));
     sample += shimmer;
 
-    // ── Master envelope ──
-    const fadeIn = Math.min(1, t / 1.5);
-    const fadeOut = Math.min(1, (durationSec - t) / 2.0);
+    // ── MASTER PROCESSING ──
+    // Soft clip for warmth/loudness
+    sample = softClip(sample * 1.8) * 0.55;
+
+    // Master envelope
+    const fadeIn = Math.min(1, t / 0.8);
+    const fadeOut = Math.min(1, (durationSec - t) / 1.5);
     const masterEnv = fadeIn * fadeOut;
 
     // Stereo widening
-    const stereoPhase = Math.sin(t * 0.8) * 0.06;
-    left[i] = (sample + shimmer * 0.5) * masterEnv;
-    right[i] = (sample * (1 - stereoPhase) + shimmer * 0.5) * masterEnv;
+    const stereoW = Math.sin(t * 1.3) * 0.08;
+    left[i] += sample * masterEnv * (1 + stereoW);
+    right[i] += sample * masterEnv * (1 - stereoW);
+    
+    // Add stereo shimmer
+    left[i] += shimmer * 0.3 * masterEnv;
+    right[i] -= shimmer * 0.2 * masterEnv;
   }
 
   return buffer;
