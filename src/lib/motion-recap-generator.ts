@@ -1,12 +1,13 @@
 /**
- * Premium Motion Recap Generator v3 — Elegant, Contextual, Cinematic
+ * Premium Motion Recap Generator v4 — Rich Contextual Music, Bold Typography, Cinematic
  *
  * Structure per day:
- *   1. Metric card (2.5s) — Clean minimal layout with activity-specific accent
+ *   1. Metric card (2.8s) — Bold layout with large readable stats
  *   2. Photo hold (3.5s) — Cinematic Ken Burns with soft overlays
- *   Intro (2s) + Outro (2.5s)
+ *   Intro (2.2s) + Outro (2.8s)
  *
- * Audio: Activity-contextual synthesized score (calm/energetic/rhythmic).
+ * Audio: Rich contextual synthesized music with chord progressions,
+ * arpeggios, melodies, and layered percussion per activity mood.
  * 100% local, no API calls. 9:16 ratio (720×1280), 24fps.
  */
 
@@ -44,32 +45,35 @@ const WIDTH = 720;
 const HEIGHT = 1280;
 
 const TIMING = {
-  INTRO: 2.0,
-  METRIC_DURATION: 2.5,
+  INTRO: 2.2,
+  METRIC_DURATION: 2.8,
   PHOTO_DURATION: 3.5,
   CROSSFADE: 0.5,
-  OUTRO: 2.5,
+  OUTRO: 2.8,
   OUTRO_FADE: 0.8,
   KEN_BURNS_SCALE: 0.04,
 };
 
 const DAY_SLOT = TIMING.METRIC_DURATION + TIMING.PHOTO_DURATION;
 
+// ── BIGGER FONTS — ~40% larger across the board ──
 const FONTS = {
-  HERO_NUMBER: 'bold 120px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  HERO_UNIT: '200 22px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  LABEL_SM: '500 13px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  LABEL_MD: '500 15px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  DAY_PILL: '700 14px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  ACTIVITY: '600 18px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  STAT_VALUE: 'bold 32px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  STAT_LABEL: '400 11px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  INTRO_TITLE: 'bold 44px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  INTRO_SUB: '300 16px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  OUTRO_BIG: 'bold 64px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  OUTRO_LABEL: '400 15px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  PHOTO_ACTIVITY: 'bold 28px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  PHOTO_METRIC: '500 14px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  HERO_NUMBER: 'bold 156px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  HERO_UNIT: '200 28px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  LABEL_SM: '500 16px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  LABEL_MD: '500 19px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  DAY_PILL: '700 18px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  ACTIVITY: '600 22px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  STAT_VALUE: 'bold 42px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  STAT_LABEL: '400 14px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  INTRO_TITLE: 'bold 56px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  INTRO_SUB: '300 20px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  OUTRO_BIG: 'bold 80px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  OUTRO_LABEL: '400 20px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  PHOTO_ACTIVITY: 'bold 34px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  PHOTO_METRIC: '600 18px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  CALORIES: 'bold 36px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  CALORIES_LABEL: '400 13px -apple-system, "SF Pro Text", system-ui, sans-serif',
 };
 
 // Activity accent colors (HSL hue)
@@ -127,76 +131,190 @@ function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * Math.max(0, Math.min(1, t));
 }
 
-// ============ CONTEXTUAL AUDIO SYNTHESIS ============
+// ============ RICH CONTEXTUAL MUSIC SYNTHESIS ============
+
+// Note frequencies for musical scales
+const NOTE_FREQ: Record<string, number> = {
+  C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196.00, A3: 220.00, B3: 246.94,
+  C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00, A4: 440.00, B4: 493.88,
+  C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99,
+};
+
+interface ChordProgression {
+  chords: number[][];    // Array of chords, each chord = array of frequencies
+  melody: number[];       // Melody note frequencies
+  bassLine: number[];     // Bass note frequencies
+  bpm: number;
+}
+
+function getChordProgression(mood: MusicMood): ChordProgression {
+  switch (mood) {
+    case 'energetic':
+      return {
+        // Am - F - C - G (epic pop progression)
+        chords: [
+          [NOTE_FREQ.A3, NOTE_FREQ.C4, NOTE_FREQ.E4],
+          [NOTE_FREQ.F3, NOTE_FREQ.A3, NOTE_FREQ.C4],
+          [NOTE_FREQ.C4, NOTE_FREQ.E4, NOTE_FREQ.G4],
+          [NOTE_FREQ.G3, NOTE_FREQ.B3, NOTE_FREQ.D4],
+        ],
+        melody: [NOTE_FREQ.E5, NOTE_FREQ.D5, NOTE_FREQ.C5, NOTE_FREQ.E5, NOTE_FREQ.G5, NOTE_FREQ.E5, NOTE_FREQ.D5, NOTE_FREQ.C5],
+        bassLine: [NOTE_FREQ.A3, NOTE_FREQ.A3, NOTE_FREQ.F3, NOTE_FREQ.F3, NOTE_FREQ.C3, NOTE_FREQ.C3, NOTE_FREQ.G3, NOTE_FREQ.G3],
+        bpm: 118,
+      };
+    case 'rhythmic':
+      return {
+        // C - Am - F - G (classic motivational)
+        chords: [
+          [NOTE_FREQ.C4, NOTE_FREQ.E4, NOTE_FREQ.G4],
+          [NOTE_FREQ.A3, NOTE_FREQ.C4, NOTE_FREQ.E4],
+          [NOTE_FREQ.F3, NOTE_FREQ.A3, NOTE_FREQ.C4],
+          [NOTE_FREQ.G3, NOTE_FREQ.B3, NOTE_FREQ.D4],
+        ],
+        melody: [NOTE_FREQ.C5, NOTE_FREQ.E5, NOTE_FREQ.G5, NOTE_FREQ.E5, NOTE_FREQ.D5, NOTE_FREQ.C5, NOTE_FREQ.D5, NOTE_FREQ.E5],
+        bassLine: [NOTE_FREQ.C3, NOTE_FREQ.C3, NOTE_FREQ.A3, NOTE_FREQ.A3, NOTE_FREQ.F3, NOTE_FREQ.F3, NOTE_FREQ.G3, NOTE_FREQ.G3],
+        bpm: 104,
+      };
+    case 'calm':
+      return {
+        // Cmaj7 - Fmaj7 - Dm7 - G7 (jazzy calm)
+        chords: [
+          [NOTE_FREQ.C4, NOTE_FREQ.E4, NOTE_FREQ.G4, NOTE_FREQ.B4],
+          [NOTE_FREQ.F3, NOTE_FREQ.A3, NOTE_FREQ.C4, NOTE_FREQ.E4],
+          [NOTE_FREQ.D4, NOTE_FREQ.F4, NOTE_FREQ.A4],
+          [NOTE_FREQ.G3, NOTE_FREQ.B3, NOTE_FREQ.D4, NOTE_FREQ.F4],
+        ],
+        melody: [NOTE_FREQ.E5, NOTE_FREQ.D5, NOTE_FREQ.C5, NOTE_FREQ.D5, NOTE_FREQ.E5, NOTE_FREQ.G5, NOTE_FREQ.E5, NOTE_FREQ.C5],
+        bassLine: [NOTE_FREQ.C3, NOTE_FREQ.C3, NOTE_FREQ.F3, NOTE_FREQ.F3, NOTE_FREQ.D3, NOTE_FREQ.D3, NOTE_FREQ.G3, NOTE_FREQ.G3],
+        bpm: 76,
+      };
+    case 'ambient':
+      return {
+        // Em - C - G - D (atmospheric)
+        chords: [
+          [NOTE_FREQ.E4, NOTE_FREQ.G4, NOTE_FREQ.B4],
+          [NOTE_FREQ.C4, NOTE_FREQ.E4, NOTE_FREQ.G4],
+          [NOTE_FREQ.G3, NOTE_FREQ.B3, NOTE_FREQ.D4],
+          [NOTE_FREQ.D4, NOTE_FREQ.F4, NOTE_FREQ.A4],
+        ],
+        melody: [NOTE_FREQ.B4, NOTE_FREQ.G4, NOTE_FREQ.E5, NOTE_FREQ.D5, NOTE_FREQ.G5, NOTE_FREQ.E5, NOTE_FREQ.B4, NOTE_FREQ.D5],
+        bassLine: [NOTE_FREQ.E3, NOTE_FREQ.E3, NOTE_FREQ.C3, NOTE_FREQ.C3, NOTE_FREQ.G3, NOTE_FREQ.G3, NOTE_FREQ.D3, NOTE_FREQ.D3],
+        bpm: 84,
+      };
+  }
+}
 
 function generateContextualAudio(durationSec: number, mood: MusicMood): AudioBuffer {
   const sampleRate = 44100;
-  const buffer = new AudioBuffer({ length: Math.ceil(sampleRate * durationSec), sampleRate, numberOfChannels: 2 });
+  const length = Math.ceil(sampleRate * durationSec);
+  const buffer = new AudioBuffer({ length, sampleRate, numberOfChannels: 2 });
   const left = buffer.getChannelData(0);
   const right = buffer.getChannelData(1);
 
-  const configs: Record<MusicMood, {
-    bpm: number; kickVol: number; hihatVol: number; padFreq: number;
-    padVol: number; bassFreq: number; shimmerVol: number; subVol: number;
-  }> = {
-    energetic: { bpm: 115, kickVol: 0.35, hihatVol: 0.08, padFreq: 130, padVol: 0.02, bassFreq: 65, shimmerVol: 0.008, subVol: 0.15 },
-    rhythmic:  { bpm: 100, kickVol: 0.28, hihatVol: 0.06, padFreq: 110, padVol: 0.035, bassFreq: 55, shimmerVol: 0.012, subVol: 0.12 },
-    calm:      { bpm: 72,  kickVol: 0.10, hihatVol: 0.02, padFreq: 220, padVol: 0.06, bassFreq: 55, shimmerVol: 0.02, subVol: 0.05 },
-    ambient:   { bpm: 80,  kickVol: 0.12, hihatVol: 0.03, padFreq: 165, padVol: 0.05, bassFreq: 55, shimmerVol: 0.018, subVol: 0.08 },
-  };
+  const prog = getChordProgression(mood);
+  const beatDur = 60 / prog.bpm;
+  const barDur = beatDur * 4; // 4 beats per bar
+  const chordCount = prog.chords.length;
 
-  const c = configs[mood];
-  const beatInterval = 60 / c.bpm;
+  // Volume profiles per mood
+  const vol = mood === 'calm'
+    ? { kick: 0.08, snare: 0.04, hihat: 0.025, pad: 0.035, bass: 0.12, melody: 0.04, arp: 0.025 }
+    : mood === 'ambient'
+    ? { kick: 0.10, snare: 0.03, hihat: 0.02, pad: 0.045, bass: 0.10, melody: 0.035, arp: 0.03 }
+    : mood === 'energetic'
+    ? { kick: 0.30, snare: 0.12, hihat: 0.06, pad: 0.02, bass: 0.18, melody: 0.05, arp: 0.04 }
+    : { kick: 0.22, snare: 0.08, hihat: 0.045, pad: 0.03, bass: 0.15, melody: 0.045, arp: 0.035 };
 
-  for (let i = 0; i < left.length; i++) {
+  for (let i = 0; i < length; i++) {
     const t = i / sampleRate;
-    const beatPhase = (t % beatInterval) / beatInterval;
+    const barPos = t / barDur;
+    const currentBar = Math.floor(barPos);
+    const posInBar = barPos - currentBar;
+    const chordIdx = currentBar % chordCount;
+    const chord = prog.chords[chordIdx];
+    const beatPhase = (t % beatDur) / beatDur;
+    const beatNum = Math.floor(posInBar * 4); // 0-3
 
-    // Sub-bass kick
-    const kickEnv = Math.exp(-beatPhase * 20);
-    const kickFreq = c.bassFreq * (1 + 2.5 * Math.exp(-beatPhase * 14));
-    const kick = Math.sin(2 * Math.PI * kickFreq * t) * kickEnv * c.kickVol;
+    let sample = 0;
 
-    // Sub-bass layer (continuous low hum)
-    const sub = Math.sin(2 * Math.PI * c.bassFreq * 0.5 * t) * c.subVol
-      * (0.6 + 0.4 * Math.sin(2 * Math.PI * 0.1 * t));
-
-    // Hi-hat on off-beats
-    const halfBeat = (t % (beatInterval / 2)) / (beatInterval / 2);
-    const isOffBeat = Math.floor(t / (beatInterval / 2)) % 2 === 1;
-    const hihatEnv = isOffBeat ? Math.exp(-halfBeat * 30) : 0;
-    const hihat = (Math.random() * 2 - 1) * hihatEnv * c.hihatVol;
-
-    // Warm pad chord — two detuned oscillators
-    const padA = Math.sin(2 * Math.PI * c.padFreq * t);
-    const padB = Math.sin(2 * Math.PI * c.padFreq * 1.005 * t); // slight detune for warmth
-    const padC = Math.sin(2 * Math.PI * c.padFreq * 1.498 * t); // fifth
-    const padEnv = 0.5 + 0.5 * Math.sin(2 * Math.PI * 0.12 * t);
-    const pad = (padA + padB * 0.7 + padC * 0.3) * c.padVol * padEnv;
-
-    // High shimmer — gentle sparkle
-    const shimmer = Math.sin(2 * Math.PI * 880 * t + Math.sin(2 * Math.PI * 0.3 * t) * 4)
-      * c.shimmerVol * (0.5 + 0.5 * Math.sin(2 * Math.PI * 0.06 * t));
-
-    // Percussion accent every 4 beats (for energetic/rhythmic)
-    let perc = 0;
-    if (mood === 'energetic' || mood === 'rhythmic') {
-      const barPhase = (t % (beatInterval * 4)) / (beatInterval * 4);
-      if (barPhase < 0.02) {
-        perc = Math.sin(2 * Math.PI * 200 * t) * Math.exp(-barPhase * 200) * 0.08;
-      }
+    // ── 1. Kick drum — on beats 1 and 3 (or every beat for energetic) ──
+    const kickOnBeat = mood === 'energetic' ? true : (beatNum === 0 || beatNum === 2);
+    if (kickOnBeat) {
+      const kickEnv = Math.exp(-beatPhase * 18);
+      const kickFreq = 55 * (1 + 3 * Math.exp(-beatPhase * 12));
+      sample += Math.sin(2 * Math.PI * kickFreq * t) * kickEnv * vol.kick;
     }
 
-    const sample = kick + sub + hihat + pad + shimmer + perc;
+    // ── 2. Snare — on beats 2 and 4 ──
+    if (beatNum === 1 || beatNum === 3) {
+      const snareEnv = Math.exp(-beatPhase * 22);
+      const snareNoise = (Math.random() * 2 - 1) * snareEnv;
+      const snareTone = Math.sin(2 * Math.PI * 185 * t) * snareEnv * 0.4;
+      sample += (snareNoise + snareTone) * vol.snare;
+    }
 
-    // Smooth fade in/out
-    const fadeIn = Math.min(1, t / 1.2);
-    const fadeOut = Math.min(1, (durationSec - t) / 1.5);
-    const envelope = fadeIn * fadeOut;
+    // ── 3. Hi-hat — 8th notes (every half beat) ──
+    const eighthPhase = (t % (beatDur / 2)) / (beatDur / 2);
+    const hihatEnv = Math.exp(-eighthPhase * 35);
+    const openHat = (beatNum === 2 && eighthPhase < 0.5);
+    const hatDecay = openHat ? Math.exp(-eighthPhase * 8) : hihatEnv;
+    sample += (Math.random() * 2 - 1) * hatDecay * vol.hihat;
 
-    // Slight stereo width
-    left[i] = sample * envelope;
-    right[i] = (sample * 0.92 + shimmer * 0.08 + pad * 0.05 * Math.sin(t * 0.7)) * envelope;
+    // ── 4. Chord pad — warm detuned oscillators ──
+    let padSum = 0;
+    for (const freq of chord) {
+      padSum += Math.sin(2 * Math.PI * freq * t);
+      padSum += Math.sin(2 * Math.PI * freq * 1.003 * t) * 0.7; // detune warmth
+    }
+    const padEnv = 0.6 + 0.4 * Math.sin(2 * Math.PI * 0.15 * t);
+    sample += (padSum / chord.length) * vol.pad * padEnv;
+
+    // ── 5. Bass line — follows chord root, octave lower ──
+    const bassIdx = Math.floor(posInBar * prog.bassLine.length / 1) % prog.bassLine.length;
+    const bassFreq = prog.bassLine[Math.floor(posInBar * 2) % prog.bassLine.length] * 0.5;
+    const bassOsc = Math.sin(2 * Math.PI * bassFreq * t) + 
+                    Math.sin(2 * Math.PI * bassFreq * 2 * t) * 0.3;
+    // Slight sidechain feel — duck bass on kick
+    const sidechainDuck = kickOnBeat ? Math.min(1, beatPhase * 6) : 1;
+    sample += bassOsc * vol.bass * sidechainDuck;
+
+    // ── 6. Melody — plays on certain beats, short plucky notes ──
+    const melodyBeatGlobal = Math.floor(t / (beatDur * 0.5));
+    const melodyIdx = melodyBeatGlobal % prog.melody.length;
+    const melodyPhase = (t % (beatDur * 0.5)) / (beatDur * 0.5);
+    // Only play melody on some beats for breathing room
+    const melodyPlay = (melodyBeatGlobal % 4 !== 3); // skip every 4th
+    if (melodyPlay) {
+      const melodyEnv = Math.exp(-melodyPhase * 6); // plucky decay
+      const melodyFreq = prog.melody[melodyIdx];
+      const melodyOsc = Math.sin(2 * Math.PI * melodyFreq * t) * 0.7 +
+                        Math.sin(2 * Math.PI * melodyFreq * 2 * t) * 0.2 + // harmonic
+                        Math.sin(2 * Math.PI * melodyFreq * 3 * t) * 0.1;  // shimmer
+      sample += melodyOsc * melodyEnv * vol.melody;
+    }
+
+    // ── 7. Arpeggio — 16th note pattern cycling through chord tones ──
+    const sixteenthDur = beatDur / 4;
+    const arpPhase = (t % sixteenthDur) / sixteenthDur;
+    const arpIdx = Math.floor(t / sixteenthDur) % chord.length;
+    const arpFreq = chord[arpIdx] * 2; // one octave up
+    const arpEnv = Math.exp(-arpPhase * 10);
+    sample += Math.sin(2 * Math.PI * arpFreq * t) * arpEnv * vol.arp;
+
+    // ── 8. Atmospheric shimmer ──
+    const shimmer = Math.sin(2 * Math.PI * 1760 * t + Math.sin(2 * Math.PI * 0.25 * t) * 5)
+      * 0.006 * (0.5 + 0.5 * Math.sin(2 * Math.PI * 0.08 * t));
+    sample += shimmer;
+
+    // ── Master envelope ──
+    const fadeIn = Math.min(1, t / 1.5);
+    const fadeOut = Math.min(1, (durationSec - t) / 2.0);
+    const masterEnv = fadeIn * fadeOut;
+
+    // Stereo widening
+    const stereoPhase = Math.sin(t * 0.8) * 0.06;
+    left[i] = (sample + shimmer * 0.5) * masterEnv;
+    right[i] = (sample * (1 - stereoPhase) + shimmer * 0.5) * masterEnv;
   }
 
   return buffer;
@@ -309,28 +427,27 @@ function drawGlow(ctx: CanvasRenderingContext2D, x: number, y: number, radius: n
   ctx.save();
   ctx.globalAlpha = alpha;
   const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
-  g.addColorStop(0, `hsla(${hue}, 70%, 50%, 0.5)`);
-  g.addColorStop(0.4, `hsla(${hue}, 55%, 40%, 0.12)`);
+  g.addColorStop(0, `hsla(${hue}, 70%, 50%, 0.55)`);
+  g.addColorStop(0.35, `hsla(${hue}, 55%, 40%, 0.15)`);
   g.addColorStop(1, 'transparent');
   ctx.fillStyle = g;
   ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
   ctx.restore();
 }
 
-// Elegant thin divider line
 function drawThinLine(ctx: CanvasRenderingContext2D, y: number, hue: number, alpha: number) {
   ctx.save();
   ctx.globalAlpha = alpha;
-  const lg = ctx.createLinearGradient(WIDTH * 0.2, 0, WIDTH * 0.8, 0);
+  const lg = ctx.createLinearGradient(WIDTH * 0.15, 0, WIDTH * 0.85, 0);
   lg.addColorStop(0, 'transparent');
-  lg.addColorStop(0.3, `hsla(${hue}, 40%, 60%, 0.35)`);
-  lg.addColorStop(0.7, `hsla(${hue}, 40%, 60%, 0.35)`);
+  lg.addColorStop(0.25, `hsla(${hue}, 40%, 60%, 0.4)`);
+  lg.addColorStop(0.75, `hsla(${hue}, 40%, 60%, 0.4)`);
   lg.addColorStop(1, 'transparent');
   ctx.strokeStyle = lg;
   ctx.lineWidth = 0.5;
   ctx.beginPath();
-  ctx.moveTo(WIDTH * 0.2, y);
-  ctx.lineTo(WIDTH * 0.8, y);
+  ctx.moveTo(WIDTH * 0.15, y);
+  ctx.lineTo(WIDTH * 0.85, y);
   ctx.stroke();
   ctx.restore();
 }
@@ -338,7 +455,6 @@ function drawThinLine(ctx: CanvasRenderingContext2D, y: number, hue: number, alp
 // ============ CINEMATIC TRANSITIONS ============
 
 function drawCrossFade(ctx: CanvasRenderingContext2D, progress: number) {
-  // Smooth directional wipe — elegant alternative to glitch
   if (progress <= 0 || progress >= 1) return;
   const t = Math.sin(progress * Math.PI);
   ctx.save();
@@ -352,55 +468,55 @@ function drawCrossFade(ctx: CanvasRenderingContext2D, progress: number) {
 
 function drawIntroCard(ctx: CanvasRenderingContext2D, progress: number, totalDays: number) {
   ctx.save();
-
   drawDarkBg(ctx, 265);
 
-  // Central soft glow
+  // Central glow — larger and brighter
   const glowT = easeOutExpo(Math.min(progress * 1.8, 1));
-  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.44, 400, 265, 0.18 * glowT);
+  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.42, 480, 265, 0.24 * glowT);
+  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.42, 250, 290, 0.1 * glowT);
 
-  // Title — slide up + fade
-  const titleT = easeOutBack(Math.min(Math.max(progress - 0.08, 0) * 2.5, 1));
+  // Title — big, bold slide up
+  const titleT = easeOutBack(Math.min(Math.max(progress - 0.06, 0) * 2.2, 1));
   if (titleT > 0) {
     ctx.globalAlpha = titleT;
-    const slideY = lerp(20, 0, titleT);
-    ctx.translate(WIDTH / 2, HEIGHT * 0.42 + slideY);
+    const slideY = lerp(30, 0, titleT);
+    ctx.translate(WIDTH / 2, HEIGHT * 0.40 + slideY);
 
     ctx.font = FONTS.INTRO_TITLE;
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.shadowColor = 'hsla(265, 60%, 55%, 0.35)';
-    ctx.shadowBlur = 50;
-    ctx.fillText('YOUR WEEK', 0, -26);
-    ctx.fillText('IN MOTION', 0, 26);
+    ctx.shadowColor = 'hsla(265, 60%, 55%, 0.4)';
+    ctx.shadowBlur = 60;
+    ctx.fillText('YOUR WEEK', 0, -34);
+    ctx.fillText('IN MOTION', 0, 34);
     ctx.shadowColor = 'transparent';
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
-  // Thin accent line
-  const lineT = easeOutCubic(Math.min(Math.max(progress - 0.25, 0) * 3, 1));
+  // Accent line
+  const lineT = easeOutCubic(Math.min(Math.max(progress - 0.22, 0) * 3, 1));
   drawThinLine(ctx, HEIGHT * 0.50, 265, lineT * 0.6);
 
-  // Subtitle
-  const subT = easeOutCubic(Math.min(Math.max(progress - 0.3, 0) * 3, 1));
+  // Subtitle — larger
+  const subT = easeOutCubic(Math.min(Math.max(progress - 0.28, 0) * 3, 1));
   if (subT > 0) {
-    ctx.globalAlpha = subT * 0.45;
-    const subY = lerp(HEIGHT * 0.535 + 8, HEIGHT * 0.535, subT);
+    ctx.globalAlpha = subT * 0.5;
+    const subY = lerp(HEIGHT * 0.54 + 10, HEIGHT * 0.54, subT);
     ctx.font = FONTS.INTRO_SUB;
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.letterSpacing = '3px';
+    ctx.letterSpacing = '4px';
     ctx.fillText(`${totalDays} DAYS  ·  ${totalDays} ACTIVITIES`, WIDTH / 2, subY);
     ctx.letterSpacing = '0px';
   }
 
   drawGrain(ctx, 0.025);
 
-  // Exit: smooth fade to black
-  if (progress > 0.72) {
-    const exitT = (progress - 0.72) / 0.28;
+  // Exit fade
+  if (progress > 0.70) {
+    const exitT = (progress - 0.70) / 0.30;
     ctx.globalAlpha = easeInOutCubic(exitT);
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -413,82 +529,98 @@ function drawIntroCard(ctx: CanvasRenderingContext2D, progress: number, totalDay
 
 function drawOutroCard(ctx: CanvasRenderingContext2D, progress: number, dayStates: DayState[]) {
   ctx.save();
-
   drawDarkBg(ctx, 150);
 
-  // Warm central glow
   const glowT = easeOutExpo(Math.min(progress * 2, 1));
-  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.38, 350, 150, 0.14 * glowT);
+  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.36, 400, 150, 0.18 * glowT);
 
   // Big number — scale in
   const numT = easeOutBack(Math.min(Math.max(progress - 0.03, 0) * 2.5, 1));
   if (numT > 0) {
     ctx.globalAlpha = numT;
-    ctx.translate(WIDTH / 2, HEIGHT * 0.36);
-    ctx.scale(lerp(0.6, 1, numT), lerp(0.6, 1, numT));
+    ctx.translate(WIDTH / 2, HEIGHT * 0.34);
+    ctx.scale(lerp(0.5, 1, numT), lerp(0.5, 1, numT));
     ctx.font = FONTS.OUTRO_BIG;
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.shadowColor = 'hsla(150, 50%, 50%, 0.25)';
-    ctx.shadowBlur = 40;
+    ctx.shadowColor = 'hsla(150, 50%, 50%, 0.3)';
+    ctx.shadowBlur = 50;
     ctx.fillText(`${dayStates.length} DAYS`, 0, 0);
     ctx.shadowColor = 'transparent';
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
   // "WEEK COMPLETE" label
-  const labelT = easeOutCubic(Math.min(Math.max(progress - 0.15, 0) * 3, 1));
+  const labelT = easeOutCubic(Math.min(Math.max(progress - 0.12, 0) * 3, 1));
   if (labelT > 0) {
-    ctx.globalAlpha = labelT * 0.45;
+    ctx.globalAlpha = labelT * 0.5;
     ctx.font = FONTS.OUTRO_LABEL;
-    ctx.fillStyle = 'hsla(150, 40%, 70%, 0.7)';
+    ctx.fillStyle = 'hsla(150, 40%, 70%, 0.75)';
     ctx.textAlign = 'center';
-    ctx.letterSpacing = '5px';
-    ctx.fillText('WEEK COMPLETE', WIDTH / 2, HEIGHT * 0.435);
+    ctx.letterSpacing = '6px';
+    ctx.fillText('WEEK COMPLETE', WIDTH / 2, HEIGHT * 0.42);
     ctx.letterSpacing = '0px';
   }
 
-  // Thin divider
-  const divT = easeOutCubic(Math.min(Math.max(progress - 0.22, 0) * 3, 1));
-  drawThinLine(ctx, HEIGHT * 0.465, 150, divT * 0.5);
+  // Total calories summary
+  const totalCals = dayStates.reduce((sum, d) => sum + (parseInt(d.calories || '0') || 0), 0);
+  if (totalCals > 0) {
+    const calT = easeOutCubic(Math.min(Math.max(progress - 0.2, 0) * 3, 1));
+    if (calT > 0) {
+      ctx.globalAlpha = calT * 0.7;
+      ctx.font = FONTS.CALORIES;
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${totalCals} CAL`, WIDTH / 2, HEIGHT * 0.48);
+      ctx.font = FONTS.CALORIES_LABEL;
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.letterSpacing = '3px';
+      ctx.fillText('TOTAL BURNED', WIDTH / 2, HEIGHT * 0.505);
+      ctx.letterSpacing = '0px';
+    }
+  }
 
-  // Activity chips row
-  const rowT = easeOutCubic(Math.min(Math.max(progress - 0.28, 0) * 2.5, 1));
+  // Divider
+  const divT = easeOutCubic(Math.min(Math.max(progress - 0.25, 0) * 3, 1));
+  drawThinLine(ctx, HEIGHT * 0.535, 150, divT * 0.5);
+
+  // Activity chips
+  const rowT = easeOutCubic(Math.min(Math.max(progress - 0.30, 0) * 2.5, 1));
   if (rowT > 0) {
     const unique = [...new Set(dayStates.map(d => d.activityType))];
-    const chipW = 85;
-    const chipGap = 10;
+    const chipW = 100;
+    const chipGap = 12;
     const totalW = unique.length * chipW + (unique.length - 1) * chipGap;
     const startX = (WIDTH - totalW) / 2;
 
     for (let i = 0; i < unique.length; i++) {
-      const delay = i * 0.06;
-      const t = easeOutCubic(Math.min(Math.max(progress - 0.28 - delay, 0) * 3.5, 1));
+      const delay = i * 0.05;
+      const t = easeOutCubic(Math.min(Math.max(progress - 0.30 - delay, 0) * 3.5, 1));
       if (t <= 0) continue;
 
       const x = startX + i * (chipW + chipGap);
-      const y = HEIGHT * 0.50;
+      const y = HEIGHT * 0.565;
       const hue = getActivityHue(unique[i]);
 
-      ctx.globalAlpha = t * 0.75;
-      ctx.fillStyle = `hsla(${hue}, 35%, 18%, 0.5)`;
+      ctx.globalAlpha = t * 0.8;
+      ctx.fillStyle = `hsla(${hue}, 35%, 18%, 0.55)`;
       ctx.beginPath();
-      ctx.roundRect(x, y, chipW, 30, 15);
+      ctx.roundRect(x, y, chipW, 34, 17);
       ctx.fill();
 
-      ctx.strokeStyle = `hsla(${hue}, 45%, 50%, 0.2)`;
+      ctx.strokeStyle = `hsla(${hue}, 45%, 50%, 0.25)`;
       ctx.lineWidth = 0.5;
       ctx.beginPath();
-      ctx.roundRect(x, y, chipW, 30, 15);
+      ctx.roundRect(x, y, chipW, 34, 17);
       ctx.stroke();
 
       ctx.font = FONTS.STAT_LABEL;
-      ctx.fillStyle = `hsla(${hue}, 45%, 75%, 0.85)`;
+      ctx.fillStyle = `hsla(${hue}, 45%, 78%, 0.9)`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const name = unique[i].length > 9 ? unique[i].slice(0, 8) + '.' : unique[i];
-      ctx.fillText(name.toUpperCase(), x + chipW / 2, y + 15);
+      ctx.fillText(name.toUpperCase(), x + chipW / 2, y + 17);
     }
   }
 
@@ -504,7 +636,7 @@ function drawOutroCard(ctx: CanvasRenderingContext2D, progress: number, dayState
   ctx.restore();
 }
 
-// ============ METRIC CARD — CLEAN & PREMIUM ============
+// ============ METRIC CARD — BOLD & PREMIUM ============
 
 function drawMetricCard(
   ctx: CanvasRenderingContext2D,
@@ -518,60 +650,59 @@ function drawMetricCard(
   const hue = getActivityHue(state.activityType);
   drawDarkBg(ctx, hue);
 
-  // Large ambient glow centered on metric
+  // Larger, brighter glow
   const glowP = easeOutExpo(Math.min(progress * 2, 1));
-  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.38, 450, hue, 0.22 * glowP);
+  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.36, 500, hue, 0.28 * glowP);
+  drawGlow(ctx, WIDTH * 0.35, HEIGHT * 0.55, 280, (hue + 40) % 360, 0.08 * glowP);
 
-  // Secondary glow for depth
-  drawGlow(ctx, WIDTH * 0.3, HEIGHT * 0.6, 300, (hue + 40) % 360, 0.06 * glowP);
+  drawGrain(ctx, 0.025);
 
-  drawGrain(ctx, 0.03);
-
-  // ── Staggered timings (no more than 2 animating at once) ──
+  // ── Staggered timings ──
   const dayT   = easeOutCubic(Math.min(progress * 4, 1));
-  const heroT  = easeOutExpo(Math.min(Math.max(progress - 0.08, 0) * 2.5, 1));
-  const unitT  = easeOutCubic(Math.min(Math.max(progress - 0.18, 0) * 3, 1));
-  const actT   = easeOutCubic(Math.min(Math.max(progress - 0.28, 0) * 3, 1));
-  const statsT = easeOutCubic(Math.min(Math.max(progress - 0.38, 0) * 2.5, 1));
+  const heroT  = easeOutExpo(Math.min(Math.max(progress - 0.06, 0) * 2.2, 1));
+  const unitT  = easeOutCubic(Math.min(Math.max(progress - 0.15, 0) * 3, 1));
+  const actT   = easeOutCubic(Math.min(Math.max(progress - 0.24, 0) * 3, 1));
+  const statsT = easeOutCubic(Math.min(Math.max(progress - 0.34, 0) * 2.5, 1));
+  const calT   = easeOutCubic(Math.min(Math.max(progress - 0.44, 0) * 3, 1));
 
-  const centerY = HEIGHT * 0.38;
+  const centerY = HEIGHT * 0.36;
 
-  // ── DAY pill — minimal rounded tag ──
+  // ── DAY pill ──
   if (dayT > 0) {
     ctx.save();
-    ctx.globalAlpha = dayT * globalAlpha * 0.85;
-    const pillY = lerp(centerY - 130, centerY - 115, dayT);
+    ctx.globalAlpha = dayT * globalAlpha * 0.9;
+    const pillY = lerp(centerY - 145, centerY - 128, dayT);
     const text = `DAY ${state.dayNumber}`;
     ctx.font = FONTS.DAY_PILL;
     const tw = ctx.measureText(text).width;
-    const pw = tw + 32;
-    const ph = 28;
+    const pw = tw + 38;
+    const ph = 34;
     const px = (WIDTH - pw) / 2;
 
-    ctx.fillStyle = `hsla(${hue}, 50%, 50%, 0.15)`;
+    ctx.fillStyle = `hsla(${hue}, 50%, 50%, 0.18)`;
     ctx.beginPath();
-    ctx.roundRect(px, pillY - ph / 2, pw, ph, 14);
+    ctx.roundRect(px, pillY - ph / 2, pw, ph, 17);
     ctx.fill();
 
-    ctx.strokeStyle = `hsla(${hue}, 50%, 55%, 0.25)`;
+    ctx.strokeStyle = `hsla(${hue}, 50%, 55%, 0.3)`;
     ctx.lineWidth = 0.5;
     ctx.beginPath();
-    ctx.roundRect(px, pillY - ph / 2, pw, ph, 14);
+    ctx.roundRect(px, pillY - ph / 2, pw, ph, 17);
     ctx.stroke();
 
-    ctx.fillStyle = `hsla(${hue}, 55%, 78%, 1)`;
+    ctx.fillStyle = `hsla(${hue}, 55%, 80%, 1)`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(text, WIDTH / 2, pillY);
     ctx.restore();
   }
 
-  // ── Hero metric — big number with count-up ──
+  // ── Hero metric — BIG number ──
   if (heroT > 0) {
     ctx.save();
     ctx.globalAlpha = heroT * globalAlpha;
-    const scale = lerp(0.6, 1, heroT);
-    const slideY = lerp(30, 0, heroT);
+    const scale = lerp(0.5, 1, heroT);
+    const slideY = lerp(40, 0, heroT);
 
     ctx.translate(WIDTH / 2, centerY + slideY);
     ctx.scale(scale, scale);
@@ -586,8 +717,8 @@ function drawMetricCard(
       display = raw.replace(/^\d+/, String(current));
     }
 
-    ctx.shadowColor = `hsla(${hue}, 65%, 55%, 0.4)`;
-    ctx.shadowBlur = 60;
+    ctx.shadowColor = `hsla(${hue}, 65%, 55%, 0.45)`;
+    ctx.shadowBlur = 70;
     ctx.font = FONTS.HERO_NUMBER;
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
@@ -601,13 +732,13 @@ function drawMetricCard(
   // ── Metric unit label ──
   if (unitT > 0) {
     ctx.save();
-    ctx.globalAlpha = unitT * globalAlpha * 0.55;
-    const unitY = lerp(centerY + 60, centerY + 52, unitT);
+    ctx.globalAlpha = unitT * globalAlpha * 0.6;
+    const unitY = lerp(centerY + 72, centerY + 62, unitT);
     ctx.font = FONTS.HERO_UNIT;
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.letterSpacing = '5px';
+    ctx.letterSpacing = '6px';
     ctx.fillText(state.metricA.label.toUpperCase(), WIDTH / 2, unitY);
     ctx.letterSpacing = '0px';
     ctx.restore();
@@ -616,75 +747,71 @@ function drawMetricCard(
   // ── Activity name ──
   if (actT > 0) {
     ctx.save();
-    ctx.globalAlpha = actT * globalAlpha * 0.3;
-    const actY = lerp(centerY + 88, centerY + 80, actT);
+    ctx.globalAlpha = actT * globalAlpha * 0.35;
+    const actY = lerp(centerY + 105, centerY + 95, actT);
     ctx.font = FONTS.ACTIVITY;
-    ctx.fillStyle = `hsla(${hue}, 30%, 70%, 0.55)`;
+    ctx.fillStyle = `hsla(${hue}, 30%, 72%, 0.6)`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.letterSpacing = '3px';
+    ctx.letterSpacing = '4px';
     ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, actY);
     ctx.letterSpacing = '0px';
     ctx.restore();
   }
 
-  // ── Thin divider ──
+  // ── Divider ──
   if (statsT > 0) {
-    drawThinLine(ctx, HEIGHT * 0.555, hue, statsT * 0.4);
+    drawThinLine(ctx, HEIGHT * 0.56, hue, statsT * 0.4);
   }
 
-  // ── Secondary stats — clean horizontal row ──
+  // ── Secondary stats row — bigger values ──
   if (statsT > 0) {
     const stats: { label: string; value: string }[] = [];
     if (state.metricB.value !== '--') stats.push({ label: state.metricB.label, value: state.metricB.value });
-    if (state.calories && state.calories !== '--') stats.push({ label: 'Cal', value: state.calories });
-    if (state.intensity) stats.push({ label: 'Effort', value: state.intensity });
     if (state.metricC && state.metricC.value !== '--') stats.push({ label: state.metricC.label, value: state.metricC.value });
+    if (state.intensity) stats.push({ label: 'Effort', value: state.intensity });
 
     const maxStats = Math.min(stats.length, 3);
     if (maxStats > 0) {
-      // Evenly spaced columns
-      const sectionW = WIDTH * 0.7;
+      const sectionW = WIDTH * 0.75;
       const colW = sectionW / maxStats;
       const startX = (WIDTH - sectionW) / 2;
 
       for (let i = 0; i < maxStats; i++) {
-        const delay = i * 0.06;
-        const t = easeOutCubic(Math.min(Math.max(progress - 0.38 - delay, 0) * 3, 1));
+        const delay = i * 0.05;
+        const t = easeOutCubic(Math.min(Math.max(progress - 0.34 - delay, 0) * 3, 1));
         if (t <= 0) continue;
 
         const cx = startX + colW * (i + 0.5);
-        const baseY = HEIGHT * 0.59;
+        const baseY = HEIGHT * 0.60;
 
         ctx.save();
-        ctx.globalAlpha = t * globalAlpha * 0.85;
+        ctx.globalAlpha = t * globalAlpha * 0.9;
 
-        // Value
         ctx.font = FONTS.STAT_VALUE;
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(stats[i].value, cx, baseY);
 
-        // Label below
         ctx.font = FONTS.STAT_LABEL;
-        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.fillStyle = 'rgba(255,255,255,0.38)';
         ctx.letterSpacing = '2px';
-        ctx.fillText(stats[i].label.toUpperCase(), cx, baseY + 22);
+        ctx.fillText(stats[i].label.toUpperCase(), cx, baseY + 28);
         ctx.letterSpacing = '0px';
 
         ctx.restore();
 
-        // Vertical separator between stats
+        // Vertical separator
         if (i < maxStats - 1) {
           const sepX = startX + colW * (i + 1);
           ctx.save();
-          ctx.globalAlpha = t * 0.12;
+          ctx.globalAlpha = t * 0.14;
           ctx.strokeStyle = `hsla(${hue}, 30%, 60%, 0.5)`;
           ctx.lineWidth = 0.5;
           ctx.beginPath();
-          ctx.moveTo(sepX, baseY - 16);
-          ctx.lineTo(sepX, baseY + 28);
+          ctx.moveTo(sepX, baseY - 20);
+          ctx.lineTo(sepX, baseY + 35);
           ctx.stroke();
           ctx.restore();
         }
@@ -692,9 +819,42 @@ function drawMetricCard(
     }
   }
 
+  // ── Calories badge (bottom) ──
+  if (calT > 0 && state.calories && parseInt(state.calories) > 0) {
+    ctx.save();
+    ctx.globalAlpha = calT * globalAlpha * 0.7;
+    const calY = HEIGHT * 0.70;
+    
+    // Glass pill background
+    const pillW = 160;
+    const pillH = 50;
+    ctx.fillStyle = `hsla(${hue}, 30%, 20%, 0.35)`;
+    ctx.beginPath();
+    ctx.roundRect((WIDTH - pillW) / 2, calY - pillH / 2, pillW, pillH, 25);
+    ctx.fill();
+    ctx.strokeStyle = `hsla(${hue}, 40%, 50%, 0.15)`;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.roundRect((WIDTH - pillW) / 2, calY - pillH / 2, pillW, pillH, 25);
+    ctx.stroke();
+
+    ctx.font = FONTS.CALORIES;
+    ctx.fillStyle = `hsla(${(hue + 15) % 360}, 60%, 70%, 0.9)`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`${state.calories}`, WIDTH / 2 - 10, calY - 1);
+    
+    ctx.font = FONTS.CALORIES_LABEL;
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.letterSpacing = '2px';
+    ctx.fillText('CAL', WIDTH / 2 + 45, calY);
+    ctx.letterSpacing = '0px';
+    ctx.restore();
+  }
+
   // ── Exit crossfade ──
-  if (progress > 0.82) {
-    const exitT = (progress - 0.82) / 0.18;
+  if (progress > 0.80) {
+    const exitT = (progress - 0.80) / 0.20;
     ctx.fillStyle = `rgba(0,0,0,${easeInOutCubic(exitT) * 0.85})`;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
   }
@@ -729,20 +889,20 @@ function drawImageCover(
 }
 
 function drawPhotoOverlays(ctx: CanvasRenderingContext2D, state: DayState, textOpacity: number) {
-  // Bottom gradient — elegant cinematic
-  const bottomGrad = ctx.createLinearGradient(0, HEIGHT - 320, 0, HEIGHT);
+  // Bottom gradient
+  const bottomGrad = ctx.createLinearGradient(0, HEIGHT - 350, 0, HEIGHT);
   bottomGrad.addColorStop(0, 'transparent');
-  bottomGrad.addColorStop(0.4, 'rgba(0,0,0,0.25)');
-  bottomGrad.addColorStop(1, 'rgba(0,0,0,0.6)');
+  bottomGrad.addColorStop(0.35, 'rgba(0,0,0,0.3)');
+  bottomGrad.addColorStop(1, 'rgba(0,0,0,0.65)');
   ctx.fillStyle = bottomGrad;
-  ctx.fillRect(0, HEIGHT - 320, WIDTH, 320);
+  ctx.fillRect(0, HEIGHT - 350, WIDTH, 350);
 
-  // Top subtle vignette
-  const topGrad = ctx.createLinearGradient(0, 0, 0, 160);
-  topGrad.addColorStop(0, 'rgba(0,0,0,0.3)');
+  // Top vignette
+  const topGrad = ctx.createLinearGradient(0, 0, 0, 180);
+  topGrad.addColorStop(0, 'rgba(0,0,0,0.35)');
   topGrad.addColorStop(1, 'transparent');
   ctx.fillStyle = topGrad;
-  ctx.fillRect(0, 0, WIDTH, 160);
+  ctx.fillRect(0, 0, WIDTH, 180);
 
   if (textOpacity <= 0) return;
 
@@ -750,31 +910,32 @@ function drawPhotoOverlays(ctx: CanvasRenderingContext2D, state: DayState, textO
 
   ctx.save();
   ctx.globalAlpha = textOpacity;
-  ctx.shadowColor = 'rgba(0,0,0,0.5)';
-  ctx.shadowBlur = 10;
+  ctx.shadowColor = 'rgba(0,0,0,0.6)';
+  ctx.shadowBlur = 12;
 
-  // Day badge — top right, minimal
+  // Day badge — top right
   ctx.font = FONTS.DAY_PILL;
-  ctx.fillStyle = `hsla(${hue}, 50%, 75%, 0.7)`;
+  ctx.fillStyle = `hsla(${hue}, 50%, 78%, 0.75)`;
   ctx.textAlign = 'right';
   ctx.textBaseline = 'top';
-  ctx.letterSpacing = '2px';
-  ctx.fillText(`DAY ${state.dayNumber}`, WIDTH - 40, 48);
+  ctx.letterSpacing = '3px';
+  ctx.fillText(`DAY ${state.dayNumber}`, WIDTH - 40, 52);
   ctx.letterSpacing = '0px';
 
-  // Activity name — bottom left
+  // Activity name — bottom left, bigger
   ctx.font = FONTS.PHOTO_ACTIVITY;
   ctx.fillStyle = '#fff';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'bottom';
-  ctx.fillText(state.activityType.toUpperCase(), 40, HEIGHT - 95);
+  ctx.fillText(state.activityType.toUpperCase(), 40, HEIGHT - 100);
 
-  // Metrics — one line, clean
+  // Metrics line — bigger
   ctx.font = FONTS.PHOTO_METRIC;
-  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.fillStyle = 'rgba(255,255,255,0.65)';
   const metricLine = `${state.metricA.label}: ${state.metricA.value}`;
   const secondMetric = state.metricB.value !== '--' ? `  ·  ${state.metricB.label}: ${state.metricB.value}` : '';
-  ctx.fillText(metricLine + secondMetric, 40, HEIGHT - 68);
+  const calPart = state.calories && parseInt(state.calories) > 0 ? `  ·  ${state.calories} cal` : '';
+  ctx.fillText(metricLine + secondMetric + calPart, 40, HEIGHT - 68);
 
   ctx.restore();
 }
@@ -786,7 +947,7 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
 
   if (dayStates.length < 3) throw new Error('Need at least 3 days for recap');
 
-  console.log('[MotionRecap] Starting v3 with', dayStates.length, 'days');
+  console.log('[MotionRecap] Starting v4 with', dayStates.length, 'days');
   onProgress?.(3, 'Loading photos...');
 
   const images = await loadImages(dayStates);
@@ -807,7 +968,7 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
 
   console.log('[MotionRecap] Duration:', totalDuration.toFixed(1), 's, Frames:', totalFrames);
 
-  // Generate contextual audio
+  // Generate contextual audio with rich chord progressions
   const mood = getDominantMood(dayStates);
   console.log('[MotionRecap] Music mood:', mood);
   const audioBuffer = generateContextualAudio(totalDuration, mood);
@@ -943,12 +1104,12 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
           const photoTime = timeInSlot - TIMING.METRIC_DURATION;
           const photoProgress = photoTime / TIMING.PHOTO_DURATION;
 
-          // Smooth Ken Burns
+          // Ken Burns
           const kbScale = lerp(1.0, 1.0 + TIMING.KEN_BURNS_SCALE, photoProgress);
           const kbPanX = lerp(-3, 3, photoProgress) * (dayIndex % 2 === 0 ? 1 : -1);
           const kbPanY = lerp(-4, 4, photoProgress);
 
-          // Elegant cross-fade in and out
+          // Cross-fade in and out
           const fadeIn = easeOutCubic(Math.min(photoTime / TIMING.CROSSFADE, 1));
           const timeToEnd = TIMING.PHOTO_DURATION - photoTime;
           const fadeOut = Math.min(1, timeToEnd / TIMING.CROSSFADE);
@@ -960,7 +1121,6 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
           drawPhotoOverlays(ctx, dayStates[dayIndex], easeOutCubic(Math.min(photoTime / 0.6, 1)));
           ctx.restore();
 
-          // Subtle cross-fade transition
           if (photoTime < 0.2) {
             drawCrossFade(ctx, photoTime / 0.2);
           }
