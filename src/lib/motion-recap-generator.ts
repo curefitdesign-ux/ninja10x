@@ -1,14 +1,12 @@
 /**
- * Premium Motion Recap Generator v2 — Futuristic, Bold, Sound-Enabled
- * 
- * For each day:
- *   1. Metric Transition (2.2s) — Activity-specific unique visual representation
- *   2. Original Photo/Video (3.2s) — Ken Burns with cinematic overlays
- *   3. Intro title card (1.5s) + Outro summary card (2s)
- * 
- * Features: Synthetic audio beat, particle effects, glitch transitions,
- * unique metric visualizations per activity type, multiple data points.
- * 
+ * Premium Motion Recap Generator v3 — Elegant, Contextual, Cinematic
+ *
+ * Structure per day:
+ *   1. Metric card (2.5s) — Clean minimal layout with activity-specific accent
+ *   2. Photo hold (3.5s) — Cinematic Ken Burns with soft overlays
+ *   Intro (2s) + Outro (2.5s)
+ *
+ * Audio: Activity-contextual synthesized score (calm/energetic/rhythmic).
  * 100% local, no API calls. 9:16 ratio (720×1280), 24fps.
  */
 
@@ -46,60 +44,46 @@ const WIDTH = 720;
 const HEIGHT = 1280;
 
 const TIMING = {
-  INTRO_TITLE: 1.5,
-  METRIC_DURATION: 2.2,
-  PHOTO_DURATION: 3.2,
-  CROSSFADE: 0.35,
-  INTRO_FADE: 0.4,
-  OUTRO_CARD: 2.0,
-  OUTRO_FADE: 0.6,
-  KEN_BURNS_SCALE: 0.045,
+  INTRO: 2.0,
+  METRIC_DURATION: 2.5,
+  PHOTO_DURATION: 3.5,
+  CROSSFADE: 0.5,
+  OUTRO: 2.5,
+  OUTRO_FADE: 0.8,
+  KEN_BURNS_SCALE: 0.04,
 };
 
 const DAY_SLOT = TIMING.METRIC_DURATION + TIMING.PHOTO_DURATION;
 
 const FONTS = {
-  INTRO_TITLE: 'bold 42px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  INTRO_SUB: '300 18px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  DAY_TAG: '700 16px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  ACTIVITY: 'bold 22px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  METRIC_LABEL: '500 15px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  METRIC_VALUE: 'bold 110px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  METRIC_UNIT: '300 20px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  STAT_VALUE: 'bold 36px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  STAT_LABEL: '400 13px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  OUTRO_BIG: 'bold 56px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  OUTRO_LABEL: '400 16px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  HERO_NUMBER: 'bold 120px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  HERO_UNIT: '200 22px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  LABEL_SM: '500 13px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  LABEL_MD: '500 15px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  DAY_PILL: '700 14px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  ACTIVITY: '600 18px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  STAT_VALUE: 'bold 32px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  STAT_LABEL: '400 11px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  INTRO_TITLE: 'bold 44px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  INTRO_SUB: '300 16px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  OUTRO_BIG: 'bold 64px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  OUTRO_LABEL: '400 15px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  PHOTO_ACTIVITY: 'bold 28px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  PHOTO_METRIC: '500 14px -apple-system, "SF Pro Text", system-ui, sans-serif',
 };
 
-// Activity accent colors (hue values for HSL)
+// Activity accent colors (HSL hue)
 const ACTIVITY_HUES: Record<string, number> = {
-  running: 16,
-  cycling: 200,
-  yoga: 280,
-  boxing: 0,
-  swimming: 190,
-  trekking: 140,
-  basketball: 30,
-  football: 120,
-  cricket: 45,
-  default: 265,
+  running: 16, cycling: 200, yoga: 280, boxing: 0, swimming: 190,
+  trekking: 140, basketball: 30, football: 120, cricket: 45, default: 265,
 };
 
-// Activity-specific visual mode
-type VisualMode = 'ring' | 'bars' | 'pulse' | 'wave' | 'grid';
-
-const ACTIVITY_VISUALS: Record<string, VisualMode> = {
-  running: 'ring',
-  cycling: 'bars',
-  yoga: 'wave',
-  boxing: 'pulse',
-  swimming: 'wave',
-  trekking: 'grid',
-  basketball: 'pulse',
-  football: 'bars',
-  cricket: 'grid',
-  default: 'ring',
+// Music mood per activity
+type MusicMood = 'energetic' | 'calm' | 'rhythmic' | 'ambient';
+const ACTIVITY_MOOD: Record<string, MusicMood> = {
+  running: 'rhythmic', cycling: 'rhythmic', yoga: 'calm', boxing: 'energetic',
+  swimming: 'ambient', trekking: 'ambient', basketball: 'energetic',
+  football: 'energetic', cricket: 'rhythmic', default: 'rhythmic',
 };
 
 function getActivityHue(activity: string): number {
@@ -110,84 +94,109 @@ function getActivityHue(activity: string): number {
   return ACTIVITY_HUES.default;
 }
 
-function getVisualMode(activity: string): VisualMode {
-  const key = activity.toLowerCase();
-  for (const [name, mode] of Object.entries(ACTIVITY_VISUALS)) {
-    if (key.includes(name)) return mode;
+function getDominantMood(dayStates: DayState[]): MusicMood {
+  const counts: Record<MusicMood, number> = { energetic: 0, calm: 0, rhythmic: 0, ambient: 0 };
+  for (const s of dayStates) {
+    const key = s.activityType.toLowerCase();
+    let mood: MusicMood = ACTIVITY_MOOD.default;
+    for (const [name, m] of Object.entries(ACTIVITY_MOOD)) {
+      if (key.includes(name)) { mood = m; break; }
+    }
+    counts[mood]++;
   }
-  return ACTIVITY_VISUALS.default;
+  let best: MusicMood = 'rhythmic';
+  let max = 0;
+  for (const [m, c] of Object.entries(counts)) {
+    if (c > max) { max = c; best = m as MusicMood; }
+  }
+  return best;
 }
 
 // ============ EASING ============
 
-function easeOutCubic(t: number): number {
-  return 1 - Math.pow(1 - t, 3);
-}
-
+function easeOutCubic(t: number): number { return 1 - Math.pow(1 - t, 3); }
 function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
-
-function easeOutExpo(t: number): number {
-  return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
-}
-
+function easeOutExpo(t: number): number { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); }
 function easeOutBack(t: number): number {
   const c = 1.70158;
   return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2);
 }
-
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * Math.max(0, Math.min(1, t));
 }
 
-// ============ AUDIO GENERATION ============
+// ============ CONTEXTUAL AUDIO SYNTHESIS ============
 
-function generateAudioTrack(durationSec: number): AudioBuffer {
+function generateContextualAudio(durationSec: number, mood: MusicMood): AudioBuffer {
   const sampleRate = 44100;
-  const ctx = new OfflineAudioContext(2, sampleRate * durationSec, sampleRate);
-
-  // We'll create a buffer manually with a deep bass pulse + rhythmic hi-hat
-  const buffer = ctx.createBuffer(2, sampleRate * durationSec, sampleRate);
+  const buffer = new AudioBuffer({ length: Math.ceil(sampleRate * durationSec), sampleRate, numberOfChannels: 2 });
   const left = buffer.getChannelData(0);
   const right = buffer.getChannelData(1);
 
-  const bpm = 95;
-  const beatInterval = 60 / bpm;
-  const totalSamples = left.length;
+  const configs: Record<MusicMood, {
+    bpm: number; kickVol: number; hihatVol: number; padFreq: number;
+    padVol: number; bassFreq: number; shimmerVol: number; subVol: number;
+  }> = {
+    energetic: { bpm: 115, kickVol: 0.35, hihatVol: 0.08, padFreq: 130, padVol: 0.02, bassFreq: 65, shimmerVol: 0.008, subVol: 0.15 },
+    rhythmic:  { bpm: 100, kickVol: 0.28, hihatVol: 0.06, padFreq: 110, padVol: 0.035, bassFreq: 55, shimmerVol: 0.012, subVol: 0.12 },
+    calm:      { bpm: 72,  kickVol: 0.10, hihatVol: 0.02, padFreq: 220, padVol: 0.06, bassFreq: 55, shimmerVol: 0.02, subVol: 0.05 },
+    ambient:   { bpm: 80,  kickVol: 0.12, hihatVol: 0.03, padFreq: 165, padVol: 0.05, bassFreq: 55, shimmerVol: 0.018, subVol: 0.08 },
+  };
 
-  for (let i = 0; i < totalSamples; i++) {
+  const c = configs[mood];
+  const beatInterval = 60 / c.bpm;
+
+  for (let i = 0; i < left.length; i++) {
     const t = i / sampleRate;
     const beatPhase = (t % beatInterval) / beatInterval;
 
-    // Deep sub-bass kick on each beat
-    const kickEnv = Math.exp(-beatPhase * 18);
-    const kickFreq = 55 * (1 + 2 * Math.exp(-beatPhase * 12));
-    const kick = Math.sin(2 * Math.PI * kickFreq * t) * kickEnv * 0.35;
+    // Sub-bass kick
+    const kickEnv = Math.exp(-beatPhase * 20);
+    const kickFreq = c.bassFreq * (1 + 2.5 * Math.exp(-beatPhase * 14));
+    const kick = Math.sin(2 * Math.PI * kickFreq * t) * kickEnv * c.kickVol;
+
+    // Sub-bass layer (continuous low hum)
+    const sub = Math.sin(2 * Math.PI * c.bassFreq * 0.5 * t) * c.subVol
+      * (0.6 + 0.4 * Math.sin(2 * Math.PI * 0.1 * t));
 
     // Hi-hat on off-beats
     const halfBeat = (t % (beatInterval / 2)) / (beatInterval / 2);
     const isOffBeat = Math.floor(t / (beatInterval / 2)) % 2 === 1;
-    const hihatEnv = isOffBeat ? Math.exp(-halfBeat * 25) : 0;
-    const hihat = (Math.random() * 2 - 1) * hihatEnv * 0.06;
+    const hihatEnv = isOffBeat ? Math.exp(-halfBeat * 30) : 0;
+    const hihat = (Math.random() * 2 - 1) * hihatEnv * c.hihatVol;
 
-    // Ambient pad — slow evolving sine
-    const pad = Math.sin(2 * Math.PI * 110 * t) * 0.03 *
-      (0.5 + 0.5 * Math.sin(2 * Math.PI * 0.15 * t));
+    // Warm pad chord — two detuned oscillators
+    const padA = Math.sin(2 * Math.PI * c.padFreq * t);
+    const padB = Math.sin(2 * Math.PI * c.padFreq * 1.005 * t); // slight detune for warmth
+    const padC = Math.sin(2 * Math.PI * c.padFreq * 1.498 * t); // fifth
+    const padEnv = 0.5 + 0.5 * Math.sin(2 * Math.PI * 0.12 * t);
+    const pad = (padA + padB * 0.7 + padC * 0.3) * c.padVol * padEnv;
 
-    // Subtle shimmer
-    const shimmer = Math.sin(2 * Math.PI * 880 * t + Math.sin(2 * Math.PI * 0.5 * t) * 3)
-      * 0.012 * (0.5 + 0.5 * Math.sin(2 * Math.PI * 0.08 * t));
+    // High shimmer — gentle sparkle
+    const shimmer = Math.sin(2 * Math.PI * 880 * t + Math.sin(2 * Math.PI * 0.3 * t) * 4)
+      * c.shimmerVol * (0.5 + 0.5 * Math.sin(2 * Math.PI * 0.06 * t));
 
-    const sample = kick + hihat + pad + shimmer;
-    
-    // Fade in/out
-    const fadeIn = Math.min(1, t / 0.8);
-    const fadeOut = Math.min(1, (durationSec - t) / 1.2);
+    // Percussion accent every 4 beats (for energetic/rhythmic)
+    let perc = 0;
+    if (mood === 'energetic' || mood === 'rhythmic') {
+      const barPhase = (t % (beatInterval * 4)) / (beatInterval * 4);
+      if (barPhase < 0.02) {
+        perc = Math.sin(2 * Math.PI * 200 * t) * Math.exp(-barPhase * 200) * 0.08;
+      }
+    }
+
+    const sample = kick + sub + hihat + pad + shimmer + perc;
+
+    // Smooth fade in/out
+    const fadeIn = Math.min(1, t / 1.2);
+    const fadeOut = Math.min(1, (durationSec - t) / 1.5);
     const envelope = fadeIn * fadeOut;
 
+    // Slight stereo width
     left[i] = sample * envelope;
-    right[i] = sample * envelope * 0.95 + shimmer * 0.05;
+    right[i] = (sample * 0.92 + shimmer * 0.08 + pad * 0.05 * Math.sin(t * 0.7)) * envelope;
   }
 
   return buffer;
@@ -196,53 +205,34 @@ function generateAudioTrack(durationSec: number): AudioBuffer {
 function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
   const numChannels = buffer.numberOfChannels;
   const sampleRate = buffer.sampleRate;
-  const format = 1; // PCM
   const bitsPerSample = 16;
   const blockAlign = numChannels * bitsPerSample / 8;
   const byteRate = sampleRate * blockAlign;
   const dataLength = buffer.length * blockAlign;
-  const headerLength = 44;
-  const totalLength = headerLength + dataLength;
+  const totalLength = 44 + dataLength;
 
-  const arrayBuffer = new ArrayBuffer(totalLength);
-  const view = new DataView(arrayBuffer);
+  const ab = new ArrayBuffer(totalLength);
+  const v = new DataView(ab);
+  const ws = (o: number, s: string) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
 
-  // WAV header
-  const writeString = (offset: number, str: string) => {
-    for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
-  };
+  ws(0, 'RIFF'); v.setUint32(4, totalLength - 8, true); ws(8, 'WAVE');
+  ws(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+  v.setUint16(22, numChannels, true); v.setUint32(24, sampleRate, true);
+  v.setUint32(28, byteRate, true); v.setUint16(32, blockAlign, true);
+  v.setUint16(34, bitsPerSample, true); ws(36, 'data'); v.setUint32(40, dataLength, true);
 
-  writeString(0, 'RIFF');
-  view.setUint32(4, totalLength - 8, true);
-  writeString(8, 'WAVE');
-  writeString(12, 'fmt ');
-  view.setUint32(16, 16, true);
-  view.setUint16(20, format, true);
-  view.setUint16(22, numChannels, true);
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, byteRate, true);
-  view.setUint16(32, blockAlign, true);
-  view.setUint16(34, bitsPerSample, true);
-  writeString(36, 'data');
-  view.setUint32(40, dataLength, true);
-
-  // Interleave channels
   const channels = [];
-  for (let ch = 0; ch < numChannels; ch++) {
-    channels.push(buffer.getChannelData(ch));
-  }
+  for (let ch = 0; ch < numChannels; ch++) channels.push(buffer.getChannelData(ch));
 
   let offset = 44;
   for (let i = 0; i < buffer.length; i++) {
     for (let ch = 0; ch < numChannels; ch++) {
-      const sample = Math.max(-1, Math.min(1, channels[ch][i]));
-      const int16 = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
-      view.setInt16(offset, int16, true);
+      const s = Math.max(-1, Math.min(1, channels[ch][i]));
+      v.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
       offset += 2;
     }
   }
-
-  return arrayBuffer;
+  return ab;
 }
 
 // ============ IMAGE LOADING ============
@@ -251,10 +241,7 @@ async function loadImage(src: string, timeoutMs = 8000): Promise<HTMLImageElemen
   return new Promise<HTMLImageElement>((resolve) => {
     const el = new Image();
     el.crossOrigin = 'anonymous';
-    const timeout = setTimeout(() => {
-      console.warn('[MotionRecap] Image load timeout:', src?.slice(0, 60));
-      resolve(createBlackPlaceholder());
-    }, timeoutMs);
+    const timeout = setTimeout(() => { resolve(createBlackPlaceholder()); }, timeoutMs);
     el.onload = () => { clearTimeout(timeout); resolve(el); };
     el.onerror = () => { clearTimeout(timeout); resolve(createBlackPlaceholder()); };
     el.src = src;
@@ -265,7 +252,7 @@ function createBlackPlaceholder(): HTMLImageElement {
   const c = document.createElement('canvas');
   c.width = WIDTH; c.height = HEIGHT;
   const cx = c.getContext('2d')!;
-  cx.fillStyle = '#0a0a0f';
+  cx.fillStyle = '#08080c';
   cx.fillRect(0, 0, WIDTH, HEIGHT);
   const img = new Image();
   img.src = c.toDataURL('image/jpeg');
@@ -274,16 +261,13 @@ function createBlackPlaceholder(): HTMLImageElement {
 
 async function loadImages(dayStates: DayState[]): Promise<HTMLImageElement[]> {
   const results: HTMLImageElement[] = [];
-  for (const state of dayStates) {
-    results.push(await loadImage(state.asset.src));
-  }
+  for (const state of dayStates) results.push(await loadImage(state.asset.src));
   return results;
 }
 
 // ============ GRAIN TEXTURE ============
 
 let grainCanvas: HTMLCanvasElement | null = null;
-
 function getGrainTexture(): HTMLCanvasElement {
   if (grainCanvas) return grainCanvas;
   grainCanvas = document.createElement('canvas');
@@ -293,323 +277,130 @@ function getGrainTexture(): HTMLCanvasElement {
   const imageData = gCtx.createImageData(256, 256);
   for (let i = 0; i < imageData.data.length; i += 4) {
     const v = Math.random() * 255;
-    imageData.data[i] = v;
-    imageData.data[i + 1] = v;
-    imageData.data[i + 2] = v;
-    imageData.data[i + 3] = 14;
+    imageData.data[i] = v; imageData.data[i + 1] = v;
+    imageData.data[i + 2] = v; imageData.data[i + 3] = 10;
   }
   gCtx.putImageData(imageData, 0, 0);
   return grainCanvas;
 }
 
-// ============ PARTICLES ============
-
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  alpha: number;
-  hue: number;
-  life: number;
-}
-
-function createParticles(hue: number, count: number = 20): Particle[] {
-  return Array.from({ length: count }, () => ({
-    x: WIDTH / 2 + (Math.random() - 0.5) * 300,
-    y: HEIGHT * 0.42 + (Math.random() - 0.5) * 200,
-    vx: (Math.random() - 0.5) * 1.5,
-    vy: -Math.random() * 2 - 0.5,
-    size: Math.random() * 3 + 1,
-    alpha: Math.random() * 0.5 + 0.2,
-    hue: hue + (Math.random() - 0.5) * 30,
-    life: Math.random(),
-  }));
-}
-
-function drawParticles(ctx: CanvasRenderingContext2D, particles: Particle[], progress: number) {
-  const spawnT = easeOutCubic(Math.min(progress * 3, 1));
-  if (spawnT <= 0) return;
-
+function drawGrain(ctx: CanvasRenderingContext2D, opacity = 0.03) {
   ctx.save();
-  for (const p of particles) {
-    const age = (progress * 2 + p.life) % 1;
-    const fadeIn = Math.min(age * 5, 1);
-    const fadeOut = Math.max(0, 1 - (age - 0.7) / 0.3);
-    const a = p.alpha * spawnT * fadeIn * fadeOut;
-    if (a <= 0) continue;
-
-    const x = p.x + p.vx * progress * 60;
-    const y = p.y + p.vy * progress * 60;
-
-    ctx.globalAlpha = a;
-    ctx.fillStyle = `hsla(${p.hue}, 70%, 70%, 1)`;
-    ctx.beginPath();
-    ctx.arc(x, y, p.size, 0, Math.PI * 2);
-    ctx.fill();
-  }
+  ctx.globalAlpha = opacity;
+  const grain = getGrainTexture();
+  for (let y = 0; y < HEIGHT; y += 256)
+    for (let x = 0; x < WIDTH; x += 256)
+      ctx.drawImage(grain, x, y);
   ctx.restore();
 }
 
-// ============ UNIQUE VISUAL ELEMENTS ============
+// ============ DRAWING HELPERS ============
 
-function drawRingVisual(ctx: CanvasRenderingContext2D, hue: number, progress: number, centerY: number) {
-  // Circular progress ring — great for Running, default
-  const ringT = easeOutExpo(Math.min(progress * 2.5, 1));
-  const arcAngle = Math.PI * 2 * ringT * 0.75;
-  const radius = 160;
+function drawDarkBg(ctx: CanvasRenderingContext2D, hue: number) {
+  const bg = ctx.createLinearGradient(0, 0, 0, HEIGHT);
+  bg.addColorStop(0, `hsl(${hue}, 12%, 4%)`);
+  bg.addColorStop(0.5, `hsl(${hue}, 8%, 3%)`);
+  bg.addColorStop(1, `hsl(${hue}, 14%, 2%)`);
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+}
 
+function drawGlow(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, hue: number, alpha: number) {
   ctx.save();
-  ctx.globalAlpha = 0.12 * ringT;
-  ctx.strokeStyle = `hsla(${hue}, 50%, 40%, 0.3)`;
-  ctx.lineWidth = 6;
-  ctx.beginPath();
-  ctx.arc(WIDTH / 2, centerY, radius, 0, Math.PI * 2);
-  ctx.stroke();
-
-  ctx.globalAlpha = 0.5 * ringT;
-  ctx.strokeStyle = `hsla(${hue}, 70%, 60%, 0.9)`;
-  ctx.lineWidth = 6;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.arc(WIDTH / 2, centerY, radius, -Math.PI / 2, -Math.PI / 2 + arcAngle);
-  ctx.stroke();
-
-  // Glow dot at end
-  if (arcAngle > 0.1) {
-    const dotX = WIDTH / 2 + Math.cos(-Math.PI / 2 + arcAngle) * radius;
-    const dotY = centerY + Math.sin(-Math.PI / 2 + arcAngle) * radius;
-    ctx.globalAlpha = 0.8 * ringT;
-    const dotGlow = ctx.createRadialGradient(dotX, dotY, 0, dotX, dotY, 18);
-    dotGlow.addColorStop(0, `hsla(${hue}, 80%, 70%, 0.8)`);
-    dotGlow.addColorStop(1, 'transparent');
-    ctx.fillStyle = dotGlow;
-    ctx.fillRect(dotX - 18, dotY - 18, 36, 36);
-    ctx.fillStyle = `hsla(${hue}, 80%, 80%, 1)`;
-    ctx.beginPath();
-    ctx.arc(dotX, dotY, 5, 0, Math.PI * 2);
-    ctx.fill();
-  }
+  ctx.globalAlpha = alpha;
+  const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
+  g.addColorStop(0, `hsla(${hue}, 70%, 50%, 0.5)`);
+  g.addColorStop(0.4, `hsla(${hue}, 55%, 40%, 0.12)`);
+  g.addColorStop(1, 'transparent');
+  ctx.fillStyle = g;
+  ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
   ctx.restore();
 }
 
-function drawBarsVisual(ctx: CanvasRenderingContext2D, hue: number, progress: number, centerY: number) {
-  // Vertical equalizer bars — great for Cycling/Football
-  const barCount = 7;
-  const barW = 16;
-  const gap = 12;
-  const totalW = barCount * barW + (barCount - 1) * gap;
-  const startX = (WIDTH - totalW) / 2;
-  const maxH = 120;
-  const baseY = centerY + 170;
-
+// Elegant thin divider line
+function drawThinLine(ctx: CanvasRenderingContext2D, y: number, hue: number, alpha: number) {
   ctx.save();
-  for (let i = 0; i < barCount; i++) {
-    const delay = i * 0.06;
-    const t = easeOutBack(Math.min(Math.max(progress - delay, 0) * 3, 1));
-    const h = maxH * t * (0.4 + 0.6 * Math.sin((i * 1.8 + progress * 8) * 0.5) * 0.5 + 0.5);
-    const x = startX + i * (barW + gap);
-
-    const barGrad = ctx.createLinearGradient(x, baseY, x, baseY - h);
-    barGrad.addColorStop(0, `hsla(${hue}, 60%, 50%, 0.15)`);
-    barGrad.addColorStop(1, `hsla(${hue}, 70%, 65%, 0.5)`);
-    ctx.fillStyle = barGrad;
-    ctx.globalAlpha = 0.7 * t;
-    ctx.beginPath();
-    ctx.roundRect(x, baseY - h, barW, h, 4);
-    ctx.fill();
-  }
-  ctx.restore();
-}
-
-function drawPulseVisual(ctx: CanvasRenderingContext2D, hue: number, progress: number, centerY: number) {
-  // Expanding pulse rings — great for Boxing/Basketball
-  const pulseCount = 3;
-  ctx.save();
-  for (let i = 0; i < pulseCount; i++) {
-    const offset = i * 0.25;
-    const t = ((progress * 2 + offset) % 1);
-    const r = 40 + t * 180;
-    const a = (1 - t) * 0.25;
-    ctx.globalAlpha = a;
-    ctx.strokeStyle = `hsla(${hue}, 65%, 60%, 0.8)`;
-    ctx.lineWidth = 2.5 - t * 1.5;
-    ctx.beginPath();
-    ctx.arc(WIDTH / 2, centerY, r, 0, Math.PI * 2);
-    ctx.stroke();
-  }
-  ctx.restore();
-}
-
-function drawWaveVisual(ctx: CanvasRenderingContext2D, hue: number, progress: number, centerY: number) {
-  // Flowing sine wave — great for Yoga/Swimming
-  const waveT = easeOutCubic(Math.min(progress * 2, 1));
-  const waveY = centerY + 165;
-
-  ctx.save();
-  ctx.globalAlpha = 0.2 * waveT;
-  ctx.strokeStyle = `hsla(${hue}, 60%, 65%, 0.7)`;
-  ctx.lineWidth = 2;
+  ctx.globalAlpha = alpha;
+  const lg = ctx.createLinearGradient(WIDTH * 0.2, 0, WIDTH * 0.8, 0);
+  lg.addColorStop(0, 'transparent');
+  lg.addColorStop(0.3, `hsla(${hue}, 40%, 60%, 0.35)`);
+  lg.addColorStop(0.7, `hsla(${hue}, 40%, 60%, 0.35)`);
+  lg.addColorStop(1, 'transparent');
+  ctx.strokeStyle = lg;
+  ctx.lineWidth = 0.5;
   ctx.beginPath();
-  for (let x = 60; x < WIDTH - 60; x += 2) {
-    const nx = (x - 60) / (WIDTH - 120);
-    const y = waveY + Math.sin(nx * Math.PI * 4 + progress * 12) * 20 * waveT
-      + Math.sin(nx * Math.PI * 2 + progress * 6) * 10 * waveT;
-    if (x === 60) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.stroke();
-
-  // Second wave, offset
-  ctx.globalAlpha = 0.1 * waveT;
-  ctx.beginPath();
-  for (let x = 60; x < WIDTH - 60; x += 2) {
-    const nx = (x - 60) / (WIDTH - 120);
-    const y = waveY + 15 + Math.sin(nx * Math.PI * 3 + progress * 8 + 1) * 15 * waveT;
-    if (x === 60) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
+  ctx.moveTo(WIDTH * 0.2, y);
+  ctx.lineTo(WIDTH * 0.8, y);
   ctx.stroke();
   ctx.restore();
 }
 
-function drawGridVisual(ctx: CanvasRenderingContext2D, hue: number, progress: number, centerY: number) {
-  // Dot matrix grid — great for Trekking/Cricket
-  const gridT = easeOutCubic(Math.min(progress * 2.5, 1));
-  const cols = 8;
-  const rows = 4;
-  const spacing = 24;
-  const startX = (WIDTH - (cols - 1) * spacing) / 2;
-  const startY = centerY + 150;
+// ============ CINEMATIC TRANSITIONS ============
 
-  ctx.save();
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const delay = (r * cols + c) * 0.015;
-      const t = easeOutExpo(Math.min(Math.max(progress - delay, 0) * 4, 1));
-      const x = startX + c * spacing;
-      const y = startY + r * spacing;
-      const active = Math.random() > 0.3;
-      ctx.globalAlpha = (active ? 0.5 : 0.1) * gridT * t;
-      ctx.fillStyle = `hsla(${hue}, 60%, ${active ? 65 : 40}%, 1)`;
-      ctx.beginPath();
-      ctx.arc(x, y, active ? 4 : 2.5, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-  ctx.restore();
-}
-
-function drawActivityVisual(ctx: CanvasRenderingContext2D, mode: VisualMode, hue: number, progress: number, centerY: number) {
-  switch (mode) {
-    case 'ring': drawRingVisual(ctx, hue, progress, centerY); break;
-    case 'bars': drawBarsVisual(ctx, hue, progress, centerY); break;
-    case 'pulse': drawPulseVisual(ctx, hue, progress, centerY); break;
-    case 'wave': drawWaveVisual(ctx, hue, progress, centerY); break;
-    case 'grid': drawGridVisual(ctx, hue, progress, centerY); break;
-  }
-}
-
-// ============ GLITCH TRANSITION ============
-
-function drawGlitchTransition(ctx: CanvasRenderingContext2D, progress: number) {
-  // Brief digital glitch between phases
+function drawCrossFade(ctx: CanvasRenderingContext2D, progress: number) {
+  // Smooth directional wipe — elegant alternative to glitch
   if (progress <= 0 || progress >= 1) return;
-  const intensity = Math.sin(progress * Math.PI) * 0.6;
-
+  const t = Math.sin(progress * Math.PI);
   ctx.save();
-  ctx.globalAlpha = intensity * 0.15;
-
-  // Horizontal slice displacement
-  const sliceCount = 6;
-  for (let i = 0; i < sliceCount; i++) {
-    const y = Math.random() * HEIGHT;
-    const h = 2 + Math.random() * 8;
-    const shift = (Math.random() - 0.5) * 30 * intensity;
-    ctx.fillStyle = `hsla(${Math.random() * 360}, 80%, 60%, 0.3)`;
-    ctx.fillRect(shift, y, WIDTH, h);
-  }
-
-  // Scan line
-  const scanY = (progress * HEIGHT * 2) % HEIGHT;
-  ctx.globalAlpha = intensity * 0.4;
-  const scanGrad = ctx.createLinearGradient(0, scanY - 2, 0, scanY + 2);
-  scanGrad.addColorStop(0, 'transparent');
-  scanGrad.addColorStop(0.5, 'rgba(255,255,255,0.15)');
-  scanGrad.addColorStop(1, 'transparent');
-  ctx.fillStyle = scanGrad;
-  ctx.fillRect(0, scanY - 2, WIDTH, 4);
-
+  ctx.globalAlpha = t * 0.25;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
   ctx.restore();
 }
 
-// ============ INTRO TITLE CARD ============
+// ============ INTRO CARD ============
 
 function drawIntroCard(ctx: CanvasRenderingContext2D, progress: number, totalDays: number) {
   ctx.save();
 
-  // Dark background
-  const bgGrad = ctx.createLinearGradient(0, 0, 0, HEIGHT);
-  bgGrad.addColorStop(0, '#050508');
-  bgGrad.addColorStop(0.5, '#0a0a12');
-  bgGrad.addColorStop(1, '#050508');
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  drawDarkBg(ctx, 265);
 
-  // Central glow
-  const glowT = easeOutExpo(Math.min(progress * 2, 1));
-  ctx.globalAlpha = 0.2 * glowT;
-  const glow = ctx.createRadialGradient(WIDTH / 2, HEIGHT * 0.45, 0, WIDTH / 2, HEIGHT * 0.45, 350);
-  glow.addColorStop(0, 'hsla(265, 70%, 55%, 0.5)');
-  glow.addColorStop(0.5, 'hsla(265, 50%, 40%, 0.15)');
-  glow.addColorStop(1, 'transparent');
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  // Central soft glow
+  const glowT = easeOutExpo(Math.min(progress * 1.8, 1));
+  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.44, 400, 265, 0.18 * glowT);
 
-  // Title
-  const titleT = easeOutBack(Math.min(Math.max(progress - 0.1, 0) * 3, 1));
+  // Title — slide up + fade
+  const titleT = easeOutBack(Math.min(Math.max(progress - 0.08, 0) * 2.5, 1));
   if (titleT > 0) {
     ctx.globalAlpha = titleT;
-    const scale = lerp(0.7, 1, titleT);
-    ctx.translate(WIDTH / 2, HEIGHT * 0.43);
-    ctx.scale(scale, scale);
+    const slideY = lerp(20, 0, titleT);
+    ctx.translate(WIDTH / 2, HEIGHT * 0.42 + slideY);
+
     ctx.font = FONTS.INTRO_TITLE;
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.shadowColor = 'hsla(265, 70%, 60%, 0.4)';
-    ctx.shadowBlur = 40;
-    ctx.fillText('YOUR WEEK', 0, -24);
-    ctx.fillText('IN MOTION', 0, 24);
+    ctx.shadowColor = 'hsla(265, 60%, 55%, 0.35)';
+    ctx.shadowBlur = 50;
+    ctx.fillText('YOUR WEEK', 0, -26);
+    ctx.fillText('IN MOTION', 0, 26);
     ctx.shadowColor = 'transparent';
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
+  // Thin accent line
+  const lineT = easeOutCubic(Math.min(Math.max(progress - 0.25, 0) * 3, 1));
+  drawThinLine(ctx, HEIGHT * 0.50, 265, lineT * 0.6);
+
   // Subtitle
-  const subT = easeOutCubic(Math.min(Math.max(progress - 0.35, 0) * 3, 1));
+  const subT = easeOutCubic(Math.min(Math.max(progress - 0.3, 0) * 3, 1));
   if (subT > 0) {
-    ctx.globalAlpha = subT * 0.5;
-    const subY = lerp(HEIGHT * 0.55 + 10, HEIGHT * 0.55, subT);
+    ctx.globalAlpha = subT * 0.45;
+    const subY = lerp(HEIGHT * 0.535 + 8, HEIGHT * 0.535, subT);
     ctx.font = FONTS.INTRO_SUB;
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`${totalDays} days · ${totalDays} activities`, WIDTH / 2, subY);
+    ctx.letterSpacing = '3px';
+    ctx.fillText(`${totalDays} DAYS  ·  ${totalDays} ACTIVITIES`, WIDTH / 2, subY);
+    ctx.letterSpacing = '0px';
   }
 
-  // Grain
-  ctx.globalAlpha = 0.03;
-  const grain = getGrainTexture();
-  for (let y = 0; y < HEIGHT; y += 256) {
-    for (let x = 0; x < WIDTH; x += 256) {
-      ctx.drawImage(grain, x, y);
-    }
-  }
+  drawGrain(ctx, 0.025);
 
-  // Exit fade
-  if (progress > 0.7) {
-    const exitT = (progress - 0.7) / 0.3;
+  // Exit: smooth fade to black
+  if (progress > 0.72) {
+    const exitT = (progress - 0.72) / 0.28;
     ctx.globalAlpha = easeInOutCubic(exitT);
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -623,102 +414,88 @@ function drawIntroCard(ctx: CanvasRenderingContext2D, progress: number, totalDay
 function drawOutroCard(ctx: CanvasRenderingContext2D, progress: number, dayStates: DayState[]) {
   ctx.save();
 
-  const bgGrad = ctx.createLinearGradient(0, 0, 0, HEIGHT);
-  bgGrad.addColorStop(0, '#050508');
-  bgGrad.addColorStop(1, '#0a0a12');
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  drawDarkBg(ctx, 150);
 
-  // Central glow
+  // Warm central glow
   const glowT = easeOutExpo(Math.min(progress * 2, 1));
-  ctx.globalAlpha = 0.15 * glowT;
-  const glow = ctx.createRadialGradient(WIDTH / 2, HEIGHT * 0.38, 0, WIDTH / 2, HEIGHT * 0.38, 300);
-  glow.addColorStop(0, 'hsla(140, 60%, 50%, 0.4)');
-  glow.addColorStop(1, 'transparent');
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.38, 350, 150, 0.14 * glowT);
 
-  // Big number
-  const numT = easeOutBack(Math.min(Math.max(progress - 0.05, 0) * 3, 1));
+  // Big number — scale in
+  const numT = easeOutBack(Math.min(Math.max(progress - 0.03, 0) * 2.5, 1));
   if (numT > 0) {
     ctx.globalAlpha = numT;
     ctx.translate(WIDTH / 2, HEIGHT * 0.36);
-    ctx.scale(lerp(0.5, 1, numT), lerp(0.5, 1, numT));
+    ctx.scale(lerp(0.6, 1, numT), lerp(0.6, 1, numT));
     ctx.font = FONTS.OUTRO_BIG;
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.shadowColor = 'hsla(140, 60%, 50%, 0.3)';
-    ctx.shadowBlur = 30;
+    ctx.shadowColor = 'hsla(150, 50%, 50%, 0.25)';
+    ctx.shadowBlur = 40;
     ctx.fillText(`${dayStates.length} DAYS`, 0, 0);
     ctx.shadowColor = 'transparent';
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
-  // "CRUSHED IT" label
-  const labelT = easeOutCubic(Math.min(Math.max(progress - 0.2, 0) * 3, 1));
+  // "WEEK COMPLETE" label
+  const labelT = easeOutCubic(Math.min(Math.max(progress - 0.15, 0) * 3, 1));
   if (labelT > 0) {
-    ctx.globalAlpha = labelT * 0.5;
+    ctx.globalAlpha = labelT * 0.45;
     ctx.font = FONTS.OUTRO_LABEL;
-    ctx.fillStyle = 'hsla(140, 50%, 70%, 0.7)';
+    ctx.fillStyle = 'hsla(150, 40%, 70%, 0.7)';
     ctx.textAlign = 'center';
-    ctx.fillText('WEEK COMPLETE ✦', WIDTH / 2, HEIGHT * 0.44);
+    ctx.letterSpacing = '5px';
+    ctx.fillText('WEEK COMPLETE', WIDTH / 2, HEIGHT * 0.435);
+    ctx.letterSpacing = '0px';
   }
 
-  // Activity icons row
-  const rowT = easeOutCubic(Math.min(Math.max(progress - 0.35, 0) * 3, 1));
-  if (rowT > 0) {
-    const uniqueActivities = [...new Set(dayStates.map(d => d.activityType))];
-    const total = uniqueActivities.length;
-    const chipW = 90;
-    const chipGap = 12;
-    const totalRowW = total * chipW + (total - 1) * chipGap;
-    const startX = (WIDTH - totalRowW) / 2;
+  // Thin divider
+  const divT = easeOutCubic(Math.min(Math.max(progress - 0.22, 0) * 3, 1));
+  drawThinLine(ctx, HEIGHT * 0.465, 150, divT * 0.5);
 
-    for (let i = 0; i < total; i++) {
-      const delay = i * 0.08;
-      const t = easeOutCubic(Math.min(Math.max(progress - 0.35 - delay, 0) * 4, 1));
+  // Activity chips row
+  const rowT = easeOutCubic(Math.min(Math.max(progress - 0.28, 0) * 2.5, 1));
+  if (rowT > 0) {
+    const unique = [...new Set(dayStates.map(d => d.activityType))];
+    const chipW = 85;
+    const chipGap = 10;
+    const totalW = unique.length * chipW + (unique.length - 1) * chipGap;
+    const startX = (WIDTH - totalW) / 2;
+
+    for (let i = 0; i < unique.length; i++) {
+      const delay = i * 0.06;
+      const t = easeOutCubic(Math.min(Math.max(progress - 0.28 - delay, 0) * 3.5, 1));
       if (t <= 0) continue;
 
       const x = startX + i * (chipW + chipGap);
-      const y = HEIGHT * 0.52;
-      const hue = getActivityHue(uniqueActivities[i]);
+      const y = HEIGHT * 0.50;
+      const hue = getActivityHue(unique[i]);
 
-      ctx.globalAlpha = t * 0.8;
-      ctx.fillStyle = `hsla(${hue}, 40%, 20%, 0.6)`;
+      ctx.globalAlpha = t * 0.75;
+      ctx.fillStyle = `hsla(${hue}, 35%, 18%, 0.5)`;
       ctx.beginPath();
-      ctx.roundRect(x, y, chipW, 32, 16);
+      ctx.roundRect(x, y, chipW, 30, 15);
       ctx.fill();
 
-      ctx.strokeStyle = `hsla(${hue}, 50%, 50%, 0.3)`;
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = `hsla(${hue}, 45%, 50%, 0.2)`;
+      ctx.lineWidth = 0.5;
       ctx.beginPath();
-      ctx.roundRect(x, y, chipW, 32, 16);
+      ctx.roundRect(x, y, chipW, 30, 15);
       ctx.stroke();
 
       ctx.font = FONTS.STAT_LABEL;
-      ctx.fillStyle = `hsla(${hue}, 50%, 75%, 0.9)`;
+      ctx.fillStyle = `hsla(${hue}, 45%, 75%, 0.85)`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      const name = uniqueActivities[i].length > 8
-        ? uniqueActivities[i].slice(0, 7) + '.'
-        : uniqueActivities[i];
-      ctx.fillText(name.toUpperCase(), x + chipW / 2, y + 16);
+      const name = unique[i].length > 9 ? unique[i].slice(0, 8) + '.' : unique[i];
+      ctx.fillText(name.toUpperCase(), x + chipW / 2, y + 15);
     }
   }
 
-  // Grain
-  ctx.globalAlpha = 0.03;
-  const grain = getGrainTexture();
-  for (let y = 0; y < HEIGHT; y += 256) {
-    for (let x = 0; x < WIDTH; x += 256) {
-      ctx.drawImage(grain, x, y);
-    }
-  }
+  drawGrain(ctx, 0.025);
 
-  // Fade out
-  if (progress > 0.7) {
-    const exitT = (progress - 0.7) / 0.3;
+  if (progress > 0.72) {
+    const exitT = (progress - 0.72) / 0.28;
     ctx.globalAlpha = easeInOutCubic(exitT);
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -727,9 +504,9 @@ function drawOutroCard(ctx: CanvasRenderingContext2D, progress: number, dayState
   ctx.restore();
 }
 
-// ============ PREMIUM METRIC TRANSITION v2 ============
+// ============ METRIC CARD — CLEAN & PREMIUM ============
 
-function drawMetricTransition(
+function drawMetricCard(
   ctx: CanvasRenderingContext2D,
   state: DayState,
   progress: number,
@@ -739,244 +516,198 @@ function drawMetricTransition(
   ctx.globalAlpha = globalAlpha;
 
   const hue = getActivityHue(state.activityType);
-  const mode = getVisualMode(state.activityType);
+  drawDarkBg(ctx, hue);
 
-  // ── Background gradient ──
-  const bgGrad = ctx.createLinearGradient(0, 0, 0, HEIGHT);
-  bgGrad.addColorStop(0, `hsl(${hue}, 10%, 4%)`);
-  bgGrad.addColorStop(0.5, `hsl(${hue}, 8%, 3%)`);
-  bgGrad.addColorStop(1, `hsl(${hue}, 12%, 2%)`);
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  // Large ambient glow centered on metric
+  const glowP = easeOutExpo(Math.min(progress * 2, 1));
+  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.38, 450, hue, 0.22 * glowP);
 
-  // ── Large radial glow (bigger) ──
-  const glowProgress = easeOutExpo(Math.min(progress * 2, 1));
-  ctx.save();
-  ctx.globalAlpha = 0.25 * glowProgress;
-  const glowGrad = ctx.createRadialGradient(
-    WIDTH / 2, HEIGHT * 0.40, 0,
-    WIDTH / 2, HEIGHT * 0.40, 500
-  );
-  glowGrad.addColorStop(0, `hsla(${hue}, 75%, 55%, 0.6)`);
-  glowGrad.addColorStop(0.3, `hsla(${hue}, 65%, 45%, 0.2)`);
-  glowGrad.addColorStop(0.6, `hsla(${hue}, 50%, 35%, 0.05)`);
-  glowGrad.addColorStop(1, 'transparent');
-  ctx.fillStyle = glowGrad;
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
-  ctx.restore();
+  // Secondary glow for depth
+  drawGlow(ctx, WIDTH * 0.3, HEIGHT * 0.6, 300, (hue + 40) % 360, 0.06 * glowP);
 
-  // ── Secondary ambient glow ──
-  ctx.save();
-  ctx.globalAlpha = 0.08 * glowProgress;
-  const ambGrad = ctx.createRadialGradient(WIDTH * 0.25, HEIGHT * 0.65, 0, WIDTH * 0.25, HEIGHT * 0.65, 350);
-  ambGrad.addColorStop(0, `hsla(${(hue + 40) % 360}, 50%, 50%, 0.3)`);
-  ambGrad.addColorStop(1, 'transparent');
-  ctx.fillStyle = ambGrad;
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
-  ctx.restore();
+  drawGrain(ctx, 0.03);
 
-  // ── Grain overlay ──
-  ctx.save();
-  ctx.globalAlpha = 0.04;
-  const grain = getGrainTexture();
-  for (let y = 0; y < HEIGHT; y += 256) {
-    for (let x = 0; x < WIDTH; x += 256) {
-      ctx.drawImage(grain, x, y);
-    }
-  }
-  ctx.restore();
+  // ── Staggered timings (no more than 2 animating at once) ──
+  const dayT   = easeOutCubic(Math.min(progress * 4, 1));
+  const heroT  = easeOutExpo(Math.min(Math.max(progress - 0.08, 0) * 2.5, 1));
+  const unitT  = easeOutCubic(Math.min(Math.max(progress - 0.18, 0) * 3, 1));
+  const actT   = easeOutCubic(Math.min(Math.max(progress - 0.28, 0) * 3, 1));
+  const statsT = easeOutCubic(Math.min(Math.max(progress - 0.38, 0) * 2.5, 1));
 
-  // ── Activity-specific visual element ──
-  const centerY = HEIGHT * 0.40;
-  drawActivityVisual(ctx, mode, hue, progress, centerY);
+  const centerY = HEIGHT * 0.38;
 
-  // ── Particles ──
-  const particles = createParticles(hue, 15);
-  drawParticles(ctx, particles, progress);
-
-  // ── Staggered animation timings ──
-  const dayTagT = easeOutCubic(Math.min(progress * 3.5, 1));
-  const metricT = easeOutExpo(Math.min(Math.max(progress - 0.06, 0) * 2.8, 1));
-  const labelT = easeOutCubic(Math.min(Math.max(progress - 0.15, 0) * 3, 1));
-  const activityT = easeOutCubic(Math.min(Math.max(progress - 0.25, 0) * 2.8, 1));
-  const statsT = easeOutCubic(Math.min(Math.max(progress - 0.35, 0) * 2.5, 1));
-
-  // ── DAY pill (larger) ──
-  if (dayTagT > 0) {
+  // ── DAY pill — minimal rounded tag ──
+  if (dayT > 0) {
     ctx.save();
-    ctx.globalAlpha = dayTagT * globalAlpha;
-    const tagY = lerp(centerY - 120, centerY - 100, dayTagT);
-    ctx.font = FONTS.DAY_TAG;
-    const dayText = `DAY ${state.dayNumber}`;
-    const textW = ctx.measureText(dayText).width;
-    const pillW = textW + 40;
-    const pillH = 34;
-    const pillX = (WIDTH - pillW) / 2;
+    ctx.globalAlpha = dayT * globalAlpha * 0.85;
+    const pillY = lerp(centerY - 130, centerY - 115, dayT);
+    const text = `DAY ${state.dayNumber}`;
+    ctx.font = FONTS.DAY_PILL;
+    const tw = ctx.measureText(text).width;
+    const pw = tw + 32;
+    const ph = 28;
+    const px = (WIDTH - pw) / 2;
 
-    ctx.fillStyle = `hsla(${hue}, 55%, 50%, 0.2)`;
+    ctx.fillStyle = `hsla(${hue}, 50%, 50%, 0.15)`;
     ctx.beginPath();
-    ctx.roundRect(pillX, tagY - pillH / 2, pillW, pillH, 17);
+    ctx.roundRect(px, pillY - ph / 2, pw, ph, 14);
     ctx.fill();
 
-    ctx.strokeStyle = `hsla(${hue}, 55%, 55%, 0.35)`;
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = `hsla(${hue}, 50%, 55%, 0.25)`;
+    ctx.lineWidth = 0.5;
     ctx.beginPath();
-    ctx.roundRect(pillX, tagY - pillH / 2, pillW, pillH, 17);
+    ctx.roundRect(px, pillY - ph / 2, pw, ph, 14);
     ctx.stroke();
 
-    ctx.fillStyle = `hsla(${hue}, 65%, 78%, 1)`;
+    ctx.fillStyle = `hsla(${hue}, 55%, 78%, 1)`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(dayText, WIDTH / 2, tagY);
+    ctx.fillText(text, WIDTH / 2, pillY);
     ctx.restore();
   }
 
-  // ── Hero metric value with count-up (BIGGER) ──
-  if (metricT > 0) {
+  // ── Hero metric — big number with count-up ──
+  if (heroT > 0) {
     ctx.save();
-    ctx.globalAlpha = metricT * globalAlpha;
-    const scale = lerp(0.5, 1, metricT);
-    const slideY = lerp(40, 0, metricT);
+    ctx.globalAlpha = heroT * globalAlpha;
+    const scale = lerp(0.6, 1, heroT);
+    const slideY = lerp(30, 0, heroT);
 
     ctx.translate(WIDTH / 2, centerY + slideY);
     ctx.scale(scale, scale);
 
-    const rawValue = state.metricA.value;
-    const numericMatch = rawValue.match(/^(\d+)/);
-    let displayValue = rawValue;
-    if (numericMatch && metricT < 0.85) {
-      const targetNum = parseInt(numericMatch[1]);
-      const currentNum = Math.round(targetNum * Math.min(metricT / 0.8, 1));
-      displayValue = rawValue.replace(/^\d+/, String(currentNum));
+    // Count-up animation
+    const raw = state.metricA.value;
+    const numMatch = raw.match(/^(\d+)/);
+    let display = raw;
+    if (numMatch && heroT < 0.9) {
+      const target = parseInt(numMatch[1]);
+      const current = Math.round(target * Math.min(heroT / 0.85, 1));
+      display = raw.replace(/^\d+/, String(current));
     }
 
-    ctx.shadowColor = `hsla(${hue}, 70%, 60%, 0.5)`;
-    ctx.shadowBlur = 50;
-    ctx.font = FONTS.METRIC_VALUE;
+    ctx.shadowColor = `hsla(${hue}, 65%, 55%, 0.4)`;
+    ctx.shadowBlur = 60;
+    ctx.font = FONTS.HERO_NUMBER;
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(displayValue, 0, 0);
-
+    ctx.fillText(display, 0, 0);
     ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.restore();
   }
 
-  // ── Metric label ──
-  if (labelT > 0) {
+  // ── Metric unit label ──
+  if (unitT > 0) {
     ctx.save();
-    ctx.globalAlpha = labelT * globalAlpha * 0.65;
-    const labelY = lerp(centerY + 70, centerY + 58, labelT);
-    ctx.font = FONTS.METRIC_LABEL;
-    ctx.fillStyle = `hsla(0, 0%, 100%, 0.6)`;
+    ctx.globalAlpha = unitT * globalAlpha * 0.55;
+    const unitY = lerp(centerY + 60, centerY + 52, unitT);
+    ctx.font = FONTS.HERO_UNIT;
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.letterSpacing = '4px';
-    ctx.fillText(state.metricA.label.toUpperCase(), WIDTH / 2, labelY);
+    ctx.letterSpacing = '5px';
+    ctx.fillText(state.metricA.label.toUpperCase(), WIDTH / 2, unitY);
     ctx.letterSpacing = '0px';
     ctx.restore();
   }
 
   // ── Activity name ──
-  if (activityT > 0) {
+  if (actT > 0) {
     ctx.save();
-    ctx.globalAlpha = activityT * globalAlpha * 0.35;
-    const actY = lerp(centerY + 108, centerY + 96, activityT);
+    ctx.globalAlpha = actT * globalAlpha * 0.3;
+    const actY = lerp(centerY + 88, centerY + 80, actT);
     ctx.font = FONTS.ACTIVITY;
-    ctx.fillStyle = `hsla(${hue}, 35%, 72%, 0.6)`;
+    ctx.fillStyle = `hsla(${hue}, 30%, 70%, 0.55)`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    ctx.letterSpacing = '3px';
     ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, actY);
+    ctx.letterSpacing = '0px';
     ctx.restore();
   }
 
-  // ── Secondary stats row (multiple metrics) ──
+  // ── Thin divider ──
+  if (statsT > 0) {
+    drawThinLine(ctx, HEIGHT * 0.555, hue, statsT * 0.4);
+  }
+
+  // ── Secondary stats — clean horizontal row ──
   if (statsT > 0) {
     const stats: { label: string; value: string }[] = [];
     if (state.metricB.value !== '--') stats.push({ label: state.metricB.label, value: state.metricB.value });
-    if (state.calories && state.calories !== '--') stats.push({ label: 'Calories', value: state.calories });
-    if (state.intensity) stats.push({ label: 'Intensity', value: state.intensity });
+    if (state.calories && state.calories !== '--') stats.push({ label: 'Cal', value: state.calories });
+    if (state.intensity) stats.push({ label: 'Effort', value: state.intensity });
     if (state.metricC && state.metricC.value !== '--') stats.push({ label: state.metricC.label, value: state.metricC.value });
 
-    if (stats.length > 0) {
-      const chipGap = 20;
-      const maxStats = Math.min(stats.length, 3);
-      const chipW = 130;
-      const totalW = maxStats * chipW + (maxStats - 1) * chipGap;
-      const startX = (WIDTH - totalW) / 2;
+    const maxStats = Math.min(stats.length, 3);
+    if (maxStats > 0) {
+      // Evenly spaced columns
+      const sectionW = WIDTH * 0.7;
+      const colW = sectionW / maxStats;
+      const startX = (WIDTH - sectionW) / 2;
 
       for (let i = 0; i < maxStats; i++) {
-        const delay = i * 0.08;
-        const t = easeOutCubic(Math.min(Math.max(progress - 0.35 - delay, 0) * 3, 1));
+        const delay = i * 0.06;
+        const t = easeOutCubic(Math.min(Math.max(progress - 0.38 - delay, 0) * 3, 1));
         if (t <= 0) continue;
 
-        const x = startX + i * (chipW + chipGap);
-        const y = HEIGHT * 0.62;
+        const cx = startX + colW * (i + 0.5);
+        const baseY = HEIGHT * 0.59;
 
         ctx.save();
-        ctx.globalAlpha = t * globalAlpha * 0.8;
+        ctx.globalAlpha = t * globalAlpha * 0.85;
 
-        // Glass chip background
-        ctx.fillStyle = `hsla(${hue}, 30%, 25%, 0.2)`;
-        ctx.beginPath();
-        ctx.roundRect(x, y, chipW, 60, 14);
-        ctx.fill();
-
-        ctx.strokeStyle = `hsla(${hue}, 40%, 50%, 0.15)`;
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        ctx.roundRect(x, y, chipW, 60, 14);
-        ctx.stroke();
-
-        // Stat value
+        // Value
         ctx.font = FONTS.STAT_VALUE;
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(stats[i].value, x + chipW / 2, y + 22);
+        ctx.fillText(stats[i].value, cx, baseY);
 
-        // Stat label
+        // Label below
         ctx.font = FONTS.STAT_LABEL;
-        ctx.fillStyle = `hsla(0, 0%, 100%, 0.4)`;
-        ctx.fillText(stats[i].label.toUpperCase(), x + chipW / 2, y + 46);
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.letterSpacing = '2px';
+        ctx.fillText(stats[i].label.toUpperCase(), cx, baseY + 22);
+        ctx.letterSpacing = '0px';
 
         ctx.restore();
+
+        // Vertical separator between stats
+        if (i < maxStats - 1) {
+          const sepX = startX + colW * (i + 1);
+          ctx.save();
+          ctx.globalAlpha = t * 0.12;
+          ctx.strokeStyle = `hsla(${hue}, 30%, 60%, 0.5)`;
+          ctx.lineWidth = 0.5;
+          ctx.beginPath();
+          ctx.moveTo(sepX, baseY - 16);
+          ctx.lineTo(sepX, baseY + 28);
+          ctx.stroke();
+          ctx.restore();
+        }
       }
     }
   }
 
-  // ── Horizontal scan line (futuristic) ──
-  const scanT = (progress * 3) % 1;
-  ctx.save();
-  ctx.globalAlpha = 0.06;
-  const scanY = scanT * HEIGHT;
-  const scanGrad = ctx.createLinearGradient(0, scanY - 1, 0, scanY + 1);
-  scanGrad.addColorStop(0, 'transparent');
-  scanGrad.addColorStop(0.5, `hsla(${hue}, 60%, 70%, 0.5)`);
-  scanGrad.addColorStop(1, 'transparent');
-  ctx.fillStyle = scanGrad;
-  ctx.fillRect(0, scanY - 1, WIDTH, 2);
-  ctx.restore();
-
-  // ── Exit fade ──
-  if (progress > 0.8) {
-    const exitT = (progress - 0.8) / 0.2;
-    ctx.fillStyle = `rgba(0, 0, 0, ${easeInOutCubic(exitT) * 0.8})`;
+  // ── Exit crossfade ──
+  if (progress > 0.82) {
+    const exitT = (progress - 0.82) / 0.18;
+    ctx.fillStyle = `rgba(0,0,0,${easeInOutCubic(exitT) * 0.85})`;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
   }
 
   ctx.restore();
 }
 
-// ============ DRAWING: PHOTO PHASE ============
+// ============ PHOTO PHASE ============
 
 function drawImageCover(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
-  scale: number = 1,
-  panX: number = 0,
-  panY: number = 0
+  scale = 1, panX = 0, panY = 0
 ) {
   const imgRatio = img.width / img.height;
   const canvasRatio = WIDTH / HEIGHT;
@@ -998,20 +729,20 @@ function drawImageCover(
 }
 
 function drawPhotoOverlays(ctx: CanvasRenderingContext2D, state: DayState, textOpacity: number) {
-  // Bottom gradient (stronger)
-  const bottomGrad = ctx.createLinearGradient(0, HEIGHT - 350, 0, HEIGHT);
+  // Bottom gradient — elegant cinematic
+  const bottomGrad = ctx.createLinearGradient(0, HEIGHT - 320, 0, HEIGHT);
   bottomGrad.addColorStop(0, 'transparent');
-  bottomGrad.addColorStop(0.5, 'rgba(0,0,0,0.3)');
-  bottomGrad.addColorStop(1, 'rgba(0,0,0,0.65)');
+  bottomGrad.addColorStop(0.4, 'rgba(0,0,0,0.25)');
+  bottomGrad.addColorStop(1, 'rgba(0,0,0,0.6)');
   ctx.fillStyle = bottomGrad;
-  ctx.fillRect(0, HEIGHT - 350, WIDTH, 350);
+  ctx.fillRect(0, HEIGHT - 320, WIDTH, 320);
 
-  // Top gradient
-  const topGrad = ctx.createLinearGradient(0, 0, 0, 200);
-  topGrad.addColorStop(0, 'rgba(0,0,0,0.35)');
+  // Top subtle vignette
+  const topGrad = ctx.createLinearGradient(0, 0, 0, 160);
+  topGrad.addColorStop(0, 'rgba(0,0,0,0.3)');
   topGrad.addColorStop(1, 'transparent');
   ctx.fillStyle = topGrad;
-  ctx.fillRect(0, 0, WIDTH, 200);
+  ctx.fillRect(0, 0, WIDTH, 160);
 
   if (textOpacity <= 0) return;
 
@@ -1019,33 +750,31 @@ function drawPhotoOverlays(ctx: CanvasRenderingContext2D, state: DayState, textO
 
   ctx.save();
   ctx.globalAlpha = textOpacity;
-  ctx.shadowColor = 'rgba(0,0,0,0.6)';
-  ctx.shadowBlur = 12;
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur = 10;
 
-  // Day badge top right
-  ctx.font = FONTS.DAY_TAG;
-  ctx.fillStyle = `hsla(${hue}, 60%, 75%, 0.8)`;
+  // Day badge — top right, minimal
+  ctx.font = FONTS.DAY_PILL;
+  ctx.fillStyle = `hsla(${hue}, 50%, 75%, 0.7)`;
   ctx.textAlign = 'right';
   ctx.textBaseline = 'top';
-  ctx.fillText(`DAY ${state.dayNumber}`, WIDTH - 48, 54);
+  ctx.letterSpacing = '2px';
+  ctx.fillText(`DAY ${state.dayNumber}`, WIDTH - 40, 48);
+  ctx.letterSpacing = '0px';
 
-  // Activity name bottom
-  ctx.font = 'bold 32px -apple-system, "SF Pro Display", system-ui, sans-serif';
+  // Activity name — bottom left
+  ctx.font = FONTS.PHOTO_ACTIVITY;
   ctx.fillStyle = '#fff';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'bottom';
-  ctx.fillText(state.activityType.toUpperCase(), 48, HEIGHT - 110);
+  ctx.fillText(state.activityType.toUpperCase(), 40, HEIGHT - 95);
 
-  // Primary metric
-  ctx.font = FONTS.METRIC_LABEL;
-  ctx.fillStyle = 'rgba(255,255,255,0.65)';
-  ctx.textBaseline = 'bottom';
-  ctx.fillText(`${state.metricA.label}: ${state.metricA.value}`, 48, HEIGHT - 78);
-
-  // Secondary metric
-  if (state.metricB.value !== '--') {
-    ctx.fillText(`${state.metricB.label}: ${state.metricB.value}`, 48, HEIGHT - 56);
-  }
+  // Metrics — one line, clean
+  ctx.font = FONTS.PHOTO_METRIC;
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  const metricLine = `${state.metricA.label}: ${state.metricA.value}`;
+  const secondMetric = state.metricB.value !== '--' ? `  ·  ${state.metricB.label}: ${state.metricB.value}` : '';
+  ctx.fillText(metricLine + secondMetric, 40, HEIGHT - 68);
 
   ctx.restore();
 }
@@ -1057,45 +786,41 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
 
   if (dayStates.length < 3) throw new Error('Need at least 3 days for recap');
 
-  console.log('[MotionRecap] Starting v2 with', dayStates.length, 'days');
+  console.log('[MotionRecap] Starting v3 with', dayStates.length, 'days');
   onProgress?.(3, 'Loading photos...');
 
-  // Load all photos
   const images = await loadImages(dayStates);
   console.log('[MotionRecap] All photos loaded');
-  onProgress?.(12, 'Generating audio...');
+  onProgress?.(12, 'Composing score...');
 
-  // Create canvas
   const canvas = document.createElement('canvas');
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
   const ctx = canvas.getContext('2d')!;
   if (!ctx) throw new Error('Canvas context failed');
 
-  const totalDuration = TIMING.INTRO_TITLE +
+  const totalDuration = TIMING.INTRO +
     dayStates.length * DAY_SLOT +
-    TIMING.OUTRO_CARD +
+    TIMING.OUTRO +
     TIMING.OUTRO_FADE;
   const totalFrames = Math.ceil(totalDuration * FPS);
 
   console.log('[MotionRecap] Duration:', totalDuration.toFixed(1), 's, Frames:', totalFrames);
 
-  // Generate audio
-  const audioBuffer = generateAudioTrack(totalDuration);
+  // Generate contextual audio
+  const mood = getDominantMood(dayStates);
+  console.log('[MotionRecap] Music mood:', mood);
+  const audioBuffer = generateContextualAudio(totalDuration, mood);
   const wavData = audioBufferToWav(audioBuffer);
   console.log('[MotionRecap] Audio generated:', (wavData.byteLength / 1024).toFixed(0), 'KB');
   onProgress?.(16, 'Preparing video...');
 
   // Setup MediaRecorder with audio
   const videoStream = canvas.captureStream(FPS);
-
-  // Create audio source and connect to stream
   const audioCtx = new AudioContext({ sampleRate: 44100 });
   const audioSource = audioCtx.createBufferSource();
   const realtimeBuffer = audioCtx.createBuffer(
-    audioBuffer.numberOfChannels,
-    audioBuffer.length,
-    audioBuffer.sampleRate
+    audioBuffer.numberOfChannels, audioBuffer.length, audioBuffer.sampleRate
   );
   for (let ch = 0; ch < audioBuffer.numberOfChannels; ch++) {
     realtimeBuffer.copyToChannel(audioBuffer.getChannelData(ch), ch);
@@ -1105,19 +830,14 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
   const dest = audioCtx.createMediaStreamDestination();
   audioSource.connect(dest);
 
-  // Combine video + audio streams
   const combinedStream = new MediaStream([
     ...videoStream.getVideoTracks(),
     ...dest.stream.getAudioTracks(),
   ]);
 
   const mimeTypes = [
-    'video/webm;codecs=vp9,opus',
-    'video/webm;codecs=vp8,opus',
-    'video/webm;codecs=vp9',
-    'video/webm;codecs=vp8',
-    'video/webm',
-    'video/mp4',
+    'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus',
+    'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4',
   ];
   const selectedMimeType = mimeTypes.find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
   console.log('[MotionRecap] Codec:', selectedMimeType);
@@ -1128,9 +848,6 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
   });
 
   const chunks: Blob[] = [];
-
-  // Pre-generate particle sets for each day (to avoid random re-generation per frame)
-  const dayParticles: Particle[][] = dayStates.map(s => createParticles(getActivityHue(s.activityType), 18));
 
   return new Promise<string>((resolve, reject) => {
     let resolved = false;
@@ -1201,78 +918,73 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
 
       const time = frameIndex / FPS;
 
-      // Global fade
+      // Global fade out
       const outroStart = totalDuration - TIMING.OUTRO_FADE;
       const outroOpacity = time > outroStart ? Math.max(0, 1 - (time - outroStart) / TIMING.OUTRO_FADE) : 1;
 
-      // Clear
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-      // Phase: Intro title card
-      if (time < TIMING.INTRO_TITLE) {
-        const introProgress = time / TIMING.INTRO_TITLE;
-        drawIntroCard(ctx, introProgress, dayStates.length);
+      // ── Phase: Intro ──
+      if (time < TIMING.INTRO) {
+        drawIntroCard(ctx, time / TIMING.INTRO, dayStates.length);
       }
-      // Phase: Day slots
-      else if (time < TIMING.INTRO_TITLE + dayStates.length * DAY_SLOT) {
-        const contentTime = time - TIMING.INTRO_TITLE;
+      // ── Phase: Day slots ──
+      else if (time < TIMING.INTRO + dayStates.length * DAY_SLOT) {
+        const contentTime = time - TIMING.INTRO;
         const dayIndex = Math.min(Math.floor(contentTime / DAY_SLOT), dayStates.length - 1);
         const timeInSlot = contentTime - dayIndex * DAY_SLOT;
         const inMetricPhase = timeInSlot < TIMING.METRIC_DURATION;
 
         if (inMetricPhase) {
           const metricProgress = timeInSlot / TIMING.METRIC_DURATION;
-          drawMetricTransition(ctx, dayStates[dayIndex], metricProgress, outroOpacity);
-
-          // Use pre-generated particles for consistency
-          drawParticles(ctx, dayParticles[dayIndex], metricProgress);
+          drawMetricCard(ctx, dayStates[dayIndex], metricProgress, outroOpacity);
         } else {
           const photoTime = timeInSlot - TIMING.METRIC_DURATION;
           const photoProgress = photoTime / TIMING.PHOTO_DURATION;
 
-          // Ken Burns (bigger scale)
+          // Smooth Ken Burns
           const kbScale = lerp(1.0, 1.0 + TIMING.KEN_BURNS_SCALE, photoProgress);
-          const kbPanX = lerp(-4, 4, photoProgress) * (dayIndex % 2 === 0 ? 1 : -1);
-          const kbPanY = lerp(-5, 5, photoProgress);
+          const kbPanX = lerp(-3, 3, photoProgress) * (dayIndex % 2 === 0 ? 1 : -1);
+          const kbPanY = lerp(-4, 4, photoProgress);
 
-          const photoFadeIn = Math.min(1, photoTime / TIMING.CROSSFADE);
+          // Elegant cross-fade in and out
+          const fadeIn = easeOutCubic(Math.min(photoTime / TIMING.CROSSFADE, 1));
           const timeToEnd = TIMING.PHOTO_DURATION - photoTime;
-          const photoFadeOut = Math.min(1, timeToEnd / TIMING.CROSSFADE);
-          const photoAlpha = outroOpacity * easeOutCubic(photoFadeIn) * photoFadeOut;
+          const fadeOut = Math.min(1, timeToEnd / TIMING.CROSSFADE);
+          const photoAlpha = outroOpacity * fadeIn * fadeOut;
 
           ctx.save();
           ctx.globalAlpha = photoAlpha;
           drawImageCover(ctx, images[dayIndex], kbScale, kbPanX, kbPanY);
-          drawPhotoOverlays(ctx, dayStates[dayIndex], easeOutCubic(Math.min(photoTime / 0.5, 1)));
+          drawPhotoOverlays(ctx, dayStates[dayIndex], easeOutCubic(Math.min(photoTime / 0.6, 1)));
           ctx.restore();
 
-          // Glitch transition at the boundaries
-          if (photoTime < 0.15) {
-            drawGlitchTransition(ctx, photoTime / 0.15);
+          // Subtle cross-fade transition
+          if (photoTime < 0.2) {
+            drawCrossFade(ctx, photoTime / 0.2);
           }
         }
       }
-      // Phase: Outro summary
+      // ── Phase: Outro ──
       else {
-        const outroTime = time - TIMING.INTRO_TITLE - dayStates.length * DAY_SLOT;
-        const outroProgress = outroTime / TIMING.OUTRO_CARD;
-        drawOutroCard(ctx, Math.min(outroProgress, 1), dayStates);
+        const outroTime = time - TIMING.INTRO - dayStates.length * DAY_SLOT;
+        drawOutroCard(ctx, Math.min(outroTime / TIMING.OUTRO, 1), dayStates);
       }
 
       frameIndex++;
 
       if (frameIndex % 6 === 0) {
         const pct = 16 + Math.floor((frameIndex / totalFrames) * 79);
-        const contentTime = Math.max(0, time - TIMING.INTRO_TITLE);
+        const contentTime = Math.max(0, time - TIMING.INTRO);
         const dayIndex = Math.min(Math.floor(contentTime / DAY_SLOT), dayStates.length - 1);
         const timeInSlot = contentTime - dayIndex * DAY_SLOT;
-        const inMetricPhase = timeInSlot < TIMING.METRIC_DURATION;
+        const inMetric = timeInSlot < TIMING.METRIC_DURATION;
 
         let phaseName: string;
-        if (time < TIMING.INTRO_TITLE) phaseName = 'Intro';
-        else if (time >= TIMING.INTRO_TITLE + dayStates.length * DAY_SLOT) phaseName = 'Summary';
-        else phaseName = `Day ${dayIndex + 1} — ${inMetricPhase ? 'Metric' : 'Photo'}`;
+        if (time < TIMING.INTRO) phaseName = 'Intro';
+        else if (time >= TIMING.INTRO + dayStates.length * DAY_SLOT) phaseName = 'Summary';
+        else phaseName = `Day ${dayIndex + 1} — ${inMetric ? 'Metric' : 'Photo'}`;
 
         onProgress?.(Math.min(pct, 94), phaseName);
       }
@@ -1301,12 +1013,9 @@ export function photosToDAyStates(photos: Array<{
       photo.activity?.toLowerCase().includes(a.toLowerCase())
     );
 
-    // Estimate calories based on activity + duration
     const durationMin = parseDurationToMinutes(photo.duration);
     const calorieRate = getCalorieRate(photo.activity);
     const estCalories = durationMin > 0 ? Math.round(durationMin * calorieRate) : 0;
-
-    // Determine intensity
     const intensity = getIntensityLevel(photo.activity, durationMin);
 
     return {
@@ -1359,7 +1068,6 @@ function getCalorieRate(activity: string): number {
 function getIntensityLevel(activity: string, durationMin: number): string {
   const highIntensity = ['boxing', 'running', 'basketball', 'football', 'swimming'];
   const isHigh = highIntensity.some(a => activity.toLowerCase().includes(a));
-
   if (durationMin >= 45 || isHigh) return '🔥';
   if (durationMin >= 20) return '⚡';
   return '✦';
