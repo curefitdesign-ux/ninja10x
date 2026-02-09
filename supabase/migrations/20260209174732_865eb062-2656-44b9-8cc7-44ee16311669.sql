@@ -1,0 +1,2 @@
+ALTER TABLE public.journey_activities DROP CONSTRAINT journey_activities_day_number_check;
+ALTER TABLE public.journey_activities ADD CONSTRAINT journey_activities_day_number_check CHECK (day_number >= 1);
