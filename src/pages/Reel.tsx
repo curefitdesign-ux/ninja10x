@@ -282,14 +282,14 @@ const Reel = () => {
       return;
     }
     
-    // CASE 2: Default navigation - ALWAYS start with current user's own stories
+    // CASE 2: Default navigation - ALWAYS start with current user's own stories only
     if (user) {
       const myIdx = effectiveUserGroups.findIndex(g => g.userId === user.id);
       if (myIdx >= 0) {
         setCurrentUserIndex(myIdx);
         setCurrentActivityIndex(0);
       } else {
-        // User has no activities - stay at index 0 but this will be handled by the empty state
+        // User has no activities — show empty state by keeping index 0
         setCurrentUserIndex(0);
         setCurrentActivityIndex(0);
       }
