@@ -614,8 +614,11 @@ const Reel = () => {
   const handleRegenerate = useCallback(async () => {
     const weekNum = weekRecapNumber || 1;
     await deleteRecapFromCache(weekNum, user?.id);
+    
+    // Use current user's own activities sorted by day_number
+    const sortedActivities = [...myActivities].sort((a, b) => a.dayNumber - b.dayNumber);
     const weekStart = (weekNum - 1) * 3;
-    const weekPhotos = myActivities.slice(weekStart, weekStart + 3).map(a => ({
+    const weekPhotos = sortedActivities.slice(weekStart, weekStart + 3).map(a => ({
       id: a.id,
       imageUrl: a.originalUrl || a.storageUrl,
       activity: a.activity || 'Workout',
@@ -633,7 +636,7 @@ const Reel = () => {
       replace: true,
       state: { weekPhotos, weekNumber: weekNum, forceRegenerate: true },
     });
-  }, [weekRecapNumber, myActivities, navigate]);
+  }, [weekRecapNumber, myActivities, navigate, user]);
 
   // Handler: Delete recap and go back to start
   const handleDeleteRecap = useCallback(async () => {
