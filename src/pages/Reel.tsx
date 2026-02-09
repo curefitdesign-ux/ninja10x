@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2 } from 'lucide-react';
+import { X, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw } from 'lucide-react';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
@@ -137,6 +137,7 @@ const Reel = () => {
   
   // Recap viewer state
   const [isAddingToStories, setIsAddingToStories] = useState(false);
+  const [showDeleteRecapConfirm, setShowDeleteRecapConfirm] = useState(false);
 
   // Story nudge animation for inactivity hint
   const { triggerShake, shakeAnimation, shakeTransition } = useStoryNudgeAnimation();
@@ -576,7 +577,7 @@ const Reel = () => {
     }
   }, [weekRecapVideoFromNav, weekRecapNumber, user]);
 
-  // Handler: Regenerate recap
+  // Handler: Regenerate recap (fresh transitions, music, Ken Burns patterns)
   const handleRegenerate = useCallback(async () => {
     const weekNum = weekRecapNumber || 1;
     await deleteRecapFromCache(weekNum);
@@ -600,6 +601,15 @@ const Reel = () => {
       state: { weekPhotos, weekNumber: weekNum, forceRegenerate: true },
     });
   }, [weekRecapNumber, myActivities, navigate]);
+
+  // Handler: Delete recap and go back to start
+  const handleDeleteRecap = useCallback(async () => {
+    const weekNum = weekRecapNumber || 1;
+    await deleteRecapFromCache(weekNum);
+    setShowDeleteRecapConfirm(false);
+    toast.success('Recap deleted');
+    navigate('/', { replace: true });
+  }, [weekRecapNumber, navigate]);
 
   if (loading) {
     return <ReelViewerSkeleton />;
@@ -711,6 +721,20 @@ const Reel = () => {
               {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
 
+            {/* Delete reel button */}
+            <button
+              onClick={() => setShowDeleteRecapConfirm(true)}
+              className="w-10 h-10 flex items-center justify-center rounded-full text-white/60 hover:text-red-400 flex-shrink-0 active:scale-95 transition-all"
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                backdropFilter: 'blur(40px) saturate(200%)',
+                WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+                border: '1px solid rgba(255,255,255,0.12)',
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+
             {/* Spacer */}
             <div className="flex-1" />
 
@@ -757,6 +781,42 @@ const Reel = () => {
             </button>
           </div>
         </div>
+
+        {/* Delete Recap Confirmation Dialog */}
+        <AlertDialog open={showDeleteRecapConfirm} onOpenChange={setShowDeleteRecapConfirm}>
+          <AlertDialogContent
+            className="rounded-3xl border-0 max-w-[320px]"
+            style={{
+              background: 'linear-gradient(180deg, rgba(60, 55, 70, 0.85) 0%, rgba(40, 38, 50, 0.9) 100%)',
+              backdropFilter: 'blur(60px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(60px) saturate(200%)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+            }}
+          >
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-white text-center text-lg">Delete this reel?</AlertDialogTitle>
+              <AlertDialogDescription className="text-white/50 text-center text-sm">
+                This will remove the cached video. You can always regenerate a fresh one with new transitions and music.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex-row gap-3 sm:justify-center">
+              <AlertDialogCancel
+                className="flex-1 rounded-full border-0 text-white/80 hover:text-white"
+                style={{ background: 'rgba(255,255,255,0.1)' }}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteRecap}
+                className="flex-1 rounded-full border-0 text-white font-semibold"
+                style={{ background: 'rgba(239, 68, 68, 0.7)' }}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     );
   }
