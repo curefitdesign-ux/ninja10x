@@ -42,14 +42,14 @@ const Gallery = () => {
         replace: true,
       });
     } else {
-      // User cancelled - go back home
-      navigate('/', { replace: true });
+      // User cancelled - go back to previous page
+      navigate(-1);
     }
   };
 
   const handleCancel = () => {
-    // If user doesn't select anything, go back
-    navigate('/', { replace: true });
+    // If user doesn't select anything, go back to previous page
+    navigate(-1);
   };
 
   return (
