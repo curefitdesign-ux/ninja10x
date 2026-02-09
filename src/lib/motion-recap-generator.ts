@@ -2201,18 +2201,25 @@ function getDominantActivity(dayStates: DayState[]): string {
   return best;
 }
 
-async function fetchActivityMusic(activity: string, durationSeconds: number, allActivities?: string[]): Promise<AudioBuffer | null> {
+async function fetchActivityMusic(activity: string, durationSeconds: number, allActivities?: string[], dayStates?: DayState[], userName?: string, weekNumber?: number): Promise<AudioBuffer | null> {
   try {
     // Use a unique seed per generation so each reel gets a different track
     const seed = _genSeed || Date.now();
-    // Build a combined activity string for richer context
-    const contextActivity = allActivities && allActivities.length > 0
-      ? allActivities.join(' ')
-      : activity;
 
-    console.log('[MotionRecap] Fetching Pixabay music for:', contextActivity, 'seed:', seed);
+    // Build rich journey context for AI-powered music selection
+    const journeyData = {
+      activities: allActivities || [activity],
+      durations: dayStates?.map(d => d.metricA?.value || d.metricB?.value || '').filter(Boolean) || [],
+      intensities: dayStates?.map(d => d.intensity || '').filter(Boolean) || [],
+      prs: dayStates?.map(d => d.metricC?.value || '').filter(Boolean) || [],
+      streakDays: dayStates?.length || 1,
+      weekNumber: weekNumber || 1,
+      userName: userName || 'User',
+    };
+
+    console.log('[MotionRecap] 🤖 AI music selection — activities:', journeyData.activities.join(', '), 'streak:', journeyData.streakDays);
     const { data, error } = await supabase.functions.invoke('fetch-activity-music', {
-      body: { activity: contextActivity, durationSeconds, seed },
+      body: { activity, seed, journeyData },
     });
 
     if (error || !data?.success || !data?.track?.url) {
@@ -2310,7 +2317,7 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
   let musicSource = 'synthesized';
 
   try {
-    const realMusic = await fetchActivityMusic(dominantActivity, totalDuration, allActivities);
+    const realMusic = await fetchActivityMusic(dominantActivity, totalDuration, allActivities, dayStates, userName, weekNumber);
     if (realMusic) {
       audioBuffer = realMusic;
       musicSource = 'pixabay';
