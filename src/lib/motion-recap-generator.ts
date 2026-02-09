@@ -1230,7 +1230,7 @@ function drawIntroCard(
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.letterSpacing = '6px';
-      ctx.fillText(`${firstName}'S JOURNEY`, WIDTH / 2, nameY);
+      ctx.fillText(`${firstName}'S JOURNEY`, WIDTH / 2, nameY, WIDTH * 0.85);
       ctx.letterSpacing = '0px';
       ctx.restore();
     }
@@ -1254,8 +1254,8 @@ function drawIntroCard(
     ctx.textBaseline = 'middle';
     ctx.shadowColor = 'hsla(265, 60%, 55%, 0.3)';
     ctx.shadowBlur = 40;
-    ctx.fillText(titleLine1, 0, -28);
-    ctx.fillText(titleLine2, 0, 28);
+    ctx.fillText(titleLine1, 0, -28, WIDTH * 0.9);
+    ctx.fillText(titleLine2, 0, 28, WIDTH * 0.9);
     ctx.shadowColor = 'transparent';
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
@@ -1275,7 +1275,7 @@ function drawIntroCard(
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.letterSpacing = '4px';
-    ctx.fillText(theme, WIDTH / 2, themeY);
+    ctx.fillText(theme, WIDTH / 2, themeY, WIDTH * 0.85);
     ctx.letterSpacing = '0px';
     ctx.restore();
   }
@@ -1290,7 +1290,7 @@ function drawIntroCard(
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.letterSpacing = '3px';
-    ctx.fillText(`${totalDays} DAYS  ·  ${totalDays} ACTIVITIES`, WIDTH / 2, subY);
+    ctx.fillText(`${totalDays} DAYS  ·  ${totalDays} ACTIVITIES`, WIDTH / 2, subY, WIDTH * 0.85);
     ctx.letterSpacing = '0px';
   }
 
@@ -1328,7 +1328,7 @@ function drawOutroCard(ctx: CanvasRenderingContext2D, progress: number, dayState
     ctx.textBaseline = 'middle';
     ctx.shadowColor = 'hsla(150, 50%, 50%, 0.3)';
     ctx.shadowBlur = 50;
-    ctx.fillText(`${dayStates.length} DAYS`, 0, 0);
+    ctx.fillText(`${dayStates.length} DAYS`, 0, 0, WIDTH * 0.85);
     ctx.shadowColor = 'transparent';
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
@@ -1341,7 +1341,7 @@ function drawOutroCard(ctx: CanvasRenderingContext2D, progress: number, dayState
     ctx.fillStyle = 'hsla(150, 40%, 70%, 0.75)';
     ctx.textAlign = 'center';
     ctx.letterSpacing = '6px';
-    ctx.fillText('WEEK COMPLETE', WIDTH / 2, HEIGHT * 0.42);
+    ctx.fillText('WEEK COMPLETE', WIDTH / 2, HEIGHT * 0.42, WIDTH * 0.85);
     ctx.letterSpacing = '0px';
   }
 
@@ -1424,8 +1424,21 @@ type MetricStyle = 'typography-wall' | 'centered-hero' | 'split-screen' | 'circu
 
 const METRIC_STYLES: MetricStyle[] = ['typography-wall', 'centered-hero', 'split-screen', 'circular-badge', 'gradient-stack'];
 
-function getMetricStyle(dayIndex: number): MetricStyle {
-  return METRIC_STYLES[dayIndex % METRIC_STYLES.length];
+// Shuffled metric styles — reset per generation for variety
+let _shuffledMetricStyles: MetricStyle[] = [];
+let _metricStyleCursor = 0;
+
+function resetMetricStylePool() {
+  _shuffledMetricStyles = shuffleArray(METRIC_STYLES);
+  _metricStyleCursor = 0;
+}
+
+function getMetricStyle(_dayIndex: number): MetricStyle {
+  if (_metricStyleCursor >= _shuffledMetricStyles.length) {
+    _shuffledMetricStyles = shuffleArray(METRIC_STYLES);
+    _metricStyleCursor = 0;
+  }
+  return _shuffledMetricStyles[_metricStyleCursor++];
 }
 
 // ── Shared: Draw bottom metric row (duration, calories, intensity) ──
@@ -1456,7 +1469,7 @@ function drawMetricDataRow(ctx: CanvasRenderingContext2D, state: DayState, progr
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(items[i].value, x, baseY + slideY);
+    ctx.fillText(items[i].value, x, baseY + slideY, 120);
     ctx.restore();
 
     // Label — subtle
@@ -1467,7 +1480,7 @@ function drawMetricDataRow(ctx: CanvasRenderingContext2D, state: DayState, progr
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.letterSpacing = '2px';
-    ctx.fillText(items[i].label.toUpperCase(), x, baseY + 28 + slideY);
+    ctx.fillText(items[i].label.toUpperCase(), x, baseY + 28 + slideY, 120);
     ctx.letterSpacing = '0px';
     ctx.restore();
   }
@@ -1517,7 +1530,7 @@ function drawStyleTypographyWall(ctx: CanvasRenderingContext2D, state: DayState,
       ctx.fillStyle = '#ffffff';
       ctx.shadowColor = `hsla(${hue}, 70%, 60%, 0.4)`;
       ctx.shadowBlur = 30;
-      ctx.fillText(dayStr, 0, 0);
+      ctx.fillText(dayStr, 0, 0, WIDTH * 0.9);
       ctx.shadowColor = 'transparent';
     } else {
       const alpha = Math.max(0.08, 0.4 - distFromCenter * 0.06) * lineT;
@@ -1540,7 +1553,7 @@ function drawStyleTypographyWall(ctx: CanvasRenderingContext2D, state: DayState,
     ctx.fillStyle = `hsla(${hue}, 40%, 50%, 1)`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, HEIGHT * 0.5);
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, HEIGHT * 0.5, WIDTH * 0.95);
     ctx.restore();
   }
 
@@ -1585,7 +1598,7 @@ function drawStyleCenteredHero(ctx: CanvasRenderingContext2D, state: DayState, p
     ctx.textBaseline = 'middle';
     ctx.shadowColor = `hsla(${hue}, 70%, 60%, 0.35)`;
     ctx.shadowBlur = 40;
-    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, HEIGHT * 0.40 + slideY);
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, HEIGHT * 0.40 + slideY, WIDTH * 0.85);
     ctx.shadowColor = 'transparent';
     ctx.restore();
   }
@@ -1599,7 +1612,7 @@ function drawStyleCenteredHero(ctx: CanvasRenderingContext2D, state: DayState, p
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, HEIGHT * 0.54 + lerp(8, 0, actT));
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, HEIGHT * 0.54 + lerp(8, 0, actT), WIDTH * 0.85);
     ctx.restore();
   }
 
@@ -1660,7 +1673,7 @@ function drawStyleSplitScreen(ctx: CanvasRenderingContext2D, state: DayState, pr
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, splitY * 0.55 + lerp(-20, 0, numT));
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, splitY * 0.55 + lerp(-20, 0, numT), WIDTH * 0.85);
     ctx.restore();
   }
   
@@ -1673,7 +1686,7 @@ function drawStyleSplitScreen(ctx: CanvasRenderingContext2D, state: DayState, pr
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, splitY + (HEIGHT - splitY) * 0.28 + lerp(10, 0, actT));
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, splitY + (HEIGHT - splitY) * 0.28 + lerp(10, 0, actT), WIDTH * 0.85);
     ctx.restore();
   }
 
@@ -1745,7 +1758,7 @@ function drawStyleCircularBadge(ctx: CanvasRenderingContext2D, state: DayState, 
     ctx.font = '800 28px -apple-system, "SF Pro Display", system-ui, sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
-    ctx.fillText(state.activityType.toUpperCase(), cx, cy + radius + 40 + lerp(8, 0, actT));
+    ctx.fillText(state.activityType.toUpperCase(), cx, cy + radius + 40 + lerp(8, 0, actT), WIDTH * 0.85);
     ctx.restore();
   }
 
@@ -1777,7 +1790,7 @@ function drawStyleGradientStack(ctx: CanvasRenderingContext2D, state: DayState, 
       ctx.shadowColor = `hsla(${hue}, 60%, 55%, 0.25)`;
       ctx.shadowBlur = 40;
     }
-    ctx.fillText(item.text, WIDTH / 2, HEIGHT * item.y + slideY);
+    ctx.fillText(item.text, WIDTH / 2, HEIGHT * item.y + slideY, WIDTH * 0.9);
     ctx.shadowColor = 'transparent';
     ctx.letterSpacing = '0px';
     ctx.restore();
@@ -1963,8 +1976,9 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
   if (dayStates.length < 3) throw new Error('Need at least 3 days for recap');
 
   console.log('[MotionRecap] Starting v5 with', dayStates.length, 'days');
-  // Reset transition pool for unique order each generation
+  // Reset pools for unique order each generation
   resetTransitionPool();
+  resetMetricStylePool();
   onProgress?.(3, 'Gathering your moments...');
 
   const images = await loadImages(dayStates);
@@ -2138,8 +2152,8 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
           const photoTime = timeInSlot - TIMING.METRIC_DURATION;
           const photoProgress = photoTime / TIMING.PHOTO_DURATION;
 
-          // Smooth Ken Burns — gentle movement per day
-          const kbDirections = [
+          // Smooth Ken Burns — randomized gentle movement per day
+          const kbDirections = shuffleArray([
             { sx: -4, sy: -3, ex: 4, ey: 3 },
             { sx: 5, sy: -2, ex: -5, ey: 2 },
             { sx: 0, sy: -5, ex: 0, ey: 5 },
@@ -2147,7 +2161,7 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
             { sx: 3, sy: 4, ex: -3, ey: -4 },
             { sx: -3, sy: 5, ex: 3, ey: -5 },
             { sx: 5, sy: 3, ex: -5, ey: -3 },
-          ];
+          ]);
           const kbDir = kbDirections[dayIndex % kbDirections.length];
           const kbScale = lerp(1.01, 1.01 + TIMING.KEN_BURNS_SCALE, easeInOutCubic(photoProgress));
           const kbPanX = lerp(kbDir.sx, kbDir.ex, easeInOutCubic(photoProgress));
