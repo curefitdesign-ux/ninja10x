@@ -194,6 +194,16 @@ const ReelGeneration = () => {
           {/* Inner glow */}
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 40%, rgba(139, 92, 246, 0.15) 0%, transparent 60%)' }} />
 
+          {/* Blurred background gif */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+            <img
+              src="/images/ai-star-loader.gif"
+              alt=""
+              className="w-32 h-32 object-contain opacity-30"
+              style={{ filter: 'blur(30px) saturate(150%)' }}
+            />
+          </div>
+
           {/* Centered content group */}
           <div className="flex flex-col items-center justify-center flex-1 w-full">
             {/* AI Star icon */}
