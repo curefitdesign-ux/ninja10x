@@ -2201,11 +2201,18 @@ function getDominantActivity(dayStates: DayState[]): string {
   return best;
 }
 
-async function fetchActivityMusic(activity: string, durationSeconds: number): Promise<AudioBuffer | null> {
+async function fetchActivityMusic(activity: string, durationSeconds: number, allActivities?: string[]): Promise<AudioBuffer | null> {
   try {
-    console.log('[MotionRecap] Fetching Pixabay music for:', activity);
+    // Use a unique seed per generation so each reel gets a different track
+    const seed = _genSeed || Date.now();
+    // Build a combined activity string for richer context
+    const contextActivity = allActivities && allActivities.length > 0
+      ? allActivities.join(' ')
+      : activity;
+
+    console.log('[MotionRecap] Fetching Pixabay music for:', contextActivity, 'seed:', seed);
     const { data, error } = await supabase.functions.invoke('fetch-activity-music', {
-      body: { activity, durationSeconds },
+      body: { activity: contextActivity, durationSeconds, seed },
     });
 
     if (error || !data?.success || !data?.track?.url) {
@@ -2214,9 +2221,8 @@ async function fetchActivityMusic(activity: string, durationSeconds: number): Pr
     }
 
     const trackUrl = data.track.url;
-    console.log('[MotionRecap] Downloading track:', data.track.title, trackUrl.slice(0, 80));
+    console.log('[MotionRecap] 🎵 Downloading:', data.track.title, 'by', data.track.artist, `(ID: ${data.track.pixabayId})`);
 
-    // Download and decode the audio file
     const response = await fetch(trackUrl);
     if (!response.ok) {
       console.warn('[MotionRecap] Track download failed:', response.status);
@@ -2241,10 +2247,10 @@ async function fetchActivityMusic(activity: string, durationSeconds: number): Pr
       const dst = result.getChannelData(ch);
 
       for (let i = 0; i < targetLength; i++) {
-        const srcIdx = i % src.length; // loop if track is shorter
+        const srcIdx = i % src.length;
         let sample = src[srcIdx];
 
-        // Fade in/out
+        // Smooth fade in/out
         const fadeIn = Math.min(1, i / (44100 * 0.8));
         const fadeOut = Math.min(1, (targetLength - i) / (44100 * 1.5));
         sample *= fadeIn * fadeOut;
@@ -2253,7 +2259,7 @@ async function fetchActivityMusic(activity: string, durationSeconds: number): Pr
       }
     }
 
-    console.log('[MotionRecap] Real music decoded and trimmed to', durationSeconds.toFixed(1), 's');
+    console.log('[MotionRecap] ✅ Real music decoded and trimmed to', durationSeconds.toFixed(1), 's');
     return result;
   } catch (err) {
     console.warn('[MotionRecap] Music fetch error:', err);
@@ -2296,18 +2302,19 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
 
   console.log('[MotionRecap] Duration:', totalDuration.toFixed(1), 's, Frames:', totalFrames);
 
-  // Try to fetch real music from Pixabay, fall back to synthesized
+  // Try to fetch real contextual music from Pixabay, fall back to synthesized
   onProgress?.(10, 'Finding the perfect soundtrack...');
   const dominantActivity = getDominantActivity(dayStates);
+  const allActivities = dayStates.map(s => s.activityType);
   let audioBuffer: AudioBuffer;
   let musicSource = 'synthesized';
 
   try {
-    const realMusic = await fetchActivityMusic(dominantActivity, totalDuration);
+    const realMusic = await fetchActivityMusic(dominantActivity, totalDuration, allActivities);
     if (realMusic) {
       audioBuffer = realMusic;
       musicSource = 'pixabay';
-      console.log('[MotionRecap] Using real Pixabay music track');
+      console.log('[MotionRecap] 🎵 Using real Pixabay music track');
     } else {
       throw new Error('No track returned');
     }
