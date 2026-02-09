@@ -616,12 +616,18 @@ const Reel = () => {
   // Handler: Regenerate recap (fresh transitions, music, Ken Burns patterns)
   const handleRegenerate = useCallback(async () => {
     const weekNum = weekRecapNumber || 1;
-    // Clear local cache
-    await deleteRecapFromCache(weekNum, user?.id);
-    // Clear cloud storage
-    if (user?.id) {
-      const path = `reels/${user.id}/week-${weekNum}.webm`;
-      await supabase.storage.from('journey-uploads').remove([path]).catch(() => {});
+    console.log('[Reel] Regenerate tapped, week:', weekNum, 'myActivities:', myActivities.length);
+    
+    // Clear local cache + cloud storage BEFORE navigating
+    try {
+      await deleteRecapFromCache(weekNum, user?.id);
+      if (user?.id) {
+        const path = `reels/${user.id}/week-${weekNum}.webm`;
+        await supabase.storage.from('journey-uploads').remove([path]);
+        console.log('[Reel] Cleared cloud cache:', path);
+      }
+    } catch (err) {
+      console.warn('[Reel] Cache clear error (continuing):', err);
     }
     
     // Use current user's own activities sorted by day_number
@@ -637,10 +643,12 @@ const Reel = () => {
       dayNumber: a.dayNumber,
       isVideo: a.isVideo,
     }));
+    console.log('[Reel] weekPhotos built:', weekPhotos.length, weekPhotos.map(p => p.activity));
     if (weekPhotos.length < 3) {
       toast.error('Need at least 3 photos to regenerate');
       return;
     }
+    // Navigate with unique timestamp to force fresh generation
     navigate('/reel-generation', {
       replace: true,
       state: { weekPhotos, weekNumber: weekNum, forceRegenerate: true, regenerateTs: Date.now() },
