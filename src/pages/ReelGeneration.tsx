@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
 import { generateMotionRecap, photosToDAyStates, type DayState } from '@/lib/motion-recap-generator';
+import { getRecapFromCache, saveRecapToCache } from '@/hooks/use-recap-cache';
 
 interface PhotoData {
   id: string;
@@ -19,6 +20,7 @@ interface PhotoData {
 interface LocationState {
   weekPhotos?: PhotoData[];
   weekNumber?: number;
+  forceRegenerate?: boolean;
 }
 
 const ReelGeneration = () => {
@@ -56,11 +58,30 @@ const ReelGeneration = () => {
     };
   }, []);
 
+  // Navigate to reel viewer with video URL
+  const navigateToReel = useCallback((videoUrl: string, weekNumber: number) => {
+    setProgress(100);
+    setPhase('Complete!');
+    toast.success('Your recap video is ready!');
+    setTimeout(() => {
+      navigate('/reel', {
+        replace: true,
+        state: {
+          weekRecapVideo: videoUrl,
+          weekNumber,
+        },
+      });
+    }, 800);
+  }, [navigate]);
+
   // Trigger generation once
   useEffect(() => {
     if (hasTriggered.current) return;
-    
+
     const photos = locationState?.weekPhotos;
+    const weekNumber = locationState?.weekNumber || 1;
+    const forceRegenerate = locationState?.forceRegenerate || false;
+
     if (!photos || photos.length < 3) {
       console.warn('[ReelGeneration] Not enough photos:', photos?.length);
       setError('Need at least 3 photos to generate a reel');
@@ -68,55 +89,65 @@ const ReelGeneration = () => {
     }
 
     hasTriggered.current = true;
-    console.log('[ReelGeneration] Starting generation with', photos.length, 'photos');
-    console.log('[ReelGeneration] Photo URLs:', photos.map(p => p.imageUrl?.slice(0, 80)));
 
-    // Convert to DayState format
-    const dayStates: DayState[] = photosToDAyStates(photos.map(p => ({
-      imageUrl: p.imageUrl,
-      activity: p.activity || 'Workout',
-      duration: p.duration,
-      distance: p.distance,
-      pr: p.pr,
-      dayNumber: p.dayNumber,
-      isVideo: p.isVideo,
-    })));
+    // Check cache first (unless force regenerate)
+    const run = async () => {
+      if (!forceRegenerate) {
+        setPhase('Checking cache...');
+        const cachedBlob = await getRecapFromCache(weekNumber);
+        if (cachedBlob) {
+          console.log('[ReelGeneration] Using cached video');
+          const cachedUrl = URL.createObjectURL(cachedBlob);
+          navigateToReel(cachedUrl, weekNumber);
+          return;
+        }
+      }
 
-    setProgress(5);
-    setPhase('Loading photos...');
+      console.log('[ReelGeneration] Starting generation with', photos.length, 'photos');
 
-    generateMotionRecap({
-      dayStates,
-      onProgress: (percent, phaseName) => {
-        setProgress(percent);
-        setPhase(phaseName);
-        console.log(`[ReelGeneration] ${phaseName}: ${percent}%`);
-      },
-    })
-      .then((videoUrl) => {
-        console.log('[ReelGeneration] Video generated successfully');
-        setProgress(100);
-        setPhase('Complete!');
-        toast.success('Your recap video is ready!');
+      // Convert to DayState format
+      const dayStates: DayState[] = photosToDAyStates(photos.map(p => ({
+        imageUrl: p.imageUrl,
+        activity: p.activity || 'Workout',
+        duration: p.duration,
+        distance: p.distance,
+        pr: p.pr,
+        dayNumber: p.dayNumber,
+        isVideo: p.isVideo,
+      })));
 
-        // Navigate to reel viewer after a brief pause
-        setTimeout(() => {
-          navigate('/reel', {
-            replace: true,
-            state: {
-              weekRecapVideo: videoUrl,
-              weekNumber: locationState?.weekNumber || 1,
-            },
-          });
-        }, 800);
-      })
-      .catch((err) => {
+      setProgress(5);
+      setPhase('Loading photos...');
+
+      try {
+        const videoUrl = await generateMotionRecap({
+          dayStates,
+          onProgress: (percent, phaseName) => {
+            setProgress(percent);
+            setPhase(phaseName);
+          },
+        });
+
+        // Save to cache as blob
+        try {
+          const response = await fetch(videoUrl);
+          const blob = await response.blob();
+          await saveRecapToCache(weekNumber, blob);
+        } catch (cacheErr) {
+          console.warn('[ReelGeneration] Failed to cache:', cacheErr);
+        }
+
+        navigateToReel(videoUrl, weekNumber);
+      } catch (err) {
         console.error('[ReelGeneration] Generation failed:', err);
         const message = err instanceof Error ? err.message : 'Failed to generate reel';
         setError(message);
         toast.error(message);
-      });
-  }, [locationState, navigate]);
+      }
+    };
+
+    run();
+  }, [locationState, navigateToReel]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -138,31 +169,22 @@ const ReelGeneration = () => {
     >
       {/* Background glows */}
       <div className="absolute inset-0">
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'radial-gradient(ellipse at 50% 35%, rgba(139, 92, 246, 0.15) 0%, transparent 50%)',
-          }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'radial-gradient(ellipse at 30% 55%, rgba(59, 130, 246, 0.08) 0%, transparent 45%)',
-          }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'radial-gradient(ellipse at 70% 45%, rgba(236, 72, 153, 0.07) 0%, transparent 40%)',
-          }}
-        />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 35%, rgba(139, 92, 246, 0.15) 0%, transparent 50%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 30% 55%, rgba(59, 130, 246, 0.08) 0%, transparent 45%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 70% 45%, rgba(236, 72, 153, 0.07) 0%, transparent 40%)' }} />
       </div>
 
       {/* Close Button */}
       <button
         onClick={handleClose}
-        className="absolute top-4 right-4 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/70 hover:text-white hover:bg-white/20 transition-all"
-        style={{ marginTop: 'env(safe-area-inset-top)' }}
+        className="absolute top-4 right-4 z-20 w-10 h-10 flex items-center justify-center rounded-full text-white/70 hover:text-white hover:bg-white/20 transition-all"
+        style={{
+          marginTop: 'env(safe-area-inset-top)',
+          background: 'rgba(255,255,255,0.1)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255,255,255,0.15)',
+        }}
       >
         <X className="w-5 h-5" />
       </button>
@@ -192,7 +214,7 @@ const ReelGeneration = () => {
         {/* Progress Section */}
         {!error && (
           <div className="w-full">
-            <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-3">
+            <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
               <div
                 className="h-full rounded-full origin-left"
                 style={{
@@ -204,7 +226,7 @@ const ReelGeneration = () => {
               />
             </div>
 
-            <div className="flex justify-between items-center text-sm">
+            <div className="flex justify-between items-center text-sm mt-3">
               <span className="text-white/50 font-medium tabular-nums">
                 {formatTime(elapsedSeconds)}
               </span>
@@ -219,7 +241,12 @@ const ReelGeneration = () => {
         {error && (
           <button
             onClick={handleClose}
-            className="mt-4 px-6 py-2 rounded-full bg-white/10 text-white/80 text-sm font-medium hover:bg-white/20 transition-colors"
+            className="mt-4 px-6 py-2 rounded-full text-white/80 text-sm font-medium hover:bg-white/20 transition-colors"
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+            }}
           >
             Go Back
           </button>
