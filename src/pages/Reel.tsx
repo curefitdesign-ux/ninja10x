@@ -948,7 +948,7 @@ const Reel = () => {
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              {isAddingToStories ? 'ADDING...' : 'ADD TO MY STORIES'}
+              {isAddingToStories ? 'ADDING...' : 'ADD TO MY STORY'}
             </span>
           </button>
         </div>
