@@ -1,15 +1,17 @@
 /**
- * Premium Motion Recap Generator v4 — Rich Contextual Music, Bold Typography, Cinematic
+ * Premium Motion Recap Generator v5 — Real Music + Bold Typography
  *
  * Structure per day:
- *   1. Metric card (2.8s) — Bold layout with large readable stats
+ *   1. Metric card (2.8s) — Extra-bold layout with large readable stats
  *   2. Photo hold (3.5s) — Cinematic Ken Burns with soft overlays
  *   Intro (2.2s) + Outro (2.8s)
  *
- * Audio: Rich contextual synthesized music with chord progressions,
- * arpeggios, melodies, and layered percussion per activity mood.
- * 100% local, no API calls. 9:16 ratio (720×1280), 24fps.
+ * Audio: Fetches real royalty-free music from Pixabay matched to activity type.
+ * Falls back to rich synthesized EDM if no track is found.
+ * 9:16 ratio (720×1280), 24fps.
  */
+
+import { supabase } from '@/integrations/supabase/client';
 
 // ============ TYPES ============
 
@@ -56,24 +58,24 @@ const TIMING = {
 
 const DAY_SLOT = TIMING.METRIC_DURATION + TIMING.PHOTO_DURATION;
 
-// ── BIGGER FONTS — ~40% larger across the board ──
+// ── EXTRA BOLD FONTS — heavier weights, larger sizes ──
 const FONTS = {
-  HERO_NUMBER: 'bold 156px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  HERO_UNIT: '200 28px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  LABEL_SM: '500 16px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  LABEL_MD: '500 19px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  DAY_PILL: '700 18px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  ACTIVITY: '600 22px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  STAT_VALUE: 'bold 42px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  STAT_LABEL: '400 14px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  INTRO_TITLE: 'bold 56px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  INTRO_SUB: '300 20px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  OUTRO_BIG: 'bold 80px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  OUTRO_LABEL: '400 20px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  PHOTO_ACTIVITY: 'bold 34px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  PHOTO_METRIC: '600 18px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  CALORIES: 'bold 36px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  CALORIES_LABEL: '400 13px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  HERO_NUMBER: '900 172px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  HERO_UNIT: '600 30px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  LABEL_SM: '600 17px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  LABEL_MD: '700 20px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  DAY_PILL: '800 20px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  ACTIVITY: '700 24px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  STAT_VALUE: '900 48px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  STAT_LABEL: '500 15px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  INTRO_TITLE: '900 64px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  INTRO_SUB: '400 22px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  OUTRO_BIG: '900 88px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  OUTRO_LABEL: '500 22px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  PHOTO_ACTIVITY: '900 38px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  PHOTO_METRIC: '700 20px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  CALORIES: '900 40px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  CALORIES_LABEL: '500 14px -apple-system, "SF Pro Text", system-ui, sans-serif',
 };
 
 // Activity accent colors (HSL hue)
@@ -1095,6 +1097,82 @@ function drawPhotoOverlays(ctx: CanvasRenderingContext2D, state: DayState, textO
   ctx.restore();
 }
 
+// ============ REAL MUSIC FETCHING ============
+
+function getDominantActivity(dayStates: DayState[]): string {
+  const counts: Record<string, number> = {};
+  for (const s of dayStates) {
+    const key = s.activityType.toLowerCase();
+    counts[key] = (counts[key] || 0) + 1;
+  }
+  let best = 'workout';
+  let max = 0;
+  for (const [k, v] of Object.entries(counts)) {
+    if (v > max) { max = v; best = k; }
+  }
+  return best;
+}
+
+async function fetchActivityMusic(activity: string, durationSeconds: number): Promise<AudioBuffer | null> {
+  try {
+    console.log('[MotionRecap] Fetching Pixabay music for:', activity);
+    const { data, error } = await supabase.functions.invoke('fetch-activity-music', {
+      body: { activity, durationSeconds },
+    });
+
+    if (error || !data?.success || !data?.track?.url) {
+      console.warn('[MotionRecap] Pixabay fetch failed:', error || data?.error);
+      return null;
+    }
+
+    const trackUrl = data.track.url;
+    console.log('[MotionRecap] Downloading track:', data.track.title, trackUrl.slice(0, 80));
+
+    // Download and decode the audio file
+    const response = await fetch(trackUrl);
+    if (!response.ok) {
+      console.warn('[MotionRecap] Track download failed:', response.status);
+      return null;
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    const audioCtx = new AudioContext({ sampleRate: 44100 });
+    const decoded = await audioCtx.decodeAudioData(arrayBuffer);
+    audioCtx.close();
+
+    // Trim or loop to match video duration
+    const targetLength = Math.ceil(44100 * durationSeconds);
+    const result = new AudioBuffer({
+      length: targetLength,
+      sampleRate: 44100,
+      numberOfChannels: Math.min(decoded.numberOfChannels, 2),
+    });
+
+    for (let ch = 0; ch < result.numberOfChannels; ch++) {
+      const src = decoded.getChannelData(ch);
+      const dst = result.getChannelData(ch);
+
+      for (let i = 0; i < targetLength; i++) {
+        const srcIdx = i % src.length; // loop if track is shorter
+        let sample = src[srcIdx];
+
+        // Fade in/out
+        const fadeIn = Math.min(1, i / (44100 * 0.8));
+        const fadeOut = Math.min(1, (targetLength - i) / (44100 * 1.5));
+        sample *= fadeIn * fadeOut;
+
+        dst[i] = sample;
+      }
+    }
+
+    console.log('[MotionRecap] Real music decoded and trimmed to', durationSeconds.toFixed(1), 's');
+    return result;
+  } catch (err) {
+    console.warn('[MotionRecap] Music fetch error:', err);
+    return null;
+  }
+}
+
 // ============ MAIN GENERATOR ============
 
 export async function generateMotionRecap(options: MotionRecapOptions): Promise<string> {
@@ -1102,12 +1180,11 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
 
   if (dayStates.length < 3) throw new Error('Need at least 3 days for recap');
 
-  console.log('[MotionRecap] Starting v4 with', dayStates.length, 'days');
+  console.log('[MotionRecap] Starting v5 with', dayStates.length, 'days');
   onProgress?.(3, 'Loading photos...');
 
   const images = await loadImages(dayStates);
   console.log('[MotionRecap] All photos loaded');
-  onProgress?.(12, 'Composing score...');
 
   const canvas = document.createElement('canvas');
   canvas.width = WIDTH;
@@ -1123,13 +1200,31 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
 
   console.log('[MotionRecap] Duration:', totalDuration.toFixed(1), 's, Frames:', totalFrames);
 
-  // Generate contextual audio with rich chord progressions
-  const mood = getDominantMood(dayStates);
-  console.log('[MotionRecap] Music mood:', mood);
-  const audioBuffer = generateContextualAudio(totalDuration, mood);
+  // Try to fetch real music from Pixabay, fall back to synthesized
+  onProgress?.(10, 'Finding music...');
+  const dominantActivity = getDominantActivity(dayStates);
+  let audioBuffer: AudioBuffer;
+  let musicSource = 'synthesized';
+
+  try {
+    const realMusic = await fetchActivityMusic(dominantActivity, totalDuration);
+    if (realMusic) {
+      audioBuffer = realMusic;
+      musicSource = 'pixabay';
+      console.log('[MotionRecap] Using real Pixabay music track');
+    } else {
+      throw new Error('No track returned');
+    }
+  } catch (err) {
+    console.log('[MotionRecap] Pixabay unavailable, using synthesized audio:', err);
+    const mood = getDominantMood(dayStates);
+    audioBuffer = generateContextualAudio(totalDuration, mood);
+  }
+
+  onProgress?.(16, `Music ready (${musicSource})`);
   const wavData = audioBufferToWav(audioBuffer);
-  console.log('[MotionRecap] Audio generated:', (wavData.byteLength / 1024).toFixed(0), 'KB');
-  onProgress?.(16, 'Preparing video...');
+  console.log('[MotionRecap] Audio ready:', (wavData.byteLength / 1024).toFixed(0), 'KB');
+  onProgress?.(18, 'Preparing video...');
 
   // Setup MediaRecorder with audio
   const videoStream = canvas.captureStream(FPS);
