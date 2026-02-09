@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX } from 'lucide-react';
+import { X, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2 } from 'lucide-react';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
@@ -18,6 +18,10 @@ import ReelToProgressTransition from '@/components/ReelToProgressTransition';
 import MakePublicSheet from '@/components/MakePublicSheet';
 import StoryHint, { useStoryNudgeAnimation } from '@/components/StoryHint';
 import { ReelViewerSkeleton } from '@/components/SkeletonLoaders';
+import { uploadToStorage } from '@/services/storage-service';
+import { deleteRecapFromCache } from '@/hooks/use-recap-cache';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -130,6 +134,9 @@ const Reel = () => {
   
   // Privacy sheet state
   const [showMakePublicSheet, setShowMakePublicSheet] = useState(false);
+  
+  // Recap viewer state
+  const [isAddingToStories, setIsAddingToStories] = useState(false);
 
   // Story nudge animation for inactivity hint
   const { triggerShake, shakeAnimation, shakeTransition } = useStoryNudgeAnimation();
@@ -539,6 +546,61 @@ const Reel = () => {
     return () => window.removeEventListener('keydown', handleKey);
   }, [goNextUser, goPrevUser, cycleActivity]);
 
+  // Handler: Add recap to stories (upload video + create journey activity)
+  const handleAddToStories = useCallback(async () => {
+    if (!weekRecapVideoFromNav || !user) return;
+    setIsAddingToStories(true);
+    try {
+      const response = await fetch(weekRecapVideoFromNav);
+      const blob = await response.blob();
+      const storageUrl = await uploadToStorage(blob, `week-${weekRecapNumber}-recap`, true);
+      if (!storageUrl) throw new Error('Upload failed');
+      const weekNum = weekRecapNumber || 1;
+      const dayNumber = weekNum * 3;
+      const { error } = await supabase.from('journey_activities').insert({
+        user_id: user.id,
+        storage_url: storageUrl,
+        original_url: storageUrl,
+        is_video: true,
+        activity: `Week ${weekNum} Recap`,
+        day_number: dayNumber,
+        is_public: true,
+      });
+      if (error) throw error;
+      toast.success('Recap added to your stories!');
+    } catch (err) {
+      console.error('[Reel] Failed to add to stories:', err);
+      toast.error('Failed to add to stories');
+    } finally {
+      setIsAddingToStories(false);
+    }
+  }, [weekRecapVideoFromNav, weekRecapNumber, user]);
+
+  // Handler: Regenerate recap
+  const handleRegenerate = useCallback(async () => {
+    const weekNum = weekRecapNumber || 1;
+    await deleteRecapFromCache(weekNum);
+    const weekStart = (weekNum - 1) * 3;
+    const weekPhotos = myActivities.slice(weekStart, weekStart + 3).map(a => ({
+      id: a.id,
+      imageUrl: a.originalUrl || a.storageUrl,
+      activity: a.activity || 'Workout',
+      duration: a.duration,
+      pr: a.pr,
+      uploadDate: new Date().toISOString().split('T')[0],
+      dayNumber: a.dayNumber,
+      isVideo: a.isVideo,
+    }));
+    if (weekPhotos.length < 3) {
+      toast.error('Need at least 3 photos to regenerate');
+      return;
+    }
+    navigate('/reel-generation', {
+      replace: true,
+      state: { weekPhotos, weekNumber: weekNum, forceRegenerate: true },
+    });
+  }, [weekRecapNumber, myActivities, navigate]);
+
   if (loading) {
     return <ReelViewerSkeleton />;
   }
@@ -547,13 +609,20 @@ const Reel = () => {
   if (hasWeekRecap && weekRecapVideoFromNav) {
     return (
       <div 
-        className="fixed inset-0 bg-black flex flex-col"
+        className="fixed inset-0 flex flex-col"
         style={{ 
           height: '100dvh',
           minHeight: '-webkit-fill-available',
           overflow: 'hidden',
+          background: 'linear-gradient(180deg, #0a0612 0%, #000 100%)',
         }}
       >
+        {/* Background aurora glows */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(139, 92, 246, 0.12) 0%, transparent 50%)' }} />
+          <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 30% 60%, rgba(59, 130, 246, 0.06) 0%, transparent 45%)' }} />
+        </div>
+
         {/* Close button */}
         <div 
           className="absolute top-0 right-0 z-50 p-3"
@@ -563,9 +632,10 @@ const Reel = () => {
             onClick={handleClose}
             className="w-10 h-10 flex items-center justify-center rounded-full text-white/80 hover:text-white transition-colors"
             style={{
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
+              background: 'rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(40px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+              border: '1px solid rgba(255,255,255,0.12)',
             }}
           >
             <X className="w-5 h-5" />
@@ -579,9 +649,10 @@ const Reel = () => {
         >
           <span className="text-white/90 font-semibold text-sm px-3 py-1.5 rounded-full"
             style={{
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
+              background: 'rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(40px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+              border: '1px solid rgba(255,255,255,0.12)',
             }}
           >
             Week {weekRecapNumber || 1} Recap
@@ -602,40 +673,74 @@ const Reel = () => {
           />
         </div>
 
-        {/* Bottom controls */}
+        {/* Bottom controls — liquid glass bar */}
         <div 
-          className="absolute bottom-0 inset-x-0 z-50 p-4 flex items-center justify-between"
-          style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}
+          className="absolute bottom-0 inset-x-0 z-50"
+          style={{ 
+            paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)',
+            background: 'linear-gradient(0deg, rgba(0,0,0,0.6) 0%, transparent 100%)',
+          }}
         >
-          {/* Mute toggle */}
-          <button
-            onClick={() => setIsMuted(prev => !prev)}
-            className="w-10 h-10 flex items-center justify-center rounded-full text-white/80"
-            style={{
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-            }}
-          >
-            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-          </button>
+          <div className="px-4 pb-2 pt-6 flex items-center gap-2">
+            {/* Mute toggle */}
+            <button
+              onClick={() => setIsMuted(prev => !prev)}
+              className="w-10 h-10 flex items-center justify-center rounded-full text-white/80 flex-shrink-0"
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                backdropFilter: 'blur(40px) saturate(200%)',
+                WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+                border: '1px solid rgba(255,255,255,0.12)',
+              }}
+            >
+              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            </button>
 
-          {/* View Stories button */}
-          <button
-            onClick={() => {
-              // Clear recap state and show regular stories
-              navigate('/reel', { replace: true, state: {} });
-            }}
-            className="px-4 py-2 rounded-full text-white/90 text-sm font-medium"
-            style={{
-              background: 'rgba(255,255,255,0.15)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255,255,255,0.2)',
-            }}
-          >
-            View Stories →
-          </button>
+            {/* Spacer */}
+            <div className="flex-1" />
+
+            {/* Regenerate button */}
+            <button
+              onClick={handleRegenerate}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-white/80 text-sm font-medium active:scale-95 transition-transform"
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                backdropFilter: 'blur(40px) saturate(200%)',
+                WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+                border: '1px solid rgba(255,255,255,0.12)',
+              }}
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Regenerate
+            </button>
+
+            {/* Add to Stories button */}
+            <button
+              onClick={handleAddToStories}
+              disabled={isAddingToStories}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-sm font-semibold active:scale-95 transition-transform disabled:opacity-50"
+              style={{
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.6) 0%, rgba(109, 40, 217, 0.5) 100%)',
+                backdropFilter: 'blur(40px) saturate(200%)',
+                WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+                border: '1px solid rgba(139, 92, 246, 0.4)',
+                boxShadow: '0 4px 20px rgba(139, 92, 246, 0.3)',
+              }}
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              {isAddingToStories ? 'Adding...' : 'Add to Stories'}
+            </button>
+          </div>
+
+          {/* View Stories link */}
+          <div className="px-4 pt-1 pb-1 flex justify-center">
+            <button
+              onClick={() => navigate('/reel', { replace: true, state: {} })}
+              className="text-white/40 text-xs font-medium hover:text-white/60 transition-colors"
+            >
+              View Stories →
+            </button>
+          </div>
         </div>
       </div>
     );

@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
+import { hasRecapCached, getRecapFromCache } from '@/hooks/use-recap-cache';
 import { toast } from 'sonner';
 import AuroraBackground from '@/components/AuroraBackground';
 import PhotoUploadCard from '@/components/PhotoUploadCard';
@@ -152,6 +153,34 @@ const Index = () => {
     });
   }, [navigate]);
 
+  // Track cached recap state
+  const [cachedWeek, setCachedWeek] = useState<number | null>(null);
+  const cacheCheckRef = useRef(false);
+
+  // Check if latest week recap is cached
+  useEffect(() => {
+    const completedWeeks = Math.floor(photos.length / 3);
+    if (completedWeeks <= 0 || cacheCheckRef.current) return;
+    cacheCheckRef.current = true;
+    hasRecapCached(completedWeeks).then(cached => {
+      setCachedWeek(cached ? completedWeeks : null);
+    });
+  }, [photos.length]);
+
+  // Play cached recap directly
+  const playCachedRecap = useCallback(async (weekNumber: number) => {
+    const blob = await getRecapFromCache(weekNumber);
+    if (blob) {
+      const url = URL.createObjectURL(blob);
+      navigate('/reel', {
+        state: { weekRecapVideo: url, weekNumber },
+      });
+    } else {
+      // Cache miss - fall back to generation
+      handleGenerateReel(photos);
+    }
+  }, [navigate, handleGenerateReel, photos]);
+
   // Reel pill for WidgetLayout3
   const reelPill = (() => {
     const completedWeeks = Math.floor(photos.length / 3);
@@ -166,11 +195,17 @@ const Index = () => {
       return sum + photoTotal;
     }, 0);
 
-    const state: PillState = 'creating'; // Always "Generate" — generation happens on dedicated page
+    const isCached = cachedWeek === completedWeeks;
+    const state: PillState = isCached ? 'complete' : 'creating';
 
     const handlePlay = () => {
-      console.log('[ReelPill] onPlay tapped — navigating to reel-generation');
-      handleGenerateReel(photos);
+      if (isCached) {
+        console.log('[ReelPill] Playing cached recap for week', completedWeeks);
+        playCachedRecap(completedWeeks);
+      } else {
+        console.log('[ReelPill] onPlay tapped — navigating to reel-generation');
+        handleGenerateReel(photos);
+      }
     };
 
     return {
