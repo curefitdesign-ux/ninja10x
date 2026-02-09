@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { X } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { generateMotionRecap, photosToDAyStates, type DayState } from '@/lib/motion-recap-generator';
 import { getRecapFromCache, saveRecapToCache } from '@/hooks/use-recap-cache';
@@ -23,19 +23,28 @@ interface LocationState {
   forceRegenerate?: boolean;
 }
 
+const MOTIVATIONAL_PHRASES = [
+  'Conquer will power',
+  'Embrace the grind',
+  'Stronger every day',
+  'Push your limits',
+  'Unleash your fire',
+  'Own the moment',
+];
+
 const ReelGeneration = () => {
   const [deviceHeight, setDeviceHeight] = useState<number>(0);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState('Setting the stage...');
   const [error, setError] = useState<string | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [motivationalPhrase] = useState(() =>
+    MOTIVATIONAL_PHRASES[Math.floor(Math.random() * MOTIVATIONAL_PHRASES.length)]
+  );
   const hasTriggered = useRef(false);
   const navigate = useNavigate();
   const location = useLocation();
   const locationState = location.state as LocationState | null;
 
-  // Calculate and set fixed device height
   useEffect(() => {
     const updateHeight = () => {
       const height = window.visualViewport?.height || window.innerHeight;
@@ -48,17 +57,6 @@ const ReelGeneration = () => {
     };
   }, []);
 
-  // Elapsed timer
-  useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setElapsedSeconds(prev => prev + 1);
-    }, 1000);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
-
-  // Navigate to reel viewer with video URL
   const navigateToReel = useCallback((videoUrl: string, weekNumber: number) => {
     setProgress(100);
     setPhase('Your story is ready ✨');
@@ -66,15 +64,11 @@ const ReelGeneration = () => {
     setTimeout(() => {
       navigate('/reel', {
         replace: true,
-        state: {
-          weekRecapVideo: videoUrl,
-          weekNumber,
-        },
+        state: { weekRecapVideo: videoUrl, weekNumber },
       });
     }, 800);
   }, [navigate]);
 
-  // Trigger generation once
   useEffect(() => {
     if (hasTriggered.current) return;
 
@@ -83,29 +77,23 @@ const ReelGeneration = () => {
     const forceRegenerate = locationState?.forceRegenerate || false;
 
     if (!photos || photos.length < 3) {
-      console.warn('[ReelGeneration] Not enough photos:', photos?.length);
       setError('Need at least 3 photos to generate a reel');
       return;
     }
 
     hasTriggered.current = true;
 
-    // Check cache first (unless force regenerate)
     const run = async () => {
       if (!forceRegenerate) {
         setPhase('Looking for your saved story...');
         const cachedBlob = await getRecapFromCache(weekNumber);
         if (cachedBlob) {
-          console.log('[ReelGeneration] Using cached video');
           const cachedUrl = URL.createObjectURL(cachedBlob);
           navigateToReel(cachedUrl, weekNumber);
           return;
         }
       }
 
-      console.log('[ReelGeneration] Starting generation with', photos.length, 'photos');
-
-      // Convert to DayState format
       const dayStates: DayState[] = photosToDAyStates(photos.map(p => ({
         imageUrl: p.imageUrl,
         activity: p.activity || 'Workout',
@@ -128,7 +116,6 @@ const ReelGeneration = () => {
           },
         });
 
-        // Save to cache as blob
         try {
           const response = await fetch(videoUrl);
           const blob = await response.blob();
@@ -149,19 +136,13 @@ const ReelGeneration = () => {
     run();
   }, [locationState, navigateToReel]);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   const handleClose = useCallback(() => {
     navigate(-1);
   }, [navigate]);
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-black"
+      className="fixed inset-0 z-[100] flex flex-col overflow-hidden bg-black"
       style={{
         height: deviceHeight > 0 ? `${deviceHeight}px` : '100dvh',
         minHeight: '-webkit-fill-available',
@@ -183,83 +164,92 @@ const ReelGeneration = () => {
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 70% 45%, rgba(236, 72, 153, 0.08) 0%, transparent 40%)' }} />
       </div>
 
-      {/* Close Button */}
-      <button
-        onClick={handleClose}
-        className="absolute top-4 right-4 z-20 w-10 h-10 flex items-center justify-center rounded-full text-white/70 hover:text-white hover:bg-white/20 transition-all"
-        style={{
-          marginTop: 'env(safe-area-inset-top)',
-          background: 'rgba(255,255,255,0.1)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255,255,255,0.15)',
-        }}
-      >
-        <X className="w-5 h-5" />
-      </button>
+      {/* Back Button */}
+      <div className="relative z-20 px-4 pt-3" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 12px)' }}>
+        <button
+          onClick={handleClose}
+          className="w-10 h-10 flex items-center justify-center text-white/70 hover:text-white transition-colors"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+      </div>
 
-      {/* Content */}
-      <div className="relative z-10 w-full max-w-xs mx-6 flex flex-col items-center">
-        {/* GIF Animation */}
-        <div className="relative w-32 h-32 mb-8">
-          <img
-            src="/images/ai-star-loader.gif"
-            alt="AI generating"
-            className="w-full h-full object-contain"
-            style={{ filter: 'drop-shadow(0 0 24px rgba(139, 92, 246, 0.5))' }}
-          />
-        </div>
+      {/* Main Card */}
+      <div className="relative z-10 flex-1 flex flex-col px-4 pb-4 min-h-0">
+        <div
+          className="flex-1 flex flex-col items-center justify-center rounded-3xl relative overflow-hidden min-h-0"
+          style={{
+            background: 'linear-gradient(180deg, rgba(20, 10, 40, 0.6) 0%, rgba(0, 0, 0, 0.8) 100%)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            boxShadow: '0 0 60px rgba(139, 92, 246, 0.1), inset 0 1px 0 rgba(255,255,255,0.05)',
+          }}
+        >
+          {/* Inner glow */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 40%, rgba(139, 92, 246, 0.15) 0%, transparent 60%)' }} />
 
-        {/* Main title */}
-        <h2 className="text-2xl font-semibold text-white text-center mb-3">
-          {error ? 'Generation failed' : 'Generating your ai recap'}
-        </h2>
-
-        {/* Subtitle */}
-        <p className="text-base text-white/40 text-center mb-8">
-          {error || phase}
-        </p>
-
-        {/* Progress Section */}
-        {!error && (
-          <div className="w-full">
-            <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
-              <div
-                className="h-full rounded-full origin-left"
-                style={{
-                  background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.8), rgba(236, 72, 153, 0.8))',
-                  transform: `scaleX(${progress / 100})`,
-                  transition: 'transform 0.4s ease-out',
-                  willChange: 'transform',
-                }}
-              />
-            </div>
-
-            <div className="flex justify-between items-center text-sm mt-3">
-              <span className="text-white/50 font-medium tabular-nums">
-                {formatTime(elapsedSeconds)}
-              </span>
-              <span className="text-white/50 font-medium tabular-nums">
-                {Math.round(progress)}%
-              </span>
-            </div>
+          {/* AI Star icon */}
+          <div className="relative mb-8">
+            <img
+              src="/images/ai-star-loader.gif"
+              alt="AI generating"
+              className="w-28 h-28 object-contain"
+              style={{ filter: 'drop-shadow(0 0 30px rgba(139, 92, 246, 0.6))' }}
+            />
           </div>
-        )}
 
-        {/* Retry button on error */}
-        {error && (
-          <button
-            onClick={handleClose}
-            className="mt-4 px-6 py-2 rounded-full text-white/80 text-sm font-medium hover:bg-white/20 transition-colors"
+          {/* Title */}
+          <h2
+            className="text-[28px] font-bold text-center leading-tight mb-auto"
             style={{
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'linear-gradient(180deg, #C4B5FD 0%, #818CF8 50%, #6366F1 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
             }}
           >
-            Go Back
-          </button>
-        )}
+            {error ? 'Generation failed' : (
+              <>Generating<br />your week journey</>
+            )}
+          </h2>
+
+          {/* Spacer to push motivational text and progress to bottom */}
+          <div className="flex-1" />
+
+          {/* Motivational phrase */}
+          <p className="text-lg text-white/80 text-center font-medium mb-6 px-6">
+            {error || motivationalPhrase}
+          </p>
+
+          {/* Progress bar inside card */}
+          {!error && (
+            <div className="w-full px-6 pb-6">
+              <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${progress}%`,
+                    background: 'linear-gradient(90deg, #fff 0%, rgba(255,255,255,0.4) 100%)',
+                    transition: 'width 0.4s ease-out',
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="pb-6">
+              <button
+                onClick={handleClose}
+                className="px-6 py-2 rounded-full text-white/80 text-sm font-medium"
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                }}
+              >
+                Go Back
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
