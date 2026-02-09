@@ -611,10 +611,6 @@ const Reel = () => {
     navigate('/', { replace: true });
   }, [weekRecapNumber, navigate]);
 
-  if (loading) {
-    return <ReelViewerSkeleton />;
-  }
-
   // Handler: Download recap video
   const handleDownloadRecap = useCallback(async () => {
     if (!weekRecapVideoFromNav) return;
@@ -634,6 +630,10 @@ const Reel = () => {
       toast.error('Failed to download');
     }
   }, [weekRecapVideoFromNav, weekRecapNumber]);
+
+  if (loading) {
+    return <ReelViewerSkeleton />;
+  }
 
   // WEEK RECAP VIDEO PLAYER — show generated recap video instead of stories
   if (hasWeekRecap && weekRecapVideoFromNav) {
