@@ -622,18 +622,19 @@ function drawThinLine(ctx: CanvasRenderingContext2D, y: number, hue: number, alp
   ctx.restore();
 }
 
-// ============ CINEMATIC TRANSITIONS — MASSIVE VARIETY ============
+// ============ CINEMATIC TRANSITIONS — SMOOTH & PREMIUM ============
+// Removed shaking/glitchy transitions: glitchSlice, motionBlur
 
 type TransitionStyle = 
   | 'radialWipe' | 'lightStreak' | 'geometricShards' | 'diamondReveal' 
-  | 'horizontalBlinds' | 'spiralReveal' | 'rippleWave' | 'glitchSlice'
-  | 'motionBlur' | 'zoomBurst' | 'pixelDissolve' | 'curtainDrop'
+  | 'horizontalBlinds' | 'spiralReveal' | 'rippleWave'
+  | 'zoomBurst' | 'pixelDissolve' | 'curtainDrop'
   | 'crossHatch' | 'smokeWipe' | 'filmBurn' | 'diagonalSlice';
 
 const TRANSITION_STYLES: TransitionStyle[] = [
   'radialWipe', 'lightStreak', 'geometricShards', 'diamondReveal',
-  'horizontalBlinds', 'spiralReveal', 'rippleWave', 'glitchSlice',
-  'motionBlur', 'zoomBurst', 'pixelDissolve', 'curtainDrop',
+  'horizontalBlinds', 'spiralReveal', 'rippleWave',
+  'zoomBurst', 'pixelDissolve', 'curtainDrop',
   'crossHatch', 'smokeWipe', 'filmBurn', 'diagonalSlice',
 ];
 
@@ -1195,8 +1196,6 @@ function drawGraphicTransition(ctx: CanvasRenderingContext2D, progress: number, 
     case 'horizontalBlinds': drawHorizontalBlindsTransition(ctx, progress, hue); break;
     case 'spiralReveal': drawSpiralRevealTransition(ctx, progress, hue); break;
     case 'rippleWave': drawRippleWaveTransition(ctx, progress, hue); break;
-    case 'glitchSlice': drawGlitchSliceTransition(ctx, progress, hue); break;
-    case 'motionBlur': drawMotionBlurTransition(ctx, progress, hue); break;
     case 'zoomBurst': drawZoomBurstTransition(ctx, progress, hue); break;
     case 'pixelDissolve': drawPixelDissolveTransition(ctx, progress, hue); break;
     case 'curtainDrop': drawCurtainDropTransition(ctx, progress, hue); break;
@@ -1439,26 +1438,22 @@ function drawOutroCard(ctx: CanvasRenderingContext2D, progress: number, dayState
 }
 
 // ============ METRIC CARD — 5 PREMIUM VISUAL STYLES WITH DATA ============
+// Each day is GUARANTEED a different style within a generation
 
 type MetricStyle = 'typography-wall' | 'centered-hero' | 'split-screen' | 'circular-badge' | 'gradient-stack';
 
 const METRIC_STYLES: MetricStyle[] = ['typography-wall', 'centered-hero', 'split-screen', 'circular-badge', 'gradient-stack'];
 
-// Shuffled metric styles — reset per generation for variety
-let _shuffledMetricStyles: MetricStyle[] = [];
-let _metricStyleCursor = 0;
+// Pre-assigned metric styles per day — guarantees each day is different
+let _assignedMetricStyles: MetricStyle[] = [];
 
 function resetMetricStylePool() {
-  _shuffledMetricStyles = shuffleArray(METRIC_STYLES, _genSeed * 19 + 3);
-  _metricStyleCursor = 0;
+  // Shuffle all 5 styles, then assign one per day index (wraps if >5 days)
+  _assignedMetricStyles = shuffleArray(METRIC_STYLES, _genSeed * 19 + 3);
 }
 
-function getMetricStyle(_dayIndex: number): MetricStyle {
-  if (_metricStyleCursor >= _shuffledMetricStyles.length) {
-    _shuffledMetricStyles = shuffleArray(METRIC_STYLES, _genSeed * 23 + _metricStyleCursor);
-    _metricStyleCursor = 0;
-  }
-  return _shuffledMetricStyles[_metricStyleCursor++];
+function getMetricStyle(dayIndex: number): MetricStyle {
+  return _assignedMetricStyles[dayIndex % _assignedMetricStyles.length];
 }
 
 // ── Shared: Draw bottom metric row (duration, calories, intensity) ──

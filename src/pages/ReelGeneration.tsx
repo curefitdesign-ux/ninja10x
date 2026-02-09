@@ -4,9 +4,10 @@ import { ChevronLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateMotionRecap, photosToDAyStates, type DayState } from '@/lib/motion-recap-generator';
-import { getRecapFromCache, saveRecapToCache } from '@/hooks/use-recap-cache';
+import { getRecapFromCache, saveRecapToCache, deleteRecapFromCache } from '@/hooks/use-recap-cache';
 import { useProfile } from '@/hooks/use-profile';
 import { useAuth } from '@/hooks/use-auth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PhotoData {
   id: string;
@@ -40,6 +41,28 @@ const MOTIVATIONAL_PHRASES = [
   'No excuses today',
   'Chase greatness',
 ];
+
+/** Upload generated reel blob to Supabase storage for cross-device access */
+async function uploadReelToStorage(blob: Blob, userId: string, weekNumber: number): Promise<string | null> {
+  try {
+    const path = `reels/${userId}/week-${weekNumber}.webm`;
+    // Remove old file first (ignore errors)
+    await supabase.storage.from('journey-uploads').remove([path]);
+    const { error } = await supabase.storage
+      .from('journey-uploads')
+      .upload(path, blob, { contentType: 'video/webm', upsert: true });
+    if (error) {
+      console.warn('[ReelUpload] Storage upload failed:', error.message);
+      return null;
+    }
+    const { data: urlData } = supabase.storage.from('journey-uploads').getPublicUrl(path);
+    console.log('[ReelUpload] Uploaded reel to storage:', path);
+    return urlData.publicUrl;
+  } catch (err) {
+    console.warn('[ReelUpload] Upload error:', err);
+    return null;
+  }
+}
 
 const ReelGeneration = () => {
   const [deviceHeight, setDeviceHeight] = useState<number>(0);
@@ -108,13 +131,38 @@ const ReelGeneration = () => {
     hasTriggered.current = true;
 
     const run = async () => {
+      // On forceRegenerate, clear ALL caches (local + cloud)
+      if (forceRegenerate) {
+        await deleteRecapFromCache(weekNumber, user?.id);
+      }
+
       if (!forceRegenerate) {
         setPhase('Looking for your saved story...');
+        // Try local cache first
         const cachedBlob = await getRecapFromCache(weekNumber, user?.id);
         if (cachedBlob) {
           const cachedUrl = URL.createObjectURL(cachedBlob);
           navigateToReel(cachedUrl, weekNumber);
           return;
+        }
+        // Try cloud storage
+        if (user?.id) {
+          const cloudPath = `reels/${user.id}/week-${weekNumber}.webm`;
+          const { data: urlData } = supabase.storage.from('journey-uploads').getPublicUrl(cloudPath);
+          if (urlData?.publicUrl) {
+            try {
+              const resp = await fetch(urlData.publicUrl);
+              if (resp.ok && resp.headers.get('content-type')?.includes('video')) {
+                const blob = await resp.blob();
+                if (blob.size > 1000) {
+                  await saveRecapToCache(weekNumber, blob, user.id);
+                  const url = URL.createObjectURL(blob);
+                  navigateToReel(url, weekNumber);
+                  return;
+                }
+              }
+            } catch { /* fall through to generation */ }
+          }
         }
       }
 
@@ -142,10 +190,15 @@ const ReelGeneration = () => {
           },
         });
 
+        // Save to local cache AND cloud storage
         try {
           const response = await fetch(videoUrl);
           const blob = await response.blob();
           await saveRecapToCache(weekNumber, blob, user?.id);
+          // Upload to cloud for cross-device access
+          if (user?.id) {
+            uploadReelToStorage(blob, user.id, weekNumber); // fire-and-forget
+          }
         } catch (cacheErr) {
           console.warn('[ReelGeneration] Failed to cache:', cacheErr);
         }

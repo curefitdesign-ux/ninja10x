@@ -616,7 +616,13 @@ const Reel = () => {
   // Handler: Regenerate recap (fresh transitions, music, Ken Burns patterns)
   const handleRegenerate = useCallback(async () => {
     const weekNum = weekRecapNumber || 1;
+    // Clear local cache
     await deleteRecapFromCache(weekNum, user?.id);
+    // Clear cloud storage
+    if (user?.id) {
+      const path = `reels/${user.id}/week-${weekNum}.webm`;
+      await supabase.storage.from('journey-uploads').remove([path]).catch(() => {});
+    }
     
     // Use current user's own activities sorted by day_number
     const sortedActivities = [...myActivities].sort((a, b) => a.dayNumber - b.dayNumber);
