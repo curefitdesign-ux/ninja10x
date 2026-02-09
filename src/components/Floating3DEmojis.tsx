@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useMemo } from 'react';
 import { ReactionType } from '@/services/journey-service';
 
 // 3D reaction assets
@@ -32,90 +33,121 @@ const EMOJI_ASSETS: Record<ReactionType, string> = {
   timer: timerImg,
 };
 
-// Positions INSIDE the story image border - on the edges but within bounds
-// Increased scale values for bigger emojis
-const EDGE_POSITIONS = [
-  { top: '4%', left: '4%', rotate: -12, scale: 1.0 },
-  { top: '22%', left: '2%', rotate: 10, scale: 0.95 },
-  { bottom: '28%', left: '3%', rotate: -15, scale: 0.9 },
-  { top: '6%', right: '4%', rotate: 14, scale: 0.98 },
-  { top: '28%', right: '2%', rotate: -8, scale: 1.0 },
-  { bottom: '22%', right: '3%', rotate: 12, scale: 0.92 },
-  { bottom: '6%', left: '10%', rotate: 5, scale: 0.85 },
-  { bottom: '5%', right: '8%', rotate: -6, scale: 0.88 },
-];
+interface FloatingBubble {
+  id: number;
+  type: ReactionType;
+  x: number;       // % from left (10-90)
+  size: number;     // px
+  duration: number; // seconds for full rise
+  delay: number;    // stagger delay
+  drift: number;    // horizontal sway amplitude px
+  rotateStart: number;
+  rotateEnd: number;
+  opacity: number;
+}
+
+function generateBubbles(reactions: ReactionType[], seed: number): FloatingBubble[] {
+  const count = Math.min(reactions.length, 8);
+  const bubbles: FloatingBubble[] = [];
+  
+  for (let i = 0; i < count; i++) {
+    const rand = () => {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      return (seed % 10000) / 10000;
+    };
+    
+    bubbles.push({
+      id: i,
+      type: reactions[i],
+      x: 8 + rand() * 84,
+      size: 32 + rand() * 16,
+      duration: 6 + rand() * 4,
+      delay: i * 0.6 + rand() * 0.8,
+      drift: 12 + rand() * 20,
+      rotateStart: -15 + rand() * 30,
+      rotateEnd: -10 + rand() * 20,
+      opacity: 0.55 + rand() * 0.35,
+    });
+  }
+  return bubbles;
+}
 
 export default function Floating3DEmojis({ reactions, newReaction, isPaused = false }: Floating3DEmojisProps) {
+  // Regenerate bubbles when reaction list changes
+  const bubbles = useMemo(
+    () => generateBubbles(reactions, reactions.length * 7919 + Date.now() % 10000),
+    [reactions.join(',')]
+  );
+
   return (
     <>
-      {reactions.slice(0, 8).map((type, i) => {
-        const pos = EDGE_POSITIONS[i % EDGE_POSITIONS.length];
-        const asset = EMOJI_ASSETS[type];
-        
-        // Create unique animation delay for each emoji - staggered entrance
-        const entranceDelay = 0.2 + i * 0.08;
-        const animDelay = i * 0.5;
+      {/* Continuous gentle bottom-to-top floating bubbles */}
+      {bubbles.map((b) => {
+        const asset = EMOJI_ASSETS[b.type];
         
         return (
           <motion.div
-            key={`${type}-${i}`}
+            key={`float-${b.id}-${b.type}`}
             className="absolute pointer-events-none"
             style={{
-              ...pos,
+              left: `${b.x}%`,
+              bottom: -50,
+              width: b.size,
+              height: b.size,
               zIndex: 50,
-              filter: 'drop-shadow(0 6px 16px rgba(0, 0, 0, 0.6))',
             }}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ 
-              scale: pos.scale, 
-              opacity: 1,
+            initial={{ y: 0, opacity: 0, scale: 0.3 }}
+            animate={isPaused ? { y: 0, opacity: b.opacity * 0.5 } : {
+              y: [0, -300, -600],
+              opacity: [0, b.opacity, 0],
+              scale: [0.4, 1, 0.6],
+              x: [0, b.drift, -b.drift * 0.5],
+              rotate: [b.rotateStart, b.rotateEnd, b.rotateStart],
             }}
-            transition={{ 
-              type: 'spring', 
-              stiffness: 300, 
-              damping: 20,
-              delay: entranceDelay,
+            transition={{
+              duration: b.duration,
+              delay: b.delay,
+              repeat: Infinity,
+              repeatDelay: 1.5 + b.delay * 0.3,
+              ease: 'easeOut',
+              y: { duration: b.duration, ease: [0.25, 0.46, 0.45, 0.94] },
+              opacity: { duration: b.duration, times: [0, 0.15, 0.85] },
+              x: { duration: b.duration, ease: 'easeInOut' },
             }}
           >
-            {/* Subtle floating animation - freezes when paused */}
-            <motion.div
-              animate={isPaused ? {} : {
-                y: [0, -4, 0],
-                rotate: [pos.rotate - 2, pos.rotate + 2, pos.rotate - 2],
+            <img
+              src={asset}
+              alt={b.type}
+              className="w-full h-full object-contain"
+              style={{
+                filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5))',
               }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                repeatDelay: animDelay,
-                ease: 'easeInOut',
-              }}
-            >
-              <img 
-                src={asset} 
-                alt={type} 
-                className="w-12 h-12 object-contain"
-              />
-            </motion.div>
+            />
           </motion.div>
         );
       })}
 
-      {/* Large burst animation for new reaction */}
+      {/* New reaction burst — rises from bottom center */}
       <AnimatePresence>
         {newReaction && (
           <motion.div
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            className="absolute left-1/2 bottom-[15%] -translate-x-1/2 pointer-events-none"
             style={{ zIndex: 60 }}
-            initial={{ scale: 0, opacity: 1, rotate: -20 }}
-            animate={{ scale: [0, 2.2, 0], opacity: [1, 1, 0], rotate: [0, 15, 0] }}
+            initial={{ scale: 0, opacity: 1, y: 0 }}
+            animate={{
+              scale: [0, 1.6, 1.2, 0.8],
+              opacity: [1, 1, 0.8, 0],
+              y: [0, -120, -200, -280],
+              rotate: [0, -10, 5, 0],
+            }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.7, ease: 'easeOut' }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
           >
-            <img 
-              src={EMOJI_ASSETS[newReaction]} 
-              alt={newReaction} 
-              className="w-24 h-24 object-contain"
-              style={{ filter: 'drop-shadow(0 10px 30px rgba(0, 0, 0, 0.6))' }}
+            <img
+              src={EMOJI_ASSETS[newReaction]}
+              alt={newReaction}
+              className="w-20 h-20 object-contain"
+              style={{ filter: 'drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5))' }}
             />
           </motion.div>
         )}
