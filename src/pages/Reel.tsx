@@ -1111,12 +1111,12 @@ const Reel = () => {
                       <motion.div
                         key={contentKey}
                         className="absolute inset-0"
-                        initial={{ opacity: 0, scale: 1.02 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.98 }}
+                        initial={{ opacity: 0, scale: 1.08, filter: 'blur(8px) brightness(1.2)' }}
+                        animate={{ opacity: 1, scale: 1, filter: 'blur(0px) brightness(1)' }}
+                        exit={{ opacity: 0, scale: 0.94, filter: 'blur(6px) brightness(0.8)' }}
                         transition={{ 
-                          duration: 0.2, 
-                          ease: [0.25, 0.46, 0.45, 0.94] 
+                          duration: 0.4, 
+                          ease: [0.22, 1, 0.36, 1]
                         }}
                       >
                         {isRecapGenerating ? (
