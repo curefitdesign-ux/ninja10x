@@ -131,9 +131,14 @@ const ReelGeneration = () => {
     hasTriggered.current = true;
 
     const run = async () => {
-      // On forceRegenerate, clear ALL caches (local + cloud)
+      // On forceRegenerate, clear ALL caches (local + cloud) and skip cache lookup
       if (forceRegenerate) {
+        console.log('[ReelGeneration] Force regenerate — clearing all caches');
         await deleteRecapFromCache(weekNumber, user?.id);
+        if (user?.id) {
+          const path = `reels/${user.id}/week-${weekNumber}.webm`;
+          await supabase.storage.from('journey-uploads').remove([path]).catch(() => {});
+        }
       }
 
       if (!forceRegenerate) {
@@ -145,13 +150,13 @@ const ReelGeneration = () => {
           navigateToReel(cachedUrl, weekNumber);
           return;
         }
-        // Try cloud storage
+        // Try cloud storage (add cache buster to avoid stale CDN responses)
         if (user?.id) {
           const cloudPath = `reels/${user.id}/week-${weekNumber}.webm`;
           const { data: urlData } = supabase.storage.from('journey-uploads').getPublicUrl(cloudPath);
           if (urlData?.publicUrl) {
             try {
-              const resp = await fetch(urlData.publicUrl);
+              const resp = await fetch(`${urlData.publicUrl}?t=${Date.now()}`);
               if (resp.ok && resp.headers.get('content-type')?.includes('video')) {
                 const blob = await resp.blob();
                 if (blob.size > 1000) {
