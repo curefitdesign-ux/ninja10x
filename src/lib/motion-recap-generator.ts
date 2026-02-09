@@ -60,22 +60,22 @@ const DAY_SLOT = TIMING.METRIC_DURATION + TIMING.PHOTO_DURATION;
 
 // ── EXTRA BOLD FONTS — heavier weights, larger sizes ──
 const FONTS = {
-  HERO_NUMBER: '900 200px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  HERO_UNIT: '700 36px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  LABEL_SM: '600 20px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  LABEL_MD: '700 24px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  DAY_PILL: '800 24px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  ACTIVITY: '700 30px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  STAT_VALUE: '900 56px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  STAT_LABEL: '600 18px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  INTRO_TITLE: '900 72px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  INTRO_SUB: '400 24px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  OUTRO_BIG: '900 96px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  OUTRO_LABEL: '500 26px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  PHOTO_ACTIVITY: '900 42px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  PHOTO_METRIC: '700 24px -apple-system, "SF Pro Text", system-ui, sans-serif',
-  CALORIES: '900 46px -apple-system, "SF Pro Display", system-ui, sans-serif',
-  CALORIES_LABEL: '600 17px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  HERO_NUMBER: '900 120px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  HERO_UNIT: '700 22px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  LABEL_SM: '600 18px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  LABEL_MD: '700 22px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  DAY_PILL: '800 20px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  ACTIVITY: '700 22px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  STAT_VALUE: '900 40px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  STAT_LABEL: '600 14px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  INTRO_TITLE: '900 56px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  INTRO_SUB: '400 20px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  OUTRO_BIG: '900 72px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  OUTRO_LABEL: '500 22px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  PHOTO_ACTIVITY: '900 36px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  PHOTO_METRIC: '700 20px -apple-system, "SF Pro Text", system-ui, sans-serif',
+  CALORIES: '900 36px -apple-system, "SF Pro Display", system-ui, sans-serif',
+  CALORIES_LABEL: '600 14px -apple-system, "SF Pro Text", system-ui, sans-serif',
 };
 
 // Activity accent colors (HSL hue)
@@ -1207,20 +1207,15 @@ function drawMetricCard(
 
   drawGrain(ctx, 0.025);
 
-  // ── Per-day layout variation seed ──
-  const layoutSeed = seededRand(state.dayNumber * 137 + Math.floor(Math.random() * 1000));
-  const layoutStyle = Math.floor(layoutSeed * 3); // 0=center, 1=top-heavy, 2=spread
-
-  // Varied entry timing per layout
-  const entryOffset = layoutStyle * 0.02;
+  // ── Fixed centered layout — no randomization for consistency ──
   const dayT   = easeOutBack(Math.min(progress * 3.5, 1));
-  const heroT  = easeOutExpo(Math.min(Math.max(progress - 0.06 - entryOffset, 0) * 2.2, 1));
-  const unitT  = easeOutCubic(Math.min(Math.max(progress - 0.16 - entryOffset, 0) * 3, 1));
-  const actT   = easeOutCubic(Math.min(Math.max(progress - 0.22 - entryOffset, 0) * 3, 1));
-  const statsT = easeOutCubic(Math.min(Math.max(progress - 0.32 - entryOffset, 0) * 2.5, 1));
-  const calT   = easeOutCubic(Math.min(Math.max(progress - 0.42 - entryOffset, 0) * 3, 1));
+  const heroT  = easeOutExpo(Math.min(Math.max(progress - 0.06, 0) * 2.2, 1));
+  const unitT  = easeOutCubic(Math.min(Math.max(progress - 0.16, 0) * 3, 1));
+  const actT   = easeOutCubic(Math.min(Math.max(progress - 0.22, 0) * 3, 1));
+  const statsT = easeOutCubic(Math.min(Math.max(progress - 0.32, 0) * 2.5, 1));
+  const calT   = easeOutCubic(Math.min(Math.max(progress - 0.42, 0) * 3, 1));
 
-  const centerY = layoutStyle === 1 ? HEIGHT * 0.32 : layoutStyle === 2 ? HEIGHT * 0.38 : HEIGHT * 0.36;
+  const centerY = HEIGHT * 0.36;
 
   // ── DAY pill — slides in from left with rotation ──
   if (dayT > 0) {
@@ -1258,13 +1253,10 @@ function drawMetricCard(
     ctx.save();
     ctx.globalAlpha = heroT * globalAlpha;
     const scale = lerp(0.3, 1, easeOutBack(heroT));
-    // Varied entry direction per layout
-    const slideY = layoutStyle === 0 ? lerp(60, 0, heroT) : layoutStyle === 1 ? lerp(-40, 0, heroT) : lerp(80, 0, heroT);
-    const slideX = layoutStyle === 2 ? lerp(-40, 0, heroT) : 0;
-    // Subtle continuous float
-    const floatY = Math.sin(progress * Math.PI * 4) * 3 * heroT;
+    const slideY = lerp(40, 0, heroT);
+    const floatY = Math.sin(progress * Math.PI * 4) * 2 * heroT;
 
-    ctx.translate(WIDTH / 2 + slideX, centerY + slideY + floatY);
+    ctx.translate(WIDTH / 2, centerY + slideY + floatY);
     ctx.scale(scale, scale);
 
     // Count-up animation
@@ -1277,8 +1269,8 @@ function drawMetricCard(
       display = raw.replace(/^\d+/, String(current));
     }
 
-    ctx.shadowColor = `hsla(${hue}, 65%, 55%, 0.45)`;
-    ctx.shadowBlur = 70;
+    ctx.shadowColor = `hsla(${hue}, 65%, 55%, 0.35)`;
+    ctx.shadowBlur = 50;
     ctx.font = FONTS.HERO_NUMBER;
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
@@ -1333,20 +1325,18 @@ function drawMetricCard(
 
     const maxStats = Math.min(stats.length, 3);
     if (maxStats > 0) {
-      const sectionW = WIDTH * 0.75;
+      const sectionW = WIDTH * 0.8;
       const colW = sectionW / maxStats;
       const startX = (WIDTH - sectionW) / 2;
 
       for (let i = 0; i < maxStats; i++) {
-        const delay = i * 0.07;
+        const delay = i * 0.05;
         const t = easeOutBack(Math.min(Math.max(progress - 0.36 - delay, 0) * 2.8, 1));
         if (t <= 0) continue;
 
-        // Slide in from alternating sides
-        const slideDir = i % 2 === 0 ? -1 : 1;
-        const slideX = lerp(slideDir * 50, 0, t);
-        const cx = startX + colW * (i + 0.5) + slideX;
-        const baseY = HEIGHT * 0.60;
+        const slideY = lerp(20, 0, t);
+        const cx = startX + colW * (i + 0.5);
+        const baseY = HEIGHT * 0.60 + slideY;
 
         ctx.save();
         ctx.globalAlpha = t * globalAlpha * 0.9;
@@ -1415,24 +1405,12 @@ function drawMetricCard(
     ctx.restore();
   }
 
-  // ── Exit — graphic transition into photo ──
+  // ── Exit — fade to black with graphic transition ──
   if (progress > 0.75) {
     const exitT = (progress - 0.75) / 0.25;
-    // Varied exit style per layout
-    if (layoutStyle === 0) {
-      // Fade to black
-      ctx.fillStyle = `rgba(0,0,0,${easeInOutCubic(exitT) * 0.9})`;
-      ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    } else if (layoutStyle === 1) {
-      // Scale out with white flash
-      ctx.fillStyle = `rgba(0,0,0,${easeInOutCubic(exitT) * 0.85})`;
-      ctx.fillRect(0, 0, WIDTH, HEIGHT);
-      if (exitT < 0.4) drawWhiteFlash(ctx, exitT / 0.4, 0.25);
-    } else {
-      // Darken with graphic overlay
-      ctx.fillStyle = `rgba(0,0,0,${easeInOutCubic(exitT) * 0.85})`;
-      ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    }
+    ctx.fillStyle = `rgba(0,0,0,${easeInOutCubic(exitT) * 0.9})`;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    if (exitT < 0.4) drawWhiteFlash(ctx, exitT / 0.4, 0.2);
     if (exitT > 0.15) {
       drawGraphicTransition(ctx, (exitT - 0.15) / 0.85, state.dayNumber, hue);
     }
