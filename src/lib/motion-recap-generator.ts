@@ -618,9 +618,31 @@ const TRANSITION_STYLES: TransitionStyle[] = [
   'horizontalBlinds', 'spiralReveal', 'rippleWave', 'glitchSlice',
 ];
 
-function getRandomTransition(index: number): TransitionStyle {
-  const seed = (index * 7 + Math.floor(Math.random() * 100)) % TRANSITION_STYLES.length;
-  return TRANSITION_STYLES[seed];
+// Shuffle array using Fisher-Yates
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Pre-shuffled transition order per generation — guarantees no repeats
+let _shuffledTransitions: TransitionStyle[] = [];
+let _transitionCursor = 0;
+
+function resetTransitionPool() {
+  _shuffledTransitions = shuffleArray(TRANSITION_STYLES);
+  _transitionCursor = 0;
+}
+
+function getRandomTransition(_index: number): TransitionStyle {
+  if (_transitionCursor >= _shuffledTransitions.length) {
+    _shuffledTransitions = shuffleArray(TRANSITION_STYLES);
+    _transitionCursor = 0;
+  }
+  return _shuffledTransitions[_transitionCursor++];
 }
 
 function drawCrossFade(ctx: CanvasRenderingContext2D, progress: number) {
@@ -1530,6 +1552,8 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
   if (dayStates.length < 3) throw new Error('Need at least 3 days for recap');
 
   console.log('[MotionRecap] Starting v5 with', dayStates.length, 'days');
+  // Reset transition pool for unique order each generation
+  resetTransitionPool();
   onProgress?.(3, 'Gathering your moments...');
 
   const images = await loadImages(dayStates);
@@ -1703,14 +1727,16 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
           const photoTime = timeInSlot - TIMING.METRIC_DURATION;
           const photoProgress = photoTime / TIMING.PHOTO_DURATION;
 
-          // Enhanced Ken Burns — more dramatic movement per day
-          const kbDirections = [
+          // Enhanced Ken Burns — randomized dramatic movement per day
+          const kbDirections = shuffleArray([
             { sx: -8, sy: -6, ex: 8, ey: 6 },    // diagonal sweep
             { sx: 10, sy: -4, ex: -10, ey: 4 },   // reverse diagonal
             { sx: 0, sy: -12, ex: 0, ey: 12 },    // vertical pan
             { sx: -12, sy: 0, ex: 12, ey: 0 },    // horizontal sweep
             { sx: 6, sy: 8, ex: -6, ey: -8 },     // reverse diagonal alt
-          ];
+            { sx: -6, sy: 10, ex: 6, ey: -10 },   // upward diagonal
+            { sx: 12, sy: 6, ex: -12, ey: -6 },   // wide sweep
+          ]);
           const kbDir = kbDirections[dayIndex % kbDirections.length];
           const kbScale = lerp(1.02, 1.02 + TIMING.KEN_BURNS_SCALE * 2, easeInOutCubic(photoProgress));
           const kbPanX = lerp(kbDir.sx, kbDir.ex, easeInOutCubic(photoProgress));
