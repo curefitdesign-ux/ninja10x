@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { generateMotionRecap, photosToDAyStates, type DayState } from '@/lib/motion-recap-generator';
 import { getRecapFromCache, saveRecapToCache } from '@/hooks/use-recap-cache';
 import { useProfile } from '@/hooks/use-profile';
+import { useAuth } from '@/hooks/use-auth';
 
 interface PhotoData {
   id: string;
@@ -46,6 +47,7 @@ const ReelGeneration = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile } = useProfile();
+  const { user } = useAuth();
   const locationState = location.state as LocationState | null;
 
   useEffect(() => {
@@ -89,7 +91,7 @@ const ReelGeneration = () => {
     const run = async () => {
       if (!forceRegenerate) {
         setPhase('Looking for your saved story...');
-        const cachedBlob = await getRecapFromCache(weekNumber);
+        const cachedBlob = await getRecapFromCache(weekNumber, user?.id);
         if (cachedBlob) {
           const cachedUrl = URL.createObjectURL(cachedBlob);
           navigateToReel(cachedUrl, weekNumber);
@@ -124,7 +126,7 @@ const ReelGeneration = () => {
         try {
           const response = await fetch(videoUrl);
           const blob = await response.blob();
-          await saveRecapToCache(weekNumber, blob);
+          await saveRecapToCache(weekNumber, blob, user?.id);
         } catch (cacheErr) {
           console.warn('[ReelGeneration] Failed to cache:', cacheErr);
         }

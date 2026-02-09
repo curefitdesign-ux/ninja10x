@@ -71,7 +71,7 @@ const Index = () => {
   const location = useLocation();
   
   // Load photos from backend (single source of truth)
-  const { activities, loading: activitiesLoading, refresh: refreshActivities } = useJourneyActivities();
+  const { activities, loading: activitiesLoading, refresh: refreshActivities, userId } = useJourneyActivities();
   
   // Convert backend activities to Photo shape for compatibility
   const photos: Photo[] = activities.map(a => ({
@@ -163,14 +163,14 @@ const Index = () => {
     const completedWeeks = Math.floor(photos.length / 3);
     if (completedWeeks <= 0 || cacheCheckRef.current) return;
     cacheCheckRef.current = true;
-    hasRecapCached(completedWeeks).then(cached => {
+    hasRecapCached(completedWeeks, userId || undefined).then(cached => {
       setCachedWeek(cached ? completedWeeks : null);
     });
   }, [photos.length]);
 
   // Play cached recap directly
   const playCachedRecap = useCallback(async (weekNumber: number) => {
-    const blob = await getRecapFromCache(weekNumber);
+    const blob = await getRecapFromCache(weekNumber, userId || undefined);
     if (blob) {
       const url = URL.createObjectURL(blob);
       navigate('/reel', {

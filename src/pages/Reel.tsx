@@ -613,7 +613,7 @@ const Reel = () => {
   // Handler: Regenerate recap (fresh transitions, music, Ken Burns patterns)
   const handleRegenerate = useCallback(async () => {
     const weekNum = weekRecapNumber || 1;
-    await deleteRecapFromCache(weekNum);
+    await deleteRecapFromCache(weekNum, user?.id);
     const weekStart = (weekNum - 1) * 3;
     const weekPhotos = myActivities.slice(weekStart, weekStart + 3).map(a => ({
       id: a.id,
@@ -638,7 +638,7 @@ const Reel = () => {
   // Handler: Delete recap and go back to start
   const handleDeleteRecap = useCallback(async () => {
     const weekNum = weekRecapNumber || 1;
-    await deleteRecapFromCache(weekNum);
+    await deleteRecapFromCache(weekNum, user?.id);
     setShowDeleteRecapConfirm(false);
     toast.success('Recap deleted');
     navigate('/', { replace: true });
