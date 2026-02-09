@@ -401,7 +401,13 @@ const Preview = () => {
     // Update local state with the saved URL from storage
     setFramedImageUrl(saved.storageUrl);
     
-    // Toast removed - celebration overlay handles success feedback
+    // Check if this upload completes a set of 3 → auto-generate reel
+    if (saved.dayNumber > 0 && saved.dayNumber % 3 === 0) {
+      console.info('[journey-debug] Preview: 3-photo milestone reached, auto-generating reel', { dayNumber: saved.dayNumber });
+      sessionStorage.removeItem(PREVIEW_STATE_KEY);
+      navigate('/reel-generation', { replace: true, state: { autoGenerate: true } });
+      return;
+    }
     
     // Show the celebration overlay first, then share sheet
     setShowMicroCelebration(true);
