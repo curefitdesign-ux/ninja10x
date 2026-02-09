@@ -49,12 +49,12 @@ const WIDTH = 720;
 const HEIGHT = 1280;
 
 const TIMING = {
-  INTRO: 2.2,
-  METRIC_DURATION: 2.8,
-  PHOTO_DURATION: 3.5,
-  CROSSFADE: 0.35,
-  OUTRO: 2.5,
-  OUTRO_FADE: 0.6,
+  INTRO: 1.8,
+  METRIC_DURATION: 2.2,
+  PHOTO_DURATION: 2.8,
+  CROSSFADE: 0.3,
+  OUTRO: 2.0,
+  OUTRO_FADE: 0.5,
   KEN_BURNS_SCALE: 0.03,
 };
 
@@ -536,6 +536,61 @@ async function loadImage(src: string, timeoutMs = 8000): Promise<HTMLImageElemen
   });
 }
 
+/** Extract a frame from a video URL as an HTMLImageElement */
+async function extractVideoFrame(src: string, timeoutMs = 12000): Promise<HTMLImageElement> {
+  return new Promise<HTMLImageElement>((resolve) => {
+    const timeout = setTimeout(() => {
+      console.warn('[MotionRecap] Video frame extraction timed out:', src.slice(0, 60));
+      resolve(createBlackPlaceholder());
+    }, timeoutMs);
+
+    const video = document.createElement('video');
+    video.crossOrigin = 'anonymous';
+    video.muted = true;
+    video.preload = 'auto';
+    video.playsInline = true;
+
+    const cleanup = () => {
+      clearTimeout(timeout);
+      video.removeEventListener('seeked', onSeeked);
+      video.removeEventListener('error', onError);
+      video.removeEventListener('loadeddata', onLoaded);
+    };
+
+    const captureFrame = () => {
+      try {
+        const c = document.createElement('canvas');
+        c.width = video.videoWidth || WIDTH;
+        c.height = video.videoHeight || HEIGHT;
+        const cx = c.getContext('2d')!;
+        cx.drawImage(video, 0, 0, c.width, c.height);
+        const img = new Image();
+        img.onload = () => { cleanup(); resolve(img); };
+        img.onerror = () => { cleanup(); resolve(createBlackPlaceholder()); };
+        img.src = c.toDataURL('image/jpeg', 0.9);
+      } catch (err) {
+        console.warn('[MotionRecap] Video frame capture failed:', err);
+        cleanup();
+        resolve(createBlackPlaceholder());
+      }
+    };
+
+    const onSeeked = () => captureFrame();
+    const onError = () => { cleanup(); resolve(createBlackPlaceholder()); };
+    const onLoaded = () => {
+      // Seek to 0.5s or 10% of duration for a meaningful frame
+      const seekTo = Math.min(0.5, video.duration * 0.1);
+      video.currentTime = seekTo;
+    };
+
+    video.addEventListener('seeked', onSeeked, { once: true });
+    video.addEventListener('error', onError, { once: true });
+    video.addEventListener('loadeddata', onLoaded, { once: true });
+    video.src = src;
+    video.load();
+  });
+}
+
 function createBlackPlaceholder(): HTMLImageElement {
   const c = document.createElement('canvas');
   c.width = WIDTH; c.height = HEIGHT;
@@ -549,7 +604,14 @@ function createBlackPlaceholder(): HTMLImageElement {
 
 async function loadImages(dayStates: DayState[]): Promise<HTMLImageElement[]> {
   const results: HTMLImageElement[] = [];
-  for (const state of dayStates) results.push(await loadImage(state.asset.src));
+  for (const state of dayStates) {
+    if (state.asset.type === 'video') {
+      console.log('[MotionRecap] Extracting frame from video:', state.asset.src.slice(0, 60));
+      results.push(await extractVideoFrame(state.asset.src));
+    } else {
+      results.push(await loadImage(state.asset.src));
+    }
+  }
   return results;
 }
 
