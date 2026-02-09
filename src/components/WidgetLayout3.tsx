@@ -16,6 +16,7 @@ import MediaSourceSheet from '@/components/MediaSourceSheet';
 interface Photo {
   id: string;
   storageUrl: string;
+  originalUrl?: string;
   isVideo?: boolean;
   activity?: string;
   frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
@@ -39,9 +40,11 @@ const renderInFrame = (photo: Photo, containerWidth: number = 180) => {
   const week = Math.ceil(photo.dayNumber / 3);
   const day = ((photo.dayNumber - 1) % 3) + 1;
   
+  // Use originalUrl (raw photo) for frame rendering, NOT storageUrl (already-framed screenshot)
+  const rawImageUrl = photo.originalUrl || photo.storageUrl;
   const frameProps = {
-    imageUrl: photo.storageUrl,
-    isVideo: photo.isVideo || isVideoUrl(photo.storageUrl),
+    imageUrl: rawImageUrl,
+    isVideo: photo.isVideo || isVideoUrl(rawImageUrl),
     activity: photo.activity || 'Activity',
     week,
     day,
