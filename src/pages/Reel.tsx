@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronLeft, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download } from 'lucide-react';
+import { X, ChevronLeft, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause } from 'lucide-react';
+import PullToRefresh from '@/components/PullToRefresh';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
@@ -140,6 +141,7 @@ const Reel = () => {
   // Recap viewer state
   const [isAddingToStories, setIsAddingToStories] = useState(false);
   const [showDeleteRecapConfirm, setShowDeleteRecapConfirm] = useState(false);
+  const [recapPlaying, setRecapPlaying] = useState(true);
 
   // Story nudge animation for inactivity hint
   const { triggerShake, shakeAnimation, shakeTransition } = useStoryNudgeAnimation();
@@ -737,9 +739,26 @@ const Reel = () => {
 
   // WEEK RECAP VIDEO PLAYER — show generated recap video instead of stories
   if (hasWeekRecap && weekRecapVideoFromNav) {
+    const handleRecapPullRefresh = async () => {
+      handleRegenerate();
+    };
+
+    const toggleRecapPlayback = () => {
+      const vid = videoRef.current;
+      if (!vid) return;
+      if (vid.paused) {
+        vid.play();
+        setRecapPlaying(true);
+      } else {
+        vid.pause();
+        setRecapPlaying(false);
+      }
+    };
+
     return (
+      <PullToRefresh onRefresh={handleRecapPullRefresh}>
       <div 
-        className="fixed inset-0 flex flex-col"
+        className="flex flex-col"
         style={{ 
           height: '100dvh',
           minHeight: '-webkit-fill-available',
@@ -806,6 +825,7 @@ const Reel = () => {
             {/* Video — key forces DOM element replacement on new URL */}
             <video
               key={weekRecapVideoFromNav}
+              ref={videoRef}
               src={weekRecapVideoFromNav}
               className="absolute inset-0 w-full h-full object-cover"
               autoPlay
@@ -813,10 +833,34 @@ const Reel = () => {
               controls={false}
               loop
               muted={isMuted}
-              onClick={() => setIsMuted(prev => !prev)}
+              onClick={toggleRecapPlayback}
             />
 
-            {/* Mute indicator */}
+            {/* Play/Pause overlay */}
+            <AnimatePresence>
+              {!recapPlaying && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.7 }}
+                  transition={{ duration: 0.15 }}
+                  onClick={toggleRecapPlayback}
+                  className="absolute inset-0 z-15 flex items-center justify-center"
+                >
+                  <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center"
+                    style={{
+                      background: 'rgba(0,0,0,0.5)',
+                      backdropFilter: 'blur(20px)',
+                      WebkitBackdropFilter: 'blur(20px)',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                    }}
+                  >
+                    <Play className="w-7 h-7 text-white ml-1" fill="white" />
+                  </div>
+                </motion.button>
+              )}
+            </AnimatePresence>
             <button
               onClick={() => setIsMuted(prev => !prev)}
               className="absolute top-4 right-4 z-20 w-9 h-9 flex items-center justify-center rounded-full text-white/70"
@@ -926,6 +970,7 @@ const Reel = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+      </PullToRefresh>
     );
   }
 
