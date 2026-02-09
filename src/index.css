@@ -83,67 +83,67 @@
 }
 @layer base {
   :root {
-    /* Aurora Dark Theme */
-    --background: 230 75% 9%;
+    /* Deep Blue-Violet Aurora Theme */
+    --background: 248 60% 7%;
     --foreground: 0 0% 100%;
 
-    --card: 230 75% 9%;
+    --card: 252 50% 10%;
     --card-foreground: 0 0% 100%;
 
-    --popover: 230 75% 12%;
+    --popover: 252 50% 12%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 195 100% 50%;
-    --primary-foreground: 230 75% 9%;
+    --primary: 252 90% 68%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 48 100% 55%;
-    --secondary-foreground: 230 75% 9%;
+    --secondary: 220 80% 60%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 230 40% 20%;
-    --muted-foreground: 0 0% 100% / 0.3;
+    --muted: 250 35% 18%;
+    --muted-foreground: 0 0% 100% / 0.35;
 
-    --accent: 340 100% 60%;
+    --accent: 280 80% 65%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 100% / 0.12;
-    --input: 0 0% 100% / 0.08;
-    --ring: 195 100% 50%;
+    --border: 0 0% 100% / 0.1;
+    --input: 0 0% 100% / 0.07;
+    --ring: 252 90% 68%;
 
     --radius: 1.5rem;
 
-    /* Liquid Glass Tokens */
-    --glass-bg: rgba(255, 255, 255, 0.06);
-    --glass-bg-hover: rgba(255, 255, 255, 0.1);
-    --glass-bg-active: rgba(255, 255, 255, 0.14);
-    --glass-border: rgba(255, 255, 255, 0.12);
-    --glass-border-focus: rgba(255, 255, 255, 0.25);
-    --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    --glass-blur: 40px;
-    --glass-saturate: 180%;
+    /* Liquid Glass Tokens — higher blur & saturation */
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-bg-hover: rgba(255, 255, 255, 0.09);
+    --glass-bg-active: rgba(255, 255, 255, 0.13);
+    --glass-border: rgba(255, 255, 255, 0.10);
+    --glass-border-focus: rgba(255, 255, 255, 0.22);
+    --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+    --glass-blur: 50px;
+    --glass-saturate: 200%;
 
-    /* Aurora Colors */
-    --aurora-cyan: 195 100% 50%;
-    --aurora-yellow: 48 100% 55%;
-    --aurora-pink: 340 100% 60%;
-    --aurora-green: 157 89% 48%;
+    /* Aurora Colors — Blue / Purple / Violet palette */
+    --aurora-cyan: 220 90% 62%;
+    --aurora-yellow: 252 90% 68%;
+    --aurora-pink: 280 80% 65%;
+    --aurora-green: 200 80% 55%;
     --aurora-blue: 234 100% 69%;
 
     /* Gradients */
-    --gradient-platform-green: linear-gradient(135deg, hsl(157 89% 48%) 0%, hsl(234 100% 69%) 100%);
-    --gradient-platform-orange: linear-gradient(90deg, hsl(55 100% 73%) 0%, hsl(21 100% 67%) 100%);
+    --gradient-platform-green: linear-gradient(135deg, hsl(220 80% 60%) 0%, hsl(280 80% 65%) 100%);
+    --gradient-platform-orange: linear-gradient(90deg, hsl(252 90% 68%) 0%, hsl(220 80% 60%) 100%);
 
-    --sidebar-background: 230 75% 9%;
+    --sidebar-background: 248 60% 7%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 195 100% 50%;
-    --sidebar-primary-foreground: 230 75% 9%;
-    --sidebar-accent: 230 40% 20%;
+    --sidebar-primary: 252 90% 68%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 250 35% 18%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 100% / 0.1;
-    --sidebar-ring: 195 100% 50%;
+    --sidebar-border: 0 0% 100% / 0.08;
+    --sidebar-ring: 252 90% 68%;
   }
 }
 

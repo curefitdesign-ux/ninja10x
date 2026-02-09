@@ -1,87 +1,83 @@
 const AuroraBackground = () => {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none">
-      {/* Base background */}
+      {/* Base background — deep blue-violet */}
       <div className="absolute inset-0 bg-background" />
       
-      {/* Aurora orbs */}
+      {/* Large violet glow — top center */}
       <div 
-        className="absolute w-[440px] h-[440px] rounded-full animate-aurora-float"
+        className="absolute w-[500px] h-[500px] rounded-full animate-aurora-float"
         style={{
-          background: 'radial-gradient(circle, hsla(195, 100%, 50%, 0.2) 0%, transparent 70%)',
-          top: '15%',
-          left: '20%',
+          background: 'radial-gradient(circle, hsla(265, 80%, 55%, 0.25) 0%, transparent 70%)',
+          top: '-5%',
+          left: '10%',
           animationDelay: '0s',
         }}
       />
       
+      {/* Blue glow — mid left */}
       <div 
-        className="absolute w-[440px] h-[440px] rounded-full animate-aurora-pulse"
+        className="absolute w-[480px] h-[480px] rounded-full animate-aurora-pulse"
         style={{
-          background: 'radial-gradient(circle, hsla(48, 100%, 55%, 0.2) 0%, transparent 70%)',
-          top: '-5%',
-          left: '-10%',
+          background: 'radial-gradient(circle, hsla(225, 90%, 55%, 0.22) 0%, transparent 70%)',
+          top: '20%',
+          left: '-15%',
           animationDelay: '2s',
         }}
       />
       
+      {/* Purple glow — right */}
       <div 
-        className="absolute w-[440px] h-[440px] rounded-full animate-aurora-float"
+        className="absolute w-[460px] h-[460px] rounded-full animate-aurora-float"
         style={{
-          background: 'radial-gradient(circle, hsla(195, 100%, 50%, 0.15) 0%, transparent 70%)',
-          top: '40%',
-          right: '-20%',
+          background: 'radial-gradient(circle, hsla(252, 85%, 60%, 0.20) 0%, transparent 70%)',
+          top: '35%',
+          right: '-10%',
           animationDelay: '1s',
         }}
       />
       
+      {/* Deep indigo — bottom left */}
       <div 
-        className="absolute w-[440px] h-[440px] rounded-full animate-aurora-pulse"
+        className="absolute w-[500px] h-[500px] rounded-full animate-aurora-pulse"
         style={{
-          background: 'radial-gradient(circle, hsla(48, 100%, 55%, 0.2) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, hsla(240, 70%, 50%, 0.18) 0%, transparent 70%)',
           top: '55%',
-          right: '-10%',
+          left: '5%',
           animationDelay: '3s',
         }}
       />
       
+      {/* Violet-pink accent — top right */}
       <div 
-        className="absolute w-[440px] h-[440px] rounded-full animate-aurora-float"
+        className="absolute w-[420px] h-[420px] rounded-full animate-aurora-float"
         style={{
-          background: 'radial-gradient(circle, hsla(340, 100%, 60%, 0.2) 0%, transparent 70%)',
-          top: '-10%',
+          background: 'radial-gradient(circle, hsla(280, 75%, 58%, 0.18) 0%, transparent 70%)',
+          top: '5%',
           right: '-5%',
           animationDelay: '4s',
         }}
       />
       
+      {/* Blue accent — bottom */}
       <div 
-        className="absolute w-[440px] h-[440px] rounded-full animate-aurora-pulse"
+        className="absolute w-[520px] h-[520px] rounded-full animate-aurora-pulse"
         style={{
-          background: 'radial-gradient(circle, hsla(195, 100%, 50%, 0.2) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, hsla(220, 85%, 55%, 0.16) 0%, transparent 70%)',
           top: '70%',
-          left: '10%',
+          left: '20%',
           animationDelay: '2.5s',
         }}
       />
       
+      {/* Subtle warm violet — center */}
       <div 
-        className="absolute w-[520px] h-[520px] rounded-full animate-aurora-float"
+        className="absolute w-[550px] h-[550px] rounded-full animate-aurora-float"
         style={{
-          background: 'radial-gradient(circle, hsla(48, 100%, 55%, 0.15) 0%, transparent 70%)',
-          top: '25%',
-          left: '5%',
-          animationDelay: '1.5s',
-        }}
-      />
-      
-      <div 
-        className="absolute w-[440px] h-[440px] rounded-full animate-aurora-pulse"
-        style={{
-          background: 'radial-gradient(circle, hsla(195, 100%, 50%, 0.2) 0%, transparent 70%)',
-          top: '50%',
+          background: 'radial-gradient(circle, hsla(260, 70%, 50%, 0.12) 0%, transparent 70%)',
+          top: '30%',
           left: '15%',
-          animationDelay: '3.5s',
+          animationDelay: '1.5s',
         }}
       />
     </div>
