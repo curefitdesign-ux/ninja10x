@@ -106,8 +106,9 @@ const Reel = () => {
   // Delete confirmation state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
-  // Auto-advance timer state
-  const AUTO_ADVANCE_DURATION = 10000; // 10 seconds
+  // Auto-advance timer state — dynamic duration based on media type
+  const DEFAULT_ADVANCE_DURATION = 10000; // 10 seconds for images
+  const [autoAdvanceDuration, setAutoAdvanceDuration] = useState(DEFAULT_ADVANCE_DURATION);
   const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
   const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoAdvanceStartRef = useRef<number>(0);
@@ -532,10 +533,11 @@ const Reel = () => {
   const isStoryLocked = !isOwnStory && (!profile?.stories_public || !hasPublicActivity);
   const isPaused = showReactsSheet || showSendReactionSheet || showDeleteConfirm || showMakePublicSheet || showProgressOverlay || isStoryLocked;
   
-  // Reset mediaLoaded when activity changes
+  // Reset mediaLoaded and duration when activity changes
   useEffect(() => {
     setMediaLoaded(false);
     setAutoAdvanceProgress(0);
+    setAutoAdvanceDuration(DEFAULT_ADVANCE_DURATION); // Reset to default, will be updated when video loads
   }, [currentUserIndex, currentActivityIndex]);
   
   useEffect(() => {
@@ -559,7 +561,7 @@ const Reel = () => {
     // Update progress every 50ms for smooth animation
     autoAdvanceTimerRef.current = setInterval(() => {
       const elapsed = Date.now() - autoAdvanceStartRef.current;
-      const progress = Math.min(elapsed / AUTO_ADVANCE_DURATION, 1);
+      const progress = Math.min(elapsed / autoAdvanceDuration, 1);
       setAutoAdvanceProgress(progress);
       
       if (progress >= 1) {
@@ -573,7 +575,7 @@ const Reel = () => {
         clearInterval(autoAdvanceTimerRef.current);
       }
     };
-  }, [currentUserIndex, currentActivityIndex, isPaused, loading, currentActivity, cycleActivity, mediaLoaded, hasWeekRecap]);
+  }, [currentUserIndex, currentActivityIndex, isPaused, loading, currentActivity, cycleActivity, mediaLoaded, hasWeekRecap, autoAdvanceDuration]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -1348,7 +1350,15 @@ const Reel = () => {
                             loop
                             muted={isMuted}
                             playsInline
-                            onLoadedData={() => setMediaLoaded(true)}
+                            onLoadedData={(e) => {
+                              setMediaLoaded(true);
+                              // Set auto-advance duration to match actual video length
+                              const vid = e.currentTarget;
+                              if (vid.duration && isFinite(vid.duration) && vid.duration > 0) {
+                                const videoDurationMs = Math.ceil(vid.duration * 1000);
+                                setAutoAdvanceDuration(videoDurationMs);
+                              }
+                            }}
                           />
                         ) : (
                           <img
