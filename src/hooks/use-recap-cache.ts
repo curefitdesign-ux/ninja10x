@@ -28,18 +28,18 @@ export interface CachedRecap {
   weekNumber: number;
 }
 
-function makeKey(weekNumber: number): string {
-  return `week-${weekNumber}`;
+function makeKey(weekNumber: number, userId?: string): string {
+  return userId ? `${userId}-week-${weekNumber}` : `week-${weekNumber}`;
 }
 
-/** Save a generated recap video blob to cache */
-export async function saveRecapToCache(weekNumber: number, blob: Blob): Promise<void> {
+/** Save a generated recap video blob to cache (scoped to userId) */
+export async function saveRecapToCache(weekNumber: number, blob: Blob, userId?: string): Promise<void> {
   try {
     const db = await openDB();
     const tx = db.transaction(STORE_NAME, 'readwrite');
     const store = tx.objectStore(STORE_NAME);
     const entry: CachedRecap = {
-      key: makeKey(weekNumber),
+      key: makeKey(weekNumber, userId),
       blob,
       createdAt: Date.now(),
       weekNumber,
@@ -49,24 +49,24 @@ export async function saveRecapToCache(weekNumber: number, blob: Blob): Promise<
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
     });
-    console.log(`[RecapCache] Saved week ${weekNumber} recap`);
+    console.log(`[RecapCache] Saved week ${weekNumber} recap for user ${userId || 'unknown'}`);
   } catch (err) {
     console.warn('[RecapCache] Failed to save:', err);
   }
 }
 
-/** Get a cached recap video blob, returns null if not cached */
-export async function getRecapFromCache(weekNumber: number): Promise<Blob | null> {
+/** Get a cached recap video blob, returns null if not cached (scoped to userId) */
+export async function getRecapFromCache(weekNumber: number, userId?: string): Promise<Blob | null> {
   try {
     const db = await openDB();
     const tx = db.transaction(STORE_NAME, 'readonly');
     const store = tx.objectStore(STORE_NAME);
-    const req = store.get(makeKey(weekNumber));
+    const req = store.get(makeKey(weekNumber, userId));
     return new Promise((resolve) => {
       req.onsuccess = () => {
         const result = req.result as CachedRecap | undefined;
         if (result?.blob) {
-          console.log(`[RecapCache] Cache hit for week ${weekNumber}`);
+          console.log(`[RecapCache] Cache hit for week ${weekNumber} user ${userId || 'unknown'}`);
           resolve(result.blob);
         } else {
           resolve(null);
@@ -79,13 +79,13 @@ export async function getRecapFromCache(weekNumber: number): Promise<Blob | null
   }
 }
 
-/** Check if a recap is cached (fast, no blob read) */
-export async function hasRecapCached(weekNumber: number): Promise<boolean> {
+/** Check if a recap is cached (fast, no blob read, scoped to userId) */
+export async function hasRecapCached(weekNumber: number, userId?: string): Promise<boolean> {
   try {
     const db = await openDB();
     const tx = db.transaction(STORE_NAME, 'readonly');
     const store = tx.objectStore(STORE_NAME);
-    const req = store.count(IDBKeyRange.only(makeKey(weekNumber)));
+    const req = store.count(IDBKeyRange.only(makeKey(weekNumber, userId)));
     return new Promise((resolve) => {
       req.onsuccess = () => resolve(req.result > 0);
       req.onerror = () => resolve(false);
@@ -95,18 +95,18 @@ export async function hasRecapCached(weekNumber: number): Promise<boolean> {
   }
 }
 
-/** Delete a cached recap (for regeneration) */
-export async function deleteRecapFromCache(weekNumber: number): Promise<void> {
+/** Delete a cached recap (for regeneration, scoped to userId) */
+export async function deleteRecapFromCache(weekNumber: number, userId?: string): Promise<void> {
   try {
     const db = await openDB();
     const tx = db.transaction(STORE_NAME, 'readwrite');
     const store = tx.objectStore(STORE_NAME);
-    store.delete(makeKey(weekNumber));
+    store.delete(makeKey(weekNumber, userId));
     await new Promise<void>((resolve, reject) => {
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
     });
-    console.log(`[RecapCache] Deleted week ${weekNumber} cache`);
+    console.log(`[RecapCache] Deleted week ${weekNumber} cache for user ${userId || 'unknown'}`);
   } catch (err) {
     console.warn('[RecapCache] Failed to delete:', err);
   }
