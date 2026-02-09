@@ -33,6 +33,12 @@ const MOTIVATIONAL_PHRASES = [
   'Push your limits',
   'Unleash your fire',
   'Own the moment',
+  'Rise and shine',
+  'Fuel the hustle',
+  'Break barriers',
+  'One rep at a time',
+  'No excuses today',
+  'Chase greatness',
 ];
 
 const ReelGeneration = () => {

@@ -219,6 +219,17 @@ function seededRand(seed: number): number {
   return x - Math.floor(x);
 }
 
+// ============ PER-GENERATION UNIQUE SEED ============
+// Every call to generateMotionRecap creates a new seed that cascades into
+// transitions, Ken Burns, metric styles, color offsets, timing jitter, etc.
+
+let _genSeed = 0;
+
+/** Seeded random that stays consistent within a generation */
+function genRand(slot: number): number {
+  return seededRand(_genSeed * 1000 + slot);
+}
+
 // Soft clipping for warmer saturation
 function softClip(x: number): number {
   if (x > 1) return 1 - Math.exp(-(x - 1));
@@ -626,11 +637,13 @@ const TRANSITION_STYLES: TransitionStyle[] = [
   'crossHatch', 'smokeWipe', 'filmBurn', 'diagonalSlice',
 ];
 
-// Shuffle array using Fisher-Yates
-function shuffleArray<T>(arr: T[]): T[] {
+// Shuffle array using Fisher-Yates with optional seed for reproducibility within a generation
+function shuffleArray<T>(arr: T[], seed?: number): T[] {
   const a = [...arr];
+  let s = seed ?? Math.random() * 99999;
   for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    s = (s * 16807 + 0) % 2147483647; // LCG
+    const j = s % (i + 1);
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
@@ -641,13 +654,13 @@ let _shuffledTransitions: TransitionStyle[] = [];
 let _transitionCursor = 0;
 
 function resetTransitionPool() {
-  _shuffledTransitions = shuffleArray(TRANSITION_STYLES);
+  _shuffledTransitions = shuffleArray(TRANSITION_STYLES, _genSeed * 7 + 1);
   _transitionCursor = 0;
 }
 
 function getRandomTransition(_index: number): TransitionStyle {
   if (_transitionCursor >= _shuffledTransitions.length) {
-    _shuffledTransitions = shuffleArray(TRANSITION_STYLES);
+    _shuffledTransitions = shuffleArray(TRANSITION_STYLES, _genSeed * 13 + _transitionCursor);
     _transitionCursor = 0;
   }
   return _shuffledTransitions[_transitionCursor++];
@@ -869,7 +882,7 @@ function drawMotionBlurTransition(ctx: CanvasRenderingContext2D, progress: numbe
   const t = easeOutExpo(progress);
   ctx.save();
   const numLines = 30;
-  const direction = Math.random() > 0.5 ? 1 : -1; // random direction per call
+  const direction = genRand(500 + hue) > 0.5 ? 1 : -1; // seeded direction per generation
   for (let i = 0; i < numLines; i++) {
     const lineT = Math.max(0, Math.min(1, (t - i * 0.012) * 2));
     if (lineT <= 0) continue;
@@ -1196,12 +1209,19 @@ function drawGraphicTransition(ctx: CanvasRenderingContext2D, progress: number, 
 
 // ============ INTRO CARD ============
 
-const WEEK_THEMES: Record<number, string> = {
-  1: 'CONQUER WILL POWER',
-  2: 'BUILD ENERGY',
-  3: 'INCREASE STAMINA',
-  4: 'BUILD STRENGTH',
-};
+const WEEK_THEMES: string[][] = [
+  ['CONQUER WILL POWER', 'IGNITE YOUR FIRE', 'UNLEASH POTENTIAL'],
+  ['BUILD ENERGY', 'RISE AND GRIND', 'FUEL THE HUSTLE'],
+  ['INCREASE STAMINA', 'PUSH THE LIMITS', 'BREAK BARRIERS'],
+  ['BUILD STRENGTH', 'FORGE YOUR PATH', 'OWN EVERY REP'],
+];
+
+function getWeekTheme(weekNum: number): string {
+  const pool = WEEK_THEMES[((weekNum - 1) % 4)];
+  // Pick a random theme from the pool per generation
+  const idx = Math.floor(genRand(900 + weekNum) * pool.length);
+  return pool[idx];
+}
 
 function drawIntroCard(
   ctx: CanvasRenderingContext2D,
@@ -1238,7 +1258,7 @@ function drawIntroCard(
 
   // ── Main title — contextual per week ──
   const weekNum = weekNumber || 1;
-  const theme = WEEK_THEMES[weekNum] || WEEK_THEMES[((weekNum - 1) % 4) + 1];
+  const theme = getWeekTheme(weekNum);
   const titleLine1 = `WEEK ${weekNum}`;
   const titleLine2 = 'IN MOTION';
 
@@ -1429,13 +1449,13 @@ let _shuffledMetricStyles: MetricStyle[] = [];
 let _metricStyleCursor = 0;
 
 function resetMetricStylePool() {
-  _shuffledMetricStyles = shuffleArray(METRIC_STYLES);
+  _shuffledMetricStyles = shuffleArray(METRIC_STYLES, _genSeed * 19 + 3);
   _metricStyleCursor = 0;
 }
 
 function getMetricStyle(_dayIndex: number): MetricStyle {
   if (_metricStyleCursor >= _shuffledMetricStyles.length) {
-    _shuffledMetricStyles = shuffleArray(METRIC_STYLES);
+    _shuffledMetricStyles = shuffleArray(METRIC_STYLES, _genSeed * 23 + _metricStyleCursor);
     _metricStyleCursor = 0;
   }
   return _shuffledMetricStyles[_metricStyleCursor++];
@@ -1975,8 +1995,11 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
 
   if (dayStates.length < 3) throw new Error('Need at least 3 days for recap');
 
-  console.log('[MotionRecap] Starting v5 with', dayStates.length, 'days');
-  // Reset pools for unique order each generation
+  // ── New unique seed per generation — ensures every reel is different ──
+  _genSeed = Date.now() ^ (Math.random() * 0xFFFFFF | 0);
+  console.log('[MotionRecap] Starting v6 with', dayStates.length, 'days, seed:', _genSeed);
+
+  // Reset pools for unique order each generation (seeded)
   resetTransitionPool();
   resetMetricStylePool();
   onProgress?.(3, 'Gathering your moments...');
@@ -2102,6 +2125,25 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
     mediaRecorder.start(200);
     audioSource.start(0);
 
+    // ── Pre-compute Ken Burns directions per day (NOT per frame!) ──
+    const KB_ALL_DIRECTIONS = [
+      { sx: -4, sy: -3, ex: 4, ey: 3 },
+      { sx: 5, sy: -2, ex: -5, ey: 2 },
+      { sx: 0, sy: -5, ex: 0, ey: 5 },
+      { sx: -5, sy: 0, ex: 5, ey: 0 },
+      { sx: 3, sy: 4, ex: -3, ey: -4 },
+      { sx: -3, sy: 5, ex: 3, ey: -5 },
+      { sx: 5, sy: 3, ex: -5, ey: -3 },
+      { sx: -6, sy: -1, ex: 6, ey: 1 },
+      { sx: 2, sy: -6, ex: -2, ey: 6 },
+      { sx: -4, sy: 4, ex: 4, ey: -4 },
+    ];
+    const kbShuffled = shuffleArray(KB_ALL_DIRECTIONS, _genSeed * 31 + 11);
+    const precomputedKB = dayStates.map((_, i) => kbShuffled[i % kbShuffled.length]);
+
+    // ── Per-generation color hue offset for extra visual variety ──
+    const hueOffset = Math.round(genRand(777) * 40 - 20); // ±20° shift
+
     let frameIndex = 0;
 
     const renderLoop = () => {
@@ -2152,17 +2194,8 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
           const photoTime = timeInSlot - TIMING.METRIC_DURATION;
           const photoProgress = photoTime / TIMING.PHOTO_DURATION;
 
-          // Smooth Ken Burns — randomized gentle movement per day
-          const kbDirections = shuffleArray([
-            { sx: -4, sy: -3, ex: 4, ey: 3 },
-            { sx: 5, sy: -2, ex: -5, ey: 2 },
-            { sx: 0, sy: -5, ex: 0, ey: 5 },
-            { sx: -5, sy: 0, ex: 5, ey: 0 },
-            { sx: 3, sy: 4, ex: -3, ey: -4 },
-            { sx: -3, sy: 5, ex: 3, ey: -5 },
-            { sx: 5, sy: 3, ex: -5, ey: -3 },
-          ]);
-          const kbDir = kbDirections[dayIndex % kbDirections.length];
+          // Smooth Ken Burns — pre-computed direction per day per generation
+          const kbDir = precomputedKB[dayIndex];
           const kbScale = lerp(1.01, 1.01 + TIMING.KEN_BURNS_SCALE, easeInOutCubic(photoProgress));
           const kbPanX = lerp(kbDir.sx, kbDir.ex, easeInOutCubic(photoProgress));
           const kbPanY = lerp(kbDir.sy, kbDir.ey, easeInOutCubic(photoProgress));
@@ -2215,9 +2248,11 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
         const inMetric = timeInSlot < TIMING.METRIC_DURATION;
 
         // Storytelling phase names
-        const storyVerbs = ['Reliving', 'Capturing', 'Weaving'];
-        const photoVerbs = ['Polishing', 'Framing', 'Highlighting'];
-        const verb = inMetric ? storyVerbs[dayIndex % storyVerbs.length] : photoVerbs[dayIndex % photoVerbs.length];
+        const storyVerbs = ['Reliving', 'Capturing', 'Weaving', 'Recalling', 'Revisiting', 'Unveiling'];
+        const photoVerbs = ['Polishing', 'Framing', 'Highlighting', 'Composing', 'Grading', 'Enhancing'];
+        const sIdx = Math.floor(genRand(dayIndex * 10 + 1) * storyVerbs.length);
+        const pIdx = Math.floor(genRand(dayIndex * 10 + 2) * photoVerbs.length);
+        const verb = inMetric ? storyVerbs[sIdx] : photoVerbs[pIdx];
         const activity = dayStates[dayIndex]?.activityType || 'moment';
         
         let phaseName: string;
