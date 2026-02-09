@@ -611,6 +611,17 @@ function drawThinLine(ctx: CanvasRenderingContext2D, y: number, hue: number, alp
 
 // ============ CINEMATIC TRANSITIONS ============
 
+// Randomized transition styles for variety on each generation
+type TransitionStyle = 'radialWipe' | 'lightStreak' | 'geometricShards' | 'diamondReveal' | 'horizontalBlinds';
+
+const TRANSITION_STYLES: TransitionStyle[] = ['radialWipe', 'lightStreak', 'geometricShards', 'diamondReveal', 'horizontalBlinds'];
+
+function getRandomTransition(index: number): TransitionStyle {
+  // Use index + random seed for variety across days and regenerations
+  const seed = (index * 7 + Math.floor(Math.random() * 100)) % TRANSITION_STYLES.length;
+  return TRANSITION_STYLES[seed];
+}
+
 function drawCrossFade(ctx: CanvasRenderingContext2D, progress: number) {
   if (progress <= 0 || progress >= 1) return;
   const t = Math.sin(progress * Math.PI);
@@ -619,6 +630,165 @@ function drawCrossFade(ctx: CanvasRenderingContext2D, progress: number) {
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
   ctx.restore();
+}
+
+// Radial wipe — circular reveal from center
+function drawRadialWipeTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  const t = easeOutCubic(progress);
+  const maxRadius = Math.sqrt(WIDTH * WIDTH + HEIGHT * HEIGHT) / 2;
+  const radius = maxRadius * t;
+  
+  ctx.save();
+  // Glowing ring at the edge
+  const ringWidth = 40;
+  const grad = ctx.createRadialGradient(WIDTH / 2, HEIGHT / 2, Math.max(0, radius - ringWidth), WIDTH / 2, HEIGHT / 2, radius);
+  grad.addColorStop(0, 'transparent');
+  grad.addColorStop(0.5, `hsla(${hue}, 70%, 65%, ${0.4 * (1 - t)})`);
+  grad.addColorStop(0.8, `hsla(${hue}, 80%, 80%, ${0.6 * (1 - t)})`);
+  grad.addColorStop(1, 'transparent');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  ctx.restore();
+}
+
+// Light streaks — diagonal light beams sweeping across
+function drawLightStreakTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  const t = easeOutExpo(progress);
+  ctx.save();
+  
+  const numStreaks = 5;
+  for (let i = 0; i < numStreaks; i++) {
+    const streakT = Math.max(0, Math.min(1, (t - i * 0.08) * 2.5));
+    if (streakT <= 0) continue;
+    
+    const x = WIDTH * (-0.3 + streakT * 1.6);
+    const w = 30 + i * 15;
+    const alpha = (1 - streakT) * 0.5;
+    
+    ctx.globalAlpha = alpha;
+    const grad = ctx.createLinearGradient(x - w, 0, x + w, 0);
+    grad.addColorStop(0, 'transparent');
+    grad.addColorStop(0.3, `hsla(${hue + i * 20}, 60%, 75%, 0.6)`);
+    grad.addColorStop(0.5, `hsla(${hue + i * 10}, 80%, 90%, 0.9)`);
+    grad.addColorStop(0.7, `hsla(${hue + i * 20}, 60%, 75%, 0.6)`);
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    
+    ctx.save();
+    ctx.translate(WIDTH / 2, HEIGHT / 2);
+    ctx.rotate(-0.4);
+    ctx.translate(-WIDTH / 2, -HEIGHT / 2);
+    ctx.fillRect(x - w, -100, w * 2, HEIGHT + 200);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+// Geometric shards — triangular fragments
+function drawGeometricShardsTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  const t = easeOutCubic(progress);
+  ctx.save();
+  
+  const shards = [
+    { x: 0, y: 0, points: [[0,0],[WIDTH*0.6,0],[0,HEIGHT*0.4]] },
+    { x: WIDTH, y: 0, points: [[0,0],[-WIDTH*0.5,0],[0,HEIGHT*0.5]] },
+    { x: 0, y: HEIGHT, points: [[0,0],[WIDTH*0.7,0],[WIDTH*0.3,-HEIGHT*0.5]] },
+    { x: WIDTH, y: HEIGHT, points: [[0,0],[-WIDTH*0.4,0],[-WIDTH*0.2,-HEIGHT*0.6]] },
+    { x: WIDTH*0.5, y: HEIGHT*0.5, points: [[-100,-200],[100,-100],[0,200]] },
+  ];
+  
+  for (let i = 0; i < shards.length; i++) {
+    const delay = i * 0.06;
+    const shardT = Math.max(0, Math.min(1, (t - delay) * 3));
+    if (shardT <= 0) continue;
+    
+    const alpha = (1 - shardT) * 0.25;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = `hsla(${hue + i * 30}, 50%, 60%, 0.4)`;
+    
+    ctx.save();
+    const scale = 0.3 + shardT * 0.7;
+    ctx.translate(shards[i].x, shards[i].y);
+    ctx.scale(scale, scale);
+    
+    ctx.beginPath();
+    ctx.moveTo(shards[i].points[0][0], shards[i].points[0][1]);
+    for (let p = 1; p < shards[i].points.length; p++) {
+      ctx.lineTo(shards[i].points[p][0], shards[i].points[p][1]);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+// Diamond reveal — expanding diamond shape
+function drawDiamondRevealTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  const t = easeOutExpo(progress);
+  const size = Math.max(WIDTH, HEIGHT) * t * 1.2;
+  
+  ctx.save();
+  ctx.globalAlpha = (1 - t) * 0.35;
+  
+  ctx.translate(WIDTH / 2, HEIGHT / 2);
+  ctx.rotate(Math.PI / 4);
+  
+  // Glowing diamond outline
+  ctx.strokeStyle = `hsla(${hue}, 70%, 70%, ${(1 - t) * 0.8})`;
+  ctx.lineWidth = 3;
+  ctx.shadowColor = `hsla(${hue}, 80%, 60%, 0.6)`;
+  ctx.shadowBlur = 30;
+  ctx.strokeRect(-size / 2, -size / 2, size, size);
+  
+  // Inner glow fill
+  ctx.fillStyle = `hsla(${hue}, 60%, 55%, ${(1 - t) * 0.08})`;
+  ctx.fillRect(-size / 2, -size / 2, size, size);
+  
+  ctx.restore();
+}
+
+// Horizontal blinds — staggered horizontal bars
+function drawHorizontalBlindsTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  const t = easeOutCubic(progress);
+  const numBlinds = 8;
+  const blindH = HEIGHT / numBlinds;
+  
+  ctx.save();
+  for (let i = 0; i < numBlinds; i++) {
+    const delay = i * 0.04;
+    const blindT = Math.max(0, Math.min(1, (t - delay) * 3));
+    if (blindT <= 0) continue;
+    
+    const y = i * blindH;
+    const alpha = (1 - blindT) * 0.3;
+    
+    ctx.globalAlpha = alpha;
+    const grad = ctx.createLinearGradient(0, y, 0, y + blindH);
+    grad.addColorStop(0, `hsla(${hue}, 50%, 60%, 0.5)`);
+    grad.addColorStop(0.5, `hsla(${hue}, 70%, 80%, 0.7)`);
+    grad.addColorStop(1, `hsla(${hue}, 50%, 60%, 0.5)`);
+    ctx.fillStyle = grad;
+    
+    const w = WIDTH * blindT;
+    const x = i % 2 === 0 ? 0 : WIDTH - w;
+    ctx.fillRect(x, y, w, blindH * 0.85);
+  }
+  ctx.restore();
+}
+
+// Master transition dispatcher
+function drawGraphicTransition(ctx: CanvasRenderingContext2D, progress: number, dayIndex: number, hue: number) {
+  if (progress <= 0 || progress >= 1) return;
+  
+  const style = getRandomTransition(dayIndex);
+  switch (style) {
+    case 'radialWipe': drawRadialWipeTransition(ctx, progress, hue); break;
+    case 'lightStreak': drawLightStreakTransition(ctx, progress, hue); break;
+    case 'geometricShards': drawGeometricShardsTransition(ctx, progress, hue); break;
+    case 'diamondReveal': drawDiamondRevealTransition(ctx, progress, hue); break;
+    case 'horizontalBlinds': drawHorizontalBlindsTransition(ctx, progress, hue); break;
+  }
 }
 
 // ============ INTRO CARD ============
@@ -1045,56 +1215,23 @@ function drawImageCover(
   ctx.restore();
 }
 
-function drawPhotoOverlays(ctx: CanvasRenderingContext2D, state: DayState, textOpacity: number) {
-  // Bottom gradient
-  const bottomGrad = ctx.createLinearGradient(0, HEIGHT - 350, 0, HEIGHT);
+function drawPhotoOverlays(ctx: CanvasRenderingContext2D, _state: DayState, _textOpacity: number) {
+  // Clean photo display — no text/data overlays on user media
+  // Only subtle cinematic vignettes for depth
+
+  // Bottom gradient vignette
+  const bottomGrad = ctx.createLinearGradient(0, HEIGHT - 250, 0, HEIGHT);
   bottomGrad.addColorStop(0, 'transparent');
-  bottomGrad.addColorStop(0.35, 'rgba(0,0,0,0.3)');
-  bottomGrad.addColorStop(1, 'rgba(0,0,0,0.65)');
+  bottomGrad.addColorStop(1, 'rgba(0,0,0,0.35)');
   ctx.fillStyle = bottomGrad;
-  ctx.fillRect(0, HEIGHT - 350, WIDTH, 350);
+  ctx.fillRect(0, HEIGHT - 250, WIDTH, 250);
 
   // Top vignette
-  const topGrad = ctx.createLinearGradient(0, 0, 0, 180);
-  topGrad.addColorStop(0, 'rgba(0,0,0,0.35)');
+  const topGrad = ctx.createLinearGradient(0, 0, 0, 120);
+  topGrad.addColorStop(0, 'rgba(0,0,0,0.2)');
   topGrad.addColorStop(1, 'transparent');
   ctx.fillStyle = topGrad;
-  ctx.fillRect(0, 0, WIDTH, 180);
-
-  if (textOpacity <= 0) return;
-
-  const hue = getActivityHue(state.activityType);
-
-  ctx.save();
-  ctx.globalAlpha = textOpacity;
-  ctx.shadowColor = 'rgba(0,0,0,0.6)';
-  ctx.shadowBlur = 12;
-
-  // Day badge — top right
-  ctx.font = FONTS.DAY_PILL;
-  ctx.fillStyle = `hsla(${hue}, 50%, 78%, 0.75)`;
-  ctx.textAlign = 'right';
-  ctx.textBaseline = 'top';
-  ctx.letterSpacing = '3px';
-  ctx.fillText(`DAY ${state.dayNumber}`, WIDTH - 40, 52);
-  ctx.letterSpacing = '0px';
-
-  // Activity name — bottom left, bigger
-  ctx.font = FONTS.PHOTO_ACTIVITY;
-  ctx.fillStyle = '#fff';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'bottom';
-  ctx.fillText(state.activityType.toUpperCase(), 40, HEIGHT - 100);
-
-  // Metrics line — bigger
-  ctx.font = FONTS.PHOTO_METRIC;
-  ctx.fillStyle = 'rgba(255,255,255,0.65)';
-  const metricLine = `${state.metricA.label}: ${state.metricA.value}`;
-  const secondMetric = state.metricB.value !== '--' ? `  ·  ${state.metricB.label}: ${state.metricB.value}` : '';
-  const calPart = state.calories && parseInt(state.calories) > 0 ? `  ·  ${state.calories} cal` : '';
-  ctx.fillText(metricLine + secondMetric + calPart, 40, HEIGHT - 68);
-
-  ctx.restore();
+  ctx.fillRect(0, 0, WIDTH, 120);
 }
 
 // ============ REAL MUSIC FETCHING ============
@@ -1371,8 +1508,11 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
           drawPhotoOverlays(ctx, dayStates[dayIndex], easeOutCubic(Math.min(photoTime / 0.6, 1)));
           ctx.restore();
 
-          if (photoTime < 0.2) {
-            drawCrossFade(ctx, photoTime / 0.2);
+          // Graphic transition effect at start of photo phase
+          const transitionDuration = 0.5;
+          if (photoTime < transitionDuration) {
+            const hue = getActivityHue(dayStates[dayIndex].activityType);
+            drawGraphicTransition(ctx, photoTime / transitionDuration, dayIndex, hue);
           }
         }
       }

@@ -659,13 +659,17 @@ const Reel = () => {
           </span>
         </div>
 
-        {/* Video Player - liquid glass card */}
-        <div className="flex-1 flex items-center justify-center px-4 py-3">
+        {/* Video Player - 9:16 liquid glass card */}
+        <div className="flex-1 flex items-center justify-center px-5 py-4">
           <div
-            className="relative w-full h-full max-w-[400px] rounded-3xl overflow-hidden"
+            className="relative rounded-[28px] overflow-hidden"
             style={{
+              aspectRatio: '9 / 16',
+              width: '100%',
+              maxWidth: '340px',
+              maxHeight: 'calc(100dvh - 200px)',
               border: '1.5px solid rgba(255,255,255,0.18)',
-              boxShadow: '0 8px 40px rgba(139, 92, 246, 0.2), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.12)',
+              boxShadow: '0 8px 40px rgba(139, 92, 246, 0.25), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.15)',
               background: 'rgba(255,255,255,0.04)',
               backdropFilter: 'blur(40px) saturate(180%)',
               WebkitBackdropFilter: 'blur(40px) saturate(180%)',
@@ -673,7 +677,7 @@ const Reel = () => {
           >
             <video
               src={weekRecapVideoFromNav}
-              className="w-full h-full object-contain rounded-3xl"
+              className="absolute inset-0 w-full h-full object-cover rounded-[28px]"
               autoPlay
               playsInline
               controls={false}
