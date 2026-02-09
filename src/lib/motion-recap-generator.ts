@@ -1318,7 +1318,7 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
   if (dayStates.length < 3) throw new Error('Need at least 3 days for recap');
 
   console.log('[MotionRecap] Starting v5 with', dayStates.length, 'days');
-  onProgress?.(3, 'Loading photos...');
+  onProgress?.(3, 'Gathering your moments...');
 
   const images = await loadImages(dayStates);
   console.log('[MotionRecap] All photos loaded');
@@ -1338,7 +1338,7 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
   console.log('[MotionRecap] Duration:', totalDuration.toFixed(1), 's, Frames:', totalFrames);
 
   // Try to fetch real music from Pixabay, fall back to synthesized
-  onProgress?.(10, 'Finding music...');
+  onProgress?.(10, 'Finding the perfect soundtrack...');
   const dominantActivity = getDominantActivity(dayStates);
   let audioBuffer: AudioBuffer;
   let musicSource = 'synthesized';
@@ -1358,10 +1358,10 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
     audioBuffer = generateContextualAudio(totalDuration, mood);
   }
 
-  onProgress?.(16, `Music ready (${musicSource})`);
+  onProgress?.(16, 'Soundtrack locked in 🎵');
   const wavData = audioBufferToWav(audioBuffer);
   console.log('[MotionRecap] Audio ready:', (wavData.byteLength / 1024).toFixed(0), 'KB');
-  onProgress?.(18, 'Preparing video...');
+  onProgress?.(18, 'Crafting your story...');
 
   // Setup MediaRecorder with audio
   const videoStream = canvas.captureStream(FPS);
@@ -1423,7 +1423,7 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
       const blob = new Blob(chunks, { type: selectedMimeType.split(';')[0] });
       const url = URL.createObjectURL(blob);
       console.log('[MotionRecap] Done! Blob size:', (blob.size / 1024).toFixed(0), 'KB');
-      onProgress?.(100, 'Complete!');
+      onProgress?.(100, 'Your story is ready ✨');
       resolve(url);
     };
 
@@ -1445,7 +1445,7 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
 
     const renderLoop = () => {
       if (resolved || frameIndex >= totalFrames) {
-        onProgress?.(95, 'Finalizing...');
+        onProgress?.(95, 'Adding the finishing touches...');
         setTimeout(() => {
           try {
             if (mediaRecorder.state !== 'inactive') {
@@ -1531,10 +1531,16 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
         const timeInSlot = contentTime - dayIndex * DAY_SLOT;
         const inMetric = timeInSlot < TIMING.METRIC_DURATION;
 
+        // Storytelling phase names
+        const storyVerbs = ['Reliving', 'Capturing', 'Weaving'];
+        const photoVerbs = ['Polishing', 'Framing', 'Highlighting'];
+        const verb = inMetric ? storyVerbs[dayIndex % storyVerbs.length] : photoVerbs[dayIndex % photoVerbs.length];
+        const activity = dayStates[dayIndex]?.activityType || 'moment';
+        
         let phaseName: string;
-        if (time < TIMING.INTRO) phaseName = 'Intro';
-        else if (time >= TIMING.INTRO + dayStates.length * DAY_SLOT) phaseName = 'Summary';
-        else phaseName = `Day ${dayIndex + 1} — ${inMetric ? 'Metric' : 'Photo'}`;
+        if (time < TIMING.INTRO) phaseName = 'Setting the scene...';
+        else if (time >= TIMING.INTRO + dayStates.length * DAY_SLOT) phaseName = 'Wrapping up your week...';
+        else phaseName = `${verb} Day ${dayIndex + 1} — ${activity}`;
 
         onProgress?.(Math.min(pct, 94), phaseName);
       }

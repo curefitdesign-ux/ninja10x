@@ -27,7 +27,7 @@ const ReelGeneration = () => {
   const [deviceHeight, setDeviceHeight] = useState<number>(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [phase, setPhase] = useState('Preparing...');
+  const [phase, setPhase] = useState('Setting the stage...');
   const [error, setError] = useState<string | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const hasTriggered = useRef(false);
@@ -61,7 +61,7 @@ const ReelGeneration = () => {
   // Navigate to reel viewer with video URL
   const navigateToReel = useCallback((videoUrl: string, weekNumber: number) => {
     setProgress(100);
-    setPhase('Complete!');
+    setPhase('Your story is ready ✨');
     toast.success('Your recap video is ready!');
     setTimeout(() => {
       navigate('/reel', {
@@ -93,7 +93,7 @@ const ReelGeneration = () => {
     // Check cache first (unless force regenerate)
     const run = async () => {
       if (!forceRegenerate) {
-        setPhase('Checking cache...');
+        setPhase('Looking for your saved story...');
         const cachedBlob = await getRecapFromCache(weekNumber);
         if (cachedBlob) {
           console.log('[ReelGeneration] Using cached video');
