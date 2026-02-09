@@ -1365,45 +1365,42 @@ function drawOutroCard(ctx: CanvasRenderingContext2D, progress: number, dayState
 
 // ============ METRIC CARD — BOLD TYPOGRAPHIC DAY INTRO ============
 
-// Draw repeated "DAY XX" text vertically — one line filled, rest outlined
-function drawDayTypographyWall(ctx: CanvasRenderingContext2D, dayNumber: number, progress: number, hue: number) {
-  ctx.save();
-  const dayStr = `DAY ${String(dayNumber).padStart(2, '0')}`;
+// ============ METRIC CARD — 5 DISTINCT VISUAL STYLES PER DAY ============
+
+type MetricStyle = 'typography-wall' | 'centered-hero' | 'split-screen' | 'circular-badge' | 'gradient-stack';
+
+const METRIC_STYLES: MetricStyle[] = ['typography-wall', 'centered-hero', 'split-screen', 'circular-badge', 'gradient-stack'];
+
+function getMetricStyle(dayIndex: number): MetricStyle {
+  return METRIC_STYLES[dayIndex % METRIC_STYLES.length];
+}
+
+// Style 1: Typography Wall — DAY XX repeated vertically
+function drawStyleTypographyWall(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  const dayStr = `DAY ${String(state.dayNumber).padStart(2, '0')}`;
   const font = '900 100px -apple-system, "SF Pro Display", system-ui, sans-serif';
   const lineH = 120;
   const totalLines = 11;
-  const centerLine = 5; // which line is the "filled" one
-  
-  // Scroll animation — text wall scrolls up slightly
+  const centerLine = 5;
   const scrollOffset = lerp(40, -20, easeInOutCubic(Math.min(progress * 1.5, 1)));
   const startY = (HEIGHT / 2) - (centerLine * lineH) + scrollOffset;
-  
+
   for (let i = 0; i < totalLines; i++) {
     const y = startY + i * lineH;
     if (y < -lineH || y > HEIGHT + lineH) continue;
-    
     const isCenterLine = i === centerLine;
     const distFromCenter = Math.abs(i - centerLine);
-    
-    // Stagger entry per line
     const lineDelay = distFromCenter * 0.03;
     const lineT = easeOutCubic(Math.min(Math.max(progress - lineDelay, 0) * 2.5, 1));
     if (lineT <= 0) continue;
-    
-    // Slide in from alternating sides
     const slideDir = i % 2 === 0 ? 1 : -1;
     const slideX = lerp(slideDir * 120, 0, lineT);
-    
     ctx.save();
     ctx.font = font;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    
     if (isCenterLine) {
-      // Filled white — the hero line
-      const heroScale = lerp(0.8, 1, easeOutBack(Math.min(Math.max(progress - 0.15, 0) * 3, 1)));
       ctx.translate(WIDTH / 2 + slideX, y);
-      ctx.scale(heroScale, heroScale);
       ctx.globalAlpha = lineT;
       ctx.fillStyle = '#ffffff';
       ctx.shadowColor = `hsla(${hue}, 70%, 60%, 0.4)`;
@@ -1411,57 +1408,251 @@ function drawDayTypographyWall(ctx: CanvasRenderingContext2D, dayNumber: number,
       ctx.fillText(dayStr, 0, 0);
       ctx.shadowColor = 'transparent';
     } else {
-      // Outlined — gets more transparent further from center
       const alpha = Math.max(0.08, 0.4 - distFromCenter * 0.06) * lineT;
       ctx.translate(WIDTH / 2 + slideX, y);
       ctx.globalAlpha = alpha;
-      ctx.strokeStyle = `hsla(0, 0%, 100%, 0.6)`;
+      ctx.strokeStyle = 'hsla(0, 0%, 100%, 0.6)';
       ctx.lineWidth = 1.5;
       ctx.strokeText(dayStr, 0, 0);
     }
-    
     ctx.restore();
   }
-  ctx.restore();
 }
 
-// Draw activity name as large background text (Nike-style)
-function drawActivityBackgroundText(ctx: CanvasRenderingContext2D, activity: string, progress: number, hue: number) {
-  ctx.save();
-  const text = activity.toUpperCase();
-  const font = '900 80px -apple-system, "SF Pro Display", system-ui, sans-serif';
-  const lineH = 90;
-  const rows = 4;
-  
-  const slideT = easeOutCubic(Math.min(Math.max(progress - 0.4, 0) * 2.5, 1));
-  if (slideT <= 0) { ctx.restore(); return; }
-  
-  // Place behind the day text, in the upper and lower regions
-  const positions = [
-    { x: WIDTH * 0.5, y: HEIGHT * 0.08 },
-    { x: WIDTH * 0.5, y: HEIGHT * 0.08 + lineH },
-    { x: WIDTH * 0.5, y: HEIGHT * 0.85 },
-    { x: WIDTH * 0.5, y: HEIGHT * 0.85 + lineH },
-  ];
-  
-  for (let i = 0; i < Math.min(rows, positions.length); i++) {
-    const delay = i * 0.04;
-    const t = easeOutCubic(Math.min(Math.max(progress - 0.45 - delay, 0) * 3, 1));
-    if (t <= 0) continue;
-    
-    const slideX = lerp(i % 2 === 0 ? -80 : 80, 0, t);
-    
+// Style 2: Centered Hero — giant day number with activity name
+function drawStyleCenteredHero(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  // Large number
+  const numT = easeOutCubic(Math.min(progress * 2, 1));
+  if (numT > 0) {
     ctx.save();
-    ctx.font = font;
+    ctx.globalAlpha = numT;
+    ctx.font = '900 220px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = `hsla(${hue}, 50%, 60%, 0.12)`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.globalAlpha = 0.06 * t;
-    ctx.strokeStyle = `hsla(${hue}, 40%, 60%, 0.4)`;
-    ctx.lineWidth = 1;
-    ctx.strokeText(text, positions[i].x + slideX, positions[i].y);
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, HEIGHT * 0.42);
     ctx.restore();
   }
-  ctx.restore();
+  // "DAY" label
+  const dayT = easeOutCubic(Math.min(Math.max(progress - 0.1, 0) * 2.5, 1));
+  if (dayT > 0) {
+    ctx.save();
+    ctx.globalAlpha = dayT * 0.5;
+    ctx.font = '600 20px -apple-system, "SF Pro Text", system-ui, sans-serif';
+    ctx.fillStyle = `hsla(${hue}, 60%, 70%, 1)`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.letterSpacing = '8px';
+    ctx.fillText('DAY', WIDTH / 2, HEIGHT * 0.32);
+    ctx.letterSpacing = '0px';
+    ctx.restore();
+  }
+  // Day number over the ghost
+  const heroT = easeOutCubic(Math.min(Math.max(progress - 0.15, 0) * 2.5, 1));
+  if (heroT > 0) {
+    const slideY = lerp(20, 0, heroT);
+    ctx.save();
+    ctx.globalAlpha = heroT;
+    ctx.font = '900 120px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = `hsla(${hue}, 70%, 60%, 0.35)`;
+    ctx.shadowBlur = 40;
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, HEIGHT * 0.42 + slideY);
+    ctx.shadowColor = 'transparent';
+    ctx.restore();
+  }
+  // Activity name
+  const actT = easeOutCubic(Math.min(Math.max(progress - 0.3, 0) * 3, 1));
+  if (actT > 0) {
+    ctx.save();
+    ctx.globalAlpha = actT * 0.8;
+    ctx.font = '800 32px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, HEIGHT * 0.56 + lerp(10, 0, actT));
+    ctx.restore();
+  }
+}
+
+// Style 3: Split Screen — day on top half, activity on bottom
+function drawStyleSplitScreen(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  const splitY = HEIGHT * 0.48;
+  // Top half — different shade
+  const topT = easeOutCubic(Math.min(progress * 2, 1));
+  if (topT > 0) {
+    ctx.save();
+    ctx.globalAlpha = topT * 0.15;
+    ctx.fillStyle = `hsla(${hue}, 40%, 50%, 1)`;
+    ctx.fillRect(0, 0, WIDTH, splitY);
+    ctx.restore();
+  }
+  // Divider line
+  const lineT = easeOutCubic(Math.min(Math.max(progress - 0.2, 0) * 3, 1));
+  if (lineT > 0) {
+    ctx.save();
+    ctx.globalAlpha = lineT * 0.3;
+    ctx.strokeStyle = `hsla(${hue}, 60%, 70%, 0.8)`;
+    ctx.lineWidth = 1;
+    const lineW = WIDTH * 0.7 * lineT;
+    ctx.beginPath();
+    ctx.moveTo((WIDTH - lineW) / 2, splitY);
+    ctx.lineTo((WIDTH + lineW) / 2, splitY);
+    ctx.stroke();
+    ctx.restore();
+  }
+  // Day number — top
+  const numT = easeOutCubic(Math.min(Math.max(progress - 0.05, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.font = '900 140px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, splitY * 0.5 + lerp(-30, 0, numT));
+    ctx.restore();
+  }
+  // "DAY" label — top
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT * 0.5;
+    ctx.font = '600 18px -apple-system, "SF Pro Text", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.letterSpacing = '6px';
+    ctx.fillText('DAY', WIDTH / 2, splitY * 0.28);
+    ctx.letterSpacing = '0px';
+    ctx.restore();
+  }
+  // Activity name — bottom
+  const actT = easeOutCubic(Math.min(Math.max(progress - 0.25, 0) * 3, 1));
+  if (actT > 0) {
+    ctx.save();
+    ctx.globalAlpha = actT;
+    ctx.font = '900 48px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, splitY + (HEIGHT - splitY) * 0.4 + lerp(15, 0, actT));
+    ctx.restore();
+  }
+  // Subtitle
+  const subT = easeOutCubic(Math.min(Math.max(progress - 0.4, 0) * 3, 1));
+  if (subT > 0) {
+    ctx.save();
+    ctx.globalAlpha = subT * 0.4;
+    ctx.font = '500 16px -apple-system, "SF Pro Text", system-ui, sans-serif';
+    ctx.fillStyle = `hsla(${hue}, 50%, 70%, 1)`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('CULT NINJA JOURNEY', WIDTH / 2, splitY + (HEIGHT - splitY) * 0.58);
+    ctx.restore();
+  }
+}
+
+// Style 4: Circular Badge — day number inside a glowing ring
+function drawStyleCircularBadge(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  const cx = WIDTH / 2, cy = HEIGHT * 0.42;
+  const radius = 130;
+  // Ring
+  const ringT = easeOutCubic(Math.min(progress * 2.5, 1));
+  if (ringT > 0) {
+    ctx.save();
+    ctx.globalAlpha = ringT * 0.6;
+    ctx.strokeStyle = `hsla(${hue}, 60%, 65%, 0.8)`;
+    ctx.lineWidth = 3;
+    ctx.shadowColor = `hsla(${hue}, 70%, 60%, 0.5)`;
+    ctx.shadowBlur = 30;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * ringT, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * ringT);
+    ctx.stroke();
+    ctx.shadowColor = 'transparent';
+    ctx.restore();
+  }
+  // Inner glow
+  if (ringT > 0.5) {
+    ctx.save();
+    ctx.globalAlpha = (ringT - 0.5) * 0.3;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+    grad.addColorStop(0, `hsla(${hue}, 50%, 60%, 0.15)`);
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
+    ctx.restore();
+  }
+  // Day number
+  const numT = easeOutCubic(Math.min(Math.max(progress - 0.15, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.font = '900 100px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), cx, cy);
+    ctx.restore();
+  }
+  // "DAY" label
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT * 0.5;
+    ctx.font = '600 16px -apple-system, "SF Pro Text", system-ui, sans-serif';
+    ctx.fillStyle = `hsla(${hue}, 50%, 70%, 1)`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.letterSpacing = '6px';
+    ctx.fillText('DAY', cx, cy - 60);
+    ctx.letterSpacing = '0px';
+    ctx.restore();
+  }
+  // Activity below ring
+  const actT = easeOutCubic(Math.min(Math.max(progress - 0.35, 0) * 3, 1));
+  if (actT > 0) {
+    ctx.save();
+    ctx.globalAlpha = actT;
+    ctx.font = '800 28px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(state.activityType.toUpperCase(), cx, cy + radius + 50 + lerp(10, 0, actT));
+    ctx.restore();
+  }
+}
+
+// Style 5: Gradient Stack — stacked text elements with color shifts
+function drawStyleGradientStack(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  const items = [
+    { text: 'DAY', size: 24, weight: '600', y: 0.32, color: `hsla(${hue}, 50%, 65%, 0.6)`, spacing: '10px' },
+    { text: String(state.dayNumber).padStart(2, '0'), size: 160, weight: '900', y: 0.44, color: '#ffffff', spacing: '0px' },
+    { text: state.activityType.toUpperCase(), size: 36, weight: '800', y: 0.58, color: `hsla(${(hue + 30) % 360}, 55%, 70%, 1)`, spacing: '2px' },
+    { text: 'CULT NINJA', size: 18, weight: '500', y: 0.65, color: 'rgba(255,255,255,0.35)', spacing: '5px' },
+  ];
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    const delay = i * 0.08;
+    const t = easeOutCubic(Math.min(Math.max(progress - delay, 0) * 2.5, 1));
+    if (t <= 0) continue;
+    const slideY = lerp(25, 0, t);
+    ctx.save();
+    ctx.globalAlpha = t * (item.color.includes('0.') ? 1 : 1);
+    ctx.font = `${item.weight} ${item.size}px -apple-system, "SF Pro Display", system-ui, sans-serif`;
+    ctx.fillStyle = item.color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.letterSpacing = item.spacing;
+    if (item.size >= 100) {
+      ctx.shadowColor = `hsla(${hue}, 60%, 55%, 0.25)`;
+      ctx.shadowBlur = 40;
+    }
+    ctx.fillText(item.text, WIDTH / 2, HEIGHT * item.y + slideY);
+    ctx.shadowColor = 'transparent';
+    ctx.letterSpacing = '0px';
+    ctx.restore();
+  }
 }
 
 function drawMetricCard(
@@ -1478,37 +1669,25 @@ function drawMetricCard(
   
   // Subtle glow behind center
   const glowP = easeOutExpo(Math.min(progress * 2, 1));
-  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.5, 400, hue, 0.12 * glowP);
+  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.45, 400, hue, 0.12 * glowP);
 
   drawGrain(ctx, 0.03);
   
-  // Activity name as faint background text
-  drawActivityBackgroundText(ctx, state.activityType, progress, hue);
-  
-  // Bold typographic DAY wall
-  drawDayTypographyWall(ctx, state.dayNumber, progress, hue);
-  
-  // "OF BECOMING CULT NINJA" subtitle below center
-  const subT = easeOutCubic(Math.min(Math.max(progress - 0.35, 0) * 3, 1));
-  if (subT > 0) {
-    ctx.save();
-    ctx.globalAlpha = subT * globalAlpha * 0.9;
-    const subY = HEIGHT * 0.58 + lerp(15, 0, subT);
-    ctx.font = '900 28px -apple-system, "SF Pro Display", system-ui, sans-serif';
-    ctx.fillStyle = `hsla(48, 95%, 55%, 1)`; // Yellow accent like reference
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('OF BECOMING', WIDTH / 2, subY);
-    ctx.fillText('CULT NINJA', WIDTH / 2, subY + 36);
-    ctx.restore();
+  // Draw the day-specific style
+  const style = getMetricStyle(state.dayNumber - 1);
+  switch (style) {
+    case 'typography-wall': drawStyleTypographyWall(ctx, state, progress, hue); break;
+    case 'centered-hero': drawStyleCenteredHero(ctx, state, progress, hue); break;
+    case 'split-screen': drawStyleSplitScreen(ctx, state, progress, hue); break;
+    case 'circular-badge': drawStyleCircularBadge(ctx, state, progress, hue); break;
+    case 'gradient-stack': drawStyleGradientStack(ctx, state, progress, hue); break;
   }
 
-  // ── Exit — fade to black with graphic transition ──
+  // ── Exit — smooth fade to black with graphic transition ──
   if (progress > 0.75) {
     const exitT = (progress - 0.75) / 0.25;
     ctx.fillStyle = `rgba(0,0,0,${easeInOutCubic(exitT) * 0.9})`;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    if (exitT < 0.4) drawWhiteFlash(ctx, exitT / 0.4, 0.2);
     if (exitT > 0.15) {
       drawGraphicTransition(ctx, (exitT - 0.15) / 0.85, state.dayNumber, hue);
     }
@@ -1543,99 +1722,24 @@ function drawImageCover(
   ctx.restore();
 }
 
-function drawPhotoOverlays(ctx: CanvasRenderingContext2D, state: DayState, textOpacity: number) {
+function drawPhotoOverlays(ctx: CanvasRenderingContext2D, _state: DayState, _textOpacity: number) {
+  // Clean photo — NO text overlays. Only subtle cinematic vignettes.
   ctx.save();
   
-  // Heavy bottom gradient for data readability
-  const bottomGrad = ctx.createLinearGradient(0, HEIGHT * 0.5, 0, HEIGHT);
+  // Bottom vignette for cinematic depth
+  const bottomGrad = ctx.createLinearGradient(0, HEIGHT - 200, 0, HEIGHT);
   bottomGrad.addColorStop(0, 'transparent');
-  bottomGrad.addColorStop(0.4, 'rgba(0,0,0,0.3)');
-  bottomGrad.addColorStop(1, 'rgba(0,0,0,0.85)');
+  bottomGrad.addColorStop(1, 'rgba(0,0,0,0.25)');
   ctx.fillStyle = bottomGrad;
-  ctx.fillRect(0, HEIGHT * 0.5, WIDTH, HEIGHT * 0.5);
+  ctx.fillRect(0, HEIGHT - 200, WIDTH, 200);
 
   // Top vignette
-  const topGrad = ctx.createLinearGradient(0, 0, 0, 150);
-  topGrad.addColorStop(0, 'rgba(0,0,0,0.3)');
+  const topGrad = ctx.createLinearGradient(0, 0, 0, 100);
+  topGrad.addColorStop(0, 'rgba(0,0,0,0.15)');
   topGrad.addColorStop(1, 'transparent');
   ctx.fillStyle = topGrad;
-  ctx.fillRect(0, 0, WIDTH, 150);
+  ctx.fillRect(0, 0, WIDTH, 100);
 
-  const t = textOpacity;
-  if (t <= 0) { ctx.restore(); return; }
-  
-  const hue = getActivityHue(state.activityType);
-  const padX = 48;
-  
-  // Activity name — large, left-aligned
-  ctx.globalAlpha = t * 0.9;
-  ctx.font = '400 18px -apple-system, "SF Pro Text", system-ui, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(`${state.activityType} · Day ${state.dayNumber}`, padX, HEIGHT * 0.72);
-  
-  // Hero metric — big bold value
-  ctx.globalAlpha = t;
-  ctx.font = '900 72px -apple-system, "SF Pro Display", system-ui, sans-serif';
-  ctx.fillStyle = '#ffffff';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'middle';
-  
-  // Show value with unit inline
-  const heroVal = state.metricA.value;
-  const heroUnit = state.metricA.label.toLowerCase();
-  const shortUnit = heroUnit === 'duration' ? '' : heroUnit.slice(0, 2);
-  ctx.fillText(heroVal, padX, HEIGHT * 0.78);
-  
-  // Unit suffix
-  if (shortUnit) {
-    const valW = ctx.measureText(heroVal).width;
-    ctx.font = '600 28px -apple-system, "SF Pro Text", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.fillText(shortUnit, padX + valW + 6, HEIGHT * 0.78 + 10);
-  }
-  
-  // Stats grid — 2 columns
-  const stats: { label: string; value: string }[] = [];
-  if (state.metricB.value !== '--') stats.push({ label: state.metricB.label, value: state.metricB.value });
-  if (state.calories && parseInt(state.calories) > 0) stats.push({ label: 'Calories', value: `${state.calories}kcal` });
-  if (state.metricC && state.metricC.value !== '--') stats.push({ label: state.metricC.label, value: state.metricC.value });
-  if (state.intensity) stats.push({ label: 'Effort', value: state.intensity });
-  
-  const gridY = HEIGHT * 0.86;
-  const colW = (WIDTH - padX * 2) / 2;
-  
-  for (let i = 0; i < Math.min(stats.length, 4); i++) {
-    const col = i % 2;
-    const row = Math.floor(i / 2);
-    const x = padX + col * colW;
-    const y = gridY + row * 70;
-    
-    // Label
-    ctx.globalAlpha = t * 0.5;
-    ctx.font = '600 14px -apple-system, "SF Pro Text", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.6)';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(stats[i].label, x, y);
-    
-    // Value
-    ctx.globalAlpha = t * 0.95;
-    ctx.font = '800 36px -apple-system, "SF Pro Display", system-ui, sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(stats[i].value, x, y + 30);
-  }
-  
-  // Thin separator line between activity name and stats
-  ctx.globalAlpha = t * 0.15;
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 0.5;
-  ctx.beginPath();
-  ctx.moveTo(padX, HEIGHT * 0.83);
-  ctx.lineTo(WIDTH - padX, HEIGHT * 0.83);
-  ctx.stroke();
-  
   ctx.restore();
 }
 
@@ -1898,24 +2002,22 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
           const photoTime = timeInSlot - TIMING.METRIC_DURATION;
           const photoProgress = photoTime / TIMING.PHOTO_DURATION;
 
-          // Enhanced Ken Burns — randomized dramatic movement per day
-          const kbDirections = shuffleArray([
-            { sx: -8, sy: -6, ex: 8, ey: 6 },    // diagonal sweep
-            { sx: 10, sy: -4, ex: -10, ey: 4 },   // reverse diagonal
-            { sx: 0, sy: -12, ex: 0, ey: 12 },    // vertical pan
-            { sx: -12, sy: 0, ex: 12, ey: 0 },    // horizontal sweep
-            { sx: 6, sy: 8, ex: -6, ey: -8 },     // reverse diagonal alt
-            { sx: -6, sy: 10, ex: 6, ey: -10 },   // upward diagonal
-            { sx: 12, sy: 6, ex: -12, ey: -6 },   // wide sweep
-          ]);
+          // Smooth Ken Burns — gentle movement per day
+          const kbDirections = [
+            { sx: -4, sy: -3, ex: 4, ey: 3 },
+            { sx: 5, sy: -2, ex: -5, ey: 2 },
+            { sx: 0, sy: -5, ex: 0, ey: 5 },
+            { sx: -5, sy: 0, ex: 5, ey: 0 },
+            { sx: 3, sy: 4, ex: -3, ey: -4 },
+            { sx: -3, sy: 5, ex: 3, ey: -5 },
+            { sx: 5, sy: 3, ex: -5, ey: -3 },
+          ];
           const kbDir = kbDirections[dayIndex % kbDirections.length];
-          const kbScale = lerp(1.02, 1.02 + TIMING.KEN_BURNS_SCALE * 2, easeInOutCubic(photoProgress));
+          const kbScale = lerp(1.01, 1.01 + TIMING.KEN_BURNS_SCALE, easeInOutCubic(photoProgress));
           const kbPanX = lerp(kbDir.sx, kbDir.ex, easeInOutCubic(photoProgress));
           const kbPanY = lerp(kbDir.sy, kbDir.ey, easeInOutCubic(photoProgress));
 
-          // Dramatic zoom-in entry with overshoot
-          const entryDur = 0.5;
-          const entryScale = photoTime < entryDur ? lerp(1.2, 1.0, easeOutBack(photoTime / entryDur)) : 1.0;
+          // Smooth fade entry — no overshoot, no shake
           const fadeIn = easeOutCubic(Math.min(photoTime / TIMING.CROSSFADE, 1));
           const timeToEnd = TIMING.PHOTO_DURATION - photoTime;
           const fadeOut = Math.min(1, timeToEnd / TIMING.CROSSFADE);
@@ -1923,41 +2025,28 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
 
           ctx.save();
           ctx.globalAlpha = photoAlpha;
-          drawImageCover(ctx, images[dayIndex], kbScale * entryScale, kbPanX, kbPanY);
-
-          // Chromatic aberration on entry
-          if (photoTime < 0.6) {
-            drawChromaticAberration(ctx, images[dayIndex], photoTime / 0.6, kbScale * entryScale, kbPanX, kbPanY);
-          }
-
-          drawPhotoOverlays(ctx, dayStates[dayIndex], easeOutCubic(Math.min(photoTime / 0.6, 1)));
+          drawImageCover(ctx, images[dayIndex], kbScale, kbPanX, kbPanY);
+          drawPhotoOverlays(ctx, dayStates[dayIndex], 0);
           ctx.restore();
 
-          // White flash at photo reveal
-          if (photoTime < 0.25) {
-            drawWhiteFlash(ctx, photoTime / 0.25, 0.35);
-          }
-
-          // Graphic transition effect at start of photo phase
-          const transitionDuration = 0.6;
+          // Smooth graphic transition at start — no white flash
+          const transitionDuration = 0.5;
           if (photoTime < transitionDuration) {
             const hue = getActivityHue(dayStates[dayIndex].activityType);
             drawGraphicTransition(ctx, photoTime / transitionDuration, dayIndex, hue);
           }
 
-          // Exit transition at end of photo phase — different style than entry
-          const exitWindow = 0.5;
+          // Smooth exit transition
+          const exitWindow = 0.45;
           const timeToEnd2 = TIMING.PHOTO_DURATION - photoTime;
           if (timeToEnd2 < exitWindow) {
             const exitP = 1 - (timeToEnd2 / exitWindow);
             const hue2 = getActivityHue(dayStates[dayIndex].activityType);
-            // Fade to black
             ctx.save();
             ctx.globalAlpha = easeInOutCubic(exitP) * 0.85;
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
             ctx.restore();
-            // Use a transition effect
             if (exitP > 0.2) {
               drawGraphicTransition(ctx, (exitP - 0.2) / 0.8, dayIndex + 100, hue2);
             }
