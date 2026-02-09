@@ -541,6 +541,9 @@ const Reel = () => {
       clearInterval(autoAdvanceTimerRef.current);
     }
     
+    // Don't run auto-advance in recap viewer mode
+    if (hasWeekRecap) return;
+    
     // Don't start timer until media is loaded
     if (isPaused || loading || !currentActivity || !mediaLoaded) {
       return;
@@ -567,7 +570,7 @@ const Reel = () => {
         clearInterval(autoAdvanceTimerRef.current);
       }
     };
-  }, [currentUserIndex, currentActivityIndex, isPaused, loading, currentActivity, cycleActivity, mediaLoaded]);
+  }, [currentUserIndex, currentActivityIndex, isPaused, loading, currentActivity, cycleActivity, mediaLoaded, hasWeekRecap]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
