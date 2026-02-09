@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { isVideoUrl } from "@/lib/media";
 import ReelProgressPill from "./ReelProgressPill";
 import FloatingCardReactions from "./FloatingCardReactions";
+import { getRecapFromCache } from "@/hooks/use-recap-cache";
+import { useAuth } from "@/hooks/use-auth";
 
 // Activity icons
 import footballIcon from '@/assets/activities/football.png';
@@ -598,6 +600,7 @@ const PhotoLoggingWidget = ({
   currentDay = 1,
 }: PhotoLoggingWidgetProps) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [focusedWeekIndex, setFocusedWeekIndex] = useState<number>(0);
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [pendingUpload, setPendingUpload] = useState<{ weekIndex: number; dayIndex: number } | null>(null);
@@ -751,8 +754,29 @@ const PhotoLoggingWidget = ({
     setPendingUpload(null);
   };
 
-  // Handle playing week recap - always navigate to generation page
-  const handlePlayWeekRecap = (weekPhotos: LoggedPhoto[], weekIndex: number) => {
+  // Handle playing week recap - check cache first, auto-play if available
+  const handlePlayWeekRecap = async (weekPhotos: LoggedPhoto[], weekIndex: number) => {
+    const weekNumber = weekIndex + 1;
+    
+    // Try to load cached recap and auto-play it directly
+    try {
+      const cachedBlob = await getRecapFromCache(weekNumber, user?.id);
+      if (cachedBlob && cachedBlob.size > 0) {
+        const url = URL.createObjectURL(cachedBlob);
+        console.log('[PhotoLoggingWidget] Cache hit — auto-playing week', weekNumber);
+        navigate('/reel', {
+          state: {
+            weekRecapVideo: url,
+            weekNumber,
+          },
+        });
+        return;
+      }
+    } catch (err) {
+      console.warn('[PhotoLoggingWidget] Cache check failed, falling back to generation:', err);
+    }
+
+    // No cache — navigate to generation page
     const mappedPhotos = weekPhotos.map(p => ({
         id: p.id,
         imageUrl: p.originalUrl || p.storageUrl,
@@ -766,7 +790,7 @@ const PhotoLoggingWidget = ({
       navigate('/reel-generation', {
         state: {
           weekPhotos: mappedPhotos,
-          weekNumber: weekIndex + 1,
+          weekNumber,
         },
     });
   };
