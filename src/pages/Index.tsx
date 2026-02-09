@@ -10,6 +10,7 @@ import WidgetLayout2 from '@/components/WidgetLayout2';
 import WidgetLayout3 from '@/components/WidgetLayout3';
 import PullToRefresh from '@/components/PullToRefresh';
 import { uploadToStorage } from '@/services/storage-service';
+import CommunityStoriesWidget from '@/components/CommunityStoriesWidget';
 import SharedImageTransition from '@/components/SharedImageTransition';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 import type { PillState } from '@/components/ReelProgressPill';
@@ -516,6 +517,9 @@ const Index = () => {
                 />
               )}
             </main>
+            
+            {/* Community stories nudge widget */}
+            <CommunityStoriesWidget />
             
             <div className="h-8" />
           </div>
