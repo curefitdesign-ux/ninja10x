@@ -591,12 +591,33 @@ const Reel = () => {
     if (!weekRecapVideoFromNav || !user) return;
     setIsAddingToStories(true);
     try {
-      const response = await fetch(weekRecapVideoFromNav);
-      const blob = await response.blob();
+      console.log('[Reel] Adding to stories, video URL type:', weekRecapVideoFromNav.substring(0, 30));
+      
+      let blob: Blob;
+      try {
+        const response = await fetch(weekRecapVideoFromNav);
+        if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
+        blob = await response.blob();
+        if (blob.size === 0) throw new Error('Empty blob');
+        console.log('[Reel] Fetched blob:', blob.size, 'bytes, type:', blob.type);
+      } catch (fetchErr) {
+        console.error('[Reel] Blob fetch failed:', fetchErr);
+        toast.error('Video expired — please regenerate first');
+        return;
+      }
+
+      // Ensure correct content type for upload
+      if (!blob.type || !blob.type.startsWith('video/')) {
+        blob = new Blob([blob], { type: 'video/webm' });
+      }
+
       const storageUrl = await uploadToStorage(blob, `week-${weekRecapNumber}-recap`, true);
-      if (!storageUrl) throw new Error('Upload failed');
+      if (!storageUrl) {
+        toast.error('Upload failed — try again');
+        return;
+      }
+      
       const weekNum = weekRecapNumber || 1;
-      // Use high day_number (1000+week) to avoid conflicts with regular daily activities
       const dayNumber = 1000 + weekNum;
       const { error } = await supabase.from('journey_activities').upsert({
         user_id: user.id,
@@ -610,9 +631,7 @@ const Reel = () => {
       }, { onConflict: 'user_id,day_number' });
       if (error) throw error;
       toast.success('Recap added to your stories!');
-      // Reload activities so the recap shows up in the reel viewer
       await loadActivities();
-      // Navigate to reel showing the new recap story
       navigate('/reel', { replace: true, state: { dayNumber } });
     } catch (err) {
       console.error('[Reel] Failed to add to stories:', err);
