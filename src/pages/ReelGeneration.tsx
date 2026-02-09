@@ -67,7 +67,7 @@ const ReelGeneration = () => {
         replace: true,
         state: { weekRecapVideo: videoUrl, weekNumber },
       });
-    }, 800);
+    }, 400);
   }, [navigate]);
 
   useEffect(() => {
@@ -166,12 +166,9 @@ const ReelGeneration = () => {
       </div>
 
       {/* Back Button */}
-      <motion.div
+      <div
         className="relative z-20 px-4 pt-3"
         style={{ paddingTop: 'calc(env(safe-area-inset-top) + 12px)' }}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       >
         <button
           onClick={handleClose}
@@ -179,15 +176,15 @@ const ReelGeneration = () => {
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
-      </motion.div>
+      </div>
 
       {/* Main Card */}
       <div className="relative z-10 flex-1 flex flex-col px-4 pb-4 min-h-0">
         <motion.div
           className="flex-1 flex flex-col items-center justify-center rounded-3xl relative overflow-hidden min-h-0 max-w-[340px] mx-auto w-full"
-          initial={{ opacity: 0, scale: 0.92, y: 30 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
           style={{
             background: 'linear-gradient(180deg, rgba(20, 10, 40, 0.6) 0%, rgba(0, 0, 0, 0.8) 100%)',
             border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -201,27 +198,25 @@ const ReelGeneration = () => {
           <div className="flex flex-col items-center justify-center flex-1 w-full">
             {/* AI Star icon */}
             <motion.div
-              className="relative mb-6"
-              initial={{ scale: 0.5, opacity: 0 }}
+              className="relative mb-5"
+              initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 180, damping: 16, delay: 0.3 }}
+              transition={{ duration: 0.25, ease: 'easeOut', delay: 0.1 }}
             >
-              <motion.img
+              <img
                 src="/images/ai-star-loader.gif"
                 alt="AI generating"
-                className="w-20 h-20 object-contain"
-                style={{ filter: 'drop-shadow(0 0 30px rgba(139, 92, 246, 0.6))' }}
-                animate={{ scale: [1, 1.06, 1] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                className="w-16 h-16 object-contain"
+                style={{ filter: 'drop-shadow(0 0 20px rgba(139, 92, 246, 0.5))' }}
               />
             </motion.div>
 
             {/* Title */}
             <motion.h2
-              className="text-[24px] font-extrabold text-center leading-tight"
-              initial={{ y: 30, opacity: 0 }}
+              className="text-lg font-extrabold text-center leading-tight"
+              initial={{ y: 12, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.25, delay: 0.15, ease: 'easeOut' }}
               style={{
                 background: 'linear-gradient(180deg, #C4B5FD 0%, #818CF8 50%, #6366F1 100%)',
                 WebkitBackgroundClip: 'text',
@@ -234,30 +229,31 @@ const ReelGeneration = () => {
             </motion.h2>
           </div>
 
-          {/* Motivational phrase with crossfade */}
+          {/* Motivational phrase */}
           <AnimatePresence mode="wait">
             <motion.p
               key={error || motivationalPhrase}
-              className="text-base text-white/80 text-center font-semibold mb-4 px-6"
-              initial={{ y: 14, opacity: 0, filter: 'blur(4px)' }}
-              animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-              exit={{ y: -14, opacity: 0, filter: 'blur(4px)' }}
-              transition={{ duration: 0.45, ease: 'easeOut' }}
+              className="text-sm text-white/70 text-center font-semibold mb-3 px-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
             >
               {error || motivationalPhrase}
             </motion.p>
           </AnimatePresence>
 
           {/* Phase label with crossfade */}
+          {/* Phase label */}
           {!error && (
             <AnimatePresence mode="wait">
               <motion.p
                 key={phase}
-                className="text-sm text-white/40 text-center font-medium mb-5 px-6"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.3 }}
+                className="text-xs text-white/40 text-center font-medium mb-4 px-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
               >
                 {phase}
               </motion.p>
@@ -266,26 +262,21 @@ const ReelGeneration = () => {
 
           {/* Progress bar */}
           {!error && (
-            <motion.div
-              className="w-full px-6 pb-6"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.5 }}
-            >
-              <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                <motion.div
+            <div className="w-full px-6 pb-6">
+              <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                <div
                   className="h-full rounded-full"
                   style={{
                     background: 'linear-gradient(90deg, #fff 0%, rgba(255,255,255,0.35) 100%)',
+                    width: `${progress}%`,
+                    transition: 'width 0.3s ease-out',
                   }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
                 />
               </div>
-              <p className="text-xs text-white/30 text-right mt-2.5 font-medium tabular-nums">
+              <p className="text-[10px] text-white/30 text-right mt-2 font-medium tabular-nums">
                 {Math.round(progress)}%
               </p>
-            </motion.div>
+            </div>
           )}
 
           {/* Error state */}
