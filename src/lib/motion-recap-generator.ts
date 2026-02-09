@@ -963,7 +963,49 @@ function drawOutroCard(ctx: CanvasRenderingContext2D, progress: number, dayState
   ctx.restore();
 }
 
-// ============ METRIC CARD — BOLD & PREMIUM ============
+// ============ METRIC CARD — BOLD & PREMIUM WITH CINEMATIC MOTION ============
+
+// Animated particle rings around hero metric
+function drawParticleRing(ctx: CanvasRenderingContext2D, cx: number, cy: number, radius: number, progress: number, hue: number, count: number) {
+  ctx.save();
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2 + progress * Math.PI * 1.5;
+    const wobble = Math.sin(progress * 6 + i * 1.3) * 8;
+    const x = cx + Math.cos(angle) * (radius + wobble);
+    const y = cy + Math.sin(angle) * (radius + wobble);
+    const size = 2 + Math.sin(progress * 4 + i) * 1.5;
+    const alpha = 0.15 + Math.sin(progress * 3 + i * 0.7) * 0.1;
+    
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = `hsla(${(hue + i * 15) % 360}, 70%, 70%, 1)`;
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+// Pulsing concentric rings
+function drawPulsingRings(ctx: CanvasRenderingContext2D, cx: number, cy: number, progress: number, hue: number) {
+  ctx.save();
+  const numRings = 3;
+  for (let i = 0; i < numRings; i++) {
+    const delay = i * 0.15;
+    const ringT = Math.max(0, (progress - delay) * 2);
+    if (ringT <= 0 || ringT > 1.5) continue;
+    
+    const radius = 60 + ringT * 180;
+    const alpha = (1 - ringT / 1.5) * 0.15;
+    
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = `hsla(${hue}, 60%, 65%, 1)`;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
 
 function drawMetricCard(
   ctx: CanvasRenderingContext2D,
@@ -977,34 +1019,51 @@ function drawMetricCard(
   const hue = getActivityHue(state.activityType);
   drawDarkBg(ctx, hue);
 
-  // Larger, brighter glow
+  // Animated dual glow — breathing effect
   const glowP = easeOutExpo(Math.min(progress * 2, 1));
-  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.36, 500, hue, 0.28 * glowP);
+  const breathe = 0.85 + Math.sin(progress * Math.PI * 3) * 0.15;
+  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.36, 500 * breathe, hue, 0.28 * glowP);
   drawGlow(ctx, WIDTH * 0.35, HEIGHT * 0.55, 280, (hue + 40) % 360, 0.08 * glowP);
+  
+  // Secondary traveling glow
+  const travelX = WIDTH * 0.3 + Math.sin(progress * Math.PI * 2) * WIDTH * 0.2;
+  const travelY = HEIGHT * 0.3 + Math.cos(progress * Math.PI * 1.5) * HEIGHT * 0.1;
+  drawGlow(ctx, travelX, travelY, 200, (hue + 60) % 360, 0.06 * glowP);
+  
+  // Pulsing rings behind hero number
+  if (progress > 0.08 && progress < 0.7) {
+    drawPulsingRings(ctx, WIDTH / 2, HEIGHT * 0.36, progress - 0.08, hue);
+  }
+  
+  // Particle ring orbiting hero
+  if (progress > 0.1) {
+    drawParticleRing(ctx, WIDTH / 2, HEIGHT * 0.36, 160, progress, hue, 12);
+  }
 
   drawGrain(ctx, 0.025);
 
-  // ── Staggered timings ──
-  const dayT   = easeOutCubic(Math.min(progress * 4, 1));
-  const heroT  = easeOutExpo(Math.min(Math.max(progress - 0.06, 0) * 2.2, 1));
-  const unitT  = easeOutCubic(Math.min(Math.max(progress - 0.15, 0) * 3, 1));
-  const actT   = easeOutCubic(Math.min(Math.max(progress - 0.24, 0) * 3, 1));
-  const statsT = easeOutCubic(Math.min(Math.max(progress - 0.34, 0) * 2.5, 1));
-  const calT   = easeOutCubic(Math.min(Math.max(progress - 0.44, 0) * 3, 1));
+  // ── Staggered timings — more dramatic delays ──
+  const dayT   = easeOutBack(Math.min(progress * 3.5, 1));
+  const heroT  = easeOutExpo(Math.min(Math.max(progress - 0.08, 0) * 2.0, 1));
+  const unitT  = easeOutCubic(Math.min(Math.max(progress - 0.18, 0) * 3, 1));
+  const actT   = easeOutCubic(Math.min(Math.max(progress - 0.26, 0) * 3, 1));
+  const statsT = easeOutCubic(Math.min(Math.max(progress - 0.36, 0) * 2.5, 1));
+  const calT   = easeOutCubic(Math.min(Math.max(progress - 0.46, 0) * 3, 1));
 
   const centerY = HEIGHT * 0.36;
 
-  // ── DAY pill ──
+  // ── DAY pill — slides in from left with rotation ──
   if (dayT > 0) {
     ctx.save();
     ctx.globalAlpha = dayT * globalAlpha * 0.9;
-    const pillY = lerp(centerY - 145, centerY - 128, dayT);
+    const slideX = lerp(-80, 0, dayT);
+    const pillY = lerp(centerY - 150, centerY - 128, dayT);
     const text = `DAY ${state.dayNumber}`;
     ctx.font = FONTS.DAY_PILL;
     const tw = ctx.measureText(text).width;
     const pw = tw + 38;
     const ph = 34;
-    const px = (WIDTH - pw) / 2;
+    const px = (WIDTH - pw) / 2 + slideX;
 
     ctx.fillStyle = `hsla(${hue}, 50%, 50%, 0.18)`;
     ctx.beginPath();
@@ -1024,14 +1083,16 @@ function drawMetricCard(
     ctx.restore();
   }
 
-  // ── Hero metric — BIG number ──
+  // ── Hero metric — BIG number with elastic bounce ──
   if (heroT > 0) {
     ctx.save();
     ctx.globalAlpha = heroT * globalAlpha;
-    const scale = lerp(0.5, 1, heroT);
-    const slideY = lerp(40, 0, heroT);
+    const scale = lerp(0.3, 1, easeOutBack(heroT));
+    const slideY = lerp(60, 0, heroT);
+    // Subtle continuous float
+    const floatY = Math.sin(progress * Math.PI * 4) * 3 * heroT;
 
-    ctx.translate(WIDTH / 2, centerY + slideY);
+    ctx.translate(WIDTH / 2, centerY + slideY + floatY);
     ctx.scale(scale, scale);
 
     // Count-up animation
@@ -1105,11 +1166,14 @@ function drawMetricCard(
       const startX = (WIDTH - sectionW) / 2;
 
       for (let i = 0; i < maxStats; i++) {
-        const delay = i * 0.05;
-        const t = easeOutCubic(Math.min(Math.max(progress - 0.34 - delay, 0) * 3, 1));
+        const delay = i * 0.07;
+        const t = easeOutBack(Math.min(Math.max(progress - 0.36 - delay, 0) * 2.8, 1));
         if (t <= 0) continue;
 
-        const cx = startX + colW * (i + 0.5);
+        // Slide in from alternating sides
+        const slideDir = i % 2 === 0 ? -1 : 1;
+        const slideX = lerp(slideDir * 50, 0, t);
+        const cx = startX + colW * (i + 0.5) + slideX;
         const baseY = HEIGHT * 0.60;
 
         ctx.save();
@@ -1179,11 +1243,16 @@ function drawMetricCard(
     ctx.restore();
   }
 
-  // ── Exit crossfade ──
-  if (progress > 0.80) {
-    const exitT = (progress - 0.80) / 0.20;
+  // ── Exit — graphic transition into photo ──
+  if (progress > 0.78) {
+    const exitT = (progress - 0.78) / 0.22;
+    // Darken
     ctx.fillStyle = `rgba(0,0,0,${easeInOutCubic(exitT) * 0.85})`;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    // Overlay graphic burst
+    if (exitT > 0.2) {
+      drawGraphicTransition(ctx, (exitT - 0.2) / 0.8, state.dayNumber, hue);
+    }
   }
 
   ctx.restore();
@@ -1491,12 +1560,19 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
           const photoTime = timeInSlot - TIMING.METRIC_DURATION;
           const photoProgress = photoTime / TIMING.PHOTO_DURATION;
 
-          // Ken Burns
-          const kbScale = lerp(1.0, 1.0 + TIMING.KEN_BURNS_SCALE, photoProgress);
-          const kbPanX = lerp(-3, 3, photoProgress) * (dayIndex % 2 === 0 ? 1 : -1);
-          const kbPanY = lerp(-4, 4, photoProgress);
+          // Enhanced Ken Burns — more dramatic movement per day
+          const kbDirections = [
+            { sx: -8, sy: -6, ex: 8, ey: 6 },    // diagonal sweep
+            { sx: 10, sy: -4, ex: -10, ey: 4 },   // reverse diagonal
+            { sx: 0, sy: -12, ex: 0, ey: 12 },    // vertical pan
+          ];
+          const kbDir = kbDirections[dayIndex % kbDirections.length];
+          const kbScale = lerp(1.02, 1.02 + TIMING.KEN_BURNS_SCALE * 2, easeInOutCubic(photoProgress));
+          const kbPanX = lerp(kbDir.sx, kbDir.ex, easeInOutCubic(photoProgress));
+          const kbPanY = lerp(kbDir.sy, kbDir.ey, easeInOutCubic(photoProgress));
 
-          // Cross-fade in and out
+          // Dramatic zoom-in entry
+          const entryScale = photoTime < 0.4 ? lerp(1.15, 1.0, easeOutCubic(photoTime / 0.4)) : 1.0;
           const fadeIn = easeOutCubic(Math.min(photoTime / TIMING.CROSSFADE, 1));
           const timeToEnd = TIMING.PHOTO_DURATION - photoTime;
           const fadeOut = Math.min(1, timeToEnd / TIMING.CROSSFADE);
@@ -1504,7 +1580,7 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
 
           ctx.save();
           ctx.globalAlpha = photoAlpha;
-          drawImageCover(ctx, images[dayIndex], kbScale, kbPanX, kbPanY);
+          drawImageCover(ctx, images[dayIndex], kbScale * entryScale, kbPanX, kbPanY);
           drawPhotoOverlays(ctx, dayStates[dayIndex], easeOutCubic(Math.min(photoTime / 0.6, 1)));
           ctx.restore();
 
