@@ -609,13 +609,19 @@ function drawThinLine(ctx: CanvasRenderingContext2D, y: number, hue: number, alp
   ctx.restore();
 }
 
-// ============ CINEMATIC TRANSITIONS ============
+// ============ CINEMATIC TRANSITIONS — MASSIVE VARIETY ============
 
-type TransitionStyle = 'radialWipe' | 'lightStreak' | 'geometricShards' | 'diamondReveal' | 'horizontalBlinds' | 'spiralReveal' | 'rippleWave' | 'glitchSlice';
+type TransitionStyle = 
+  | 'radialWipe' | 'lightStreak' | 'geometricShards' | 'diamondReveal' 
+  | 'horizontalBlinds' | 'spiralReveal' | 'rippleWave' | 'glitchSlice'
+  | 'motionBlur' | 'zoomBurst' | 'pixelDissolve' | 'curtainDrop'
+  | 'crossHatch' | 'smokeWipe' | 'filmBurn' | 'diagonalSlice';
 
 const TRANSITION_STYLES: TransitionStyle[] = [
   'radialWipe', 'lightStreak', 'geometricShards', 'diamondReveal',
   'horizontalBlinds', 'spiralReveal', 'rippleWave', 'glitchSlice',
+  'motionBlur', 'zoomBurst', 'pixelDissolve', 'curtainDrop',
+  'crossHatch', 'smokeWipe', 'filmBurn', 'diagonalSlice',
 ];
 
 // Shuffle array using Fisher-Yates
@@ -655,7 +661,8 @@ function drawCrossFade(ctx: CanvasRenderingContext2D, progress: number) {
   ctx.restore();
 }
 
-// Radial wipe
+// ── Original transitions ──
+
 function drawRadialWipeTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
   const t = easeOutCubic(progress);
   const maxRadius = Math.sqrt(WIDTH * WIDTH + HEIGHT * HEIGHT) / 2;
@@ -672,7 +679,6 @@ function drawRadialWipeTransition(ctx: CanvasRenderingContext2D, progress: numbe
   ctx.restore();
 }
 
-// Light streaks
 function drawLightStreakTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
   const t = easeOutExpo(progress);
   ctx.save();
@@ -701,7 +707,6 @@ function drawLightStreakTransition(ctx: CanvasRenderingContext2D, progress: numb
   ctx.restore();
 }
 
-// Geometric shards
 function drawGeometricShardsTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
   const t = easeOutCubic(progress);
   ctx.save();
@@ -731,7 +736,6 @@ function drawGeometricShardsTransition(ctx: CanvasRenderingContext2D, progress: 
   ctx.restore();
 }
 
-// Diamond reveal
 function drawDiamondRevealTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
   const t = easeOutExpo(progress);
   const size = Math.max(WIDTH, HEIGHT) * t * 1.2;
@@ -749,7 +753,6 @@ function drawDiamondRevealTransition(ctx: CanvasRenderingContext2D, progress: nu
   ctx.restore();
 }
 
-// Horizontal blinds
 function drawHorizontalBlindsTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
   const t = easeOutCubic(progress);
   const numBlinds = 8;
@@ -772,14 +775,11 @@ function drawHorizontalBlindsTransition(ctx: CanvasRenderingContext2D, progress:
   ctx.restore();
 }
 
-// Spiral reveal — rotating golden spiral of light
 function drawSpiralRevealTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
   const t = easeOutExpo(progress);
   ctx.save();
-  const cx = WIDTH / 2;
-  const cy = HEIGHT / 2;
-  const arms = 3;
-  const totalDots = 40;
+  const cx = WIDTH / 2, cy = HEIGHT / 2;
+  const arms = 3, totalDots = 40;
   for (let a = 0; a < arms; a++) {
     const armOffset = (a / arms) * Math.PI * 2;
     for (let i = 0; i < totalDots; i++) {
@@ -790,15 +790,11 @@ function drawSpiralRevealTransition(ctx: CanvasRenderingContext2D, progress: num
       const x = cx + Math.cos(angle) * dist;
       const y = cy + Math.sin(angle) * dist;
       const size = (3 + i * 0.15) * (1 - dotT * 0.5);
-      const alpha = (1 - dotT) * 0.6;
-      ctx.globalAlpha = alpha;
+      ctx.globalAlpha = (1 - dotT) * 0.6;
       ctx.fillStyle = `hsla(${(hue + i * 8) % 360}, 75%, 70%, 1)`;
-      ctx.beginPath();
-      ctx.arc(x, y, size, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
     }
   }
-  // Central flash
   if (t < 0.4) {
     const flashAlpha = (1 - t / 0.4) * 0.5;
     const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 200 * t);
@@ -811,39 +807,31 @@ function drawSpiralRevealTransition(ctx: CanvasRenderingContext2D, progress: num
   ctx.restore();
 }
 
-// Ripple wave — concentric shockwaves from center
 function drawRippleWaveTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
   const t = easeOutCubic(progress);
   ctx.save();
-  const cx = WIDTH / 2;
-  const cy = HEIGHT / 2;
+  const cx = WIDTH / 2, cy = HEIGHT / 2;
   const maxR = Math.sqrt(WIDTH * WIDTH + HEIGHT * HEIGHT) * 0.6;
   const numWaves = 5;
   for (let i = 0; i < numWaves; i++) {
     const waveT = Math.max(0, Math.min(1, (t - i * 0.08) * 2.5));
     if (waveT <= 0) continue;
     const radius = maxR * waveT;
-    const thickness = 25 - i * 3;
     const alpha = (1 - waveT) * 0.35;
     ctx.globalAlpha = alpha;
     ctx.strokeStyle = `hsla(${(hue + i * 25) % 360}, 65%, 70%, 1)`;
-    ctx.lineWidth = thickness * (1 - waveT * 0.6);
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.stroke();
-    // Inner glow fill
+    ctx.lineWidth = (25 - i * 3) * (1 - waveT * 0.6);
+    ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.stroke();
     if (i === 0) {
       const glowGrad = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius);
       glowGrad.addColorStop(0, 'transparent');
       glowGrad.addColorStop(1, `hsla(${hue}, 60%, 60%, ${alpha * 0.3})`);
-      ctx.fillStyle = glowGrad;
-      ctx.fill();
+      ctx.fillStyle = glowGrad; ctx.fill();
     }
   }
   ctx.restore();
 }
 
-// Glitch slice — horizontal scan-line glitch effect
 function drawGlitchSliceTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
   const t = easeOutExpo(progress);
   ctx.save();
@@ -855,23 +843,270 @@ function drawGlitchSliceTransition(ctx: CanvasRenderingContext2D, progress: numb
     const offsetX = Math.sin(i * 2.7 + t * 10) * 60 * (1 - sliceT);
     const y = i * sliceH;
     const alpha = (1 - sliceT) * 0.4;
-    // RGB split effect
     ctx.globalAlpha = alpha * 0.6;
     ctx.fillStyle = `hsla(${hue - 30}, 100%, 60%, 0.5)`;
     ctx.fillRect(offsetX - 3, y, WIDTH, sliceH * 0.7);
     ctx.fillStyle = `hsla(${hue + 30}, 100%, 60%, 0.5)`;
     ctx.fillRect(offsetX + 3, y, WIDTH, sliceH * 0.7);
-    // Main slice
     ctx.globalAlpha = alpha;
     ctx.fillStyle = `hsla(${hue}, 70%, 80%, 0.4)`;
     ctx.fillRect(offsetX, y, WIDTH, sliceH * 0.7);
   }
-  // Scanline overlay
   ctx.globalAlpha = (1 - t) * 0.12;
   for (let y = 0; y < HEIGHT; y += 3) {
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, y, WIDTH, 1);
   }
+  ctx.restore();
+}
+
+// ── NEW TRANSITIONS ──
+
+// Motion Blur — directional streaks that wipe across
+function drawMotionBlurTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  const t = easeOutExpo(progress);
+  ctx.save();
+  const numLines = 30;
+  const direction = Math.random() > 0.5 ? 1 : -1; // random direction per call
+  for (let i = 0; i < numLines; i++) {
+    const lineT = Math.max(0, Math.min(1, (t - i * 0.012) * 2));
+    if (lineT <= 0) continue;
+    const y = (i / numLines) * HEIGHT;
+    const lineWidth = HEIGHT / numLines;
+    const offsetX = direction * lerp(-WIDTH, WIDTH * 0.3, lineT);
+    const alpha = (1 - lineT) * 0.35;
+    ctx.globalAlpha = alpha;
+    // Stretched blur effect via gradient
+    const grad = ctx.createLinearGradient(offsetX - 200, 0, offsetX + WIDTH + 200, 0);
+    grad.addColorStop(0, 'transparent');
+    grad.addColorStop(0.2, `hsla(${hue + i * 5}, 55%, 65%, 0.6)`);
+    grad.addColorStop(0.5, `hsla(${hue}, 70%, 85%, 0.8)`);
+    grad.addColorStop(0.8, `hsla(${hue + i * 5}, 55%, 65%, 0.6)`);
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(offsetX, y, WIDTH * 1.5, lineWidth * 0.9);
+  }
+  // Central bright streak
+  if (t < 0.6) {
+    const streakX = lerp(-100, WIDTH + 100, t / 0.6);
+    ctx.globalAlpha = (1 - t / 0.6) * 0.4;
+    const sg = ctx.createLinearGradient(streakX - 60, 0, streakX + 60, 0);
+    sg.addColorStop(0, 'transparent');
+    sg.addColorStop(0.5, `hsla(${hue}, 80%, 95%, 0.9)`);
+    sg.addColorStop(1, 'transparent');
+    ctx.fillStyle = sg;
+    ctx.fillRect(streakX - 60, 0, 120, HEIGHT);
+  }
+  ctx.restore();
+}
+
+// Zoom Burst — radial speed lines from center
+function drawZoomBurstTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  const t = easeOutExpo(progress);
+  ctx.save();
+  const cx = WIDTH / 2, cy = HEIGHT / 2;
+  const numRays = 24;
+  for (let i = 0; i < numRays; i++) {
+    const rayT = Math.max(0, Math.min(1, (t - i * 0.01) * 2.5));
+    if (rayT <= 0) continue;
+    const angle = (i / numRays) * Math.PI * 2;
+    const innerR = 30 * rayT;
+    const outerR = Math.sqrt(WIDTH * WIDTH + HEIGHT * HEIGHT) * 0.5 * rayT;
+    const spread = (Math.PI / numRays) * 0.6;
+    ctx.globalAlpha = (1 - rayT) * 0.25;
+    ctx.fillStyle = `hsla(${(hue + i * 15) % 360}, 60%, 70%, 0.7)`;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(angle - spread) * innerR, cy + Math.sin(angle - spread) * innerR);
+    ctx.lineTo(cx + Math.cos(angle - spread * 0.3) * outerR, cy + Math.sin(angle - spread * 0.3) * outerR);
+    ctx.lineTo(cx + Math.cos(angle + spread * 0.3) * outerR, cy + Math.sin(angle + spread * 0.3) * outerR);
+    ctx.lineTo(cx + Math.cos(angle + spread) * innerR, cy + Math.sin(angle + spread) * innerR);
+    ctx.closePath();
+    ctx.fill();
+  }
+  // Central flash
+  if (t < 0.3) {
+    const fg = ctx.createRadialGradient(cx, cy, 0, cx, cy, 150);
+    fg.addColorStop(0, `hsla(${hue}, 90%, 95%, ${(1 - t / 0.3) * 0.6})`);
+    fg.addColorStop(1, 'transparent');
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = fg;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  }
+  ctx.restore();
+}
+
+// Pixel Dissolve — blocks that fade in/out randomly
+function drawPixelDissolveTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  const t = easeOutCubic(progress);
+  ctx.save();
+  const blockSize = 40;
+  const cols = Math.ceil(WIDTH / blockSize);
+  const rows = Math.ceil(HEIGHT / blockSize);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const seed = seededRand(r * cols + c + 42);
+      const blockT = Math.max(0, Math.min(1, (t - seed * 0.5) * 3));
+      if (blockT <= 0 || blockT >= 1) continue;
+      const alpha = Math.sin(blockT * Math.PI) * 0.4;
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = `hsla(${(hue + seed * 60) % 360}, 50%, ${50 + seed * 30}%, 0.6)`;
+      ctx.fillRect(c * blockSize, r * blockSize, blockSize - 1, blockSize - 1);
+    }
+  }
+  ctx.restore();
+}
+
+// Curtain Drop — vertical strips falling from top
+function drawCurtainDropTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  const t = easeOutCubic(progress);
+  ctx.save();
+  const numStrips = 10;
+  const stripW = WIDTH / numStrips;
+  for (let i = 0; i < numStrips; i++) {
+    const delay = Math.abs(i - numStrips / 2) * 0.04;
+    const stripT = Math.max(0, Math.min(1, (t - delay) * 2.5));
+    if (stripT <= 0) continue;
+    const h = HEIGHT * stripT;
+    const alpha = (1 - stripT) * 0.35;
+    ctx.globalAlpha = alpha;
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, `hsla(${hue + i * 10}, 50%, 55%, 0.5)`);
+    grad.addColorStop(0.8, `hsla(${hue + i * 10}, 65%, 70%, 0.7)`);
+    grad.addColorStop(1, `hsla(${hue}, 80%, 85%, 0.3)`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(i * stripW, 0, stripW - 2, h);
+  }
+  ctx.restore();
+}
+
+// Cross Hatch — diagonal lines crossing
+function drawCrossHatchTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  const t = easeOutExpo(progress);
+  ctx.save();
+  const numLines = 20;
+  const spacing = (WIDTH + HEIGHT) / numLines;
+  // Forward diagonals
+  for (let i = 0; i < numLines; i++) {
+    const lineT = Math.max(0, Math.min(1, (t - i * 0.02) * 2.5));
+    if (lineT <= 0) continue;
+    ctx.globalAlpha = (1 - lineT) * 0.3;
+    ctx.strokeStyle = `hsla(${hue}, 60%, 70%, 0.7)`;
+    ctx.lineWidth = 2 + (1 - lineT) * 4;
+    const offset = i * spacing - HEIGHT;
+    ctx.beginPath();
+    ctx.moveTo(offset * lineT, 0);
+    ctx.lineTo((offset + HEIGHT) * lineT, HEIGHT);
+    ctx.stroke();
+  }
+  // Backward diagonals (delayed)
+  for (let i = 0; i < numLines; i++) {
+    const lineT = Math.max(0, Math.min(1, (t - 0.15 - i * 0.02) * 2.5));
+    if (lineT <= 0) continue;
+    ctx.globalAlpha = (1 - lineT) * 0.2;
+    ctx.strokeStyle = `hsla(${(hue + 40) % 360}, 55%, 65%, 0.6)`;
+    ctx.lineWidth = 1.5 + (1 - lineT) * 3;
+    const offset = i * spacing;
+    ctx.beginPath();
+    ctx.moveTo(WIDTH - offset * lineT, 0);
+    ctx.lineTo(WIDTH - (offset + HEIGHT) * lineT, HEIGHT);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// Smoke Wipe — soft cloudy wipe
+function drawSmokeWipeTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  const t = easeOutCubic(progress);
+  ctx.save();
+  const numClouds = 15;
+  for (let i = 0; i < numClouds; i++) {
+    const seed1 = seededRand(i * 17 + 3);
+    const seed2 = seededRand(i * 23 + 11);
+    const cloudT = Math.max(0, Math.min(1, (t - seed1 * 0.3) * 2));
+    if (cloudT <= 0) continue;
+    const x = seed1 * WIDTH + lerp(-200, 200, cloudT);
+    const y = seed2 * HEIGHT;
+    const r = 80 + seed1 * 120;
+    const alpha = Math.sin(cloudT * Math.PI) * 0.25;
+    ctx.globalAlpha = alpha;
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+    grad.addColorStop(0, `hsla(${hue}, 30%, 70%, 0.5)`);
+    grad.addColorStop(0.5, `hsla(${hue}, 20%, 60%, 0.3)`);
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  ctx.restore();
+}
+
+// Film Burn — warm orange/white burn from edges
+function drawFilmBurnTransition(ctx: CanvasRenderingContext2D, progress: number, _hue: number) {
+  const t = easeOutExpo(progress);
+  ctx.save();
+  // Edge burns
+  const burns = [
+    { x: 0, y: HEIGHT * 0.3 },
+    { x: WIDTH, y: HEIGHT * 0.6 },
+    { x: WIDTH * 0.3, y: 0 },
+    { x: WIDTH * 0.7, y: HEIGHT },
+  ];
+  for (let i = 0; i < burns.length; i++) {
+    const burnT = Math.max(0, Math.min(1, (t - i * 0.08) * 2));
+    if (burnT <= 0) continue;
+    const r = 250 * burnT;
+    const alpha = Math.sin(burnT * Math.PI) * 0.5;
+    ctx.globalAlpha = alpha;
+    const grad = ctx.createRadialGradient(burns[i].x, burns[i].y, 0, burns[i].x, burns[i].y, r);
+    grad.addColorStop(0, 'hsla(40, 100%, 95%, 0.9)');
+    grad.addColorStop(0.3, 'hsla(30, 90%, 60%, 0.7)');
+    grad.addColorStop(0.6, 'hsla(15, 80%, 40%, 0.4)');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(burns[i].x - r, burns[i].y - r, r * 2, r * 2);
+  }
+  // Flicker
+  if (t < 0.3) {
+    ctx.globalAlpha = (1 - t / 0.3) * 0.15;
+    ctx.fillStyle = 'hsla(45, 100%, 90%, 1)';
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  }
+  ctx.restore();
+}
+
+// Diagonal Slice — bold diagonal cut wipe
+function drawDiagonalSliceTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  const t = easeOutCubic(progress);
+  ctx.save();
+  // Two diagonal wedges closing in
+  const offset = lerp(WIDTH * 1.5, 0, t);
+  ctx.globalAlpha = (1 - t) * 0.4;
+  // Top-left wedge
+  ctx.fillStyle = `hsla(${hue}, 60%, 55%, 0.5)`;
+  ctx.beginPath();
+  ctx.moveTo(-offset, 0);
+  ctx.lineTo(WIDTH - offset, 0);
+  ctx.lineTo(-offset, HEIGHT);
+  ctx.closePath();
+  ctx.fill();
+  // Bottom-right wedge
+  ctx.fillStyle = `hsla(${(hue + 30) % 360}, 55%, 60%, 0.4)`;
+  ctx.beginPath();
+  ctx.moveTo(WIDTH + offset, HEIGHT);
+  ctx.lineTo(offset, HEIGHT);
+  ctx.lineTo(WIDTH + offset, 0);
+  ctx.closePath();
+  ctx.fill();
+  // Edge glow line
+  ctx.globalAlpha = (1 - t) * 0.7;
+  ctx.strokeStyle = `hsla(${hue}, 80%, 80%, 0.8)`;
+  ctx.lineWidth = 2;
+  ctx.shadowColor = `hsla(${hue}, 80%, 70%, 0.6)`;
+  ctx.shadowBlur = 20;
+  ctx.beginPath();
+  ctx.moveTo(WIDTH - offset, 0);
+  ctx.lineTo(-offset, HEIGHT);
+  ctx.stroke();
+  ctx.shadowColor = 'transparent';
   ctx.restore();
 }
 
@@ -896,7 +1131,6 @@ function drawChromaticAberration(ctx: CanvasRenderingContext2D, img: HTMLImageEl
   let sx = 0, sy = 0, sw = img.width, sh = img.height;
   if (imgRatio > canvasRatio) { sw = img.height * canvasRatio; sx = (img.width - sw) / 2; }
   else { sh = img.width / canvasRatio; sy = (img.height - sh) / 2; }
-  // Red channel offset
   ctx.save();
   ctx.globalAlpha = 0.15 * (1 - progress);
   ctx.globalCompositeOperation = 'screen';
@@ -904,7 +1138,6 @@ function drawChromaticAberration(ctx: CanvasRenderingContext2D, img: HTMLImageEl
   ctx.scale(scale, scale);
   ctx.drawImage(img, sx, sy, sw, sh, -WIDTH / 2, -HEIGHT / 2, WIDTH, HEIGHT);
   ctx.restore();
-  // Blue channel offset
   ctx.save();
   ctx.globalAlpha = 0.12 * (1 - progress);
   ctx.globalCompositeOperation = 'screen';
@@ -930,9 +1163,7 @@ function drawAmbientParticles(ctx: CanvasRenderingContext2D, progress: number, h
     const alpha = 0.05 + Math.sin(progress * Math.PI * 2 + i) * 0.04;
     ctx.globalAlpha = alpha;
     ctx.fillStyle = `hsla(${(hue + i * 18) % 360}, 50%, 70%, 1)`;
-    ctx.beginPath();
-    ctx.arc(x, wrappedY, size, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(x, wrappedY, size, 0, Math.PI * 2); ctx.fill();
   }
   ctx.restore();
 }
@@ -950,6 +1181,14 @@ function drawGraphicTransition(ctx: CanvasRenderingContext2D, progress: number, 
     case 'spiralReveal': drawSpiralRevealTransition(ctx, progress, hue); break;
     case 'rippleWave': drawRippleWaveTransition(ctx, progress, hue); break;
     case 'glitchSlice': drawGlitchSliceTransition(ctx, progress, hue); break;
+    case 'motionBlur': drawMotionBlurTransition(ctx, progress, hue); break;
+    case 'zoomBurst': drawZoomBurstTransition(ctx, progress, hue); break;
+    case 'pixelDissolve': drawPixelDissolveTransition(ctx, progress, hue); break;
+    case 'curtainDrop': drawCurtainDropTransition(ctx, progress, hue); break;
+    case 'crossHatch': drawCrossHatchTransition(ctx, progress, hue); break;
+    case 'smokeWipe': drawSmokeWipeTransition(ctx, progress, hue); break;
+    case 'filmBurn': drawFilmBurnTransition(ctx, progress, hue); break;
+    case 'diagonalSlice': drawDiagonalSliceTransition(ctx, progress, hue); break;
   }
 }
 
@@ -1704,6 +1943,24 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
           if (photoTime < transitionDuration) {
             const hue = getActivityHue(dayStates[dayIndex].activityType);
             drawGraphicTransition(ctx, photoTime / transitionDuration, dayIndex, hue);
+          }
+
+          // Exit transition at end of photo phase — different style than entry
+          const exitWindow = 0.5;
+          const timeToEnd2 = TIMING.PHOTO_DURATION - photoTime;
+          if (timeToEnd2 < exitWindow) {
+            const exitP = 1 - (timeToEnd2 / exitWindow);
+            const hue2 = getActivityHue(dayStates[dayIndex].activityType);
+            // Fade to black
+            ctx.save();
+            ctx.globalAlpha = easeInOutCubic(exitP) * 0.85;
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+            ctx.restore();
+            // Use a transition effect
+            if (exitP > 0.2) {
+              drawGraphicTransition(ctx, (exitP - 0.2) / 0.8, dayIndex + 100, hue2);
+            }
           }
         }
       }
