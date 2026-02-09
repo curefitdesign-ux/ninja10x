@@ -184,7 +184,7 @@ const ReelGeneration = () => {
       {/* Main Card */}
       <div className="relative z-10 flex-1 flex flex-col px-4 pb-4 min-h-0">
         <motion.div
-          className="flex-1 flex flex-col items-center justify-center rounded-3xl relative overflow-hidden min-h-0"
+          className="flex-1 flex flex-col items-center justify-center rounded-3xl relative overflow-hidden min-h-0 max-w-[340px] mx-auto w-full"
           initial={{ opacity: 0, scale: 0.92, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
@@ -199,16 +199,16 @@ const ReelGeneration = () => {
 
           {/* AI Star icon */}
           <motion.div
-            className="relative mb-10"
+            className="relative mb-6"
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 180, damping: 16, delay: 0.3 }}
           >
-            <motion.img
+          <motion.img
               src="/images/ai-star-loader.gif"
               alt="AI generating"
-              className="w-32 h-32 object-contain"
-              style={{ filter: 'drop-shadow(0 0 40px rgba(139, 92, 246, 0.7))' }}
+              className="w-20 h-20 object-contain"
+              style={{ filter: 'drop-shadow(0 0 30px rgba(139, 92, 246, 0.6))' }}
               animate={{ scale: [1, 1.06, 1] }}
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             />
@@ -216,7 +216,7 @@ const ReelGeneration = () => {
 
           {/* Title */}
           <motion.h2
-            className="text-[34px] font-extrabold text-center leading-tight mb-auto"
+            className="text-[24px] font-extrabold text-center leading-tight mb-auto"
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -237,7 +237,7 @@ const ReelGeneration = () => {
           <AnimatePresence mode="wait">
             <motion.p
               key={error || motivationalPhrase}
-              className="text-xl text-white/80 text-center font-semibold mb-4 px-6"
+              className="text-base text-white/80 text-center font-semibold mb-4 px-6"
               initial={{ y: 14, opacity: 0, filter: 'blur(4px)' }}
               animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
               exit={{ y: -14, opacity: 0, filter: 'blur(4px)' }}
