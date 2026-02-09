@@ -197,41 +197,42 @@ const ReelGeneration = () => {
           {/* Inner glow */}
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 40%, rgba(139, 92, 246, 0.15) 0%, transparent 60%)' }} />
 
-          {/* AI Star icon */}
-          <motion.div
-            className="relative mb-6"
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 180, damping: 16, delay: 0.3 }}
-          >
-          <motion.img
-              src="/images/ai-star-loader.gif"
-              alt="AI generating"
-              className="w-20 h-20 object-contain"
-              style={{ filter: 'drop-shadow(0 0 30px rgba(139, 92, 246, 0.6))' }}
-              animate={{ scale: [1, 1.06, 1] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            />
-          </motion.div>
+          {/* Centered content group */}
+          <div className="flex flex-col items-center justify-center flex-1 w-full">
+            {/* AI Star icon */}
+            <motion.div
+              className="relative mb-6"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 180, damping: 16, delay: 0.3 }}
+            >
+              <motion.img
+                src="/images/ai-star-loader.gif"
+                alt="AI generating"
+                className="w-20 h-20 object-contain"
+                style={{ filter: 'drop-shadow(0 0 30px rgba(139, 92, 246, 0.6))' }}
+                animate={{ scale: [1, 1.06, 1] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            </motion.div>
 
-          {/* Title */}
-          <motion.h2
-            className="text-[24px] font-extrabold text-center leading-tight mb-auto"
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            style={{
-              background: 'linear-gradient(180deg, #C4B5FD 0%, #818CF8 50%, #6366F1 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            {error ? 'Generation failed' : (
-              <>Generating<br />your week journey</>
-            )}
-          </motion.h2>
-
-          <div className="flex-1" />
+            {/* Title */}
+            <motion.h2
+              className="text-[24px] font-extrabold text-center leading-tight"
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                background: 'linear-gradient(180deg, #C4B5FD 0%, #818CF8 50%, #6366F1 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              {error ? 'Generation failed' : (
+                <>Generating<br />your week journey</>
+              )}
+            </motion.h2>
+          </div>
 
           {/* Motivational phrase with crossfade */}
           <AnimatePresence mode="wait">
