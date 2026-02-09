@@ -959,49 +959,48 @@ function drawIntroCard(ctx: CanvasRenderingContext2D, progress: number, totalDay
   ctx.save();
   drawDarkBg(ctx, 265);
 
-  // Central glow — larger and brighter
+  // Central glow
   const glowT = easeOutExpo(Math.min(progress * 1.8, 1));
-  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.42, 480, 265, 0.24 * glowT);
-  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.42, 250, 290, 0.1 * glowT);
+  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.42, 400, 265, 0.2 * glowT);
 
-  // Title — big, bold slide up
+  // Title — "YOUR WEEK IN MOTION"
   const titleT = easeOutBack(Math.min(Math.max(progress - 0.06, 0) * 2.2, 1));
   if (titleT > 0) {
     ctx.globalAlpha = titleT;
-    const slideY = lerp(30, 0, titleT);
+    const slideY = lerp(20, 0, titleT);
     ctx.translate(WIDTH / 2, HEIGHT * 0.40 + slideY);
 
     ctx.font = FONTS.INTRO_TITLE;
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.shadowColor = 'hsla(265, 60%, 55%, 0.4)';
-    ctx.shadowBlur = 60;
-    ctx.fillText('YOUR WEEK', 0, -34);
-    ctx.fillText('IN MOTION', 0, 34);
+    ctx.shadowColor = 'hsla(265, 60%, 55%, 0.3)';
+    ctx.shadowBlur = 40;
+    ctx.fillText('YOUR WEEK', 0, -28);
+    ctx.fillText('IN MOTION', 0, 28);
     ctx.shadowColor = 'transparent';
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
   // Accent line
   const lineT = easeOutCubic(Math.min(Math.max(progress - 0.22, 0) * 3, 1));
-  drawThinLine(ctx, HEIGHT * 0.50, 265, lineT * 0.6);
+  drawThinLine(ctx, HEIGHT * 0.50, 265, lineT * 0.5);
 
-  // Subtitle — larger
+  // Subtitle
   const subT = easeOutCubic(Math.min(Math.max(progress - 0.28, 0) * 3, 1));
   if (subT > 0) {
     ctx.globalAlpha = subT * 0.5;
-    const subY = lerp(HEIGHT * 0.54 + 10, HEIGHT * 0.54, subT);
+    const subY = lerp(HEIGHT * 0.54 + 8, HEIGHT * 0.54, subT);
     ctx.font = FONTS.INTRO_SUB;
     ctx.fillStyle = 'rgba(255,255,255,0.55)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.letterSpacing = '4px';
+    ctx.letterSpacing = '3px';
     ctx.fillText(`${totalDays} DAYS  ·  ${totalDays} ACTIVITIES`, WIDTH / 2, subY);
     ctx.letterSpacing = '0px';
   }
 
-  drawGrain(ctx, 0.025);
+  drawGrain(ctx, 0.03);
 
   // Exit fade
   if (progress > 0.70) {
@@ -1125,46 +1124,103 @@ function drawOutroCard(ctx: CanvasRenderingContext2D, progress: number, dayState
   ctx.restore();
 }
 
-// ============ METRIC CARD — BOLD & PREMIUM WITH CINEMATIC MOTION ============
+// ============ METRIC CARD — BOLD TYPOGRAPHIC DAY INTRO ============
 
-// Animated particle rings around hero metric
-function drawParticleRing(ctx: CanvasRenderingContext2D, cx: number, cy: number, radius: number, progress: number, hue: number, count: number) {
+// Draw repeated "DAY XX" text vertically — one line filled, rest outlined
+function drawDayTypographyWall(ctx: CanvasRenderingContext2D, dayNumber: number, progress: number, hue: number) {
   ctx.save();
-  for (let i = 0; i < count; i++) {
-    const angle = (i / count) * Math.PI * 2 + progress * Math.PI * 1.5;
-    const wobble = Math.sin(progress * 6 + i * 1.3) * 8;
-    const x = cx + Math.cos(angle) * (radius + wobble);
-    const y = cy + Math.sin(angle) * (radius + wobble);
-    const size = 2 + Math.sin(progress * 4 + i) * 1.5;
-    const alpha = 0.15 + Math.sin(progress * 3 + i * 0.7) * 0.1;
+  const dayStr = `DAY ${String(dayNumber).padStart(2, '0')}`;
+  const font = '900 100px -apple-system, "SF Pro Display", system-ui, sans-serif';
+  const lineH = 120;
+  const totalLines = 11;
+  const centerLine = 5; // which line is the "filled" one
+  
+  // Scroll animation — text wall scrolls up slightly
+  const scrollOffset = lerp(40, -20, easeInOutCubic(Math.min(progress * 1.5, 1)));
+  const startY = (HEIGHT / 2) - (centerLine * lineH) + scrollOffset;
+  
+  for (let i = 0; i < totalLines; i++) {
+    const y = startY + i * lineH;
+    if (y < -lineH || y > HEIGHT + lineH) continue;
     
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = `hsla(${(hue + i * 15) % 360}, 70%, 70%, 1)`;
-    ctx.beginPath();
-    ctx.arc(x, y, size, 0, Math.PI * 2);
-    ctx.fill();
+    const isCenterLine = i === centerLine;
+    const distFromCenter = Math.abs(i - centerLine);
+    
+    // Stagger entry per line
+    const lineDelay = distFromCenter * 0.03;
+    const lineT = easeOutCubic(Math.min(Math.max(progress - lineDelay, 0) * 2.5, 1));
+    if (lineT <= 0) continue;
+    
+    // Slide in from alternating sides
+    const slideDir = i % 2 === 0 ? 1 : -1;
+    const slideX = lerp(slideDir * 120, 0, lineT);
+    
+    ctx.save();
+    ctx.font = font;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    if (isCenterLine) {
+      // Filled white — the hero line
+      const heroScale = lerp(0.8, 1, easeOutBack(Math.min(Math.max(progress - 0.15, 0) * 3, 1)));
+      ctx.translate(WIDTH / 2 + slideX, y);
+      ctx.scale(heroScale, heroScale);
+      ctx.globalAlpha = lineT;
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = `hsla(${hue}, 70%, 60%, 0.4)`;
+      ctx.shadowBlur = 30;
+      ctx.fillText(dayStr, 0, 0);
+      ctx.shadowColor = 'transparent';
+    } else {
+      // Outlined — gets more transparent further from center
+      const alpha = Math.max(0.08, 0.4 - distFromCenter * 0.06) * lineT;
+      ctx.translate(WIDTH / 2 + slideX, y);
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = `hsla(0, 0%, 100%, 0.6)`;
+      ctx.lineWidth = 1.5;
+      ctx.strokeText(dayStr, 0, 0);
+    }
+    
+    ctx.restore();
   }
   ctx.restore();
 }
 
-// Pulsing concentric rings
-function drawPulsingRings(ctx: CanvasRenderingContext2D, cx: number, cy: number, progress: number, hue: number) {
+// Draw activity name as large background text (Nike-style)
+function drawActivityBackgroundText(ctx: CanvasRenderingContext2D, activity: string, progress: number, hue: number) {
   ctx.save();
-  const numRings = 3;
-  for (let i = 0; i < numRings; i++) {
-    const delay = i * 0.15;
-    const ringT = Math.max(0, (progress - delay) * 2);
-    if (ringT <= 0 || ringT > 1.5) continue;
+  const text = activity.toUpperCase();
+  const font = '900 80px -apple-system, "SF Pro Display", system-ui, sans-serif';
+  const lineH = 90;
+  const rows = 4;
+  
+  const slideT = easeOutCubic(Math.min(Math.max(progress - 0.4, 0) * 2.5, 1));
+  if (slideT <= 0) { ctx.restore(); return; }
+  
+  // Place behind the day text, in the upper and lower regions
+  const positions = [
+    { x: WIDTH * 0.5, y: HEIGHT * 0.08 },
+    { x: WIDTH * 0.5, y: HEIGHT * 0.08 + lineH },
+    { x: WIDTH * 0.5, y: HEIGHT * 0.85 },
+    { x: WIDTH * 0.5, y: HEIGHT * 0.85 + lineH },
+  ];
+  
+  for (let i = 0; i < Math.min(rows, positions.length); i++) {
+    const delay = i * 0.04;
+    const t = easeOutCubic(Math.min(Math.max(progress - 0.45 - delay, 0) * 3, 1));
+    if (t <= 0) continue;
     
-    const radius = 60 + ringT * 180;
-    const alpha = (1 - ringT / 1.5) * 0.15;
+    const slideX = lerp(i % 2 === 0 ? -80 : 80, 0, t);
     
-    ctx.globalAlpha = alpha;
-    ctx.strokeStyle = `hsla(${hue}, 60%, 65%, 1)`;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.save();
+    ctx.font = font;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.globalAlpha = 0.06 * t;
+    ctx.strokeStyle = `hsla(${hue}, 40%, 60%, 0.4)`;
+    ctx.lineWidth = 1;
+    ctx.strokeText(text, positions[i].x + slideX, positions[i].y);
+    ctx.restore();
   }
   ctx.restore();
 }
@@ -1180,228 +1236,31 @@ function drawMetricCard(
 
   const hue = getActivityHue(state.activityType);
   drawDarkBg(ctx, hue);
-
-  // Animated dual glow — breathing effect
+  
+  // Subtle glow behind center
   const glowP = easeOutExpo(Math.min(progress * 2, 1));
-  const breathe = 0.85 + Math.sin(progress * Math.PI * 3) * 0.15;
-  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.36, 500 * breathe, hue, 0.28 * glowP);
-  drawGlow(ctx, WIDTH * 0.35, HEIGHT * 0.55, 280, (hue + 40) % 360, 0.08 * glowP);
+  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.5, 400, hue, 0.12 * glowP);
+
+  drawGrain(ctx, 0.03);
   
-  // Secondary traveling glow
-  const travelX = WIDTH * 0.3 + Math.sin(progress * Math.PI * 2) * WIDTH * 0.2;
-  const travelY = HEIGHT * 0.3 + Math.cos(progress * Math.PI * 1.5) * HEIGHT * 0.1;
-  drawGlow(ctx, travelX, travelY, 200, (hue + 60) % 360, 0.06 * glowP);
+  // Activity name as faint background text
+  drawActivityBackgroundText(ctx, state.activityType, progress, hue);
   
-  // Pulsing rings behind hero number
-  if (progress > 0.08 && progress < 0.7) {
-    drawPulsingRings(ctx, WIDTH / 2, HEIGHT * 0.36, progress - 0.08, hue);
-  }
+  // Bold typographic DAY wall
+  drawDayTypographyWall(ctx, state.dayNumber, progress, hue);
   
-  // Particle ring orbiting hero
-  if (progress > 0.1) {
-    drawParticleRing(ctx, WIDTH / 2, HEIGHT * 0.36, 160, progress, hue, 12);
-  }
-
-  // Ambient floating particles throughout
-  drawAmbientParticles(ctx, progress, hue);
-
-  drawGrain(ctx, 0.025);
-
-  // ── Fixed centered layout — no randomization for consistency ──
-  const dayT   = easeOutBack(Math.min(progress * 3.5, 1));
-  const heroT  = easeOutExpo(Math.min(Math.max(progress - 0.06, 0) * 2.2, 1));
-  const unitT  = easeOutCubic(Math.min(Math.max(progress - 0.16, 0) * 3, 1));
-  const actT   = easeOutCubic(Math.min(Math.max(progress - 0.22, 0) * 3, 1));
-  const statsT = easeOutCubic(Math.min(Math.max(progress - 0.32, 0) * 2.5, 1));
-  const calT   = easeOutCubic(Math.min(Math.max(progress - 0.42, 0) * 3, 1));
-
-  const centerY = HEIGHT * 0.36;
-
-  // ── DAY pill — slides in from left with rotation ──
-  if (dayT > 0) {
+  // "OF BECOMING CULT NINJA" subtitle below center
+  const subT = easeOutCubic(Math.min(Math.max(progress - 0.35, 0) * 3, 1));
+  if (subT > 0) {
     ctx.save();
-    ctx.globalAlpha = dayT * globalAlpha * 0.9;
-    const slideX = lerp(-80, 0, dayT);
-    const pillY = lerp(centerY - 150, centerY - 128, dayT);
-    const text = `DAY ${state.dayNumber}`;
-    ctx.font = FONTS.DAY_PILL;
-    const tw = ctx.measureText(text).width;
-    const pw = tw + 38;
-    const ph = 34;
-    const px = (WIDTH - pw) / 2 + slideX;
-
-    ctx.fillStyle = `hsla(${hue}, 50%, 50%, 0.18)`;
-    ctx.beginPath();
-    ctx.roundRect(px, pillY - ph / 2, pw, ph, 17);
-    ctx.fill();
-
-    ctx.strokeStyle = `hsla(${hue}, 50%, 55%, 0.3)`;
-    ctx.lineWidth = 0.5;
-    ctx.beginPath();
-    ctx.roundRect(px, pillY - ph / 2, pw, ph, 17);
-    ctx.stroke();
-
-    ctx.fillStyle = `hsla(${hue}, 55%, 80%, 1)`;
+    ctx.globalAlpha = subT * globalAlpha * 0.9;
+    const subY = HEIGHT * 0.58 + lerp(15, 0, subT);
+    ctx.font = '900 28px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = `hsla(48, 95%, 55%, 1)`; // Yellow accent like reference
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(text, WIDTH / 2, pillY);
-    ctx.restore();
-  }
-
-  // ── Hero metric — BIG number with elastic bounce ──
-  if (heroT > 0) {
-    ctx.save();
-    ctx.globalAlpha = heroT * globalAlpha;
-    const scale = lerp(0.3, 1, easeOutBack(heroT));
-    const slideY = lerp(40, 0, heroT);
-    const floatY = Math.sin(progress * Math.PI * 4) * 2 * heroT;
-
-    ctx.translate(WIDTH / 2, centerY + slideY + floatY);
-    ctx.scale(scale, scale);
-
-    // Count-up animation
-    const raw = state.metricA.value;
-    const numMatch = raw.match(/^(\d+)/);
-    let display = raw;
-    if (numMatch && heroT < 0.9) {
-      const target = parseInt(numMatch[1]);
-      const current = Math.round(target * Math.min(heroT / 0.85, 1));
-      display = raw.replace(/^\d+/, String(current));
-    }
-
-    ctx.shadowColor = `hsla(${hue}, 65%, 55%, 0.35)`;
-    ctx.shadowBlur = 50;
-    ctx.font = FONTS.HERO_NUMBER;
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(display, 0, 0);
-    ctx.shadowColor = 'transparent';
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.restore();
-  }
-
-  // ── Metric unit label ──
-  if (unitT > 0) {
-    ctx.save();
-    ctx.globalAlpha = unitT * globalAlpha * 0.6;
-    const unitY = lerp(centerY + 72, centerY + 62, unitT);
-    ctx.font = FONTS.HERO_UNIT;
-    ctx.fillStyle = 'rgba(255,255,255,0.6)';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.letterSpacing = '6px';
-    ctx.fillText(state.metricA.label.toUpperCase(), WIDTH / 2, unitY);
-    ctx.letterSpacing = '0px';
-    ctx.restore();
-  }
-
-  // ── Activity name ──
-  if (actT > 0) {
-    ctx.save();
-    ctx.globalAlpha = actT * globalAlpha * 0.35;
-    const actY = lerp(centerY + 105, centerY + 95, actT);
-    ctx.font = FONTS.ACTIVITY;
-    ctx.fillStyle = `hsla(${hue}, 30%, 72%, 0.6)`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.letterSpacing = '4px';
-    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, actY);
-    ctx.letterSpacing = '0px';
-    ctx.restore();
-  }
-
-  // ── Divider ──
-  if (statsT > 0) {
-    drawThinLine(ctx, HEIGHT * 0.56, hue, statsT * 0.4);
-  }
-
-  // ── Secondary stats row — bigger values ──
-  if (statsT > 0) {
-    const stats: { label: string; value: string }[] = [];
-    if (state.metricB.value !== '--') stats.push({ label: state.metricB.label, value: state.metricB.value });
-    if (state.metricC && state.metricC.value !== '--') stats.push({ label: state.metricC.label, value: state.metricC.value });
-    if (state.intensity) stats.push({ label: 'Effort', value: state.intensity });
-
-    const maxStats = Math.min(stats.length, 3);
-    if (maxStats > 0) {
-      const sectionW = WIDTH * 0.8;
-      const colW = sectionW / maxStats;
-      const startX = (WIDTH - sectionW) / 2;
-
-      for (let i = 0; i < maxStats; i++) {
-        const delay = i * 0.05;
-        const t = easeOutBack(Math.min(Math.max(progress - 0.36 - delay, 0) * 2.8, 1));
-        if (t <= 0) continue;
-
-        const slideY = lerp(20, 0, t);
-        const cx = startX + colW * (i + 0.5);
-        const baseY = HEIGHT * 0.60 + slideY;
-
-        ctx.save();
-        ctx.globalAlpha = t * globalAlpha * 0.9;
-
-        ctx.font = FONTS.STAT_VALUE;
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(stats[i].value, cx, baseY);
-
-        ctx.font = FONTS.STAT_LABEL;
-        ctx.fillStyle = 'rgba(255,255,255,0.38)';
-        ctx.letterSpacing = '2px';
-        ctx.fillText(stats[i].label.toUpperCase(), cx, baseY + 28);
-        ctx.letterSpacing = '0px';
-
-        ctx.restore();
-
-        // Vertical separator
-        if (i < maxStats - 1) {
-          const sepX = startX + colW * (i + 1);
-          ctx.save();
-          ctx.globalAlpha = t * 0.14;
-          ctx.strokeStyle = `hsla(${hue}, 30%, 60%, 0.5)`;
-          ctx.lineWidth = 0.5;
-          ctx.beginPath();
-          ctx.moveTo(sepX, baseY - 20);
-          ctx.lineTo(sepX, baseY + 35);
-          ctx.stroke();
-          ctx.restore();
-        }
-      }
-    }
-  }
-
-  // ── Calories badge (bottom) ──
-  if (calT > 0 && state.calories && parseInt(state.calories) > 0) {
-    ctx.save();
-    ctx.globalAlpha = calT * globalAlpha * 0.7;
-    const calY = HEIGHT * 0.70;
-    
-    // Glass pill background
-    const pillW = 160;
-    const pillH = 50;
-    ctx.fillStyle = `hsla(${hue}, 30%, 20%, 0.35)`;
-    ctx.beginPath();
-    ctx.roundRect((WIDTH - pillW) / 2, calY - pillH / 2, pillW, pillH, 25);
-    ctx.fill();
-    ctx.strokeStyle = `hsla(${hue}, 40%, 50%, 0.15)`;
-    ctx.lineWidth = 0.5;
-    ctx.beginPath();
-    ctx.roundRect((WIDTH - pillW) / 2, calY - pillH / 2, pillW, pillH, 25);
-    ctx.stroke();
-
-    ctx.font = FONTS.CALORIES;
-    ctx.fillStyle = `hsla(${(hue + 15) % 360}, 60%, 70%, 0.9)`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(`${state.calories}`, WIDTH / 2 - 10, calY - 1);
-    
-    ctx.font = FONTS.CALORIES_LABEL;
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.letterSpacing = '2px';
-    ctx.fillText('CAL', WIDTH / 2 + 45, calY);
-    ctx.letterSpacing = '0px';
+    ctx.fillText('OF BECOMING', WIDTH / 2, subY);
+    ctx.fillText('CULT NINJA', WIDTH / 2, subY + 36);
     ctx.restore();
   }
 
@@ -1445,23 +1304,100 @@ function drawImageCover(
   ctx.restore();
 }
 
-function drawPhotoOverlays(ctx: CanvasRenderingContext2D, _state: DayState, _textOpacity: number) {
-  // Clean photo display — no text/data overlays on user media
-  // Only subtle cinematic vignettes for depth
-
-  // Bottom gradient vignette
-  const bottomGrad = ctx.createLinearGradient(0, HEIGHT - 250, 0, HEIGHT);
+function drawPhotoOverlays(ctx: CanvasRenderingContext2D, state: DayState, textOpacity: number) {
+  ctx.save();
+  
+  // Heavy bottom gradient for data readability
+  const bottomGrad = ctx.createLinearGradient(0, HEIGHT * 0.5, 0, HEIGHT);
   bottomGrad.addColorStop(0, 'transparent');
-  bottomGrad.addColorStop(1, 'rgba(0,0,0,0.35)');
+  bottomGrad.addColorStop(0.4, 'rgba(0,0,0,0.3)');
+  bottomGrad.addColorStop(1, 'rgba(0,0,0,0.85)');
   ctx.fillStyle = bottomGrad;
-  ctx.fillRect(0, HEIGHT - 250, WIDTH, 250);
+  ctx.fillRect(0, HEIGHT * 0.5, WIDTH, HEIGHT * 0.5);
 
   // Top vignette
-  const topGrad = ctx.createLinearGradient(0, 0, 0, 120);
-  topGrad.addColorStop(0, 'rgba(0,0,0,0.2)');
+  const topGrad = ctx.createLinearGradient(0, 0, 0, 150);
+  topGrad.addColorStop(0, 'rgba(0,0,0,0.3)');
   topGrad.addColorStop(1, 'transparent');
   ctx.fillStyle = topGrad;
-  ctx.fillRect(0, 0, WIDTH, 120);
+  ctx.fillRect(0, 0, WIDTH, 150);
+
+  const t = textOpacity;
+  if (t <= 0) { ctx.restore(); return; }
+  
+  const hue = getActivityHue(state.activityType);
+  const padX = 48;
+  
+  // Activity name — large, left-aligned
+  ctx.globalAlpha = t * 0.9;
+  ctx.font = '400 18px -apple-system, "SF Pro Text", system-ui, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(`${state.activityType} · Day ${state.dayNumber}`, padX, HEIGHT * 0.72);
+  
+  // Hero metric — big bold value
+  ctx.globalAlpha = t;
+  ctx.font = '900 72px -apple-system, "SF Pro Display", system-ui, sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  
+  // Show value with unit inline
+  const heroVal = state.metricA.value;
+  const heroUnit = state.metricA.label.toLowerCase();
+  const shortUnit = heroUnit === 'duration' ? '' : heroUnit.slice(0, 2);
+  ctx.fillText(heroVal, padX, HEIGHT * 0.78);
+  
+  // Unit suffix
+  if (shortUnit) {
+    const valW = ctx.measureText(heroVal).width;
+    ctx.font = '600 28px -apple-system, "SF Pro Text", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillText(shortUnit, padX + valW + 6, HEIGHT * 0.78 + 10);
+  }
+  
+  // Stats grid — 2 columns
+  const stats: { label: string; value: string }[] = [];
+  if (state.metricB.value !== '--') stats.push({ label: state.metricB.label, value: state.metricB.value });
+  if (state.calories && parseInt(state.calories) > 0) stats.push({ label: 'Calories', value: `${state.calories}kcal` });
+  if (state.metricC && state.metricC.value !== '--') stats.push({ label: state.metricC.label, value: state.metricC.value });
+  if (state.intensity) stats.push({ label: 'Effort', value: state.intensity });
+  
+  const gridY = HEIGHT * 0.86;
+  const colW = (WIDTH - padX * 2) / 2;
+  
+  for (let i = 0; i < Math.min(stats.length, 4); i++) {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const x = padX + col * colW;
+    const y = gridY + row * 70;
+    
+    // Label
+    ctx.globalAlpha = t * 0.5;
+    ctx.font = '600 14px -apple-system, "SF Pro Text", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(stats[i].label, x, y);
+    
+    // Value
+    ctx.globalAlpha = t * 0.95;
+    ctx.font = '800 36px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(stats[i].value, x, y + 30);
+  }
+  
+  // Thin separator line between activity name and stats
+  ctx.globalAlpha = t * 0.15;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(padX, HEIGHT * 0.83);
+  ctx.lineTo(WIDTH - padX, HEIGHT * 0.83);
+  ctx.stroke();
+  
+  ctx.restore();
 }
 
 // ============ REAL MUSIC FETCHING ============
