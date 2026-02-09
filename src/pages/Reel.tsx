@@ -282,11 +282,15 @@ const Reel = () => {
       return;
     }
     
-    // CASE 2: Default navigation - go to current user's first story
+    // CASE 2: Default navigation - ALWAYS start with current user's own stories
     if (user) {
       const myIdx = effectiveUserGroups.findIndex(g => g.userId === user.id);
       if (myIdx >= 0) {
         setCurrentUserIndex(myIdx);
+        setCurrentActivityIndex(0);
+      } else {
+        // User has no activities - stay at index 0 but this will be handled by the empty state
+        setCurrentUserIndex(0);
         setCurrentActivityIndex(0);
       }
     }
@@ -1143,16 +1147,16 @@ const Reel = () => {
                     className="relative w-full max-w-[307px] overflow-hidden rounded-2xl"
                     style={{ aspectRatio: '9/16' }}
                   >
-                    <AnimatePresence mode="wait">
+                    <AnimatePresence mode="popLayout">
                       <motion.div
                         key={contentKey}
                         className="absolute inset-0"
-                        initial={{ opacity: 0, scale: 1.08, filter: 'blur(8px) brightness(1.2)' }}
-                        animate={{ opacity: 1, scale: 1, filter: 'blur(0px) brightness(1)' }}
-                        exit={{ opacity: 0, scale: 0.94, filter: 'blur(6px) brightness(0.8)' }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                         transition={{ 
-                          duration: 0.4, 
-                          ease: [0.22, 1, 0.36, 1]
+                          duration: 0.25, 
+                          ease: 'easeOut',
                         }}
                       >
                         {isRecapGenerating ? (
