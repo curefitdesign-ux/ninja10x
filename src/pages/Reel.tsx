@@ -766,8 +766,9 @@ const Reel = () => {
             {/* Inner card glow */}
             <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 35%, rgba(139, 92, 246, 0.12) 0%, transparent 55%)' }} />
 
-            {/* Video */}
+            {/* Video — key forces DOM element replacement on new URL */}
             <video
+              key={weekRecapVideoFromNav}
               src={weekRecapVideoFromNav}
               className="absolute inset-0 w-full h-full object-cover"
               autoPlay

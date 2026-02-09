@@ -19,7 +19,7 @@ import Camera from "./pages/Camera";
 import Gallery from "./pages/Gallery";
 
 import Reel from "./pages/Reel";
-import ReelGeneration from "./pages/ReelGeneration";
+import ReelGenerationBase from "./pages/ReelGeneration";
 import ProfileSetupPage from "./pages/ProfileSetupPage";
 import AvatarCrop from "./pages/AvatarCrop";
 import PageTransition from "./components/PageTransition";
@@ -86,6 +86,12 @@ const ProfileSetupRouteWrapper = ({ children }: { children: React.ReactNode }) =
   }
   
   return <>{children}</>;
+};
+
+// Force ReelGeneration to fully remount on every navigation (location.key changes per navigate call)
+const ReelGeneration = () => {
+  const location = useLocation();
+  return <ReelGenerationBase key={location.key} />;
 };
 
 const AnimatedRoutes = () => {
