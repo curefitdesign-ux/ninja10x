@@ -86,12 +86,14 @@ const ACTIVITY_HUES: Record<string, number> = {
   trekking: 140, basketball: 30, football: 120, cricket: 45, default: 265,
 };
 
-// Music mood per activity
-type MusicMood = 'energetic' | 'calm' | 'rhythmic' | 'ambient';
+// Music mood per activity — expanded for richer contextual scoring
+type MusicMood = 'energetic' | 'calm' | 'rhythmic' | 'ambient' | 'intense' | 'groovy';
 const ACTIVITY_MOOD: Record<string, MusicMood> = {
-  running: 'rhythmic', cycling: 'rhythmic', yoga: 'calm', boxing: 'energetic',
+  running: 'rhythmic', cycling: 'groovy', yoga: 'calm', boxing: 'intense',
   swimming: 'ambient', trekking: 'ambient', basketball: 'energetic',
-  football: 'energetic', cricket: 'rhythmic', default: 'rhythmic',
+  football: 'energetic', cricket: 'rhythmic', badminton: 'groovy',
+  tennis: 'groovy', meditation: 'calm', stretching: 'calm',
+  walking: 'ambient', hiking: 'ambient', default: 'rhythmic',
 };
 
 function getActivityHue(activity: string): number {
@@ -103,7 +105,7 @@ function getActivityHue(activity: string): number {
 }
 
 function getDominantMood(dayStates: DayState[]): MusicMood {
-  const counts: Record<MusicMood, number> = { energetic: 0, calm: 0, rhythmic: 0, ambient: 0 };
+  const counts: Record<MusicMood, number> = { energetic: 0, calm: 0, rhythmic: 0, ambient: 0, intense: 0, groovy: 0 };
   for (const s of dayStates) {
     const key = s.activityType.toLowerCase();
     let mood: MusicMood = ACTIVITY_MOOD.default;
@@ -146,73 +148,6 @@ const N: Record<string, number> = {
   C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880.00,
 };
 
-interface TrackConfig {
-  bpm: number;
-  chords: number[][];
-  bass: number[];
-  lead: number[];
-  dropIntensity: number; // 0-1 how hard the drop hits
-}
-
-function getTrackConfig(mood: MusicMood): TrackConfig {
-  switch (mood) {
-    case 'energetic':
-      return {
-        bpm: 128, // Classic EDM tempo
-        // Am - F - C - G (Avicii/Chainsmokers-style progression)
-        chords: [
-          [N.A3, N.C4, N.E4, N.A4],
-          [N.F3, N.A3, N.C4, N.F4],
-          [N.C4, N.E4, N.G4, N.C5],
-          [N.G3, N.B3, N.D4, N.G4],
-        ],
-        bass: [N.A2, N.A2, N.F2, N.F2, N.C3, N.C3, N.G2, N.G2],
-        lead: [N.E5, N.E5, N.D5, N.C5, N.C5, N.D5, N.E5, N.G5],
-        dropIntensity: 1.0,
-      };
-    case 'rhythmic':
-      return {
-        bpm: 120,
-        // Em - C - G - D (uplifting workout)
-        chords: [
-          [N.E3, N.G3, N.B3, N.E4],
-          [N.C4, N.E4, N.G4, N.C5],
-          [N.G3, N.B3, N.D4, N.G4],
-          [N.D4, N.F4, N.A4, N.D5],
-        ],
-        bass: [N.E2, N.E2, N.C3, N.C3, N.G2, N.G2, N.D3, N.D3],
-        lead: [N.B4, N.E5, N.D5, N.B4, N.G5, N.E5, N.D5, N.E5],
-        dropIntensity: 0.85,
-      };
-    case 'calm':
-      return {
-        bpm: 100,
-        chords: [
-          [N.C4, N.E4, N.G4, N.B4],
-          [N.A3, N.C4, N.E4, N.A4],
-          [N.F3, N.A3, N.C4, N.F4],
-          [N.G3, N.B3, N.D4, N.G4],
-        ],
-        bass: [N.C2, N.C2, N.A2, N.A2, N.F2, N.F2, N.G2, N.G2],
-        lead: [N.G4, N.E5, N.D5, N.C5, N.E5, N.D5, N.C5, N.B4],
-        dropIntensity: 0.4,
-      };
-    case 'ambient':
-      return {
-        bpm: 110,
-        chords: [
-          [N.E3, N.G3, N.B3, N.D4],
-          [N.C4, N.E4, N.G4, N.B4],
-          [N.A3, N.C4, N.E4, N.A4],
-          [N.F3, N.A3, N.C4, N.E4],
-        ],
-        bass: [N.E2, N.E2, N.C3, N.C3, N.A2, N.A2, N.F2, N.F2],
-        lead: [N.E5, N.D5, N.B4, N.G4, N.D5, N.E5, N.G5, N.E5],
-        dropIntensity: 0.55,
-      };
-  }
-}
-
 // Deterministic pseudo-random for consistent noise patterns
 function seededRand(seed: number): number {
   const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
@@ -220,9 +155,6 @@ function seededRand(seed: number): number {
 }
 
 // ============ PER-GENERATION UNIQUE SEED ============
-// Every call to generateMotionRecap creates a new seed that cascades into
-// transitions, Ken Burns, metric styles, color offsets, timing jitter, etc.
-
 let _genSeed = 0;
 
 /** Seeded random that stays consistent within a generation */
@@ -245,34 +177,179 @@ function supersaw(freq: number, t: number, numVoices = 7): number {
   for (let v = 0; v < voices; v++) {
     const f = freq * (1 + detunes[v]);
     const phase = (f * t) % 1;
-    sum += phase * 2 - 1; // Sawtooth wave
+    sum += phase * 2 - 1;
   }
   return sum / voices;
 }
 
-function generateContextualAudio(durationSec: number, mood: MusicMood): AudioBuffer {
+interface TrackConfig {
+  bpm: number;
+  chords: number[][];
+  bass: number[];
+  lead: number[];
+  dropIntensity: number;
+  swingAmount: number; // 0-1 groove swing
+  filterCutoff: number; // 0-1 brightness
+  reverbMix: number; // 0-1
+}
+
+// 12 distinct musical keys — seed picks one
+const SCALE_ROOTS = [
+  { name: 'Am', root: N.A2, offsets: [0, 2, 3, 5, 7, 8, 10] },
+  { name: 'Em', root: N.E2, offsets: [0, 2, 3, 5, 7, 8, 10] },
+  { name: 'Dm', root: N.D2, offsets: [0, 2, 3, 5, 7, 8, 10] },
+  { name: 'Cm', root: N.C2, offsets: [0, 2, 3, 5, 7, 8, 10] },
+  { name: 'Gm', root: N.G2, offsets: [0, 2, 3, 5, 7, 8, 10] },
+  { name: 'Fm', root: N.F2, offsets: [0, 2, 3, 5, 7, 8, 10] },
+  { name: 'C',  root: N.C2, offsets: [0, 2, 4, 5, 7, 9, 11] },
+  { name: 'G',  root: N.G2, offsets: [0, 2, 4, 5, 7, 9, 11] },
+  { name: 'D',  root: N.D2, offsets: [0, 2, 4, 5, 7, 9, 11] },
+  { name: 'F',  root: N.F2, offsets: [0, 2, 4, 5, 7, 9, 11] },
+  { name: 'Bb', root: N.B2 / 1.059463, offsets: [0, 2, 4, 5, 7, 9, 11] },
+  { name: 'Eb', root: N.E2 * 1.059463, offsets: [0, 2, 3, 5, 7, 8, 10] },
+];
+
+// Chord progression templates (scale degree indices)
+const PROGRESSIONS = [
+  [0, 5, 3, 4], // i - VI - iv - v
+  [0, 3, 5, 4], // i - iv - VI - v
+  [0, 4, 5, 3], // i - v - VI - iv
+  [5, 3, 0, 4], // VI - iv - i - v
+  [0, 2, 5, 4], // i - iii - VI - v
+  [3, 5, 0, 4], // iv - VI - i - v
+  [0, 5, 4, 3], // i - VI - v - iv
+  [5, 0, 3, 4], // VI - i - iv - v
+];
+
+function freqFromScaleDegree(rootFreq: number, offsets: number[], degree: number, octave = 0): number {
+  const semitones = offsets[degree % offsets.length] + 12 * (Math.floor(degree / offsets.length) + octave);
+  return rootFreq * Math.pow(2, semitones / 12);
+}
+
+function buildChords(rootFreq: number, offsets: number[], prog: number[]): number[][] {
+  return prog.map(deg => {
+    const oct2 = freqFromScaleDegree(rootFreq, offsets, deg, 1);
+    const oct3 = freqFromScaleDegree(rootFreq, offsets, deg, 2);
+    return [
+      oct2,
+      freqFromScaleDegree(rootFreq, offsets, (deg + 2) % 7, 1),
+      freqFromScaleDegree(rootFreq, offsets, (deg + 4) % 7, 1),
+      oct3,
+    ];
+  });
+}
+
+function buildBassLine(rootFreq: number, offsets: number[], prog: number[]): number[] {
+  const bass: number[] = [];
+  for (const deg of prog) {
+    bass.push(freqFromScaleDegree(rootFreq, offsets, deg, 0));
+    bass.push(freqFromScaleDegree(rootFreq, offsets, deg, 0));
+  }
+  return bass;
+}
+
+function buildLeadLine(rootFreq: number, offsets: number[], seed: number): number[] {
+  const lead: number[] = [];
+  let deg = Math.floor(seededRand(seed * 3 + 1) * 5);
+  for (let i = 0; i < 8; i++) {
+    lead.push(freqFromScaleDegree(rootFreq, offsets, deg, 2));
+    const step = Math.floor(seededRand(seed * 7 + i) * 5) - 2;
+    deg = Math.max(0, Math.min(6, deg + step));
+  }
+  return lead;
+}
+
+function getTrackConfig(mood: MusicMood, seed: number): TrackConfig {
+  // Seed-based selection of key, progression, and BPM
+  const keyIdx = Math.floor(seededRand(seed * 11 + 1) * SCALE_ROOTS.length);
+  const progIdx = Math.floor(seededRand(seed * 13 + 2) * PROGRESSIONS.length);
+  const scale = SCALE_ROOTS[keyIdx];
+  const prog = PROGRESSIONS[progIdx];
+  
+  const chords = buildChords(scale.root, scale.offsets, prog);
+  const bass = buildBassLine(scale.root, scale.offsets, prog);
+  const lead = buildLeadLine(scale.root, scale.offsets, seed);
+
+  // BPM ranges per mood with seed jitter
+  const jitter = seededRand(seed * 17 + 3) * 16 - 8; // ±8 BPM
+  
+  switch (mood) {
+    case 'intense':
+      return { bpm: Math.round(132 + jitter), chords, bass, lead, dropIntensity: 1.0, swingAmount: 0, filterCutoff: 0.9, reverbMix: 0.15 };
+    case 'energetic':
+      return { bpm: Math.round(126 + jitter), chords, bass, lead, dropIntensity: 0.9, swingAmount: 0.05, filterCutoff: 0.8, reverbMix: 0.2 };
+    case 'groovy':
+      return { bpm: Math.round(118 + jitter), chords, bass, lead, dropIntensity: 0.75, swingAmount: 0.15, filterCutoff: 0.7, reverbMix: 0.25 };
+    case 'rhythmic':
+      return { bpm: Math.round(120 + jitter), chords, bass, lead, dropIntensity: 0.85, swingAmount: 0.08, filterCutoff: 0.75, reverbMix: 0.2 };
+    case 'calm':
+      return { bpm: Math.round(95 + jitter), chords, bass, lead, dropIntensity: 0.35, swingAmount: 0.12, filterCutoff: 0.4, reverbMix: 0.5 };
+    case 'ambient':
+      return { bpm: Math.round(105 + jitter), chords, bass, lead, dropIntensity: 0.5, swingAmount: 0.1, filterCutoff: 0.5, reverbMix: 0.45 };
+  }
+}
+
+function generateContextualAudio(durationSec: number, mood: MusicMood, dayStates?: DayState[]): AudioBuffer {
   const sampleRate = 44100;
   const length = Math.ceil(sampleRate * durationSec);
   const buffer = new AudioBuffer({ length, sampleRate, numberOfChannels: 2 });
   const left = buffer.getChannelData(0);
   const right = buffer.getChannelData(1);
 
-  const cfg = getTrackConfig(mood);
+  const cfg = getTrackConfig(mood, _genSeed);
   const beatDur = 60 / cfg.bpm;
   const barDur = beatDur * 4;
   const totalBars = Math.ceil(durationSec / barDur);
   const chordCount = cfg.chords.length;
   const di = cfg.dropIntensity;
 
-  // Arrangement: intro → buildup → drop → sustain → breakdown → outro
+  // Per-day mood configs for musical sections (if we have day data)
+  const dayMoods: MusicMood[] = dayStates
+    ? dayStates.map(s => {
+        const key = s.activityType.toLowerCase();
+        for (const [name, m] of Object.entries(ACTIVITY_MOOD)) {
+          if (key.includes(name)) return m;
+        }
+        return mood;
+      })
+    : [mood, mood, mood];
+
+  // Calculate which bars correspond to which day
+  const introBars = Math.max(1, Math.floor(totalBars * 0.08));
+  const outroBars = Math.max(1, Math.floor(totalBars * 0.12));
+  const contentBars = totalBars - introBars - outroBars;
+  const barsPerDay = Math.floor(contentBars / Math.max(1, dayMoods.length));
+
+  // Seed-based pattern variations
+  const kickPattern = Math.floor(seededRand(_genSeed * 19 + 1) * 4); // 4 kick patterns
+  const hatPattern = Math.floor(seededRand(_genSeed * 23 + 2) * 3); // 3 hat patterns
+  const arpOctave = 1 + Math.floor(seededRand(_genSeed * 29 + 3) * 2); // 1 or 2 octaves up
+
+  console.log(`[MotionRecap] 🎵 Music: ${cfg.bpm}BPM, key=${SCALE_ROOTS[Math.floor(seededRand(_genSeed * 11 + 1) * SCALE_ROOTS.length)].name}, mood=${mood}, days=${dayMoods.join('→')}`);
+
   const getSection = (bar: number): 'intro' | 'buildup' | 'drop' | 'sustain' | 'breakdown' | 'outro' => {
     const pct = bar / totalBars;
     if (pct < 0.08) return 'intro';
     if (pct < 0.18) return 'buildup';
     if (pct < 0.5) return 'drop';
     if (pct < 0.7) return 'sustain';
-    if (pct < 0.82) return 'breakdown';
+    if (pct < 0.85) return 'breakdown';
     return 'outro';
+  };
+
+  // Determine per-bar intensity based on which day's activity we're in
+  const getDayIntensity = (bar: number): number => {
+    if (bar < introBars || bar >= totalBars - outroBars) return 0.5;
+    const dayIdx = Math.min(Math.floor((bar - introBars) / barsPerDay), dayMoods.length - 1);
+    const dayMood = dayMoods[dayIdx];
+    switch (dayMood) {
+      case 'intense': return 1.0;
+      case 'energetic': return 0.9;
+      case 'groovy': return 0.75;
+      case 'rhythmic': return 0.8;
+      case 'calm': return 0.4;
+      case 'ambient': return 0.5;
+    }
   };
 
   for (let i = 0; i < length; i++) {
@@ -285,70 +362,79 @@ function generateContextualAudio(durationSec: number, mood: MusicMood): AudioBuf
     const beatPhase = (t % beatDur) / beatDur;
     const beatNum = Math.floor(posInBar * 4);
     const section = getSection(currentBar);
+    const dayIntensity = getDayIntensity(currentBar);
 
     let sample = 0;
 
-    // Section-based intensity multipliers
     const isDropOrSustain = section === 'drop' || section === 'sustain';
     const isBuild = section === 'buildup';
     const isBreakdown = section === 'breakdown';
     const isIntro = section === 'intro';
     const isOutro = section === 'outro';
-
     const buildProgress = isBuild ? (barPos - totalBars * 0.08) / (totalBars * 0.1) : 0;
+    const effectiveDI = di * dayIntensity;
 
-    // ── 1. KICK — punchy 808-style ──
+    // ── 1. KICK — seed-varied patterns ──
     const kickActive = isDropOrSustain || isBuild || isOutro;
-    const kickPattern = isDropOrSustain
-      ? (beatNum === 0 || beatNum === 2 || (di > 0.7 && beatPhase < 0.1)) // four-on-floor for high energy
-      : (beatNum === 0 || beatNum === 2);
+    let shouldKick = false;
+    if (kickPattern === 0) shouldKick = beatNum === 0 || beatNum === 2; // four-on-floor
+    else if (kickPattern === 1) shouldKick = beatNum === 0 || (beatNum === 2 && beatPhase < 0.15); // broken
+    else if (kickPattern === 2) shouldKick = beatNum === 0 || beatNum === 1 || beatNum === 3; // syncopated
+    else shouldKick = posInBar < 0.25 || (posInBar > 0.45 && posInBar < 0.55); // offbeat
     
-    if (kickActive && kickPattern) {
+    if (kickActive && shouldKick) {
       const kickEnv = Math.exp(-beatPhase * 25);
-      const kickSweep = 50 * (1 + 5 * Math.exp(-beatPhase * 15)); // pitch sweep down
+      const kickSweep = 50 * (1 + 5 * Math.exp(-beatPhase * 15));
       const kickBody = Math.sin(2 * Math.PI * kickSweep * t) * kickEnv;
-      const kickClick = Math.exp(-beatPhase * 80) * 0.3; // transient click
-      sample += (kickBody + kickClick) * 0.38 * di;
+      const kickClick = Math.exp(-beatPhase * 80) * 0.3;
+      sample += (kickBody + kickClick) * 0.38 * effectiveDI;
     }
 
-    // ── 2. SNARE / CLAP — layered ──
+    // ── 2. SNARE / CLAP ──
     const snareActive = isDropOrSustain || (isBuild && buildProgress > 0.3);
     if (snareActive && (beatNum === 1 || beatNum === 3)) {
       const snareEnv = Math.exp(-beatPhase * 18);
-      const snareBody = Math.sin(2 * Math.PI * 200 * t) * snareEnv * 0.35;
+      const snareBody = Math.sin(2 * Math.PI * (180 + seededRand(_genSeed * 31) * 40) * t) * snareEnv * 0.35;
       const snareNoise = seededRand(i) * 2 - 1;
       const snareRattle = snareNoise * Math.exp(-beatPhase * 25) * 0.5;
-      // Clap layer — slightly delayed
       const clapDelay = beatPhase - 0.01;
       const clapEnv = clapDelay > 0 ? Math.exp(-clapDelay * 30) : 0;
       const clap = (seededRand(i + 7777) * 2 - 1) * clapEnv * 0.25;
-      sample += (snareBody + snareRattle + clap) * 0.22 * di;
+      sample += (snareBody + snareRattle + clap) * 0.22 * effectiveDI;
     }
 
-    // Build snare roll (fills) — accelerating hits
+    // Build snare roll
     if (isBuild && buildProgress > 0.6) {
-      const rollSpeed = lerp(4, 16, (buildProgress - 0.6) / 0.4); // accelerates
+      const rollSpeed = lerp(4, 16, (buildProgress - 0.6) / 0.4);
       const rollPhase = (t * rollSpeed / beatDur) % 1;
       if (rollPhase < 0.3) {
-        sample += (seededRand(i + 3333) * 2 - 1) * Math.exp(-rollPhase * 15) * 0.12 * di;
+        sample += (seededRand(i + 3333) * 2 - 1) * Math.exp(-rollPhase * 15) * 0.12 * effectiveDI;
       }
     }
 
-    // ── 3. HI-HATS — 16th note groove ──
+    // ── 3. HI-HATS — seed-varied patterns ──
     const hatActive = isDropOrSustain || (isBuild && buildProgress > 0.2) || isBreakdown;
     if (hatActive) {
       const sixteenthDur = beatDur / 4;
       const hatPhase = (t % sixteenthDur) / sixteenthDur;
       const sixteenthIdx = Math.floor(posInBar * 16) % 16;
-      // Accent pattern: louder on off-beats for groove
-      const accent = (sixteenthIdx % 4 === 2) ? 1.3 : (sixteenthIdx % 2 === 0 ? 0.7 : 1.0);
-      const hatEnv = Math.exp(-hatPhase * (sixteenthIdx % 4 === 0 ? 15 : 40)); // open hat on beats
-      const hat = (seededRand(i + sixteenthIdx * 1000) * 2 - 1) * hatEnv * accent;
-      const hatVol = isBreakdown ? 0.03 : 0.055;
-      sample += hat * hatVol * di;
+      
+      let hatPlay = true;
+      if (hatPattern === 1) hatPlay = sixteenthIdx % 2 === 0; // 8th notes only
+      else if (hatPattern === 2) hatPlay = sixteenthIdx % 4 !== 3; // skip every 4th
+
+      if (hatPlay) {
+        // Swing feel
+        const swungPhase = hatPhase + (sixteenthIdx % 2 === 1 ? cfg.swingAmount * 0.15 : 0);
+        const accent = (sixteenthIdx % 4 === 2) ? 1.3 : (sixteenthIdx % 2 === 0 ? 0.7 : 1.0);
+        const hatEnv = Math.exp(-swungPhase * (sixteenthIdx % 4 === 0 ? 15 : 40));
+        const hat = (seededRand(i + sixteenthIdx * 1000) * 2 - 1) * hatEnv * accent;
+        const hatVol = isBreakdown ? 0.03 : 0.055;
+        sample += hat * hatVol * effectiveDI;
+      }
     }
 
-    // ── 4. SUPERSAW PAD — thick EDM chords ──
+    // ── 4. SUPERSAW PAD ──
     const padActive = isDropOrSustain || isBreakdown || isOutro;
     if (padActive) {
       let padSum = 0;
@@ -357,21 +443,23 @@ function generateContextualAudio(durationSec: number, mood: MusicMood): AudioBuf
       }
       padSum /= chord.length;
       
-      // Sidechain compression feel — pump effect
       const pumpPhase = (t % beatDur) / beatDur;
       const sidechain = isDropOrSustain
-        ? 0.15 + 0.85 * Math.min(1, pumpPhase * 4) // aggressive pump
+        ? 0.15 + 0.85 * Math.min(1, pumpPhase * 4)
         : 0.5 + 0.5 * Math.min(1, pumpPhase * 3);
       
+      // Filter effect based on config brightness
+      const brightness = cfg.filterCutoff;
+      const filteredPad = softClip(padSum * (1 + brightness));
+      
       const padVol = isDropOrSustain ? 0.045 : (isBreakdown ? 0.06 : 0.03);
-      sample += softClip(padSum * 1.5) * padVol * sidechain * di;
+      sample += filteredPad * padVol * sidechain * effectiveDI;
     }
 
-    // Intro/buildup pad — filtered, slowly opening
+    // Intro/buildup pad
     if (isIntro || isBuild) {
       let filteredPad = 0;
       for (const freq of chord) {
-        // Simple low-pass effect: fewer harmonics
         filteredPad += Math.sin(2 * Math.PI * freq * t);
         filteredPad += Math.sin(2 * Math.PI * freq * 1.005 * t) * 0.5;
       }
@@ -380,61 +468,50 @@ function generateContextualAudio(durationSec: number, mood: MusicMood): AudioBuf
       sample += filteredPad * 0.04 * filterOpen;
     }
 
-    // ── 5. BASS — sub + mid-bass, sidechained ──
+    // ── 5. BASS ──
     const bassActive = isDropOrSustain || (isBuild && buildProgress > 0.5) || isOutro;
     if (bassActive) {
       const bassIdx = Math.floor(posInBar * 2) % cfg.bass.length;
       const bassFreq = cfg.bass[bassIdx];
-      
-      // Sub bass (sine)
       const sub = Math.sin(2 * Math.PI * bassFreq * t);
-      // Mid-bass (slightly distorted saw for presence)
       const midBassPhase = (bassFreq * t) % 1;
       const midBass = softClip((midBassPhase * 2 - 1) * 2) * 0.4;
-      
-      // Sidechain duck on kick
-      const bassPump = (beatNum === 0 || beatNum === 2) 
-        ? Math.min(1, beatPhase * 5) 
-        : 1;
-      
-      sample += (sub * 0.20 + midBass * 0.08) * bassPump * di;
+      const bassPump = (beatNum === 0 || beatNum === 2) ? Math.min(1, beatPhase * 5) : 1;
+      sample += (sub * 0.20 + midBass * 0.08) * bassPump * effectiveDI;
     }
 
-    // ── 6. LEAD MELODY — plucky synth ──
+    // ── 6. LEAD MELODY ──
     const leadActive = isDropOrSustain || isBreakdown;
     if (leadActive) {
       const eighthDur = beatDur / 2;
       const leadBeat = Math.floor(t / eighthDur);
       const leadPhase = (t % eighthDur) / eighthDur;
       const leadIdx = leadBeat % cfg.lead.length;
-      // Play on select beats for musicality
-      const shouldPlay = (leadBeat % 3 !== 2); // skip every 3rd for breathing
+      const shouldPlay = (leadBeat % 3 !== 2);
       
       if (shouldPlay) {
         const freq = cfg.lead[leadIdx];
-        const pluckEnv = Math.exp(-leadPhase * 8); // sharp pluck
-        // Two oscillators for richness
+        const pluckEnv = Math.exp(-leadPhase * 8);
         const osc1 = Math.sin(2 * Math.PI * freq * t);
-        const osc2 = Math.sin(2 * Math.PI * freq * 2.01 * t) * 0.3; // octave shimmer
-        const osc3 = Math.sin(2 * Math.PI * freq * 3 * t) * 0.1; // brightness
+        const osc2 = Math.sin(2 * Math.PI * freq * 2.01 * t) * 0.3;
+        const osc3 = Math.sin(2 * Math.PI * freq * 3 * t) * 0.1;
         const leadSig = (osc1 + osc2 + osc3) * pluckEnv;
         const leadVol = isBreakdown ? 0.05 : 0.04;
-        sample += leadSig * leadVol * di;
+        sample += leadSig * leadVol * effectiveDI;
       }
     }
 
-    // ── 7. ARPEGGIOS — 16th note patterns on drop ──
+    // ── 7. ARPEGGIOS ──
     if (isDropOrSustain) {
       const sixteenthDur = beatDur / 4;
       const arpPhase = (t % sixteenthDur) / sixteenthDur;
       const arpBeat = Math.floor(t / sixteenthDur);
       const arpIdx = arpBeat % chord.length;
-      const arpFreq = chord[arpIdx] * 2; // octave up
+      const arpFreq = chord[arpIdx] * arpOctave;
       const arpEnv = Math.exp(-arpPhase * 12);
       const arpOsc = Math.sin(2 * Math.PI * arpFreq * t) * 0.6 +
                      Math.sin(2 * Math.PI * arpFreq * 1.5 * t) * 0.3;
-      // Pan arps slightly for width
-      const arpVol = 0.025 * di;
+      const arpVol = 0.025 * effectiveDI;
       const arpPan = Math.sin(arpBeat * 0.7) * 0.3;
       left[i] += arpOsc * arpEnv * arpVol * (1 + arpPan);
       right[i] += arpOsc * arpEnv * arpVol * (1 - arpPan);
@@ -442,47 +519,44 @@ function generateContextualAudio(durationSec: number, mood: MusicMood): AudioBuf
 
     // ── 8. RISER / BUILD FX ──
     if (isBuild) {
-      // White noise riser — gets louder toward drop
-      const riserVol = buildProgress * buildProgress * 0.08 * di;
+      const riserVol = buildProgress * buildProgress * 0.08 * effectiveDI;
       sample += (seededRand(i + 5555) * 2 - 1) * riserVol;
-      
-      // Pitch-rising sine sweep
       const sweepFreq = lerp(200, 2000, buildProgress * buildProgress);
-      sample += Math.sin(2 * Math.PI * sweepFreq * t) * buildProgress * 0.02 * di;
+      sample += Math.sin(2 * Math.PI * sweepFreq * t) * buildProgress * 0.02 * effectiveDI;
     }
 
     // ── 9. DROP IMPACT ──
     if (section === 'drop' && currentBar === Math.floor(totalBars * 0.18)) {
       const dropTime = posInBar * barDur;
       if (dropTime < 0.3) {
-        // Impact: low boom + noise burst
         const impactEnv = Math.exp(-dropTime * 12);
-        sample += Math.sin(2 * Math.PI * 40 * t) * impactEnv * 0.3 * di;
-        sample += (seededRand(i + 9999) * 2 - 1) * Math.exp(-dropTime * 20) * 0.15 * di;
+        sample += Math.sin(2 * Math.PI * 40 * t) * impactEnv * 0.3 * effectiveDI;
+        sample += (seededRand(i + 9999) * 2 - 1) * Math.exp(-dropTime * 20) * 0.15 * effectiveDI;
       }
     }
 
-    // ── 10. HIGH SHIMMER / ATMOSPHERE ──
+    // ── 10. SHIMMER ──
     const shimmerVol = isBreakdown ? 0.012 : (isDropOrSustain ? 0.005 : 0.008);
     const shimmer = Math.sin(2 * Math.PI * 2200 * t + Math.sin(2 * Math.PI * 0.2 * t) * 6)
       * shimmerVol * (0.5 + 0.5 * Math.sin(2 * Math.PI * 0.06 * t));
     sample += shimmer;
 
-    // ── MASTER PROCESSING ──
-    // Soft clip for warmth/loudness
-    sample = softClip(sample * 1.8) * 0.55;
+    // ── 11. REVERB TAIL (simple comb delay) ──
+    const reverbDelay = Math.floor(sampleRate * 0.08); // 80ms
+    if (i > reverbDelay && cfg.reverbMix > 0) {
+      const delayed = (left[i - reverbDelay] + right[i - reverbDelay]) * 0.5;
+      sample += delayed * cfg.reverbMix * 0.3;
+    }
 
-    // Master envelope
+    // ── MASTER PROCESSING ──
+    sample = softClip(sample * 1.8) * 0.55;
     const fadeIn = Math.min(1, t / 0.8);
     const fadeOut = Math.min(1, (durationSec - t) / 1.5);
     const masterEnv = fadeIn * fadeOut;
 
-    // Stereo widening
     const stereoW = Math.sin(t * 1.3) * 0.08;
     left[i] += sample * masterEnv * (1 + stereoW);
     right[i] += sample * masterEnv * (1 - stereoW);
-    
-    // Add stereo shimmer
     left[i] += shimmer * 0.3 * masterEnv;
     right[i] -= shimmer * 0.2 * masterEnv;
   }
@@ -2240,7 +2314,7 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
   } catch (err) {
     console.log('[MotionRecap] Pixabay unavailable, using synthesized audio:', err);
     const mood = getDominantMood(dayStates);
-    audioBuffer = generateContextualAudio(totalDuration, mood);
+    audioBuffer = generateContextualAudio(totalDuration, mood, dayStates);
   }
 
   onProgress?.(16, 'Soundtrack locked in 🎵');
