@@ -73,24 +73,11 @@ const ReelGeneration = () => {
     MOTIVATIONAL_PHRASES[Math.floor(Math.random() * MOTIVATIONAL_PHRASES.length)]
   );
   const hasTriggered = useRef(false);
-  const prevStateRef = useRef<string>('');
   const navigate = useNavigate();
   const location = useLocation();
   const { profile } = useProfile();
   const { user } = useAuth();
   const locationState = location.state as LocationState | null;
-
-  // Reset trigger when navigation state changes (e.g. forceRegenerate)
-  useEffect(() => {
-    const stateKey = JSON.stringify(locationState);
-    if (stateKey !== prevStateRef.current) {
-      prevStateRef.current = stateKey;
-      hasTriggered.current = false;
-      setProgress(0);
-      setError(null);
-      setPhase('Setting the stage...');
-    }
-  }, [locationState]);
 
   useEffect(() => {
     const updateHeight = () => {

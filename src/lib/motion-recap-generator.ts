@@ -848,73 +848,7 @@ function drawRippleWaveTransition(ctx: CanvasRenderingContext2D, progress: numbe
   ctx.restore();
 }
 
-function drawGlitchSliceTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
-  const t = easeOutExpo(progress);
-  ctx.save();
-  const numSlices = 12;
-  const sliceH = HEIGHT / numSlices;
-  for (let i = 0; i < numSlices; i++) {
-    const sliceT = Math.max(0, Math.min(1, (t - Math.abs(i - numSlices / 2) * 0.025) * 3));
-    if (sliceT <= 0) continue;
-    const offsetX = Math.sin(i * 2.7 + t * 10) * 60 * (1 - sliceT);
-    const y = i * sliceH;
-    const alpha = (1 - sliceT) * 0.4;
-    ctx.globalAlpha = alpha * 0.6;
-    ctx.fillStyle = `hsla(${hue - 30}, 100%, 60%, 0.5)`;
-    ctx.fillRect(offsetX - 3, y, WIDTH, sliceH * 0.7);
-    ctx.fillStyle = `hsla(${hue + 30}, 100%, 60%, 0.5)`;
-    ctx.fillRect(offsetX + 3, y, WIDTH, sliceH * 0.7);
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = `hsla(${hue}, 70%, 80%, 0.4)`;
-    ctx.fillRect(offsetX, y, WIDTH, sliceH * 0.7);
-  }
-  ctx.globalAlpha = (1 - t) * 0.12;
-  for (let y = 0; y < HEIGHT; y += 3) {
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, y, WIDTH, 1);
-  }
-  ctx.restore();
-}
-
-// ── NEW TRANSITIONS ──
-
-// Motion Blur — directional streaks that wipe across
-function drawMotionBlurTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
-  const t = easeOutExpo(progress);
-  ctx.save();
-  const numLines = 30;
-  const direction = genRand(500 + hue) > 0.5 ? 1 : -1; // seeded direction per generation
-  for (let i = 0; i < numLines; i++) {
-    const lineT = Math.max(0, Math.min(1, (t - i * 0.012) * 2));
-    if (lineT <= 0) continue;
-    const y = (i / numLines) * HEIGHT;
-    const lineWidth = HEIGHT / numLines;
-    const offsetX = direction * lerp(-WIDTH, WIDTH * 0.3, lineT);
-    const alpha = (1 - lineT) * 0.35;
-    ctx.globalAlpha = alpha;
-    // Stretched blur effect via gradient
-    const grad = ctx.createLinearGradient(offsetX - 200, 0, offsetX + WIDTH + 200, 0);
-    grad.addColorStop(0, 'transparent');
-    grad.addColorStop(0.2, `hsla(${hue + i * 5}, 55%, 65%, 0.6)`);
-    grad.addColorStop(0.5, `hsla(${hue}, 70%, 85%, 0.8)`);
-    grad.addColorStop(0.8, `hsla(${hue + i * 5}, 55%, 65%, 0.6)`);
-    grad.addColorStop(1, 'transparent');
-    ctx.fillStyle = grad;
-    ctx.fillRect(offsetX, y, WIDTH * 1.5, lineWidth * 0.9);
-  }
-  // Central bright streak
-  if (t < 0.6) {
-    const streakX = lerp(-100, WIDTH + 100, t / 0.6);
-    ctx.globalAlpha = (1 - t / 0.6) * 0.4;
-    const sg = ctx.createLinearGradient(streakX - 60, 0, streakX + 60, 0);
-    sg.addColorStop(0, 'transparent');
-    sg.addColorStop(0.5, `hsla(${hue}, 80%, 95%, 0.9)`);
-    sg.addColorStop(1, 'transparent');
-    ctx.fillStyle = sg;
-    ctx.fillRect(streakX - 60, 0, 120, HEIGHT);
-  }
-  ctx.restore();
-}
+// (glitchSlice and motionBlur removed — too shaky/distracting)
 
 // Zoom Burst — radial speed lines from center
 function drawZoomBurstTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
@@ -1440,15 +1374,18 @@ function drawOutroCard(ctx: CanvasRenderingContext2D, progress: number, dayState
 // ============ METRIC CARD — 5 PREMIUM VISUAL STYLES WITH DATA ============
 // Each day is GUARANTEED a different style within a generation
 
-type MetricStyle = 'typography-wall' | 'centered-hero' | 'split-screen' | 'circular-badge' | 'gradient-stack';
+type MetricStyle = 'typography-wall' | 'centered-hero' | 'split-screen' | 'circular-badge' | 'gradient-stack' | 'bold-diagonal' | 'minimal-strip' | 'neon-frame';
 
-const METRIC_STYLES: MetricStyle[] = ['typography-wall', 'centered-hero', 'split-screen', 'circular-badge', 'gradient-stack'];
+const METRIC_STYLES: MetricStyle[] = [
+  'typography-wall', 'centered-hero', 'split-screen', 'circular-badge', 'gradient-stack',
+  'bold-diagonal', 'minimal-strip', 'neon-frame',
+];
 
 // Pre-assigned metric styles per day — guarantees each day is different
 let _assignedMetricStyles: MetricStyle[] = [];
 
 function resetMetricStylePool() {
-  // Shuffle all 5 styles, then assign one per day index (wraps if >5 days)
+  // Shuffle all 8 styles, then assign one per day index (wraps if >8 days)
   _assignedMetricStyles = shuffleArray(METRIC_STYLES, _genSeed * 19 + 3);
 }
 
@@ -1819,6 +1756,208 @@ function drawStyleGradientStack(ctx: CanvasRenderingContext2D, state: DayState, 
   drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.72);
 }
 
+// Style 6: Bold Diagonal — day number at a dramatic angle with thick stripe
+function drawStyleBoldDiagonal(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  // Diagonal accent stripe
+  const stripeT = easeOutCubic(Math.min(progress * 2.5, 1));
+  if (stripeT > 0) {
+    ctx.save();
+    ctx.globalAlpha = stripeT * 0.15;
+    ctx.translate(WIDTH / 2, HEIGHT / 2);
+    ctx.rotate(-Math.PI / 6);
+    ctx.fillStyle = `hsla(${hue}, 50%, 55%, 1)`;
+    const stripeW = 180 * stripeT;
+    ctx.fillRect(-stripeW / 2, -HEIGHT, stripeW, HEIGHT * 2);
+    ctx.restore();
+  }
+
+  // Day number — rotated and huge
+  const numT = easeOutBack(Math.min(Math.max(progress - 0.05, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.translate(WIDTH * 0.55, HEIGHT * 0.35);
+    ctx.rotate(-0.12);
+    ctx.font = '900 200px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = `hsla(${hue}, 70%, 55%, 0.4)`;
+    ctx.shadowBlur = 50;
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), 0, 0, WIDTH);
+    ctx.shadowColor = 'transparent';
+    ctx.restore();
+  }
+
+  // "DAY" label top-left
+  const labelT = easeOutCubic(Math.min(Math.max(progress - 0.15, 0) * 3, 1));
+  if (labelT > 0) {
+    ctx.save();
+    ctx.globalAlpha = labelT * 0.6;
+    ctx.font = '800 28px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = `hsla(${hue}, 55%, 70%, 1)`;
+    ctx.letterSpacing = '8px';
+    ctx.fillText('DAY', WIDTH * 0.12, HEIGHT * 0.18 + lerp(10, 0, labelT));
+    ctx.letterSpacing = '0px';
+    ctx.restore();
+  }
+
+  // Activity name — bottom aligned
+  const actT = easeOutCubic(Math.min(Math.max(progress - 0.25, 0) * 3, 1));
+  if (actT > 0) {
+    ctx.save();
+    ctx.globalAlpha = actT;
+    ctx.font = '900 44px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'left';
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH * 0.08, HEIGHT * 0.6 + lerp(8, 0, actT), WIDTH * 0.85);
+    ctx.restore();
+  }
+
+  drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.78);
+}
+
+// Style 7: Minimal Strip — clean horizontal bars with data
+function drawStyleMinimalStrip(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  // Three horizontal accent bars
+  const bars = [
+    { y: HEIGHT * 0.25, w: WIDTH * 0.6, h: 2 },
+    { y: HEIGHT * 0.50, w: WIDTH * 0.4, h: 2 },
+    { y: HEIGHT * 0.65, w: WIDTH * 0.55, h: 2 },
+  ];
+  for (let i = 0; i < bars.length; i++) {
+    const barT = easeOutCubic(Math.min(Math.max(progress - i * 0.08, 0) * 3, 1));
+    if (barT <= 0) continue;
+    ctx.save();
+    ctx.globalAlpha = barT * 0.25;
+    ctx.fillStyle = `hsla(${hue + i * 20}, 50%, 65%, 1)`;
+    ctx.fillRect((WIDTH - bars[i].w * barT) / 2, bars[i].y, bars[i].w * barT, bars[i].h);
+    ctx.restore();
+  }
+
+  // "DAY" — tiny, tracked wide
+  const dayLabelT = easeOutCubic(Math.min(progress * 3, 1));
+  if (dayLabelT > 0) {
+    ctx.save();
+    ctx.globalAlpha = dayLabelT * 0.4;
+    ctx.font = '600 14px -apple-system, "SF Pro Text", system-ui, sans-serif';
+    ctx.fillStyle = `hsla(${hue}, 50%, 70%, 1)`;
+    ctx.textAlign = 'center';
+    ctx.letterSpacing = '12px';
+    ctx.fillText('DAY', WIDTH / 2, HEIGHT * 0.30);
+    ctx.letterSpacing = '0px';
+    ctx.restore();
+  }
+
+  // Day number — clean, centered
+  const numT = easeOutCubic(Math.min(Math.max(progress - 0.08, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.font = '200 160px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, HEIGHT * 0.40 + lerp(12, 0, numT), WIDTH * 0.85);
+    ctx.restore();
+  }
+
+  // Activity — light weight
+  const actT = easeOutCubic(Math.min(Math.max(progress - 0.22, 0) * 3, 1));
+  if (actT > 0) {
+    ctx.save();
+    ctx.globalAlpha = actT * 0.8;
+    ctx.font = '300 24px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.letterSpacing = '4px';
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, HEIGHT * 0.55 + lerp(6, 0, actT), WIDTH * 0.85);
+    ctx.letterSpacing = '0px';
+    ctx.restore();
+  }
+
+  drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.76);
+}
+
+// Style 8: Neon Frame — glowing rectangular frame with data inside
+function drawStyleNeonFrame(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  const frameT = easeOutCubic(Math.min(progress * 2, 1));
+  const fx = WIDTH * 0.12, fy = HEIGHT * 0.18;
+  const fw = WIDTH * 0.76, fh = HEIGHT * 0.55;
+
+  // Draw neon rectangle
+  if (frameT > 0) {
+    ctx.save();
+    ctx.globalAlpha = frameT * 0.7;
+    ctx.strokeStyle = `hsla(${hue}, 70%, 65%, 0.9)`;
+    ctx.lineWidth = 2;
+    ctx.shadowColor = `hsla(${hue}, 80%, 60%, 0.8)`;
+    ctx.shadowBlur = 40;
+    const drawLen = (fw * 2 + fh * 2) * frameT;
+    ctx.beginPath();
+    // Trace the rectangle progressively
+    const perimeter = fw * 2 + fh * 2;
+    let remaining = drawLen;
+    ctx.moveTo(fx, fy);
+    // Top edge
+    const topLen = Math.min(remaining, fw); remaining -= topLen;
+    ctx.lineTo(fx + topLen, fy);
+    // Right edge
+    if (remaining > 0) { const rLen = Math.min(remaining, fh); remaining -= rLen; ctx.lineTo(fx + fw, fy + rLen); }
+    // Bottom edge
+    if (remaining > 0) { const bLen = Math.min(remaining, fw); remaining -= bLen; ctx.lineTo(fx + fw - bLen, fy + fh); }
+    // Left edge
+    if (remaining > 0) { const lLen = Math.min(remaining, fh); ctx.lineTo(fx, fy + fh - lLen); }
+    ctx.stroke();
+    ctx.shadowColor = 'transparent';
+    ctx.restore();
+
+    // Inner glow fill
+    ctx.save();
+    ctx.globalAlpha = frameT * 0.04;
+    ctx.fillStyle = `hsla(${hue}, 50%, 60%, 1)`;
+    ctx.fillRect(fx, fy, fw, fh);
+    ctx.restore();
+  }
+
+  // Day number centered in frame
+  const numT = easeOutBack(Math.min(Math.max(progress - 0.15, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.font = '900 130px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, fy + fh * 0.38 + lerp(15, 0, numT));
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = numT * 0.5;
+    ctx.font = '600 16px -apple-system, "SF Pro Text", system-ui, sans-serif';
+    ctx.fillStyle = `hsla(${hue}, 60%, 75%, 1)`;
+    ctx.textAlign = 'center';
+    ctx.letterSpacing = '8px';
+    ctx.fillText('DAY', WIDTH / 2, fy + fh * 0.15);
+    ctx.letterSpacing = '0px';
+    ctx.restore();
+  }
+
+  // Activity below center in frame
+  const actT = easeOutCubic(Math.min(Math.max(progress - 0.3, 0) * 3, 1));
+  if (actT > 0) {
+    ctx.save();
+    ctx.globalAlpha = actT;
+    ctx.font = '800 30px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, fy + fh * 0.72 + lerp(6, 0, actT), fw * 0.9);
+    ctx.restore();
+  }
+
+  drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.82);
+}
+
 function drawMetricCard(
   ctx: CanvasRenderingContext2D,
   state: DayState,
@@ -1845,6 +1984,9 @@ function drawMetricCard(
     case 'split-screen': drawStyleSplitScreen(ctx, state, progress, hue); break;
     case 'circular-badge': drawStyleCircularBadge(ctx, state, progress, hue); break;
     case 'gradient-stack': drawStyleGradientStack(ctx, state, progress, hue); break;
+    case 'bold-diagonal': drawStyleBoldDiagonal(ctx, state, progress, hue); break;
+    case 'minimal-strip': drawStyleMinimalStrip(ctx, state, progress, hue); break;
+    case 'neon-frame': drawStyleNeonFrame(ctx, state, progress, hue); break;
   }
 
   // ── Exit — smooth fade to black with graphic transition ──
@@ -1992,13 +2134,13 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
 
   // ── New unique seed per generation — ensures every reel is COMPLETELY different ──
   _genSeed = (Date.now() * 31) ^ (Math.random() * 0xFFFFFFFF >>> 0);
-  console.log('[MotionRecap] 🎬 Starting v7 with', dayStates.length, 'days, UNIQUE seed:', _genSeed);
+  console.log(`[MotionRecap] 🎬 Starting v8 — ${dayStates.length} days, seed: ${_genSeed}`);
 
   // Reset ALL pools for unique order each generation (seeded by unique seed)
   resetTransitionPool();
   resetMetricStylePool();
-  console.log('[MotionRecap] 🎨 Transitions:', _shuffledTransitions.slice(0, 5).join(', '));
-  console.log('[MotionRecap] 🎨 Metric styles:', _assignedMetricStyles.join(', '));
+  console.log(`[MotionRecap] 🎨 Metric styles for days: ${_assignedMetricStyles.slice(0, dayStates.length).join(' → ')}`);
+  console.log(`[MotionRecap] 🎨 First transitions: ${_shuffledTransitions.slice(0, 4).join(' → ')}`);
   onProgress?.(3, 'Gathering your moments...');
 
   const images = await loadImages(dayStates);
