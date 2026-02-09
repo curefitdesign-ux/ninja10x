@@ -301,6 +301,7 @@ const Reel = () => {
   const currentGroup = effectiveUserGroups[currentUserIndex];
   const currentActivity = currentGroup?.activities[currentActivityIndex];
   const isWeekRecapStory = currentActivity?.id?.startsWith('week-recap');
+  const isRecapActivity = currentActivity?.activity?.toLowerCase().includes('recap') || currentActivity?.frame === 'recap';
   const isOwnStory = user && currentGroup?.userId === user.id;
   
   // Check if activity was created within the last 24 hours
@@ -593,8 +594,9 @@ const Reel = () => {
       const storageUrl = await uploadToStorage(blob, `week-${weekRecapNumber}-recap`, true);
       if (!storageUrl) throw new Error('Upload failed');
       const weekNum = weekRecapNumber || 1;
-      const dayNumber = weekNum * 3;
-      const { error } = await supabase.from('journey_activities').insert({
+      // Use high day_number (1000+week) to avoid conflicts with regular daily activities
+      const dayNumber = 1000 + weekNum;
+      const { error } = await supabase.from('journey_activities').upsert({
         user_id: user.id,
         storage_url: storageUrl,
         original_url: storageUrl,
@@ -602,18 +604,53 @@ const Reel = () => {
         activity: `Week ${weekNum} Recap`,
         day_number: dayNumber,
         is_public: true,
-      });
+        frame: 'recap',
+      }, { onConflict: 'user_id,day_number' });
       if (error) throw error;
       toast.success('Recap added to your stories!');
+      // Reload activities so the recap shows up in the reel viewer
+      await loadActivities();
+      // Navigate to reel showing the new recap story
+      navigate('/reel', { replace: true, state: { dayNumber } });
     } catch (err) {
       console.error('[Reel] Failed to add to stories:', err);
       toast.error('Failed to add to stories');
     } finally {
       setIsAddingToStories(false);
     }
-  }, [weekRecapVideoFromNav, weekRecapNumber, user]);
+  }, [weekRecapVideoFromNav, weekRecapNumber, user, loadActivities, navigate]);
 
-  // Handler: Regenerate recap — ALWAYS creates a brand new reel
+  // Handler: Create own recap when viewing another user's recap story
+  const handleCreateOwnRecap = useCallback(() => {
+    if (!user || myActivities.length < 3) {
+      toast.error(`Log at least 3 activities first (you have ${myActivities.length})`);
+      return;
+    }
+    const latestWeek = Math.ceil(myActivities.length / 3);
+    const weekStart = (latestWeek - 1) * 3;
+    const weekPhotos = [...myActivities]
+      .sort((a, b) => a.dayNumber - b.dayNumber)
+      .slice(weekStart, weekStart + 3)
+      .map(a => ({
+        id: a.id,
+        imageUrl: a.originalUrl || a.storageUrl,
+        activity: a.activity || 'Workout',
+        duration: a.duration,
+        pr: a.pr,
+        uploadDate: new Date().toISOString().split('T')[0],
+        dayNumber: a.dayNumber,
+        isVideo: a.isVideo,
+      }));
+    if (weekPhotos.length < 3) {
+      toast.error('Need 3 photos for your recap');
+      return;
+    }
+    navigate('/reel-generation', {
+      replace: true,
+      state: { weekPhotos, weekNumber: latestWeek, forceRegenerate: true, regenerateTs: Date.now() },
+    });
+  }, [user, myActivities, navigate]);
+
   const handleRegenerate = useCallback(async () => {
     const weekNum = weekRecapNumber || 1;
     console.log('[Reel] 🔄 REGENERATE tapped — week:', weekNum, 'activities:', myActivities.length);
@@ -1520,7 +1557,27 @@ const Reel = () => {
             );
           })()}
 
-        {/* View Progress button - sticky to bottom with translucent blur */}
+          {/* Create Your Recap CTA — shown when viewing another user's recap */}
+          {!isOwnStory && isRecapActivity && myActivities.length >= 3 && (
+            <button
+              onClick={handleCreateOwnRecap}
+              className="w-[85%] py-3.5 rounded-2xl font-bold tracking-wider text-[14px] active:scale-[0.97] transition-transform mx-auto mb-1"
+              style={{
+                background: 'rgba(255, 255, 255, 0.93)',
+              }}
+            >
+              <span
+                style={{
+                  background: 'linear-gradient(90deg, #8B5CF6, #3B82F6)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                ✨ CREATE YOUR RECAP
+              </span>
+            </button>
+          )}
+
           <motion.div
             className="w-full"
             style={{ y: bottomSheetY }}
