@@ -28,8 +28,11 @@ const PageTransition = ({ children }: PageTransitionProps) => {
     }
   }, []);
 
+  // Skip transition overlay for full-screen immersive routes
+  const skipTransition = location.pathname === '/reel' || location.pathname === '/reel-generation';
+
   useEffect(() => {
-    if (!isFirstMount.current) {
+    if (!isFirstMount.current && !skipTransition) {
       // Navigation occurred - trigger enter animation
       setTransitionStage('enter');
       setShowOverlay(true);
@@ -41,7 +44,11 @@ const PageTransition = ({ children }: PageTransitionProps) => {
       
       return () => clearTimeout(timer);
     }
-  }, [location.pathname]);
+    if (skipTransition) {
+      setShowOverlay(false);
+      setTransitionStage('idle');
+    }
+  }, [location.pathname, skipTransition]);
 
   const getTransitionClass = () => {
     switch (transitionStage) {
