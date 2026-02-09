@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronLeft, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Pencil, Download } from 'lucide-react';
+import { X, ChevronLeft, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download } from 'lucide-react';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
@@ -791,7 +791,7 @@ const Reel = () => {
               onClick={handleRegenerate}
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors active:scale-95"
             >
-              <Pencil className="w-4 h-4" />
+              <Sparkles className="w-4 h-4" />
               <span className="text-sm font-medium">Regenerate</span>
             </button>
 
