@@ -611,13 +611,14 @@ function drawThinLine(ctx: CanvasRenderingContext2D, y: number, hue: number, alp
 
 // ============ CINEMATIC TRANSITIONS ============
 
-// Randomized transition styles for variety on each generation
-type TransitionStyle = 'radialWipe' | 'lightStreak' | 'geometricShards' | 'diamondReveal' | 'horizontalBlinds';
+type TransitionStyle = 'radialWipe' | 'lightStreak' | 'geometricShards' | 'diamondReveal' | 'horizontalBlinds' | 'spiralReveal' | 'rippleWave' | 'glitchSlice';
 
-const TRANSITION_STYLES: TransitionStyle[] = ['radialWipe', 'lightStreak', 'geometricShards', 'diamondReveal', 'horizontalBlinds'];
+const TRANSITION_STYLES: TransitionStyle[] = [
+  'radialWipe', 'lightStreak', 'geometricShards', 'diamondReveal',
+  'horizontalBlinds', 'spiralReveal', 'rippleWave', 'glitchSlice',
+];
 
 function getRandomTransition(index: number): TransitionStyle {
-  // Use index + random seed for variety across days and regenerations
   const seed = (index * 7 + Math.floor(Math.random() * 100)) % TRANSITION_STYLES.length;
   return TRANSITION_STYLES[seed];
 }
@@ -632,14 +633,12 @@ function drawCrossFade(ctx: CanvasRenderingContext2D, progress: number) {
   ctx.restore();
 }
 
-// Radial wipe — circular reveal from center
+// Radial wipe
 function drawRadialWipeTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
   const t = easeOutCubic(progress);
   const maxRadius = Math.sqrt(WIDTH * WIDTH + HEIGHT * HEIGHT) / 2;
   const radius = maxRadius * t;
-  
   ctx.save();
-  // Glowing ring at the edge
   const ringWidth = 40;
   const grad = ctx.createRadialGradient(WIDTH / 2, HEIGHT / 2, Math.max(0, radius - ringWidth), WIDTH / 2, HEIGHT / 2, radius);
   grad.addColorStop(0, 'transparent');
@@ -651,20 +650,17 @@ function drawRadialWipeTransition(ctx: CanvasRenderingContext2D, progress: numbe
   ctx.restore();
 }
 
-// Light streaks — diagonal light beams sweeping across
+// Light streaks
 function drawLightStreakTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
   const t = easeOutExpo(progress);
   ctx.save();
-  
   const numStreaks = 5;
   for (let i = 0; i < numStreaks; i++) {
     const streakT = Math.max(0, Math.min(1, (t - i * 0.08) * 2.5));
     if (streakT <= 0) continue;
-    
     const x = WIDTH * (-0.3 + streakT * 1.6);
     const w = 30 + i * 15;
     const alpha = (1 - streakT) * 0.5;
-    
     ctx.globalAlpha = alpha;
     const grad = ctx.createLinearGradient(x - w, 0, x + w, 0);
     grad.addColorStop(0, 'transparent');
@@ -673,7 +669,6 @@ function drawLightStreakTransition(ctx: CanvasRenderingContext2D, progress: numb
     grad.addColorStop(0.7, `hsla(${hue + i * 20}, 60%, 75%, 0.6)`);
     grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
-    
     ctx.save();
     ctx.translate(WIDTH / 2, HEIGHT / 2);
     ctx.rotate(-0.4);
@@ -684,11 +679,10 @@ function drawLightStreakTransition(ctx: CanvasRenderingContext2D, progress: numb
   ctx.restore();
 }
 
-// Geometric shards — triangular fragments
+// Geometric shards
 function drawGeometricShardsTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
   const t = easeOutCubic(progress);
   ctx.save();
-  
   const shards = [
     { x: 0, y: 0, points: [[0,0],[WIDTH*0.6,0],[0,HEIGHT*0.4]] },
     { x: WIDTH, y: 0, points: [[0,0],[-WIDTH*0.5,0],[0,HEIGHT*0.5]] },
@@ -696,26 +690,18 @@ function drawGeometricShardsTransition(ctx: CanvasRenderingContext2D, progress: 
     { x: WIDTH, y: HEIGHT, points: [[0,0],[-WIDTH*0.4,0],[-WIDTH*0.2,-HEIGHT*0.6]] },
     { x: WIDTH*0.5, y: HEIGHT*0.5, points: [[-100,-200],[100,-100],[0,200]] },
   ];
-  
   for (let i = 0; i < shards.length; i++) {
     const delay = i * 0.06;
     const shardT = Math.max(0, Math.min(1, (t - delay) * 3));
     if (shardT <= 0) continue;
-    
-    const alpha = (1 - shardT) * 0.25;
-    ctx.globalAlpha = alpha;
+    ctx.globalAlpha = (1 - shardT) * 0.25;
     ctx.fillStyle = `hsla(${hue + i * 30}, 50%, 60%, 0.4)`;
-    
     ctx.save();
-    const scale = 0.3 + shardT * 0.7;
     ctx.translate(shards[i].x, shards[i].y);
-    ctx.scale(scale, scale);
-    
+    ctx.scale(0.3 + shardT * 0.7, 0.3 + shardT * 0.7);
     ctx.beginPath();
     ctx.moveTo(shards[i].points[0][0], shards[i].points[0][1]);
-    for (let p = 1; p < shards[i].points.length; p++) {
-      ctx.lineTo(shards[i].points[p][0], shards[i].points[p][1]);
-    }
+    for (let p = 1; p < shards[i].points.length; p++) ctx.lineTo(shards[i].points[p][0], shards[i].points[p][1]);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
@@ -723,56 +709,208 @@ function drawGeometricShardsTransition(ctx: CanvasRenderingContext2D, progress: 
   ctx.restore();
 }
 
-// Diamond reveal — expanding diamond shape
+// Diamond reveal
 function drawDiamondRevealTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
   const t = easeOutExpo(progress);
   const size = Math.max(WIDTH, HEIGHT) * t * 1.2;
-  
   ctx.save();
   ctx.globalAlpha = (1 - t) * 0.35;
-  
   ctx.translate(WIDTH / 2, HEIGHT / 2);
   ctx.rotate(Math.PI / 4);
-  
-  // Glowing diamond outline
   ctx.strokeStyle = `hsla(${hue}, 70%, 70%, ${(1 - t) * 0.8})`;
   ctx.lineWidth = 3;
   ctx.shadowColor = `hsla(${hue}, 80%, 60%, 0.6)`;
   ctx.shadowBlur = 30;
   ctx.strokeRect(-size / 2, -size / 2, size, size);
-  
-  // Inner glow fill
   ctx.fillStyle = `hsla(${hue}, 60%, 55%, ${(1 - t) * 0.08})`;
   ctx.fillRect(-size / 2, -size / 2, size, size);
-  
   ctx.restore();
 }
 
-// Horizontal blinds — staggered horizontal bars
+// Horizontal blinds
 function drawHorizontalBlindsTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
   const t = easeOutCubic(progress);
   const numBlinds = 8;
   const blindH = HEIGHT / numBlinds;
-  
   ctx.save();
   for (let i = 0; i < numBlinds; i++) {
     const delay = i * 0.04;
     const blindT = Math.max(0, Math.min(1, (t - delay) * 3));
     if (blindT <= 0) continue;
-    
-    const y = i * blindH;
-    const alpha = (1 - blindT) * 0.3;
-    
-    ctx.globalAlpha = alpha;
-    const grad = ctx.createLinearGradient(0, y, 0, y + blindH);
+    ctx.globalAlpha = (1 - blindT) * 0.3;
+    const grad = ctx.createLinearGradient(0, i * blindH, 0, i * blindH + blindH);
     grad.addColorStop(0, `hsla(${hue}, 50%, 60%, 0.5)`);
     grad.addColorStop(0.5, `hsla(${hue}, 70%, 80%, 0.7)`);
     grad.addColorStop(1, `hsla(${hue}, 50%, 60%, 0.5)`);
     ctx.fillStyle = grad;
-    
     const w = WIDTH * blindT;
     const x = i % 2 === 0 ? 0 : WIDTH - w;
-    ctx.fillRect(x, y, w, blindH * 0.85);
+    ctx.fillRect(x, i * blindH, w, blindH * 0.85);
+  }
+  ctx.restore();
+}
+
+// Spiral reveal — rotating golden spiral of light
+function drawSpiralRevealTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  const t = easeOutExpo(progress);
+  ctx.save();
+  const cx = WIDTH / 2;
+  const cy = HEIGHT / 2;
+  const arms = 3;
+  const totalDots = 40;
+  for (let a = 0; a < arms; a++) {
+    const armOffset = (a / arms) * Math.PI * 2;
+    for (let i = 0; i < totalDots; i++) {
+      const dotT = Math.max(0, Math.min(1, (t - i * 0.015) * 3));
+      if (dotT <= 0) continue;
+      const dist = 20 + i * 18 * dotT;
+      const angle = armOffset + i * 0.35 + t * Math.PI * 3;
+      const x = cx + Math.cos(angle) * dist;
+      const y = cy + Math.sin(angle) * dist;
+      const size = (3 + i * 0.15) * (1 - dotT * 0.5);
+      const alpha = (1 - dotT) * 0.6;
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = `hsla(${(hue + i * 8) % 360}, 75%, 70%, 1)`;
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  // Central flash
+  if (t < 0.4) {
+    const flashAlpha = (1 - t / 0.4) * 0.5;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 200 * t);
+    grad.addColorStop(0, `hsla(${hue}, 80%, 90%, ${flashAlpha})`);
+    grad.addColorStop(1, 'transparent');
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  }
+  ctx.restore();
+}
+
+// Ripple wave — concentric shockwaves from center
+function drawRippleWaveTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  const t = easeOutCubic(progress);
+  ctx.save();
+  const cx = WIDTH / 2;
+  const cy = HEIGHT / 2;
+  const maxR = Math.sqrt(WIDTH * WIDTH + HEIGHT * HEIGHT) * 0.6;
+  const numWaves = 5;
+  for (let i = 0; i < numWaves; i++) {
+    const waveT = Math.max(0, Math.min(1, (t - i * 0.08) * 2.5));
+    if (waveT <= 0) continue;
+    const radius = maxR * waveT;
+    const thickness = 25 - i * 3;
+    const alpha = (1 - waveT) * 0.35;
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = `hsla(${(hue + i * 25) % 360}, 65%, 70%, 1)`;
+    ctx.lineWidth = thickness * (1 - waveT * 0.6);
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.stroke();
+    // Inner glow fill
+    if (i === 0) {
+      const glowGrad = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius);
+      glowGrad.addColorStop(0, 'transparent');
+      glowGrad.addColorStop(1, `hsla(${hue}, 60%, 60%, ${alpha * 0.3})`);
+      ctx.fillStyle = glowGrad;
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+// Glitch slice — horizontal scan-line glitch effect
+function drawGlitchSliceTransition(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  const t = easeOutExpo(progress);
+  ctx.save();
+  const numSlices = 12;
+  const sliceH = HEIGHT / numSlices;
+  for (let i = 0; i < numSlices; i++) {
+    const sliceT = Math.max(0, Math.min(1, (t - Math.abs(i - numSlices / 2) * 0.025) * 3));
+    if (sliceT <= 0) continue;
+    const offsetX = Math.sin(i * 2.7 + t * 10) * 60 * (1 - sliceT);
+    const y = i * sliceH;
+    const alpha = (1 - sliceT) * 0.4;
+    // RGB split effect
+    ctx.globalAlpha = alpha * 0.6;
+    ctx.fillStyle = `hsla(${hue - 30}, 100%, 60%, 0.5)`;
+    ctx.fillRect(offsetX - 3, y, WIDTH, sliceH * 0.7);
+    ctx.fillStyle = `hsla(${hue + 30}, 100%, 60%, 0.5)`;
+    ctx.fillRect(offsetX + 3, y, WIDTH, sliceH * 0.7);
+    // Main slice
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = `hsla(${hue}, 70%, 80%, 0.4)`;
+    ctx.fillRect(offsetX, y, WIDTH, sliceH * 0.7);
+  }
+  // Scanline overlay
+  ctx.globalAlpha = (1 - t) * 0.12;
+  for (let y = 0; y < HEIGHT; y += 3) {
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, y, WIDTH, 1);
+  }
+  ctx.restore();
+}
+
+// ── White flash between phases for impact ──
+function drawWhiteFlash(ctx: CanvasRenderingContext2D, progress: number, intensity = 0.5) {
+  if (progress <= 0 || progress >= 1) return;
+  const t = progress < 0.15 ? progress / 0.15 : 1 - (progress - 0.15) / 0.85;
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, t) * intensity;
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  ctx.restore();
+}
+
+// ── Chromatic aberration on photo entry ──
+function drawChromaticAberration(ctx: CanvasRenderingContext2D, img: HTMLImageElement, progress: number, scale: number, panX: number, panY: number) {
+  if (progress >= 1) return;
+  const offset = lerp(8, 0, easeOutCubic(progress));
+  if (offset < 0.5) return;
+  const imgRatio = img.width / img.height;
+  const canvasRatio = WIDTH / HEIGHT;
+  let sx = 0, sy = 0, sw = img.width, sh = img.height;
+  if (imgRatio > canvasRatio) { sw = img.height * canvasRatio; sx = (img.width - sw) / 2; }
+  else { sh = img.width / canvasRatio; sy = (img.height - sh) / 2; }
+  // Red channel offset
+  ctx.save();
+  ctx.globalAlpha = 0.15 * (1 - progress);
+  ctx.globalCompositeOperation = 'screen';
+  ctx.translate(WIDTH / 2 + panX + offset, HEIGHT / 2 + panY);
+  ctx.scale(scale, scale);
+  ctx.drawImage(img, sx, sy, sw, sh, -WIDTH / 2, -HEIGHT / 2, WIDTH, HEIGHT);
+  ctx.restore();
+  // Blue channel offset
+  ctx.save();
+  ctx.globalAlpha = 0.12 * (1 - progress);
+  ctx.globalCompositeOperation = 'screen';
+  ctx.translate(WIDTH / 2 + panX - offset, HEIGHT / 2 + panY);
+  ctx.scale(scale, scale);
+  ctx.drawImage(img, sx, sy, sw, sh, -WIDTH / 2, -HEIGHT / 2, WIDTH, HEIGHT);
+  ctx.restore();
+}
+
+// ── Ambient floating particles during metric phase ──
+function drawAmbientParticles(ctx: CanvasRenderingContext2D, progress: number, hue: number) {
+  ctx.save();
+  const count = 20;
+  for (let i = 0; i < count; i++) {
+    const seed1 = seededRand(i * 31 + 7);
+    const seed2 = seededRand(i * 47 + 13);
+    const speed = 0.3 + seed1 * 0.7;
+    const x = seed1 * WIDTH;
+    const baseY = seed2 * HEIGHT;
+    const y = baseY - progress * speed * HEIGHT * 0.4;
+    const wrappedY = ((y % HEIGHT) + HEIGHT) % HEIGHT;
+    const size = 1 + seed2 * 2.5;
+    const alpha = 0.05 + Math.sin(progress * Math.PI * 2 + i) * 0.04;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = `hsla(${(hue + i * 18) % 360}, 50%, 70%, 1)`;
+    ctx.beginPath();
+    ctx.arc(x, wrappedY, size, 0, Math.PI * 2);
+    ctx.fill();
   }
   ctx.restore();
 }
@@ -780,7 +918,6 @@ function drawHorizontalBlindsTransition(ctx: CanvasRenderingContext2D, progress:
 // Master transition dispatcher
 function drawGraphicTransition(ctx: CanvasRenderingContext2D, progress: number, dayIndex: number, hue: number) {
   if (progress <= 0 || progress >= 1) return;
-  
   const style = getRandomTransition(dayIndex);
   switch (style) {
     case 'radialWipe': drawRadialWipeTransition(ctx, progress, hue); break;
@@ -788,6 +925,9 @@ function drawGraphicTransition(ctx: CanvasRenderingContext2D, progress: number, 
     case 'geometricShards': drawGeometricShardsTransition(ctx, progress, hue); break;
     case 'diamondReveal': drawDiamondRevealTransition(ctx, progress, hue); break;
     case 'horizontalBlinds': drawHorizontalBlindsTransition(ctx, progress, hue); break;
+    case 'spiralReveal': drawSpiralRevealTransition(ctx, progress, hue); break;
+    case 'rippleWave': drawRippleWaveTransition(ctx, progress, hue); break;
+    case 'glitchSlice': drawGlitchSliceTransition(ctx, progress, hue); break;
   }
 }
 
@@ -1039,6 +1179,9 @@ function drawMetricCard(
   if (progress > 0.1) {
     drawParticleRing(ctx, WIDTH / 2, HEIGHT * 0.36, 160, progress, hue, 12);
   }
+
+  // Ambient floating particles throughout
+  drawAmbientParticles(ctx, progress, hue);
 
   drawGrain(ctx, 0.025);
 
@@ -1565,14 +1708,17 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
             { sx: -8, sy: -6, ex: 8, ey: 6 },    // diagonal sweep
             { sx: 10, sy: -4, ex: -10, ey: 4 },   // reverse diagonal
             { sx: 0, sy: -12, ex: 0, ey: 12 },    // vertical pan
+            { sx: -12, sy: 0, ex: 12, ey: 0 },    // horizontal sweep
+            { sx: 6, sy: 8, ex: -6, ey: -8 },     // reverse diagonal alt
           ];
           const kbDir = kbDirections[dayIndex % kbDirections.length];
           const kbScale = lerp(1.02, 1.02 + TIMING.KEN_BURNS_SCALE * 2, easeInOutCubic(photoProgress));
           const kbPanX = lerp(kbDir.sx, kbDir.ex, easeInOutCubic(photoProgress));
           const kbPanY = lerp(kbDir.sy, kbDir.ey, easeInOutCubic(photoProgress));
 
-          // Dramatic zoom-in entry
-          const entryScale = photoTime < 0.4 ? lerp(1.15, 1.0, easeOutCubic(photoTime / 0.4)) : 1.0;
+          // Dramatic zoom-in entry with overshoot
+          const entryDur = 0.5;
+          const entryScale = photoTime < entryDur ? lerp(1.2, 1.0, easeOutBack(photoTime / entryDur)) : 1.0;
           const fadeIn = easeOutCubic(Math.min(photoTime / TIMING.CROSSFADE, 1));
           const timeToEnd = TIMING.PHOTO_DURATION - photoTime;
           const fadeOut = Math.min(1, timeToEnd / TIMING.CROSSFADE);
@@ -1581,11 +1727,22 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
           ctx.save();
           ctx.globalAlpha = photoAlpha;
           drawImageCover(ctx, images[dayIndex], kbScale * entryScale, kbPanX, kbPanY);
+
+          // Chromatic aberration on entry
+          if (photoTime < 0.6) {
+            drawChromaticAberration(ctx, images[dayIndex], photoTime / 0.6, kbScale * entryScale, kbPanX, kbPanY);
+          }
+
           drawPhotoOverlays(ctx, dayStates[dayIndex], easeOutCubic(Math.min(photoTime / 0.6, 1)));
           ctx.restore();
 
+          // White flash at photo reveal
+          if (photoTime < 0.25) {
+            drawWhiteFlash(ctx, photoTime / 0.25, 0.35);
+          }
+
           // Graphic transition effect at start of photo phase
-          const transitionDuration = 0.5;
+          const transitionDuration = 0.6;
           if (photoTime < transitionDuration) {
             const hue = getActivityHue(dayStates[dayIndex].activityType);
             drawGraphicTransition(ctx, photoTime / transitionDuration, dayIndex, hue);
