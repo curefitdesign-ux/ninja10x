@@ -19,7 +19,7 @@ import MakePublicSheet from '@/components/MakePublicSheet';
 import StoryHint, { useStoryNudgeAnimation } from '@/components/StoryHint';
 import { ReelViewerSkeleton } from '@/components/SkeletonLoaders';
 import { uploadToStorage } from '@/services/storage-service';
-import { deleteRecapFromCache } from '@/hooks/use-recap-cache';
+import { deleteRecapFromCache, clearAllRecapCache } from '@/hooks/use-recap-cache';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
@@ -613,24 +613,26 @@ const Reel = () => {
     }
   }, [weekRecapVideoFromNav, weekRecapNumber, user]);
 
-  // Handler: Regenerate recap (fresh transitions, music, Ken Burns patterns)
+  // Handler: Regenerate recap — ALWAYS creates a brand new reel
   const handleRegenerate = useCallback(async () => {
     const weekNum = weekRecapNumber || 1;
-    console.log('[Reel] Regenerate tapped, week:', weekNum, 'myActivities:', myActivities.length);
+    console.log('[Reel] 🔄 REGENERATE tapped — week:', weekNum, 'activities:', myActivities.length);
     
-    // Clear local cache + cloud storage BEFORE navigating
+    // NUCLEAR CACHE CLEAR — wipe everything so nothing stale can be served
     try {
-      await deleteRecapFromCache(weekNum, user?.id);
+      // Clear ALL local IndexedDB recaps
+      await clearAllRecapCache();
+      // Clear cloud storage for this week
       if (user?.id) {
         const path = `reels/${user.id}/week-${weekNum}.webm`;
         await supabase.storage.from('journey-uploads').remove([path]);
-        console.log('[Reel] Cleared cloud cache:', path);
+        console.log('[Reel] ☁️ Cleared cloud cache:', path);
       }
     } catch (err) {
-      console.warn('[Reel] Cache clear error (continuing):', err);
+      console.warn('[Reel] Cache clear error (continuing anyway):', err);
     }
     
-    // Use current user's own activities sorted by day_number
+    // Build week photos from user's activities
     const sortedActivities = [...myActivities].sort((a, b) => a.dayNumber - b.dayNumber);
     const weekStart = (weekNum - 1) * 3;
     const weekPhotos = sortedActivities.slice(weekStart, weekStart + 3).map(a => ({
@@ -643,16 +645,24 @@ const Reel = () => {
       dayNumber: a.dayNumber,
       isVideo: a.isVideo,
     }));
-    console.log('[Reel] weekPhotos built:', weekPhotos.length, weekPhotos.map(p => p.activity));
+    
+    console.log('[Reel] 📸 Built weekPhotos:', weekPhotos.length, weekPhotos.map(p => `${p.activity}(day${p.dayNumber})`));
+    
     if (weekPhotos.length < 3) {
-      toast.error('Need at least 3 photos to regenerate');
+      console.error('[Reel] ❌ Not enough photos! Have:', weekPhotos.length, 'Need: 3');
+      toast.error(`Need at least 3 photos (have ${weekPhotos.length})`);
       return;
     }
-    // Navigate with unique timestamp to force fresh generation
-    navigate('/reel-generation', {
-      replace: true,
-      state: { weekPhotos, weekNumber: weekNum, forceRegenerate: true, regenerateTs: Date.now() },
-    });
+    
+    // Navigate to generation page — forceRegenerate + unique timestamp guarantees fresh build
+    const navState = { 
+      weekPhotos, 
+      weekNumber: weekNum, 
+      forceRegenerate: true, 
+      regenerateTs: Date.now() 
+    };
+    console.log('[Reel] 🚀 Navigating to /reel-generation with forceRegenerate=true, ts:', navState.regenerateTs);
+    navigate('/reel-generation', { replace: true, state: navState });
   }, [weekRecapNumber, myActivities, navigate, user]);
 
   // Handler: Delete recap and go back to start

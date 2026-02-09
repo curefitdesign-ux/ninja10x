@@ -111,3 +111,20 @@ export async function deleteRecapFromCache(weekNumber: number, userId?: string):
     console.warn('[RecapCache] Failed to delete:', err);
   }
 }
+
+/** Wipe ALL cached recaps (nuclear option for regeneration) */
+export async function clearAllRecapCache(): Promise<void> {
+  try {
+    const db = await openDB();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.clear();
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    console.log('[RecapCache] Cleared ALL cached recaps');
+  } catch (err) {
+    console.warn('[RecapCache] Failed to clear all:', err);
+  }
+}

@@ -1990,13 +1990,15 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
 
   if (dayStates.length < 3) throw new Error('Need at least 3 days for recap');
 
-  // ── New unique seed per generation — ensures every reel is different ──
-  _genSeed = Date.now() ^ (Math.random() * 0xFFFFFF | 0);
-  console.log('[MotionRecap] Starting v6 with', dayStates.length, 'days, seed:', _genSeed);
+  // ── New unique seed per generation — ensures every reel is COMPLETELY different ──
+  _genSeed = (Date.now() * 31) ^ (Math.random() * 0xFFFFFFFF >>> 0);
+  console.log('[MotionRecap] 🎬 Starting v7 with', dayStates.length, 'days, UNIQUE seed:', _genSeed);
 
-  // Reset pools for unique order each generation (seeded)
+  // Reset ALL pools for unique order each generation (seeded by unique seed)
   resetTransitionPool();
   resetMetricStylePool();
+  console.log('[MotionRecap] 🎨 Transitions:', _shuffledTransitions.slice(0, 5).join(', '));
+  console.log('[MotionRecap] 🎨 Metric styles:', _assignedMetricStyles.join(', '));
   onProgress?.(3, 'Gathering your moments...');
 
   const images = await loadImages(dayStates);

@@ -4,7 +4,7 @@ import { ChevronLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateMotionRecap, photosToDAyStates, type DayState } from '@/lib/motion-recap-generator';
-import { getRecapFromCache, saveRecapToCache, deleteRecapFromCache } from '@/hooks/use-recap-cache';
+import { getRecapFromCache, saveRecapToCache, deleteRecapFromCache, clearAllRecapCache } from '@/hooks/use-recap-cache';
 import { useProfile } from '@/hooks/use-profile';
 import { useAuth } from '@/hooks/use-auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -131,21 +131,23 @@ const ReelGeneration = () => {
     hasTriggered.current = true;
 
     const run = async () => {
-      // On forceRegenerate, clear ALL caches (local + cloud) and skip cache lookup
       if (forceRegenerate) {
-        console.log('[ReelGeneration] Force regenerate — clearing all caches');
-        await deleteRecapFromCache(weekNumber, user?.id);
+        // NUCLEAR: Clear ALL caches — local IndexedDB + cloud storage
+        console.log('[ReelGeneration] 🔥 FORCE REGENERATE — nuking all caches');
+        await clearAllRecapCache();
         if (user?.id) {
           const path = `reels/${user.id}/week-${weekNumber}.webm`;
           await supabase.storage.from('journey-uploads').remove([path]).catch(() => {});
+          console.log('[ReelGeneration] ☁️ Deleted cloud reel:', path);
         }
-      }
-
-      if (!forceRegenerate) {
+        // Skip ALL cache lookups — go straight to generation
+        console.log('[ReelGeneration] ⚡ Skipping all caches, generating fresh reel...');
+      } else {
         setPhase('Looking for your saved story...');
         // Try local cache first
         const cachedBlob = await getRecapFromCache(weekNumber, user?.id);
         if (cachedBlob) {
+          console.log('[ReelGeneration] 💾 Found local cache hit');
           const cachedUrl = URL.createObjectURL(cachedBlob);
           navigateToReel(cachedUrl, weekNumber);
           return;
@@ -160,6 +162,7 @@ const ReelGeneration = () => {
               if (resp.ok && resp.headers.get('content-type')?.includes('video')) {
                 const blob = await resp.blob();
                 if (blob.size > 1000) {
+                  console.log('[ReelGeneration] ☁️ Found cloud cache hit');
                   await saveRecapToCache(weekNumber, blob, user.id);
                   const url = URL.createObjectURL(blob);
                   navigateToReel(url, weekNumber);
