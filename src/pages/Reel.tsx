@@ -118,6 +118,8 @@ const Reel = () => {
   // Audio state for video playback
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const avatarStripRef = useRef<HTMLDivElement>(null);
+  const activeAvatarRef = useRef<HTMLButtonElement>(null);
 
   // Bottom sheet states and transition animations
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -380,6 +382,22 @@ const Reel = () => {
   }, []);
 
   const [lastTap, setLastTap] = useState(0);
+  const [userTransitionFlash, setUserTransitionFlash] = useState(false);
+  const prevUserIndexRef = useRef(currentUserIndex);
+  
+  // Flash highlight and scroll active avatar into view when switching users
+  useEffect(() => {
+    if (currentUserIndex !== prevUserIndexRef.current) {
+      setUserTransitionFlash(true);
+      setTimeout(() => setUserTransitionFlash(false), 600);
+      prevUserIndexRef.current = currentUserIndex;
+    }
+    // Scroll active avatar into view
+    if (activeAvatarRef.current) {
+      activeAvatarRef.current.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }, [currentUserIndex, currentActivityIndex]);
+
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     const now = Date.now();
     if (now - lastTap < 300) {
@@ -388,11 +406,22 @@ const Reel = () => {
         handleReact('heart');
       }
     } else {
-      // Single tap -> cycle to next activity
-      cycleActivity();
+      // Single tap -> left side = prev, right side = next (Instagram-style)
+      const target = e.currentTarget as HTMLElement;
+      const rect = target.getBoundingClientRect();
+      const clientX = 'touches' in e ? e.touches[0]?.clientX ?? rect.width / 2 : (e as React.MouseEvent).clientX;
+      const tapX = clientX - rect.left;
+      
+      if (tapX < rect.width * 0.35) {
+        // Left 35% - go back
+        prevActivity();
+      } else {
+        // Right 65% - go forward
+        cycleActivity();
+      }
     }
     setLastTap(now);
-  }, [lastTap, cycleActivity, isOwnStory]);
+  }, [lastTap, cycleActivity, prevActivity, isOwnStory]);
 
   const handleNavigateToProgress = () => {
     setIsTransitioning(true);
@@ -907,6 +936,7 @@ const Reel = () => {
             {/* Center - User avatars strip - SCROLLABLE horizontally */}
             <div className="flex-1 overflow-hidden mx-2">
               <div 
+                ref={avatarStripRef}
                 className="flex items-center gap-2 overflow-x-auto scrollbar-hide"
                 style={{ 
                   WebkitOverflowScrolling: 'touch',
@@ -927,12 +957,18 @@ const Reel = () => {
                       return (
                       <button
                         key={group.userId}
+                        ref={isActive ? activeAvatarRef : undefined}
                         onClick={() => {
                           setCurrentUserIndex(idx);
                           setCurrentActivityIndex(0);
                         }}
-                        className="relative active:scale-95 transition-transform flex-shrink-0"
-                        style={{ transform: isActive ? 'scale(1)' : 'scale(0.9)' }}
+                        className="relative active:scale-95 flex-shrink-0"
+                        style={{ 
+                          transform: isActive ? 'scale(1)' : 'scale(0.85)',
+                          opacity: isActive ? 1 : 0.5,
+                          transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
+                          filter: isActive && userTransitionFlash ? 'drop-shadow(0 0 8px rgba(236, 72, 153, 0.6))' : 'none',
+                        }}
                       >
                         {/* Instagram-style story ring with auto-advance progress */}
                         <svg
