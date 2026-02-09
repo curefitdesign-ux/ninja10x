@@ -6,6 +6,24 @@ import { fetchPublicFeed, type LocalActivity } from '@/hooks/use-journey-activit
 import { useAuth } from '@/hooks/use-auth';
 import ProfileAvatar from '@/components/ProfileAvatar';
 
+const isRecent = (dateStr: string) => Date.now() - new Date(dateStr).getTime() < 24 * 60 * 60 * 1000;
+
+const activityEmoji = (activity: string) => {
+  const a = activity.toLowerCase();
+  if (a.includes('run')) return '🏃';
+  if (a.includes('yoga')) return '🧘';
+  if (a.includes('cycle') || a.includes('cycling')) return '🚴';
+  if (a.includes('box')) return '🥊';
+  if (a.includes('swim')) return '🏊';
+  if (a.includes('gym') || a.includes('weight') || a.includes('workout')) return '💪';
+  if (a.includes('trek') || a.includes('hike')) return '🥾';
+  if (a.includes('cricket')) return '🏏';
+  if (a.includes('basket')) return '🏀';
+  if (a.includes('football')) return '⚽';
+  if (a.includes('recap')) return '✨';
+  return '🔥';
+};
+
 const CommunityStoriesWidget = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -78,34 +96,66 @@ const CommunityStoriesWidget = () => {
               <div className="relative">
                 <svg
                   className="absolute inset-0"
-                  style={{ width: 44, height: 44, transform: 'rotate(-90deg)' }}
+                  style={{ width: 48, height: 48, transform: 'rotate(-90deg)' }}
                   viewBox="0 0 100 100"
                 >
                   <circle
                     cx="50" cy="50" r="44"
-                    fill="none" strokeWidth="5"
-                    stroke="url(#communityRing)"
+                    fill="none" strokeWidth="6"
+                    stroke={`url(#communityRing-${idx})`}
                     strokeLinecap="round"
                   />
                   <defs>
-                    <linearGradient id="communityRing" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <linearGradient id={`communityRing-${idx}`} x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="#FEDA75" />
-                      <stop offset="50%" stopColor="#D62976" />
+                      <stop offset="35%" stopColor="#FA7E1E" />
+                      <stop offset="60%" stopColor="#D62976" />
                       <stop offset="100%" stopColor="#4F5BD5" />
                     </linearGradient>
                   </defs>
                 </svg>
-                <div style={{ width: 44, height: 44, padding: 4 }}>
+                <div style={{ width: 48, height: 48, padding: 5 }}>
                   <div className="w-full h-full rounded-full overflow-hidden">
                     <ProfileAvatar
                       src={activity.avatarUrl}
                       name={activity.displayName || 'User'}
-                      size={36}
+                      size={38}
                     />
                   </div>
                 </div>
+
+                {/* New story indicator dot */}
+                {isRecent(activity.createdAt) && (
+                  <motion.div
+                    className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full"
+                    style={{
+                      background: 'linear-gradient(135deg, #4F5BD5, #D62976)',
+                      border: '2px solid rgba(0,0,0,0.6)',
+                      boxShadow: '0 0 6px rgba(79, 91, 213, 0.6)',
+                    }}
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                )}
+
+                {/* Activity type badge */}
+                {activity.activity && (
+                  <div
+                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full"
+                    style={{
+                      background: 'rgba(0,0,0,0.65)',
+                      backdropFilter: 'blur(8px)',
+                      WebkitBackdropFilter: 'blur(8px)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                    }}
+                  >
+                    <span className="text-[7px] text-white/70 font-semibold whitespace-nowrap">
+                      {activityEmoji(activity.activity)} {activity.activity.slice(0, 6)}
+                    </span>
+                  </div>
+                )}
               </div>
-              <span className="text-[9px] text-white/40 font-medium max-w-[48px] truncate">
+              <span className="text-[9px] text-white/40 font-medium max-w-[48px] truncate mt-0.5">
                 {activity.displayName?.split(' ')[0] || 'User'}
               </span>
             </motion.button>
