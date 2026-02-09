@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw } from 'lucide-react';
+import { X, ChevronLeft, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Pencil, Download } from 'lucide-react';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
@@ -615,6 +615,26 @@ const Reel = () => {
     return <ReelViewerSkeleton />;
   }
 
+  // Handler: Download recap video
+  const handleDownloadRecap = useCallback(async () => {
+    if (!weekRecapVideoFromNav) return;
+    try {
+      const response = await fetch(weekRecapVideoFromNav);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `week-${weekRecapNumber || 1}-recap.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('Download started!');
+    } catch {
+      toast.error('Failed to download');
+    }
+  }, [weekRecapVideoFromNav, weekRecapNumber]);
+
   // WEEK RECAP VIDEO PLAYER — show generated recap video instead of stories
   if (hasWeekRecap && weekRecapVideoFromNav) {
     return (
@@ -624,70 +644,69 @@ const Reel = () => {
           height: '100dvh',
           minHeight: '-webkit-fill-available',
           overflow: 'hidden',
-          background: 'linear-gradient(180deg, #0a0612 0%, #000 100%)',
+          background: 'linear-gradient(180deg, #0c0818 0%, #050208 100%)',
         }}
       >
-        {/* Background aurora glows */}
+        {/* Dot grid background */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-25"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(139, 92, 246, 0.5) 1px, transparent 1px)',
+            backgroundSize: '20px 20px',
+          }}
+        />
+
+        {/* Background glows */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(139, 92, 246, 0.12) 0%, transparent 50%)' }} />
-          <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 30% 60%, rgba(59, 130, 246, 0.06) 0%, transparent 45%)' }} />
+          <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(139, 92, 246, 0.18) 0%, transparent 50%)' }} />
+          <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 30% 55%, rgba(59, 130, 246, 0.08) 0%, transparent 45%)' }} />
+          <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 70% 40%, rgba(236, 72, 153, 0.06) 0%, transparent 40%)' }} />
         </div>
 
-        {/* Close button */}
+        {/* Back button */}
         <div 
-          className="absolute top-0 right-0 z-50 p-3"
-          style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)' }}
+          className="relative z-50 px-4 pt-3"
+          style={{ paddingTop: 'calc(env(safe-area-inset-top) + 12px)' }}
         >
           <button
             onClick={handleClose}
-            className="w-10 h-10 flex items-center justify-center rounded-full text-white/80 hover:text-white transition-colors"
-            style={{
-              background: 'rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(40px) saturate(200%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(200%)',
-              border: '1px solid rgba(255,255,255,0.12)',
-            }}
+            className="w-10 h-10 flex items-center justify-center text-white/70 hover:text-white transition-colors"
           >
-            <X className="w-5 h-5" />
+            <ChevronLeft className="w-6 h-6" />
           </button>
         </div>
 
-        {/* Week label */}
-        <div 
-          className="absolute top-0 left-0 z-50 p-3 flex items-center gap-2"
-          style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)' }}
-        >
-          <span className="text-white/90 font-semibold text-sm px-3 py-1.5 rounded-full"
-            style={{
-              background: 'rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(40px) saturate(200%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(200%)',
-              border: '1px solid rgba(255,255,255,0.12)',
-            }}
-          >
-            Week {weekRecapNumber || 1} Recap
-          </span>
-        </div>
-
-        {/* Video Player - 9:16 liquid glass card */}
-        <div className="flex-1 flex items-center justify-center px-5 py-4">
+        {/* Video Player Card */}
+        <div className="relative z-10 flex-1 flex flex-col px-4 pb-3 min-h-0">
           <div
-            className="relative rounded-[28px] overflow-hidden"
+            className="flex-1 relative rounded-3xl overflow-hidden min-h-0"
             style={{
-              aspectRatio: '9 / 16',
-              width: '100%',
-              maxWidth: '340px',
-              maxHeight: 'calc(100dvh - 200px)',
-              border: '1.5px solid rgba(255,255,255,0.18)',
-              boxShadow: '0 8px 40px rgba(139, 92, 246, 0.25), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.15)',
-              background: 'rgba(255,255,255,0.04)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              boxShadow: '0 0 80px rgba(139, 92, 246, 0.12), inset 0 1px 0 rgba(255,255,255,0.06)',
+              background: 'linear-gradient(180deg, rgba(20, 10, 40, 0.5) 0%, rgba(0, 0, 0, 0.85) 100%)',
             }}
           >
+            {/* Light beam effect from top-right */}
+            <div
+              className="absolute pointer-events-none z-10"
+              style={{
+                top: '-20%',
+                right: '5%',
+                width: '50%',
+                height: '70%',
+                background: 'linear-gradient(200deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.03) 40%, transparent 70%)',
+                filter: 'blur(30px)',
+                transform: 'rotate(-15deg)',
+              }}
+            />
+
+            {/* Inner card glow */}
+            <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 35%, rgba(139, 92, 246, 0.12) 0%, transparent 55%)' }} />
+
+            {/* Video */}
             <video
               src={weekRecapVideoFromNav}
-              className="absolute inset-0 w-full h-full object-cover rounded-[28px]"
+              className="absolute inset-0 w-full h-full object-cover"
               autoPlay
               playsInline
               controls={false}
@@ -695,91 +714,79 @@ const Reel = () => {
               muted={isMuted}
               onClick={() => setIsMuted(prev => !prev)}
             />
-          </div>
-        </div>
 
-        {/* Bottom controls — liquid glass bar */}
-        <div 
-          className="absolute bottom-0 inset-x-0 z-50"
-          style={{ 
-            paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)',
-            background: 'linear-gradient(0deg, rgba(0,0,0,0.6) 0%, transparent 100%)',
-          }}
-        >
-          <div className="px-4 pb-2 pt-6 flex items-center gap-2">
-            {/* Mute toggle */}
+            {/* Mute indicator */}
             <button
               onClick={() => setIsMuted(prev => !prev)}
-              className="w-10 h-10 flex items-center justify-center rounded-full text-white/80 flex-shrink-0"
+              className="absolute top-4 right-4 z-20 w-9 h-9 flex items-center justify-center rounded-full text-white/70"
               style={{
-                background: 'rgba(255,255,255,0.08)',
-                backdropFilter: 'blur(40px) saturate(200%)',
-                WebkitBackdropFilter: 'blur(40px) saturate(200%)',
-                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(0,0,0,0.4)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
               }}
             >
               {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
 
-            {/* Delete reel button */}
-            <button
-              onClick={() => setShowDeleteRecapConfirm(true)}
-              className="w-10 h-10 flex items-center justify-center rounded-full text-white/60 hover:text-red-400 flex-shrink-0 active:scale-95 transition-all"
-              style={{
-                background: 'rgba(255,255,255,0.08)',
-                backdropFilter: 'blur(40px) saturate(200%)',
-                WebkitBackdropFilter: 'blur(40px) saturate(200%)',
-                border: '1px solid rgba(255,255,255,0.12)',
-              }}
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            {/* Week label pill */}
+            <div className="absolute top-4 left-4 z-20">
+              <span
+                className="text-white/90 font-semibold text-xs px-3 py-1.5 rounded-full"
+                style={{
+                  background: 'rgba(0,0,0,0.4)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                }}
+              >
+                Week {weekRecapNumber || 1} Recap
+              </span>
+            </div>
+          </div>
+        </div>
 
-            {/* Spacer */}
-            <div className="flex-1" />
-
-            {/* Regenerate button */}
+        {/* Bottom Section */}
+        <div 
+          className="relative z-50 px-4 pb-4 flex flex-col gap-3"
+          style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}
+        >
+          {/* Regenerate + Download row */}
+          <div className="flex items-center justify-between px-2">
             <button
               onClick={handleRegenerate}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-white/80 text-sm font-medium active:scale-95 transition-transform"
-              style={{
-                background: 'rgba(255,255,255,0.08)',
-                backdropFilter: 'blur(40px) saturate(200%)',
-                WebkitBackdropFilter: 'blur(40px) saturate(200%)',
-                border: '1px solid rgba(255,255,255,0.12)',
-              }}
+              className="flex items-center gap-2 text-white/70 hover:text-white transition-colors active:scale-95"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              Regenerate
+              <Pencil className="w-4 h-4" />
+              <span className="text-sm font-medium">Regenerate</span>
             </button>
 
-            {/* Add to Stories button */}
             <button
-              onClick={handleAddToStories}
-              disabled={isAddingToStories}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-sm font-semibold active:scale-95 transition-transform disabled:opacity-50"
-              style={{
-                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.6) 0%, rgba(109, 40, 217, 0.5) 100%)',
-                backdropFilter: 'blur(40px) saturate(200%)',
-                WebkitBackdropFilter: 'blur(40px) saturate(200%)',
-                border: '1px solid rgba(139, 92, 246, 0.4)',
-                boxShadow: '0 4px 20px rgba(139, 92, 246, 0.3)',
-              }}
+              onClick={handleDownloadRecap}
+              className="flex items-center gap-2 text-white/70 hover:text-white transition-colors active:scale-95"
             >
-              <Share2 className="w-3.5 h-3.5" />
-              {isAddingToStories ? 'Adding...' : 'Add to Stories'}
+              <Download className="w-4 h-4" />
+              <span className="text-sm font-medium">Download</span>
             </button>
           </div>
 
-          {/* View Stories link */}
-          <div className="px-4 pt-1 pb-1 flex justify-center">
-            <button
-              onClick={() => navigate('/reel', { replace: true, state: {} })}
-              className="text-white/40 text-xs font-medium hover:text-white/60 transition-colors"
+          {/* ADD TO MY STORIES CTA */}
+          <button
+            onClick={handleAddToStories}
+            disabled={isAddingToStories}
+            className="w-full py-4 rounded-2xl font-bold tracking-wider text-[15px] active:scale-[0.97] transition-transform disabled:opacity-50"
+            style={{
+              background: 'rgba(255, 255, 255, 0.93)',
+            }}
+          >
+            <span
+              style={{
+                background: 'linear-gradient(90deg, #F97316, #EC4899)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
             >
-              View Stories →
-            </button>
-          </div>
+              {isAddingToStories ? 'ADDING...' : 'ADD TO MY STORIES'}
+            </span>
+          </button>
         </div>
 
         {/* Delete Recap Confirmation Dialog */}
