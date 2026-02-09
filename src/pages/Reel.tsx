@@ -634,7 +634,7 @@ const Reel = () => {
     }
     navigate('/reel-generation', {
       replace: true,
-      state: { weekPhotos, weekNumber: weekNum, forceRegenerate: true },
+      state: { weekPhotos, weekNumber: weekNum, forceRegenerate: true, regenerateTs: Date.now() },
     });
   }, [weekRecapNumber, myActivities, navigate, user]);
 
