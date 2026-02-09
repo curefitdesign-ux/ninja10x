@@ -37,6 +37,8 @@ export interface DayState {
 
 export interface MotionRecapOptions {
   dayStates: DayState[];
+  userName?: string;
+  weekNumber?: number;
   onProgress?: (percent: number, phase: string) => void;
 }
 
@@ -1194,15 +1196,52 @@ function drawGraphicTransition(ctx: CanvasRenderingContext2D, progress: number, 
 
 // ============ INTRO CARD ============
 
-function drawIntroCard(ctx: CanvasRenderingContext2D, progress: number, totalDays: number) {
+const WEEK_THEMES: Record<number, string> = {
+  1: 'CONQUER WILL POWER',
+  2: 'BUILD ENERGY',
+  3: 'INCREASE STAMINA',
+  4: 'BUILD STRENGTH',
+};
+
+function drawIntroCard(
+  ctx: CanvasRenderingContext2D,
+  progress: number,
+  totalDays: number,
+  userName?: string,
+  weekNumber?: number,
+) {
   ctx.save();
   drawDarkBg(ctx, 265);
 
   // Central glow
   const glowT = easeOutExpo(Math.min(progress * 1.8, 1));
-  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.42, 400, 265, 0.2 * glowT);
+  drawGlow(ctx, WIDTH / 2, HEIGHT * 0.38, 400, 265, 0.2 * glowT);
 
-  // Title — "YOUR WEEK IN MOTION"
+  // ── User name pill — small, subtle, above the main title ──
+  const firstName = userName ? userName.split(' ')[0].toUpperCase() : '';
+  if (firstName) {
+    const nameT = easeOutCubic(Math.min(Math.max(progress - 0.02, 0) * 3, 1));
+    if (nameT > 0) {
+      ctx.save();
+      ctx.globalAlpha = nameT * 0.6;
+      const nameY = lerp(HEIGHT * 0.28 + 10, HEIGHT * 0.28, nameT);
+      ctx.font = '600 16px -apple-system, "SF Pro Text", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.letterSpacing = '6px';
+      ctx.fillText(`${firstName}'S JOURNEY`, WIDTH / 2, nameY);
+      ctx.letterSpacing = '0px';
+      ctx.restore();
+    }
+  }
+
+  // ── Main title — contextual per week ──
+  const weekNum = weekNumber || 1;
+  const theme = WEEK_THEMES[weekNum] || WEEK_THEMES[((weekNum - 1) % 4) + 1];
+  const titleLine1 = `WEEK ${weekNum}`;
+  const titleLine2 = 'IN MOTION';
+
   const titleT = easeOutBack(Math.min(Math.max(progress - 0.06, 0) * 2.2, 1));
   if (titleT > 0) {
     ctx.globalAlpha = titleT;
@@ -1215,8 +1254,8 @@ function drawIntroCard(ctx: CanvasRenderingContext2D, progress: number, totalDay
     ctx.textBaseline = 'middle';
     ctx.shadowColor = 'hsla(265, 60%, 55%, 0.3)';
     ctx.shadowBlur = 40;
-    ctx.fillText('YOUR WEEK', 0, -28);
-    ctx.fillText('IN MOTION', 0, 28);
+    ctx.fillText(titleLine1, 0, -28);
+    ctx.fillText(titleLine2, 0, 28);
     ctx.shadowColor = 'transparent';
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
@@ -1225,13 +1264,29 @@ function drawIntroCard(ctx: CanvasRenderingContext2D, progress: number, totalDay
   const lineT = easeOutCubic(Math.min(Math.max(progress - 0.22, 0) * 3, 1));
   drawThinLine(ctx, HEIGHT * 0.50, 265, lineT * 0.5);
 
-  // Subtitle
-  const subT = easeOutCubic(Math.min(Math.max(progress - 0.28, 0) * 3, 1));
+  // ── Theme subtitle — contextual per week ──
+  const themeT = easeOutCubic(Math.min(Math.max(progress - 0.26, 0) * 3, 1));
+  if (themeT > 0) {
+    ctx.save();
+    ctx.globalAlpha = themeT * 0.65;
+    const themeY = lerp(HEIGHT * 0.53 + 8, HEIGHT * 0.53, themeT);
+    ctx.font = '700 18px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = `hsla(265, 60%, 75%, 0.9)`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.letterSpacing = '4px';
+    ctx.fillText(theme, WIDTH / 2, themeY);
+    ctx.letterSpacing = '0px';
+    ctx.restore();
+  }
+
+  // ── Stats subtitle ──
+  const subT = easeOutCubic(Math.min(Math.max(progress - 0.34, 0) * 3, 1));
   if (subT > 0) {
-    ctx.globalAlpha = subT * 0.5;
-    const subY = lerp(HEIGHT * 0.54 + 8, HEIGHT * 0.54, subT);
+    ctx.globalAlpha = subT * 0.45;
+    const subY = lerp(HEIGHT * 0.58 + 8, HEIGHT * 0.58, subT);
     ctx.font = FONTS.INTRO_SUB;
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.fillStyle = 'rgba(255,255,255,0.50)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.letterSpacing = '3px';
@@ -1822,7 +1877,7 @@ async function fetchActivityMusic(activity: string, durationSeconds: number): Pr
 // ============ MAIN GENERATOR ============
 
 export async function generateMotionRecap(options: MotionRecapOptions): Promise<string> {
-  const { dayStates, onProgress } = options;
+  const { dayStates, userName, weekNumber, onProgress } = options;
 
   if (dayStates.length < 3) throw new Error('Need at least 3 days for recap');
 
@@ -1986,7 +2041,7 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
 
       // ── Phase: Intro ──
       if (time < TIMING.INTRO) {
-        drawIntroCard(ctx, time / TIMING.INTRO, dayStates.length);
+        drawIntroCard(ctx, time / TIMING.INTRO, dayStates.length, userName, weekNumber);
       }
       // ── Phase: Day slots ──
       else if (time < TIMING.INTRO + dayStates.length * DAY_SLOT) {

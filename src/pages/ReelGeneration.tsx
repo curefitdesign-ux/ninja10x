@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateMotionRecap, photosToDAyStates, type DayState } from '@/lib/motion-recap-generator';
 import { getRecapFromCache, saveRecapToCache } from '@/hooks/use-recap-cache';
+import { useProfile } from '@/hooks/use-profile';
 
 interface PhotoData {
   id: string;
@@ -44,6 +45,7 @@ const ReelGeneration = () => {
   const hasTriggered = useRef(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { profile } = useProfile();
   const locationState = location.state as LocationState | null;
 
   useEffect(() => {
@@ -111,6 +113,8 @@ const ReelGeneration = () => {
       try {
         const videoUrl = await generateMotionRecap({
           dayStates,
+          userName: profile?.display_name,
+          weekNumber,
           onProgress: (percent, phaseName) => {
             setProgress(percent);
             setPhase(phaseName);
