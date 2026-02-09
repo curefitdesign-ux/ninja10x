@@ -842,8 +842,8 @@ const Reel = () => {
     );
   }
 
-  // Prioritize originalUrl (raw source) for clean playback, fall back to storageUrl (templated)
-  const mediaUrl = currentActivity.originalUrl || currentActivity.storageUrl;
+  // Use storageUrl (templated/framed screenshot) for display, fall back to originalUrl
+  const mediaUrl = currentActivity.storageUrl || currentActivity.originalUrl || '';
   const isVideo = currentActivity.isVideo || isVideoUrl(mediaUrl); // Check both flag and URL
   const currentReactions = localReactions[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS }, reactorProfiles: [] };
   
