@@ -2201,18 +2201,20 @@ function getDominantActivity(dayStates: DayState[]): string {
   return best;
 }
 
-async function fetchActivityMusic(activity: string, durationSeconds: number, allActivities?: string[]): Promise<AudioBuffer | null> {
+async function fetchActivityMusic(activity: string, durationSeconds: number, allActivities?: string[], dayStates?: DayState[]): Promise<AudioBuffer | null> {
   try {
     // Use a unique seed per generation so each reel gets a different track
     const seed = _genSeed || Date.now();
-    // Build a combined activity string for richer context
-    const contextActivity = allActivities && allActivities.length > 0
-      ? allActivities.join(' ')
-      : activity;
 
-    console.log('[MotionRecap] Fetching Pixabay music for:', contextActivity, 'seed:', seed);
+    // Build rich context for AI-powered music selection
+    const activities = allActivities && allActivities.length > 0 ? allActivities : [activity];
+    const metrics = dayStates
+      ? dayStates.map(d => `${d.activityType}: ${d.metricA.value} ${d.metricA.label}, ${d.metricB.value} ${d.metricB.label}${d.calories ? ', ' + d.calories + ' cal' : ''}${d.intensity ? ', intensity:' + d.intensity : ''}`)
+      : [];
+
+    console.log('[MotionRecap] 🤖 AI music selection for:', activities.join(', '), 'seed:', seed);
     const { data, error } = await supabase.functions.invoke('fetch-activity-music', {
-      body: { activity: contextActivity, durationSeconds, seed },
+      body: { activity: activities.join(' '), activities, metrics, seed },
     });
 
     if (error || !data?.success || !data?.track?.url) {
@@ -2310,7 +2312,7 @@ export async function generateMotionRecap(options: MotionRecapOptions): Promise<
   let musicSource = 'synthesized';
 
   try {
-    const realMusic = await fetchActivityMusic(dominantActivity, totalDuration, allActivities);
+    const realMusic = await fetchActivityMusic(dominantActivity, totalDuration, allActivities, dayStates);
     if (realMusic) {
       audioBuffer = realMusic;
       musicSource = 'pixabay';
