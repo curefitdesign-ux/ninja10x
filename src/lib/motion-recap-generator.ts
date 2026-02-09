@@ -83,7 +83,10 @@ const FONTS = {
 // Activity accent colors (HSL hue)
 const ACTIVITY_HUES: Record<string, number> = {
   running: 16, cycling: 200, yoga: 280, boxing: 0, swimming: 190,
-  trekking: 140, basketball: 30, football: 120, cricket: 45, default: 265,
+  trekking: 140, basketball: 30, football: 120, cricket: 45,
+  badminton: 170, tennis: 55, walking: 90, hiking: 140,
+  dance: 320, gym: 265, weight: 265, strength: 265,
+  meditation: 260, stretching: 300, martial: 355, default: 265,
 };
 
 // Music mood per activity — expanded for richer contextual scoring
@@ -1510,11 +1513,14 @@ function drawOutroCard(ctx: CanvasRenderingContext2D, progress: number, dayState
 // ============ METRIC CARD — 5 PREMIUM VISUAL STYLES WITH DATA ============
 // Each day is GUARANTEED a different style within a generation
 
-type MetricStyle = 'typography-wall' | 'centered-hero' | 'split-screen' | 'circular-badge' | 'gradient-stack' | 'bold-diagonal' | 'minimal-strip' | 'neon-frame';
+type MetricStyle = 'typography-wall' | 'centered-hero' | 'split-screen' | 'circular-badge' | 'gradient-stack' | 'bold-diagonal' | 'minimal-strip' | 'neon-frame' | 'pulse-meter' | 'scoreboard' | 'track-lanes' | 'power-gauge' | 'medal-podium' | 'horizon-line' | 'ticker-tape' | 'hexagon-grid' | 'wave-form' | 'arena-spotlight' | 'progress-rings' | 'block-mosaic';
 
 const METRIC_STYLES: MetricStyle[] = [
   'typography-wall', 'centered-hero', 'split-screen', 'circular-badge', 'gradient-stack',
   'bold-diagonal', 'minimal-strip', 'neon-frame',
+  'pulse-meter', 'scoreboard', 'track-lanes', 'power-gauge', 'medal-podium',
+  'horizon-line', 'ticker-tape', 'hexagon-grid', 'wave-form', 'arena-spotlight',
+  'progress-rings', 'block-mosaic',
 ];
 
 // Pre-assigned metric styles per day — guarantees each day is different
@@ -2094,6 +2100,834 @@ function drawStyleNeonFrame(ctx: CanvasRenderingContext2D, state: DayState, prog
   drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.82);
 }
 
+// ── ACTIVITY-SPECIFIC ICON DRAWING ──
+// Draws a contextual visual element based on the activity type
+
+function getActivityEmoji(activity: string): string {
+  const a = activity.toLowerCase();
+  if (a.includes('running') || a.includes('jogging')) return '🏃';
+  if (a.includes('cycling') || a.includes('bike')) return '🚴';
+  if (a.includes('yoga') || a.includes('meditation')) return '🧘';
+  if (a.includes('boxing') || a.includes('martial')) return '🥊';
+  if (a.includes('swimming') || a.includes('swim')) return '🏊';
+  if (a.includes('basketball')) return '🏀';
+  if (a.includes('football') || a.includes('soccer')) return '⚽';
+  if (a.includes('cricket')) return '🏏';
+  if (a.includes('tennis') || a.includes('badminton') || a.includes('racquet')) return '🏸';
+  if (a.includes('trekking') || a.includes('hiking')) return '⛰️';
+  if (a.includes('weight') || a.includes('gym') || a.includes('strength')) return '🏋️';
+  if (a.includes('walk')) return '🚶';
+  if (a.includes('stretch')) return '🤸';
+  if (a.includes('dance')) return '💃';
+  return '💪';
+}
+
+function drawActivityIcon(ctx: CanvasRenderingContext2D, activity: string, x: number, y: number, size: number, alpha: number) {
+  const emoji = getActivityEmoji(activity);
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.font = `${size}px -apple-system, "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(emoji, x, y);
+  ctx.restore();
+}
+
+// Style 9: Pulse Meter — heartbeat line with activity icon
+function drawStylePulseMeter(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  // Pulse line across middle
+  const lineT = easeOutCubic(Math.min(progress * 2.5, 1));
+  if (lineT > 0) {
+    ctx.save();
+    ctx.globalAlpha = lineT * 0.5;
+    ctx.strokeStyle = `hsla(${hue}, 70%, 60%, 0.9)`;
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = `hsla(${hue}, 80%, 55%, 0.6)`;
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    const baseY = HEIGHT * 0.42;
+    const drawW = WIDTH * lineT;
+    const pulseW = 60;
+    const pulseH = 80;
+    for (let x = 0; x < drawW; x += 2) {
+      const normX = x / WIDTH;
+      let y = baseY;
+      // Create pulse spikes at intervals
+      const pulsePos = (normX * 3) % 1;
+      if (pulsePos > 0.3 && pulsePos < 0.35) y = baseY - pulseH * 0.3;
+      else if (pulsePos > 0.35 && pulsePos < 0.4) y = baseY - pulseH;
+      else if (pulsePos > 0.4 && pulsePos < 0.45) y = baseY + pulseH * 0.5;
+      else if (pulsePos > 0.45 && pulsePos < 0.5) y = baseY - pulseH * 0.4;
+      else if (pulsePos > 0.5 && pulsePos < 0.55) y = baseY;
+      if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.shadowColor = 'transparent';
+    ctx.restore();
+  }
+
+  // Activity icon — large, semi-transparent background
+  const iconT = easeOutCubic(Math.min(Math.max(progress - 0.1, 0) * 2, 1));
+  drawActivityIcon(ctx, state.activityType, WIDTH / 2, HEIGHT * 0.22, 80, iconT * 0.15);
+
+  // DAY number
+  const numT = easeOutBack(Math.min(Math.max(progress - 0.08, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.font = '900 120px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH * 0.7, HEIGHT * 0.22 + lerp(15, 0, numT), 200);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = numT * 0.5;
+    ctx.font = '600 16px -apple-system, "SF Pro Text", system-ui, sans-serif';
+    ctx.fillStyle = `hsla(${hue}, 55%, 70%, 1)`;
+    ctx.textAlign = 'center';
+    ctx.letterSpacing = '6px';
+    ctx.fillText('DAY', WIDTH * 0.7, HEIGHT * 0.14);
+    ctx.letterSpacing = '0px';
+    ctx.restore();
+  }
+
+  // Activity name
+  const actT = easeOutCubic(Math.min(Math.max(progress - 0.25, 0) * 3, 1));
+  if (actT > 0) {
+    ctx.save();
+    ctx.globalAlpha = actT;
+    ctx.font = '900 40px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, HEIGHT * 0.57 + lerp(8, 0, actT), WIDTH * 0.85);
+    ctx.restore();
+  }
+
+  drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.74);
+}
+
+// Style 10: Scoreboard — sports LED board aesthetic
+function drawStyleScoreboard(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  // Scoreboard frame
+  const frameT = easeOutCubic(Math.min(progress * 2, 1));
+  if (frameT > 0) {
+    const fx = WIDTH * 0.08, fy = HEIGHT * 0.15;
+    const fw = WIDTH * 0.84, fh = HEIGHT * 0.35;
+    ctx.save();
+    ctx.globalAlpha = frameT * 0.2;
+    ctx.fillStyle = `hsla(${hue}, 30%, 12%, 1)`;
+    ctx.beginPath();
+    ctx.roundRect(fx, fy, fw, fh, 12);
+    ctx.fill();
+    ctx.strokeStyle = `hsla(${hue}, 50%, 45%, 0.5)`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.restore();
+
+    // Dot matrix effect
+    ctx.save();
+    ctx.globalAlpha = frameT * 0.08;
+    const dotSize = 3, dotGap = 10;
+    for (let dx = fx + 10; dx < fx + fw - 10; dx += dotGap) {
+      for (let dy = fy + 10; dy < fy + fh - 10; dy += dotGap) {
+        ctx.fillStyle = `hsla(${hue}, 40%, 50%, 0.4)`;
+        ctx.beginPath(); ctx.arc(dx, dy, dotSize * 0.5, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  // Activity icon top-left
+  const iconT = easeOutCubic(Math.min(Math.max(progress - 0.05, 0) * 3, 1));
+  drawActivityIcon(ctx, state.activityType, WIDTH * 0.2, HEIGHT * 0.25, 48, iconT * 0.7);
+
+  // Day number — LED-style
+  const numT = easeOutCubic(Math.min(Math.max(progress - 0.1, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.font = '900 100px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = `hsla(${hue}, 70%, 60%, 1)`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = `hsla(${hue}, 80%, 55%, 0.7)`;
+    ctx.shadowBlur = 25;
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH * 0.65, HEIGHT * 0.32 + lerp(10, 0, numT), 200);
+    ctx.shadowColor = 'transparent';
+    ctx.restore();
+  }
+
+  // Activity name below board
+  const actT = easeOutCubic(Math.min(Math.max(progress - 0.2, 0) * 3, 1));
+  if (actT > 0) {
+    ctx.save();
+    ctx.globalAlpha = actT;
+    ctx.font = '800 36px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, HEIGHT * 0.58 + lerp(8, 0, actT), WIDTH * 0.85);
+    ctx.restore();
+  }
+
+  drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.76);
+}
+
+// Style 11: Track Lanes — horizontal lane lines reminiscent of a running track
+function drawStyleTrackLanes(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  const numLanes = 6;
+  const laneH = HEIGHT * 0.06;
+  const startY = HEIGHT * 0.22;
+
+  for (let i = 0; i < numLanes; i++) {
+    const laneT = easeOutCubic(Math.min(Math.max(progress - i * 0.04, 0) * 3, 1));
+    if (laneT <= 0) continue;
+    const y = startY + i * (laneH + 4);
+    const isActive = i === Math.floor(numLanes / 2);
+
+    ctx.save();
+    ctx.globalAlpha = laneT * (isActive ? 0.25 : 0.08);
+    ctx.fillStyle = isActive
+      ? `hsla(${hue}, 60%, 55%, 1)`
+      : `hsla(${hue}, 25%, 35%, 1)`;
+    ctx.fillRect(0, y, WIDTH * laneT, laneH);
+    ctx.restore();
+
+    // Lane number
+    ctx.save();
+    ctx.globalAlpha = laneT * 0.3;
+    ctx.font = '700 14px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = `hsla(${hue}, 40%, 65%, 1)`;
+    ctx.textAlign = 'center';
+    ctx.fillText(String(i + 1), WIDTH * 0.06, y + laneH / 2 + 5);
+    ctx.restore();
+  }
+
+  // Activity icon on active lane
+  const iconT = easeOutCubic(Math.min(Math.max(progress - 0.15, 0) * 2.5, 1));
+  const activeLaneY = startY + Math.floor(numLanes / 2) * (laneH + 4) + laneH / 2;
+  drawActivityIcon(ctx, state.activityType, WIDTH * 0.8 * iconT, activeLaneY, 36, iconT * 0.8);
+
+  // Day number below lanes
+  const numT = easeOutBack(Math.min(Math.max(progress - 0.12, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.font = '900 140px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = `hsla(${hue}, 60%, 50%, 0.3)`;
+    ctx.shadowBlur = 30;
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, HEIGHT * 0.6 + lerp(15, 0, numT), WIDTH * 0.85);
+    ctx.shadowColor = 'transparent';
+    ctx.restore();
+  }
+
+  drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.78);
+}
+
+// Style 12: Power Gauge — circular meter/arc with activity icon center
+function drawStylePowerGauge(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  const cx = WIDTH / 2, cy = HEIGHT * 0.38;
+  const radius = 130;
+
+  // Background arc (track)
+  const trackT = easeOutCubic(Math.min(progress * 2, 1));
+  if (trackT > 0) {
+    ctx.save();
+    ctx.globalAlpha = trackT * 0.15;
+    ctx.strokeStyle = `hsla(${hue}, 30%, 40%, 1)`;
+    ctx.lineWidth = 12;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, Math.PI * 0.75, Math.PI * 2.25);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Filled arc (progress based on day number)
+  const fillT = easeOutExpo(Math.min(Math.max(progress - 0.1, 0) * 2, 1));
+  if (fillT > 0) {
+    const fillAngle = Math.PI * 0.75 + Math.PI * 1.5 * Math.min(state.dayNumber / 7, 1) * fillT;
+    ctx.save();
+    ctx.globalAlpha = fillT * 0.8;
+    ctx.strokeStyle = `hsla(${hue}, 70%, 60%, 1)`;
+    ctx.lineWidth = 12;
+    ctx.lineCap = 'round';
+    ctx.shadowColor = `hsla(${hue}, 80%, 55%, 0.6)`;
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, Math.PI * 0.75, fillAngle);
+    ctx.stroke();
+    ctx.shadowColor = 'transparent';
+    ctx.restore();
+
+    // Tick marks around arc
+    for (let i = 0; i <= 7; i++) {
+      const a = Math.PI * 0.75 + (Math.PI * 1.5 / 7) * i;
+      const tickT = easeOutCubic(Math.min(Math.max(progress - 0.15 - i * 0.02, 0) * 4, 1));
+      if (tickT <= 0) continue;
+      ctx.save();
+      ctx.globalAlpha = tickT * 0.3;
+      ctx.strokeStyle = `hsla(${hue}, 50%, 65%, 1)`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * (radius + 18), cy + Math.sin(a) * (radius + 18));
+      ctx.lineTo(cx + Math.cos(a) * (radius + 28), cy + Math.sin(a) * (radius + 28));
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // Activity icon center
+  const iconT = easeOutBack(Math.min(Math.max(progress - 0.15, 0) * 2.5, 1));
+  drawActivityIcon(ctx, state.activityType, cx, cy - 15, 56, iconT * 0.8);
+
+  // Day number below icon
+  if (iconT > 0) {
+    ctx.save();
+    ctx.globalAlpha = iconT;
+    ctx.font = '900 42px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText(`DAY ${state.dayNumber}`, cx, cy + 40);
+    ctx.restore();
+  }
+
+  // Activity name
+  const actT = easeOutCubic(Math.min(Math.max(progress - 0.3, 0) * 3, 1));
+  if (actT > 0) {
+    ctx.save();
+    ctx.globalAlpha = actT;
+    ctx.font = '800 30px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText(state.activityType.toUpperCase(), cx, HEIGHT * 0.62 + lerp(6, 0, actT), WIDTH * 0.85);
+    ctx.restore();
+  }
+
+  drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.78);
+}
+
+// Style 13: Medal Podium — 3 blocks like a podium
+function drawStyleMedalPodium(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  const podiumY = HEIGHT * 0.55;
+  const blockW = WIDTH * 0.22;
+  const heights = [HEIGHT * 0.18, HEIGHT * 0.25, HEIGHT * 0.14];
+  const xs = [WIDTH * 0.17, WIDTH * 0.42, WIDTH * 0.67];
+
+  for (let i = 0; i < 3; i++) {
+    const delay = [0.08, 0, 0.12][i];
+    const blockT = easeOutBack(Math.min(Math.max(progress - delay, 0) * 2.5, 1));
+    if (blockT <= 0) continue;
+    const h = heights[i] * blockT;
+    ctx.save();
+    ctx.globalAlpha = blockT * (i === 1 ? 0.3 : 0.15);
+    const grad = ctx.createLinearGradient(0, podiumY - h, 0, podiumY);
+    grad.addColorStop(0, `hsla(${hue + i * 30}, 60%, 60%, 1)`);
+    grad.addColorStop(1, `hsla(${hue + i * 30}, 40%, 30%, 1)`);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(xs[i], podiumY - h, blockW, h, [8, 8, 0, 0]);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Activity icon on top of first-place podium
+  const iconT = easeOutBack(Math.min(Math.max(progress - 0.1, 0) * 2.5, 1));
+  drawActivityIcon(ctx, state.activityType, xs[1] + blockW / 2, podiumY - heights[1] - 30, 48, iconT * 0.7);
+
+  // "DAY XX" above
+  const numT = easeOutCubic(Math.min(Math.max(progress - 0.05, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.font = '900 80px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, HEIGHT * 0.18 + lerp(12, 0, numT), WIDTH * 0.85);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = numT * 0.4;
+    ctx.font = '600 16px -apple-system, "SF Pro Text", system-ui, sans-serif';
+    ctx.fillStyle = `hsla(${hue}, 50%, 70%, 1)`;
+    ctx.textAlign = 'center';
+    ctx.letterSpacing = '6px';
+    ctx.fillText('DAY', WIDTH / 2, HEIGHT * 0.11);
+    ctx.letterSpacing = '0px';
+    ctx.restore();
+  }
+
+  drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.76);
+}
+
+// Style 14: Horizon Line — landscape horizon split with gradient sky
+function drawStyleHorizonLine(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  const horizY = HEIGHT * 0.52;
+
+  // Sky gradient
+  const skyT = easeOutCubic(Math.min(progress * 2, 1));
+  if (skyT > 0) {
+    ctx.save();
+    ctx.globalAlpha = skyT * 0.15;
+    const sky = ctx.createLinearGradient(0, 0, 0, horizY);
+    sky.addColorStop(0, `hsla(${hue}, 40%, 20%, 1)`);
+    sky.addColorStop(0.7, `hsla(${(hue + 30) % 360}, 50%, 40%, 1)`);
+    sky.addColorStop(1, `hsla(${(hue + 60) % 360}, 60%, 55%, 1)`);
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, WIDTH, horizY);
+    ctx.restore();
+  }
+
+  // Horizon glow line
+  const lineT = easeOutExpo(Math.min(Math.max(progress - 0.1, 0) * 2.5, 1));
+  if (lineT > 0) {
+    ctx.save();
+    ctx.globalAlpha = lineT * 0.6;
+    ctx.strokeStyle = `hsla(${hue}, 70%, 70%, 1)`;
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = `hsla(${hue}, 80%, 65%, 0.8)`;
+    ctx.shadowBlur = 30;
+    const w = WIDTH * lineT;
+    ctx.beginPath();
+    ctx.moveTo((WIDTH - w) / 2, horizY);
+    ctx.lineTo((WIDTH + w) / 2, horizY);
+    ctx.stroke();
+    ctx.shadowColor = 'transparent';
+    ctx.restore();
+  }
+
+  // Activity icon as "sun" near horizon
+  const iconT = easeOutCubic(Math.min(Math.max(progress - 0.08, 0) * 2.5, 1));
+  drawActivityIcon(ctx, state.activityType, WIDTH / 2, horizY - 60, 60, iconT * 0.5);
+
+  // Day number above
+  const numT = easeOutBack(Math.min(Math.max(progress - 0.05, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.font = '900 120px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, HEIGHT * 0.25 + lerp(12, 0, numT), WIDTH * 0.85);
+    ctx.restore();
+  }
+
+  // Activity name below horizon
+  const actT = easeOutCubic(Math.min(Math.max(progress - 0.25, 0) * 3, 1));
+  if (actT > 0) {
+    ctx.save();
+    ctx.globalAlpha = actT;
+    ctx.font = '800 32px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, HEIGHT * 0.60 + lerp(6, 0, actT), WIDTH * 0.85);
+    ctx.restore();
+  }
+
+  drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.76);
+}
+
+// Style 15: Ticker Tape — scrolling text strips
+function drawStyleTickerTape(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  const tapeCount = 5;
+  const tapeH = 36;
+  const baseY = HEIGHT * 0.18;
+  const actName = state.activityType.toUpperCase();
+  const dayStr = `DAY ${String(state.dayNumber).padStart(2, '0')}`;
+  const repeatedText = `${dayStr}  •  ${actName}  •  `.repeat(6);
+
+  for (let i = 0; i < tapeCount; i++) {
+    const tapeT = easeOutCubic(Math.min(Math.max(progress - i * 0.05, 0) * 2.5, 1));
+    if (tapeT <= 0) continue;
+    const y = baseY + i * (tapeH + 8);
+    const dir = i % 2 === 0 ? 1 : -1;
+    const scrollX = dir * progress * WIDTH * 0.5;
+
+    ctx.save();
+    ctx.globalAlpha = tapeT * (i === 2 ? 0.6 : 0.15);
+    ctx.fillStyle = `hsla(${hue + i * 15}, 45%, 50%, 1)`;
+    ctx.fillRect(0, y, WIDTH, tapeH);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = tapeT * (i === 2 ? 0.9 : 0.3);
+    ctx.font = `${i === 2 ? '800' : '600'} ${i === 2 ? 16 : 12}px -apple-system, "SF Pro Display", system-ui, sans-serif`;
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(repeatedText, scrollX % WIDTH - WIDTH, y + tapeH / 2);
+    ctx.fillText(repeatedText, scrollX % WIDTH, y + tapeH / 2);
+    ctx.restore();
+  }
+
+  // Activity icon centered
+  const iconT = easeOutBack(Math.min(Math.max(progress - 0.15, 0) * 2.5, 1));
+  drawActivityIcon(ctx, state.activityType, WIDTH / 2, HEIGHT * 0.52, 72, iconT * 0.6);
+
+  // Big day number
+  const numT = easeOutBack(Math.min(Math.max(progress - 0.2, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.font = '900 100px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = `hsla(${hue}, 65%, 55%, 0.35)`;
+    ctx.shadowBlur = 35;
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, HEIGHT * 0.65 + lerp(10, 0, numT), WIDTH * 0.85);
+    ctx.shadowColor = 'transparent';
+    ctx.restore();
+  }
+
+  drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.80);
+}
+
+// Style 16: Hexagon Grid — honeycomb pattern with data
+function drawStyleHexagonGrid(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  const hexSize = 40;
+  const cols = 8, rows = 6;
+  const startX = WIDTH * 0.08, startY = HEIGHT * 0.15;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const idx = r * cols + c;
+      const hexT = easeOutCubic(Math.min(Math.max(progress - idx * 0.008, 0) * 3, 1));
+      if (hexT <= 0) continue;
+      const xOff = r % 2 === 0 ? 0 : hexSize * 0.87;
+      const hx = startX + c * hexSize * 1.74 + xOff;
+      const hy = startY + r * hexSize * 1.5;
+
+      ctx.save();
+      ctx.globalAlpha = hexT * 0.1;
+      ctx.fillStyle = `hsla(${(hue + idx * 5) % 360}, 40%, 50%, 1)`;
+      ctx.beginPath();
+      for (let a = 0; a < 6; a++) {
+        const angle = (Math.PI / 3) * a - Math.PI / 6;
+        const px = hx + hexSize * 0.8 * hexT * Math.cos(angle);
+        const py = hy + hexSize * 0.8 * hexT * Math.sin(angle);
+        if (a === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  // Activity icon
+  const iconT = easeOutBack(Math.min(Math.max(progress - 0.12, 0) * 2.5, 1));
+  drawActivityIcon(ctx, state.activityType, WIDTH / 2, HEIGHT * 0.48, 64, iconT * 0.5);
+
+  // Day number
+  const numT = easeOutBack(Math.min(Math.max(progress - 0.08, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.font = '900 110px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = `hsla(${hue}, 60%, 50%, 0.3)`;
+    ctx.shadowBlur = 30;
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, HEIGHT * 0.58 + lerp(12, 0, numT), WIDTH * 0.85);
+    ctx.shadowColor = 'transparent';
+    ctx.restore();
+  }
+
+  // Activity name
+  const actT = easeOutCubic(Math.min(Math.max(progress - 0.25, 0) * 3, 1));
+  if (actT > 0) {
+    ctx.save();
+    ctx.globalAlpha = actT;
+    ctx.font = '800 28px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, HEIGHT * 0.68 + lerp(6, 0, actT), WIDTH * 0.85);
+    ctx.restore();
+  }
+
+  drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.80);
+}
+
+// Style 17: Wave Form — audio waveform bars
+function drawStyleWaveForm(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  const numBars = 40;
+  const barW = WIDTH * 0.7 / numBars;
+  const maxH = HEIGHT * 0.18;
+  const centerY = HEIGHT * 0.42;
+  const startX = WIDTH * 0.15;
+
+  for (let i = 0; i < numBars; i++) {
+    const barT = easeOutCubic(Math.min(Math.max(progress - i * 0.008, 0) * 3, 1));
+    if (barT <= 0) continue;
+    // Create wave pattern based on activity hue seed
+    const h = maxH * (0.2 + 0.8 * Math.abs(Math.sin(i * 0.4 + hue * 0.1))) * barT;
+    ctx.save();
+    ctx.globalAlpha = barT * 0.5;
+    const grad = ctx.createLinearGradient(0, centerY - h, 0, centerY + h);
+    grad.addColorStop(0, `hsla(${(hue + i * 3) % 360}, 65%, 65%, 1)`);
+    grad.addColorStop(0.5, `hsla(${hue}, 70%, 55%, 1)`);
+    grad.addColorStop(1, `hsla(${(hue + i * 3) % 360}, 65%, 65%, 1)`);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(startX + i * (barW + 2), centerY - h / 2, barW, h, 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Activity icon + name at top
+  const iconT = easeOutCubic(Math.min(Math.max(progress - 0.05, 0) * 3, 1));
+  drawActivityIcon(ctx, state.activityType, WIDTH * 0.15, HEIGHT * 0.18, 40, iconT * 0.6);
+
+  if (iconT > 0) {
+    ctx.save();
+    ctx.globalAlpha = iconT * 0.7;
+    ctx.font = '700 20px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = `hsla(${hue}, 55%, 70%, 1)`;
+    ctx.textAlign = 'left';
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH * 0.25, HEIGHT * 0.18);
+    ctx.restore();
+  }
+
+  // Day number below waveform
+  const numT = easeOutBack(Math.min(Math.max(progress - 0.15, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.font = '900 120px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, HEIGHT * 0.62 + lerp(10, 0, numT), WIDTH * 0.85);
+    ctx.restore();
+  }
+
+  drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.78);
+}
+
+// Style 18: Arena Spotlight — dramatic spotlight beams from above
+function drawStyleArenaSpotlight(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  // Spotlight beams
+  const beamT = easeOutExpo(Math.min(progress * 2, 1));
+  if (beamT > 0) {
+    const beams = [
+      { x: WIDTH * 0.3, spread: 80 },
+      { x: WIDTH * 0.5, spread: 100 },
+      { x: WIDTH * 0.7, spread: 80 },
+    ];
+    for (let i = 0; i < beams.length; i++) {
+      const bT = easeOutCubic(Math.min(Math.max(beamT - i * 0.1, 0) * 2, 1));
+      if (bT <= 0) continue;
+      ctx.save();
+      ctx.globalAlpha = bT * (i === 1 ? 0.12 : 0.06);
+      ctx.beginPath();
+      ctx.moveTo(beams[i].x - 5, 0);
+      ctx.lineTo(beams[i].x - beams[i].spread, HEIGHT);
+      ctx.lineTo(beams[i].x + beams[i].spread, HEIGHT);
+      ctx.lineTo(beams[i].x + 5, 0);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, 0, 0, HEIGHT);
+      grad.addColorStop(0, `hsla(${hue}, 70%, 80%, 1)`);
+      grad.addColorStop(0.5, `hsla(${hue}, 50%, 60%, 0.5)`);
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  // Floor glow
+  const floorT = easeOutCubic(Math.min(Math.max(progress - 0.15, 0) * 2.5, 1));
+  if (floorT > 0) {
+    ctx.save();
+    ctx.globalAlpha = floorT * 0.2;
+    const fg = ctx.createRadialGradient(WIDTH / 2, HEIGHT * 0.85, 0, WIDTH / 2, HEIGHT * 0.85, WIDTH * 0.5);
+    fg.addColorStop(0, `hsla(${hue}, 60%, 55%, 0.5)`);
+    fg.addColorStop(1, 'transparent');
+    ctx.fillStyle = fg;
+    ctx.fillRect(0, HEIGHT * 0.6, WIDTH, HEIGHT * 0.4);
+    ctx.restore();
+  }
+
+  // Activity icon in spotlight
+  const iconT = easeOutBack(Math.min(Math.max(progress - 0.12, 0) * 2.5, 1));
+  drawActivityIcon(ctx, state.activityType, WIDTH / 2, HEIGHT * 0.45, 72, iconT * 0.6);
+
+  // Day number
+  const numT = easeOutBack(Math.min(Math.max(progress - 0.08, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.font = '900 110px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = `hsla(${hue}, 70%, 60%, 0.5)`;
+    ctx.shadowBlur = 40;
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, HEIGHT * 0.30 + lerp(12, 0, numT), WIDTH * 0.85);
+    ctx.shadowColor = 'transparent';
+    ctx.restore();
+  }
+
+  // Activity name
+  const actT = easeOutCubic(Math.min(Math.max(progress - 0.25, 0) * 3, 1));
+  if (actT > 0) {
+    ctx.save();
+    ctx.globalAlpha = actT;
+    ctx.font = '800 34px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, HEIGHT * 0.58 + lerp(6, 0, actT), WIDTH * 0.85);
+    ctx.restore();
+  }
+
+  drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.76);
+}
+
+// Style 19: Progress Rings — multiple concentric progress arcs
+function drawStyleProgressRings(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  const cx = WIDTH / 2, cy = HEIGHT * 0.38;
+  const rings = [
+    { radius: 70, width: 8, fillPct: 1.0, hueOff: 0 },
+    { radius: 95, width: 6, fillPct: 0.75, hueOff: 30 },
+    { radius: 115, width: 5, fillPct: 0.5, hueOff: 60 },
+    { radius: 132, width: 4, fillPct: 0.85, hueOff: 90 },
+  ];
+
+  for (let i = 0; i < rings.length; i++) {
+    const r = rings[i];
+    const ringT = easeOutExpo(Math.min(Math.max(progress - i * 0.06, 0) * 2.5, 1));
+    if (ringT <= 0) continue;
+
+    // Track
+    ctx.save();
+    ctx.globalAlpha = ringT * 0.1;
+    ctx.strokeStyle = `hsla(${(hue + r.hueOff) % 360}, 30%, 35%, 1)`;
+    ctx.lineWidth = r.width;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(cx, cy, r.radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+
+    // Fill
+    ctx.save();
+    ctx.globalAlpha = ringT * 0.7;
+    ctx.strokeStyle = `hsla(${(hue + r.hueOff) % 360}, 65%, 60%, 1)`;
+    ctx.lineWidth = r.width;
+    ctx.lineCap = 'round';
+    ctx.shadowColor = `hsla(${(hue + r.hueOff) % 360}, 70%, 55%, 0.4)`;
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r.radius, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * r.fillPct * ringT);
+    ctx.stroke();
+    ctx.shadowColor = 'transparent';
+    ctx.restore();
+  }
+
+  // Activity icon center
+  const iconT = easeOutBack(Math.min(Math.max(progress - 0.1, 0) * 2.5, 1));
+  drawActivityIcon(ctx, state.activityType, cx, cy, 44, iconT * 0.7);
+
+  // Day number below rings
+  const numT = easeOutBack(Math.min(Math.max(progress - 0.18, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.font = '900 80px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`DAY ${state.dayNumber}`, cx, HEIGHT * 0.58 + lerp(10, 0, numT), WIDTH * 0.85);
+    ctx.restore();
+  }
+
+  // Activity name
+  const actT = easeOutCubic(Math.min(Math.max(progress - 0.3, 0) * 3, 1));
+  if (actT > 0) {
+    ctx.save();
+    ctx.globalAlpha = actT * 0.8;
+    ctx.font = '700 24px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = `hsla(${hue}, 50%, 75%, 1)`;
+    ctx.textAlign = 'center';
+    ctx.letterSpacing = '3px';
+    ctx.fillText(state.activityType.toUpperCase(), cx, HEIGHT * 0.66 + lerp(5, 0, actT), WIDTH * 0.85);
+    ctx.letterSpacing = '0px';
+    ctx.restore();
+  }
+
+  drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.78);
+}
+
+// Style 20: Block Mosaic — colored blocks that form a pattern
+function drawStyleBlockMosaic(ctx: CanvasRenderingContext2D, state: DayState, progress: number, hue: number) {
+  const blockSize = 50;
+  const cols = Math.ceil(WIDTH / blockSize);
+  const rows = 5;
+  const startY = HEIGHT * 0.15;
+
+  // Draw mosaic blocks from center outward
+  const centerCol = Math.floor(cols / 2);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const distFromCenter = Math.abs(c - centerCol) + r;
+      const blockT = easeOutCubic(Math.min(Math.max(progress - distFromCenter * 0.015, 0) * 3, 1));
+      if (blockT <= 0) continue;
+      const seed = seededRand(r * cols + c + state.dayNumber * 100);
+      const shouldDraw = seed > 0.4; // Sparse pattern
+      if (!shouldDraw) continue;
+
+      ctx.save();
+      ctx.globalAlpha = blockT * (0.1 + seed * 0.15);
+      ctx.fillStyle = `hsla(${(hue + seed * 60) % 360}, 55%, ${45 + seed * 20}%, 1)`;
+      ctx.beginPath();
+      ctx.roundRect(c * blockSize + 2, startY + r * blockSize + 2, blockSize - 4, blockSize - 4, 6);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  // Activity icon
+  const iconT = easeOutBack(Math.min(Math.max(progress - 0.1, 0) * 2.5, 1));
+  drawActivityIcon(ctx, state.activityType, WIDTH / 2, HEIGHT * 0.48, 64, iconT * 0.5);
+
+  // Day number
+  const numT = easeOutBack(Math.min(Math.max(progress - 0.08, 0) * 2.5, 1));
+  if (numT > 0) {
+    ctx.save();
+    ctx.globalAlpha = numT;
+    ctx.font = '900 130px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = `hsla(${hue}, 60%, 50%, 0.3)`;
+    ctx.shadowBlur = 30;
+    ctx.fillText(String(state.dayNumber).padStart(2, '0'), WIDTH / 2, HEIGHT * 0.55 + lerp(12, 0, numT), WIDTH * 0.85);
+    ctx.shadowColor = 'transparent';
+    ctx.restore();
+  }
+
+  // Activity name
+  const actT = easeOutCubic(Math.min(Math.max(progress - 0.25, 0) * 3, 1));
+  if (actT > 0) {
+    ctx.save();
+    ctx.globalAlpha = actT;
+    ctx.font = '800 30px -apple-system, "SF Pro Display", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText(state.activityType.toUpperCase(), WIDTH / 2, HEIGHT * 0.67 + lerp(6, 0, actT), WIDTH * 0.85);
+    ctx.restore();
+  }
+
+  drawMetricDataRow(ctx, state, progress, hue, HEIGHT * 0.80);
+}
+
 function drawMetricCard(
   ctx: CanvasRenderingContext2D,
   state: DayState,
@@ -2123,6 +2957,18 @@ function drawMetricCard(
     case 'bold-diagonal': drawStyleBoldDiagonal(ctx, state, progress, hue); break;
     case 'minimal-strip': drawStyleMinimalStrip(ctx, state, progress, hue); break;
     case 'neon-frame': drawStyleNeonFrame(ctx, state, progress, hue); break;
+    case 'pulse-meter': drawStylePulseMeter(ctx, state, progress, hue); break;
+    case 'scoreboard': drawStyleScoreboard(ctx, state, progress, hue); break;
+    case 'track-lanes': drawStyleTrackLanes(ctx, state, progress, hue); break;
+    case 'power-gauge': drawStylePowerGauge(ctx, state, progress, hue); break;
+    case 'medal-podium': drawStyleMedalPodium(ctx, state, progress, hue); break;
+    case 'horizon-line': drawStyleHorizonLine(ctx, state, progress, hue); break;
+    case 'ticker-tape': drawStyleTickerTape(ctx, state, progress, hue); break;
+    case 'hexagon-grid': drawStyleHexagonGrid(ctx, state, progress, hue); break;
+    case 'wave-form': drawStyleWaveForm(ctx, state, progress, hue); break;
+    case 'arena-spotlight': drawStyleArenaSpotlight(ctx, state, progress, hue); break;
+    case 'progress-rings': drawStyleProgressRings(ctx, state, progress, hue); break;
+    case 'block-mosaic': drawStyleBlockMosaic(ctx, state, progress, hue); break;
   }
 
   // ── Exit — smooth fade to black with graphic transition ──
