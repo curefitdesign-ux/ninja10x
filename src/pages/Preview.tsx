@@ -71,24 +71,24 @@ const isVideoUrl = (url: string) => {
 // Background colors matched from each template - dark gradient shades
 const FRAME_COLORS: Record<FrameType, { bg: string; gradient: string }> = {
   shaky: { 
-    bg: 'rgba(20, 20, 30, 0.85)', 
-    gradient: 'linear-gradient(180deg, rgba(30, 30, 40, 0.9) 0%, rgba(10, 10, 15, 0.95) 100%)'
+    bg: 'rgba(20, 20, 30, 0.55)', 
+    gradient: 'linear-gradient(180deg, rgba(30, 30, 40, 0.6) 0%, rgba(10, 10, 15, 0.7) 100%)'
   },
   journal: { 
-    bg: 'rgba(15, 60, 50, 0.85)', 
-    gradient: 'linear-gradient(180deg, rgba(25, 80, 65, 0.9) 0%, rgba(10, 40, 35, 0.95) 100%)'
+    bg: 'rgba(15, 60, 50, 0.55)', 
+    gradient: 'linear-gradient(180deg, rgba(25, 80, 65, 0.6) 0%, rgba(10, 40, 35, 0.7) 100%)'
   },
   vogue: { 
-    bg: 'rgba(40, 40, 45, 0.85)', 
-    gradient: 'linear-gradient(180deg, rgba(50, 50, 55, 0.9) 0%, rgba(20, 20, 25, 0.95) 100%)'
+    bg: 'rgba(40, 40, 45, 0.55)', 
+    gradient: 'linear-gradient(180deg, rgba(50, 50, 55, 0.6) 0%, rgba(20, 20, 25, 0.7) 100%)'
   },
   fitness: { 
-    bg: 'rgba(50, 50, 20, 0.85)', 
-    gradient: 'linear-gradient(180deg, rgba(60, 60, 25, 0.9) 0%, rgba(35, 35, 15, 0.95) 100%)'
+    bg: 'rgba(50, 50, 20, 0.55)', 
+    gradient: 'linear-gradient(180deg, rgba(60, 60, 25, 0.6) 0%, rgba(35, 35, 15, 0.7) 100%)'
   },
   ticket: { 
-    bg: 'rgba(55, 50, 45, 0.85)', 
-    gradient: 'linear-gradient(180deg, rgba(65, 60, 55, 0.9) 0%, rgba(40, 35, 30, 0.95) 100%)'
+    bg: 'rgba(55, 50, 45, 0.55)', 
+    gradient: 'linear-gradient(180deg, rgba(65, 60, 55, 0.6) 0%, rgba(40, 35, 30, 0.7) 100%)'
   },
 };
 

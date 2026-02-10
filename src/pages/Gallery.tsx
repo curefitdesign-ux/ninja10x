@@ -1,10 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import ImageCropper from '@/components/ImageCropper';
 
 /**
  * Gallery page - Opens native file picker directly
- * This is a wrapper that triggers the native gallery picker on mount
- * and navigates to Preview with the selected media.
+ * After selection, shows ImageCropper for 9:16 crop before Preview.
  */
 const Gallery = () => {
   const location = useLocation();
@@ -14,11 +14,13 @@ const Gallery = () => {
   
   const dayNumber = (location.state as { dayNumber?: number })?.dayNumber || 1;
 
+  // Crop state
+  const [selectedMedia, setSelectedMedia] = useState<{ url: string; isVideo: boolean } | null>(null);
+
   useEffect(() => {
     // Trigger file picker immediately on mount (only once)
     if (!hasTriggeredRef.current && fileInputRef.current) {
       hasTriggeredRef.current = true;
-      // Small delay to ensure DOM is ready
       requestAnimationFrame(() => {
         fileInputRef.current?.click();
       });
@@ -30,27 +32,56 @@ const Gallery = () => {
     if (file) {
       const isVideo = file.type.startsWith('video/');
       const url = URL.createObjectURL(file);
-      navigate('/preview', {
-        state: {
-          imageUrl: url,
-          originalUrl: url,
-          isVideo,
-          dayNumber,
-          fromGallery: true,
-          file,
-        },
-        replace: true,
-      });
+      // Show cropper before going to preview
+      setSelectedMedia({ url, isVideo });
     } else {
-      // User cancelled - go back to previous page
       navigate(-1);
     }
   };
 
-  const handleCancel = () => {
-    // If user doesn't select anything, go back to previous page
+  const handleCropConfirm = (croppedDataUrl: string) => {
+    if (!selectedMedia) return;
+    navigate('/preview', {
+      state: {
+        imageUrl: croppedDataUrl,
+        originalUrl: selectedMedia.url,
+        isVideo: selectedMedia.isVideo,
+        dayNumber,
+        fromGallery: true,
+      },
+      replace: true,
+    });
+  };
+
+  const handleCropCancel = () => {
+    // Reset and re-trigger picker
+    setSelectedMedia(null);
+    hasTriggeredRef.current = false;
     navigate(-1);
   };
+
+  const handleCancel = () => {
+    navigate(-1);
+  };
+
+  // Show cropper if media selected
+  if (selectedMedia) {
+    return (
+      <ImageCropper
+        mediaSrc={selectedMedia.url}
+        isVideo={selectedMedia.isVideo}
+        onConfirm={handleCropConfirm}
+        onCancel={handleCropCancel}
+        onRetake={() => {
+          setSelectedMedia(null);
+          hasTriggeredRef.current = false;
+          requestAnimationFrame(() => {
+            fileInputRef.current?.click();
+          });
+        }}
+      />
+    );
+  }
 
   return (
     <div 
@@ -61,18 +92,16 @@ const Gallery = () => {
         minHeight: '-webkit-fill-available',
       }}
     >
-      {/* Hidden file input that's triggered on mount */}
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*,video/*"
-        capture={undefined} // Allow gallery selection
+        capture={undefined}
         className="hidden"
         onChange={handleFileChange}
         onBlur={handleCancel}
       />
       
-      {/* Loading indicator while picker is open */}
       <div className="flex flex-col items-center gap-4">
         <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" />
         <p className="text-white/50 text-sm">Select a photo or video...</p>
