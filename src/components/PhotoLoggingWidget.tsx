@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { isVideoUrl } from "@/lib/media";
 import ReelProgressPill from "./ReelProgressPill";
 import FloatingCardReactions from "./FloatingCardReactions";
-import { getRecapFromCache, hasRecapCached } from "@/hooks/use-recap-cache";
+import { getRecapFromCache } from "@/hooks/use-recap-cache";
 import { useAuth } from "@/hooks/use-auth";
 
 // Activity icons
@@ -596,7 +596,6 @@ const PhotoLoggingWidget = ({
   const [showActivitySheet, setShowActivitySheet] = useState(false);
   const [pendingUpload, setPendingUpload] = useState<{ weekIndex: number; dayIndex: number } | null>(null);
   const [showUploadOptions, setShowUploadOptions] = useState(false);
-  const [cachedWeeks, setCachedWeeks] = useState<Set<number>>(new Set());
   
   // Calculate completed weeks and current active week for pill display
   const getCompletedWeekCount = () => {
@@ -613,6 +612,7 @@ const PhotoLoggingWidget = ({
   };
   
   const completedWeeks = getCompletedWeekCount();
+  const showReelPill = completedWeeks > 0;
   
   // Get photos for each week (3 photos per week)
   const getWeekPhotos = useCallback((weekIndex: number): (LoggedPhoto | null)[] => {
@@ -632,29 +632,7 @@ const PhotoLoggingWidget = ({
     return { hasPhotos, isComplete, isCurrentWeek, isActive: hasPhotos || isCurrentWeek };
   }, [getWeekPhotos, currentWeek]);
 
-  // Check which completed weeks have cached recaps
-  useEffect(() => {
-    const checkCaches = async () => {
-      const newCached = new Set<number>();
-      for (let i = 0; i < 4; i++) {
-        const weekNum = i + 1;
-        const { isComplete } = getWeekStatus(i);
-        if (isComplete) {
-          const cached = await hasRecapCached(weekNum, user?.id);
-          if (cached) newCached.add(weekNum);
-        }
-      }
-      setCachedWeeks(newCached);
-    };
-    checkCaches();
-  }, [photos, user?.id, getWeekStatus]);
-
-  // Show pill only when focused week is complete
-  const focusedWeekComplete = getWeekStatus(focusedWeekIndex).isComplete;
-  const showReelPill = focusedWeekComplete;
-  const focusedWeekNumber = focusedWeekIndex + 1;
-  const focusedWeekCached = cachedWeeks.has(focusedWeekNumber);
-
+  // Find the current active week (last week with any photos that isn't complete, or first week with photos in next week)
   const getCurrentActiveWeekIndex = useCallback(() => {
     for (let i = 0; i <= 3; i++) {
       const weekPhotos = getWeekPhotos(i);
@@ -905,18 +883,19 @@ const PhotoLoggingWidget = ({
         {showReelPill && (
           <div className="w-full flex justify-center -mt-1 px-6">
             <ReelProgressPill
-              weekNumber={focusedWeekNumber}
-              state={focusedWeekCached ? 'complete' : 'idle'}
+              weekNumber={completedWeeks}
+              state={'creating'}
               progress={0}
               isActivelyGenerating={false}
               onPlay={() => {
-                const startDay = focusedWeekIndex * 3 + 1;
+                const weekIndex = completedWeeks - 1;
+                const startDay = weekIndex * 3 + 1;
                 const weekPhotos = photos.filter(p => 
                   Number(p.dayNumber) >= startDay && Number(p.dayNumber) <= startDay + 2
                 );
                 
                 if (weekPhotos.length >= 3) {
-                  handlePlayWeekRecap(weekPhotos, focusedWeekIndex);
+                  handlePlayWeekRecap(weekPhotos, weekIndex);
                 }
               }}
               className="py-1.5"
