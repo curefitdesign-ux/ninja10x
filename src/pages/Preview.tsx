@@ -173,6 +173,8 @@ const Preview = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
+  const [hasNudged, setHasNudged] = useState(false);
+  const [lowResBackground, setLowResBackground] = useState<string | null>(null);
 
   // Handle tap animation with haptic feedback
   const handleTap = (id: string) => {
@@ -487,7 +489,26 @@ const Preview = () => {
     });
   }, [currentFrame]);
 
-  // Scroll to the initially-selected frame on mount
+  // Generate low-res background for performance
+  useEffect(() => {
+    if (!imageUrl || isVideo) return;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      // Tiny resolution - will be blurred anyway
+      canvas.width = 32;
+      canvas.height = 32;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, 32, 32);
+        setLowResBackground(canvas.toDataURL('image/jpeg', 0.3));
+      }
+    };
+    img.src = imageUrl;
+  }, [imageUrl, isVideo]);
+
+  // Scroll to the initially-selected frame on mount + nudge animation
   useEffect(() => {
     if (!containerRef.current || !isLoaded) return;
 
@@ -502,6 +523,19 @@ const Preview = () => {
 
         const targetScroll = el.offsetLeft - (container.clientWidth - el.offsetWidth) / 2;
         container.scrollLeft = Math.max(0, targetScroll);
+
+        // Nudge animation: scroll right briefly then back to hint more templates
+        if (!hasNudged) {
+          setTimeout(() => {
+            if (!container) return;
+            const nudgeDistance = 60;
+            container.scrollTo({ left: targetScroll + nudgeDistance, behavior: 'smooth' });
+            setTimeout(() => {
+              container.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
+              setHasNudged(true);
+            }, 400);
+          }, 800);
+        }
       });
     });
   }, [isLoaded]);
@@ -643,11 +677,11 @@ const Preview = () => {
           minHeight: '-webkit-fill-available',
         }}
       >
-        {/* Blurred background image */}
+        {/* Blurred background image - low-res for performance */}
         <div 
           className="fixed inset-0 scale-150 transition-all duration-500 pointer-events-none"
           style={{
-            backgroundImage: `url("${imageUrl}")`,
+            backgroundImage: `url("${lowResBackground || imageUrl}")`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             filter: 'blur(80px) brightness(0.5)',
@@ -829,7 +863,7 @@ const Preview = () => {
         overflow: 'hidden',
       }}
     >
-      {/* Blurred background — screenshot of the captured media */}
+      {/* Blurred background — low-res version for performance */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {isVideo ? (
           <video
@@ -840,7 +874,7 @@ const Preview = () => {
           />
         ) : (
           <img
-            src={imageUrl || ''}
+            src={lowResBackground || imageUrl || ''}
             alt=""
             className="absolute inset-0 w-full h-full object-cover scale-[1.3]"
             style={{ filter: 'blur(60px) brightness(0.45) saturate(1.4)' }}
@@ -1055,7 +1089,7 @@ const Preview = () => {
                   </span>
                 </button>
 
-                {/* Duration row */}
+                {/* Duration row - optional */}
                 <button 
                   onClick={() => { handleTap('duration'); openEditSheet('duration'); }}
                   className={`w-full flex justify-between items-center py-3.5 ${config.secondaryInputType !== 'none' ? 'border-b border-white/[0.08]' : ''} tap-bounce min-h-[52px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
