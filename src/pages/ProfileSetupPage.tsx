@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Camera, X, Eye, EyeOff } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 
 import { supabase } from '@/integrations/supabase/client';
@@ -10,7 +9,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
 import { z } from 'zod';
 
-// Import Netflix-style preset avatars
+// Import preset avatars - color + sport themed
 import avatarRed from '@/assets/avatars/avatar-red.png';
 import avatarBlue from '@/assets/avatars/avatar-blue.png';
 import avatarPurple from '@/assets/avatars/avatar-purple.png';
@@ -19,6 +18,12 @@ import avatarOrange from '@/assets/avatars/avatar-orange.png';
 import avatarTeal from '@/assets/avatars/avatar-teal.png';
 import avatarPink from '@/assets/avatars/avatar-pink.png';
 import avatarYellow from '@/assets/avatars/avatar-yellow.png';
+import avatarBoxer from '@/assets/avatars/boxer.png';
+import avatarCyclist from '@/assets/avatars/cyclist.png';
+import avatarRunner from '@/assets/avatars/runner.png';
+import avatarSwimmer from '@/assets/avatars/swimmer.png';
+import avatarWeightlifter from '@/assets/avatars/weightlifter.png';
+import avatarYogi from '@/assets/avatars/yogi.png';
 
 const PRESET_AVATARS = [
   { id: 'red', src: avatarRed },
@@ -29,6 +34,12 @@ const PRESET_AVATARS = [
   { id: 'teal', src: avatarTeal },
   { id: 'pink', src: avatarPink },
   { id: 'yellow', src: avatarYellow },
+  { id: 'boxer', src: avatarBoxer },
+  { id: 'cyclist', src: avatarCyclist },
+  { id: 'runner', src: avatarRunner },
+  { id: 'swimmer', src: avatarSwimmer },
+  { id: 'weightlifter', src: avatarWeightlifter },
+  { id: 'yogi', src: avatarYogi },
 ];
 
 const nameSchema = z.string().trim().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters');
@@ -268,6 +279,33 @@ const ProfileSetupPage = () => {
           </p>
         </div>
 
+        {/* Name Input - at top */}
+        <div 
+          className="rounded-2xl p-4 mb-6"
+          style={{
+            background: 'rgba(255, 255, 255, 0.06)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+        >
+          <label className="text-white/50 text-xs mb-2 block">Your Name</label>
+          <input
+            type="text"
+            value={displayName}
+            onChange={(e) => {
+              setDisplayName(e.target.value);
+              if (nameError) setNameError(null);
+            }}
+            placeholder="Enter your name"
+            className="w-full h-12 bg-transparent border-none text-white text-lg placeholder:text-white/30 focus:outline-none px-0"
+            disabled={loading}
+            maxLength={50}
+          />
+          {nameError && (
+            <p className="text-red-400 text-xs mt-2">{nameError}</p>
+          )}
+        </div>
+
         {/* Avatar Display + Upload Button */}
         <div className="flex flex-col items-center mb-6">
           <input
@@ -276,11 +314,12 @@ const ProfileSetupPage = () => {
             accept="image/*"
             onChange={handleFileSelect}
             className="hidden"
+            id="avatar-file-input"
           />
           
           {/* Avatar Display Circle */}
           <div
-            className="relative w-36 h-36 rounded-full overflow-hidden mb-5"
+            className="relative w-32 h-32 rounded-full overflow-hidden mb-4"
             style={{
               background: avatarPreview 
                 ? 'transparent' 
@@ -306,21 +345,22 @@ const ProfileSetupPage = () => {
             )}
           </div>
 
-          {/* Upload Photo Button */}
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="relative flex items-center gap-3 px-6 py-3 rounded-2xl overflow-hidden active:scale-98 transition-transform"
+          {/* Upload Photo Button - use label for better mobile compat */}
+          <label
+            htmlFor="avatar-file-input"
+            className="relative flex items-center gap-3 px-6 py-3 rounded-2xl overflow-hidden active:scale-95 transition-transform cursor-pointer"
             style={{
               background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.2) 100%)',
               backdropFilter: 'blur(20px)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
               boxShadow: '0 8px 32px rgba(99, 102, 241, 0.2)',
+              opacity: loading ? 0.5 : 1,
+              pointerEvents: loading ? 'none' as const : 'auto' as const,
             }}
-            disabled={loading}
           >
             <Camera className="w-5 h-5 text-white/90" strokeWidth={2} />
             <span className="text-white font-medium text-sm">Upload Photo</span>
-          </button>
+          </label>
         </div>
 
         {/* Divider */}
@@ -330,8 +370,8 @@ const ProfileSetupPage = () => {
           <div className="flex-1 h-px bg-white/10" />
         </div>
 
-        {/* Preset Avatars Grid - 4x2 */}
-        <div className="grid grid-cols-4 gap-3 mb-8">
+        {/* Preset Avatars Grid - 4 columns */}
+        <div className="grid grid-cols-4 gap-3 mb-6">
           {PRESET_AVATARS.map((avatar) => (
             <button
               key={avatar.id}
@@ -376,34 +416,6 @@ const ProfileSetupPage = () => {
           ))}
         </div>
 
-        {/* Name Input */}
-        <div 
-          className="rounded-2xl p-4 mb-6"
-          style={{
-            background: 'rgba(255, 255, 255, 0.06)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-          }}
-        >
-          <label className="text-white/50 text-xs mb-2 block">Your Name</label>
-          <Input
-            type="text"
-            value={displayName}
-            onChange={(e) => {
-              setDisplayName(e.target.value);
-              if (nameError) setNameError(null);
-            }}
-            placeholder="Enter your name"
-            className="h-12 bg-transparent border-none text-white text-lg placeholder:text-white/30 focus-visible:ring-0 px-0"
-            disabled={loading}
-            maxLength={50}
-          />
-          {nameError && (
-            <p className="text-red-400 text-xs mt-2">{nameError}</p>
-          )}
-        </div>
-
-        {/* Story Visibility Toggle - Only in edit mode */}
         {editMode && (
           <div 
             className="rounded-2xl p-4 mb-6"

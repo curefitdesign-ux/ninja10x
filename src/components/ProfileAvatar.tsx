@@ -10,6 +10,12 @@ import avatarOrange from '@/assets/avatars/avatar-orange.png';
 import avatarTeal from '@/assets/avatars/avatar-teal.png';
 import avatarPink from '@/assets/avatars/avatar-pink.png';
 import avatarYellow from '@/assets/avatars/avatar-yellow.png';
+import avatarBoxer from '@/assets/avatars/boxer.png';
+import avatarCyclist from '@/assets/avatars/cyclist.png';
+import avatarRunner from '@/assets/avatars/runner.png';
+import avatarSwimmer from '@/assets/avatars/swimmer.png';
+import avatarWeightlifter from '@/assets/avatars/weightlifter.png';
+import avatarYogi from '@/assets/avatars/yogi.png';
 
 // Map avatar color names to their imported paths
 const AVATAR_MAP: Record<string, string> = {
@@ -21,6 +27,12 @@ const AVATAR_MAP: Record<string, string> = {
   'avatar-teal': avatarTeal,
   'avatar-pink': avatarPink,
   'avatar-yellow': avatarYellow,
+  'boxer': avatarBoxer,
+  'cyclist': avatarCyclist,
+  'runner': avatarRunner,
+  'swimmer': avatarSwimmer,
+  'weightlifter': avatarWeightlifter,
+  'yogi': avatarYogi,
 };
 
 // Resolve avatar URL - handles Vite-hashed paths stored in DB
