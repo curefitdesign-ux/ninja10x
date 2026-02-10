@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { activity, seed, journeyData } = await req.json();
+    const { activity, seed, journeyData, previousTrackIndex } = await req.json();
 
     const journeyContext = journeyData || {};
     const activities: string[] = journeyContext.activities || [activity || 'workout'];
@@ -97,6 +97,7 @@ Deno.serve(async (req) => {
     const userName: string = journeyContext.userName || 'User';
     const intensities: string[] = journeyContext.intensities || [];
     const prs: string[] = journeyContext.prs || [];
+    const prevIdx: number | null = typeof previousTrackIndex === 'number' ? previousTrackIndex : null;
 
     // ── Step 1: Fetch tracks from Google Sheet ──
     let sheetTracks: Array<Record<string, string>> = [];
@@ -123,6 +124,10 @@ Personal Records: ${prs.filter(Boolean).join(', ') || 'None'}
 Overall vibe: ${streakDays >= 6 ? 'Incredible streak, celebratory' : streakDays >= 3 ? 'Building momentum, motivated' : 'Just getting started, encouraging'}
 `.trim();
 
+        const avoidClause = prevIdx !== null
+          ? `\n- IMPORTANT: Do NOT pick track index ${prevIdx} — that was used last time. Pick a DIFFERENT track.`
+          : '';
+
         const prompt = `You are a music curator for a fitness journey recap video. Pick THE SINGLE BEST track from this library based on the user's workout data and content.
 
 MUSIC LIBRARY (from Google Sheet):
@@ -132,7 +137,7 @@ USER JOURNEY:
 ${userJourneySummary}
 
 Rules:
-- CRITICAL: Do NOT select any Hindi songs, Bollywood songs, or songs in Hindi/Indian languages. English or instrumental tracks ONLY.
+- CRITICAL: Do NOT select any Hindi songs, Bollywood songs, or songs in Hindi/Indian languages. English or instrumental tracks ONLY.${avoidClause}
 - Match the song's mood/genre/tags to the user's specific activities and energy level
 - Consider the visual content: photos/videos of the user's workouts should feel enhanced by the music
 - Boxing/MMA/martial arts → intense, aggressive, hard-hitting electronic or rock tracks
@@ -165,7 +170,7 @@ Return ONLY the track index number (e.g. "5"). Nothing else.`;
               { role: 'system', content: 'You are a music selection AI. Return ONLY a single number — the index of the best track. No explanation.' },
               { role: 'user', content: prompt },
             ],
-            temperature: 0.7,
+            temperature: 1.2,
             max_tokens: 10,
           }),
         });
@@ -201,12 +206,13 @@ Return ONLY the track index number (e.g. "5"). Nothing else.`;
                     url: trackUrl,
                     title: trackTitle,
                     artist: 'Google Sheet Library',
-                    duration: 120,
+                    duration: parseInt(selectedRow['duration'] || '120', 10) || 120,
                     mood: trackMood,
                     energy: 'medium',
                     tags: activities,
                     aiSelected: true,
                     source: 'google-sheet',
+                    trackIndex: parsed,
                   },
                 }),
                 { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },

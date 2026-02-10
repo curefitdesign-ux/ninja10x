@@ -159,6 +159,7 @@ function seededRand(seed: number): number {
 
 // ============ PER-GENERATION UNIQUE SEED ============
 let _genSeed = 0;
+let _lastSelectedTrackIndex: number | null = null;
 
 /** Seeded random that stays consistent within a generation */
 function genRand(slot: number): number {
@@ -3063,18 +3064,27 @@ async function fetchActivityMusic(activity: string, durationSeconds: number, all
       userName: userName || 'User',
     };
 
-    console.log('[MotionRecap] 🤖 AI music selection — activities:', journeyData.activities.join(', '), 'streak:', journeyData.streakDays);
+    // Pass previousTrackIndex so AI avoids repeating the same song on regeneration
+    const previousTrackIndex = _lastSelectedTrackIndex;
+
+    console.log('[MotionRecap] 🤖 AI music selection — activities:', journeyData.activities.join(', '), 'streak:', journeyData.streakDays, 'prevTrack:', previousTrackIndex);
     const { data, error } = await supabase.functions.invoke('fetch-activity-music', {
-      body: { activity, seed, journeyData },
+      body: { activity, seed, journeyData, previousTrackIndex },
     });
 
     if (error || !data?.success || !data?.track?.url) {
-      console.warn('[MotionRecap] Pixabay fetch failed:', error || data?.error);
+      console.warn('[MotionRecap] Music fetch failed:', error || data?.error);
       return null;
     }
 
+    // Remember selected track index for next regeneration
+    if (typeof data.track.trackIndex === 'number') {
+      _lastSelectedTrackIndex = data.track.trackIndex;
+    }
+
     const trackUrl = data.track.url;
-    console.log('[MotionRecap] 🎵 Downloading:', data.track.title, 'by', data.track.artist, `(ID: ${data.track.pixabayId})`);
+    const trackDuration = data.track.duration || 120; // seconds from sheet
+    console.log('[MotionRecap] 🎵 Downloading:', data.track.title, 'by', data.track.artist, `(duration: ${trackDuration}s)`);
 
     const response = await fetch(trackUrl);
     if (!response.ok) {
@@ -3087,7 +3097,19 @@ async function fetchActivityMusic(activity: string, durationSeconds: number, all
     const decoded = await audioCtx.decodeAudioData(arrayBuffer);
     audioCtx.close();
 
-    // Trim or loop to match video duration
+    // ── Smart offset: skip intro (usually has vocals/buildup) ──
+    // Pick a random offset between 15-40% of the track to land on an instrumental/drop section
+    // Most pop/EDM songs: intro 0-15%, verse 15-30%, chorus 30-45%, etc.
+    // Starting at 20-40% usually hits a high-energy instrumental section
+    const trackSamples = decoded.length;
+    const minOffsetPct = 0.15; // skip at least first 15% (intro/vocals)
+    const maxOffsetPct = 0.45; // don't go past 45%
+    const offsetPct = minOffsetPct + seededRand(_genSeed * 41 + 7) * (maxOffsetPct - minOffsetPct);
+    const startSample = Math.floor(trackSamples * offsetPct);
+    
+    console.log(`[MotionRecap] 🎯 Smart offset: starting at ${(offsetPct * 100).toFixed(0)}% of track (${(startSample / 44100).toFixed(1)}s in)`);
+
+    // Trim from smart offset to match video duration
     const targetLength = Math.ceil(44100 * durationSeconds);
     const result = new AudioBuffer({
       length: targetLength,
@@ -3100,7 +3122,8 @@ async function fetchActivityMusic(activity: string, durationSeconds: number, all
       const dst = result.getChannelData(ch);
 
       for (let i = 0; i < targetLength; i++) {
-        const srcIdx = i % src.length;
+        // Start from smart offset, loop if needed
+        const srcIdx = (startSample + i) % src.length;
         let sample = src[srcIdx];
 
         // Smooth fade in/out
@@ -3112,7 +3135,7 @@ async function fetchActivityMusic(activity: string, durationSeconds: number, all
       }
     }
 
-    console.log('[MotionRecap] ✅ Real music decoded and trimmed to', durationSeconds.toFixed(1), 's');
+    console.log('[MotionRecap] ✅ Real music decoded, smart-trimmed to', durationSeconds.toFixed(1), 's');
     return result;
   } catch (err) {
     console.warn('[MotionRecap] Music fetch error:', err);
