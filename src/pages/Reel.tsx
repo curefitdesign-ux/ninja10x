@@ -1311,11 +1311,11 @@ const Reel = () => {
             <div className="flex items-center justify-center gap-2" style={{ height: 20 }}>
               <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
               <span className="text-white/40">•</span>
-              {isWeekRecapStory ? (
+              {isWeekRecapStory || isRecapActivity ? (
                 <span className="text-white/60 text-xs">Week {weekRecapNumber || 1} Recap</span>
-              ) : (
+              ) : currentActivity.dayNumber < 1000 ? (
                 <span className="text-white/60 text-xs">Week {week} • Day {dayInWeek}</span>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
