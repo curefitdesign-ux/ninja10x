@@ -754,6 +754,51 @@ const Reel = () => {
     }
   }, [weekRecapVideoFromNav, weekRecapNumber]);
 
+  // Handler: Share current story via Web Share API
+  const handleShareStory = useCallback(async () => {
+    try {
+      const mediaUrl = currentActivity?.storageUrl || currentActivity?.originalUrl;
+      const userName = currentGroup?.displayName || 'Someone';
+      const activityName = currentActivity?.activity || 'workout';
+      const shareText = isOwnStory 
+        ? `Check out my ${activityName} on my fitness journey! 💪`
+        : `Check out ${userName}'s ${activityName}! 🔥`;
+
+      if (navigator.share) {
+        const shareData: ShareData = {
+          title: `${isOwnStory ? 'My' : `${userName}'s`} Fitness Story`,
+          text: shareText,
+        };
+
+        // Try to share the media file if possible
+        if (mediaUrl) {
+          try {
+            const response = await fetch(mediaUrl);
+            const blob = await response.blob();
+            const ext = currentActivity?.isVideo ? 'mp4' : 'jpg';
+            const file = new File([blob], `story.${ext}`, { type: blob.type });
+            if (navigator.canShare?.({ files: [file] })) {
+              shareData.files = [file];
+            }
+          } catch {
+            if (mediaUrl.startsWith('http')) {
+              shareData.url = mediaUrl;
+            }
+          }
+        }
+
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        toast.success('Copied to clipboard!');
+      }
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') {
+        toast.error('Failed to share');
+      }
+    }
+  }, [currentActivity, currentGroup, isOwnStory]);
+
   if (loading) {
     return <ReelViewerSkeleton />;
   }
@@ -1220,8 +1265,14 @@ const Reel = () => {
               </div>
             </div>
             
-            {/* Right side - Close button */}
-            <div className="w-10 shrink-0 flex justify-end">
+            {/* Right side - Share + Close buttons */}
+            <div className="flex items-center shrink-0">
+              <button
+                onClick={handleShareStory}
+                className="text-white/80 hover:text-white transition-colors p-2 min-w-[40px] min-h-[40px] flex items-center justify-center active:scale-95"
+              >
+                <Share2 className="w-5 h-5" strokeWidth={1.5} />
+              </button>
               <button
                 onClick={handleClose}
                 className="text-white/80 hover:text-white transition-colors p-2 min-w-[40px] min-h-[40px] flex items-center justify-center"
