@@ -1,6 +1,7 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import CameraUI from '@/components/CameraUI';
+import ImageCropper from '@/components/ImageCropper';
 
 const Camera = () => {
   const navigate = useNavigate();
@@ -14,23 +15,49 @@ const Camera = () => {
   const dayNumber = state?.dayNumber ?? 1;
   const week = Math.ceil(dayNumber / 3);
 
+  // Crop state - show cropper after capture
+  const [capturedMedia, setCapturedMedia] = useState<{ url: string; isVideo: boolean } | null>(null);
+
   const handleCapture = useCallback((mediaDataUrl: string, isVideo?: boolean) => {
-    // Navigate to preview with captured media - activity selection happens in Preview
+    // Show cropper before going to preview
+    setCapturedMedia({ url: mediaDataUrl, isVideo: isVideo || false });
+  }, []);
+
+  const handleCropConfirm = (croppedDataUrl: string) => {
+    if (!capturedMedia) return;
     navigate('/preview', {
       state: {
-        imageUrl: mediaDataUrl,
-        originalUrl: mediaDataUrl,
-        isVideo: isVideo || false,
+        imageUrl: croppedDataUrl,
+        originalUrl: capturedMedia.url,
+        isVideo: capturedMedia.isVideo,
         dayNumber,
         fromCamera: true,
       },
       replace: true,
     });
-  }, [navigate, dayNumber]);
+  };
+
+  const handleCropCancel = () => {
+    // Go back to camera
+    setCapturedMedia(null);
+  };
 
   const handleClose = useCallback(() => {
     navigate('/', { replace: true });
   }, [navigate]);
+
+  // Show cropper after capture
+  if (capturedMedia) {
+    return (
+      <ImageCropper
+        mediaSrc={capturedMedia.url}
+        isVideo={capturedMedia.isVideo}
+        onConfirm={handleCropConfirm}
+        onCancel={handleCropCancel}
+        onRetake={() => setCapturedMedia(null)}
+      />
+    );
+  }
 
   return (
     <div 
