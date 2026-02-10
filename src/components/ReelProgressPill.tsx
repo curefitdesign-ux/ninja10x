@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Play } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-export type PillState = 'creating' | 'rendering' | 'complete' | 'celebrate';
+export type PillState = 'idle' | 'creating' | 'rendering' | 'complete' | 'celebrate';
 
 interface Reaction {
   type: string;
@@ -342,6 +342,7 @@ const ReelProgressPill = ({
   const isCelebrating = state === 'celebrate' || showCelebration;
   const needsAttention = justCompleted && state === 'complete';
   const isComplete = state === 'complete';
+  const isIdle = state === 'idle';
   const isCreating = state === 'creating';
   const isRendering = state === 'rendering';
 
@@ -455,6 +456,16 @@ const ReelProgressPill = ({
                 style={{ filter: 'drop-shadow(0 0 6px rgba(139, 92, 246, 0.4))' }}
               />
             </motion.div>
+          ) : isIdle ? (
+            <motion.div
+              key="stacked-cards"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+            >
+              <StackedCardsIcon />
+            </motion.div>
           ) : (
             <motion.div
               key="play-badge"
@@ -494,7 +505,7 @@ const ReelProgressPill = ({
                   color: isComplete ? '#34d399' : 'rgba(255,255,255,0.6)',
                 }}
               >
-                {isComplete ? 'PLAY NOW' : isRendering ? 'Rendering...' : isActivelyGenerating ? 'Creating...' : 'Generate'}
+                {isComplete ? 'Play' : isRendering ? 'Rendering...' : isActivelyGenerating ? 'Creating...' : 'Generate'}
               </span>
             </motion.div>
           </AnimatePresence>

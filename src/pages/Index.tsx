@@ -144,19 +144,26 @@ const Index = () => {
     });
   }, [navigate]);
 
-  // Track cached recap state
-  const [cachedWeek, setCachedWeek] = useState<number | null>(null);
+  // Track cached recap state for all completed weeks
+  const [cachedWeeks, setCachedWeeks] = useState<Set<number>>(new Set());
   const cacheCheckRef = useRef(false);
 
-  // Check if latest week recap is cached
+  // Check cache for ALL completed weeks
   useEffect(() => {
     const completedWeeks = Math.floor(photos.length / 3);
     if (completedWeeks <= 0 || cacheCheckRef.current) return;
     cacheCheckRef.current = true;
-    hasRecapCached(completedWeeks, userId || undefined).then(cached => {
-      setCachedWeek(cached ? completedWeeks : null);
-    });
-  }, [photos.length]);
+    
+    const checkAll = async () => {
+      const cached = new Set<number>();
+      for (let w = 1; w <= completedWeeks; w++) {
+        const isCached = await hasRecapCached(w, userId || undefined);
+        if (isCached) cached.add(w);
+      }
+      setCachedWeeks(cached);
+    };
+    checkAll();
+  }, [photos.length, userId]);
 
   // Play cached recap directly
   const playCachedRecap = useCallback(async (weekNumber: number) => {
@@ -168,16 +175,22 @@ const Index = () => {
       });
     } else {
       // Cache miss - fall back to generation
-      handleGenerateReel(photos);
+      const weekStart = (weekNumber - 1) * 3;
+      const weekPhotos = photos.slice(weekStart, weekStart + 3);
+      if (weekPhotos.length === 3) {
+        handleGenerateReel(weekPhotos);
+      }
     }
-  }, [navigate, handleGenerateReel, photos]);
+  }, [navigate, handleGenerateReel, photos, userId]);
 
-  // Reel pill for WidgetLayout3
+  // Reel pill for WidgetLayout3 — show latest completed week with correct CTA
   const reelPill = (() => {
     const completedWeeks = Math.floor(photos.length / 3);
     if (completedWeeks <= 0) return null;
 
-    const weekStart = (completedWeeks - 1) * 3;
+    // Show the latest completed week
+    const targetWeek = completedWeeks;
+    const weekStart = (targetWeek - 1) * 3;
     const weekPhotos = photos.slice(weekStart, weekStart + 3);
 
     const totalReactions = weekPhotos.reduce((sum, p) => {
@@ -186,21 +199,22 @@ const Index = () => {
       return sum + photoTotal;
     }, 0);
 
-    const isCached = cachedWeek === completedWeeks;
-    const state: PillState = isCached ? 'complete' : 'creating';
+    const isCached = cachedWeeks.has(targetWeek);
+    // cached → 'complete' (Play), not cached → 'idle' (Generate)
+    const state: PillState = isCached ? 'complete' : 'idle';
 
     const handlePlay = () => {
       if (isCached) {
-        console.log('[ReelPill] Playing cached recap for week', completedWeeks);
-        playCachedRecap(completedWeeks);
+        console.log('[ReelPill] Playing cached recap for week', targetWeek);
+        playCachedRecap(targetWeek);
       } else {
-        console.log('[ReelPill] onPlay tapped — navigating to reel-generation');
+        console.log('[ReelPill] Generating recap for week', targetWeek);
         handleGenerateReel(photos);
       }
     };
 
     return {
-      weekNumber: completedWeeks,
+      weekNumber: targetWeek,
       state,
       progress: 0,
       totalReactions,
