@@ -218,37 +218,16 @@ const ImmersiveHomeLayout = ({
                 />
               </motion.div>
 
-              {/* Glass pill CTA */}
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
+              {/* Motivational text - prominent, no box */}
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: 0.35 }}
-                className="mt-8"
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="mt-8 text-center text-white/90 text-lg font-semibold leading-snug px-4"
+                style={{ textShadow: '0 2px 16px rgba(0,0,0,0.4)' }}
               >
-                <button
-                  onClick={() => setShowMediaSheet(true)}
-                  className="flex items-center gap-2.5 px-5 py-3 rounded-full active:scale-[0.96] transition-transform"
-                  style={{
-                    background: 'rgba(255,255,255,0.1)',
-                    backdropFilter: 'blur(30px)',
-                    WebkitBackdropFilter: 'blur(30px)',
-                    border: '1px solid rgba(255,255,255,0.14)',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.12)',
-                  }}
-                >
-                  <span className="text-white/85 font-semibold text-sm">
-                    Day {latestPhoto.dayNumber}
-                  </span>
-                  {latestPhoto.duration && (
-                    <>
-                      <div className="w-px h-4 bg-white/15" />
-                      <span className="text-white/50 text-sm">{latestPhoto.duration}</span>
-                    </>
-                  )}
-                  <div className="w-px h-4 bg-white/15" />
-                  <Plus className="w-4 h-4 text-white/60" />
-                </button>
-              </motion.div>
+                Nice one, {firstName}! 📸 {3 - (photos.length % 3 === 0 ? 3 : photos.length % 3)} more to complete this week.
+              </motion.p>
             </>
           ) : (
             /* Empty state */
@@ -309,19 +288,7 @@ const ImmersiveHomeLayout = ({
 
         {/* Bottom section */}
         <div className="relative z-10 pb-28">
-          {/* Journey label */}
-          {pastPhotos.length > 0 && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.45 }}
-              className="px-5 mb-3 text-white/50 text-[13px] font-semibold tracking-wide"
-            >
-              {firstName}, your journey
-            </motion.p>
-          )}
-
-          {/* Horizontal scroll cards */}
+          {/* Horizontal scroll - no box, just thumbnails */}
           {pastPhotos.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -339,20 +306,12 @@ const ImmersiveHomeLayout = ({
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handlePhotoTap(photo)}
                   className="flex-shrink-0 rounded-2xl overflow-hidden relative"
-                  style={{
-                    width: '110px',
-                    height: '110px',
-                    background: 'rgba(255,255,255,0.06)',
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
-                  }}
+                  style={{ width: '100px', height: '100px' }}
                 >
                   {photo.isVideo || isVideoUrl(photo.storageUrl) ? (
                     <video
                       src={photo.storageUrl}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover rounded-2xl"
                       muted playsInline preload="metadata"
                       onLoadedData={(e) => { (e.target as HTMLVideoElement).currentTime = 0.1; }}
                     />
@@ -360,12 +319,12 @@ const ImmersiveHomeLayout = ({
                     <img
                       src={photo.storageUrl}
                       alt={photo.activity || ''}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover rounded-2xl"
                     />
                   )}
                   <div
                     className="absolute inset-x-0 bottom-0 p-2"
-                    style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.65))' }}
+                    style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.55))' }}
                   >
                     <span className="text-white/90 text-[10px] font-semibold tracking-wide uppercase block truncate">
                       {photo.activity || 'Workout'}
@@ -373,25 +332,6 @@ const ImmersiveHomeLayout = ({
                   </div>
                 </motion.button>
               ))}
-
-              {/* Add card */}
-              <motion.button
-                initial={{ opacity: 0, x: 24 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + pastPhotos.length * 0.06 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowMediaSheet(true)}
-                className="flex-shrink-0 rounded-2xl flex flex-col items-center justify-center gap-2"
-                style={{
-                  width: '110px',
-                  height: '110px',
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1.5px dashed rgba(255,255,255,0.1)',
-                }}
-              >
-                <Plus className="w-5 h-5 text-white/25" />
-                <span className="text-white/25 text-[10px] font-medium">Add</span>
-              </motion.button>
             </motion.div>
           )}
 
