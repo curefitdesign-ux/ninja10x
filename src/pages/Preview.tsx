@@ -539,16 +539,18 @@ const Preview = () => {
         const targetScroll = el.offsetLeft - (container.clientWidth - el.offsetWidth) / 2;
         container.scrollLeft = Math.max(0, targetScroll);
 
-        // Nudge animation: scroll right briefly then back to hint more templates
+        // Nudge animation: scroll all the way right then back to center to hint more templates
         if (!hasNudged) {
           setTimeout(() => {
             if (!container) return;
-            const nudgeDistance = 60;
-            container.scrollTo({ left: targetScroll + nudgeDistance, behavior: 'smooth' });
+            // Scroll to the very end (rightmost position)
+            const maxScroll = container.scrollWidth - container.clientWidth;
+            container.scrollTo({ left: maxScroll, behavior: 'smooth' });
             setTimeout(() => {
+              // Scroll back to the originally selected frame
               container.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
               setHasNudged(true);
-            }, 400);
+            }, 600);
           }, 800);
         }
       });
