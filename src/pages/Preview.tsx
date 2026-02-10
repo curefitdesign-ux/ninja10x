@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil, Trash2, ImagePlus, MoreHorizontal, Footprints, Bike, MountainSnow, PersonStanding, Dumbbell } from 'lucide-react';
+import { X, Check, Pencil, Trash2, ImagePlus, MoreHorizontal, Footprints, Bike, MountainSnow, PersonStanding, Dumbbell, Camera, Image as ImageIcon } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { CricketBatBall, BoxingGlove, FootballIcon, Shuttlecock, BasketballIcon, TennisBall } from '@/components/SportIcons';
 import ShareSheet from '@/components/ShareSheet';
@@ -155,6 +155,7 @@ const Preview = () => {
   const [customActivityName, setCustomActivityName] = useState('');
   
   const [elementsHidden, setElementsHidden] = useState(false);
+  const [mediaSource, setMediaSource] = useState<'camera' | 'gallery' | null>(null);
   const [isReview, setIsReview] = useState(false);
   const [photoId, setPhotoId] = useState<string | null>(null);
   const [dayNumber, setDayNumber] = useState<number>(1);
@@ -218,8 +219,8 @@ const Preview = () => {
     if (mediaUrl && (state?.fromCamera || state?.fromGallery)) {
       setImageUrl(mediaUrl);
       setIsVideo(state.isVideo ?? isVideoUrl(mediaUrl));
-      setActivity(null); // Don't set default - let user select
-      // Start with empty values - only show on card if user enters data
+      setActivity(null);
+      setMediaSource(state.fromCamera ? 'camera' : 'gallery');
       setDuration(state.duration || '');
       setPr(state.pr || '');
       setIsReview(false);
@@ -966,7 +967,11 @@ const Preview = () => {
             onClick={handleRetake}
             className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm tap-bounce ${tappedElement === 'retake-btn' ? 'animate-liquid-tap' : ''}`}
           >
-            <ImagePlus className="w-5 h-5 text-white" />
+            {mediaSource === 'camera' ? (
+              <Camera className="w-5 h-5 text-white" />
+            ) : (
+              <ImageIcon className="w-5 h-5 text-white" />
+            )}
           </button>
         </div>
         
