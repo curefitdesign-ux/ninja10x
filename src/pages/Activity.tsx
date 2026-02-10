@@ -485,8 +485,8 @@ const Activity = () => {
                   whileHover={{ scale: 1.02 }}
                   className="flex flex-col items-center group"
                 >
-                  <div className="relative w-20 h-20 flex items-center justify-center mb-2">
-                    <img src={activity.icon} alt={activity.label} className="w-16 h-16 object-contain" />
+                  <div className="relative w-14 h-14 flex items-center justify-center mb-2">
+                    <img src={activity.icon} alt={activity.label} className="w-11 h-11 object-contain" />
                   </div>
                   <span className="text-[10px] text-white/60 text-center whitespace-pre-line leading-tight group-hover:text-white/80 transition-colors">
                     {activity.label}
