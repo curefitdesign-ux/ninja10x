@@ -124,6 +124,11 @@ export default function ReactionNotificationPill() {
             reaction_type: string;
           };
           
+          console.log('[ReactionPill] New reaction received:', newReaction.id, 'for activity:', newReaction.activity_id);
+          console.log('[ReactionPill] My activities:', [...userActivitiesRef.current]);
+          console.log('[ReactionPill] Is my activity?', userActivitiesRef.current.has(newReaction.activity_id));
+          console.log('[ReactionPill] From someone else?', newReaction.user_id !== user.id);
+          
           // Only notify if this is a reaction to the current user's activity
           // and it's from someone else
           if (
@@ -158,11 +163,12 @@ export default function ReactionNotificationPill() {
               clearTimeout(dismissTimeoutRef.current);
               dismissTimeoutRef.current = null;
             }
-            // Pill persists until user taps and views - no auto-dismiss
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[ReactionPill] Channel status:', status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
