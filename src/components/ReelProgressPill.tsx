@@ -138,18 +138,10 @@ const AbstractPattern = () => (
   </div>
 );
 
-// Play icon for complete state (no emoji)
+// Play icon for complete state — just the icon, no circular background
 const PlayBadge = () => (
   <div className="relative w-8 h-8 flex-shrink-0 flex items-center justify-center">
-    <div 
-      className="w-8 h-8 rounded-full flex items-center justify-center"
-      style={{
-        background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.25) 0%, rgba(16, 185, 129, 0.2) 100%)',
-        border: '1.5px solid rgba(52, 211, 153, 0.5)',
-      }}
-    >
-      <Play className="w-3.5 h-3.5 ml-0.5 text-emerald-400" fill="currentColor" />
-    </div>
+    <Play className="w-5 h-5 ml-0.5 text-emerald-400" fill="currentColor" />
   </div>
 );
 

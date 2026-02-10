@@ -94,13 +94,11 @@ const ReelGeneration = () => {
   const navigateToReel = useCallback((videoUrl: string, weekNumber: number) => {
     setProgress(100);
     setPhase('Your story is ready ✨');
-    toast.success('Your recap video is ready!');
-    setTimeout(() => {
-      navigate('/reel', {
-        replace: true,
-        state: { weekRecapVideo: videoUrl, weekNumber },
-      });
-    }, 400);
+    // Navigate immediately — no delay for cached reels
+    navigate('/reel', {
+      replace: true,
+      state: { weekRecapVideo: videoUrl, weekNumber },
+    });
   }, [navigate]);
 
   useEffect(() => {
