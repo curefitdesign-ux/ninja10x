@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import ImmersiveHomeLayout from '@/components/ImmersiveHomeLayout';
 import PullToRefresh from '@/components/PullToRefresh';
 
-import CommunityStoriesWidget from '@/components/CommunityStoriesWidget';
 import SharedImageTransition from '@/components/SharedImageTransition';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 import type { PillState } from '@/components/ReelProgressPill';
@@ -418,11 +417,6 @@ const Index = () => {
             weekTransitionAnimation={weekTransitionAnimation}
             reelPill={reelPill}
           />
-          
-          {/* Community stories nudge widget */}
-          <div className="relative z-10 -mt-20 pb-24">
-            <CommunityStoriesWidget />
-          </div>
         </PullToRefresh>
       )}
 
