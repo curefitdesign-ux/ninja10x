@@ -1415,7 +1415,7 @@ const Reel = () => {
                             src={mediaUrl}
                             className="w-full h-full rounded-3xl"
                             style={{ 
-                              objectFit: 'cover',
+                              objectFit: 'contain',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
                               opacity: mediaLoaded ? 1 : 0,
                               transition: 'opacity 0.2s ease',
@@ -1443,7 +1443,7 @@ const Reel = () => {
                             loading="eager"
                             decoding="async"
                             style={{ 
-                              objectFit: 'cover',
+                              objectFit: 'contain',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
                               opacity: mediaLoaded ? 1 : 0,
                               transition: 'opacity 0.2s ease',
