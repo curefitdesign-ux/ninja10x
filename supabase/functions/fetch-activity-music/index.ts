@@ -123,7 +123,7 @@ Personal Records: ${prs.filter(Boolean).join(', ') || 'None'}
 Overall vibe: ${streakDays >= 6 ? 'Incredible streak, celebratory' : streakDays >= 3 ? 'Building momentum, motivated' : 'Just getting started, encouraging'}
 `.trim();
 
-        const prompt = `You are a music curator for a fitness journey recap video. Pick THE SINGLE BEST track from this library based on the user's workout data.
+        const prompt = `You are a music curator for a fitness journey recap video. Pick THE SINGLE BEST track from this library based on the user's workout data and content.
 
 MUSIC LIBRARY (from Google Sheet):
 ${libraryContext}
@@ -132,14 +132,22 @@ USER JOURNEY:
 ${userJourneySummary}
 
 Rules:
-- Match the song's mood/genre/tags to the user's activities and energy level
-- Boxing/MMA → intense, aggressive tracks
-- Yoga/meditation → calm, peaceful tracks
-- Running → rhythmic, upbeat tracks
-- Cycling → groovy, driving tracks
+- CRITICAL: Do NOT select any Hindi songs, Bollywood songs, or songs in Hindi/Indian languages. English or instrumental tracks ONLY.
+- Match the song's mood/genre/tags to the user's specific activities and energy level
+- Consider the visual content: photos/videos of the user's workouts should feel enhanced by the music
+- Boxing/MMA/martial arts → intense, aggressive, hard-hitting electronic or rock tracks
+- Yoga/meditation/stretching → calm, ambient, peaceful instrumental tracks
+- Running/jogging/sprinting → rhythmic, upbeat, high-BPM tracks with driving energy
+- Cycling/spinning → groovy, driving, EDM or electronic tracks
+- Weight training/gym → powerful, bass-heavy, motivational tracks
+- Swimming → flowing, atmospheric tracks
+- Team sports (basketball, football, cricket) → energetic, anthemic, stadium-feel tracks
+- Trekking/hiking → epic, cinematic, nature-inspired tracks
+- Dancing → funky, groove-heavy, rhythmic tracks
 - Long streak (6+ days) → celebratory/triumphant tracks
 - If the user set personal records → lean celebratory/intense
-- Look at ALL columns in the library — title, mood, genre, tags, category — to find the best match
+- Look at ALL columns in the library — title, mood, genre, tags, category, language — to find the best match
+- Prefer instrumental or English-language tracks that work universally
 
 Return ONLY the track index number (e.g. "5"). Nothing else.`;
 
