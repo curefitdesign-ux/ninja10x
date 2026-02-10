@@ -183,42 +183,37 @@ const Index = () => {
     }
   }, [navigate, handleGenerateReel, photos, userId]);
 
+  // Handler: week-specific reel tap from ImmersiveHomeLayout
+  const handleWeekReelTap = useCallback((weekNumber: number) => {
+    const isCached = cachedWeeks.has(weekNumber);
+    if (isCached) {
+      console.log('[WeekReelTap] Playing cached recap for week', weekNumber);
+      playCachedRecap(weekNumber);
+    } else {
+      console.log('[WeekReelTap] Generating recap for week', weekNumber);
+      const weekStart = (weekNumber - 1) * 3;
+      const weekPhotos = photos.slice(weekStart, weekStart + 3);
+      if (weekPhotos.length === 3) {
+        handleGenerateReel(weekPhotos);
+      }
+    }
+  }, [cachedWeeks, playCachedRecap, photos, handleGenerateReel]);
+
   // Reel pill for WidgetLayout3 — show latest completed week with correct CTA
   const reelPill = (() => {
     const completedWeeks = Math.floor(photos.length / 3);
     if (completedWeeks <= 0) return null;
 
-    // Show the latest completed week
     const targetWeek = completedWeeks;
-    const weekStart = (targetWeek - 1) * 3;
-    const weekPhotos = photos.slice(weekStart, weekStart + 3);
-
-    const totalReactions = weekPhotos.reduce((sum, p) => {
-      const reactions = p.reactions ? Object.values(p.reactions) : [];
-      const photoTotal = reactions.reduce((s, r) => s + (r?.count ?? 0), 0);
-      return sum + photoTotal;
-    }, 0);
-
     const isCached = cachedWeeks.has(targetWeek);
-    // cached → 'complete' (Play), not cached → 'idle' (Generate)
     const state: PillState = isCached ? 'complete' : 'idle';
-
-    const handlePlay = () => {
-      if (isCached) {
-        console.log('[ReelPill] Playing cached recap for week', targetWeek);
-        playCachedRecap(targetWeek);
-      } else {
-        console.log('[ReelPill] Generating recap for week', targetWeek);
-        handleGenerateReel(photos);
-      }
-    };
 
     return {
       weekNumber: targetWeek,
       state,
       progress: 0,
-      totalReactions,
-      onPlay: handlePlay,
+      totalReactions: 0,
+      onPlay: () => handleWeekReelTap(targetWeek),
       isActivelyGenerating: false,
     };
   })();
@@ -430,6 +425,8 @@ const Index = () => {
             isUploading={isUploading}
             weekTransitionAnimation={weekTransitionAnimation}
             reelPill={reelPill}
+            onWeekReelTap={handleWeekReelTap}
+            cachedWeeks={cachedWeeks}
           />
         </PullToRefresh>
       )}
