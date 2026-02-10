@@ -1352,7 +1352,7 @@ const Reel = () => {
                 
                 return (
                   <div
-                    className="relative w-full max-w-[307px] overflow-hidden rounded-2xl"
+                    className="relative w-full max-w-[307px] overflow-hidden rounded-3xl"
                     style={{ aspectRatio: '9/16' }}
                   >
                     <AnimatePresence mode="popLayout">
@@ -1370,7 +1370,7 @@ const Reel = () => {
                         {isRecapGenerating ? (
                           // Show generating placeholder for week recap
                           <div 
-                            className="w-full h-full rounded-2xl flex flex-col items-center justify-center gap-6"
+                            className="w-full h-full rounded-3xl flex flex-col items-center justify-center gap-6"
                             style={{
                               background: 'linear-gradient(135deg, hsl(var(--muted)) 0%, hsl(var(--background)) 100%)',
                             }}
@@ -1413,7 +1413,7 @@ const Reel = () => {
                             ref={videoRef}
                             key={mediaUrl}
                             src={mediaUrl}
-                            className="w-full h-full rounded-2xl"
+                            className="w-full h-full rounded-3xl"
                             style={{ 
                               objectFit: 'cover',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
@@ -1439,7 +1439,7 @@ const Reel = () => {
                             key={mediaUrl}
                             src={mediaUrl}
                             alt={`Day ${currentActivity.dayNumber}`}
-                            className="w-full h-full rounded-2xl"
+                            className="w-full h-full rounded-3xl"
                             loading="eager"
                             decoding="async"
                             style={{ 
@@ -1536,7 +1536,7 @@ const Reel = () => {
                     {/* Lock overlay for locked content */}
                     {shouldShowLocked && (
                       <div
-                        className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl"
+                        className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-3xl"
                       >
                         <div
                           className="flex flex-col items-center gap-3"
@@ -1722,26 +1722,6 @@ const Reel = () => {
             );
           })()}
 
-          {/* Create Your Recap CTA — shown when viewing another user's recap */}
-          {!isOwnStory && isRecapActivity && myActivities.length >= 3 && (
-            <button
-              onClick={handleCreateOwnRecap}
-              className="w-[85%] py-3.5 rounded-2xl font-bold tracking-wider text-[14px] active:scale-[0.97] transition-transform mx-auto mb-1"
-              style={{
-                background: 'rgba(255, 255, 255, 0.93)',
-              }}
-            >
-              <span
-                style={{
-                  background: 'linear-gradient(90deg, #8B5CF6, #3B82F6)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                ✨ CREATE YOUR RECAP
-              </span>
-            </button>
-          )}
 
           <motion.div
             className="w-full"
