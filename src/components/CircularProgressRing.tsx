@@ -87,10 +87,9 @@ const CircularProgressRing = ({
       );
       
       if (isActiveWeek) {
-        // Active week: green-tinted glass
-        glassGradient.addColorStop(0, "rgba(57, 255, 133, 0.15)");
-        glassGradient.addColorStop(0.5, "rgba(57, 255, 133, 0.06)");
-        glassGradient.addColorStop(1, "rgba(57, 255, 133, 0.10)");
+        glassGradient.addColorStop(0, "rgba(15, 228, 152, 0.15)");
+        glassGradient.addColorStop(0.5, "rgba(0, 190, 255, 0.06)");
+        glassGradient.addColorStop(1, "rgba(0, 190, 255, 0.10)");
       } else {
         // Inactive weeks: frosted glass effect
         glassGradient.addColorStop(0, "rgba(255, 255, 255, 0.12)");
@@ -112,44 +111,47 @@ const CircularProgressRing = ({
         const midAngle = toRad((barStart + barEnd) / 2);
         
         if (isActiveBar) {
-          // Draw outer glow layer first (bleeds outside the ring)
+          // Draw outer glow layer first
           ctx.save();
           ctx.beginPath();
           ctx.arc(centerX, centerY, ringRadius, toRad(barStart), toRad(barEnd));
           ctx.lineCap = "round";
           ctx.lineWidth = strokeWidth;
-          ctx.strokeStyle = "rgba(57, 255, 133, 0.4)";
-          ctx.shadowColor = "rgba(57, 255, 133, 0.7)";
+          ctx.strokeStyle = "rgba(15, 228, 152, 0.4)";
+          ctx.shadowColor = "rgba(0, 190, 255, 0.6)";
           ctx.shadowBlur = 18;
           ctx.shadowOffsetX = Math.cos(midAngle) * 2;
           ctx.shadowOffsetY = Math.sin(midAngle) * 2;
           ctx.stroke();
           ctx.restore();
           
-          // Draw main active bar with radial gradient (inner brighter)
+          // Draw main active bar with gradient #0FE498 → #00BEFF
           ctx.save();
           ctx.beginPath();
           ctx.arc(centerX, centerY, ringRadius, toRad(barStart), toRad(barEnd));
           ctx.lineCap = "round";
           ctx.lineWidth = strokeWidth;
           
-          // Create radial gradient from inner to outer edge
+          // Calculate progress ratio for this bar (0-1 across all 12 bars)
+          const progressRatio = (barIndex - 1) / 11;
+          
+          // Interpolate between #0FE498 and #00BEFF based on bar position
+          const r = Math.round(15 + (0 - 15) * progressRatio);
+          const g = Math.round(228 + (190 - 228) * progressRatio);
+          const b = Math.round(152 + (255 - 152) * progressRatio);
+          
           const innerRadius = ringRadius - strokeWidth / 2;
           const outerRadius = ringRadius + strokeWidth / 2;
-          const gradientCenterX = centerX + Math.cos(midAngle) * ringRadius;
-          const gradientCenterY = centerY + Math.sin(midAngle) * ringRadius;
-          
-          // Linear gradient perpendicular to the arc (inner to outer)
-          const perpAngle = midAngle; // Points outward from center
+          const perpAngle = midAngle;
           const gradient = ctx.createLinearGradient(
             centerX + Math.cos(perpAngle) * innerRadius,
             centerY + Math.sin(perpAngle) * innerRadius,
             centerX + Math.cos(perpAngle) * outerRadius,
             centerY + Math.sin(perpAngle) * outerRadius
           );
-          gradient.addColorStop(0, "rgba(160, 255, 200, 1)"); // Inner edge - brighter
-          gradient.addColorStop(0.3, "rgba(57, 255, 133, 1)"); // Neon green
-          gradient.addColorStop(1, "rgba(40, 220, 100, 0.9)"); // Outer edge - slightly dimmer
+          gradient.addColorStop(0, `rgba(${Math.min(r + 80, 255)}, ${Math.min(g + 30, 255)}, ${Math.min(b + 30, 255)}, 1)`);
+          gradient.addColorStop(0.3, `rgba(${r}, ${g}, ${b}, 1)`);
+          gradient.addColorStop(1, `rgba(${Math.max(r - 10, 0)}, ${Math.max(g - 20, 0)}, ${b}, 0.9)`);
           
           ctx.strokeStyle = gradient;
           ctx.stroke();
@@ -211,7 +213,7 @@ const CircularProgressRing = ({
             exit={{ opacity: 0, scale: 1.1 }}
             transition={{ duration: 0.4 }}
             style={{
-              background: 'radial-gradient(circle, rgba(57, 255, 133, 0.3) 0%, rgba(57, 255, 133, 0.1) 40%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(15, 228, 152, 0.3) 0%, rgba(0, 190, 255, 0.1) 40%, transparent 70%)',
             }}
           />
         )}
