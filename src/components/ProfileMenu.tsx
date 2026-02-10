@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, UserPen, ChevronDown, Mail, User } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
+import ProfileAvatar from '@/components/ProfileAvatar';
 import { toast } from 'sonner';
 
 interface ProfileMenuProps {
@@ -42,19 +43,11 @@ const ProfileMenu = ({ onEditProfile }: ProfileMenuProps) => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          {profile?.avatar_url ? (
-            <img 
-              src={profile.avatar_url} 
-              alt={profile.display_name || 'Profile'} 
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
-              <span className="text-white text-sm font-semibold">
-                {profile?.display_name?.charAt(0).toUpperCase() || '?'}
-              </span>
-            </div>
-          )}
+          <ProfileAvatar
+            src={profile?.avatar_url}
+            name={profile?.display_name}
+            size={40}
+          />
         </motion.button>
 
         {/* Dropdown Menu */}
@@ -90,18 +83,12 @@ const ProfileMenu = ({ onEditProfile }: ProfileMenuProps) => {
                 {/* User Info Header */}
                 <div className="px-4 py-4 border-b border-white/10">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-emerald-400/30">
-                      {profile?.avatar_url ? (
-                        <img 
-                          src={profile.avatar_url} 
-                          alt={profile.display_name || 'Profile'} 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
-                          <User className="w-6 h-6 text-white" />
-                        </div>
-                      )}
+                    <div className="ring-2 ring-emerald-400/30 rounded-full">
+                      <ProfileAvatar
+                        src={profile?.avatar_url}
+                        name={profile?.display_name}
+                        size={48}
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-white font-medium text-sm truncate">

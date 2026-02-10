@@ -8,7 +8,7 @@ import GradientMeshBackground from "@/components/GradientMeshBackground";
 import PullToRefresh from "@/components/PullToRefresh";
 import PhotoLoggingWidget, { LoggedPhoto } from "@/components/PhotoLoggingWidget";
 
-import CuroSpeechBubble from "@/components/CuroSpeechBubble";
+
 import ProfileMenu from "@/components/ProfileMenu";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
 import NotificationSheet, { Notification } from "@/components/NotificationSheet";
@@ -286,7 +286,7 @@ const Activity = () => {
   // Show skeleton during initial load
   if (loading && photos.length === 0) {
     return (
-      <div className="min-h-screen bg-[#0a0a12] text-white overflow-x-hidden relative">
+      <div className="min-h-screen text-white overflow-x-hidden relative" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #1e1245 25%, #160d3a 50%, #0f0a2e 75%, #0a0720 100%)' }}>
         <GradientMeshBackground />
         <ActivityPageSkeleton />
       </div>
@@ -294,7 +294,7 @@ const Activity = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a12] text-white overflow-x-hidden relative">
+    <div className="min-h-screen text-white overflow-x-hidden relative" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #1e1245 25%, #160d3a 50%, #0f0a2e 75%, #0a0720 100%)' }}>
       <GradientMeshBackground />
 
       {/* Transition from Progress Page */}
@@ -406,7 +406,41 @@ const Activity = () => {
                 mascotAlt={mascot.alt}
                 onMascotTap={handleMascotTap}
               />
-              <CuroSpeechBubble photosCount={photos.length} currentWeek={currentWeek} userName={profile?.display_name} />
+              {/* Prominent motivational text - no speech bubble */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="mt-5 text-center px-6"
+              >
+                <h2
+                  className="text-white font-bold leading-tight"
+                  style={{
+                    fontSize: 'clamp(22px, 6vw, 28px)',
+                    textShadow: '0 2px 20px rgba(0,0,0,0.3)',
+                  }}
+                >
+                  {photos.length === 0
+                    ? `Hey ${profile?.display_name?.split(' ')[0] || 'there'}! 👋`
+                    : photos.length % 3 === 0 && photos.length > 0
+                      ? `Great week, ${profile?.display_name?.split(' ')[0] || 'there'}! 🔥`
+                      : `Nice one,${profile?.display_name?.split(' ')[0] || 'there'}!`}
+                </h2>
+                <p
+                  className="font-medium mt-1"
+                  style={{
+                    fontSize: 'clamp(18px, 5vw, 24px)',
+                    color: 'rgba(180, 160, 220, 0.7)',
+                    textShadow: '0 2px 12px rgba(0,0,0,0.2)',
+                  }}
+                >
+                  {photos.length === 0
+                    ? 'Tap + to log your first workout.'
+                    : photos.length % 3 === 0 && photos.length > 0
+                      ? 'Week complete — reel time!'
+                      : `${3 - (photos.length % 3)} more to complete this week.`}
+                </p>
+              </motion.div>
             </motion.div>
           </div>
 
@@ -438,8 +472,7 @@ const Activity = () => {
               transition={{ duration: 0.5, delay: 0.35 }} 
               className="mb-6"
             >
-              <h2 className="text-xl font-semibold text-white">Stay Active</h2>
-              <p className="text-sm text-white/50 mt-1">Pick an activity & log it above</p>
+              <h2 className="text-xl font-semibold text-white">Do any of the following activities today</h2>
             </motion.div>
             <div className="grid grid-cols-4 gap-4">
               {activities_grid.map((activity, idx) => (
