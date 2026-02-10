@@ -1,27 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+
 import { hasRecapCached, getRecapFromCache } from '@/hooks/use-recap-cache';
 import { toast } from 'sonner';
-import AuroraBackground from '@/components/AuroraBackground';
-import PhotoUploadCard from '@/components/PhotoUploadCard';
-import WidgetLayout2 from '@/components/WidgetLayout2';
-import WidgetLayout3 from '@/components/WidgetLayout3';
+import ImmersiveHomeLayout from '@/components/ImmersiveHomeLayout';
 import PullToRefresh from '@/components/PullToRefresh';
-import { uploadToStorage } from '@/services/storage-service';
+
 import CommunityStoriesWidget from '@/components/CommunityStoriesWidget';
 import SharedImageTransition from '@/components/SharedImageTransition';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 import type { PillState } from '@/components/ReelProgressPill';
 
 import CameraUI from '@/components/CameraUI';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 // Activity icons
 import footballIcon from '@/assets/activities/football.png';
@@ -64,7 +55,7 @@ const ACTIVITY_OPTIONS = [
   { name: 'Boxing', icon: boxingIcon },
 ];
 
-type LayoutType = 'layout1' | 'layout2' | 'layout3';
+
 
 const Index = () => {
   const navigate = useNavigate();
@@ -107,7 +98,7 @@ const Index = () => {
   const [acknowledgedActivity, setAcknowledgedActivity] = useState<{ name: string; icon: string } | null>(null);
   const [cameraEntering, setCameraEntering] = useState(false);
   const [simulatedDate, setSimulatedDate] = useState<string | null>(null);
-  const [selectedLayout, setSelectedLayout] = useState<LayoutType>('layout3');
+  
   const [initialCaptureMode, setInitialCaptureMode] = useState<'photo' | 'video'>('photo');
   const [pendingMedia, setPendingMedia] = useState<{ url: string; isVideo: boolean } | null>(null);
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
@@ -412,116 +403,25 @@ const Index = () => {
         )}
       </AnimatePresence>
 
-      {!instantCamera && <AuroraBackground />}
-      
       {!instantCamera && (
         <PullToRefresh onRefresh={handleRefresh}>
-          <div className="relative z-10 flex flex-col min-h-screen">
-            <div className="h-12" />
+          <ImmersiveHomeLayout
+            photos={photos}
+            onAddPhoto={handleAddPhoto}
+            onOpenCamera={handleOpenCamera}
+            currentDate={getCurrentDate()}
+            onGenerateReel={handleGenerateReel}
+            onRemovePhoto={handleRemovePhoto}
+            onEditPhoto={handleEditPhoto}
+            isGenerating={false}
+            isUploading={isUploading}
+            weekTransitionAnimation={weekTransitionAnimation}
+            reelPill={reelPill}
+          />
           
-            {/* Top Controls Row */}
-            <div className="flex justify-between items-start px-4">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors">
-                    {selectedLayout === 'layout1' ? 'Layout 1' : selectedLayout === 'layout2' ? 'Layout 2' : 'Layout 3'}
-                    <ChevronDown className="w-3 h-3" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent 
-                  className="bg-black/90 backdrop-blur-xl border border-white/20 rounded-xl z-50"
-                  align="start"
-                >
-                  <DropdownMenuItem 
-                    onClick={() => setSelectedLayout('layout1')}
-                    className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout1' ? 'bg-white/10' : ''}`}
-                  >
-                    Layout 1
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => setSelectedLayout('layout2')}
-                    className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout2' ? 'bg-white/10' : ''}`}
-                  >
-                    Layout 2
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => setSelectedLayout('layout3')}
-                    className={`text-white/80 hover:text-white hover:bg-white/10 cursor-pointer ${selectedLayout === 'layout3' ? 'bg-white/10' : ''}`}
-                  >
-                    Layout 3
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <div className="flex flex-col gap-2 items-end">
-                <button
-                  onClick={simulateNextDay}
-                  className="px-3 py-1.5 text-xs bg-foreground/10 backdrop-blur-sm rounded-full text-foreground/70 hover:bg-foreground/20 transition-colors"
-                >
-                  Test: Next Day
-                </button>
-                <button
-                  onClick={clearAllPhotos}
-                  className="px-3 py-1.5 text-xs bg-red-500/20 backdrop-blur-sm rounded-full text-red-400 hover:bg-red-500/30 transition-colors"
-                >
-                  Clear Photos
-                </button>
-                {simulatedDate && (
-                  <>
-                    <span className="text-[10px] text-foreground/50 text-center">
-                      {simulatedDate}
-                    </span>
-                    <button
-                      onClick={resetSimulation}
-                      className="px-3 py-1 text-[10px] text-foreground/50 hover:text-foreground/70 transition-colors"
-                    >
-                      Reset
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-            
-            <div className="py-2" />
-            
-            <main className="flex-1 flex flex-col justify-center py-6 -mt-[100px]">
-              {selectedLayout === 'layout1' ? (
-                <PhotoUploadCard 
-                  photos={photos} 
-                  onCardClick={handleCardClick}
-                  hasUploadedToday={hasUploadedToday()}
-                  hoursUntilNextUpload={getHoursUntilMidnight()}
-                  currentDate={getCurrentDate()}
-                />
-              ) : selectedLayout === 'layout2' ? (
-                <WidgetLayout2 
-                  photos={photos} 
-                  onCardClick={handleCardClick}
-                  hasUploadedToday={hasUploadedToday()}
-                  hoursUntilNextUpload={getHoursUntilMidnight()}
-                  currentDate={getCurrentDate()}
-                />
-              ) : (
-                <WidgetLayout3 
-                  photos={photos} 
-                  onAddPhoto={handleAddPhoto}
-                  onOpenCamera={handleOpenCamera}
-                  currentDate={getCurrentDate()}
-                  onGenerateReel={handleGenerateReel}
-                  onRemovePhoto={handleRemovePhoto}
-                  onEditPhoto={handleEditPhoto}
-                  isGenerating={false}
-                  isUploading={isUploading}
-                  weekTransitionAnimation={weekTransitionAnimation}
-                  reelPill={reelPill}
-                />
-              )}
-            </main>
-            
-            {/* Community stories nudge widget */}
+          {/* Community stories nudge widget */}
+          <div className="relative z-10 -mt-20 pb-24">
             <CommunityStoriesWidget />
-            
-            <div className="h-8" />
           </div>
         </PullToRefresh>
       )}
