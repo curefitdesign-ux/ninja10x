@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil, Trash2, ImagePlus, MoreHorizontal, Footprints, Bike, MountainSnow, PersonStanding, Dumbbell, Camera, Image as ImageIcon } from 'lucide-react';
+import { X, Check, Pencil, Trash2, ImagePlus, MoreHorizontal, Footprints, Bike, MountainSnow, PersonStanding, Dumbbell, Camera, Image as ImageIcon, Loader2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { CricketBatBall, BoxingGlove, FootballIcon, Shuttlecock, BasketballIcon, TennisBall } from '@/components/SportIcons';
 import ShareSheet from '@/components/ShareSheet';
@@ -7,6 +7,7 @@ import MediaSourceSheet from '@/components/MediaSourceSheet';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
 import ShakyFrame from '@/components/frames/ShakyFrame';
 import JournalFrame from '@/components/frames/JournalFrame';
 import VogueFrame from '@/components/frames/VogueFrame';
@@ -52,7 +53,17 @@ const activityOptions: Array<{
 ];
 
 // Get activity-specific input config from centralized utility
-const getActivityInputConfig = (activityName: string) => {
+const getActivityInputConfig = (activityName: string, customMetricsOverride?: { primaryMetric: string; primaryUnit: string; secondaryMetric: string; secondaryUnit: string } | null) => {
+  if (customMetricsOverride) {
+    return {
+      primaryMetric: customMetricsOverride.primaryMetric,
+      primaryUnit: customMetricsOverride.primaryUnit,
+      primaryInputType: 'wheel' as const,
+      secondaryMetric: customMetricsOverride.secondaryMetric,
+      secondaryUnit: customMetricsOverride.secondaryUnit,
+      secondaryInputType: customMetricsOverride.secondaryUnit ? 'number' as const : 'none' as const,
+    };
+  }
   const config = getActivityConfig(activityName);
   return {
     primaryMetric: config.primaryMetric,
@@ -153,6 +164,9 @@ const Preview = () => {
   const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
   const [showCustomActivityInput, setShowCustomActivityInput] = useState(false);
   const [customActivityName, setCustomActivityName] = useState('');
+  const [showCricketSubOption, setShowCricketSubOption] = useState(false);
+  const [isLoadingAiMetrics, setIsLoadingAiMetrics] = useState(false);
+  const [customMetrics, setCustomMetrics] = useState<{ primaryMetric: string; primaryUnit: string; secondaryMetric: string; secondaryUnit: string } | null>(null);
   
   const [elementsHidden, setElementsHidden] = useState(false);
   const [mediaSource, setMediaSource] = useState<'camera' | 'gallery' | null>(null);
@@ -624,7 +638,24 @@ const Preview = () => {
   const calculatedWeek = Math.ceil(dayNumber / 3);
 
   // Get activity-specific labels for the frame
-  const activityLabels = getActivityInputConfig(activity || '');
+  const activityLabels = getActivityInputConfig(activity || '', customMetrics);
+
+  // AI-powered metric suggestion for custom activities
+  const fetchAiMetrics = async (name: string) => {
+    setIsLoadingAiMetrics(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('suggest-activity-metrics', {
+        body: { activityName: name },
+      });
+      if (!error && data?.secondaryMetric) {
+        setCustomMetrics(data);
+      }
+    } catch (e) {
+      console.warn('AI metrics suggestion failed, using defaults', e);
+    } finally {
+      setIsLoadingAiMetrics(false);
+    }
+  };
 
   const frameProps = {
     imageUrl: imageUrl || '',
@@ -661,11 +692,40 @@ const Preview = () => {
     return null;
   }
 
-  // Handle activity selection
+  // Handle activity selection (including cricket sub-options)
   const handleActivitySelection = (selectedActivity: string) => {
     triggerHaptic('medium');
+    setCustomMetrics(null); // Reset custom metrics for known activities
     setActivity(selectedActivity);
     setFlowStep('template');
+  };
+
+  // Handle cricket sub-option
+  const handleCricketSubOption = (subType: 'batting' | 'bowling') => {
+    triggerHaptic('medium');
+    setShowCricketSubOption(false);
+    if (subType === 'bowling') {
+      setCustomMetrics({
+        primaryMetric: 'Duration',
+        primaryUnit: 'min',
+        secondaryMetric: 'Wickets',
+        secondaryUnit: 'wkts',
+      });
+    } else {
+      setCustomMetrics(null); // Use default cricket config (Runs)
+    }
+    setActivity('Cricket');
+    setFlowStep('template');
+  };
+
+  // Handle custom "Other" activity with AI suggestions
+  const handleCustomActivityConfirm = (name: string) => {
+    triggerHaptic('medium');
+    setActivity(name);
+    setShowCustomActivityInput(false);
+    setFlowStep('template');
+    // Fire and forget AI suggestion
+    fetchAiMetrics(name);
   };
 
   // Activity Selection Step - Show as bottom sheet over media preview
@@ -777,6 +837,9 @@ const Preview = () => {
                         triggerHaptic('medium');
                         setShowCustomActivityInput(true);
                         setCustomActivityName('');
+                      } else if (activityOption.name === 'Cricket') {
+                        triggerHaptic('medium');
+                        setShowCricketSubOption(true);
                       } else {
                         handleActivitySelection(activityOption.name);
                       }
@@ -824,23 +887,56 @@ const Preview = () => {
                       className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/40 text-base focus:outline-none focus:border-white/40"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && customActivityName.trim()) {
-                          handleActivitySelection(customActivityName.trim());
-                          setShowCustomActivityInput(false);
+                          handleCustomActivityConfirm(customActivityName.trim());
                         }
                       }}
                     />
                     <button
                       onClick={() => {
                         if (customActivityName.trim()) {
-                          triggerHaptic('medium');
-                          handleActivitySelection(customActivityName.trim());
-                          setShowCustomActivityInput(false);
+                          handleCustomActivityConfirm(customActivityName.trim());
                         }
                       }}
                       disabled={!customActivityName.trim()}
                       className="bg-white/20 hover:bg-white/30 disabled:opacity-40 px-4 rounded-xl flex items-center justify-center transition-colors"
                     >
                       <Check className="w-5 h-5 text-white" />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Cricket Batting/Bowling Sub-option */}
+            <AnimatePresence>
+              {showCricketSubOption && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-4 overflow-hidden"
+                >
+                  <p className="text-white/60 text-sm text-center mb-3">What did you play?</p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleCricketSubOption('batting')}
+                      className="flex-1 py-3 rounded-xl text-white font-semibold text-sm transition-colors"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                      }}
+                    >
+                      🏏 Batting
+                    </button>
+                    <button
+                      onClick={() => handleCricketSubOption('bowling')}
+                      className="flex-1 py-3 rounded-xl text-white font-semibold text-sm transition-colors"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                      }}
+                    >
+                      🎯 Bowling
                     </button>
                   </div>
                 </motion.div>
@@ -1029,7 +1125,7 @@ const Preview = () => {
         >
           {/* Editable data points - contextual to activity */}
           {(() => {
-            const config = getActivityInputConfig(activity || '');
+            const config = getActivityInputConfig(activity || '', customMetrics);
             const activityOption = activityOptions.find(a => a.name === activity);
             
             return (
@@ -1078,7 +1174,11 @@ const Preview = () => {
                   >
                     <div className="flex items-baseline gap-2">
                       <span className="text-white/60 text-[15px] font-medium">{config.secondaryMetric}</span>
-                      <span className="text-[11px] text-white/30">(Optional)</span>
+                      {isLoadingAiMetrics ? (
+                        <span className="text-[11px] text-white/30 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> AI suggesting...</span>
+                      ) : (
+                        <span className="text-[11px] text-white/30">(Optional)</span>
+                      )}
                     </div>
                     <span className={`font-bold text-[17px] ${pr ? 'text-white' : 'text-white/30'}`}>
                       {pr || '-'}
@@ -1159,7 +1259,7 @@ const Preview = () => {
       <AnimatePresence>
         {editingField && editingField !== 'activity' && (
           (() => {
-            const activityConfig = getActivityInputConfig(activity || '');
+            const activityConfig = getActivityInputConfig(activity || '', customMetrics);
             const isDuration = editingField === 'duration';
             const fieldLabel = isDuration ? activityConfig.primaryMetric : activityConfig.secondaryMetric;
             const fieldUnit = isDuration ? activityConfig.primaryUnit : activityConfig.secondaryUnit;
@@ -1239,7 +1339,10 @@ const Preview = () => {
                           if (isOther) {
                             setShowCustomActivityInput(true);
                             setCustomActivityName('');
+                          } else if (activityOption.name === 'Cricket') {
+                            setShowCricketSubOption(true);
                           } else {
+                            setCustomMetrics(null);
                             setActivity(activityOption.name);
                             setEditingField(null);
                           }
@@ -1289,9 +1392,11 @@ const Preview = () => {
                           className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/40 text-base focus:outline-none focus:border-white/40"
                           onKeyDown={(e) => {
                             if (e.key === 'Enter' && customActivityName.trim()) {
-                              setActivity(customActivityName.trim());
+                              const name = customActivityName.trim();
+                              setActivity(name);
                               setShowCustomActivityInput(false);
                               setEditingField(null);
+                              fetchAiMetrics(name);
                             }
                           }}
                         />
@@ -1299,15 +1404,53 @@ const Preview = () => {
                           onClick={() => {
                             if (customActivityName.trim()) {
                               triggerHaptic('medium');
-                              setActivity(customActivityName.trim());
+                              const name = customActivityName.trim();
+                              setActivity(name);
                               setShowCustomActivityInput(false);
                               setEditingField(null);
+                              fetchAiMetrics(name);
                             }
                           }}
                           disabled={!customActivityName.trim()}
                           className="bg-white/20 hover:bg-white/30 disabled:opacity-40 px-4 rounded-xl flex items-center justify-center transition-colors"
                         >
                           <Check className="w-5 h-5 text-white" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Cricket Batting/Bowling Sub-option */}
+                <AnimatePresence>
+                  {showCricketSubOption && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-4 overflow-hidden"
+                    >
+                      <p className="text-white/60 text-sm text-center mb-3">What did you play?</p>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => { handleCricketSubOption('batting'); setEditingField(null); }}
+                          className="flex-1 py-3 rounded-xl text-white font-semibold text-sm transition-colors"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                          }}
+                        >
+                          🏏 Batting
+                        </button>
+                        <button
+                          onClick={() => { handleCricketSubOption('bowling'); setEditingField(null); }}
+                          className="flex-1 py-3 rounded-xl text-white font-semibold text-sm transition-colors"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                          }}
+                        >
+                          🎯 Bowling
                         </button>
                       </div>
                     </motion.div>
