@@ -5,32 +5,35 @@ import type { LucideProps } from 'lucide-react';
  * (24x24 viewBox, stroke-based, 1.5px stroke)
  */
 
-// Cricket — bat and stumps
+// Cricket — stumps with bails
 export const CricketBatBall = ({ size = 24, strokeWidth = 1.5, className, ...props }: LucideProps) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
-    {/* Bat */}
-    <path d="M5 21 L9 17" />
-    <path d="M9 17 L10 16 C10 16 11.5 14.5 11 13 L8 10 L10.5 7.5 C11.5 6.5 13 6.5 14 7.5 L16.5 10 C17.5 11 17.5 12.5 16.5 13.5 L14 16 L11 13" />
-    {/* Stumps */}
-    <line x1="19" y1="3" x2="19" y2="10" />
-    <line x1="21" y1="3" x2="21" y2="10" />
-    <line x1="18" y1="4" x2="22" y2="4" />
+    {/* Three stumps */}
+    <line x1="8" y1="5" x2="8" y2="20" />
+    <line x1="12" y1="5" x2="12" y2="20" />
+    <line x1="16" y1="5" x2="16" y2="20" />
+    {/* Two bails on top */}
+    <path d="M7.5 5 C8.5 3.5 11.5 3.5 12.5 5" />
+    <path d="M11.5 5 C12.5 3.5 15.5 3.5 16.5 5" />
+    {/* Ground line */}
+    <line x1="5" y1="20" x2="19" y2="20" />
   </svg>
 );
 
-// Boxing glove — punching fist
+// Boxing glove — angled punch view
 export const BoxingGlove = ({ size = 24, strokeWidth = 1.5, className, ...props }: LucideProps) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
-    {/* Glove shape */}
-    <path d="M6 11 C6 7 8 4 12 4 C16 4 18 6 18 9 C18 11 17 12.5 15.5 13.5 L15.5 14 L8.5 14 L8.5 13.5 C7 12.5 6 11.5 6 11Z" />
-    {/* Thumb */}
-    <path d="M6 11 C4.5 10.5 4 9 4.5 7.5 C5 6.5 6 6 7 6.5" />
-    {/* Wrist guard */}
-    <rect x="8" y="14" width="8" height="3" rx="0.5" />
-    {/* Wrist strap detail */}
-    <line x1="8" y1="15.5" x2="16" y2="15.5" />
-    {/* Arm */}
-    <path d="M10 17 L10 20 M14 17 L14 20" />
+    {/* Glove - side punch angle */}
+    <path d="M8 5 C5 5 4 7 4 9 C4 11 5 13 8 13" />
+    <path d="M8 5 C8 3 10 2 12 2 C15 2 18 4 19 7 C20 10 19 13 16 14 L8 14" />
+    {/* Thumb tucked */}
+    <path d="M8 7 C6.5 7 6 8 6 9 C6 10 6.5 11 8 11" />
+    {/* Lacing detail */}
+    <line x1="12" y1="4" x2="12" y2="6" />
+    <line x1="15" y1="4.5" x2="15" y2="6.5" />
+    {/* Wrist cuff */}
+    <path d="M8 14 L8 18 C8 19 9 20 10 20 L16 20 C17 20 18 19 18 18 L18 14" />
+    <line x1="8" y1="16" x2="18" y2="16" />
   </svg>
 );
 
@@ -62,20 +65,21 @@ export const FootballIcon = ({ size = 24, strokeWidth = 1.5, className, ...props
   </svg>
 );
 
-// Badminton — racquet and shuttlecock
+// Badminton — shuttlecock
 export const Shuttlecock = ({ size = 24, strokeWidth = 1.5, className, ...props }: LucideProps) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
-    {/* Racquet head */}
-    <ellipse cx="8" cy="8" rx="5" ry="6" />
-    {/* Racquet strings */}
-    <line x1="8" y1="2" x2="8" y2="14" />
-    <line x1="3" y1="8" x2="13" y2="8" />
-    {/* Racquet handle */}
-    <line x1="11" y1="12" x2="14" y2="15" />
-    <line x1="14" y1="15" x2="16" y2="17" />
-    {/* Shuttlecock */}
-    <circle cx="19" cy="5" r="1.5" />
-    <path d="M18 6.5 L17 9 M19 6.5 L19 9 M20 6.5 L21 9" />
+    {/* Cork base (rounded bottom) */}
+    <ellipse cx="12" cy="19" rx="2.5" ry="2" />
+    {/* Feather skirt */}
+    <path d="M9.5 17.5 C8.5 14 7.5 10 9 5" />
+    <path d="M14.5 17.5 C15.5 14 16.5 10 15 5" />
+    {/* Top connection */}
+    <path d="M9 5 C10 3.5 14 3.5 15 5" />
+    {/* Center spine */}
+    <line x1="12" y1="4" x2="12" y2="17" />
+    {/* Cross feather lines */}
+    <path d="M9.8 9 L14.2 9" />
+    <path d="M9.5 13 L14.5 13" />
   </svg>
 );
 
@@ -109,16 +113,18 @@ export const BasketballIcon = ({ size = 24, strokeWidth = 1.5, className, ...pro
 // Tennis — racquet with ball
 export const TennisBall = ({ size = 24, strokeWidth = 1.5, className, ...props }: LucideProps) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
-    {/* Racquet head */}
-    <ellipse cx="10" cy="8" rx="6" ry="7" />
-    {/* Racquet strings cross */}
-    <line x1="10" y1="1" x2="10" y2="15" />
-    <line x1="4" y1="8" x2="16" y2="8" />
+    {/* Racquet head - tilted */}
+    <ellipse cx="9" cy="9" rx="6" ry="7" transform="rotate(-15 9 9)" />
+    {/* Racquet strings */}
+    <line x1="5" y1="5" x2="13" y2="13" />
+    <line x1="5" y1="13" x2="13" y2="5" />
     {/* Handle */}
-    <line x1="14" y1="13" x2="18" y2="17" />
-    <line x1="18" y1="17" x2="20" y2="19" />
+    <path d="M13.5 13.5 L18 18" />
+    <path d="M18 18 L20 20" />
     {/* Ball */}
-    <circle cx="19" cy="5" r="2" />
-    <path d="M17.5 4 C18.5 5 18.5 5 17.5 6" />
+    <circle cx="19" cy="5" r="2.5" />
+    {/* Ball seam */}
+    <path d="M17 4.5 C18 5.5 18 5.5 17 6.5" />
+    <path d="M21 3.5 C20 4.5 20 5.5 21 6.5" />
   </svg>
 );
