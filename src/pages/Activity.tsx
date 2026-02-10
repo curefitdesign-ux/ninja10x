@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Home, Dumbbell, Activity as ActivityIcon, ShoppingBag, Users, Flame, Footprints, Trash2, Bell } from "lucide-react";
+import { ArrowRight, Home, Dumbbell, Activity as ActivityIcon, ShoppingBag, Users, Flame, Footprints, Trash2, Bell, Plus } from "lucide-react";
 import CircularProgressRing from "@/components/CircularProgressRing";
 import GradientMeshBackground from "@/components/GradientMeshBackground";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -283,19 +283,74 @@ const Activity = () => {
     { id: "social", icon: Users, label: "SOCIAL" },
   ];
 
+  // Helper for video detection
+  const isVideoUrl = (url: string) => url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
+
+  // Build action slots for reference layout
+  const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
+  const photosInWeek = photos.length % 3;
+  const remaining = photosInWeek === 0 && photos.length > 0 ? 0 : 3 - photosInWeek;
+  const firstName = profile?.display_name?.split(' ')[0] || 'there';
+
+  const actionSlots: Array<{ type: 'photo'; photo: typeof latestPhoto; extraCount: number } | { type: 'add'; label: string }> = [];
+  if (latestPhoto) {
+    actionSlots.push({ type: 'photo', photo: latestPhoto, extraCount: photos.length > 1 ? photos.length - 1 : 0 });
+  }
+  actionSlots.push({ type: 'add', label: 'Push' });
+  actionSlots.push({ type: 'add', label: 'Rise' });
+
   // Show skeleton during initial load
   if (loading && photos.length === 0) {
     return (
-      <div className="min-h-screen bg-[#0a0a12] text-white overflow-x-hidden relative">
-        <GradientMeshBackground />
+      <div className="min-h-screen text-white overflow-x-hidden relative" style={{ background: '#0f0a2e' }}>
         <ActivityPageSkeleton />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a12] text-white overflow-x-hidden relative">
-      <GradientMeshBackground />
+    <div className="min-h-screen text-white overflow-x-hidden relative">
+      {/* Deep purple gradient background matching reference */}
+      <div
+        className="fixed inset-0"
+        style={{
+          background: 'linear-gradient(180deg, #2a1b4e 0%, #1e1245 20%, #160d3a 45%, #0f0a2e 70%, #0a0720 100%)',
+        }}
+      />
+      {/* Radial glow at top-center */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 70% 45% at 50% 30%, rgba(120, 80, 200, 0.25) 0%, transparent 70%)',
+        }}
+      />
+      {/* Enhanced noise/grain texture */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          opacity: 0.08,
+          mixBlendMode: 'overlay',
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'repeat',
+        }}
+      />
+      {/* Secondary finer grain layer */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          opacity: 0.04,
+          mixBlendMode: 'soft-light',
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'repeat',
+        }}
+      />
+      {/* Subtle vignette */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse at center, transparent 40%, rgba(8, 5, 20, 0.5) 100%)',
+        }}
+      />
 
       {/* Transition from Progress Page */}
       <AnimatePresence>
@@ -388,10 +443,8 @@ const Activity = () => {
             </motion.button>
           </div>
           
-          {/* Stats Header - hidden for clean layout */}
-
           {/* Mascot Section with Circular Progress */}
-          <div className="relative px-4 mt-6">
+          <div className="relative px-4 mt-2">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -406,29 +459,107 @@ const Activity = () => {
                 mascotAlt={mascot.alt}
                 onMascotTap={handleMascotTap}
               />
-              <CuroSpeechBubble photosCount={photos.length} currentWeek={currentWeek} userName={profile?.display_name} />
             </motion.div>
           </div>
 
-          {/* Photo Logging Widget */}
-          <div className="mt-8">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.3 }}>
-              {loading ? (
-                <div className="flex items-center justify-center h-40">
-                  <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
-                </div>
-              ) : (
-                <PhotoLoggingWidget 
-                  photos={photos}
-                  currentWeek={currentWeek}
-                  currentDay={currentDay}
-                  onPhotoTap={handlePhotoTap}
-                  onPhotoAdd={handlePhotoAdd}
-                  onPlayReel={handlePlayReel}
-                />
-              )}
-            </motion.div>
-          </div>
+          {/* Prominent motivational text */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-4 text-center px-6"
+          >
+            <h2
+              className="text-white font-bold leading-tight"
+              style={{
+                fontSize: 'clamp(22px, 6vw, 28px)',
+                textShadow: '0 2px 20px rgba(0,0,0,0.3)',
+              }}
+            >
+              {photos.length === 0
+                ? `Hey ${firstName}! 👋`
+                : remaining === 0
+                  ? `Great week, ${firstName}! 🔥`
+                  : `Nice one,${firstName}!`}
+            </h2>
+            <p
+              className="text-white/60 font-medium mt-1"
+              style={{
+                fontSize: 'clamp(18px, 5vw, 24px)',
+                textShadow: '0 2px 12px rgba(0,0,0,0.2)',
+              }}
+            >
+              {photos.length === 0
+                ? 'Tap + to log your first workout.'
+                : remaining === 0
+                  ? 'Week complete — reel time!'
+                  : `${remaining} more to complete this week.`}
+            </p>
+          </motion.div>
+
+          {/* Action slots row */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.45 }}
+            className="flex items-center justify-center gap-3 mt-8 px-4"
+          >
+            {actionSlots.map((slot, idx) => {
+              if (slot.type === 'photo' && slot.photo) {
+                return (
+                  <motion.button
+                    key="photo-thumb"
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handlePhotoTap(slot.photo!)}
+                    className="relative rounded-2xl overflow-hidden"
+                    style={{ width: 100, height: 120 }}
+                  >
+                    {slot.photo.isVideo || isVideoUrl(slot.photo.storageUrl) ? (
+                      <video
+                        src={slot.photo.storageUrl}
+                        className="w-full h-full object-cover"
+                        muted playsInline preload="metadata"
+                      />
+                    ) : (
+                      <img
+                        src={slot.photo.storageUrl}
+                        alt={slot.photo.activity || 'Activity'}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                    {slot.extraCount > 0 && (
+                      <div
+                        className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md text-white text-xs font-bold"
+                        style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}
+                      >
+                        +{slot.extraCount}
+                      </div>
+                    )}
+                  </motion.button>
+                );
+              }
+              return (
+                <motion.button
+                  key={`add-${idx}`}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    setPendingDayNumber(photos.length + 1);
+                    setShowMediaSourceSheet(true);
+                  }}
+                  className="flex flex-col items-center justify-center rounded-2xl"
+                  style={{
+                    width: 100,
+                    height: 120,
+                    border: '1.5px dashed rgba(255,255,255,0.2)',
+                    background: 'rgba(255,255,255,0.04)',
+                  }}
+                >
+                  <Plus className="w-7 h-7 text-white/50 mb-1" />
+                  <span className="text-white/40 text-xs font-medium">{'label' in slot ? slot.label : ''}</span>
+                </motion.button>
+              );
+            })}
+          </motion.div>
 
           {/* Activities Section */}
           <div className="px-4 mt-12">
@@ -438,8 +569,7 @@ const Activity = () => {
               transition={{ duration: 0.5, delay: 0.35 }} 
               className="mb-6"
             >
-              <h2 className="text-xl font-semibold text-white">Stay Active</h2>
-              <p className="text-sm text-white/50 mt-1">Pick an activity & log it above</p>
+              <h2 className="text-xl font-bold text-white text-center leading-snug">Do any of the following<br/>activities today</h2>
             </motion.div>
             <div className="grid grid-cols-4 gap-4">
               {activities_grid.map((activity, idx) => (
