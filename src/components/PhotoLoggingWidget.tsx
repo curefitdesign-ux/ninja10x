@@ -353,21 +353,12 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
         {/* LOCKED state for upcoming/inactive days (no photo, not the active day) */}
         {!hasPhoto && shouldShowExpanded && !isActiveDay && (
           <div className="absolute inset-0 flex items-center justify-center">
-            {/* Frosted glass lock badge */}
-            <motion.div 
-              className="relative p-2.5 rounded-full"
-              style={{
-                background: 'rgba(255, 255, 255, 0.08)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-              }}
+            <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.1 + index * 0.03, duration: 0.25 }}
             >
-              <Lock className="w-5 h-5 text-white/40" />
+              <Lock className="w-5 h-5 text-white/25" />
             </motion.div>
           </div>
         )}
