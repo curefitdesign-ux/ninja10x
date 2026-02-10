@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Plus, Camera } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { useProfile } from '@/hooks/use-profile';
 import ProfileAvatar from '@/components/ProfileAvatar';
+import CircularProgressRing from '@/components/CircularProgressRing';
 import ReelProgressPill, { type PillState } from '@/components/ReelProgressPill';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
 
@@ -55,10 +56,13 @@ const ImmersiveHomeLayout = ({
   const navigate = useNavigate();
   const { profile } = useProfile();
   const [showMediaSheet, setShowMediaSheet] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const firstName = profile?.display_name?.split(' ')[0] || 'there';
+  const currentWeek = Math.floor(photos.length / 3) + 1;
+  const photosInWeek = photos.length % 3;
+  const remaining = photosInWeek === 0 && photos.length > 0 ? 0 : 3 - photosInWeek;
 
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
-  const pastPhotos = photos.length > 1 ? photos.slice(0, -1).reverse() : [];
 
   const handlePhotoTap = (photo: Photo) => {
     triggerHaptic('medium');
@@ -67,42 +71,32 @@ const ImmersiveHomeLayout = ({
     });
   };
 
-  const firstName = profile?.display_name?.split(' ')[0] || 'there';
+  // Build action slots: first is latest photo thumb, rest are empty "+" slots
+  const actionSlots = [];
+  if (latestPhoto) {
+    actionSlots.push({ type: 'photo' as const, photo: latestPhoto, extraCount: photos.length > 1 ? photos.length - 1 : 0 });
+  }
+  // Add 2 empty action slots
+  actionSlots.push({ type: 'add' as const, label: 'Push' });
+  actionSlots.push({ type: 'add' as const, label: 'Rise' });
 
   return (
     <div className="relative flex flex-col" style={{ minHeight: '100dvh' }}>
-      {/* Warm ambient background */}
+      {/* Deep purple gradient background */}
       <div
         className="fixed inset-0"
         style={{
-          background: latestPhoto
-            ? 'linear-gradient(180deg, #3a2a1a 0%, #2d1a0a 30%, #1a0f06 70%, #0f0a04 100%)'
-            : 'linear-gradient(180deg, #252535 0%, #1a1a2e 50%, #0f0f1f 100%)',
+          background: 'linear-gradient(180deg, #2a1b4e 0%, #1e1245 25%, #160d3a 50%, #0f0a2e 75%, #0a0720 100%)',
         }}
       />
 
-      {/* Blurred hero ambient from latest photo */}
-      {latestPhoto && (
-        <div className="fixed inset-0 pointer-events-none">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `url(${latestPhoto.storageUrl})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              filter: 'blur(80px) saturate(160%) brightness(0.4)',
-              transform: 'scale(1.4)',
-            }}
-          />
-          {/* Warm color wash overlay */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: 'linear-gradient(180deg, rgba(180,120,60,0.15) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.5) 100%)',
-            }}
-          />
-        </div>
-      )}
+      {/* Subtle radial glow */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 60% 40% at 50% 35%, rgba(120, 80, 200, 0.2) 0%, transparent 70%)',
+        }}
+      />
 
       {/* Content */}
       <div className="relative z-10 flex flex-col flex-1">
@@ -111,19 +105,7 @@ const ImmersiveHomeLayout = ({
           className="flex items-center justify-between px-5"
           style={{ paddingTop: 'calc(env(safe-area-inset-top, 12px) + 12px)' }}
         >
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            className="w-11 h-11 rounded-full flex items-center justify-center"
-            style={{
-              background: 'rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-              border: '1px solid rgba(255,255,255,0.1)',
-            }}
-          >
-            <Sparkles className="w-5 h-5 text-white/70" />
-          </motion.button>
-
+          <div className="w-11 h-11" /> {/* spacer */}
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => navigate('/profile-setup', { state: { isEditing: true } })}
@@ -141,204 +123,130 @@ const ImmersiveHomeLayout = ({
           </motion.button>
         </div>
 
-        {/* Hero area */}
+        {/* Hero area - ring + mascot */}
         <div className="flex-1 flex flex-col items-center justify-center px-5">
-          {latestPhoto ? (
-            <>
-              {/* Activity title */}
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.15 }}
-                className="text-center font-black uppercase leading-[0.85] tracking-tight mb-8"
-                style={{
-                  fontSize: 'clamp(44px, 13vw, 68px)',
-                  color: 'white',
-                  textShadow: '0 4px 40px rgba(0,0,0,0.4)',
-                }}
-              >
-                {(latestPhoto.activity || 'Workout').split(' ').map((word, i) => (
-                  <span key={i} className="block">{word}</span>
-                ))}
-              </motion.h1>
+          {/* Circular progress ring with mascot */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+          >
+            <CircularProgressRing
+              currentDay={photos.length}
+              currentWeek={currentWeek > 4 ? 4 : currentWeek}
+              onMascotTap={() => {
+                if (latestPhoto) handlePhotoTap(latestPhoto);
+              }}
+            />
+          </motion.div>
 
-              {/* Hero photo card */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.92 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="relative cursor-pointer"
-                onClick={() => handlePhotoTap(latestPhoto)}
-                style={{ width: '260px', maxWidth: '68vw' }}
-              >
-                <div
-                  className="rounded-3xl overflow-hidden"
-                  style={{
-                    aspectRatio: '3/4',
-                    boxShadow: '0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)',
-                  }}
-                >
-                  {latestPhoto.isVideo || isVideoUrl(latestPhoto.storageUrl) ? (
-                    <video
-                      src={latestPhoto.storageUrl}
-                      className="w-full h-full object-cover"
-                      muted playsInline autoPlay loop
-                    />
-                  ) : (
-                    <img
-                      src={latestPhoto.storageUrl}
-                      alt={latestPhoto.activity || 'Activity'}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-
-                  {/* Glass reflection at bottom of photo */}
-                  <div
-                    className="absolute inset-x-0 bottom-0 h-1/3 pointer-events-none"
-                    style={{
-                      background: 'linear-gradient(transparent, rgba(0,0,0,0.4))',
-                    }}
-                  />
-                </div>
-
-                {/* Glass orb decorations */}
-                <div
-                  className="absolute -right-5 top-[40%] w-7 h-7 rounded-full pointer-events-none"
-                  style={{
-                    background: 'radial-gradient(circle at 35% 35%, rgba(255,255,255,0.45), rgba(200,160,100,0.2), transparent)',
-                    filter: 'blur(0.5px)',
-                  }}
-                />
-                <div
-                  className="absolute -left-6 bottom-[30%] w-5 h-5 rounded-full pointer-events-none"
-                  style={{
-                    background: 'radial-gradient(circle at 35% 35%, rgba(255,255,255,0.3), rgba(200,160,100,0.15), transparent)',
-                    filter: 'blur(0.5px)',
-                  }}
-                />
-              </motion.div>
-
-              {/* Motivational text - prominent, no box */}
-              <motion.p
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="mt-8 text-center text-white/90 text-lg font-semibold leading-snug px-4"
-                style={{ textShadow: '0 2px 16px rgba(0,0,0,0.4)' }}
-              >
-                Nice one, {firstName}! 📸 {3 - (photos.length % 3 === 0 ? 3 : photos.length % 3)} more to complete this week.
-              </motion.p>
-            </>
-          ) : (
-            /* Empty state */
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="flex flex-col items-center gap-8"
+          {/* Motivational text - large & prominent, no box */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-6 text-center px-6"
+          >
+            <h2
+              className="text-white font-bold leading-tight"
+              style={{
+                fontSize: 'clamp(22px, 6vw, 28px)',
+                textShadow: '0 2px 20px rgba(0,0,0,0.3)',
+              }}
             >
-              <div
-                className="w-60 h-72 rounded-3xl flex items-center justify-center"
-                style={{
-                  background: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.015) 100%)',
-                  border: '1.5px dashed rgba(255,255,255,0.12)',
-                }}
-              >
-                <Camera className="w-14 h-14 text-white/15" />
-              </div>
+              {photos.length === 0
+                ? `Hey ${firstName}! 👋`
+                : remaining === 0
+                  ? `Great week, ${firstName}! 🔥`
+                  : `Nice one,${firstName}!`}
+            </h2>
+            <p
+              className="text-white/60 font-medium mt-1"
+              style={{
+                fontSize: 'clamp(18px, 5vw, 24px)',
+                textShadow: '0 2px 12px rgba(0,0,0,0.2)',
+              }}
+            >
+              {photos.length === 0
+                ? 'Tap + to log your first workout.'
+                : remaining === 0
+                  ? 'Week complete — reel time!'
+                  : `${remaining} more to complete this week.`}
+            </p>
+          </motion.div>
 
-              <div className="text-center">
-                <h2 className="text-white font-bold text-2xl mb-2">Start your journey</h2>
-                <p className="text-white/35 text-sm">Capture your first workout</p>
-              </div>
-
-              <div className="flex gap-3">
+          {/* Action slots row */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.45 }}
+            className="flex items-center gap-3 mt-10"
+          >
+            {actionSlots.map((slot, idx) => {
+              if (slot.type === 'photo' && slot.photo) {
+                return (
+                  <motion.button
+                    key="photo-thumb"
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handlePhotoTap(slot.photo!)}
+                    className="relative rounded-2xl overflow-hidden"
+                    style={{ width: 100, height: 120 }}
+                  >
+                    {slot.photo.isVideo || isVideoUrl(slot.photo.storageUrl) ? (
+                      <video
+                        src={slot.photo.storageUrl}
+                        className="w-full h-full object-cover"
+                        muted playsInline preload="metadata"
+                      />
+                    ) : (
+                      <img
+                        src={slot.photo.storageUrl}
+                        alt={slot.photo.activity || 'Activity'}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                    {slot.extraCount > 0 && (
+                      <div
+                        className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md text-white text-xs font-bold"
+                        style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}
+                      >
+                        +{slot.extraCount}
+                      </div>
+                    )}
+                  </motion.button>
+                );
+              }
+              return (
                 <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={onOpenCamera}
-                  className="flex items-center gap-2 px-6 py-3.5 rounded-2xl active:scale-[0.96] transition-transform"
-                  style={{
-                    background: 'rgba(255,255,255,0.1)',
-                    backdropFilter: 'blur(20px)',
-                    WebkitBackdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255,255,255,0.14)',
-                  }}
-                >
-                  <Camera className="w-5 h-5 text-white/80" />
-                  <span className="text-white/80 font-medium text-sm">Camera</span>
-                </motion.button>
-                <motion.button
+                  key={`add-${idx}`}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowMediaSheet(true)}
-                  className="flex items-center gap-2 px-6 py-3.5 rounded-2xl active:scale-[0.96] transition-transform"
+                  className="flex flex-col items-center justify-center rounded-2xl"
                   style={{
-                    background: 'rgba(255,255,255,0.1)',
-                    backdropFilter: 'blur(20px)',
-                    WebkitBackdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255,255,255,0.14)',
+                    width: 100,
+                    height: 120,
+                    border: '1.5px dashed rgba(255,255,255,0.2)',
+                    background: 'rgba(255,255,255,0.04)',
                   }}
                 >
-                  <Plus className="w-5 h-5 text-white/80" />
-                  <span className="text-white/80 font-medium text-sm">Gallery</span>
+                  <Plus className="w-7 h-7 text-white/50 mb-1" />
+                  <span className="text-white/40 text-xs font-medium">{slot.label}</span>
                 </motion.button>
-              </div>
-            </motion.div>
-          )}
+              );
+            })}
+          </motion.div>
         </div>
 
         {/* Bottom section */}
-        <div className="relative z-10 pb-28">
-          {/* Horizontal scroll - no box, just thumbnails */}
-          {pastPhotos.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              ref={scrollRef}
-              className="flex gap-3 overflow-x-auto scrollbar-hide px-5 pb-3"
-            >
-              {pastPhotos.map((photo, idx) => (
-                <motion.button
-                  key={photo.id}
-                  initial={{ opacity: 0, x: 24 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + idx * 0.06 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handlePhotoTap(photo)}
-                  className="flex-shrink-0 rounded-2xl overflow-hidden relative"
-                  style={{ width: '100px', height: '100px' }}
-                >
-                  {photo.isVideo || isVideoUrl(photo.storageUrl) ? (
-                    <video
-                      src={photo.storageUrl}
-                      className="w-full h-full object-cover rounded-2xl"
-                      muted playsInline preload="metadata"
-                      onLoadedData={(e) => { (e.target as HTMLVideoElement).currentTime = 0.1; }}
-                    />
-                  ) : (
-                    <img
-                      src={photo.storageUrl}
-                      alt={photo.activity || ''}
-                      className="w-full h-full object-cover rounded-2xl"
-                    />
-                  )}
-                  <div
-                    className="absolute inset-x-0 bottom-0 p-2"
-                    style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.55))' }}
-                  >
-                    <span className="text-white/90 text-[10px] font-semibold tracking-wide uppercase block truncate">
-                      {photo.activity || 'Workout'}
-                    </span>
-                  </div>
-                </motion.button>
-              ))}
-            </motion.div>
-          )}
-
+        <div className="relative z-10 pb-28 px-5">
           {/* Reel pill */}
           <AnimatePresence>
             {!!reelPill && (
-              <div className="px-5 mt-2">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4"
+              >
                 <ReelProgressPill
                   weekNumber={reelPill.weekNumber}
                   state={reelPill.state}
@@ -347,7 +255,7 @@ const ImmersiveHomeLayout = ({
                   onPlay={reelPill.onPlay}
                   isActivelyGenerating={reelPill.isActivelyGenerating}
                 />
-              </div>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
