@@ -729,10 +729,27 @@ const Reel = () => {
   const handleDeleteRecap = useCallback(async () => {
     const weekNum = weekRecapNumber || 1;
     await deleteRecapFromCache(weekNum, user?.id);
+    
+    // Also delete the recap record from the database so it's removed for other users
+    if (user?.id) {
+      try {
+        const { error } = await supabase
+          .from('journey_activities')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('frame', 'recap')
+          .gte('day_number', 1000 + (weekNum - 1) * 3)
+          .lte('day_number', 1000 + weekNum * 3);
+        if (error) console.error('Failed to delete recap from DB:', error);
+      } catch (e) {
+        console.error('Error deleting recap from DB:', e);
+      }
+    }
+    
     setShowDeleteRecapConfirm(false);
     toast.success('Recap deleted');
     navigate('/', { replace: true });
-  }, [weekRecapNumber, navigate]);
+  }, [weekRecapNumber, navigate, user?.id]);
 
   // Handler: Download recap video
   const handleDownloadRecap = useCallback(async () => {
@@ -927,6 +944,18 @@ const Reel = () => {
                 </motion.button>
               )}
             </AnimatePresence>
+            {/* Share button - top left, aligned with sound icon */}
+            <button
+              onClick={handleShareStory}
+              className="absolute top-4 left-4 z-20 w-9 h-9 flex items-center justify-center rounded-full text-white/70 active:scale-95 transition-transform"
+              style={{
+                background: 'rgba(0,0,0,0.4)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+              }}
+            >
+              <Share2 className="w-4 h-4" strokeWidth={1.5} />
+            </button>
             <button
               onClick={() => setIsMuted(prev => !prev)}
               className="absolute top-4 right-4 z-20 w-9 h-9 flex items-center justify-center rounded-full text-white/70"
@@ -1265,14 +1294,8 @@ const Reel = () => {
               </div>
             </div>
             
-            {/* Right side - Share + Close buttons */}
+            {/* Right side - Close button */}
             <div className="flex items-center shrink-0">
-              <button
-                onClick={handleShareStory}
-                className="text-white/80 hover:text-white transition-colors p-2 min-w-[40px] min-h-[40px] flex items-center justify-center active:scale-95"
-              >
-                <Share2 className="w-5 h-5" strokeWidth={1.5} />
-              </button>
               <button
                 onClick={handleClose}
                 className="text-white/80 hover:text-white transition-colors p-2 min-w-[40px] min-h-[40px] flex items-center justify-center"
@@ -1469,6 +1492,23 @@ const Reel = () => {
                       </div>
                     )}
                     
+                    {/* Share button - bottom left, aligned with sound icon */}
+                    {!shouldShowLocked && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleShareStory();
+                        }}
+                        className="absolute bottom-3 left-3 z-20 p-2.5 rounded-full active:scale-95 transition-transform"
+                        style={{
+                          background: 'rgba(0,0,0,0.5)',
+                          backdropFilter: 'blur(8px)',
+                        }}
+                      >
+                        <Share2 className="w-5 h-5 text-white" strokeWidth={1.5} />
+                      </button>
+                    )}
+
                     {/* Audio toggle button for videos */}
                     {isVideo && !shouldShowLocked && (
                       <button
