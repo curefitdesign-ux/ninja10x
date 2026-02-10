@@ -71,24 +71,24 @@ const isVideoUrl = (url: string) => {
 // Background colors matched from each template - dark gradient shades
 const FRAME_COLORS: Record<FrameType, { bg: string; gradient: string }> = {
   shaky: { 
-    bg: 'rgba(20, 20, 30, 0.55)', 
-    gradient: 'linear-gradient(180deg, rgba(30, 30, 40, 0.6) 0%, rgba(10, 10, 15, 0.7) 100%)'
+    bg: 'rgba(20, 20, 30, 0.2)', 
+    gradient: 'linear-gradient(180deg, rgba(30, 30, 40, 0.15) 0%, rgba(10, 10, 15, 0.3) 100%)'
   },
   journal: { 
-    bg: 'rgba(15, 60, 50, 0.55)', 
-    gradient: 'linear-gradient(180deg, rgba(25, 80, 65, 0.6) 0%, rgba(10, 40, 35, 0.7) 100%)'
+    bg: 'rgba(15, 60, 50, 0.2)', 
+    gradient: 'linear-gradient(180deg, rgba(25, 80, 65, 0.15) 0%, rgba(10, 40, 35, 0.3) 100%)'
   },
   vogue: { 
-    bg: 'rgba(40, 40, 45, 0.55)', 
-    gradient: 'linear-gradient(180deg, rgba(50, 50, 55, 0.6) 0%, rgba(20, 20, 25, 0.7) 100%)'
+    bg: 'rgba(40, 40, 45, 0.2)', 
+    gradient: 'linear-gradient(180deg, rgba(50, 50, 55, 0.15) 0%, rgba(20, 20, 25, 0.3) 100%)'
   },
   fitness: { 
-    bg: 'rgba(50, 50, 20, 0.55)', 
-    gradient: 'linear-gradient(180deg, rgba(60, 60, 25, 0.6) 0%, rgba(35, 35, 15, 0.7) 100%)'
+    bg: 'rgba(50, 50, 20, 0.2)', 
+    gradient: 'linear-gradient(180deg, rgba(60, 60, 25, 0.15) 0%, rgba(35, 35, 15, 0.3) 100%)'
   },
   ticket: { 
-    bg: 'rgba(55, 50, 45, 0.55)', 
-    gradient: 'linear-gradient(180deg, rgba(65, 60, 55, 0.6) 0%, rgba(40, 35, 30, 0.7) 100%)'
+    bg: 'rgba(55, 50, 45, 0.2)', 
+    gradient: 'linear-gradient(180deg, rgba(65, 60, 55, 0.15) 0%, rgba(40, 35, 30, 0.3) 100%)'
   },
 };
 
@@ -883,60 +883,14 @@ const Preview = () => {
         )}
       </div>
       
-      {/* Subtle particle/dust animation */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full bg-white/20 animate-particle-float"
-            style={{
-              width: `${Math.random() * 3 + 1}px`,
-              height: `${Math.random() * 3 + 1}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${Math.random() * 10 + 10}s`,
-            }}
-          />
-        ))}
-        <div 
-          className="absolute w-64 h-64 rounded-full animate-orb-float-1"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
-            top: '10%',
-            left: '-10%',
-          }}
-        />
-        <div 
-          className="absolute w-48 h-48 rounded-full animate-orb-float-2"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)',
-            top: '60%',
-            right: '-5%',
-          }}
-        />
-        <div 
-          className="absolute w-32 h-32 rounded-full animate-orb-float-3"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)',
-            bottom: '20%',
-            left: '20%',
-          }}
-        />
-      </div>
-      
-      {/* Dynamic gradient overlay based on current frame - edge to edge */}
+      {/* Subtle gradient overlay based on current template - very light tint */}
       <div 
-        className="fixed inset-0 transition-all duration-500 animate-color-pulse pointer-events-none"
+        className="fixed inset-0 transition-all duration-700 ease-out pointer-events-none"
         style={{ 
           backgroundColor: FRAME_COLORS[currentFrame].bg,
           backgroundImage: FRAME_COLORS[currentFrame].gradient 
         }}
       />
-      <div className="fixed inset-0 bg-black/20 animate-subtle-pulse pointer-events-none" />
-      
-      {/* Activity-specific background effect */}
-      {activity && <ActivityBackgroundEffect activity={activity} />}
 
       {/* Content - scrollable layout */}
       <div 
@@ -1021,25 +975,33 @@ const Preview = () => {
                 const isRightOfCurrent = index > activeIndex;
                 
                 return (
-                  <div 
+                  <motion.div 
                     key={frame}
                     ref={(el) => {
                       frameItemRefs.current[index] = el;
                     }}
                     data-frame={frame}
+                    initial={{ opacity: 0, y: 30, scale: 0.85 }}
+                    animate={{ 
+                      opacity: elementsHidden && !isActiveFrame ? 0 : opacity,
+                      y: 0, 
+                      scale: scale,
+                    }}
+                    transition={{ 
+                      delay: index * 0.1,
+                      type: 'spring',
+                      stiffness: 260,
+                      damping: 22,
+                    }}
                     className={`flex-shrink-0 snap-center flex items-center justify-center ${
                       elementsHidden && isLeftOfCurrent ? 'opacity-0 -translate-x-full' : ''
                     } ${
                       elementsHidden && isRightOfCurrent ? 'opacity-0 translate-x-full' : ''
                     }`}
                     style={{ 
-                      // Card takes ~65% width, leaving ~17.5% visible on each side for adjacent cards
                       width: 'min(65vw, 280px)',
                       height: 'calc(min(65vw, 280px) * 16 / 9)',
                       maxHeight: '480px',
-                      transform: `scale(${scale})`,
-                      opacity: elementsHidden && !isActiveFrame ? 0 : opacity,
-                      transition: 'transform 0.12s ease-out, opacity 0.12s ease-out',
                       willChange: 'transform, opacity',
                     }}
                   >
@@ -1053,7 +1015,7 @@ const Preview = () => {
                       {frame === 'fitness' && <FitnessFrame {...frameProps} />}
                       {frame === 'ticket' && <TicketFrame {...frameProps} />}
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
