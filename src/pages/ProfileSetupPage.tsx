@@ -270,7 +270,7 @@ const ProfileSetupPage = () => {
         )}
 
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-white mb-2">
             {editMode ? 'Edit your profile' : 'Choose profile picture'}
           </h1>
@@ -279,39 +279,13 @@ const ProfileSetupPage = () => {
           </p>
         </div>
 
-        {/* Name Input - at top */}
-        <div 
-          className="rounded-2xl p-4 mb-6"
-          style={{
-            background: 'rgba(255, 255, 255, 0.06)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-          }}
-        >
-          <label className="text-white/50 text-xs mb-2 block">Your Name</label>
-          <input
-            type="text"
-            value={displayName}
-            onChange={(e) => {
-              setDisplayName(e.target.value);
-              if (nameError) setNameError(null);
-            }}
-            placeholder="Enter your name"
-            className="w-full h-12 bg-transparent border-none text-white text-lg placeholder:text-white/30 focus:outline-none px-0"
-            disabled={loading}
-            maxLength={50}
-          />
-          {nameError && (
-            <p className="text-red-400 text-xs mt-2">{nameError}</p>
-          )}
-        </div>
-
         {/* Avatar Display + Upload Button */}
-        <div className="flex flex-col items-center mb-6">
+        <div className="flex flex-col items-center mb-5">
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
+            
             onChange={handleFileSelect}
             className="hidden"
             id="avatar-file-input"
@@ -319,7 +293,7 @@ const ProfileSetupPage = () => {
           
           {/* Avatar Display Circle */}
           <div
-            className="relative w-32 h-32 rounded-full overflow-hidden mb-4"
+            className="relative w-28 h-28 rounded-full overflow-hidden mb-3"
             style={{
               background: avatarPreview 
                 ? 'transparent' 
@@ -345,10 +319,10 @@ const ProfileSetupPage = () => {
             )}
           </div>
 
-          {/* Upload Photo Button - use label for better mobile compat */}
+          {/* Upload Photo Button */}
           <label
             htmlFor="avatar-file-input"
-            className="relative flex items-center gap-3 px-6 py-3 rounded-2xl overflow-hidden active:scale-95 transition-transform cursor-pointer"
+            className="relative flex items-center gap-2 px-5 py-2.5 rounded-full overflow-hidden active:scale-95 transition-transform cursor-pointer"
             style={{
               background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.2) 100%)',
               backdropFilter: 'blur(20px)',
@@ -358,62 +332,83 @@ const ProfileSetupPage = () => {
               pointerEvents: loading ? 'none' as const : 'auto' as const,
             }}
           >
-            <Camera className="w-5 h-5 text-white/90" strokeWidth={2} />
+            <Camera className="w-4 h-4 text-white/90" strokeWidth={2} />
             <span className="text-white font-medium text-sm">Upload Photo</span>
           </label>
         </div>
 
         {/* Divider */}
-        <div className="flex items-center gap-4 mb-5">
+        <div className="flex items-center gap-4 mb-4">
           <div className="flex-1 h-px bg-white/10" />
           <span className="text-white/40 text-xs">or choose a preset</span>
           <div className="flex-1 h-px bg-white/10" />
         </div>
 
-        {/* Preset Avatars Grid - 4 columns */}
-        <div className="grid grid-cols-4 gap-3 mb-6">
-          {PRESET_AVATARS.map((avatar) => (
-            <button
-              key={avatar.id}
-              onClick={() => selectPresetAvatar(avatar.id)}
-              disabled={loading}
-              className="relative aspect-square rounded-full overflow-hidden active:scale-95 transition-transform"
-              style={{
-                border: selectedAvatar === avatar.id 
-                  ? '3px solid hsl(160, 84%, 50%)' 
-                  : '2px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: selectedAvatar === avatar.id 
-                  ? '0 0 20px rgba(52, 211, 153, 0.3)' 
-                  : 'none',
-              }}
-            >
-              <img
-                src={avatar.src}
-                alt={`Avatar ${avatar.id}`}
-                className="w-full h-full object-cover"
-              />
-              <AnimatePresence>
-                {selectedAvatar === avatar.id && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute inset-0 flex items-center justify-center bg-black/30"
-                  >
-                    <div 
-                      className="w-7 h-7 rounded-full flex items-center justify-center"
-                      style={{
-                        background: 'linear-gradient(135deg, hsl(160, 84%, 39%) 0%, hsl(172, 66%, 50%) 100%)',
-                      }}
+        {/* Preset Avatars - Horizontal Scroll */}
+        <div className="mb-6 -mx-6">
+          <div className="flex gap-3 overflow-x-auto px-6 pb-2 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+            {PRESET_AVATARS.map((avatar) => (
+              <button
+                key={avatar.id}
+                onClick={() => selectPresetAvatar(avatar.id)}
+                disabled={loading}
+                className="relative flex-shrink-0 w-16 h-16 rounded-full overflow-hidden active:scale-95 transition-transform"
+                style={{
+                  border: selectedAvatar === avatar.id 
+                    ? '3px solid hsl(160, 84%, 50%)' 
+                    : '2px solid rgba(255, 255, 255, 0.1)',
+                  boxShadow: selectedAvatar === avatar.id 
+                    ? '0 0 20px rgba(52, 211, 153, 0.3)' 
+                    : 'none',
+                }}
+              >
+                <img
+                  src={avatar.src}
+                  alt={`Avatar ${avatar.id}`}
+                  className="w-full h-full object-cover"
+                />
+                <AnimatePresence>
+                  {selectedAvatar === avatar.id && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute inset-0 flex items-center justify-center bg-black/30"
                     >
-                      <Check className="w-4 h-4 text-white" strokeWidth={3} />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </button>
-          ))}
+                      <div 
+                        className="w-6 h-6 rounded-full flex items-center justify-center"
+                        style={{
+                          background: 'linear-gradient(135deg, hsl(160, 84%, 39%) 0%, hsl(172, 66%, 50%) 100%)',
+                        }}
+                      >
+                        <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Name Input - centered, single line, no box */}
+        <div className="flex flex-col items-center mb-6">
+          <input
+            type="text"
+            value={displayName}
+            onChange={(e) => {
+              setDisplayName(e.target.value);
+              if (nameError) setNameError(null);
+            }}
+            placeholder="Enter your name"
+            className="w-full h-12 bg-transparent text-white text-lg text-center placeholder:text-white/30 focus:outline-none border-b border-white/15 focus:border-white/40 transition-colors"
+            disabled={loading}
+            maxLength={50}
+          />
+          {nameError && (
+            <p className="text-red-400 text-xs mt-2">{nameError}</p>
+          )}
         </div>
 
         {editMode && (
