@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Camera, X, Eye, EyeOff } from 'lucide-react';
+import { Check, Camera, X, Eye, EyeOff, LogOut } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 
 import { supabase } from '@/integrations/supabase/client';
@@ -49,7 +49,7 @@ const ProfileSetupPage = () => {
   const [searchParams] = useSearchParams();
   const editMode = searchParams.get('edit') === 'true';
   
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { profile, updateProfile, needsSetup, loading: profileLoading } = useProfile();
   const [displayName, setDisplayName] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
@@ -471,6 +471,23 @@ const ProfileSetupPage = () => {
             {loading ? 'Saving...' : (editMode ? 'Save Changes' : 'Continue')}
           </span>
         </button>
+
+        {/* Back to Login - only in setup mode */}
+        {!editMode && (
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={async () => {
+                await signOut();
+                navigate('/auth', { replace: true });
+              }}
+              disabled={loading}
+              className="flex items-center gap-2 text-white/40 hover:text-white/70 active:scale-95 transition-all py-2 text-sm"
+            >
+              <LogOut size={15} />
+              <span>Back to Login</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
