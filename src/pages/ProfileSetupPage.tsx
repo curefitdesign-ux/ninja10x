@@ -290,9 +290,9 @@ const ProfileSetupPage = () => {
             id="avatar-file-input"
           />
           
-          {/* Avatar Display Circle - also clickable */}
-          <label
-            htmlFor="avatar-file-input"
+          {/* Avatar Display Circle - clickable to upload */}
+          <div
+            onClick={() => fileInputRef.current?.click()}
             className="relative w-28 h-28 rounded-full overflow-hidden mb-3 cursor-pointer active:scale-95 transition-transform"
             style={{
               background: avatarPreview 
@@ -317,11 +317,12 @@ const ProfileSetupPage = () => {
                 <Camera className="w-10 h-10 text-white/25" strokeWidth={1.5} />
               </div>
             )}
-          </label>
+          </div>
 
           {/* Upload Photo Button */}
-          <label
-            htmlFor="avatar-file-input"
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
             className="relative flex items-center gap-2 px-5 py-2.5 rounded-full overflow-hidden active:scale-95 transition-transform cursor-pointer"
             style={{
               background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.2) 100%)',
@@ -334,7 +335,7 @@ const ProfileSetupPage = () => {
           >
             <Camera className="w-4 h-4 text-white/90" strokeWidth={2} />
             <span className="text-white font-medium text-sm">Upload Photo</span>
-          </label>
+          </button>
         </div>
 
         {/* Divider */}
@@ -392,34 +393,22 @@ const ProfileSetupPage = () => {
           </div>
         </div>
 
-        {/* Name Input - glass card style like reference */}
-        <div className="mb-6">
-          <div 
-            className="rounded-2xl overflow-hidden"
-            style={{
-              background: 'rgba(255, 255, 255, 0.06)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+        {/* Name Input - centered single line */}
+        <div className="flex flex-col items-center mb-6">
+          <input
+            type="text"
+            value={displayName}
+            onChange={(e) => {
+              setDisplayName(e.target.value);
+              if (nameError) setNameError(null);
             }}
-          >
-            <div className="flex items-center justify-between px-5 h-14">
-              <span className="text-white/60 text-base">Name</span>
-              <input
-                type="text"
-                value={displayName}
-                onChange={(e) => {
-                  setDisplayName(e.target.value);
-                  if (nameError) setNameError(null);
-                }}
-                placeholder="Your name"
-                className="bg-transparent text-white text-base font-semibold text-right placeholder:text-white/25 focus:outline-none flex-1 ml-4"
-                disabled={loading}
-                maxLength={50}
-              />
-            </div>
-          </div>
+            placeholder="Enter your name"
+            className="w-full h-12 bg-transparent text-white text-lg text-center placeholder:text-white/30 focus:outline-none border-b border-white/15 focus:border-white/40 transition-colors"
+            disabled={loading}
+            maxLength={50}
+          />
           {nameError && (
-            <p className="text-red-400 text-xs mt-2 text-center">{nameError}</p>
+            <p className="text-red-400 text-xs mt-2">{nameError}</p>
           )}
         </div>
 
