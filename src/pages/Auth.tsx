@@ -117,9 +117,11 @@ const Auth = () => {
           return;
         }
 
-        toast.success('Account created!');
-        if (data.user) {
-          setShowProfileSetup(true);
+        if (data.session) {
+          toast.success('Account created!');
+          navigate('/profile-setup', { replace: true });
+        } else {
+          toast.success('Check your email to confirm your account.');
         }
       }
     } catch (err) {
