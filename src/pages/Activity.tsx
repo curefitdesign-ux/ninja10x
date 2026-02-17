@@ -393,9 +393,9 @@ const Activity = () => {
           {/* Mascot Section with Circular Progress */}
           <div className="relative px-4 mt-6">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.92, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ type: 'spring', stiffness: 180, damping: 18, delay: 0.15 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
               className="flex flex-col items-center"
             >
               <CircularProgressRing 
@@ -410,7 +410,7 @@ const Activity = () => {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
+                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
                 className="mt-5 text-center px-6"
               >
                 <h2
@@ -446,7 +446,7 @@ const Activity = () => {
 
           {/* Photo Logging Widget */}
           <div className="mt-8">
-            <motion.div initial={{ opacity: 0, y: 16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.25 }}>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: 0.18 }}>
               {loading ? (
                 <div className="flex items-center justify-center h-40">
                   <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
@@ -467,9 +467,9 @@ const Activity = () => {
           {/* Activities Section */}
           <div className="px-4 mt-12">
             <motion.div
-              initial={{ opacity: 0, y: 12 }} 
+              initial={{ opacity: 0, y: 8 }} 
               animate={{ opacity: 1, y: 0 }} 
-              transition={{ type: 'spring', stiffness: 170, damping: 20, delay: 0.3 }} 
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: 0.22 }} 
               className="mb-6"
             >
               <h2 className="text-xl font-semibold text-white">Do any of the following activities today</h2>
@@ -478,9 +478,9 @@ const Activity = () => {
               {activities_grid.map((activity, idx) => (
                 <motion.button
                   key={activity.id}
-                  initial={{ opacity: 0, y: 14, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 200, damping: 16, delay: 0.35 + idx * 0.06 }}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1], delay: 0.26 + idx * 0.05 }}
                   whileTap={{ scale: 0.95 }}
                   whileHover={{ scale: 1.02 }}
                   className="flex flex-col items-center group"
@@ -505,10 +505,10 @@ const Activity = () => {
               ].map((card, idx) => (
                 <motion.button
                   key={card.alt}
-                  initial={{ opacity: 0, y: 18, scale: 0.94 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-40px" }}
-                  transition={{ type: 'spring', stiffness: 180, damping: 18, delay: idx * 0.08 }}
+                  transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: idx * 0.06 }}
                   whileTap={{ scale: 0.96 }}
                   className="relative rounded-3xl overflow-hidden"
                 >
@@ -521,10 +521,10 @@ const Activity = () => {
           {/* Smart Workout Plan */}
           <div className="px-4 mt-4">
             <motion.button
-              initial={{ opacity: 0, y: 18, scale: 0.95 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ type: 'spring', stiffness: 170, damping: 18 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
               whileTap={{ scale: 0.96 }}
               className="relative w-full rounded-3xl overflow-hidden"
             >
@@ -542,10 +542,10 @@ const Activity = () => {
               {fitnessPrograms.map((program, idx) => (
                 <motion.button
                   key={program.id}
-                  initial={{ opacity: 0, y: 20, scale: 0.93 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-30px" }}
-                  transition={{ type: 'spring', stiffness: 180, damping: 17, delay: idx * 0.05 }}
+                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1], delay: idx * 0.04 }}
                   whileTap={{ scale: 0.96 }}
                   className="relative aspect-[4/5] rounded-2xl overflow-hidden"
                 >
