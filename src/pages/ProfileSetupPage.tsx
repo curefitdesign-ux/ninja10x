@@ -284,15 +284,16 @@ const ProfileSetupPage = () => {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/png,image/jpeg,image/jpg,image/webp"
             onChange={handleFileSelect}
             className="hidden"
-            id="avatar-file-input"
+            style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', opacity: 0 }}
           />
           
           {/* Avatar Display Circle - clickable to upload */}
-          <div
-            onClick={() => fileInputRef.current?.click()}
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); fileInputRef.current?.click(); }}
             className="relative w-28 h-28 rounded-full overflow-hidden mb-3 cursor-pointer active:scale-95 transition-transform"
             style={{
               background: avatarPreview 
@@ -317,12 +318,12 @@ const ProfileSetupPage = () => {
                 <Camera className="w-10 h-10 text-white/25" strokeWidth={1.5} />
               </div>
             )}
-          </div>
+          </button>
 
           {/* Upload Photo Button */}
           <button
             type="button"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); fileInputRef.current?.click(); }}
             className="relative flex items-center gap-2 px-5 py-2.5 rounded-full overflow-hidden active:scale-95 transition-transform cursor-pointer"
             style={{
               background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.2) 100%)',
