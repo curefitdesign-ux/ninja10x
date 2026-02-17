@@ -393,9 +393,9 @@ const Activity = () => {
           {/* Mascot Section with Circular Progress */}
           <div className="relative px-4 mt-6">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              initial={{ opacity: 0, scale: 0.92, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 180, damping: 18, delay: 0.15 }}
               className="flex flex-col items-center"
             >
               <CircularProgressRing 
@@ -446,7 +446,7 @@ const Activity = () => {
 
           {/* Photo Logging Widget */}
           <div className="mt-8">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.3 }}>
+            <motion.div initial={{ opacity: 0, y: 16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.25 }}>
               {loading ? (
                 <div className="flex items-center justify-center h-40">
                   <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
@@ -467,9 +467,9 @@ const Activity = () => {
           {/* Activities Section */}
           <div className="px-4 mt-12">
             <motion.div
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              transition={{ duration: 0.5, delay: 0.35 }} 
+              initial={{ opacity: 0, y: 12 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ type: 'spring', stiffness: 170, damping: 20, delay: 0.3 }} 
               className="mb-6"
             >
               <h2 className="text-xl font-semibold text-white">Do any of the following activities today</h2>
@@ -478,9 +478,9 @@ const Activity = () => {
               {activities_grid.map((activity, idx) => (
                 <motion.button
                   key={activity.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.4 + idx * 0.05 }}
+                  initial={{ opacity: 0, y: 14, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 16, delay: 0.35 + idx * 0.06 }}
                   whileTap={{ scale: 0.95 }}
                   whileHover={{ scale: 1.02 }}
                   className="flex flex-col items-center group"
@@ -499,18 +499,35 @@ const Activity = () => {
           {/* Feature Cards Row */}
           <div className="px-4 mt-8">
             <div className="grid grid-cols-2 gap-3">
-              <motion.button whileTap={{ scale: 0.98 }} className="relative rounded-3xl overflow-hidden">
-                <img src={connectFitnessDevice} alt="Connect Fitness device" className="w-full h-auto object-contain" />
-              </motion.button>
-              <motion.button whileTap={{ scale: 0.98 }} className="relative rounded-3xl overflow-hidden">
-                <img src={workoutWithFriends} alt="Workout With Friends" className="w-full h-auto object-contain" />
-              </motion.button>
+              {[
+                { src: connectFitnessDevice, alt: "Connect Fitness device" },
+                { src: workoutWithFriends, alt: "Workout With Friends" },
+              ].map((card, idx) => (
+                <motion.button
+                  key={card.alt}
+                  initial={{ opacity: 0, y: 18, scale: 0.94 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ type: 'spring', stiffness: 180, damping: 18, delay: idx * 0.08 }}
+                  whileTap={{ scale: 0.96 }}
+                  className="relative rounded-3xl overflow-hidden"
+                >
+                  <img src={card.src} alt={card.alt} className="w-full h-auto object-contain" />
+                </motion.button>
+              ))}
             </div>
           </div>
 
           {/* Smart Workout Plan */}
           <div className="px-4 mt-4">
-            <motion.button whileTap={{ scale: 0.98 }} className="relative w-full rounded-3xl overflow-hidden">
+            <motion.button
+              initial={{ opacity: 0, y: 18, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ type: 'spring', stiffness: 170, damping: 18 }}
+              whileTap={{ scale: 0.96 }}
+              className="relative w-full rounded-3xl overflow-hidden"
+            >
               <img src={smartWorkoutPlan} alt="Smart workout plan" className="w-full h-auto object-contain" />
             </motion.button>
           </div>
@@ -522,8 +539,16 @@ const Activity = () => {
               <ArrowRight className="w-5 h-5 text-white/60" />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {fitnessPrograms.map((program) => (
-                <motion.button key={program.id} whileTap={{ scale: 0.98 }} className="relative aspect-[4/5] rounded-2xl overflow-hidden">
+              {fitnessPrograms.map((program, idx) => (
+                <motion.button
+                  key={program.id}
+                  initial={{ opacity: 0, y: 20, scale: 0.93 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, margin: "-30px" }}
+                  transition={{ type: 'spring', stiffness: 180, damping: 17, delay: idx * 0.05 }}
+                  whileTap={{ scale: 0.96 }}
+                  className="relative aspect-[4/5] rounded-2xl overflow-hidden"
+                >
                   <img src={program.image} alt={`Fitness program ${program.id}`} className="w-full h-full object-cover" />
                 </motion.button>
               ))}
