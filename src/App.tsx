@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,6 +24,7 @@ import ReelGenerationBase from "./pages/ReelGeneration";
 import ProfileSetupPage from "./pages/ProfileSetupPage";
 import AvatarCrop from "./pages/AvatarCrop";
 import PageTransition from "./components/PageTransition";
+import { enableAutoMotion } from "@/lib/motion";
 
 const queryClient = new QueryClient();
 
@@ -120,19 +122,23 @@ const AnimatedRoutes = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <NotificationCenter />
-        <ReactionNotificationPill />
-        <AnimatedRoutes />
-        <BottomNavBar />
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  useEffect(() => enableAutoMotion(), []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <NotificationCenter />
+          <ReactionNotificationPill />
+          <AnimatedRoutes />
+          <BottomNavBar />
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
