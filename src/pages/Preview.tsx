@@ -1135,15 +1135,15 @@ const Preview = () => {
               <div 
                 className="rounded-2xl px-5 py-1 relative overflow-hidden"
                 style={{
-                  background: 'rgba(20, 18, 35, 0.75)',
-                  backdropFilter: 'blur(40px) saturate(180%)',
-                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                  border: '1px solid rgba(255, 255, 255, 0.14)',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 24px rgba(0,0,0,0.3)',
+                  background: 'rgba(0, 0, 0, 0.10)',
+                  backdropFilter: 'blur(40px) saturate(160%)',
+                  WebkitBackdropFilter: 'blur(40px) saturate(160%)',
+                  border: '1px solid rgba(255, 255, 255, 0.10)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
                 }}
               >
                 {/* Top edge reflection */}
-                <div className="absolute inset-x-0 top-0 h-px rounded-t-2xl" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25) 30%, rgba(255,255,255,0.25) 70%, transparent)' }} />
+                <div className="absolute inset-x-0 top-0 h-px rounded-t-2xl" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18) 30%, rgba(255,255,255,0.18) 70%, transparent)' }} />
 
                 {/* Activity selector row */}
                 <button 
