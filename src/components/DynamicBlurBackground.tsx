@@ -20,9 +20,9 @@ export default function DynamicBlurBackground({ imageUrl, children }: DynamicBlu
           }}
         />
         
-        {/* Dark overlay for contrast */}
+        {/* Minimal overlay — just enough for text legibility, keep photo vibrant */}
         <div 
-          className="absolute inset-0 bg-black/60"
+          className="absolute inset-0 bg-black/25"
         />
       </div>
 
