@@ -1341,7 +1341,6 @@ const Reel = () => {
                 return (
                   <div
                     className="relative w-full h-full overflow-hidden"
-                    style={{ aspectRatio: '9/16' }}
                   >
                     <AnimatePresence mode="popLayout">
                       <motion.div
@@ -1401,9 +1400,9 @@ const Reel = () => {
                             ref={videoRef}
                             key={mediaUrl}
                             src={mediaUrl}
-                            className="w-full h-full rounded-3xl"
+                            className="w-full h-full"
                             style={{ 
-                              objectFit: 'contain',
+                              objectFit: 'cover',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
                               opacity: mediaLoaded ? 1 : 0,
                               transition: 'opacity 0.2s ease',
@@ -1427,11 +1426,11 @@ const Reel = () => {
                             key={mediaUrl}
                             src={mediaUrl}
                             alt={`Day ${currentActivity.dayNumber}`}
-                            className="w-full h-full rounded-3xl"
+                            className="w-full h-full"
                             loading="eager"
                             decoding="async"
                             style={{ 
-                              objectFit: 'contain',
+                              objectFit: 'cover',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
                               opacity: mediaLoaded ? 1 : 0,
                               transition: 'opacity 0.2s ease',
