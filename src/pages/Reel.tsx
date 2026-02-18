@@ -1310,11 +1310,11 @@ const Reel = () => {
 
         {/* MAIN CONTENT ZONE - flexible middle section */}
         <div
-          className="flex-1 flex items-center justify-center z-30 overflow-hidden px-4 relative"
+          className="flex-1 flex items-center justify-center z-30 overflow-hidden relative"
         >
           {/* Card container with shake animation - single wrapper */}
           <motion.div 
-            className="relative w-full max-w-[340px] flex items-center justify-center"
+            className="relative w-full h-full flex items-center justify-center"
             style={{ 
               maxHeight: '100%',
               x: dragX,
@@ -1340,7 +1340,7 @@ const Reel = () => {
                 
                 return (
                   <div
-                    className="relative w-full max-w-[307px] overflow-hidden rounded-3xl"
+                    className="relative w-full h-full overflow-hidden"
                     style={{ aspectRatio: '9/16' }}
                   >
                     <AnimatePresence mode="popLayout">
