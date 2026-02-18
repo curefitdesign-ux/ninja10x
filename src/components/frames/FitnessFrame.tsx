@@ -117,7 +117,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
           top: '22%',
           left: '50%',
           width: '58%',
-          aspectRatio: '3/4',
+          height: '44%',
           transform: 'translateX(-50%) rotate(-8deg)',
         }}
       >
