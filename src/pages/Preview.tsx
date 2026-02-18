@@ -957,32 +957,26 @@ const Preview = () => {
         overflow: 'hidden',
       }}
     >
-      {/* Blurred background — low-res version for performance */}
+      {/* Blurred background — always the uploaded image, never a colour */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {isVideo ? (
           <video
             src={imageUrl || ''}
             autoPlay muted loop playsInline
             className="absolute inset-0 w-full h-full object-cover scale-[1.3]"
-            style={{ filter: 'blur(60px) brightness(0.45) saturate(1.4)' }}
+            style={{ filter: 'blur(50px) brightness(0.75) saturate(1.2)' }}
           />
         ) : (
           <img
             src={lowResBackground || imageUrl || ''}
             alt=""
             className="absolute inset-0 w-full h-full object-cover scale-[1.3]"
-            style={{ filter: 'blur(60px) brightness(0.45) saturate(1.4)' }}
+            style={{ filter: 'blur(50px) brightness(0.75) saturate(1.2)' }}
           />
         )}
+        {/* Single 10% dark veil — no colour tint */}
+        <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.10)' }} />
       </div>
-      
-      {/* Template-aware tint — shifts boldly as user scrolls between frames */}
-      <div 
-        className="fixed inset-0 transition-all duration-500 ease-out pointer-events-none"
-        style={{ 
-          background: FRAME_COLORS[currentFrame].gradient,
-        }}
-      />
 
       {/* Content - scrollable layout */}
       <div 
