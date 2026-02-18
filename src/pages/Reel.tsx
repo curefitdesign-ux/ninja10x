@@ -1308,15 +1308,17 @@ const Reel = () => {
           </div>
         </div>
 
-        {/* MAIN CONTENT ZONE - flexible middle section, full bleed no padding */}
+        {/* MAIN CONTENT ZONE - flexible middle section, card-style with padding */}
         <div
-          className="flex-1 z-30 overflow-hidden relative"
+          className="flex-1 flex items-center justify-center z-30 overflow-hidden relative px-4 py-2"
           style={{ background: 'transparent' }}
         >
-          {/* Card container with shake animation - single wrapper, fills zone fully */}
+          {/* Card container with shake animation */}
           <motion.div 
-            className="relative w-full h-full"
+            className="relative flex items-center justify-center"
             style={{ 
+              width: '100%',
+              height: '100%',
               x: dragX,
               opacity: cardOpacity,
               rotateY: cardRotate,
@@ -1340,15 +1342,23 @@ const Reel = () => {
                 
                 return (
                   <div
-                    className="relative w-full h-full"
-                    style={{ background: 'transparent' }}
+                    className="relative flex items-center justify-center"
+                    style={{ 
+                      width: '100%',
+                      height: '100%',
+                      background: 'transparent',
+                    }}
                   >
-                    {/* Card — full bleed, no aspect ratio constraint, no rounded corners, no background */}
+                    {/* Card — 9:16 aspect ratio, rounded corners, contained */}
                     <div
-                      className="relative overflow-hidden w-full h-full"
+                      className="relative overflow-hidden"
                       style={{
-                        borderRadius: '0px',
+                        aspectRatio: '9/16',
+                        height: '100%',
+                        maxWidth: '100%',
+                        borderRadius: '20px',
                         background: 'transparent',
+                        boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
                       }}
                     >
                     <AnimatePresence mode="popLayout">
