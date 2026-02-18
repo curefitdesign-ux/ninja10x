@@ -655,7 +655,7 @@ const Preview = () => {
   const frameProps = {
     imageUrl: imageUrl || '',
     isVideo,
-    activity: activity || '',
+    activity: activity || 'Activity',
     week: calculatedWeek,
     day: dayNumber,
     duration,
@@ -1047,12 +1047,16 @@ const Preview = () => {
             <div 
               ref={containerRef}
               onScroll={handleScroll}
-              className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center touch-pan-x"
+              className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full h-full items-center touch-pan-x select-none"
               style={{ 
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
                 overscrollBehaviorX: 'contain',
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                // Prevent long-press callout / context menu on touch devices
+                WebkitTouchCallout: 'none',
                 // Reduced card width to show ~20% of adjacent templates on each side
                 paddingLeft: 'calc((100vw - min(65vw, 280px)) / 2)',
                 paddingRight: 'calc((100vw - min(65vw, 280px)) / 2)',
