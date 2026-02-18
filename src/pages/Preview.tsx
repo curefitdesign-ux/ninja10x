@@ -1125,8 +1125,9 @@ const Preview = () => {
           {/* Editable data points - contextual to activity */}
           {(() => {
             const config = getActivityInputConfig(activity || '', customMetrics);
-            const activityOption = activityOptions.find(a => a.name === activity);
-            
+            const isCricket = activity === 'Cricket';
+            const cricketMode = customMetrics?.secondaryMetric === 'Wickets' ? 'bowling' : 'batting';
+
             return (
               <div 
                 className="rounded-2xl px-5 py-1 relative overflow-hidden"
@@ -1151,7 +1152,38 @@ const Preview = () => {
                   </span>
                 </button>
 
-                {/* Duration row - optional */}
+                {/* Cricket batting/bowling inline switcher */}
+                {isCricket && (
+                  <div className="w-full flex justify-between items-center py-3 border-b border-white/[0.08] min-h-[52px]">
+                    <span className="text-white/60 text-[15px] font-medium">Type</span>
+                    <div className="flex gap-1.5">
+                      <button
+                        onClick={() => { setCustomMetrics(null); }}
+                        className="px-3 py-1 rounded-lg text-[12px] font-semibold transition-all"
+                        style={{
+                          background: cricketMode === 'batting' ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.06)',
+                          color: cricketMode === 'batting' ? '#fff' : 'rgba(255,255,255,0.45)',
+                          border: cricketMode === 'batting' ? '1px solid rgba(255,255,255,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                        }}
+                      >
+                        Batting
+                      </button>
+                      <button
+                        onClick={() => { setCustomMetrics({ primaryMetric: 'Duration', primaryUnit: 'min', secondaryMetric: 'Wickets', secondaryUnit: 'wkts' }); }}
+                        className="px-3 py-1 rounded-lg text-[12px] font-semibold transition-all"
+                        style={{
+                          background: cricketMode === 'bowling' ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.06)',
+                          color: cricketMode === 'bowling' ? '#fff' : 'rgba(255,255,255,0.45)',
+                          border: cricketMode === 'bowling' ? '1px solid rgba(255,255,255,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                        }}
+                      >
+                        Bowling
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Duration row */}
                 <button 
                   onClick={() => { handleTap('duration'); openEditSheet('duration'); }}
                   className={`w-full flex justify-between items-center py-3.5 ${config.secondaryInputType !== 'none' ? 'border-b border-white/[0.08]' : ''} tap-bounce min-h-[52px] ${tappedElement === 'duration' ? 'animate-liquid-tap' : ''}`}
