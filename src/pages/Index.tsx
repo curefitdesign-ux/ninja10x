@@ -106,7 +106,7 @@ const Index = () => {
   const [previousPhotoCount, setPreviousPhotoCount] = useState(photos.length);
   
   // Navigate to /reel-generation with properly mapped photo data
-  const handleGenerateReel = useCallback((photosToProcess: Photo[]) => {
+  const handleGenerateReel = useCallback((photosToProcess: Photo[], forceRegenerate = true) => {
     const latest3 = photosToProcess.slice(-3);
     
     // Check if all photos have storage URLs
@@ -135,11 +135,12 @@ const Index = () => {
 
     const weekNumber = Math.ceil(Math.max(...latest3.map(p => p.dayNumber)) / 3);
 
-    console.log('[Index] Navigating to reel-generation with', weekPhotos.length, 'photos');
+    console.log('[Index] Navigating to reel-generation with', weekPhotos.length, 'photos, forceRegenerate:', forceRegenerate);
     navigate('/reel-generation', {
       state: {
         weekPhotos,
         weekNumber,
+        forceRegenerate, // Always bust cache so user's actual uploaded photos are used
       },
     });
   }, [navigate]);
