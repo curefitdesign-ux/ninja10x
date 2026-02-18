@@ -1340,12 +1340,13 @@ const Reel = () => {
                 
                 return (
                   <div
-                    className="relative w-full h-full overflow-hidden"
+                    className="relative w-full h-full flex items-center justify-center"
+                    style={{ background: 'transparent' }}
                   >
                     <AnimatePresence mode="popLayout">
                       <motion.div
                         key={contentKey}
-                        className="absolute inset-0"
+                        className="absolute inset-0 flex items-center justify-center"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -1400,9 +1401,13 @@ const Reel = () => {
                             ref={videoRef}
                             key={mediaUrl}
                             src={mediaUrl}
-                            className="w-full h-full"
+                            className="max-w-full max-h-full"
                             style={{ 
-                              objectFit: 'cover',
+                              objectFit: 'contain',
+                              width: 'auto',
+                              height: 'auto',
+                              maxWidth: '100%',
+                              maxHeight: '100%',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
                               opacity: mediaLoaded ? 1 : 0,
                               transition: 'opacity 0.2s ease',
@@ -1413,7 +1418,6 @@ const Reel = () => {
                             playsInline
                             onLoadedData={(e) => {
                               setMediaLoaded(true);
-                              // Set auto-advance duration to match actual video length
                               const vid = e.currentTarget;
                               if (vid.duration && isFinite(vid.duration) && vid.duration > 0) {
                                 const videoDurationMs = Math.ceil(vid.duration * 1000);
@@ -1426,11 +1430,15 @@ const Reel = () => {
                             key={mediaUrl}
                             src={mediaUrl}
                             alt={`Day ${currentActivity.dayNumber}`}
-                            className="w-full h-full"
+                            className="max-w-full max-h-full"
                             loading="eager"
                             decoding="async"
                             style={{ 
-                              objectFit: 'cover',
+                              objectFit: 'contain',
+                              width: 'auto',
+                              height: 'auto',
+                              maxWidth: '100%',
+                              maxHeight: '100%',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
                               opacity: mediaLoaded ? 1 : 0,
                               transition: 'opacity 0.2s ease',
