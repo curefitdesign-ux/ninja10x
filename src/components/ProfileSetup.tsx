@@ -285,28 +285,8 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
           </p>
         </div>
 
-        {/* Name Input — top, single line like Auth page */}
-        <div className="mb-5">
-          <Input
-            id="displayName"
-            type="text"
-            value={displayName}
-            onChange={(e) => {
-              setDisplayName(e.target.value);
-              if (nameError) setNameError(null);
-            }}
-            placeholder="Your name"
-            className="h-12 text-white placeholder:text-white/30 rounded-xl focus:border-emerald-400/50 focus:ring-emerald-400/20 text-center"
-            disabled={loading}
-            maxLength={50}
-          />
-          {nameError && (
-            <p className="text-red-400 text-xs mt-1 text-center">{nameError}</p>
-          )}
-        </div>
-
         {/* Large Avatar Preview */}
-        <div className="flex justify-center mb-4">
+        <div className="flex justify-center mb-3">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -334,6 +314,26 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
               )}
             </div>
           </motion.div>
+        </div>
+
+        {/* Name Input — below avatar pic */}
+        <div className="mb-5">
+          <Input
+            id="displayName"
+            type="text"
+            value={displayName}
+            onChange={(e) => {
+              setDisplayName(e.target.value);
+              if (nameError) setNameError(null);
+            }}
+            placeholder="Your name"
+            className="h-12 text-white placeholder:text-white/30 rounded-xl focus:border-emerald-400/50 focus:ring-emerald-400/20 text-center bg-transparent border-0 border-b border-white/20 rounded-none text-lg font-medium"
+            disabled={loading}
+            maxLength={50}
+          />
+          {nameError && (
+            <p className="text-red-400 text-xs mt-1 text-center">{nameError}</p>
+          )}
         </div>
 
         {/* Upload Photo Button */}
