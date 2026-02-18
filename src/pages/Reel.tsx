@@ -1308,15 +1308,15 @@ const Reel = () => {
           </div>
         </div>
 
-        {/* MAIN CONTENT ZONE - flexible middle section */}
+        {/* MAIN CONTENT ZONE - flexible middle section, full bleed no padding */}
         <div
-          className="flex-1 flex items-center justify-center z-30 overflow-hidden relative"
+          className="flex-1 z-30 overflow-hidden relative"
+          style={{ background: 'transparent' }}
         >
-          {/* Card container with shake animation - single wrapper */}
+          {/* Card container with shake animation - single wrapper, fills zone fully */}
           <motion.div 
-            className="relative w-full h-full flex items-center justify-center"
+            className="relative w-full h-full"
             style={{ 
-              maxHeight: '100%',
               x: dragX,
               opacity: cardOpacity,
               rotateY: cardRotate,
@@ -1340,20 +1340,13 @@ const Reel = () => {
                 
                 return (
                   <div
-                    className="relative flex items-center justify-center"
-                    style={{ 
-                      width: '100%',
-                      height: '100%',
-                      background: 'transparent',
-                    }}
+                    className="relative w-full h-full"
+                    style={{ background: 'transparent' }}
                   >
-                    {/* Card — 9:16 aspect ratio, contained within zone, no rounded corners to avoid black edges */}
+                    {/* Card — full bleed, no aspect ratio constraint, no rounded corners, no background */}
                     <div
-                      className="relative overflow-hidden"
+                      className="relative overflow-hidden w-full h-full"
                       style={{
-                        aspectRatio: '9/16',
-                        height: '100%',
-                        maxWidth: '100%',
                         borderRadius: '0px',
                         background: 'transparent',
                       }}
@@ -1373,7 +1366,7 @@ const Reel = () => {
                         {isRecapGenerating ? (
                           // Show generating placeholder for week recap
                           <div 
-                            className="w-full h-full rounded-3xl flex flex-col items-center justify-center gap-6"
+                            className="w-full h-full flex flex-col items-center justify-center gap-6"
                             style={{
                               background: 'linear-gradient(135deg, hsl(var(--muted)) 0%, hsl(var(--background)) 100%)',
                             }}
