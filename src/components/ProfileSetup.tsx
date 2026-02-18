@@ -55,12 +55,15 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
   useEffect(() => {
     if (editMode && existingProfile) {
       setDisplayName(existingProfile.display_name);
-      // Check if avatar is a preset or custom
-      const presetMatch = PRESET_AVATARS.find(a => existingProfile.avatar_url.includes(a.id) || existingProfile.avatar_url === a.src);
+      // Check if avatar is a preset key (e.g. 'avatar-red') or a custom upload URL
+      const storedUrl = existingProfile.avatar_url;
+      const presetMatch = PRESET_AVATARS.find(a => 
+        storedUrl === `avatar-${a.id}` || storedUrl.includes(`avatar-${a.id}`)
+      );
       if (presetMatch) {
         setSelectedAvatar(presetMatch.id);
-      } else if (existingProfile.avatar_url) {
-        setCustomAvatarPreview(existingProfile.avatar_url);
+      } else if (storedUrl) {
+        setCustomAvatarPreview(storedUrl);
       }
     }
   }, [editMode, existingProfile]);
@@ -176,9 +179,9 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
 
         avatarUrl = urlData.publicUrl;
       } else if (selectedAvatar) {
-        // Use preset avatar
-        const preset = PRESET_AVATARS.find(a => a.id === selectedAvatar);
-        avatarUrl = preset?.src || '';
+        // Save the stable key (e.g. 'avatar-red') not the Vite-hashed path.
+        // ProfileAvatar resolves the key back to the correct hashed asset URL at render time.
+        avatarUrl = `avatar-${selectedAvatar}`;
       } else {
         // Keep existing custom avatar
         avatarUrl = customAvatarPreview || '';
