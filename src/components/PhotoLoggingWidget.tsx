@@ -70,6 +70,110 @@ interface CardClusterProps {
   onPlayReel?: (weekPhotos: LoggedPhoto[]) => void;
 }
 
+// Liquid metal shimmer overlay component
+const LiquidMetalShimmer = ({ isActive }: { isActive: boolean }) => {
+  if (!isActive) return null;
+  return (
+    <>
+      {/* Primary liquid metal blob — slowly morphs */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none rounded-3xl overflow-hidden"
+        style={{ zIndex: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* Morphing chrome gradient layer */}
+        <motion.div
+          className="absolute inset-[-20%]"
+          style={{
+            background: `conic-gradient(
+              from 0deg at 40% 50%,
+              rgba(255,255,255,0.00) 0deg,
+              rgba(255,255,255,0.06) 60deg,
+              rgba(180,200,255,0.08) 100deg,
+              rgba(255,255,255,0.12) 140deg,
+              rgba(200,180,255,0.06) 180deg,
+              rgba(255,255,255,0.00) 220deg,
+              rgba(255,200,180,0.05) 280deg,
+              rgba(255,255,255,0.00) 360deg
+            )`,
+            filter: 'blur(8px)',
+          }}
+          animate={{
+            rotate: [0, 360],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+        />
+
+        {/* Second slower layer for depth */}
+        <motion.div
+          className="absolute inset-[-30%]"
+          style={{
+            background: `conic-gradient(
+              from 180deg at 60% 45%,
+              rgba(255,255,255,0.00) 0deg,
+              rgba(160,200,255,0.07) 80deg,
+              rgba(255,255,255,0.10) 130deg,
+              rgba(255,180,200,0.05) 200deg,
+              rgba(255,255,255,0.08) 260deg,
+              rgba(255,255,255,0.00) 360deg
+            )`,
+            filter: 'blur(12px)',
+          }}
+          animate={{
+            rotate: [0, -360],
+          }}
+          transition={{
+            duration: 13,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+        />
+
+        {/* Traveling light streak — horizontal sweep */}
+        <motion.div
+          className="absolute top-0 bottom-0"
+          style={{
+            width: '35%',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.10) 40%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.10) 60%, transparent 100%)',
+            filter: 'blur(6px)',
+          }}
+          animate={{
+            left: ['-40%', '140%'],
+          }}
+          transition={{
+            duration: 3.5,
+            repeat: Infinity,
+            repeatDelay: 2.5,
+            ease: [0.4, 0, 0.2, 1],
+          }}
+        />
+
+        {/* Edge reflection — top */}
+        <div
+          className="absolute top-0 left-0 right-0 h-px"
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 30%, rgba(255,255,255,0.50) 50%, rgba(255,255,255,0.35) 70%, transparent 100%)',
+          }}
+        />
+        {/* Edge reflection — bottom */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-px"
+          style={{
+            background: 'linear-gradient(90deg, transparent 10%, rgba(255,255,255,0.12) 40%, rgba(255,255,255,0.20) 60%, transparent 90%)',
+          }}
+        />
+      </motion.div>
+    </>
+  );
+};
+
 // Ultra-smooth spring configs - iOS-like physics
 const smoothSpring = {
   type: "spring" as const,
@@ -171,12 +275,12 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
     return (
       <motion.button
         key={index}
-        className={`absolute rounded-xl border shadow-lg ${
+        className={`absolute rounded-xl shadow-lg ${
           hasPhoto 
             ? 'border-emerald-400/40' 
             : isActiveDay 
-              ? 'border-emerald-400/50 ring-2 ring-emerald-400/30' 
-              : 'border-white/10'
+              ? 'border-emerald-400/50' 
+              : ''
         }`}
         style={{
           width: cardWidth,
@@ -185,6 +289,16 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
           background: shouldShowExpanded ? expandedBg : solidBg,
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
+          border: hasPhoto
+            ? '1px solid rgba(52,211,153,0.4)'
+            : isActiveDay
+              ? '1px solid rgba(52,211,153,0.5)'
+              : '1px solid rgba(255,255,255,0.12)',
+          boxShadow: !shouldShowExpanded
+            ? 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(255,255,255,0.04)'
+            : isActiveDay
+              ? '0 0 20px rgba(52,211,153,0.2), inset 0 1px 0 rgba(255,255,255,0.2)'
+              : 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 20px rgba(0,0,0,0.3)',
           zIndex,
           willChange: 'transform, opacity',
           overflow: 'visible', // Allow reaction badge to float outside
@@ -221,12 +335,48 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
         onClick={(e) => handleCardClick(e, index, photo)}
         whileTap={{ scale: 0.96 }}
       >
+        {/* Liquid metal shimmer on empty collapsed cards */}
+        {!hasPhoto && !shouldShowExpanded && (
+          <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ borderRadius: (borderRadius * scale) - 1, zIndex: 2 }}>
+            <motion.div
+              className="absolute inset-[-50%]"
+              style={{
+                background: `conic-gradient(
+                  from 0deg at 50% 50%,
+                  transparent 0deg,
+                  rgba(255,255,255,0.06) 60deg,
+                  rgba(200,210,255,0.09) 120deg,
+                  rgba(255,255,255,0.13) 160deg,
+                  rgba(255,200,230,0.06) 220deg,
+                  transparent 280deg,
+                  rgba(255,255,255,0.05) 330deg,
+                  transparent 360deg
+                )`,
+                filter: 'blur(4px)',
+              }}
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+            />
+            <motion.div
+              className="absolute top-0 bottom-0"
+              style={{
+                width: '60%',
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%)',
+                filter: 'blur(3px)',
+              }}
+              animate={{ left: ['-70%', '130%'] }}
+              transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1.8, ease: [0.4, 0, 0.2, 1] }}
+            />
+            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)' }} />
+          </div>
+        )}
+
         {/* Photo content wrapper with overflow hidden for media clipping */}
         <div 
           className="absolute inset-0 overflow-hidden" 
           style={{ 
             zIndex: 1,
-            borderRadius: (borderRadius * scale) - 1, // Match outer border radius minus border
+            borderRadius: (borderRadius * scale) - 1,
           }}
         >
           {/* storageUrl is always the templated PNG - render as image */}
@@ -503,6 +653,26 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
         mass: 0.8,
       }}
     >
+      {/* Liquid metal shimmer — active week only */}
+      <AnimatePresence>
+        {shouldShowExpanded && (
+          <motion.div
+            className="absolute pointer-events-none"
+            style={{
+              inset: reactionPadding / 2,
+              borderRadius: 24,
+              zIndex: 0,
+              overflow: 'hidden',
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <LiquidMetalShimmer isActive={shouldShowExpanded} />
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Contextual icon ABOVE stacked cards - only for current incomplete week */}
       <AnimatePresence>
         {!isExpanded && !isWeekComplete && collapsedIconConfig && (
