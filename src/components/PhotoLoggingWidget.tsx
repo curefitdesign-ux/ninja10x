@@ -335,8 +335,8 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
         onClick={(e) => handleCardClick(e, index, photo)}
         whileTap={{ scale: 0.96 }}
       >
-        {/* Liquid metal shimmer on empty collapsed cards */}
-        {!hasPhoto && !shouldShowExpanded && (
+        {/* Liquid metal shimmer — only on individual expanded day cards (not collapsed stacks) */}
+        {!hasPhoto && shouldShowExpanded && isActiveDay && (
           <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ borderRadius: (borderRadius * scale) - 1, zIndex: 2 }}>
             <motion.div
               className="absolute inset-[-50%]"
@@ -653,26 +653,7 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
         mass: 0.8,
       }}
     >
-      {/* Liquid metal shimmer — active week only */}
-      <AnimatePresence>
-        {shouldShowExpanded && (
-          <motion.div
-            className="absolute pointer-events-none"
-            style={{
-              inset: reactionPadding / 2,
-              borderRadius: 24,
-              zIndex: 0,
-              overflow: 'hidden',
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <LiquidMetalShimmer isActive={shouldShowExpanded} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* No week-level shimmer — shimmer lives only on individual day cards */}
       {/* Contextual icon ABOVE stacked cards - only for current incomplete week */}
       <AnimatePresence>
         {!isExpanded && !isWeekComplete && collapsedIconConfig && (

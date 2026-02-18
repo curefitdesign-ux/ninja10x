@@ -79,27 +79,27 @@ const isVideoUrl = (url: string) => {
   return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
 };
 
-// Background colors matched from each template - dark gradient shades
-const FRAME_COLORS: Record<FrameType, { bg: string; gradient: string }> = {
+// Background tints per template - bolder so shift is obvious when scrolling
+const FRAME_COLORS: Record<FrameType, { accent: string; gradient: string }> = {
   shaky: { 
-    bg: 'rgba(20, 20, 30, 0.2)', 
-    gradient: 'linear-gradient(180deg, rgba(30, 30, 40, 0.15) 0%, rgba(10, 10, 15, 0.3) 100%)'
+    accent: 'rgba(80, 60, 160, 0.55)', 
+    gradient: 'linear-gradient(160deg, rgba(90, 65, 180, 0.4) 0%, rgba(30, 20, 70, 0.6) 100%)'
   },
   journal: { 
-    bg: 'rgba(15, 60, 50, 0.2)', 
-    gradient: 'linear-gradient(180deg, rgba(25, 80, 65, 0.15) 0%, rgba(10, 40, 35, 0.3) 100%)'
+    accent: 'rgba(20, 120, 90, 0.55)', 
+    gradient: 'linear-gradient(160deg, rgba(25, 140, 105, 0.4) 0%, rgba(10, 55, 40, 0.6) 100%)'
   },
   vogue: { 
-    bg: 'rgba(40, 40, 45, 0.2)', 
-    gradient: 'linear-gradient(180deg, rgba(50, 50, 55, 0.15) 0%, rgba(20, 20, 25, 0.3) 100%)'
+    accent: 'rgba(30, 30, 40, 0.65)', 
+    gradient: 'linear-gradient(160deg, rgba(50, 50, 65, 0.5) 0%, rgba(10, 10, 18, 0.7) 100%)'
   },
   fitness: { 
-    bg: 'rgba(50, 50, 20, 0.2)', 
-    gradient: 'linear-gradient(180deg, rgba(60, 60, 25, 0.15) 0%, rgba(35, 35, 15, 0.3) 100%)'
+    accent: 'rgba(200, 160, 20, 0.45)', 
+    gradient: 'linear-gradient(160deg, rgba(220, 180, 25, 0.35) 0%, rgba(80, 65, 10, 0.6) 100%)'
   },
   ticket: { 
-    bg: 'rgba(55, 50, 45, 0.2)', 
-    gradient: 'linear-gradient(180deg, rgba(65, 60, 55, 0.15) 0%, rgba(40, 35, 30, 0.3) 100%)'
+    accent: 'rgba(180, 80, 50, 0.45)', 
+    gradient: 'linear-gradient(160deg, rgba(200, 90, 55, 0.35) 0%, rgba(80, 35, 20, 0.6) 100%)'
   },
 };
 
@@ -976,12 +976,11 @@ const Preview = () => {
         )}
       </div>
       
-      {/* Subtle gradient overlay based on current template - very light tint */}
+      {/* Template-aware tint — shifts boldly as user scrolls between frames */}
       <div 
-        className="fixed inset-0 transition-all duration-700 ease-out pointer-events-none"
+        className="fixed inset-0 transition-all duration-500 ease-out pointer-events-none"
         style={{ 
-          backgroundColor: FRAME_COLORS[currentFrame].bg,
-          backgroundImage: FRAME_COLORS[currentFrame].gradient 
+          background: FRAME_COLORS[currentFrame].gradient,
         }}
       />
 
@@ -1103,22 +1102,18 @@ const Preview = () => {
                       maxHeight: '480px',
                       willChange: 'transform, opacity',
                     }}
-                  >
-                    <div 
-                      className="w-full h-full flex items-center justify-center relative"
-                      style={{ aspectRatio: '9/16', maxHeight: '100%' }}
                     >
-                      {frame === 'shaky' && <ShakyFrame {...frameProps} />}
-                      {frame === 'journal' && <JournalFrame {...frameProps} />}
-                      {frame === 'vogue' && <VogueFrame {...frameProps} />}
-                      {frame === 'fitness' && <FitnessFrame {...frameProps} />}
-                      {frame === 'ticket' && <TicketFrame {...frameProps} />}
-                      {/* Active frame edge highlight */}
-                      {isActiveFrame && (
-                        <div className="absolute inset-0 pointer-events-none rounded-2xl" style={{ border: '1px solid rgba(255,255,255,0.22)', background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%)', boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 16px 48px rgba(0,0,0,0.4)' }} />
-                      )}
-                    </div>
-                  </motion.div>
+                      <div 
+                        className="w-full h-full flex items-center justify-center relative"
+                        style={{ aspectRatio: '9/16', maxHeight: '100%' }}
+                      >
+                        {frame === 'shaky' && <ShakyFrame {...frameProps} />}
+                        {frame === 'journal' && <JournalFrame {...frameProps} />}
+                        {frame === 'vogue' && <VogueFrame {...frameProps} />}
+                        {frame === 'fitness' && <FitnessFrame {...frameProps} />}
+                        {frame === 'ticket' && <TicketFrame {...frameProps} />}
+                      </div>
+                    </motion.div>
                 );
               })}
             </div>
