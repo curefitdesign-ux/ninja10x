@@ -306,7 +306,7 @@ const Progress = () => {
               paddingTop: "12px",
               paddingInline: "4vw",
               paddingBottom: "16px",
-              minHeight: "130px",
+              minHeight: "116px",
               scale: storyStripScale,
             }}
             initial={{ opacity: 0 }}
@@ -342,9 +342,9 @@ const Progress = () => {
                       data-shared-element={index === 0 ? "progress-hero-card" : undefined}
                       className="relative flex-shrink-0 overflow-hidden cursor-pointer active:scale-95 transition-transform"
                       style={{
-                        width: "72px",
+                        width: "56px",
                         height: "100px",
-                        borderRadius: "14px",
+                        borderRadius: "12px",
                         boxShadow: isOwnStory ? "0 12px 40px rgba(100, 70, 180, 0.5)" : "0 4px 16px rgba(0,0,0,0.25)",
                         border: isOwnStory ? "2px solid rgba(160, 120, 220, 0.35)" : "1px solid rgba(255,255,255,0.1)",
                       }}
@@ -432,18 +432,18 @@ const Progress = () => {
                       </div>
                       
                       {/* User avatar overlay - ALWAYS clear, never locked */}
-                      <div className="absolute bottom-1.5 left-1.5">
+                      <div className="absolute bottom-1.5 left-1">
                         <ProfileAvatar
                           src={photo.avatarUrl}
                           name={photo.displayName}
-                          size={24}
+                          size={20}
                           style={{ border: '2px solid rgba(255,255,255,0.6)' }}
                         />
                       </div>
                       
                       {/* Day badge */}
                       <div 
-                        className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-white font-semibold text-[9px]"
+                        className="absolute bottom-1.5 right-1 px-1 py-0.5 rounded-full text-white font-semibold text-[8px]"
                         style={{ 
                           background: "rgba(0,0,0,0.5)", 
                           backdropFilter: "blur(4px)",
