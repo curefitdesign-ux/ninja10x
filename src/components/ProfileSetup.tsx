@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Camera, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
@@ -286,6 +285,26 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
           </p>
         </div>
 
+        {/* Name Input — top, single line like Auth page */}
+        <div className="mb-5">
+          <Input
+            id="displayName"
+            type="text"
+            value={displayName}
+            onChange={(e) => {
+              setDisplayName(e.target.value);
+              if (nameError) setNameError(null);
+            }}
+            placeholder="Your name"
+            className="h-12 text-white placeholder:text-white/30 rounded-xl focus:border-emerald-400/50 focus:ring-emerald-400/20 text-center"
+            disabled={loading}
+            maxLength={50}
+          />
+          {nameError && (
+            <p className="text-red-400 text-xs mt-1 text-center">{nameError}</p>
+          )}
+        </div>
+
         {/* Large Avatar Preview */}
         <div className="flex justify-center mb-4">
           <motion.div
@@ -382,30 +401,6 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
               </AnimatePresence>
             </motion.button>
           ))}
-        </div>
-
-        {/* Name Input */}
-        <div className="mb-6">
-          <Label htmlFor="displayName" className="text-white/70 mb-2 block text-sm">
-            Your Name
-          </Label>
-          <Input
-            id="displayName"
-            type="text"
-            value={displayName}
-            onChange={(e) => {
-              setDisplayName(e.target.value);
-              if (nameError) setNameError(null);
-            }}
-            placeholder="Enter your name"
-            className="h-12 bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-xl focus:border-emerald-400/50 focus:ring-emerald-400/20"
-            style={{ backdropFilter: 'blur(10px)' }}
-            disabled={loading}
-            maxLength={50}
-          />
-          {nameError && (
-            <p className="text-red-400 text-xs mt-1">{nameError}</p>
-          )}
         </div>
 
         {/* Submit Button */}
