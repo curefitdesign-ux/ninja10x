@@ -1347,13 +1347,15 @@ const Reel = () => {
                       background: 'transparent',
                     }}
                   >
-                    {/* Card — 9:16 aspect ratio, contained within zone */}
+                    {/* Card — 9:16 aspect ratio, contained within zone, no rounded corners to avoid black edges */}
                     <div
-                      className="relative overflow-hidden rounded-2xl"
+                      className="relative overflow-hidden"
                       style={{
                         aspectRatio: '9/16',
                         height: '100%',
                         maxWidth: '100%',
+                        borderRadius: '0px',
+                        background: 'transparent',
                       }}
                     >
                     <AnimatePresence mode="popLayout">
@@ -1855,13 +1857,13 @@ const Reel = () => {
               boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 32px 64px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.4)',
             }}
           >
-            {/* Glass inner surface */}
+            {/* Glass inner surface — neutral clear glass, no color tint */}
             <div
               className="relative rounded-[23px] overflow-hidden"
               style={{
-                background: 'linear-gradient(160deg, rgba(80,70,110,0.65) 0%, rgba(35,32,55,0.82) 50%, rgba(25,22,42,0.88) 100%)',
-                backdropFilter: 'blur(60px) saturate(200%)',
-                WebkitBackdropFilter: 'blur(60px) saturate(200%)',
+                background: 'rgba(30,28,40,0.35)',
+                backdropFilter: 'blur(60px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(60px) saturate(180%)',
               }}
             >
               {/* Inner top light beam highlight */}
