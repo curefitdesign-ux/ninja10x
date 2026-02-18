@@ -249,9 +249,9 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
   
   const handleShare = async (app: typeof socialApps[0]) => {
     triggerHaptic('medium');
-    
-    // Web fallback URLs for each platform
-    const webFallbacks: Record<string, string> = {
+
+    // Web URLs — always open in new tab (safe across all environments)
+    const webUrls: Record<string, string> = {
       'WhatsApp': `https://wa.me/?text=${encodeURIComponent(fullShareText)}`,
       'X': `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
       'Facebook': `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`,
@@ -261,47 +261,42 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
       'Snapchat': `https://snapchat.com`,
       'Messages': `sms:?body=${encodeURIComponent(fullShareText)}`,
     };
-    
-    // Try native share first for supported apps
-    if (navigator.share && ['WhatsApp', 'Messages'].includes(app.name)) {
+
+    // On real mobile devices, try the Web Share API first (triggers native share sheet)
+    if (navigator.share) {
       try {
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
-        const file = new File([blob], `activity.${isVideo ? 'mp4' : 'png'}`, { type: blob.type });
-        
-        await navigator.share({
+        const shareData: ShareData = {
           title: 'My Fitness Activity',
           text: shareText,
-          files: [file],
-        });
+          url: shareUrl,
+        };
+
+        // Try to attach the image file for richer sharing
+        try {
+          const response = await fetch(imageUrl);
+          const blob = await response.blob();
+          const file = new File([blob], `activity.${isVideo ? 'mp4' : 'png'}`, { type: blob.type });
+          if (navigator.canShare?.({ files: [file] })) {
+            shareData.files = [file];
+          }
+        } catch {
+          // Image attach failed — proceed with text+url only
+        }
+
+        await navigator.share(shareData);
         return;
-      } catch (err) {
-        console.log('Native share failed, using deep link');
+      } catch (err: any) {
+        // User cancelled (AbortError) — don't fall through to web URL
+        if (err?.name === 'AbortError') return;
+        // Other error — fall through to web URL
+        console.log('[ShareSheet] navigator.share failed, falling back to web URL:', err);
       }
     }
-    
-    // Try deep link first, then fallback to web
-    const deepLink = app.share(fullShareText);
-    
-    // For Instagram and Snapchat, go directly to web/app store since they don't support text sharing
-    if (['Instagram', 'Snapchat'].includes(app.name)) {
-      window.open(webFallbacks[app.name], '_blank', 'noopener,noreferrer');
-      return;
-    }
-    
-    if (deepLink) {
-      // Attempt deep link
-      const start = Date.now();
-      window.location.href = deepLink;
-      
-      // Fallback to web after timeout
-      setTimeout(() => {
-        if (Date.now() - start < 2000 && webFallbacks[app.name]) {
-          window.open(webFallbacks[app.name], '_blank', 'noopener,noreferrer');
-        }
-      }, 1500);
-    } else if (webFallbacks[app.name]) {
-      window.open(webFallbacks[app.name], '_blank', 'noopener,noreferrer');
+
+    // Fallback: open the platform's web share URL in a new tab
+    const url = webUrls[app.name];
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
