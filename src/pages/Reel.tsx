@@ -1149,7 +1149,7 @@ const Reel = () => {
             <div className="flex-1 overflow-hidden mx-2">
               <div 
                 ref={avatarStripRef}
-                className="flex items-center gap-2 overflow-x-auto scrollbar-hide"
+                className={`flex items-center gap-2 overflow-x-auto scrollbar-hide ${effectiveUserGroups.length === 1 ? 'justify-center' : ''}`}
                 style={{ 
                   WebkitOverflowScrolling: 'touch',
                   scrollbarWidth: 'none',
@@ -1647,6 +1647,23 @@ const Reel = () => {
                   transition: 'opacity 0.2s ease, transform 0.2s ease',
                 }}
               >
+                {/* Share button - below card, above reactions */}
+                {!isContentLocked && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleShareStory();
+                    }}
+                    className="mb-2 p-2.5 rounded-full active:scale-95 transition-transform"
+                    style={{
+                      background: 'rgba(0,0,0,0.45)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
+                    }}
+                  >
+                    <Share2 className="w-5 h-5 text-white" strokeWidth={1.5} />
+                  </button>
+                )}
                 {/* Liquid glass reaction pill */}
                 <button
                   onClick={() => isOwnStory ? (currentReactions.total > 0 && setShowReactsSheet(true)) : setShowSendReactionSheet(true)}
