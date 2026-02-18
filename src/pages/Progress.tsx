@@ -18,28 +18,32 @@ import engineBadgeImg from "@/assets/progress/engine-badge.png";
 import SharedImageTransition from "@/components/SharedImageTransition";
 import { isVideoUrl } from "@/lib/media";
 
-// Tile positions - optimized for mobile viewport with percentage-based layout
-// Reduced vertical spacing (5% gap instead of 7%) for tighter path
+// Tile positions — Day 1 at TOP, Day 12 at BOTTOM (journey flows downward)
+// S-curve diagonal: Week 1 sweeps right, Week 2 sweeps back left, etc.
 const TILE_POSITIONS = [
-  { left: 42, top: 8 },
-  { left: 50, top: 13 },
-  { left: 58, top: 18 },
-  { left: 66, top: 23 },
-  { left: 58, top: 28 },
-  { left: 50, top: 33 },
-  { left: 42, top: 38 },
-  { left: 50, top: 43 },
-  { left: 58, top: 48 },
-  { left: 66, top: 53 },
-  { left: 58, top: 58 },
-  { left: 50, top: 63 },
+  // Week 1 — right side of screen, sweeping right→left
+  { left: 68, top: 3  },  // Day 1
+  { left: 57, top: 10 },  // Day 2
+  { left: 46, top: 17 },  // Day 3
+  // Week 2 — center, continuing left→right
+  { left: 38, top: 24 },  // Day 4
+  { left: 48, top: 31 },  // Day 5
+  { left: 60, top: 38 },  // Day 6
+  // Week 3 — right side, sweeping right→left
+  { left: 68, top: 45 },  // Day 7
+  { left: 57, top: 52 },  // Day 8
+  { left: 46, top: 59 },  // Day 9
+  // Week 4 — center-left, continuing down
+  { left: 38, top: 66 },  // Day 10
+  { left: 48, top: 73 },  // Day 11
+  { left: 58, top: 80 },  // Day 12
 ];
 
 const LABELS = [
-  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 8, left: 76 },
-  { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 23, left: 4 },
-  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 38, left: 76 },
-  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 63, left: 4 },
+  { tileIndex: 0, text: ["BUILD", "STRENGTH"],    side: "right" as const, top: 3,  left: 74 },
+  { tileIndex: 3, text: ["INCREASE", "STAMINA"],  side: "left"  as const, top: 24, left: 2  },
+  { tileIndex: 6, text: ["BUILD", "ENERGY"],      side: "right" as const, top: 45, left: 74 },
+  { tileIndex: 9, text: ["CONQUER", "WILL POWER"],side: "left"  as const, top: 66, left: 2  },
 ];
 
 const Progress = () => {
@@ -214,8 +218,8 @@ const Progress = () => {
     }
   }, [navigate, fromReel]);
 
-  // Tile state - based on user's own activities
-  const getDayFromIndex = (index: number) => 12 - index;
+  // Day 1 = index 0 (top), Day 12 = index 11 (bottom)
+  const getDayFromIndex = (index: number) => index + 1;
   const isTileActive = (dayNumber: number) => myActivities.some(a => a.dayNumber === dayNumber);
 
   return (
@@ -512,7 +516,7 @@ const Progress = () => {
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "8%", top: "0%", width: "24%", aspectRatio: "1" }}
+              style={{ left: "6%", top: "2%", width: "22%", aspectRatio: "1" }}
               initial={{ opacity: 0, scale: 0.6, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.4 }}
@@ -617,7 +621,7 @@ const Progress = () => {
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "5%", bottom: "0%", width: "50%", aspectRatio: "2.5" }}
+              style={{ left: "35%", bottom: "3%", width: "46%", aspectRatio: "2.5" }}
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7 }}
