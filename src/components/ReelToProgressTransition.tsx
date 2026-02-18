@@ -49,7 +49,7 @@ interface ReelToProgressTransitionProps {
   currentActivity: Activity | null;
   publicFeed: Activity[];
   myActivities: { dayNumber: number }[];
-  onStoryTap: (index: number, userId?: string) => void;
+  onStoryTap: (index: number, userId?: string, activityId?: string) => void;
 }
 
 export default function ReelToProgressTransition({
@@ -109,7 +109,7 @@ export default function ReelToProgressTransition({
     
     // Slight delay to show expansion animation before closing
     setTimeout(() => {
-      onStoryTap(index, story.userId);
+      onStoryTap(index, story.userId, story.id);
     }, 250);
   }, [onStoryTap]);
 
