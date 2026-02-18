@@ -1340,9 +1340,22 @@ const Reel = () => {
                 
                 return (
                   <div
-                    className="relative w-full h-full flex items-center justify-center"
-                    style={{ background: 'transparent' }}
+                    className="relative flex items-center justify-center"
+                    style={{ 
+                      width: '100%',
+                      height: '100%',
+                      background: 'transparent',
+                    }}
                   >
+                    {/* Card — 9:16 aspect ratio, contained within zone */}
+                    <div
+                      className="relative overflow-hidden rounded-2xl"
+                      style={{
+                        aspectRatio: '9/16',
+                        height: '100%',
+                        maxWidth: '100%',
+                      }}
+                    >
                     <AnimatePresence mode="popLayout">
                       <motion.div
                         key={contentKey}
@@ -1401,13 +1414,9 @@ const Reel = () => {
                             ref={videoRef}
                             key={mediaUrl}
                             src={mediaUrl}
-                            className="max-w-full max-h-full"
+                            className="absolute inset-0 w-full h-full"
                             style={{ 
-                              objectFit: 'contain',
-                              width: 'auto',
-                              height: 'auto',
-                              maxWidth: '100%',
-                              maxHeight: '100%',
+                              objectFit: 'cover',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
                               opacity: mediaLoaded ? 1 : 0,
                               transition: 'opacity 0.2s ease',
@@ -1430,15 +1439,11 @@ const Reel = () => {
                             key={mediaUrl}
                             src={mediaUrl}
                             alt={`Day ${currentActivity.dayNumber}`}
-                            className="max-w-full max-h-full"
+                            className="absolute inset-0 w-full h-full"
                             loading="eager"
                             decoding="async"
                             style={{ 
-                              objectFit: 'contain',
-                              width: 'auto',
-                              height: 'auto',
-                              maxWidth: '100%',
-                              maxHeight: '100%',
+                              objectFit: 'cover',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
                               opacity: mediaLoaded ? 1 : 0,
                               transition: 'opacity 0.2s ease',
@@ -1578,6 +1583,7 @@ const Reel = () => {
                       />
                     )}
                     
+                    </div>{/* end 9:16 card */}
                   </div>
                 );
               })()}
