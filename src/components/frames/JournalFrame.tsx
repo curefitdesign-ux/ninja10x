@@ -113,33 +113,33 @@ const JournalFrame = ({
       </div>
       
       {/* Bottom content */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 pt-0">
+      <div className="absolute bottom-0 left-0 right-0 p-3 pt-0">
         {/* Badge */}
-        <div className="mb-3">
+        <div className="mb-1.5">
           <div 
-            className="inline-flex rounded-full px-3 py-1"
+            className="inline-flex rounded-full px-2.5 py-0.5"
             style={{ background: '#2DD4A8' }}
           >
-            <span className="text-black font-bold text-[10px] tracking-wide whitespace-nowrap">WEEK {week} | DAY {day}</span>
+            <span className="text-black font-bold text-[9px] tracking-wide whitespace-nowrap">WEEK {week} | DAY {day}</span>
           </div>
         </div>
         
         {/* Activity name */}
-        <h2 className="text-black text-[32px] font-black leading-none mb-3">{activity}</h2>
+        <h2 className="text-black text-[22px] font-black leading-none mb-2">{activity}</h2>
         
         {/* Stats row - only show if user entered values */}
         {(duration || pr) && (
-          <div className="flex gap-8">
+          <div className="flex gap-6">
             {pr && (
               <div>
-                <p className="text-gray-500 text-xs font-medium">{metricLabel}</p>
-                <p className="text-black text-2xl font-black">{pr}</p>
+                <p className="text-gray-500 text-[9px] font-medium mb-0.5">{metricLabel}</p>
+                <p className="text-black text-[15px] font-black leading-none">{pr}</p>
               </div>
             )}
             {duration && (
               <div>
-                <p className="text-gray-500 text-xs font-medium">{durationLabel}</p>
-                <p className="text-black text-2xl font-black">{duration}</p>
+                <p className="text-gray-500 text-[9px] font-medium mb-0.5">{durationLabel}</p>
+                <p className="text-black text-[15px] font-black leading-none">{duration}</p>
               </div>
             )}
           </div>
