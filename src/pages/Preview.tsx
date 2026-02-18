@@ -974,8 +974,13 @@ const Preview = () => {
             style={{ filter: 'blur(50px) brightness(0.75) saturate(1.2)' }}
           />
         )}
-        {/* Single 10% dark veil — no colour tint */}
+        {/* 10% dark veil */}
         <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.10)' }} />
+        {/* Subtle per-frame colour tint — sits on top of photo, very low opacity */}
+        <div
+          className="absolute inset-0 transition-all duration-700 ease-out"
+          style={{ background: FRAME_COLORS[currentFrame].accent, opacity: 0.28 }}
+        />
       </div>
 
       {/* Content - scrollable layout */}
