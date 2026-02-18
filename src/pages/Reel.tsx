@@ -944,18 +944,6 @@ const Reel = () => {
                 </motion.button>
               )}
             </AnimatePresence>
-            {/* Share button - top left, aligned with sound icon */}
-            <button
-              onClick={handleShareStory}
-              className="absolute top-4 left-4 z-20 w-9 h-9 flex items-center justify-center rounded-full text-white/70 active:scale-95 transition-transform"
-              style={{
-                background: 'rgba(0,0,0,0.4)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-              }}
-            >
-              <Share2 className="w-4 h-4" strokeWidth={1.5} />
-            </button>
             <button
               onClick={() => setIsMuted(prev => !prev)}
               className="absolute top-4 right-4 z-20 w-9 h-9 flex items-center justify-center rounded-full text-white/70"
@@ -1492,22 +1480,6 @@ const Reel = () => {
                       </div>
                     )}
                     
-                    {/* Share button - bottom left, aligned with sound icon */}
-                    {!shouldShowLocked && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleShareStory();
-                        }}
-                        className="absolute bottom-3 left-3 z-20 p-2.5 rounded-full active:scale-95 transition-transform"
-                        style={{
-                          background: 'rgba(0,0,0,0.5)',
-                          backdropFilter: 'blur(8px)',
-                        }}
-                      >
-                        <Share2 className="w-5 h-5 text-white" strokeWidth={1.5} />
-                      </button>
-                    )}
 
                     {/* Audio toggle button for videos */}
                     {isVideo && !shouldShowLocked && (
@@ -1647,18 +1619,20 @@ const Reel = () => {
                   transition: 'opacity 0.2s ease, transform 0.2s ease',
                 }}
               >
-                {/* Share button - below card, above reactions */}
+                {/* Share button - centered, just above reactions pill */}
                 {!isContentLocked && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleShareStory();
                     }}
-                    className="mb-2 p-2.5 rounded-full active:scale-95 transition-transform"
+                    className="mb-1.5 p-2.5 rounded-full active:scale-95 transition-transform"
                     style={{
-                      background: 'rgba(0,0,0,0.45)',
-                      backdropFilter: 'blur(10px)',
-                      WebkitBackdropFilter: 'blur(10px)',
+                      background: 'rgba(255,255,255,0.1)',
+                      backdropFilter: 'blur(20px)',
+                      WebkitBackdropFilter: 'blur(20px)',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15)',
                     }}
                   >
                     <Share2 className="w-5 h-5 text-white" strokeWidth={1.5} />
