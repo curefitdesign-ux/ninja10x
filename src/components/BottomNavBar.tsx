@@ -1,20 +1,22 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Dumbbell, Trophy, ShoppingBag, Waves } from "lucide-react";
+import { Home, Dumbbell, ShoppingBag, Waves } from "lucide-react";
+import activityActive from "@/assets/nav/activity-active.png";
+import activityInactive from "@/assets/nav/activity-inactive.png";
 
 const navItems = [
-  { id: "home", icon: Home, label: "Home", path: "/" },
-  { id: "fitness", icon: Dumbbell, label: "Fitness", path: "/" },
-  { id: "sports", icon: Trophy, label: "Sports", path: "/" },
-  { id: "store", icon: ShoppingBag, label: "Store", path: "/" },
-  { id: "pilates", icon: Waves, label: "Pilates", path: "/" },
+  { id: "home", label: "Home", path: "/", type: "icon" as const, Icon: Home },
+  { id: "fitness", label: "Fitness", path: "/", type: "icon" as const, Icon: Dumbbell },
+  { id: "activity", label: "Activity", path: "/", type: "image" as const, Icon: null },
+  { id: "store", label: "Store", path: "/", type: "icon" as const, Icon: ShoppingBag },
+  { id: "pilates", label: "Pilates", path: "/", type: "icon" as const, Icon: Waves },
 ];
 
 const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState("home");
+  const [activeTab, setActiveTab] = useState("activity");
 
   const hiddenPaths = ["/auth", "/profile-setup", "/avatar-crop", "/camera", "/preview", "/gallery", "/reel", "/progress"];
   const shouldHide = hidden || hiddenPaths.some(path => location.pathname.startsWith(path));
@@ -49,13 +51,24 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
               onClick={() => handleNavClick(item)}
               className="pressable flex flex-col items-center pt-2 pb-1 px-3 relative"
             >
-              <item.icon
-                className="w-[22px] h-[22px] transition-colors duration-150"
-                style={{
-                  color: isActive ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
-                  strokeWidth: isActive ? 2.2 : 1.6,
-                }}
-              />
+              {item.type === "image" ? (
+                <img
+                  src={isActive ? activityActive : activityInactive}
+                  alt="Activity"
+                  className="w-[22px] h-[22px] object-contain transition-opacity duration-150"
+                  style={{ opacity: isActive ? 1 : 0.45 }}
+                />
+              ) : (
+                item.Icon && (
+                  <item.Icon
+                    className="w-[22px] h-[22px] transition-colors duration-150"
+                    style={{
+                      color: isActive ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
+                      strokeWidth: isActive ? 2.2 : 1.6,
+                    }}
+                  />
+                )
+              )}
               <span
                 className="text-[10px] mt-1 font-medium tracking-wide transition-colors duration-150"
                 style={{
