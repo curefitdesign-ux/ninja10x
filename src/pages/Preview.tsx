@@ -1220,19 +1220,6 @@ const Preview = () => {
             );
           })()}
 
-          {/* Health sync widget - compact */}
-          <div 
-            className={`bg-white/10 backdrop-blur-xl rounded-xl p-2.5 flex items-center gap-2 tap-bounce min-h-[50px] ${tappedElement === 'connect' ? 'animate-liquid-tap' : ''}`}
-            onClick={() => { handleTap('connect'); setShowSyncPopup(true); }}
-          >
-            <div className="flex-1">
-              <h3 className="text-white font-medium text-xs">Auto sync with a device</h3>
-              <p className="text-white/60 text-[10px]">Sync your health & fitness data</p>
-            </div>
-            <button className="bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-lg">
-              <span className="text-white font-semibold text-[10px]">CONNECT</span>
-            </button>
-          </div>
         </div>
       </div>
 
