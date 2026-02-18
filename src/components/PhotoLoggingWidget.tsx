@@ -419,84 +419,19 @@ const CardCluster = ({ weekIndex, photos, isActiveWeek, isExpanded, isPastWeekWi
           )}
         </div>
         
-        {/* Empty state - animated upload icon ONLY when expanded */}
+        {/* Empty state - static upload icon, no circle animations */}
         {!hasPhoto && shouldShowExpanded && isActiveDay && (
           <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-            
-            {/* Breathing outer glow */}
-            <motion.div
-              className="absolute w-16 h-16 rounded-full"
-              style={{
-                background: 'radial-gradient(circle, rgba(52, 211, 153, 0.4) 0%, transparent 70%)',
-              }}
-              animate={{
-                scale: [1, 1.4, 1],
-                opacity: [0.6, 0.3, 0.6],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-            
-            {/* Expanding ripple ring */}
-            <motion.div
-              className="absolute w-12 h-12 rounded-full border-2 border-emerald-400/50"
-              animate={{
-                scale: [1, 1.8],
-                opacity: [0.8, 0],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "easeOut",
-              }}
-            />
-            
-            {/* Main upload button with pulse */}
-            <motion.div 
+            <div 
               className="relative p-3 rounded-full"
               style={{
-                background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.3) 0%, rgba(16, 185, 129, 0.2) 100%)',
+                background: 'rgba(52, 211, 153, 0.15)',
                 backdropFilter: 'blur(8px)',
-                border: '1.5px solid rgba(52, 211, 153, 0.5)',
-                boxShadow: '0 0 20px rgba(52, 211, 153, 0.3), inset 0 1px 1px rgba(255,255,255,0.2)',
+                border: '1.5px solid rgba(52, 211, 153, 0.4)',
               }}
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ 
-                scale: [1, 1.08, 1],
-                opacity: 1,
-              }}
-              transition={{ 
-                scale: {
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                },
-                opacity: { duration: 0.3 },
-              }}
-              whileTap={{ scale: 0.9 }}
             >
-              {/* Bouncing upload icon with shimmer */}
-              <motion.div
-                animate={{ 
-                  y: [0, -4, 0],
-                  filter: [
-                    'drop-shadow(0 0 8px rgba(52,211,153,0.6))',
-                    'drop-shadow(0 0 16px rgba(52,211,153,0.9))',
-                    'drop-shadow(0 0 8px rgba(52,211,153,0.6))',
-                  ],
-                }}
-                transition={{
-                  duration: 1.2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                <Upload className="w-6 h-6 text-emerald-400" strokeWidth={2.5} />
-              </motion.div>
-            </motion.div>
+              <Upload className="w-6 h-6 text-emerald-400" strokeWidth={2.5} />
+            </div>
           </div>
         )}
         
