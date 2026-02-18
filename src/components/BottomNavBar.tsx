@@ -25,6 +25,11 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
 
   const handleNavClick = (item: typeof navItems[0]) => {
     setActiveTab(item.id);
+    if (item.id === "home") {
+      // Deep link to curefit home tab
+      window.location.href = "curefit://hometab";
+      return;
+    }
     if (item.path && location.pathname !== item.path) {
       navigate(item.path);
     }
@@ -55,7 +60,7 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
                 <img
                   src={isActive ? activityActive : activityInactive}
                   alt="Activity"
-                  className="w-[22px] h-[22px] object-contain transition-opacity duration-150"
+                  className="w-[32px] h-[32px] object-contain transition-opacity duration-150"
                   style={{ opacity: isActive ? 1 : 0.45 }}
                 />
               ) : (
