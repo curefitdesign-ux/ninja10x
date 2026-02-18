@@ -234,7 +234,7 @@ const Activity = () => {
       }));
       const weekNumber = Math.ceil(Math.max(...weekPhotos.map(p => p.dayNumber)) / 3);
       navigate('/reel-generation', {
-        state: { weekPhotos: mappedPhotos, weekNumber },
+        state: { weekPhotos: mappedPhotos, weekNumber, forceRegenerate: true },
       });
     } else {
       toast.info('Complete 3 days to create an AI reel!');

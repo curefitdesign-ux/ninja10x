@@ -635,7 +635,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
                            isVideo: a.isVideo,
                          }));
                          navigate('/reel-generation', {
-                           state: { weekPhotos, weekNumber: currentWeekConfig!.week },
+                           state: { weekPhotos, weekNumber: currentWeekConfig!.week, forceRegenerate: true },
                          });
                        }}
                    />
