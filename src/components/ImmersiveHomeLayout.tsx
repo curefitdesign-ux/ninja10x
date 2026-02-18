@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,6 +8,7 @@ import ProfileAvatar from '@/components/ProfileAvatar';
 import CircularProgressRing from '@/components/CircularProgressRing';
 import ReelProgressPill, { type PillState } from '@/components/ReelProgressPill';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
+import DayCardSheet from '@/components/DayCardSheet';
 
 interface Photo {
   id: string;
@@ -66,6 +67,12 @@ const ImmersiveHomeLayout = ({
   const [focusedWeek, setFocusedWeek] = useState<number | null>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
 
+  // Day card sheet state
+  const [daySheetOpen, setDaySheetOpen] = useState(false);
+  const [daySheetPhoto, setDaySheetPhoto] = useState<Photo | null>(null);
+  const [daySheetDayNumber, setDaySheetDayNumber] = useState(1);
+  const [daySheetLayoutId, setDaySheetLayoutId] = useState('');
+
   const firstName = profile?.display_name?.split(' ')[0] || 'there';
   const completedWeeks = Math.floor(photos.length / 3);
   const currentWeek = completedWeeks + 1;
@@ -94,11 +101,16 @@ const ImmersiveHomeLayout = ({
     }
   }, [photos.length, hasAnimated, completedWeeks]);
 
-  const handlePhotoTap = (photo: Photo) => {
+  const openDaySheet = (photo: Photo | null, dayNum: number, layoutId: string) => {
     triggerHaptic('medium');
-    navigate('/reel', {
-      state: { activityId: photo.id, dayNumber: photo.dayNumber },
-    });
+    setDaySheetPhoto(photo);
+    setDaySheetDayNumber(dayNum);
+    setDaySheetLayoutId(layoutId);
+    setDaySheetOpen(true);
+  };
+
+  const handlePhotoTap = (photo: Photo) => {
+    openDaySheet(photo, photo.dayNumber, `day-card-${photo.id}`);
   };
 
   const handleWeekTap = (weekNumber: number) => {
@@ -250,6 +262,7 @@ const ImmersiveHomeLayout = ({
                     {focusedPhotos.map((photo, idx) => (
                       <motion.button
                         key={photo.id}
+                        layoutId={`day-card-${photo.id}`}
                         initial={{ opacity: 0, scale: 0.85, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         transition={{ duration: 0.4, delay: idx * 0.1, type: 'spring', stiffness: 300 }}
@@ -278,6 +291,46 @@ const ImmersiveHomeLayout = ({
                         </div>
                       </motion.button>
                     ))}
+                    {/* Empty slots for this week */}
+                    {Array.from({ length: 3 - focusedPhotos.length }).map((_, i) => {
+                      const emptyDayNum = (focusedWeek! - 1) * 3 + focusedPhotos.length + i + 1;
+                      const isNext = emptyDayNum === photos.length + 1;
+                      const slotLayoutId = `day-card-empty-${emptyDayNum}`;
+                      return isNext ? (
+                        <motion.button
+                          key={slotLayoutId}
+                          layoutId={slotLayoutId}
+                          initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: (focusedPhotos.length + i) * 0.1, type: 'spring', stiffness: 300 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => openDaySheet(null, emptyDayNum, slotLayoutId)}
+                          className="relative rounded-xl flex flex-col items-center justify-center"
+                          style={{
+                            width: 90,
+                            height: 110,
+                            border: '1.5px dashed rgba(255,255,255,0.2)',
+                            background: 'rgba(255,255,255,0.04)',
+                          }}
+                        >
+                          <Plus className="w-6 h-6 text-white/40 mb-1" />
+                          <span className="text-white/30 text-[10px] font-medium">Day {emptyDayNum}</span>
+                        </motion.button>
+                      ) : (
+                        <div
+                          key={slotLayoutId}
+                          className="relative rounded-xl flex flex-col items-center justify-center"
+                          style={{
+                            width: 90,
+                            height: 110,
+                            border: '1.5px dashed rgba(255,255,255,0.07)',
+                            background: 'rgba(255,255,255,0.02)',
+                          }}
+                        >
+                          <span className="text-white/20 text-[10px] font-medium">Day {emptyDayNum}</span>
+                        </div>
+                      );
+                    })}
                   </div>
 
                   {/* Week theme label */}
@@ -444,6 +497,20 @@ const ImmersiveHomeLayout = ({
         isOpen={showMediaSheet}
         onClose={() => setShowMediaSheet(false)}
         dayNumber={photos.length + 1}
+      />
+
+      {/* Day Card → Bottom Sheet morph */}
+      <DayCardSheet
+        isOpen={daySheetOpen}
+        photo={daySheetPhoto}
+        dayNumber={daySheetDayNumber}
+        layoutId={daySheetLayoutId}
+        onClose={() => setDaySheetOpen(false)}
+        onCamera={() => { setDaySheetOpen(false); setShowMediaSheet(true); }}
+        onGallery={() => { setDaySheetOpen(false); setShowMediaSheet(true); }}
+        onViewActivity={(photo) => {
+          navigate('/reel', { state: { activityId: photo.id, dayNumber: photo.dayNumber } });
+        }}
       />
     </div>
   );
