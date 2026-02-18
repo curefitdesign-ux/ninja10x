@@ -444,13 +444,19 @@ const Reel = () => {
     setShowProgressOverlay(false);
   };
 
-  const handleProgressStoryTap = (index: number, userId?: string) => {
+  const handleProgressStoryTap = (index: number, userId?: string, activityId?: string) => {
     setShowProgressOverlay(false);
     if (userId) {
-      const idx = effectiveUserGroups.findIndex(g => g.userId === userId);
-      if (idx >= 0) {
-        setCurrentUserIndex(idx);
-        setCurrentActivityIndex(0);
+      const groupIdx = effectiveUserGroups.findIndex(g => g.userId === userId);
+      if (groupIdx >= 0) {
+        setCurrentUserIndex(groupIdx);
+        // If we have an activityId, jump to that exact activity
+        if (activityId) {
+          const actIdx = effectiveUserGroups[groupIdx].activities.findIndex(a => a.id === activityId);
+          setCurrentActivityIndex(actIdx >= 0 ? actIdx : 0);
+        } else {
+          setCurrentActivityIndex(0);
+        }
       }
     }
   };
