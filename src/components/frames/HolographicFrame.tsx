@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react';
+import holographicOverlay from '@/assets/frames/holographic-overlay.png';
 
 interface HolographicFrameProps {
   imageUrl: string;
@@ -40,10 +41,25 @@ const HolographicFrame = ({
 
   return (
     <div
-      className="w-[90%] mx-auto aspect-[9/16] relative overflow-hidden rounded-[20px]"
-      style={{ boxShadow: '0 0 40px rgba(120, 80, 255, 0.5), 0 0 80px rgba(255, 60, 180, 0.3)' }}
+      className="w-[90%] mx-auto aspect-[9/16] relative overflow-hidden"
+      style={{ borderRadius: '4px' }}
     >
-      {/* Layer 1: User photo/video — full bleed */}
+      {/* ── Layer 1: Holographic gradient base background ── */}
+      <div
+        className="absolute inset-0"
+        style={{
+          zIndex: 0,
+          background: `
+            radial-gradient(ellipse at 10% 50%, rgba(0, 220, 220, 0.55) 0%, transparent 45%),
+            radial-gradient(ellipse at 85% 90%, rgba(240, 160, 120, 0.65) 0%, transparent 45%),
+            radial-gradient(ellipse at 20% 5%, rgba(160, 170, 210, 0.7) 0%, transparent 50%),
+            radial-gradient(ellipse at 90% 10%, rgba(140, 155, 210, 0.5) 0%, transparent 40%),
+            linear-gradient(180deg, #b0b8d8 0%, #c8d0e8 30%, #9ecece 60%, #d8c0b0 100%)
+          `,
+        }}
+      />
+
+      {/* ── Layer 2: User photo — full bleed ── */}
       <div className="absolute inset-0" style={{ zIndex: 1 }}>
         {isVideo ? (
           <video
@@ -70,258 +86,186 @@ const HolographicFrame = ({
         )}
       </div>
 
-      {/* Layer 2: Dark vignette gradient for readability */}
-      <div
-        className="absolute inset-0"
+      {/* ── Layer 3: Holographic overlay with multiply blend — white = transparent (shows photo), colors = frame ── */}
+      <img
+        src={holographicOverlay}
+        alt=""
+        className="absolute inset-0 w-full h-full pointer-events-none"
         style={{
           zIndex: 2,
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 35%, transparent 55%, rgba(0,0,0,0.75) 100%)',
+          objectFit: 'fill',
+          mixBlendMode: 'multiply',
         }}
       />
 
-      {/* Layer 3: Holographic rainbow overlay — mix-blend-mode color */}
+      {/* ── Layer 4: Header bar — "CULT NINJA — ACTIVITY" ── */}
+      {/* Positioned in the top gray-blue strip above the photo window */}
       <div
-        className="absolute inset-0"
+        className="absolute top-0 left-0 right-0 flex items-center"
         style={{
-          zIndex: 3,
-          background: `linear-gradient(
-            135deg,
-            rgba(255, 0, 128, 0.18) 0%,
-            rgba(255, 120, 0, 0.15) 15%,
-            rgba(255, 230, 0, 0.13) 28%,
-            rgba(0, 230, 120, 0.15) 42%,
-            rgba(0, 180, 255, 0.18) 57%,
-            rgba(80, 0, 255, 0.20) 72%,
-            rgba(200, 0, 255, 0.22) 85%,
-            rgba(255, 0, 128, 0.18) 100%
-          )`,
-          mixBlendMode: 'screen',
+          zIndex: 10,
+          height: '14.5%',
+          paddingLeft: '10%',
+          paddingRight: '5%',
         }}
-      />
-
-      {/* Layer 4: Iridescent shimmer bands */}
-      <div
-        className="absolute inset-0"
-        style={{
-          zIndex: 4,
-          background: `repeating-linear-gradient(
-            -45deg,
-            transparent 0px,
-            rgba(255,255,255,0.03) 1px,
-            transparent 2px,
-            transparent 8px
-          )`,
-        }}
-      />
-
-      {/* Layer 5: Top header bar — vertical WEEK/DAY label */}
-      <div
-        className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-4 pb-2"
-        style={{ zIndex: 10 }}
       >
-        {/* Left: vertical WEEK / DAY stacked */}
-        <div
-          className="flex flex-col items-start"
+        <span
           style={{
-            writingMode: 'horizontal-tb',
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "'Montserrat', 'Arial Black', sans-serif",
-              fontWeight: 900,
-              fontSize: 'clamp(8px, 2.5vw, 11px)',
-              color: 'rgba(255,255,255,0.55)',
-              letterSpacing: '0.20em',
-              textTransform: 'uppercase',
-              lineHeight: 1,
-            }}
-          >
-            WEEK
-          </span>
-          <span
-            style={{
-              fontFamily: "'Montserrat', 'Arial Black', sans-serif",
-              fontWeight: 900,
-              fontSize: 'clamp(22px, 8vw, 36px)',
-              color: '#ffffff',
-              letterSpacing: '-0.02em',
-              lineHeight: 1,
-              textShadow: '0 0 20px rgba(180, 120, 255, 0.8)',
-            }}
-          >
-            {week}
-          </span>
-        </div>
-
-        {/* Center: thin divider line */}
-        <div
-          style={{
-            flex: 1,
-            height: '1px',
-            margin: '0 12px',
-            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
-            marginTop: '8px',
-          }}
-        />
-
-        {/* Right: DAY */}
-        <div className="flex flex-col items-end">
-          <span
-            style={{
-              fontFamily: "'Montserrat', 'Arial Black', sans-serif",
-              fontWeight: 900,
-              fontSize: 'clamp(8px, 2.5vw, 11px)',
-              color: 'rgba(255,255,255,0.55)',
-              letterSpacing: '0.20em',
-              textTransform: 'uppercase',
-              lineHeight: 1,
-            }}
-          >
-            DAY
-          </span>
-          <span
-            style={{
-              fontFamily: "'Montserrat', 'Arial Black', sans-serif",
-              fontWeight: 900,
-              fontSize: 'clamp(22px, 8vw, 36px)',
-              color: '#ffffff',
-              letterSpacing: '-0.02em',
-              lineHeight: 1,
-              textShadow: '0 0 20px rgba(120, 200, 255, 0.8)',
-            }}
-          >
-            {day}
-          </span>
-        </div>
-      </div>
-
-      {/* Layer 6: Bottom content — activity name + metric boxes */}
-      <div
-        className="absolute bottom-0 left-0 right-0 px-4 pb-5"
-        style={{ zIndex: 10 }}
-      >
-        {/* Activity name */}
-        <div
-          style={{
-            fontFamily: "'Montserrat', 'Arial Black', sans-serif",
+            fontFamily: "'Arial Black', 'Montserrat', sans-serif",
             fontWeight: 900,
-            fontSize: 'clamp(20px, 7vw, 30px)',
-            color: '#ffffff',
+            fontSize: 'clamp(13px, 4.5vw, 20px)',
+            color: '#000000',
             textTransform: 'uppercase',
             letterSpacing: '-0.01em',
-            lineHeight: 1.0,
-            textShadow: '0 2px 16px rgba(0,0,0,0.6)',
-            marginBottom: '10px',
+            lineHeight: 1,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
         >
-          {activity || 'Activity'}
-        </div>
-
-        {/* Metric boxes — right-aligned, 33% width each, side by side */}
-        {(duration || pr) && (
-          <div className="flex gap-2 justify-end">
-            {pr && (
-              <div
-                className="flex flex-col items-center justify-center"
-                style={{
-                  width: '33%',
-                  background: 'rgba(255,255,255,0.12)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(255,255,255,0.25)',
-                  borderRadius: '10px',
-                  padding: '8px 6px',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.3)',
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "'Montserrat', Arial, sans-serif",
-                    fontWeight: 700,
-                    fontSize: 'clamp(14px, 5vw, 20px)',
-                    color: '#ffffff',
-                    lineHeight: 1,
-                    textShadow: '0 0 10px rgba(200,150,255,0.6)',
-                  }}
-                >
-                  {pr}
-                </span>
-                <span
-                  style={{
-                    fontFamily: "'Montserrat', Arial, sans-serif",
-                    fontWeight: 500,
-                    fontSize: 'clamp(7px, 2.2vw, 9px)',
-                    color: 'rgba(255,255,255,0.6)',
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase',
-                    marginTop: '3px',
-                  }}
-                >
-                  {metricLabel}
-                </span>
-              </div>
-            )}
-            {duration && (
-              <div
-                className="flex flex-col items-center justify-center"
-                style={{
-                  width: '33%',
-                  background: 'rgba(255,255,255,0.12)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(255,255,255,0.25)',
-                  borderRadius: '10px',
-                  padding: '8px 6px',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.3)',
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "'Montserrat', Arial, sans-serif",
-                    fontWeight: 700,
-                    fontSize: 'clamp(14px, 5vw, 20px)',
-                    color: '#ffffff',
-                    lineHeight: 1,
-                    textShadow: '0 0 10px rgba(120,200,255,0.6)',
-                  }}
-                >
-                  {duration}
-                </span>
-                <span
-                  style={{
-                    fontFamily: "'Montserrat', Arial, sans-serif",
-                    fontWeight: 500,
-                    fontSize: 'clamp(7px, 2.2vw, 9px)',
-                    color: 'rgba(255,255,255,0.6)',
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase',
-                    marginTop: '3px',
-                  }}
-                >
-                  {durationLabel}
-                </span>
-              </div>
-            )}
-          </div>
-        )}
+          CULT NINJA — {activity || 'Activity'}
+        </span>
       </div>
 
-      {/* Layer 7: Holographic border glow */}
+      {/* ── Layer 5: Left strip vertical text "*** WEEK N / DAY N ***" ── */}
       <div
-        className="absolute inset-0 rounded-[20px] pointer-events-none"
+        className="absolute flex items-center justify-center"
         style={{
-          zIndex: 11,
-          border: '1.5px solid',
-          borderImageSlice: 1,
-          borderRadius: '20px',
-          boxShadow: `
-            inset 0 0 0 1px rgba(255,255,255,0.15),
-            0 0 20px rgba(180, 80, 255, 0.4),
-            0 0 40px rgba(80, 180, 255, 0.2)
-          `,
+          zIndex: 10,
+          top: '14.5%',
+          left: 0,
+          width: '9%',
+          bottom: '0%',
         }}
-      />
+      >
+        <span
+          style={{
+            fontFamily: "'Arial', 'Helvetica', sans-serif",
+            fontWeight: 700,
+            fontSize: 'clamp(5px, 1.6vw, 7px)',
+            color: '#000000',
+            textTransform: 'uppercase',
+            letterSpacing: '0.15em',
+            whiteSpace: 'nowrap',
+            transform: 'rotate(-90deg)',
+            transformOrigin: 'center center',
+          }}
+        >
+          *** WEEK {week} / DAY {day} ***
+        </span>
+      </div>
+
+      {/* ── Layer 6: Metric boxes — bottom-right, in the holographic cutout area ── */}
+      <div
+        className="absolute flex flex-col"
+        style={{
+          zIndex: 10,
+          bottom: '2%',
+          right: '4%',
+          width: '38%',
+          gap: '3%',
+        }}
+      >
+        {/* Box 1: Duration */}
+        {duration && (
+          <div
+            style={{
+              border: '2px solid #c8956a',
+              borderRadius: '4px',
+              padding: '6px 10px 4px',
+              backgroundColor: 'rgba(240, 200, 170, 0.15)',
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "'Arial Black', 'Montserrat', sans-serif",
+                fontWeight: 900,
+                fontSize: 'clamp(18px, 6.5vw, 30px)',
+                color: '#000000',
+                lineHeight: 1,
+                letterSpacing: '-0.02em',
+              }}
+            >
+              {duration.replace(/[^0-9:/.]/g, '') || duration}
+            </div>
+            <div
+              style={{
+                fontFamily: "'Arial', 'Helvetica', sans-serif",
+                fontWeight: 700,
+                fontSize: 'clamp(6px, 2vw, 8px)',
+                color: '#000000',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                marginTop: '2px',
+              }}
+            >
+              HRS | {durationLabel.toUpperCase()}
+            </div>
+          </div>
+        )}
+
+        {/* Box 2: PR / Metric */}
+        {pr && (
+          <div
+            style={{
+              border: '2px solid #000000',
+              borderRadius: '4px',
+              backgroundColor: '#000000',
+              padding: '6px 10px 4px',
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "'Arial Black', 'Montserrat', sans-serif",
+                fontWeight: 900,
+                fontSize: 'clamp(18px, 6.5vw, 30px)',
+                color: '#ffffff',
+                lineHeight: 1,
+                letterSpacing: '-0.02em',
+              }}
+            >
+              {pr}
+            </div>
+            <div
+              style={{
+                fontFamily: "'Arial', 'Helvetica', sans-serif",
+                fontWeight: 700,
+                fontSize: 'clamp(6px, 2vw, 8px)',
+                color: '#ffffff',
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                marginTop: '2px',
+              }}
+            >
+              {metricLabel}
+            </div>
+          </div>
+        )}
+
+        {/* Fallback when no metrics entered — show placeholder boxes */}
+        {!duration && !pr && (
+          <>
+            <div
+              style={{
+                border: '2px solid #c8956a',
+                borderRadius: '4px',
+                padding: '10px',
+                backgroundColor: 'rgba(240, 200, 170, 0.15)',
+                height: '60px',
+              }}
+            />
+            <div
+              style={{
+                border: '2px solid #000000',
+                borderRadius: '4px',
+                backgroundColor: '#000000',
+                padding: '10px',
+                height: '60px',
+              }}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 };
