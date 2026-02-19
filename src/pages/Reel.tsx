@@ -1316,8 +1316,8 @@ const Reel = () => {
 
         {/* MAIN CONTENT ZONE - flexible middle section, card-style with padding */}
         <div
-          className="flex-1 flex items-center justify-center z-30 overflow-hidden relative px-4 py-2"
-          style={{ background: 'transparent' }}
+          className="flex-1 flex items-center justify-center z-30 relative px-4 py-2"
+          style={{ background: 'transparent', overflow: 'visible' }}
         >
           {/* Card container with shake animation */}
           <motion.div 

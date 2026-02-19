@@ -336,11 +336,11 @@ const Progress = () => {
                   // Lock content if user's profile is private OR they haven't shared any public activity
                   const shouldBlur = !isOwnStory && (!profile?.stories_public || !hasPublicActivity);
                   
-                  return (
+                   return (
                     <motion.button
                       key={photo.id}
                       data-shared-element={index === 0 ? "progress-hero-card" : undefined}
-                      className="relative flex-shrink-0 overflow-hidden cursor-pointer active:scale-95 transition-transform"
+                      className="relative flex-shrink-0 cursor-pointer active:scale-95 transition-transform"
                       style={{
                         width: "56px",
                         height: "100px",
@@ -367,91 +367,94 @@ const Progress = () => {
                       whileTap={{ scale: 0.95 }}
                       transition={{ delay: 0.2 + index * 0.05 }}
                     >
-                      {photo.isVideo || isVideoUrl(photo.storageUrl) ? (
-                        <video
-                          src={photo.storageUrl}
-                          className="w-full h-full object-cover"
-                          style={{ filter: shouldBlur ? 'blur(12px)' : 'none' }}
-                          muted
-                          playsInline
-                          loop
-                          autoPlay
-                          preload="metadata"
-                        />
-                      ) : (
-                        <img
-                          src={photo.storageUrl}
-                          alt={`Day ${photo.dayNumber}`}
-                          className="w-full h-full object-cover"
-                          style={{ filter: shouldBlur ? 'blur(12px)' : 'none' }}
-                          onError={(e) => {
-                            const img = e.currentTarget;
-                            if (!img.dataset.retried) {
-                              img.dataset.retried = "true";
-                              img.src = photo.storageUrl + "?t=" + Date.now();
-                            }
-                          }}
-                        />
-                      )}
-                      
-                      {/* Lock overlay for blurred content */}
-                      {shouldBlur && (
-                        <div 
-                          className="absolute inset-0 flex flex-col items-center justify-center gap-1"
-                          style={{
-                            background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%)',
-                            backdropFilter: 'blur(2px)',
-                          }}
-                        >
+                      {/* Inner clip — keeps image/overlays contained within rounded corners */}
+                      <div className="absolute inset-0 overflow-hidden rounded-[11px]">
+                        {photo.isVideo || isVideoUrl(photo.storageUrl) ? (
+                          <video
+                            src={photo.storageUrl}
+                            className="w-full h-full object-cover"
+                            style={{ filter: shouldBlur ? 'blur(12px)' : 'none' }}
+                            muted
+                            playsInline
+                            loop
+                            autoPlay
+                            preload="metadata"
+                          />
+                        ) : (
+                          <img
+                            src={photo.storageUrl}
+                            alt={`Day ${photo.dayNumber}`}
+                            className="w-full h-full object-cover"
+                            style={{ filter: shouldBlur ? 'blur(12px)' : 'none' }}
+                            onError={(e) => {
+                              const img = e.currentTarget;
+                              if (!img.dataset.retried) {
+                                img.dataset.retried = "true";
+                                img.src = photo.storageUrl + "?t=" + Date.now();
+                              }
+                            }}
+                          />
+                        )}
+                        
+                        {/* Lock overlay for blurred content */}
+                        {shouldBlur && (
                           <div 
-                            className="w-8 h-8 rounded-full flex items-center justify-center"
+                            className="absolute inset-0 flex flex-col items-center justify-center gap-1"
                             style={{
-                              background: 'rgba(255,255,255,0.15)',
-                              backdropFilter: 'blur(8px)',
-                              border: '1px solid rgba(255,255,255,0.2)',
+                              background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%)',
+                              backdropFilter: 'blur(2px)',
                             }}
                           >
-                            <Lock className="w-3.5 h-3.5 text-white" />
+                            <div 
+                              className="w-8 h-8 rounded-full flex items-center justify-center"
+                              style={{
+                                background: 'rgba(255,255,255,0.15)',
+                                backdropFilter: 'blur(8px)',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                              }}
+                            >
+                              <Lock className="w-3.5 h-3.5 text-white" />
+                            </div>
                           </div>
+                        )}
+                        
+                        {/* Activity tag pill - top left - always show with fallback */}
+                        <div 
+                          className="absolute top-1.5 left-1.5 px-2 py-px rounded-full z-30 flex items-center justify-center"
+                          style={{
+                            background: 'rgba(0,0,0,0.6)',
+                            backdropFilter: 'blur(8px)',
+                            WebkitBackdropFilter: 'blur(8px)',
+                            lineHeight: 1,
+                          }}
+                        >
+                          <span className="text-white font-semibold text-[10px] drop-shadow-sm leading-none">
+                            {photo.activity || 'Workout'}
+                          </span>
                         </div>
-                      )}
-                      
-                      {/* Activity tag pill - top left - always show with fallback */}
-                      <div 
-                        className="absolute top-1.5 left-1.5 px-2 py-px rounded-full z-30 flex items-center justify-center"
-                        style={{
-                          background: 'rgba(0,0,0,0.6)',
-                          backdropFilter: 'blur(8px)',
-                          WebkitBackdropFilter: 'blur(8px)',
-                          lineHeight: 1,
-                        }}
-                      >
-                        <span className="text-white font-semibold text-[10px] drop-shadow-sm leading-none">
-                          {photo.activity || 'Workout'}
-                        </span>
-                      </div>
-                      
-                      {/* User avatar overlay - ALWAYS clear, never locked */}
-                      <div className="absolute bottom-1.5 left-1">
-                        <ProfileAvatar
-                          src={photo.avatarUrl}
-                          name={photo.displayName}
-                          size={20}
-                          style={{ border: '2px solid rgba(255,255,255,0.6)' }}
-                        />
-                      </div>
-                      
-                      {/* Day badge */}
-                      <div 
-                        className="absolute bottom-1.5 right-1 px-1 py-0.5 rounded-full text-white font-semibold text-[8px]"
-                        style={{ 
-                          background: "rgba(0,0,0,0.5)", 
-                          backdropFilter: "blur(4px)",
-                          opacity: shouldBlur ? 0.5 : 1,
-                        }}
-                      >
-                        D{photo.dayNumber}
-                      </div>
+                        
+                        {/* User avatar overlay - ALWAYS clear, never locked */}
+                        <div className="absolute bottom-1.5 left-1">
+                          <ProfileAvatar
+                            src={photo.avatarUrl}
+                            name={photo.displayName}
+                            size={20}
+                            style={{ border: '2px solid rgba(255,255,255,0.6)' }}
+                          />
+                        </div>
+                        
+                        {/* Day badge */}
+                        <div 
+                          className="absolute bottom-1.5 right-1 px-1 py-0.5 rounded-full text-white font-semibold text-[8px]"
+                          style={{ 
+                            background: "rgba(0,0,0,0.5)", 
+                            backdropFilter: "blur(4px)",
+                            opacity: shouldBlur ? 0.5 : 1,
+                          }}
+                        >
+                          D{photo.dayNumber}
+                        </div>
+                      </div>{/* end inner clip */}
                     </motion.button>
                   );
                 })
