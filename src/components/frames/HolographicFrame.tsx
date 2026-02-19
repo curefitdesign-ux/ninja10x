@@ -39,35 +39,28 @@ const HolographicFrame = ({
     }
   }, [isVideo, imageUrl]);
 
-  // Extract numeric duration value (e.g. "02" from "2 hrs")
-  const durationValue = duration
-    ? duration.replace(/[^0-9./:]/g, '').trim() || duration.replace(/\s*(hrs?|min.*)/i, '').trim()
-    : '00';
-  const durationUnit = duration
-    ? duration.toLowerCase().includes('min') ? 'MINS' : 'HRS'
-    : 'HRS';
-  const metricLabel = label1 || 'DURATION';
+  const durationValue = duration ? duration.replace(/[^0-9.:]/g, '') : '00';
+  const durationUnit = duration ? (duration.toLowerCase().includes('min') ? 'MINS' : 'HRS') : 'HRS';
   const prValue = pr || '—';
+  const metricLabel = label1 || 'DURATION';
   const prLabel = label2 || 'Personal Best Score';
 
   return (
-    // overflow-hidden clips the photo; drop-shadow on outer for depth
     <div
       className="w-full aspect-[9/16] relative overflow-hidden"
       style={{
-        // Holographic gradient — this IS the visible border/background
-        background: 'linear-gradient(170deg, #b0b5d0 0%, #9ab5d0 12%, #6dcfcf 28%, #a0d0a8 44%, #d8c07a 62%, #dea080 76%, #c8a0b5 100%)',
+        // Holographic gradient background matching the reference
+        background: 'linear-gradient(160deg, #b8bfe8 0%, #9eb8d9 15%, #7dd4d4 35%, #a8d8b0 50%, #e8c88a 70%, #e8a890 85%, #d4a0b8 100%)',
       }}
     >
-      {/* ── Layer 1: User photo — positioned inside the overlay's white window ──
-          Overlay white window: top ~10.5%, left ~4.5%, right ~4.8%, bottom ~13.5%     */}
+      {/* ── Layer 1: User photo/video — fills most of the frame ── */}
       <div
         className="absolute overflow-hidden"
         style={{
-          top: '10.5%',
+          top: '12%',
           left: '4.5%',
-          right: '4.8%',
-          bottom: '13.5%',
+          right: '4.5%',
+          bottom: '26%',
           zIndex: 2,
         }}
       >
@@ -96,59 +89,49 @@ const HolographicFrame = ({
         )}
       </div>
 
-      {/* ── Layer 2: Holographic overlay — full opacity, multiply blend ──
-          White areas in overlay = transparent (shows photo through)
-          Gradient areas = visible holographic border                    */}
+      {/* ── Layer 2: Holographic frame overlay (sits on top of photo) ── */}
       <img
         src={holographicOverlay}
         alt=""
         className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{
-          objectFit: 'fill',
-          zIndex: 3,
-          mixBlendMode: 'multiply',
-          opacity: 1,
-        }}
+        style={{ objectFit: 'fill', zIndex: 3, mixBlendMode: 'multiply', opacity: 0.9 }}
       />
 
-      {/* ── Layer 3: Header "CULT NINJA — ACTIVITY" ──
-          Sits in the top gradient strip (~10% tall), above the photo window  */}
+      {/* ── Layer 3: Header — CULT NINJA — ACTIVITY ── */}
       <div
         className="absolute"
         style={{
-          top: '1.5%',
-          left: '4.5%',
-          right: '4.5%',
+          top: '2%',
+          left: '5%',
+          right: '5%',
           zIndex: 10,
-          lineHeight: 1,
         }}
       >
         <div
           style={{
-            fontFamily: "'Arial Black', Impact, 'Helvetica Neue', sans-serif",
+            fontFamily: "'Arial Black', 'Helvetica Neue', sans-serif",
             fontWeight: 900,
-            // Small enough that even long activity names don't truncate
-            fontSize: 'clamp(10px, 3.8vw, 17px)',
-            color: '#000000',
+            fontSize: 'clamp(18px, 6.5vw, 28px)',
+            color: '#000',
             textTransform: 'uppercase',
             letterSpacing: '-0.01em',
-            lineHeight: 1.05,
-            wordBreak: 'break-word',
+            lineHeight: 1.1,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
         >
           CULT NINJA — {activity || 'WORKOUT'}
         </div>
       </div>
 
-      {/* ── Layer 4: Left vertical WEEK / DAY label ──
-          Sits in the left holographic border strip                       */}
+      {/* ── Layer 4: Left-side vertical WEEK / DAY label ── */}
       <div
         className="absolute"
         style={{
-          left: '0',
-          top: '18%',
-          bottom: '22%',
-          width: '5%',
+          left: '-2%',
+          top: '30%',
+          bottom: '30%',
           zIndex: 10,
           display: 'flex',
           alignItems: 'center',
@@ -160,12 +143,12 @@ const HolographicFrame = ({
             writingMode: 'vertical-rl',
             textOrientation: 'mixed',
             transform: 'rotate(180deg)',
-            fontFamily: "'Arial', 'Courier New', monospace",
+            fontFamily: "'Arial', monospace",
             fontWeight: 700,
-            fontSize: 'clamp(5px, 1.6vw, 8px)',
-            color: '#000000',
+            fontSize: 'clamp(8px, 2.5vw, 11px)',
+            color: '#000',
             textTransform: 'uppercase',
-            letterSpacing: '0.15em',
+            letterSpacing: '0.12em',
             whiteSpace: 'nowrap',
           }}
         >
@@ -173,21 +156,20 @@ const HolographicFrame = ({
         </div>
       </div>
 
-      {/* ── Layer 5: Metric boxes — bottom-right, inside overlay cut-out ──
-          The overlay has a notched cut-out at bottom-right for these boxes */}
+      {/* ── Layer 5: Metric boxes — bottom-right corner ── */}
       <div
         className="absolute"
         style={{
-          bottom: '1.5%',
+          bottom: '3%',
           right: '4.5%',
-          width: '33%',
+          width: '42%',
           zIndex: 10,
           display: 'flex',
           flexDirection: 'column',
-          gap: '3px',
+          gap: '4px',
         }}
       >
-        {/* Box 1: Duration — beveled top-left corner shape */}
+        {/* Metric Box 1 — Duration (beveled top-left corner shape) */}
         <div className="relative" style={{ width: '100%' }}>
           <img
             src={metric1Bg}
@@ -197,31 +179,28 @@ const HolographicFrame = ({
           />
           <div
             className="relative flex flex-col items-center justify-center"
-            style={{ paddingTop: '10%', paddingBottom: '8%', paddingLeft: '4%', paddingRight: '4%' }}
+            style={{ padding: '8% 6%', minHeight: 'clamp(50px, 14vw, 70px)' }}
           >
-            {/* Large duration number */}
             <div
               style={{
-                fontFamily: "'Arial Black', Impact, sans-serif",
+                fontFamily: "'Arial Black', sans-serif",
                 fontWeight: 900,
-                fontSize: 'clamp(20px, 7.5vw, 34px)',
-                color: '#000000',
+                fontSize: 'clamp(26px, 10vw, 44px)',
+                color: '#000',
                 lineHeight: 1,
-                letterSpacing: '-0.03em',
+                letterSpacing: '-0.02em',
               }}
             >
               {durationValue}
             </div>
-            {/* Unit + label */}
             <div
               style={{
                 fontFamily: "'Arial', sans-serif",
                 fontWeight: 700,
-                fontSize: 'clamp(5.5px, 1.8vw, 8px)',
-                color: '#000000',
-                letterSpacing: '0.06em',
-                marginTop: '3px',
-                textTransform: 'uppercase',
+                fontSize: 'clamp(7px, 2.2vw, 10px)',
+                color: '#000',
+                letterSpacing: '0.08em',
+                marginTop: '2px',
               }}
             >
               {durationUnit} | {metricLabel}
@@ -229,7 +208,7 @@ const HolographicFrame = ({
           </div>
         </div>
 
-        {/* Box 2: PR — white top / black bottom split shape */}
+        {/* Metric Box 2 — PR / Personal Best (split white/black shape) */}
         <div className="relative" style={{ width: '100%' }}>
           <img
             src={metric2Bg}
@@ -239,19 +218,19 @@ const HolographicFrame = ({
           />
           <div
             className="relative flex flex-col"
-            style={{ minHeight: 'clamp(44px, 13vw, 62px)' }}
+            style={{ minHeight: 'clamp(56px, 16vw, 80px)' }}
           >
             {/* White top half — PR value */}
             <div
               className="flex items-center justify-center"
-              style={{ flex: '1 1 50%', paddingTop: '6%' }}
+              style={{ flex: 1, paddingTop: '6%', paddingBottom: '2%' }}
             >
               <div
                 style={{
-                  fontFamily: "'Arial Black', Impact, sans-serif",
+                  fontFamily: "'Arial Black', sans-serif",
                   fontWeight: 900,
-                  fontSize: 'clamp(18px, 6.5vw, 29px)',
-                  color: '#000000',
+                  fontSize: 'clamp(22px, 8vw, 36px)',
+                  color: '#000',
                   lineHeight: 1,
                   letterSpacing: '-0.02em',
                 }}
@@ -262,18 +241,17 @@ const HolographicFrame = ({
             {/* Black bottom half — label */}
             <div
               className="flex items-center justify-center"
-              style={{ flex: '1 1 50%', paddingBottom: '8%' }}
+              style={{ flex: 1, paddingBottom: '8%', paddingTop: '2%' }}
             >
               <div
                 style={{
                   fontFamily: "'Arial', sans-serif",
                   fontWeight: 700,
-                  fontSize: 'clamp(5.5px, 1.8vw, 8px)',
-                  color: '#ffffff',
+                  fontSize: 'clamp(7px, 2.2vw, 10px)',
+                  color: '#fff',
                   letterSpacing: '0.04em',
                   textAlign: 'center',
-                  lineHeight: 1.2,
-                  textTransform: 'capitalize',
+                  lineHeight: 1.3,
                 }}
               >
                 {prLabel}
