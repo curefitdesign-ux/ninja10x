@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 import tokenBg from '@/assets/frames/token-bg.png';
 import tokenDuckRing from '@/assets/frames/token-duck-ring.png';
+import tokenCultNinjaText from '@/assets/frames/token-cult-ninja-text.png';
 
 interface TokenFrameProps {
   imageUrl: string;
@@ -69,7 +70,7 @@ const TokenFrame = ({
           top: '10%',
           left: '7%',
           right: '7%',
-          bottom: '5%',
+          bottom: '15%',
           zIndex: 2,
           borderRadius: '2px',
         }}
@@ -99,7 +100,22 @@ const TokenFrame = ({
         )}
       </div>
 
-      {/* Layer 3: Duck + rings stamp seal — overlays on the photo */}
+      {/* Layer 3: CULT NINJA JOURNEY text — half-overlays the top edge of the media */}
+      <img
+        src={tokenCultNinjaText}
+        alt=""
+        className="absolute pointer-events-none"
+        style={{
+          top: '7%',
+          left: '7%',
+          right: '7%',
+          zIndex: 5,
+          objectFit: 'contain',
+          objectPosition: 'left',
+        }}
+      />
+
+      {/* Layer 4: Duck + rings stamp seal — overlays on the photo */}
       <img
         src={tokenDuckRing}
         alt=""
