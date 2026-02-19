@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 import tokenBg from '@/assets/frames/token-bg.png';
 import tokenDuckRing from '@/assets/frames/token-duck-ring.png';
+import tokenCultNinjaText from '@/assets/frames/token-cult-ninja-text.png';
 
 interface TokenFrameProps {
   imageUrl: string;
@@ -30,7 +31,7 @@ const TokenFrame = ({
   label2,
 }: TokenFrameProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const metricLabel = label1 || 'Personal Best Score';
+  const metricLabel = label1 || 'Metric';
 
   useEffect(() => {
     if (isVideo && videoRef.current) {
@@ -39,23 +40,17 @@ const TokenFrame = ({
     }
   }, [isVideo, imageUrl]);
 
-  // Build the metrics line: "02 HRS | 05 PERSONAL BEST SCORE"
-  const durationUnit = duration?.toLowerCase().includes('min') ? 'MINS' : 'HRS';
-  const durationClean = duration ? duration.replace(/[a-zA-Z\s]/g, '').trim() : '';
-  const prClean = pr ? pr.replace(/[a-zA-Z\s]/g, '').trim() : '';
-
-  const metricsParts: string[] = [];
-  if (durationClean) metricsParts.push(`${durationClean} ${durationUnit}`);
-  if (prClean) metricsParts.push(`${prClean} ${metricLabel.toUpperCase()}`);
-  const metricsLine = metricsParts.join(' | ');
+  const metricsLine = [duration, pr ? `${pr} ${metricLabel}` : '']
+    .filter(Boolean)
+    .join(' | ');
 
   return (
-    // No overflow-hidden on outer — allows drop-shadow to render on perforated edges
+    // No overflow-hidden on outer — allows drop-shadow to render uncropped on perforated edges
     <div
       className="w-[90%] mx-auto aspect-[9/16] relative"
       style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.32))' }}
     >
-      {/* Layer 1: Stamp background — perforated edges + baked CULT NINJA Journey header + bottom gray strip */}
+      {/* Layer 1: Stamp frame background — perforated edges + CULT NINJA header + gray strip */}
       <img
         src={tokenBg}
         alt=""
@@ -68,14 +63,14 @@ const TokenFrame = ({
         }}
       />
 
-      {/* Layer 2: User photo — starts BELOW the baked header text (~20% from top) */}
+      {/* Layer 2: User photo/video — clipped to inner photo window, sits above stamp bg */}
       <div
         className="absolute overflow-hidden"
         style={{
-          top: '20%',
+          top: '10%',
           left: '7%',
           right: '7%',
-          bottom: '18%',
+          bottom: '15%',
           zIndex: 2,
           borderRadius: '2px',
         }}
@@ -105,63 +100,35 @@ const TokenFrame = ({
         )}
       </div>
 
-      {/* Layer 3: Duck + rings stamp seal — bottom-left, overlaps photo/strip boundary */}
+      {/* Layer 3: CULT NINJA JOURNEY text — above media, center-aligned, smaller */}
+      <img
+        src={tokenCultNinjaText}
+        alt=""
+        className="absolute pointer-events-none"
+        style={{
+          top: '2%',
+          left: '10%',
+          right: '10%',
+          width: '80%',
+          zIndex: 5,
+          objectFit: 'contain',
+          objectPosition: 'center',
+        }}
+      />
+
+      {/* Layer 4: Duck + rings stamp seal — overlays on the photo */}
       <img
         src={tokenDuckRing}
         alt=""
         className="absolute pointer-events-none"
         style={{
-          bottom: '16%',
-          left: '4%',
-          width: '20%',
+          bottom: '20%',
+          left: '3%',
+          width: '22%',
           zIndex: 10,
           objectFit: 'contain',
         }}
       />
-
-      {/* Layer 4: Activity name + metrics — bottom gray strip, center-aligned */}
-      <div
-        className="absolute text-center"
-        style={{
-          bottom: '2%',
-          left: '7%',
-          right: '7%',
-          zIndex: 10,
-        }}
-      >
-        {/* Large bold activity name */}
-        <div
-          style={{
-            fontFamily: "'Arial Black', Impact, 'Helvetica Neue', sans-serif",
-            fontWeight: 900,
-            fontSize: 'clamp(16px, 6.5vw, 28px)',
-            color: '#0a4f6f',
-            textTransform: 'uppercase',
-            letterSpacing: '0.02em',
-            lineHeight: 1.1,
-          }}
-        >
-          {activity || 'Activity'}
-        </div>
-
-        {/* Smaller metrics line */}
-        {metricsLine ? (
-          <div
-            style={{
-              fontFamily: "'Arial', sans-serif",
-              fontWeight: 700,
-              fontSize: 'clamp(6px, 2.2vw, 9px)',
-              color: '#555555',
-              letterSpacing: '0.05em',
-              marginTop: '2px',
-              lineHeight: 1.3,
-              textTransform: 'uppercase',
-            }}
-          >
-            {metricsLine}
-          </div>
-        ) : null}
-      </div>
     </div>
   );
 };
