@@ -1079,7 +1079,9 @@ const Reel = () => {
 
   // Use storageUrl (templated/framed screenshot) for display, fall back to originalUrl
   const mediaUrl = currentActivity.storageUrl || currentActivity.originalUrl || '';
-  const isVideo = currentActivity.isVideo || isVideoUrl(mediaUrl); // Check both flag and URL
+  // Determine media type from the actual URL extension ONLY — storageUrl for video activities
+  // is a .jpg/.png screenshot (the framed capture), so we must not rely on the is_video DB flag here.
+  const isVideo = isVideoUrl(mediaUrl);
   const currentReactions = localReactions[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS }, reactorProfiles: [] };
   
   // Week recap is generating if it's a recap story with no valid video URL
