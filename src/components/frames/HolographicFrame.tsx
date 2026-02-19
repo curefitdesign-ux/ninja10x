@@ -56,8 +56,11 @@ const HolographicFrame = ({
   const hasMetric1 = !!duration;
   const hasMetric2 = !!pr;
 
-  // Strip letters from duration value for display (e.g. "30 min" → "30")
+  // Strip letters/units from duration value for display (e.g. "30 min" → "30")
   const durationValue = duration.replace(/[a-zA-Z\s]/g, '') || duration;
+
+  // Strip units from pr/secondary metric value for display (e.g. "10.5km" → "10.5", "3 sets" → "3")
+  const prValue = pr.replace(/[a-zA-Z\s]/g, '') || pr;
 
   useEffect(() => {
     if (isVideo && videoRef.current) {
@@ -214,9 +217,9 @@ const HolographicFrame = ({
           style={{
             zIndex: 13,
             right: 0,
-            bottom: hasMetric2 ? '21%' : '10%',
+            bottom: '21%',
             width: '32%',
-            height: hasMetric2 ? '12%' : '20%',
+            height: '12%',
             paddingTop: '2%',
             paddingLeft: '6%',
             paddingRight: '2%',
@@ -264,7 +267,7 @@ const HolographicFrame = ({
           style={{
             zIndex: 13,
             right: 0,
-            bottom: '6%',
+            bottom: '9%',
             width: '32%',
             height: '7%',
             paddingLeft: '6%',
@@ -283,19 +286,19 @@ const HolographicFrame = ({
               overflow: 'visible',
             }}
           >
-            {pr}
+            {prValue}
           </div>
         </div>
       )}
 
-      {/* ── LAYER 6c: Metric 2 SUBTEXT (label) — white text, 1% from bottom ── */}
+      {/* ── LAYER 6c: Metric 2 SUBTEXT (label) — white text, 4% from bottom ── */}
       {hasMetric2 && (
         <div
           className="absolute flex flex-col justify-start"
           style={{
             zIndex: 13,
             right: 0,
-            bottom: '1%',
+            bottom: '4%',
             width: '32%',
             height: '5%',
             paddingLeft: '6%',
