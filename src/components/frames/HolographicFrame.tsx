@@ -257,29 +257,26 @@ const HolographicFrame = ({
         </div>
       )}
 
-      {/* ── LAYER 6b: Metric 2 TEXT (pr / secondary) ──
-          Black box = lower ~12% of card. ── */}
+      {/* ── LAYER 6b: Metric 2 NUMBER (pr value) — black text, 5% from bottom ── */}
       {hasMetric2 && (
         <div
-          className="absolute flex flex-col justify-start"
+          className="absolute flex flex-col justify-end"
           style={{
             zIndex: 13,
             right: 0,
-            bottom: '1%',
+            bottom: '6%',
             width: '32%',
-            height: '12%',
-            paddingTop: '2%',
+            height: '7%',
             paddingLeft: '6%',
             paddingRight: '2%',
           }}
         >
-          {/* Large pr value */}
           <div
             style={{
               fontFamily: "'Arial Black', 'Impact', sans-serif",
               fontWeight: 900,
               fontSize: 'clamp(14px, 6cqw, 32px)',
-              color: '#ffffff',
+              color: '#000000',
               lineHeight: 1,
               letterSpacing: '-0.02em',
               whiteSpace: 'nowrap',
@@ -288,7 +285,24 @@ const HolographicFrame = ({
           >
             {pr}
           </div>
-          {/* White label */}
+        </div>
+      )}
+
+      {/* ── LAYER 6c: Metric 2 SUBTEXT (label) — white text, 1% from bottom ── */}
+      {hasMetric2 && (
+        <div
+          className="absolute flex flex-col justify-start"
+          style={{
+            zIndex: 13,
+            right: 0,
+            bottom: '1%',
+            width: '32%',
+            height: '5%',
+            paddingLeft: '6%',
+            paddingRight: '2%',
+            paddingTop: '1%',
+          }}
+        >
           <div
             style={{
               fontFamily: "'Arial Black', 'Impact', sans-serif",
@@ -297,7 +311,6 @@ const HolographicFrame = ({
               color: '#ffffff',
               letterSpacing: '0.01em',
               textTransform: 'capitalize',
-              marginTop: '2px',
               lineHeight: 1.2,
               whiteSpace: 'normal',
               wordBreak: 'break-word',
