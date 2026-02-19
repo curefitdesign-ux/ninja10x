@@ -48,7 +48,6 @@ const TokenFrame = ({
     // No overflow-hidden on outer — allows drop-shadow to render uncropped on perforated edges
     <div
       className="w-[90%] mx-auto aspect-[9/16] relative"
-      style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.32))' }}
     >
       {/* Layer 1: Stamp frame background — perforated edges + CULT NINJA header + gray strip */}
       <img
@@ -63,7 +62,7 @@ const TokenFrame = ({
         }}
       />
 
-      {/* Layer 2: User photo/video — clipped to inner photo window, sits above stamp bg */}
+      {/* Layer 2: User photo/video — clipped to inner photo window, no background/shadow */}
       <div
         className="absolute overflow-hidden"
         style={{
@@ -73,6 +72,8 @@ const TokenFrame = ({
           bottom: '15%',
           zIndex: 2,
           borderRadius: '2px',
+          background: 'transparent',
+          boxShadow: 'none',
         }}
       >
         {isVideo ? (
@@ -100,18 +101,18 @@ const TokenFrame = ({
         )}
       </div>
 
-      {/* Layer 3: CULT NINJA JOURNEY text — half-overlays the top edge of the media */}
+      {/* Layer 3: CULT NINJA JOURNEY text — centered, smaller size */}
       <img
         src={tokenCultNinjaText}
         alt=""
         className="absolute pointer-events-none"
         style={{
-          top: '7%',
-          left: '7%',
-          right: '7%',
+          top: '2%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '50%',
           zIndex: 5,
           objectFit: 'contain',
-          objectPosition: 'left',
         }}
       />
 
