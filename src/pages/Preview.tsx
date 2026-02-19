@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Check, Pencil, Trash2, ImagePlus, MoreHorizontal, Footprints, Bike, MountainSnow, PersonStanding, Dumbbell, Camera, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { X, Check, Pencil, Trash2, ImagePlus, MoreHorizontal, Footprints, Bike, MountainSnow, PersonStanding, Dumbbell, Camera, Image as ImageIcon, Loader2, Waves, ArrowUpFromLine, SkipForward, Zap, Weight, Flame } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { CricketBatBall, BoxingGlove, FootballIcon, Shuttlecock, BasketballIcon, TennisBall } from '@/components/SportIcons';
 import ShareSheet from '@/components/ShareSheet';
@@ -50,6 +50,12 @@ const activityOptions: Array<{
   { name: 'Boxing', icon: BoxingGlove, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Rounds', secondaryUnit: 'rounds', secondaryInputType: 'number' },
   { name: 'Football', icon: FootballIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
   { name: 'Basketball', icon: BasketballIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
+  { name: 'Swimming', icon: Waves, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' },
+  { name: 'Stair Climbing', icon: ArrowUpFromLine, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Floors', secondaryUnit: 'floors', secondaryInputType: 'number' },
+  { name: 'Skipping Rope', icon: SkipForward, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Count', secondaryUnit: 'reps', secondaryInputType: 'number' },
+  { name: 'HRX Session', icon: Zap, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Type', secondaryUnit: '', secondaryInputType: 'none' },
+  { name: 'Strength', icon: Weight, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'PR', secondaryUnit: 'kg', secondaryInputType: 'decimal' },
+  { name: 'Burn', icon: Flame, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
   { name: 'Other', icon: MoreHorizontal, isCustom: true, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
 ];
 
@@ -743,19 +749,18 @@ const Preview = () => {
           minHeight: '-webkit-fill-available',
         }}
       >
-        {/* Blurred background image - low-res for performance */}
-        <div 
-          className="fixed inset-0 scale-150 transition-all duration-500 pointer-events-none"
-          style={{
-            backgroundImage: `url("${lowResBackground || imageUrl}")`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            filter: 'blur(80px) brightness(0.5)',
-          }}
-        />
+        {/* Blurred background image - use img tag to avoid CSS bg blob URL issues */}
+        {!isVideo && (
+          <img
+            src={lowResBackground || imageUrl || ''}
+            alt=""
+            className="fixed inset-0 w-full h-full scale-150 pointer-events-none"
+            style={{ objectFit: 'cover', filter: 'blur(80px) brightness(0.5)', zIndex: 0 }}
+          />
+        )}
         
         {/* Dark gradient overlay */}
-        <div className="fixed inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/80 pointer-events-none" />
+        <div className="fixed inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/80 pointer-events-none" style={{ zIndex: 1 }} />
         
         {/* Header */}
         <div 
@@ -825,8 +830,8 @@ const Preview = () => {
             {/* Title */}
             <h2 className="text-white text-xl font-bold text-center mb-5">Choose your activity</h2>
             
-            {/* Activity Grid - 4 columns, larger icons */}
-            <div className="grid grid-cols-4 gap-x-4 gap-y-5">
+            {/* Activity Grid - 4 columns, larger icons, scrollable */}
+            <div className="grid grid-cols-4 gap-x-4 gap-y-5 max-h-64 overflow-y-auto pb-1">
               {activityOptions.map((activityOption, index) => {
                 const isOther = 'isCustom' in activityOption && activityOption.isCustom;
                 return (
@@ -1351,7 +1356,7 @@ const Preview = () => {
                 <h2 className="text-white text-xl font-bold text-center mb-5">Change activity</h2>
                 
                 {/* Activity Grid - 4 columns */}
-                <div className="grid grid-cols-4 gap-x-4 gap-y-5">
+                <div className="grid grid-cols-4 gap-x-4 gap-y-5 max-h-64 overflow-y-auto pb-1">
                   {activityOptions.map((activityOption, index) => {
                     const isSelected = activity === activityOption.name || (activityOption.name === 'Other' && !activityOptions.slice(0, -1).some(a => a.name === activity) && activity);
                     const isOther = 'isCustom' in activityOption && activityOption.isCustom;
