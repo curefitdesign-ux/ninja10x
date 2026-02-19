@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import tokenBg from '@/assets/frames/token-bg.png';
-import tokenBird from '@/assets/frames/token-bird.png';
-import tokenCircles from '@/assets/frames/token-circles.png';
+import tokenDuckRing from '@/assets/frames/token-duck-ring.png';
+import tokenCultNinjaText from '@/assets/frames/token-cult-ninja-text.png';
 
 interface TokenFrameProps {
   imageUrl: string;
@@ -50,8 +50,30 @@ const TokenFrame = ({
       className="w-[90%] mx-auto aspect-[9/16] overflow-hidden relative"
       style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.28)' }}
     >
-      {/* Layer 0: Full-bleed user photo / video */}
-      <div className="absolute inset-0 z-0">
+      {/* Layer 0: Stamp frame background — gray bg + perforated edges */}
+      <img
+        src={tokenBg}
+        alt=""
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'fill',
+          zIndex: 0,
+        }}
+      />
+
+      {/* Layer 1: User photo/video — clipped inside the stamp window area */}
+      <div
+        className="absolute overflow-hidden"
+        style={{
+          top: '18%',
+          left: '6%',
+          right: '6%',
+          bottom: '22%',
+          zIndex: 10,
+        }}
+      >
         {isVideo ? (
           <video
             ref={videoRef}
@@ -77,57 +99,35 @@ const TokenFrame = ({
         )}
       </div>
 
-      {/* Layer 1: token.png stamp frame — contains perforations, gray bg,
-          "CULT NINJA / Journey" header and bottom gray strip baked in.
-          mix-blend-mode: multiply makes the white center transparent so photo shows through. */}
+      {/* Layer 2: CULT NINJA Journey text — overlaid on top of photo */}
       <img
-        src={tokenBg}
-        alt=""
-        className="absolute inset-0 pointer-events-none"
+        src={tokenCultNinjaText}
+        alt="CULT NINJA Journey"
+        className="absolute pointer-events-none"
         style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'fill',
-          zIndex: 10,
-          mixBlendMode: 'multiply',
+          top: '2%',
+          left: '6%',
+          width: '65%',
+          zIndex: 20,
+          objectFit: 'contain',
         }}
       />
 
-      {/* Layer 2: Stamp seal — concentric rings + bird mascot
-          Positioned bottom-left, overlapping the photo/bottom-strip boundary */}
-      <div
-        className="absolute"
+      {/* Layer 3: Duck + rings stamp seal — bottom-left, overlapping photo/strip boundary */}
+      <img
+        src={tokenDuckRing}
+        alt=""
+        className="absolute pointer-events-none"
         style={{
-          bottom: '17%',
-          left: '5%',
+          bottom: '18%',
+          left: '3%',
           width: '22%',
-          aspectRatio: '1 / 1',
           zIndex: 20,
+          objectFit: 'contain',
         }}
-      >
-        {/* Outer circles ring */}
-        <img
-          src={tokenCircles}
-          alt=""
-          className="absolute inset-0 w-full h-full"
-          style={{ objectFit: 'contain' }}
-        />
-        {/* Bird mascot centered inside rings */}
-        <img
-          src={tokenBird}
-          alt=""
-          className="absolute"
-          style={{
-            width: '52%',
-            height: '52%',
-            top: '24%',
-            left: '24%',
-            objectFit: 'contain',
-          }}
-        />
-      </div>
+      />
 
-      {/* Layer 3: Activity name + metrics — rendered inside the bottom gray strip */}
+      {/* Layer 4: Activity name + metrics — bottom gray strip */}
       <div
         className="absolute left-0 right-0 text-center"
         style={{
@@ -139,11 +139,11 @@ const TokenFrame = ({
         <div
           style={{
             fontFamily: "'Montserrat', 'Arial Black', sans-serif",
-            fontWeight: 700,
-            fontSize: 'clamp(18px, 6.5vw, 28px)',
+            fontWeight: 800,
+            fontSize: 'clamp(20px, 7vw, 32px)',
             color: '#0a5278',
             textTransform: 'uppercase',
-            letterSpacing: '0.04em',
+            letterSpacing: '0.02em',
             lineHeight: 1.1,
           }}
         >
@@ -153,11 +153,11 @@ const TokenFrame = ({
           <div
             style={{
               fontFamily: "'Montserrat', Arial, sans-serif",
-              fontWeight: 500,
+              fontWeight: 600,
               fontSize: 'clamp(8px, 2.8vw, 12px)',
-              color: '#808080',
+              color: '#555',
               letterSpacing: '0.05em',
-              marginTop: 3,
+              marginTop: 4,
               lineHeight: 1.3,
             }}
           >
