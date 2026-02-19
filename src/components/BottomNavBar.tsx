@@ -1,17 +1,15 @@
-// v3 – liquid glass nav
+// v4 – liquid glass nav with teal activity glow
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Dumbbell, ShoppingBag, Waves } from "lucide-react";
-import activityActive from "@/assets/nav/activity-active.png";
-import activityInactive from "@/assets/nav/activity-inactive.png";
+import { Home, Dumbbell, ShoppingBag, Waves, Activity } from "lucide-react";
 
 const navItems = [
-  { id: "home", label: "Home", path: "/", type: "icon" as const, Icon: Home },
-  { id: "fitness", label: "Fitness", path: "/", type: "icon" as const, Icon: Dumbbell },
-  { id: "activity", label: "Activity", path: "/", type: "image" as const, Icon: null },
-  { id: "store", label: "Store", path: "/", type: "icon" as const, Icon: ShoppingBag },
-  { id: "pilates", label: "Pilates", path: "/", type: "icon" as const, Icon: Waves },
+  { id: "home", label: "Home", path: "/", Icon: Home },
+  { id: "fitness", label: "Fitness", path: "/", Icon: Dumbbell },
+  { id: "activity", label: "Activity", path: "/", Icon: Activity },
+  { id: "store", label: "Store", path: "/", Icon: ShoppingBag },
+  { id: "pilates", label: "Pilates", path: "/", Icon: Waves },
 ];
 
 const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
@@ -27,7 +25,6 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
   const handleNavClick = (item: typeof navItems[0]) => {
     setActiveTab(item.id);
     if (item.id === "home") {
-      // Deep link to curefit home tab
       window.location.href = "curefit://hometab";
       return;
     }
@@ -35,6 +32,8 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
       navigate(item.path);
     }
   };
+
+  const TEAL = "#0FE498";
 
   const nav = (
     <nav
@@ -54,47 +53,56 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
       >
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
+          const isActivity = item.id === "activity";
+
+          const iconColor = isActivity && isActive
+            ? TEAL
+            : isActive
+            ? "#ffffff"
+            : "rgba(180, 160, 220, 0.5)";
+
+          const labelColor = isActivity && isActive
+            ? TEAL
+            : isActive
+            ? "#ffffff"
+            : "rgba(180, 160, 220, 0.5)";
+
           return (
             <button
               key={item.id}
               onClick={() => handleNavClick(item)}
               className="pressable flex flex-col items-center pt-2 pb-1 px-3 relative"
             >
-              {item.type === "image" ? (
-                <div className="relative flex items-center justify-center">
-                  {/* Subtle glow halo behind the active activity icon */}
-                  {isActive && (
-                    <div
-                      className="absolute inset-0 rounded-full pointer-events-none"
-                      style={{
-                        background: "radial-gradient(ellipse at center, rgba(249, 115, 22, 0.28) 0%, rgba(236, 72, 153, 0.18) 55%, transparent 80%)",
-                        transform: "scale(2.2)",
-                        filter: "blur(6px)",
-                      }}
-                    />
-                  )}
-                  <img
-                    src={isActive ? activityActive : activityInactive}
-                    alt="Activity"
-                    className="w-[32px] h-[32px] object-contain transition-opacity duration-150 relative z-10"
-                    style={{ opacity: isActive ? 1 : 0.45 }}
-                  />
-                </div>
-              ) : (
-                item.Icon && (
-                  <item.Icon
-                    className="w-[22px] h-[22px] transition-colors duration-150"
+              <div className="relative flex items-center justify-center">
+                {/* Subtle teal glow behind active activity icon */}
+                {isActive && isActivity && (
+                  <div
+                    className="absolute rounded-full pointer-events-none"
                     style={{
-                      color: isActive ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
-                      strokeWidth: isActive ? 2.2 : 1.6,
+                      inset: "-8px",
+                      background: "radial-gradient(ellipse at center, rgba(15, 228, 152, 0.22) 0%, rgba(0, 190, 255, 0.10) 55%, transparent 80%)",
+                      filter: "blur(6px)",
                     }}
                   />
-                )
-              )}
+                )}
+                <item.Icon
+                  className="transition-all duration-150 relative z-10"
+                  style={{
+                    width: isActivity ? "26px" : "22px",
+                    height: isActivity ? "26px" : "22px",
+                    color: iconColor,
+                    strokeWidth: isActive ? 2.2 : 1.6,
+                    filter: isActivity && isActive
+                      ? "drop-shadow(0 0 5px rgba(15, 228, 152, 0.55))"
+                      : "none",
+                  }}
+                />
+              </div>
               <span
-                className="text-[10px] mt-1 font-medium tracking-wide transition-colors duration-150"
+                className="text-[10px] mt-1 tracking-wide transition-colors duration-150"
                 style={{
-                  color: isActive ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
+                  color: labelColor,
+                  fontWeight: isActive ? 600 : 400,
                 }}
               >
                 {item.label}
