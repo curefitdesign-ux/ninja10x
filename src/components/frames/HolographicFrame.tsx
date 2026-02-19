@@ -15,6 +15,18 @@ interface HolographicFrameProps {
   label2?: string;
 }
 
+/**
+ * Holographic Frame — pixel-perfect recreation of template_8 reference.
+ *
+ * Layer stack (bottom → top):
+ *  0. Holographic gradient background (full bleed)
+ *  1. User media (full bleed — photo shows through overlay's white window)
+ *  2. Holographic overlay PNG @ mix-blend-mode: multiply, opacity 1
+ *     — white areas = transparent (photo shows) / colored areas = frame shows
+ *  3. Header text   "CULT NINJA — {ACTIVITY}"  (above photo, in top strip)
+ *  4. Sidebar text  "*** WEEK N / DAY N ***"   (left strip, rotated -90°)
+ *  5. Metric boxes  (bottom-right notch, only when user has entered metrics)
+ */
 const HolographicFrame = ({
   imageUrl,
   isVideo,
@@ -29,12 +41,13 @@ const HolographicFrame = ({
   label2,
 }: HolographicFrameProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const metricLabel = label1 || 'Distance';
+
+  // Label defaults matching activity context
   const durationLabel = label2 || 'Duration';
+  const metricLabel   = label1 || 'Distance';
 
   const hasMetric1 = !!duration;
   const hasMetric2 = !!pr;
-  const metricCount = (hasMetric1 ? 1 : 0) + (hasMetric2 ? 1 : 0);
 
   useEffect(() => {
     if (isVideo && videoRef.current) {
@@ -46,24 +59,31 @@ const HolographicFrame = ({
   return (
     <div
       className="w-[90%] mx-auto aspect-[9/16] relative overflow-hidden"
-      style={{ borderRadius: '4px' }}
+      style={{ borderRadius: '0px' }}
     >
-      {/* ── Layer 1: Holographic gradient base background ── */}
+      {/* ─────────────────────────────────────────────────────
+          LAYER 0 — Holographic gradient base (full card)
+          Matches: blue-gray top, cyan-teal left, peach bottom-right
+         ───────────────────────────────────────────────────── */}
       <div
         className="absolute inset-0"
         style={{
           zIndex: 0,
           background: `
-            radial-gradient(ellipse at 10% 50%, rgba(0, 220, 220, 0.55) 0%, transparent 45%),
-            radial-gradient(ellipse at 85% 90%, rgba(240, 160, 120, 0.65) 0%, transparent 45%),
-            radial-gradient(ellipse at 20% 5%, rgba(160, 170, 210, 0.7) 0%, transparent 50%),
-            radial-gradient(ellipse at 90% 10%, rgba(140, 155, 210, 0.5) 0%, transparent 40%),
-            linear-gradient(180deg, #b0b8d8 0%, #c8d0e8 30%, #9ecece 60%, #d8c0b0 100%)
+            radial-gradient(ellipse 55% 35% at 6% 55%,  rgba(0, 224, 210, 0.80) 0%, transparent 65%),
+            radial-gradient(ellipse 55% 40% at 85% 92%, rgba(238, 155, 120, 0.90) 0%, transparent 55%),
+            radial-gradient(ellipse 70% 30% at 15% 4%,  rgba(165, 172, 215, 0.85) 0%, transparent 55%),
+            radial-gradient(ellipse 50% 30% at 92% 8%,  rgba(145, 158, 218, 0.70) 0%, transparent 50%),
+            radial-gradient(ellipse 60% 25% at 50% 0%,  rgba(180, 185, 220, 0.60) 0%, transparent 60%),
+            linear-gradient(175deg, #b2b9d8 0%, #c4cce4 28%, #a0d0cc 62%, #d6b8a8 100%)
           `,
         }}
       />
 
-      {/* ── Layer 2: User photo — full bleed ── */}
+      {/* ─────────────────────────────────────────────────────
+          LAYER 1 — User photo / video (full bleed)
+          The multiply overlay will mask it to the white window
+         ───────────────────────────────────────────────────── */}
       <div className="absolute inset-0" style={{ zIndex: 1 }}>
         {isVideo ? (
           <video
@@ -90,7 +110,11 @@ const HolographicFrame = ({
         )}
       </div>
 
-      {/* ── Layer 3: Holographic overlay — NO opacity, pure multiply blend ── */}
+      {/* ─────────────────────────────────────────────────────
+          LAYER 2 — Holographic overlay PNG
+          mix-blend-mode: multiply  |  opacity: 1  (no reduction)
+          White = photo shows through / Colored = frame gradient
+         ───────────────────────────────────────────────────── */}
       <img
         src={holographicOverlay}
         alt=""
@@ -103,108 +127,127 @@ const HolographicFrame = ({
         }}
       />
 
-      {/* ── Layer 4: Header bar — "CULT NINJA — ACTIVITY" ── */}
+      {/* ─────────────────────────────────────────────────────
+          LAYER 3 — Header: "CULT NINJA — {ACTIVITY}"
+          Sits in the blue-gray top strip (~0–15% of card height)
+          Full width, left-padded past the left holographic strip
+         ───────────────────────────────────────────────────── */}
       <div
-        className="absolute top-0 left-0 right-0 flex items-center"
+        className="absolute left-0 right-0 top-0 flex items-center"
         style={{
           zIndex: 10,
-          height: '14.5%',
-          paddingLeft: '10%',
-          paddingRight: '5%',
+          height: '14%',
+          paddingLeft: '3%',
+          paddingRight: '2%',
         }}
       >
         <span
           style={{
-            fontFamily: "'Arial Black', 'Montserrat', sans-serif",
+            fontFamily: "'Arial Black', 'Impact', 'Helvetica Neue', sans-serif",
             fontWeight: 900,
-            fontSize: 'clamp(13px, 4.5vw, 20px)',
+            fontSize: 'clamp(15px, 5.6vw, 24px)',
             color: '#000000',
             textTransform: 'uppercase',
-            letterSpacing: '-0.01em',
+            letterSpacing: '-0.02em',
             lineHeight: 1,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
+            display: 'block',
+            width: '100%',
           }}
         >
           CULT NINJA — {activity || 'Activity'}
         </span>
       </div>
 
-      {/* ── Layer 5: Left strip vertical text "*** WEEK N / DAY N ***" ── */}
+      {/* ─────────────────────────────────────────────────────
+          LAYER 4 — Left sidebar vertical text
+          "*** WEEK N / DAY N ***"  rotated -90°
+          In the left cyan/teal holographic strip (~0–9% width)
+         ───────────────────────────────────────────────────── */}
       <div
         className="absolute flex items-center justify-center"
         style={{
           zIndex: 10,
-          top: '14.5%',
+          top: '14%',
           left: 0,
           width: '9%',
-          bottom: '0%',
+          bottom: 0,
         }}
       >
         <span
           style={{
             fontFamily: "'Arial', 'Helvetica', sans-serif",
             fontWeight: 700,
-            fontSize: 'clamp(5px, 1.6vw, 7px)',
+            fontSize: 'clamp(4.5px, 1.5vw, 6.5px)',
             color: '#000000',
             textTransform: 'uppercase',
-            letterSpacing: '0.15em',
+            letterSpacing: '0.18em',
             whiteSpace: 'nowrap',
             transform: 'rotate(-90deg)',
             transformOrigin: 'center center',
+            display: 'block',
           }}
         >
           *** WEEK {week} / DAY {day} ***
         </span>
       </div>
 
-      {/* ── Layer 6: Metric boxes — stack dynamically as user adds metrics ── */}
-      {metricCount > 0 && (
+      {/* ─────────────────────────────────────────────────────
+          LAYER 5 — Metric boxes
+          Positioned in the bottom-right notch of the overlay
+          (~62–96% width, ~79–100% height)
+          Stack grows as user enters metrics — no placeholder boxes
+         ───────────────────────────────────────────────────── */}
+      {(hasMetric1 || hasMetric2) && (
         <div
           className="absolute flex flex-col"
           style={{
             zIndex: 10,
-            bottom: '2%',
-            right: '4%',
-            width: '38%',
-            gap: '0px',
+            right: '3%',
+            bottom: '1.5%',
+            width: '36%',
+            gap: 0,
           }}
         >
-          {/* Box 1: Duration — white bg with chamfered top-left corner, black border */}
+          {/* ── Metric Box 1: Duration ──
+              White background, thin black border, chamfered top-left corner.
+              Only shown when duration is entered. */}
           {hasMetric1 && (
             <div
               style={{
+                backgroundColor: '#ffffff',
                 border: '2px solid #000000',
                 borderBottom: hasMetric2 ? '1px solid #000000' : '2px solid #000000',
-                padding: '6px 10px 5px',
-                backgroundColor: '#ffffff',
-                clipPath: metricCount === 1
-                  ? 'polygon(16px 0%, 100% 0%, 100% 100%, 0% 100%, 0% 16px)'
-                  : 'polygon(16px 0%, 100% 0%, 100% 100%, 0% 100%, 0% 16px)',
+                padding: '5% 8% 4%',
+                /* Chamfered top-left corner via clip-path */
+                clipPath: 'polygon(14px 0%, 100% 0%, 100% 100%, 0% 100%, 0% 14px)',
               }}
             >
+              {/* Large metric value */}
               <div
                 style={{
-                  fontFamily: "'Arial Black', 'Montserrat', sans-serif",
+                  fontFamily: "'Arial Black', 'Impact', sans-serif",
                   fontWeight: 900,
-                  fontSize: 'clamp(18px, 6.5vw, 30px)',
+                  fontSize: 'clamp(22px, 8vw, 36px)',
                   color: '#000000',
                   lineHeight: 1,
-                  letterSpacing: '-0.02em',
+                  letterSpacing: '-0.03em',
                 }}
               >
                 {duration.replace(/[^0-9:/.]/g, '') || duration}
               </div>
+              {/* Sub-label */}
               <div
                 style={{
                   fontFamily: "'Arial', 'Helvetica', sans-serif",
                   fontWeight: 700,
-                  fontSize: 'clamp(6px, 2vw, 8px)',
+                  fontSize: 'clamp(5.5px, 1.8vw, 7.5px)',
                   color: '#000000',
-                  letterSpacing: '0.06em',
+                  letterSpacing: '0.05em',
                   textTransform: 'uppercase',
-                  marginTop: '2px',
+                  marginTop: '3px',
                 }}
               >
                 HRS | {durationLabel.toUpperCase()}
@@ -212,44 +255,54 @@ const HolographicFrame = ({
             </div>
           )}
 
-          {/* Box 2: PR / Metric — solid black bg, white text, rounded bottom-right */}
+          {/* ── Metric Box 2: PR / secondary metric ──
+              Solid black background, white text.
+              Chamfered top-left only when it's the first (and only) box.
+              Rounded bottom-right corner.
+              Only shown when pr is entered. */}
           {hasMetric2 && (
             <div
               style={{
+                backgroundColor: '#000000',
                 border: '2px solid #000000',
                 borderTop: hasMetric1 ? 'none' : '2px solid #000000',
-                backgroundColor: '#000000',
-                padding: '6px 10px 5px',
+                padding: '5% 8% 5%',
                 borderRadius: hasMetric1 ? '0 0 6px 0' : '0 0 6px 0',
+                /* Chamfered top-left only when standalone (no metric1 above it) */
                 clipPath: !hasMetric1
-                  ? 'polygon(16px 0%, 100% 0%, 100% 100%, 0% 100%, 0% 16px)'
+                  ? 'polygon(14px 0%, 100% 0%, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0% 100%, 0% 14px)'
                   : undefined,
               }}
             >
+              {/* Large metric value */}
               <div
                 style={{
-                  fontFamily: "'Arial Black', 'Montserrat', sans-serif",
+                  fontFamily: "'Arial Black', 'Impact', sans-serif",
                   fontWeight: 900,
-                  fontSize: 'clamp(18px, 6.5vw, 30px)',
+                  fontSize: 'clamp(20px, 7.5vw, 34px)',
                   color: '#ffffff',
                   lineHeight: 1,
-                  letterSpacing: '-0.02em',
+                  letterSpacing: '-0.03em',
                 }}
               >
                 {pr}
               </div>
+              {/* Sub-label — supports two-word wrapping like "Personal Best Score" */}
               <div
                 style={{
-                  fontFamily: "'Arial', 'Helvetica', sans-serif",
-                  fontWeight: 700,
-                  fontSize: 'clamp(6px, 2vw, 8px)',
-                  color: 'rgba(255,255,255,0.85)',
-                  letterSpacing: '0.04em',
-                  textTransform: 'uppercase',
-                  marginTop: '2px',
+                  fontFamily: "'Arial Black', 'Impact', sans-serif",
+                  fontWeight: 900,
+                  fontSize: 'clamp(6px, 2vw, 9px)',
+                  color: '#ffffff',
+                  letterSpacing: '0.01em',
+                  textTransform: 'capitalize',
+                  marginTop: '3px',
+                  lineHeight: 1.2,
+                  whiteSpace: 'normal',
+                  wordBreak: 'break-word',
                 }}
               >
-                {metricLabel.toUpperCase()}
+                {metricLabel}
               </div>
             </div>
           )}
