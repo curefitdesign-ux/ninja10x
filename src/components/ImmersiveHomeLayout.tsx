@@ -1,16 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Upload } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Plus } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { useProfile } from '@/hooks/use-profile';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import CircularProgressRing from '@/components/CircularProgressRing';
+import ReelProgressPill, { type PillState } from '@/components/ReelProgressPill';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
 import DayCardSheet from '@/components/DayCardSheet';
-import TagembedWidget from '@/components/TagembedWidget';
-import NotificationCenter from '@/components/NotificationCenter';
-import type { PillState } from '@/components/ReelProgressPill';
 
 interface Photo {
   id: string;
@@ -43,17 +41,16 @@ interface ImmersiveHomeLayoutProps {
     onPlay?: () => void;
     isActivelyGenerating?: boolean;
   } | null;
+  // New: week-aware reel pill handler
   onWeekReelTap?: (weekNumber: number) => void;
   cachedWeeks?: Set<number>;
 }
 
-// Day theme names per day slot
-const DAY_THEMES = [
-  'begin...', 'push...', 'rise',
-  'grind...', 'level up', 'commit',
-  'stretch', 'burn...', 'endure',
-  'peak...', 'master', 'legend',
-];
+const isVideoUrl = (url: string) => {
+  return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
+};
+
+const WEEK_THEMES = ['Conquer Will Power', 'Build Energy', 'Increase Stamina', 'Build Strength'];
 
 const ImmersiveHomeLayout = ({
   photos,
@@ -67,7 +64,8 @@ const ImmersiveHomeLayout = ({
   const navigate = useNavigate();
   const { profile } = useProfile();
   const [showMediaSheet, setShowMediaSheet] = useState(false);
-  // NotificationCenter manages its own open state internally
+  const [focusedWeek, setFocusedWeek] = useState<number | null>(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
 
   // Day card sheet state
   const [daySheetOpen, setDaySheetOpen] = useState(false);
@@ -76,11 +74,32 @@ const ImmersiveHomeLayout = ({
   const [daySheetLayoutId, setDaySheetLayoutId] = useState('');
 
   const firstName = profile?.display_name?.split(' ')[0] || 'there';
-  const completedCount = photos.length; // 0-12
-  const currentWeek = Math.min(Math.floor(completedCount / 3) + 1, 4);
-  const photosInWeek = completedCount % 3;
-  const remaining = photosInWeek === 0 && completedCount > 0 ? 0 : 3 - photosInWeek;
-  const nextDayNumber = Math.min(completedCount + 1, 12);
+  const completedWeeks = Math.floor(photos.length / 3);
+  const currentWeek = completedWeeks + 1;
+  const photosInWeek = photos.length % 3;
+  const remaining = photosInWeek === 0 && photos.length > 0 ? 0 : 3 - photosInWeek;
+
+  const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
+
+  // Build week groups (up to 4 weeks, 3 photos each)
+  const weekGroups: { weekNumber: number; photos: Photo[] }[] = [];
+  for (let w = 0; w < 4; w++) {
+    const weekPhotos = photos.slice(w * 3, (w + 1) * 3);
+    if (weekPhotos.length > 0) {
+      weekGroups.push({ weekNumber: w + 1, photos: weekPhotos });
+    }
+  }
+
+  // On load: show all photos, then after 2s zoom into current/last completed week
+  useEffect(() => {
+    if (photos.length > 0 && !hasAnimated) {
+      const timer = setTimeout(() => {
+        setFocusedWeek(completedWeeks > 0 ? completedWeeks : 1);
+        setHasAnimated(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [photos.length, hasAnimated, completedWeeks]);
 
   const openDaySheet = (photo: Photo | null, dayNum: number, layoutId: string) => {
     triggerHaptic('medium');
@@ -90,294 +109,397 @@ const ImmersiveHomeLayout = ({
     setDaySheetOpen(true);
   };
 
-  const handleDayCardTap = (dayNum: number) => {
-    const photo = photos.find(p => p.dayNumber === dayNum);
-    if (photo) {
-      // View existing activity
-      openDaySheet(photo, dayNum, `day-card-${photo.id}`);
-    } else if (dayNum === nextDayNumber) {
-      // Unlock and log new activity
-      triggerHaptic('medium');
-      setShowMediaSheet(true);
-    }
+  const handlePhotoTap = (photo: Photo) => {
+    openDaySheet(photo, photo.dayNumber, `day-card-${photo.id}`);
   };
 
-  // Motivational greeting
-  const greeting = completedCount === 0
-    ? `Hey ${firstName}! 👋`
-    : remaining === 0
-      ? `Great week, ${firstName}! 🔥`
-      : `Nice one, ${firstName}! 💪`;
+  const handleWeekTap = (weekNumber: number) => {
+    triggerHaptic('light');
+    setFocusedWeek(weekNumber);
+  };
 
-  const subtext = completedCount === 0
-    ? 'Tap + to log your first workout.'
-    : remaining === 0
-      ? 'Week complete — reel time!'
-      : `${remaining} more to complete this week.`;
+  // Get pill data for the focused week
+  const getFocusedPill = () => {
+    const targetWeek = focusedWeek || (completedWeeks > 0 ? completedWeeks : null);
+    if (!targetWeek || targetWeek > completedWeeks) return null;
 
-  // Build exactly 3 day cards for the current week display
-  const weekStart = (currentWeek - 1) * 3; // 0-indexed start of current week
-  const currentWeekCards = Array.from({ length: 3 }, (_, i) => {
-    const dayNum = weekStart + i + 1; // 1-indexed
-    const photo = photos.find(p => p.dayNumber === dayNum);
-    const isCompleted = !!photo;
-    const isNext = dayNum === nextDayNumber && completedCount < 12;
-    const isLocked = !isCompleted && !isNext;
-    return { dayNum, photo, isCompleted, isNext, isLocked };
-  });
+    const isCached = cachedWeeks.has(targetWeek);
+    const state: PillState = isCached ? 'complete' : 'idle';
+
+    return {
+      weekNumber: targetWeek,
+      state,
+      progress: 0,
+      totalReactions: 0,
+      onPlay: () => onWeekReelTap?.(targetWeek),
+      isActivelyGenerating: false,
+    };
+  };
+
+  const activePill = getFocusedPill() || reelPill;
+
+  // Determine which photos to show expanded
+  const focusedPhotos = focusedWeek
+    ? photos.slice((focusedWeek - 1) * 3, focusedWeek * 3)
+    : [];
 
   return (
-    <div
-      className="relative flex flex-col"
-      style={{
-        minHeight: '100dvh',
-        background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 40%, #1a1a2e 100%)',
-      }}
-    >
-      {/* Subtle top glow */}
+    <div className="relative flex flex-col" style={{ minHeight: '100dvh' }}>
+      {/* Deep purple gradient background */}
       <div
-        className="fixed inset-0 pointer-events-none"
+        className="fixed inset-0"
         style={{
-          background: 'radial-gradient(ellipse 70% 35% at 50% 0%, rgba(80, 60, 160, 0.18) 0%, transparent 70%)',
-          zIndex: 0,
+          background: 'linear-gradient(180deg, #2a1b4e 0%, #1e1245 25%, #160d3a 50%, #0f0a2e 75%, #0a0720 100%)',
         }}
       />
 
+      {/* Subtle radial glow */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 60% 40% at 50% 35%, rgba(120, 80, 200, 0.2) 0%, transparent 70%)',
+        }}
+      />
+
+      {/* Content */}
       <div className="relative z-10 flex flex-col flex-1">
-        {/* ── TOP BAR ── */}
+        {/* Top bar */}
         <div
           className="flex items-center justify-between px-5"
-          style={{ paddingTop: 'calc(env(safe-area-inset-top, 16px) + 16px)' }}
+          style={{ paddingTop: 'calc(env(safe-area-inset-top, 12px) + 12px)' }}
         >
-          {/* Avatar */}
+          <div className="w-11 h-11" /> {/* spacer */}
           <motion.button
-            whileTap={{ scale: 0.92 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => navigate('/profile-setup', { state: { isEditing: true } })}
             className="rounded-full"
             style={{
-              boxShadow: '0 2px 16px rgba(0,0,0,0.4)',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
               border: '2px solid rgba(255,255,255,0.15)',
             }}
           >
             <ProfileAvatar
               src={profile?.avatar_url}
               name={profile?.display_name}
-              size={42}
+              size={44}
             />
           </motion.button>
-
-          {/* Bell — NotificationCenter manages its own open state */}
-          <NotificationCenter />
         </div>
 
-        {/* ── HERO: RING + MASCOT ── */}
-        <div className="flex justify-center mt-6">
-          <CircularProgressRing
-            currentDay={completedCount}
-            currentWeek={currentWeek > 4 ? 4 : currentWeek}
-          />
-        </div>
-
-        {/* ── MOTIVATIONAL TEXT ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-center px-6 mt-6"
-        >
-          <h2
-            className="text-white font-bold"
-            style={{ fontSize: 'clamp(24px, 6.5vw, 30px)', letterSpacing: '-0.3px' }}
-          >
-            {greeting}
-          </h2>
-          <p
-            className="mt-1"
-            style={{
-              fontSize: 'clamp(17px, 4.5vw, 21px)',
-              color: 'rgba(160,150,200,0.85)',
-              fontWeight: 500,
-            }}
-          >
-            {subtext}
-          </p>
-        </motion.div>
-
-        {/* ── DAY CARDS ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.35 }}
-          className="mt-8 px-5 overflow-x-auto"
-          style={{ scrollbarWidth: 'none' }}
-        >
-          <div className="flex gap-3 pb-2" style={{ minWidth: 'max-content' }}>
-            {currentWeekCards.map(({ dayNum, photo, isCompleted, isNext, isLocked }, idx) => {
-              const theme = DAY_THEMES[dayNum - 1] || 'go...';
-              const isActive = isNext; // The next-to-log card is "active" styled
-
-              return (
-                <motion.button
-                  key={dayNum}
-                  initial={{ opacity: 0, scale: 0.88, y: 12 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ delay: 0.4 + idx * 0.08, type: 'spring', stiffness: 280, damping: 20 }}
-                  whileTap={!isLocked ? { scale: 0.96 } : {}}
-                  onClick={() => handleDayCardTap(dayNum)}
-                  disabled={isLocked}
-                  className="relative flex flex-col items-center justify-between rounded-2xl"
-                  style={{
-                    width: 130,
-                    height: 165,
-                    padding: '14px 10px',
-                    background: isCompleted
-                      ? 'rgba(15,228,152,0.08)'
-                      : isActive
-                        ? 'rgba(15,228,152,0.06)'
-                        : 'rgba(255,255,255,0.04)',
-                    border: isCompleted || isActive
-                      ? '1.5px solid rgba(15,228,152,0.55)'
-                      : '1.5px solid rgba(255,255,255,0.08)',
-                    boxShadow: isActive
-                      ? '0 0 24px rgba(15,228,152,0.18), inset 0 1px 0 rgba(255,255,255,0.06)'
-                      : isCompleted
-                        ? '0 0 16px rgba(15,228,152,0.12)'
-                        : 'none',
-                  }}
+        {/* Journey photo strip — shows all weeks initially, zooms to focused week */}
+        {weekGroups.length > 0 && (
+          <div className="mt-3 px-4">
+            <AnimatePresence mode="wait">
+              {!focusedWeek ? (
+                /* All weeks overview — compact thumbnails */
+                <motion.div
+                  key="all-weeks"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.4 }}
+                  className="flex flex-wrap justify-center gap-1.5"
                 >
-                  {/* Day label top */}
-                  <span
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 600,
-                      fontStyle: 'italic',
-                      color: isCompleted || isActive
-                        ? 'rgba(15,228,152,0.9)'
-                        : 'rgba(180,170,210,0.5)',
-                      letterSpacing: '0.01em',
-                    }}
-                  >
-                    day {dayNum}
-                  </span>
-
-                  {/* Center icon */}
-                  {isCompleted ? (
-                    // Show thumbnail of the completed activity
-                    <div
-                      className="relative rounded-xl overflow-hidden"
-                      style={{ width: 72, height: 72 }}
-                    >
-                      {photo && (
-                        <img
-                          src={photo.storageUrl}
-                          alt={photo.activity || ''}
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                      <div
-                        className="absolute inset-0 flex items-center justify-center"
-                        style={{ background: 'rgba(15,228,152,0.25)' }}
-                      >
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(15,228,152,0.95)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      </div>
-                    </div>
-                  ) : isActive ? (
-                    // Upload button
-                    <div
-                      className="flex items-center justify-center rounded-full"
+                  {photos.map((photo, idx) => (
+                    <motion.button
+                      key={photo.id}
+                      initial={{ opacity: 0, scale: 0.7 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: idx * 0.05, type: 'spring', stiffness: 300 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleWeekTap(Math.ceil((idx + 1) / 3))}
+                      className="relative rounded-lg overflow-hidden"
                       style={{
-                        width: 64,
+                        width: 52,
                         height: 64,
-                        background: 'rgba(15,228,152,0.18)',
-                        border: '2px solid rgba(15,228,152,0.6)',
-                        boxShadow: '0 0 20px rgba(15,228,152,0.25)',
+                        border: '1px solid rgba(255,255,255,0.12)',
                       }}
                     >
-                      <Upload
-                        style={{ color: 'rgba(15,228,152,0.95)', width: 26, height: 26, strokeWidth: 2 }}
-                      />
-                    </div>
-                  ) : (
-                    // Locked
-                    <div
-                      className="flex items-center justify-center"
-                      style={{ width: 64, height: 64 }}
-                    >
-                      <Lock
-                        style={{ color: 'rgba(180,170,210,0.3)', width: 28, height: 28, strokeWidth: 1.5 }}
-                      />
-                    </div>
-                  )}
+                      {photo.isVideo || isVideoUrl(photo.storageUrl) ? (
+                        <video src={photo.storageUrl} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+                      ) : (
+                        <img src={photo.storageUrl} alt={photo.activity || ''} className="w-full h-full object-cover" />
+                      )}
+                    </motion.button>
+                  ))}
+                </motion.div>
+              ) : (
+                /* Focused week — expanded cards */
+                <motion.div
+                  key={`week-${focusedWeek}`}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.4, type: 'spring', stiffness: 250 }}
+                >
+                  {/* Week selector tabs */}
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    {weekGroups.map(({ weekNumber }) => (
+                      <motion.button
+                        key={weekNumber}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleWeekTap(weekNumber)}
+                        className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
+                        style={{
+                          background: focusedWeek === weekNumber
+                            ? 'rgba(255,255,255,0.15)'
+                            : 'rgba(255,255,255,0.05)',
+                          color: focusedWeek === weekNumber
+                            ? 'rgba(255,255,255,0.95)'
+                            : 'rgba(255,255,255,0.4)',
+                          border: focusedWeek === weekNumber
+                            ? '1px solid rgba(255,255,255,0.25)'
+                            : '1px solid rgba(255,255,255,0.08)',
+                        }}
+                      >
+                        W{weekNumber}
+                      </motion.button>
+                    ))}
+                  </div>
 
-                  {/* Theme label bottom */}
-                  <span
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 500,
-                      fontStyle: 'italic',
-                      color: isCompleted || isActive
-                        ? 'rgba(15,228,152,0.8)'
-                        : 'rgba(180,170,210,0.4)',
-                      letterSpacing: '0.01em',
-                    }}
+                  {/* Expanded photos for focused week */}
+                  <div className="flex items-center justify-center gap-2.5">
+                    {focusedPhotos.map((photo, idx) => (
+                      <motion.button
+                        key={photo.id}
+                        layoutId={`day-card-${photo.id}`}
+                        initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: idx * 0.1, type: 'spring', stiffness: 300 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handlePhotoTap(photo)}
+                        className="relative rounded-xl overflow-hidden"
+                        style={{
+                          width: 90,
+                          height: 110,
+                          border: '1.5px solid rgba(255,255,255,0.15)',
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                        }}
+                      >
+                        {photo.isVideo || isVideoUrl(photo.storageUrl) ? (
+                          <video src={photo.storageUrl} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+                        ) : (
+                          <img src={photo.storageUrl} alt={photo.activity || 'Activity'} className="w-full h-full object-cover" />
+                        )}
+                        <div
+                          className="absolute bottom-1.5 left-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-center"
+                          style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)' }}
+                        >
+                          <span className="text-white/90 text-[10px] font-semibold truncate block">
+                            {photo.activity || `Day ${photo.dayNumber}`}
+                          </span>
+                        </div>
+                      </motion.button>
+                    ))}
+                    {/* Empty slots for this week */}
+                    {Array.from({ length: 3 - focusedPhotos.length }).map((_, i) => {
+                      const emptyDayNum = (focusedWeek! - 1) * 3 + focusedPhotos.length + i + 1;
+                      const isNext = emptyDayNum === photos.length + 1;
+                      const slotLayoutId = `day-card-empty-${emptyDayNum}`;
+                      return isNext ? (
+                        <motion.button
+                          key={slotLayoutId}
+                          layoutId={slotLayoutId}
+                          initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: (focusedPhotos.length + i) * 0.1, type: 'spring', stiffness: 300 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => openDaySheet(null, emptyDayNum, slotLayoutId)}
+                          className="relative rounded-xl flex flex-col items-center justify-center"
+                          style={{
+                            width: 90,
+                            height: 110,
+                            border: '1.5px dashed rgba(255,255,255,0.2)',
+                            background: 'rgba(255,255,255,0.04)',
+                          }}
+                        >
+                          <Plus className="w-6 h-6 text-white/40 mb-1" />
+                          <span className="text-white/30 text-[10px] font-medium">Day {emptyDayNum}</span>
+                        </motion.button>
+                      ) : (
+                        <div
+                          key={slotLayoutId}
+                          className="relative rounded-xl flex flex-col items-center justify-center"
+                          style={{
+                            width: 90,
+                            height: 110,
+                            border: '1.5px dashed rgba(255,255,255,0.07)',
+                            background: 'rgba(255,255,255,0.02)',
+                          }}
+                        >
+                          <span className="text-white/20 text-[10px] font-medium">Day {emptyDayNum}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Week theme label */}
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-center text-white/40 text-[11px] font-medium mt-2 tracking-wide"
                   >
-                    {isCompleted ? photo?.activity || theme : theme}
-                  </span>
-                </motion.button>
-              );
-            })}
+                    {WEEK_THEMES[(focusedWeek - 1) % 4]}
+                  </motion.p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
 
-            {/* Peek of next week / future card */}
-            {completedCount < 12 && (
-              <div
-                className="rounded-2xl opacity-30 flex-shrink-0"
-                style={{
-                  width: 40,
-                  height: 165,
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1.5px solid rgba(255,255,255,0.06)',
-                  alignSelf: 'center',
-                }}
-              />
+        {/* Hero area - ring + mascot */}
+        <div className="flex-1 flex flex-col items-center justify-center px-5">
+          {/* Circular progress ring with mascot */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+          >
+            <CircularProgressRing
+              currentDay={photos.length}
+              currentWeek={currentWeek > 4 ? 4 : currentWeek}
+              onMascotTap={() => {
+                if (latestPhoto) handlePhotoTap(latestPhoto);
+              }}
+            />
+          </motion.div>
+
+          {/* Motivational text - large & prominent, no box */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-6 text-center px-6"
+          >
+            <h2
+              className="text-white font-bold leading-tight"
+              style={{
+                fontSize: 'clamp(22px, 6vw, 28px)',
+                textShadow: '0 2px 20px rgba(0,0,0,0.3)',
+              }}
+            >
+              {photos.length === 0
+                ? `Hey ${firstName}! 👋`
+                : remaining === 0
+                  ? `Great week, ${firstName}! 🔥`
+                  : `Nice one, ${firstName}!`}
+            </h2>
+            <p
+              className="text-white/60 font-medium mt-1"
+              style={{
+                fontSize: 'clamp(18px, 5vw, 24px)',
+                textShadow: '0 2px 12px rgba(0,0,0,0.2)',
+              }}
+            >
+              {photos.length === 0
+                ? 'Tap + to log your first workout.'
+                : remaining === 0
+                  ? 'Week complete — reel time!'
+                  : `${remaining} more to complete this week.`}
+            </p>
+          </motion.div>
+
+          {/* Add photo actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.45 }}
+            className="flex items-center gap-3 mt-10"
+          >
+            {latestPhoto && (
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handlePhotoTap(latestPhoto)}
+                className="relative rounded-2xl overflow-hidden"
+                style={{ width: 100, height: 120 }}
+              >
+                {latestPhoto.isVideo || isVideoUrl(latestPhoto.storageUrl) ? (
+                  <video
+                    src={latestPhoto.storageUrl}
+                    className="w-full h-full object-cover"
+                    muted playsInline preload="metadata"
+                  />
+                ) : (
+                  <img
+                    src={latestPhoto.storageUrl}
+                    alt={latestPhoto.activity || 'Activity'}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+                {photos.length > 1 && (
+                  <div
+                    className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md text-white text-xs font-bold"
+                    style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}
+                  >
+                    +{photos.length - 1}
+                  </div>
+                )}
+              </motion.button>
             )}
-          </div>
-        </motion.div>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowMediaSheet(true)}
+              className="flex flex-col items-center justify-center rounded-2xl"
+              style={{
+                width: 100,
+                height: 120,
+                border: '1.5px dashed rgba(255,255,255,0.2)',
+                background: 'rgba(255,255,255,0.04)',
+              }}
+            >
+              <Plus className="w-7 h-7 text-white/50 mb-1" />
+              <span className="text-white/40 text-xs font-medium">Push</span>
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowMediaSheet(true)}
+              className="flex flex-col items-center justify-center rounded-2xl"
+              style={{
+                width: 100,
+                height: 120,
+                border: '1.5px dashed rgba(255,255,255,0.2)',
+                background: 'rgba(255,255,255,0.04)',
+              }}
+            >
+              <Plus className="w-7 h-7 text-white/50 mb-1" />
+              <span className="text-white/40 text-xs font-medium">Rise</span>
+            </motion.button>
+          </motion.div>
+        </div>
 
-        {/* ── WALL OF NINJA'S ── */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-          className="mt-8 px-5 pb-32"
-        >
-          <h2
-            className="text-white font-bold mb-4"
-            style={{ fontSize: 22, letterSpacing: '-0.2px' }}
-          >
-            Wall of Ninja's
-          </h2>
-          <div
-            className="rounded-2xl overflow-hidden"
-            style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
-          >
-            <TagembedWidget />
-          </div>
-        </motion.div>
+        {/* Bottom section */}
+        <div className="relative z-10 pb-28 px-5">
+          {/* Reel pill — context-aware per focused week */}
+          <AnimatePresence>
+            {!!activePill && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4"
+              >
+                <ReelProgressPill
+                  weekNumber={activePill.weekNumber}
+                  state={activePill.state}
+                  progress={activePill.progress}
+                  totalReactions={activePill.totalReactions}
+                  onPlay={activePill.onPlay}
+                  isActivelyGenerating={activePill.isActivelyGenerating}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
-      {/* ── MEDIA SOURCE SHEET ── */}
+      {/* Media Source Sheet */}
       <MediaSourceSheet
         isOpen={showMediaSheet}
         onClose={() => setShowMediaSheet(false)}
-        dayNumber={nextDayNumber}
+        dayNumber={photos.length + 1}
       />
 
-      {/* ── DAY CARD SHEET ── */}
+      {/* Day Card → Bottom Sheet morph */}
       <DayCardSheet
         isOpen={daySheetOpen}
         photo={daySheetPhoto}
@@ -390,7 +512,6 @@ const ImmersiveHomeLayout = ({
           navigate('/reel', { state: { activityId: photo.id, dayNumber: photo.dayNumber } });
         }}
       />
-
     </div>
   );
 };
