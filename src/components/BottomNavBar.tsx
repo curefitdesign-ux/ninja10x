@@ -1,3 +1,4 @@
+// v3 – liquid glass nav
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -44,7 +45,7 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
         backdropFilter: "blur(40px) saturate(180%)",
         WebkitBackdropFilter: "blur(40px) saturate(180%)",
         borderTop: "1px solid rgba(255, 255, 255, 0.08)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 -8px 32px rgba(10, 7, 32, 0.08)",
       }}
     >
       <div
