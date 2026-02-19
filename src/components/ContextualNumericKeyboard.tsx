@@ -71,9 +71,9 @@ const ContextualNumericKeyboard = ({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         style={{
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(8px) saturate(150%)',
+          WebkitBackdropFilter: 'blur(8px) saturate(150%)',
+          backgroundColor: 'rgba(0, 0, 0, 0.25)',
         }}
         onClick={onClose}
       />
@@ -89,11 +89,11 @@ const ContextualNumericKeyboard = ({
         <div 
           className="rounded-t-[28px] overflow-hidden"
           style={{
-            background: 'linear-gradient(180deg, rgba(50, 50, 55, 0.75) 0%, rgba(35, 35, 40, 0.85) 100%)',
-            backdropFilter: 'blur(80px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(80px) saturate(180%)',
-            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-            boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.4)',
+            background: 'rgba(0, 0, 0, 0.10)',
+            backdropFilter: 'blur(60px) saturate(200%)',
+            WebkitBackdropFilter: 'blur(60px) saturate(200%)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.12)',
+            boxShadow: '0 -10px 40px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.10)',
           }}
         >
           {/* Drag handle */}
