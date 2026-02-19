@@ -13,6 +13,7 @@ import JournalFrame from '@/components/frames/JournalFrame';
 import VogueFrame from '@/components/frames/VogueFrame';
 import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
+import TokenFrame from '@/components/frames/TokenFrame';
 import ContextualNumericKeyboard from '@/components/ContextualNumericKeyboard';
 import { getActivityConfig } from '@/lib/activity-context';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
@@ -23,7 +24,7 @@ import { useJourneyActivities } from '@/hooks/use-journey-activities';
 
 import { toast } from 'sonner';
 
-const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
+const FRAMES = ['shaky', 'journal', 'vogue', 'fitness', 'ticket', 'token'] as const;
 type FrameType = typeof FRAMES[number];
 
 // Activity options with minimal line icons
@@ -100,6 +101,10 @@ const FRAME_COLORS: Record<FrameType, { accent: string; gradient: string }> = {
   ticket: { 
     accent: 'rgba(180, 80, 50, 0.45)', 
     gradient: 'linear-gradient(160deg, rgba(200, 90, 55, 0.35) 0%, rgba(80, 35, 20, 0.6) 100%)'
+  },
+  token: {
+    accent: 'rgba(10, 82, 120, 0.45)',
+    gradient: 'linear-gradient(160deg, rgba(15, 100, 145, 0.35) 0%, rgba(5, 40, 60, 0.6) 100%)'
   },
 };
 
@@ -681,6 +686,8 @@ const Preview = () => {
         return <FitnessFrame {...frameProps} />;
       case 'ticket':
         return <TicketFrame {...frameProps} />;
+      case 'token':
+        return <TokenFrame {...frameProps} />;
     }
   };
 
@@ -1041,6 +1048,7 @@ const Preview = () => {
                 {currentFrame === 'vogue' && <VogueFrame {...frameProps} />}
                 {currentFrame === 'fitness' && <FitnessFrame {...frameProps} />}
                 {currentFrame === 'ticket' && <TicketFrame {...frameProps} />}
+                {currentFrame === 'token' && <TokenFrame {...frameProps} />}
               </div>
             </div>
           ) : (
@@ -1111,6 +1119,7 @@ const Preview = () => {
                         {frame === 'vogue' && <VogueFrame {...frameProps} />}
                         {frame === 'fitness' && <FitnessFrame {...frameProps} />}
                         {frame === 'ticket' && <TicketFrame {...frameProps} />}
+                        {frame === 'token' && <TokenFrame {...frameProps} />}
                       </div>
                     </motion.div>
                 );
