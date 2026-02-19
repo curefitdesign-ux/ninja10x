@@ -128,21 +128,21 @@ const HolographicFrame = ({
           height: '13%',
           paddingLeft: '4%',
           paddingRight: '3%',
+          overflow: 'hidden',
         }}
       >
         <span
           style={{
             fontFamily: "'Arial Black', 'Impact', 'Helvetica Neue', sans-serif",
             fontWeight: 900,
-            // Large — matches reference where header fills most of the top strip
-            fontSize: 'clamp(9px, 4cqw, 18px)',
+            fontSize: 'clamp(8px, 3.5cqw, 16px)',
             color: '#000000',
             textTransform: 'uppercase',
             letterSpacing: '-0.02em',
             lineHeight: 1,
             whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
+            overflow: 'visible',
+            textOverflow: 'clip',
             display: 'block',
             width: '100%',
           }}
@@ -206,31 +206,23 @@ const HolographicFrame = ({
 
       {/* ── LAYER 6a: Metric 1 TEXT (duration) ──
           Positioned over the WHITE box in the bottom-right.
-          From PNG: box occupies roughly right 32% of card width,
-          bottom 20% of card height (for single box) or top half of bottom 22%.
-
-          Layout (matches reference):
-            - Large numeric value
-            - Small "HRS | DURATION" label below ── */}
+          When both metrics: white box = bottom 12%–24% zone.
+          When only metric 1: white box = bottom ~0–20% zone. ── */}
       {hasMetric1 && (
         <div
-          className="absolute flex flex-col justify-center"
+          className="absolute flex flex-col justify-start"
           style={{
-            zIndex: 12,
-            // Right edge — aligns with box right edge in PNG
+            zIndex: 13,
             right: 0,
-            // Bottom position: when both, the white box is the upper of the two
-            bottom: hasMetric2 ? '11%' : '0%',
-            // Width matches box width in PNG (~32% of card)
+            bottom: hasMetric2 ? '12%' : '1%',
             width: '32%',
-            // Height of the white box area
-            height: hasMetric2 ? '11%' : '20%',
-            // Internal padding — push text away from left border
-            paddingLeft: '8%',
-            paddingRight: '4%',
+            height: hasMetric2 ? '12%' : '20%',
+            paddingTop: '2%',
+            paddingLeft: '6%',
+            paddingRight: '2%',
           }}
         >
-          {/* Large numeric value — "02" style from reference */}
+          {/* Large numeric value */}
           <div
             style={{
               fontFamily: "'Arial Black', 'Impact', sans-serif",
@@ -239,25 +231,25 @@ const HolographicFrame = ({
               color: '#000000',
               lineHeight: 1,
               letterSpacing: '-0.02em',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
+              overflow: 'visible',
             }}
           >
             {durationValue}
           </div>
-          {/* Small label — "HRS | DURATION" */}
+          {/* Small label — left-aligned, no truncation */}
           <div
             style={{
               fontFamily: "'Arial', 'Helvetica', sans-serif",
               fontWeight: 700,
-              fontSize: 'clamp(4px, 1.5cqw, 7px)',
+              fontSize: 'clamp(4px, 1.4cqw, 7px)',
               color: '#000000',
-              letterSpacing: '0.04em',
+              letterSpacing: '0.03em',
               textTransform: 'uppercase',
               marginTop: '2px',
               whiteSpace: 'nowrap',
-              overflow: 'hidden',
+              overflow: 'visible',
+              textAlign: 'left',
             }}
           >
             MIN | {durationLabel.toUpperCase()}
@@ -266,23 +258,19 @@ const HolographicFrame = ({
       )}
 
       {/* ── LAYER 6b: Metric 2 TEXT (pr / secondary) ──
-          Positioned over the BLACK box — bottom portion of metric-2.png.
-          From the PNG the black box is the lower ~11% of the card.
-
-          Layout (matches reference):
-            - Large value "05/10"
-            - Bold white label "Personal Best Score" ── */}
+          Black box = lower ~12% of card. ── */}
       {hasMetric2 && (
         <div
-          className="absolute flex flex-col justify-center"
+          className="absolute flex flex-col justify-start"
           style={{
-            zIndex: 12,
+            zIndex: 13,
             right: 0,
-            bottom: 0,
+            bottom: '1%',
             width: '32%',
-            height: '11%',
-            paddingLeft: '8%',
-            paddingRight: '4%',
+            height: '12%',
+            paddingTop: '2%',
+            paddingLeft: '6%',
+            paddingRight: '2%',
           }}
         >
           {/* Large pr value */}
@@ -294,14 +282,13 @@ const HolographicFrame = ({
               color: '#ffffff',
               lineHeight: 1,
               letterSpacing: '-0.02em',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
+              overflow: 'visible',
             }}
           >
             {pr}
           </div>
-          {/* Bold white label — "Personal Best Score" style */}
+          {/* White label */}
           <div
             style={{
               fontFamily: "'Arial Black', 'Impact', sans-serif",
@@ -314,6 +301,7 @@ const HolographicFrame = ({
               lineHeight: 1.2,
               whiteSpace: 'normal',
               wordBreak: 'break-word',
+              overflow: 'visible',
             }}
           >
             {metricLabel}
