@@ -112,7 +112,7 @@ const HolographicFrame = ({
         )}
       </div>
 
-      {/* ── LAYER 2: Holographic overlay PNG — NO blend mode ── */}
+      {/* ── LAYER 2: Holographic overlay PNG — NO blend mode, same size as card ── */}
       <img
         src={holographicOverlay}
         alt=""
@@ -120,7 +120,6 @@ const HolographicFrame = ({
         style={{
           zIndex: 2,
           objectFit: 'fill',
-          // NO mixBlendMode — straight overlay
         }}
       />
 
@@ -183,58 +182,49 @@ const HolographicFrame = ({
         </span>
       </div>
 
-      {/* ── LAYER 5a: Metric 1 PNG (duration) ──
-          Only shown when duration is entered.
-          Positioned bottom-right, top half of the metric zone. */}
+      {/* ── LAYER 5a: Metric 1 PNG — same full-card size as overlay ──
+          The PNG already has the box positioned in the bottom-right corner.
+          Only shown when duration is entered. */}
       {hasMetric1 && (
         <img
           src={metric1Png}
           alt=""
-          className="absolute pointer-events-none"
+          className="absolute inset-0 w-full h-full pointer-events-none"
           style={{
             zIndex: 11,
             objectFit: 'fill',
-            right: 0,
-            bottom: hasMetric2 ? '21%' : '0%',
-            width: '40%',
-            height: hasMetric2 ? '21%' : '21%',
           }}
         />
       )}
 
-      {/* ── LAYER 5b: Metric 2 PNG (pr) ──
-          Only shown when pr is entered.
-          Stacks below metric 1 PNG. */}
+      {/* ── LAYER 5b: Metric 2 PNG — same full-card size as overlay ──
+          The PNG already has both boxes positioned in the bottom-right corner.
+          Only shown when pr is entered. */}
       {hasMetric2 && (
         <img
           src={metric2Png}
           alt=""
-          className="absolute pointer-events-none"
+          className="absolute inset-0 w-full h-full pointer-events-none"
           style={{
-            zIndex: 11,
+            zIndex: 12,
             objectFit: 'fill',
-            right: 0,
-            bottom: 0,
-            width: '40%',
-            height: '22%',
           }}
         />
       )}
 
-      {/* ── LAYER 6a: Metric 1 TEXT (duration value + label) ──
-          Positioned exactly over the metric-1 PNG area.
-          Text only — no background box. */}
+      {/* ── LAYER 6a: Metric 1 TEXT — floats over metric-1 PNG box area ──
+          Box is in bottom-right of the full-card PNG.
+          From PNG proportions: ~68% from left, ~80% from top. */}
       {hasMetric1 && (
         <div
           className="absolute flex flex-col justify-center"
           style={{
-            zIndex: 12,
-            right: '2%',
-            bottom: hasMetric2 ? '22%' : '1%',
-            width: '37%',
-            height: '20%',
-            paddingLeft: '8%',
-            paddingRight: '4%',
+            zIndex: 13,
+            right: '3%',
+            bottom: hasMetric2 ? '20%' : '2%',
+            width: '31%',
+            height: '18%',
+            paddingLeft: '6%',
           }}
         >
           <div
@@ -265,20 +255,17 @@ const HolographicFrame = ({
         </div>
       )}
 
-      {/* ── LAYER 6b: Metric 2 TEXT (pr value + label) ──
-          Positioned exactly over the metric-2 PNG area.
-          Text only — no background box. */}
+      {/* ── LAYER 6b: Metric 2 TEXT — floats over black half of metric-2 PNG ── */}
       {hasMetric2 && (
         <div
           className="absolute flex flex-col justify-center"
           style={{
-            zIndex: 12,
-            right: '2%',
-            bottom: '1%',
-            width: '37%',
-            height: '21%',
-            paddingLeft: '8%',
-            paddingRight: '4%',
+            zIndex: 13,
+            right: '3%',
+            bottom: '2%',
+            width: '31%',
+            height: '10%',
+            paddingLeft: '6%',
           }}
         >
           <div
