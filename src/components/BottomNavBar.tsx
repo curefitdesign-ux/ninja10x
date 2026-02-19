@@ -40,10 +40,8 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
       className="fixed bottom-0 left-0 right-0"
       style={{
         zIndex: 9999,
-        background: "rgba(10, 7, 32, 0.55)",
-        backdropFilter: "blur(40px) saturate(180%)",
-        WebkitBackdropFilter: "blur(40px) saturate(180%)",
-        borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+        background: "hsl(var(--background))",
+        borderTop: "1px solid hsl(var(--border))",
       }}
     >
       <div
@@ -52,7 +50,6 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
       >
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
-          const isActivityTab = item.id === "activity";
           return (
             <button
               key={item.id}
@@ -60,37 +57,18 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
               className="pressable flex flex-col items-center pt-2 pb-1 px-3 relative"
             >
               {item.type === "image" ? (
-                <div className="relative">
-                  {/* Glow halo behind icon when active */}
-                  {isActive && (
-                    <div
-                      className="absolute inset-0 rounded-full"
-                      style={{
-                        background: "radial-gradient(circle, rgba(249,115,22,0.55) 0%, rgba(236,72,153,0.35) 50%, transparent 75%)",
-                        transform: "scale(2.2)",
-                        filter: "blur(6px)",
-                        pointerEvents: "none",
-                      }}
-                    />
-                  )}
-                  <img
-                    src={isActive ? activityActive : activityInactive}
-                    alt="Activity"
-                    className="w-[32px] h-[32px] object-contain transition-all duration-200 relative z-10"
-                    style={{
-                      opacity: isActive ? 1 : 0.45,
-                      filter: isActive
-                        ? "drop-shadow(0 0 8px rgba(249,115,22,0.9)) drop-shadow(0 0 16px rgba(236,72,153,0.6))"
-                        : "none",
-                    }}
-                  />
-                </div>
+                <img
+                  src={isActive ? activityActive : activityInactive}
+                  alt="Activity"
+                  className="w-[32px] h-[32px] object-contain transition-opacity duration-150"
+                  style={{ opacity: isActive ? 1 : 0.45 }}
+                />
               ) : (
                 item.Icon && (
                   <item.Icon
                     className="w-[22px] h-[22px] transition-colors duration-150"
                     style={{
-                      color: isActive ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.35)",
+                      color: isActive ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
                       strokeWidth: isActive ? 2.2 : 1.6,
                     }}
                   />
@@ -99,11 +77,7 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
               <span
                 className="text-[10px] mt-1 font-medium tracking-wide transition-colors duration-150"
                 style={{
-                  color: isActivityTab && isActive
-                    ? "rgba(249,115,22,0.95)"
-                    : isActive
-                    ? "rgba(255,255,255,0.9)"
-                    : "rgba(255,255,255,0.35)",
+                  color: isActive ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
                 }}
               >
                 {item.label}
