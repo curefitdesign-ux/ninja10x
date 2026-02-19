@@ -69,7 +69,7 @@ const TokenFrame = ({
           top: '20%',
           left: '7%',
           right: '7%',
-          bottom: '15%',
+          bottom: '5%',
           zIndex: 2,
           borderRadius: '2px',
         }}
