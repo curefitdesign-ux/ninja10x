@@ -1506,15 +1506,12 @@ const Reel = () => {
                     )}
                     
 
-                    {/* Audio toggle button for videos */}
-                    {isVideo && !shouldShowLocked && (
+                    {/* Share button - inside card, bottom-right */}
+                    {!shouldShowLocked && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setIsMuted(!isMuted);
-                          if (videoRef.current) {
-                            videoRef.current.muted = !isMuted;
-                          }
+                          handleShareStory();
                         }}
                         className="absolute bottom-3 right-3 z-20 p-2.5 rounded-full active:scale-95 transition-transform"
                         style={{
@@ -1522,11 +1519,7 @@ const Reel = () => {
                           backdropFilter: 'blur(8px)',
                         }}
                       >
-                        {isMuted ? (
-                          <VolumeX className="w-5 h-5 text-white" />
-                        ) : (
-                          <Volume2 className="w-5 h-5 text-white" />
-                        )}
+                        <Share2 className="w-5 h-5 text-white" strokeWidth={1.5} />
                       </button>
                     )}
                     
@@ -1645,12 +1638,15 @@ const Reel = () => {
                   transition: 'opacity 0.2s ease, transform 0.2s ease',
                 }}
               >
-                {/* Share button - centered, just above reactions pill */}
-                {!isContentLocked && (
+                {/* Music toggle - centered, just above reactions pill */}
+                {isVideo && !isContentLocked && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleShareStory();
+                      setIsMuted(!isMuted);
+                      if (videoRef.current) {
+                        videoRef.current.muted = !isMuted;
+                      }
                     }}
                     className="mb-1.5 p-2.5 rounded-full active:scale-95 transition-transform"
                     style={{
@@ -1661,7 +1657,11 @@ const Reel = () => {
                       boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15)',
                     }}
                   >
-                    <Share2 className="w-5 h-5 text-white" strokeWidth={1.5} />
+                    {isMuted ? (
+                      <VolumeX className="w-5 h-5 text-white" />
+                    ) : (
+                      <Volume2 className="w-5 h-5 text-white" />
+                    )}
                   </button>
                 )}
                 {/* Liquid glass reaction pill */}
