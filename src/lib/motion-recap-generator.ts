@@ -603,7 +603,33 @@ function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
 
 // ============ IMAGE LOADING ============
 
-async function loadImage(src: string, timeoutMs = 8000): Promise<HTMLImageElement> {
+/**
+ * Fetch an image URL as a blob first, then create an object URL.
+ * This bypasses CORS canvas taint issues with Supabase storage URLs.
+ * Falls back to direct crossOrigin load if fetch fails.
+ */
+async function loadImage(src: string, timeoutMs = 12000): Promise<HTMLImageElement> {
+  // Try fetch-as-blob approach first (avoids CORS canvas taint)
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const resp = await fetch(src, { signal: controller.signal });
+    clearTimeout(timer);
+    if (resp.ok) {
+      const blob = await resp.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      return new Promise<HTMLImageElement>((resolve) => {
+        const el = new Image();
+        el.onload = () => { resolve(el); /* keep objectUrl alive via el.src */ };
+        el.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(createBlackPlaceholder()); };
+        el.src = objectUrl;
+      });
+    }
+  } catch (err) {
+    console.warn('[MotionRecap] Blob fetch failed, falling back to crossOrigin:', src.slice(0, 80), err);
+  }
+
+  // Fallback: direct crossOrigin load
   return new Promise<HTMLImageElement>((resolve) => {
     const el = new Image();
     el.crossOrigin = 'anonymous';
@@ -614,16 +640,34 @@ async function loadImage(src: string, timeoutMs = 8000): Promise<HTMLImageElemen
   });
 }
 
-/** Extract a frame from a video URL as an HTMLImageElement */
-async function extractVideoFrame(src: string, timeoutMs = 12000): Promise<HTMLImageElement> {
+/** Extract a frame from a video URL as an HTMLImageElement.
+ * Fetches as blob first to avoid CORS canvas taint with Supabase storage. */
+async function extractVideoFrame(src: string, timeoutMs = 15000): Promise<HTMLImageElement> {
+  // Fetch video as blob to avoid CORS canvas taint
+  let videoSrc = src;
+  let blobUrl: string | null = null;
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const resp = await fetch(src, { signal: controller.signal });
+    clearTimeout(timer);
+    if (resp.ok) {
+      const blob = await resp.blob();
+      blobUrl = URL.createObjectURL(blob);
+      videoSrc = blobUrl;
+    }
+  } catch {
+    console.warn('[MotionRecap] Video blob fetch failed, using original URL');
+  }
+
   return new Promise<HTMLImageElement>((resolve) => {
     const timeout = setTimeout(() => {
       console.warn('[MotionRecap] Video frame extraction timed out:', src.slice(0, 60));
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
       resolve(createBlackPlaceholder());
     }, timeoutMs);
 
     const video = document.createElement('video');
-    video.crossOrigin = 'anonymous';
     video.muted = true;
     video.preload = 'auto';
     video.playsInline = true;
@@ -643,18 +687,19 @@ async function extractVideoFrame(src: string, timeoutMs = 12000): Promise<HTMLIm
         const cx = c.getContext('2d')!;
         cx.drawImage(video, 0, 0, c.width, c.height);
         const img = new Image();
-        img.onload = () => { cleanup(); resolve(img); };
-        img.onerror = () => { cleanup(); resolve(createBlackPlaceholder()); };
+        img.onload = () => { cleanup(); if (blobUrl) URL.revokeObjectURL(blobUrl); resolve(img); };
+        img.onerror = () => { cleanup(); if (blobUrl) URL.revokeObjectURL(blobUrl); resolve(createBlackPlaceholder()); };
         img.src = c.toDataURL('image/jpeg', 0.9);
       } catch (err) {
         console.warn('[MotionRecap] Video frame capture failed:', err);
         cleanup();
+        if (blobUrl) URL.revokeObjectURL(blobUrl);
         resolve(createBlackPlaceholder());
       }
     };
 
     const onSeeked = () => captureFrame();
-    const onError = () => { cleanup(); resolve(createBlackPlaceholder()); };
+    const onError = () => { cleanup(); if (blobUrl) URL.revokeObjectURL(blobUrl); resolve(createBlackPlaceholder()); };
     const onLoaded = () => {
       // Seek to 0.5s or 10% of duration for a meaningful frame
       const seekTo = Math.min(0.5, video.duration * 0.1);
@@ -664,7 +709,7 @@ async function extractVideoFrame(src: string, timeoutMs = 12000): Promise<HTMLIm
     video.addEventListener('seeked', onSeeked, { once: true });
     video.addEventListener('error', onError, { once: true });
     video.addEventListener('loadeddata', onLoaded, { once: true });
-    video.src = src;
+    video.src = videoSrc;
     video.load();
   });
 }
@@ -683,12 +728,14 @@ function createBlackPlaceholder(): HTMLImageElement {
 async function loadImages(dayStates: DayState[]): Promise<HTMLImageElement[]> {
   const results: HTMLImageElement[] = [];
   for (const state of dayStates) {
+    console.log(`[MotionRecap] Loading asset (${state.asset.type}):`, state.asset.src.slice(0, 100));
     if (state.asset.type === 'video') {
-      console.log('[MotionRecap] Extracting frame from video:', state.asset.src.slice(0, 60));
       results.push(await extractVideoFrame(state.asset.src));
     } else {
       results.push(await loadImage(state.asset.src));
     }
+    const loaded = results[results.length - 1];
+    console.log(`[MotionRecap] Loaded ${results.length}/${dayStates.length} — naturalWidth:${loaded.naturalWidth}`);
   }
   return results;
 }
