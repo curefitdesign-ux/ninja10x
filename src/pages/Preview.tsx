@@ -818,28 +818,34 @@ const Preview = () => {
           </motion.div>
         </div>
         
-        {/* Bottom Sheet for Activity Selection - Liquid Glass */}
+        {/* Full-screen sheet for Activity Selection */}
         <motion.div
-          className="fixed bottom-0 left-0 right-0 z-30"
-          style={{ height: '80dvh' }}
+          className="fixed inset-0 z-30"
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
           <div 
-            className="glass-sheet rounded-t-3xl px-5 pt-4 flex flex-col h-full"
+            className="glass-sheet h-full px-5 flex flex-col"
             style={{
+              paddingTop: 'max(env(safe-area-inset-top, 20px), 20px)',
               paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
             }}
           >
-            {/* Handle */}
-            <div className="w-12 h-1.5 bg-white/30 rounded-full mx-auto mb-4" />
+            {/* Header row */}
+            <div className="flex items-center justify-between mb-6">
+              <button
+                onClick={() => navigate('/gallery', { state: { dayNumber }, replace: true })}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
+              <h2 className="text-white text-xl font-bold">Choose your activity</h2>
+              <div className="w-10 h-10" />
+            </div>
             
-            {/* Title */}
-            <h2 className="text-white text-xl font-bold text-center mb-4">Choose your activity</h2>
-            
-            {/* Activity Grid - 4 columns, fits all 18 activities without scroll */}
-            <div className="flex-1 grid grid-cols-4 gap-x-3 gap-y-3 content-start overflow-hidden">
+            {/* Activity Grid - 4 columns, fills remaining space */}
+            <div className="flex-1 grid grid-cols-4 gap-x-3 gap-y-4 content-start overflow-y-auto">
               {activityOptions.map((activityOption, index) => {
                 const isOther = 'isCustom' in activityOption && activityOption.isCustom;
                 return (
@@ -854,17 +860,15 @@ const Preview = () => {
                         triggerHaptic('medium');
                         setShowCustomActivityInput(true);
                         setCustomActivityName('');
-                      } else if (activityOption.name === 'Cricket') {
-                        triggerHaptic('medium');
-                        setShowCricketSubOption(true);
                       } else {
+                        // Cricket: select directly, sub-option is on the preview/data card
                         handleActivitySelection(activityOption.name);
                       }
                     }}
                     className="flex flex-col items-center gap-1.5"
                   >
                     <div 
-                      className="w-[56px] h-[56px] rounded-[16px] flex items-center justify-center overflow-hidden"
+                      className="w-[62px] h-[62px] rounded-[18px] flex items-center justify-center overflow-hidden"
                       style={{ 
                         background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 100%)',
                         backdropFilter: 'blur(16px)',
@@ -881,8 +885,8 @@ const Preview = () => {
                       {activityOption.name}
                     </span>
                   </motion.button>
-                );})}
-
+                );
+              })}
             </div>
 
             {/* Custom Activity Name Input */}
@@ -923,47 +927,12 @@ const Preview = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {/* Cricket Batting/Bowling Sub-option */}
-            <AnimatePresence>
-              {showCricketSubOption && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mt-4 overflow-hidden"
-                >
-                  <p className="text-white/60 text-sm text-center mb-3">What did you play?</p>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => handleCricketSubOption('batting')}
-                      className="flex-1 py-3 rounded-xl text-white font-semibold text-sm transition-colors"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%)',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                      }}
-                    >
-                      🏏 Batting
-                    </button>
-                    <button
-                      onClick={() => handleCricketSubOption('bowling')}
-                      className="flex-1 py-3 rounded-xl text-white font-semibold text-sm transition-colors"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%)',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                      }}
-                    >
-                      🎯 Bowling
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
         </motion.div>
       </div>
     );
   }
+
 
 
   // Template Selection Step (confirmation is now a popup on ShareSheet)
@@ -1331,7 +1300,7 @@ const Preview = () => {
         )}
       </AnimatePresence>
 
-      {/* Activity Selection Bottom Sheet */}
+      {/* Activity Selection Bottom Sheet — full screen */}
       <AnimatePresence>
         {editingField === 'activity' && (
           <motion.div
@@ -1339,34 +1308,40 @@ const Preview = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50"
-            onClick={() => setEditingField(null)}
           >
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setEditingField(null)} />
             
-            {/* Bottom Sheet */}
+            {/* Full-screen sheet */}
             <motion.div
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="absolute bottom-0 left-0 right-0"
+              className="absolute inset-0"
               onClick={(e) => e.stopPropagation()}
             >
               <div 
-                className="glass-sheet rounded-t-3xl px-5 pt-4"
+                className="glass-sheet h-full px-5 pt-4 flex flex-col"
                 style={{
+                  paddingTop: 'max(env(safe-area-inset-top, 20px), 20px)',
                   paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
                 }}
               >
-                {/* Handle */}
-                <div className="w-12 h-1.5 bg-white/30 rounded-full mx-auto mb-4" />
+                {/* Header row */}
+                <div className="flex items-center justify-between mb-6">
+                  <button
+                    onClick={() => { setEditingField(null); setShowCustomActivityInput(false); }}
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm"
+                  >
+                    <X className="w-5 h-5 text-white" />
+                  </button>
+                  <h2 className="text-white text-xl font-bold">Change activity</h2>
+                  <div className="w-10 h-10" />
+                </div>
                 
-                {/* Title */}
-                <h2 className="text-white text-xl font-bold text-center mb-5">Change activity</h2>
-                
-                {/* Activity Grid - 4 columns */}
-                <div className="grid grid-cols-4 gap-x-4 gap-y-5 max-h-64 overflow-y-auto pb-1">
+                {/* Activity Grid - 4 columns, fills remaining space */}
+                <div className="flex-1 grid grid-cols-4 gap-x-3 gap-y-4 content-start overflow-y-auto">
                   {activityOptions.map((activityOption, index) => {
                     const isSelected = activity === activityOption.name || (activityOption.name === 'Other' && !activityOptions.slice(0, -1).some(a => a.name === activity) && activity);
                     const isOther = 'isCustom' in activityOption && activityOption.isCustom;
@@ -1382,18 +1357,17 @@ const Preview = () => {
                           if (isOther) {
                             setShowCustomActivityInput(true);
                             setCustomActivityName('');
-                          } else if (activityOption.name === 'Cricket') {
-                            setShowCricketSubOption(true);
                           } else {
+                            // Cricket: just select it directly, sub-option is on preview page
                             setCustomMetrics(null);
                             setActivity(activityOption.name);
                             setEditingField(null);
                           }
                         }}
-                        className="flex flex-col items-center gap-2.5"
+                        className="flex flex-col items-center gap-2"
                       >
                         <div 
-                          className="w-[68px] h-[68px] rounded-[20px] flex items-center justify-center overflow-hidden"
+                          className="w-[62px] h-[62px] rounded-[18px] flex items-center justify-center overflow-hidden"
                           style={{ 
                             background: isSelected 
                               ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.15) 100%)'
@@ -1408,7 +1382,7 @@ const Preview = () => {
                             return <IconComp className={`w-7 h-7 ${isSelected ? 'text-white' : 'text-white/80'}`} strokeWidth={1.5} />;
                           })()}
                         </div>
-                        <span className={`text-xs font-semibold text-center leading-tight ${isSelected ? 'text-white' : 'text-white/90'}`}>
+                        <span className={`text-[10px] font-semibold text-center leading-tight ${isSelected ? 'text-white' : 'text-white/90'}`}>
                           {activityOption.name}
                         </span>
                       </motion.button>
@@ -1463,47 +1437,13 @@ const Preview = () => {
                     </motion.div>
                   )}
                 </AnimatePresence>
-
-                {/* Cricket Batting/Bowling Sub-option */}
-                <AnimatePresence>
-                  {showCricketSubOption && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="mt-4 overflow-hidden"
-                    >
-                      <p className="text-white/60 text-sm text-center mb-3">What did you play?</p>
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => { handleCricketSubOption('batting'); setEditingField(null); }}
-                          className="flex-1 py-3 rounded-xl text-white font-semibold text-sm transition-colors"
-                          style={{
-                            background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%)',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                          }}
-                        >
-                          🏏 Batting
-                        </button>
-                        <button
-                          onClick={() => { handleCricketSubOption('bowling'); setEditingField(null); }}
-                          className="flex-1 py-3 rounded-xl text-white font-semibold text-sm transition-colors"
-                          style={{
-                            background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%)',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                          }}
-                        >
-                          🎯 Bowling
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+
 
       {/* Sync Popup */}
       {showSyncPopup && (
