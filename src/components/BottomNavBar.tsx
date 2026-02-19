@@ -40,8 +40,11 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
       className="fixed bottom-0 left-0 right-0"
       style={{
         zIndex: 9999,
-        background: "hsl(var(--background))",
-        borderTop: "1px solid hsl(var(--border))",
+        background: "rgba(10, 7, 32, 0.10)",
+        backdropFilter: "blur(40px) saturate(180%)",
+        WebkitBackdropFilter: "blur(40px) saturate(180%)",
+        borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
       }}
     >
       <div
@@ -57,12 +60,25 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
               className="pressable flex flex-col items-center pt-2 pb-1 px-3 relative"
             >
               {item.type === "image" ? (
-                <img
-                  src={isActive ? activityActive : activityInactive}
-                  alt="Activity"
-                  className="w-[32px] h-[32px] object-contain transition-opacity duration-150"
-                  style={{ opacity: isActive ? 1 : 0.45 }}
-                />
+                <div className="relative flex items-center justify-center">
+                  {/* Subtle glow halo behind the active activity icon */}
+                  {isActive && (
+                    <div
+                      className="absolute inset-0 rounded-full pointer-events-none"
+                      style={{
+                        background: "radial-gradient(ellipse at center, rgba(249, 115, 22, 0.28) 0%, rgba(236, 72, 153, 0.18) 55%, transparent 80%)",
+                        transform: "scale(2.2)",
+                        filter: "blur(6px)",
+                      }}
+                    />
+                  )}
+                  <img
+                    src={isActive ? activityActive : activityInactive}
+                    alt="Activity"
+                    className="w-[32px] h-[32px] object-contain transition-opacity duration-150 relative z-10"
+                    style={{ opacity: isActive ? 1 : 0.45 }}
+                  />
+                </div>
               ) : (
                 item.Icon && (
                   <item.Icon
