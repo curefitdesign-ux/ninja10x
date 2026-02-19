@@ -776,13 +776,13 @@ const Preview = () => {
           <div className="w-10 h-10" /> {/* Spacer */}
         </div>
 
-        {/* Media Preview - Centered, morphs into template card */}
-        <div className="relative z-10 flex-1 flex items-center justify-center px-6" style={{ height: 'calc(100dvh - 400px)' }}>
+        {/* Media Preview - small peek above the 80% sheet */}
+        <div className="relative z-10 flex items-end justify-center px-6" style={{ height: '20dvh', paddingBottom: '8px' }}>
           <motion.div 
             layoutId="preview-media-card"
-            className="relative overflow-hidden rounded-2xl"
+            className="relative overflow-hidden rounded-xl"
             style={{ 
-              width: 'min(70vw, 260px)',
+              width: 'min(28vw, 110px)',
               aspectRatio: '9/16',
               boxShadow: '0 0 0 1px rgba(255,255,255,0.12), 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.18)',
             }}
@@ -814,12 +814,13 @@ const Preview = () => {
         {/* Bottom Sheet for Activity Selection - Liquid Glass */}
         <motion.div
           className="fixed bottom-0 left-0 right-0 z-30"
+          style={{ height: '80dvh' }}
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
           <div 
-            className="glass-sheet rounded-t-3xl px-5 pt-4"
+            className="glass-sheet rounded-t-3xl px-5 pt-4 flex flex-col h-full"
             style={{
               paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
             }}
@@ -828,18 +829,18 @@ const Preview = () => {
             <div className="w-12 h-1.5 bg-white/30 rounded-full mx-auto mb-4" />
             
             {/* Title */}
-            <h2 className="text-white text-xl font-bold text-center mb-5">Choose your activity</h2>
+            <h2 className="text-white text-xl font-bold text-center mb-4">Choose your activity</h2>
             
-            {/* Activity Grid - 4 columns, larger icons, scrollable */}
-            <div className="grid grid-cols-4 gap-x-4 gap-y-5 max-h-64 overflow-y-auto pb-1">
+            {/* Activity Grid - 4 columns, fits all 18 activities without scroll */}
+            <div className="flex-1 grid grid-cols-4 gap-x-3 gap-y-3 content-start overflow-hidden">
               {activityOptions.map((activityOption, index) => {
                 const isOther = 'isCustom' in activityOption && activityOption.isCustom;
                 return (
                   <motion.button
                     key={activityOption.name}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.02 }}
+                    transition={{ delay: index * 0.015 }}
                     whileTap={{ scale: 0.92 }}
                     onClick={() => {
                       if (isOther) {
@@ -853,10 +854,10 @@ const Preview = () => {
                         handleActivitySelection(activityOption.name);
                       }
                     }}
-                    className="flex flex-col items-center gap-2.5"
+                    className="flex flex-col items-center gap-1.5"
                   >
                     <div 
-                      className="w-[68px] h-[68px] rounded-[20px] flex items-center justify-center overflow-hidden"
+                      className="w-[56px] h-[56px] rounded-[16px] flex items-center justify-center overflow-hidden"
                       style={{ 
                         background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 100%)',
                         backdropFilter: 'blur(16px)',
@@ -866,15 +867,15 @@ const Preview = () => {
                     >
                       {(() => {
                         const IconComp = activityOption.icon;
-                        return <IconComp className="w-7 h-7 text-white/80" strokeWidth={1.5} />;
+                        return <IconComp className="w-6 h-6 text-white/80" strokeWidth={1.5} />;
                       })()}
                     </div>
-                    <span className="text-white/90 text-xs font-semibold text-center leading-tight">
+                    <span className="text-white/90 text-[10px] font-semibold text-center leading-tight">
                       {activityOption.name}
                     </span>
                   </motion.button>
-                );
-              })}
+                );})}
+
             </div>
 
             {/* Custom Activity Name Input */}
