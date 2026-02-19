@@ -44,21 +44,34 @@ const TokenFrame = ({
     .join(' | ');
 
   return (
-    // No overflow-hidden on outer — allows shadow to render uncropped
-    // No background — stamp bg PNG provides all the gray/white surface
+    // No overflow-hidden on outer — allows drop-shadow to render uncropped on perforated edges
     <div
       className="w-[90%] mx-auto aspect-[9/16] relative"
       style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.32))' }}
     >
-      {/* Layer 1: User photo/video — bleeds behind CULT NINJA text area */}
+      {/* Layer 1: Stamp frame background — perforated edges + CULT NINJA header + gray strip */}
+      <img
+        src={tokenBg}
+        alt=""
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'fill',
+          zIndex: 1,
+        }}
+      />
+
+      {/* Layer 2: User photo/video — clipped to inner photo window, sits above stamp bg */}
       <div
         className="absolute overflow-hidden"
         style={{
-          top: '5%',
-          left: '6.5%',
-          right: '6.5%',
-          bottom: '13%',
-          zIndex: 1,
+          top: '20%',
+          left: '7%',
+          right: '7%',
+          bottom: '15%',
+          zIndex: 2,
+          borderRadius: '2px',
         }}
       >
         {isVideo ? (
@@ -86,20 +99,7 @@ const TokenFrame = ({
         )}
       </div>
 
-      {/* Layer 0: Stamp frame background — gray bg + perforated edges + baked CULT NINJA text — sits ON TOP of media */}
-      <img
-        src={tokenBg}
-        alt=""
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'fill',
-          zIndex: 5,
-        }}
-      />
-
-      {/* Layer 2: Duck + rings stamp seal — bottom-left, at photo/strip boundary */}
+      {/* Layer 3: Duck + rings stamp seal — overlays on the photo */}
       <img
         src={tokenDuckRing}
         alt=""
@@ -108,19 +108,19 @@ const TokenFrame = ({
           bottom: '20%',
           left: '3%',
           width: '22%',
-          zIndex: 20,
+          zIndex: 10,
           objectFit: 'contain',
         }}
       />
 
-      {/* Layer 3: Activity name + metrics — bottom gray strip, right-aligned */}
+      {/* Layer 4: Activity name + metrics — bottom gray strip, right-aligned */}
       <div
         className="absolute text-right"
         style={{
           bottom: '3%',
           right: '7%',
           paddingBottom: '2%',
-          zIndex: 25,
+          zIndex: 10,
         }}
       >
         <div
