@@ -135,7 +135,7 @@ const HolographicFrame = ({
             fontFamily: "'Arial Black', 'Impact', 'Helvetica Neue', sans-serif",
             fontWeight: 900,
             // Large — matches reference where header fills most of the top strip
-            fontSize: 'clamp(14px, 6.5cqw, 28px)',
+            fontSize: 'clamp(9px, 4cqw, 18px)',
             color: '#000000',
             textTransform: 'uppercase',
             letterSpacing: '-0.02em',
@@ -187,7 +187,7 @@ const HolographicFrame = ({
           - metric-1.png: single white chamfered box → shown when ONLY duration
           - metric-2.png: white box + black box  → shown when BOTH metrics exist
           Both PNGs are full-card size; boxes sit in the bottom-right corner. ── */}
-      {hasMetric1 && !hasMetric2 && (
+      {hasMetric1 && (
         <img
           src={metric1Png}
           alt=""
@@ -195,12 +195,12 @@ const HolographicFrame = ({
           style={{ zIndex: 11, objectFit: 'fill' }}
         />
       )}
-      {hasMetric1 && hasMetric2 && (
+      {hasMetric2 && (
         <img
           src={metric2Png}
           alt=""
           className="absolute inset-0 w-full h-full pointer-events-none"
-          style={{ zIndex: 11, objectFit: 'fill' }}
+          style={{ zIndex: 12, objectFit: 'fill' }}
         />
       )}
 
@@ -260,7 +260,7 @@ const HolographicFrame = ({
               overflow: 'hidden',
             }}
           >
-            HRS | {durationLabel.toUpperCase()}
+            MIN | {durationLabel.toUpperCase()}
           </div>
         </div>
       )}
