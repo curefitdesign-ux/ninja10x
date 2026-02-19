@@ -14,6 +14,7 @@ import VogueFrame from '@/components/frames/VogueFrame';
 import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
 import TokenFrame from '@/components/frames/TokenFrame';
+import HolographicFrame from '@/components/frames/HolographicFrame';
 import ContextualNumericKeyboard from '@/components/ContextualNumericKeyboard';
 import { getActivityConfig } from '@/lib/activity-context';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
@@ -24,7 +25,7 @@ import { useJourneyActivities } from '@/hooks/use-journey-activities';
 
 import { toast } from 'sonner';
 
-const FRAMES = ['token', 'shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
+const FRAMES = ['token', 'holographic', 'shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
 
 // Activity options with minimal line icons
@@ -111,6 +112,10 @@ const FRAME_COLORS: Record<FrameType, { accent: string; gradient: string }> = {
   token: {
     accent: 'rgba(10, 82, 120, 0.45)',
     gradient: 'linear-gradient(160deg, rgba(15, 100, 145, 0.35) 0%, rgba(5, 40, 60, 0.6) 100%)'
+  },
+  holographic: {
+    accent: 'rgba(120, 180, 200, 0.45)',
+    gradient: 'linear-gradient(160deg, rgba(180, 200, 230, 0.35) 0%, rgba(200, 160, 140, 0.4) 100%)'
   },
 };
 
@@ -694,6 +699,8 @@ const Preview = () => {
         return <TicketFrame {...frameProps} />;
       case 'token':
         return <TokenFrame {...frameProps} />;
+      case 'holographic':
+        return <HolographicFrame {...frameProps} />;
     }
   };
 
@@ -1055,6 +1062,7 @@ const Preview = () => {
                 {currentFrame === 'fitness' && <FitnessFrame {...frameProps} />}
                 {currentFrame === 'ticket' && <TicketFrame {...frameProps} />}
                 {currentFrame === 'token' && <TokenFrame {...frameProps} />}
+                {currentFrame === 'holographic' && <HolographicFrame {...frameProps} />}
               </div>
             </div>
           ) : (
@@ -1126,6 +1134,7 @@ const Preview = () => {
                         {frame === 'fitness' && <FitnessFrame {...frameProps} />}
                         {frame === 'ticket' && <TicketFrame {...frameProps} />}
                         {frame === 'token' && <TokenFrame {...frameProps} />}
+                        {frame === 'holographic' && <HolographicFrame {...frameProps} />}
                       </div>
                     </motion.div>
                 );
