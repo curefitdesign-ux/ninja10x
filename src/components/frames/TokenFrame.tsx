@@ -110,7 +110,7 @@ const TokenFrame = ({
           top: '2%',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '50%',
+          width: '70%',
           zIndex: 5,
           objectFit: 'contain',
         }}
