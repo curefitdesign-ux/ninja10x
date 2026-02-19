@@ -79,7 +79,7 @@ const TokenFrame = ({
 
       {/* Layer 1: token.png stamp frame — contains perforations, gray bg,
           "CULT NINJA / Journey" header and bottom gray strip baked in.
-          The transparent center window reveals the photo underneath. */}
+          mix-blend-mode: multiply makes the white center transparent so photo shows through. */}
       <img
         src={tokenBg}
         alt=""
@@ -89,6 +89,7 @@ const TokenFrame = ({
           height: '100%',
           objectFit: 'fill',
           zIndex: 10,
+          mixBlendMode: 'multiply',
         }}
       />
 
