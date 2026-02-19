@@ -921,8 +921,13 @@ const PhotoLoggingWidget = ({
         {/* Scrollable Cards Container */}
         <div 
           ref={scrollContainerRef}
-          className="absolute inset-0 flex items-center overflow-x-auto overflow-y-hidden scrollbar-hide gap-4 px-4"
+          className="absolute inset-x-0 flex items-center overflow-x-auto scrollbar-hide gap-4 px-4"
           style={{ 
+            top: 0,
+            bottom: 0,
+            overflowY: 'visible',
+            paddingTop: 12,
+            paddingBottom: 12,
             WebkitOverflowScrolling: 'touch',
           }}
         >
