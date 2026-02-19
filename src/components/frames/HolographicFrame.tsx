@@ -119,28 +119,30 @@ const HolographicFrame = ({
       />
 
       {/* ── LAYER 3: Header "CULT NINJA — {ACTIVITY}"
-          Reference: massive bold text fills full top strip edge-to-edge ── */}
+          Matches reference: very large black bold text across the full top strip.
+          Top strip height = ~13% of card. ── */}
       <div
         className="absolute left-0 right-0 top-0 flex items-center"
         style={{
           zIndex: 10,
           height: '13%',
-          paddingLeft: '3%',
+          paddingLeft: '4%',
           paddingRight: '3%',
-          overflow: 'visible',
+          overflow: 'hidden',
         }}
       >
         <span
           style={{
             fontFamily: "'Arial Black', 'Impact', 'Helvetica Neue', sans-serif",
             fontWeight: 900,
-            fontSize: 'clamp(11px, 5.5cqw, 26px)',
+            fontSize: 'clamp(8px, 3.5cqw, 16px)',
             color: '#000000',
             textTransform: 'uppercase',
             letterSpacing: '-0.02em',
             lineHeight: 1,
             whiteSpace: 'nowrap',
             overflow: 'visible',
+            textOverflow: 'clip',
             display: 'block',
             width: '100%',
           }}
@@ -202,47 +204,49 @@ const HolographicFrame = ({
         />
       )}
 
-      {/* ── LAYER 6a: Metric 1 TEXT (duration) — WHITE box ── */}
+      {/* ── LAYER 6a: Metric 1 TEXT (duration) ──
+          Positioned over the WHITE box in the bottom-right.
+          When both metrics: white box = bottom 12%–24% zone.
+          When only metric 1: white box = bottom ~0–20% zone. ── */}
       {hasMetric1 && (
         <div
           className="absolute flex flex-col justify-start"
           style={{
             zIndex: 13,
             right: 0,
-            // Moved up by ~20% of box height relative to previous position
-            bottom: hasMetric2 ? '14.4%' : '3%',
-            width: '38%',
-            height: hasMetric2 ? '13%' : '20%',
-            paddingTop: '1.5%',
-            paddingLeft: '5%',
+            bottom: hasMetric2 ? '12%' : '1%',
+            width: '32%',
+            height: hasMetric2 ? '12%' : '20%',
+            paddingTop: '2%',
+            paddingLeft: '6%',
             paddingRight: '2%',
           }}
         >
-          {/* Large numeric value — big, like "02" in reference */}
+          {/* Large numeric value */}
           <div
             style={{
               fontFamily: "'Arial Black', 'Impact', sans-serif",
               fontWeight: 900,
-              fontSize: 'clamp(20px, 9cqw, 48px)',
+              fontSize: 'clamp(16px, 7cqw, 36px)',
               color: '#000000',
-              lineHeight: 0.9,
-              letterSpacing: '-0.03em',
+              lineHeight: 1,
+              letterSpacing: '-0.02em',
               whiteSpace: 'nowrap',
               overflow: 'visible',
             }}
           >
             {durationValue}
           </div>
-          {/* Label — "MIN | DURATION" */}
+          {/* Small label — left-aligned, no truncation */}
           <div
             style={{
               fontFamily: "'Arial', 'Helvetica', sans-serif",
               fontWeight: 700,
-              fontSize: 'clamp(5px, 1.8cqw, 9px)',
+              fontSize: 'clamp(4px, 1.4cqw, 7px)',
               color: '#000000',
-              letterSpacing: '0.06em',
+              letterSpacing: '0.03em',
               textTransform: 'uppercase',
-              marginTop: '3px',
+              marginTop: '2px',
               whiteSpace: 'nowrap',
               overflow: 'visible',
               textAlign: 'left',
@@ -253,7 +257,8 @@ const HolographicFrame = ({
         </div>
       )}
 
-      {/* ── LAYER 6b: Metric 2 TEXT (pr / secondary) — BLACK box ── */}
+      {/* ── LAYER 6b: Metric 2 TEXT (pr / secondary) ──
+          Black box = lower ~12% of card. ── */}
       {hasMetric2 && (
         <div
           className="absolute flex flex-col justify-start"
@@ -261,38 +266,38 @@ const HolographicFrame = ({
             zIndex: 13,
             right: 0,
             bottom: '1%',
-            width: '38%',
-            height: '14%',
-            paddingTop: '1.5%',
-            paddingLeft: '5%',
+            width: '32%',
+            height: '12%',
+            paddingTop: '2%',
+            paddingLeft: '6%',
             paddingRight: '2%',
           }}
         >
-          {/* Large pr value — "05/10" style */}
+          {/* Large pr value */}
           <div
             style={{
               fontFamily: "'Arial Black', 'Impact', sans-serif",
               fontWeight: 900,
-              fontSize: 'clamp(18px, 8cqw, 42px)',
+              fontSize: 'clamp(14px, 6cqw, 32px)',
               color: '#ffffff',
-              lineHeight: 0.9,
-              letterSpacing: '-0.03em',
+              lineHeight: 1,
+              letterSpacing: '-0.02em',
               whiteSpace: 'nowrap',
               overflow: 'visible',
             }}
           >
             {pr}
           </div>
-          {/* Bold white label — "Personal Best Score" */}
+          {/* White label */}
           <div
             style={{
               fontFamily: "'Arial Black', 'Impact', sans-serif",
               fontWeight: 900,
-              fontSize: 'clamp(5px, 1.9cqw, 10px)',
+              fontSize: 'clamp(4px, 1.6cqw, 8px)',
               color: '#ffffff',
               letterSpacing: '0.01em',
               textTransform: 'capitalize',
-              marginTop: '3px',
+              marginTop: '2px',
               lineHeight: 1.2,
               whiteSpace: 'normal',
               wordBreak: 'break-word',
