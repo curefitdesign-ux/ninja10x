@@ -67,10 +67,10 @@ const TokenFrame = ({
       <div
         className="absolute overflow-hidden"
         style={{
-        top: '18%',
+        top: '13%',
         left: '6.5%',
         right: '6.5%',
-        bottom: '23%',
+        bottom: '21%',
           zIndex: 10,
         }}
       >
