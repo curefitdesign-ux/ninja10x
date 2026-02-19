@@ -2,13 +2,11 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Home, Dumbbell, Activity as ActivityIcon, ShoppingBag, Users, Flame, Footprints, Trash2, Bell } from "lucide-react";
+import { Bell, Trash2 } from "lucide-react";
 import CircularProgressRing from "@/components/CircularProgressRing";
 import GradientMeshBackground from "@/components/GradientMeshBackground";
 import PullToRefresh from "@/components/PullToRefresh";
 import PhotoLoggingWidget, { LoggedPhoto } from "@/components/PhotoLoggingWidget";
-
-
 import ProfileMenu from "@/components/ProfileMenu";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
 import NotificationSheet, { Notification } from "@/components/NotificationSheet";
@@ -19,22 +17,11 @@ import { JourneyActivity } from "@/services/journey-service";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 
-// Import new activity icons
+// Activity icons
 import bookClassIcon from "@/assets/activity-icons/book-class.png";
 import checkinGymIcon from "@/assets/activity-icons/checkin-gym.png";
 import playSportsIcon from "@/assets/activity-icons/play-sports.png";
 import workoutAtHomeIcon from "@/assets/activity-icons/workout-home.png";
-// Import feature assets
-import connectFitnessDevice from "@/assets/activity-page/connect-fitness-device.png";
-import workoutWithFriends from "@/assets/activity-page/workout-with-friends.png";
-import smartWorkoutPlan from "@/assets/activity-page/smart-workout-plan.png";
-// Fitness program images
-import yogaBeginners from "@/assets/programs/yoga-beginners.png";
-import workoutBeginners from "@/assets/programs/workout-beginners.png";
-import bellyBurn from "@/assets/programs/belly-burn.png";
-import walkFitness from "@/assets/programs/walk-fitness.png";
-import cultJunior from "@/assets/programs/cult-junior.png";
-import prenatalYoga from "@/assets/programs/prenatal-yoga.png";
 
 // Mascot states
 import curoHappy from "@/assets/mascot/curo-happy.png";
@@ -266,23 +253,6 @@ const Activity = () => {
     { id: "workout", label: "workout\nat home", icon: workoutAtHomeIcon },
   ];
 
-  const fitnessPrograms = [
-    { id: 1, image: yogaBeginners },
-    { id: 2, image: workoutBeginners },
-    { id: 3, image: bellyBurn },
-    { id: 4, image: walkFitness },
-    { id: 5, image: cultJunior },
-    { id: 6, image: prenatalYoga },
-  ];
-
-  const navItems = [
-    { id: "home", icon: Home, label: "HOME" },
-    { id: "fitness", icon: Dumbbell, label: "FITNESS" },
-    { id: "activity", icon: ActivityIcon, label: "ACTIVITY", isCenter: true },
-    { id: "store", icon: ShoppingBag, label: "STORE" },
-    { id: "social", icon: Users, label: "SOCIAL" },
-  ];
-
   // Show skeleton during initial load
   if (loading && photos.length === 0) {
     return (
@@ -464,123 +434,6 @@ const Activity = () => {
             </motion.div>
           </div>
 
-          {/* Activities Section */}
-          <div className="px-4 mt-12">
-            <motion.div
-              initial={{ opacity: 0, y: 8 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: 0.22 }} 
-              className="mb-6"
-            >
-              <h2 className="text-xl font-semibold text-white">Do any of the following activities today</h2>
-            </motion.div>
-            <div className="grid grid-cols-4 gap-4">
-              {activities_grid.map((activity, idx) => (
-                <motion.button
-                  key={activity.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1], delay: 0.26 + idx * 0.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  whileHover={{ scale: 1.02 }}
-                  className="flex flex-col items-center group"
-                >
-                  <div className="relative w-14 h-14 flex items-center justify-center mb-2">
-                    <img src={activity.icon} alt={activity.label} className="w-11 h-11 object-contain" />
-                  </div>
-                  <span className="text-[10px] text-white/60 text-center whitespace-pre-line leading-tight group-hover:text-white/80 transition-colors">
-                    {activity.label}
-                  </span>
-                </motion.button>
-              ))}
-            </div>
-          </div>
-
-          {/* Feature Cards Row */}
-          <div className="px-4 mt-8">
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { src: connectFitnessDevice, alt: "Connect Fitness device" },
-                { src: workoutWithFriends, alt: "Workout With Friends" },
-              ].map((card, idx) => (
-                <motion.button
-                  key={card.alt}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-40px" }}
-                  transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: idx * 0.06 }}
-                  whileTap={{ scale: 0.96 }}
-                  className="relative rounded-3xl overflow-hidden"
-                >
-                  <img src={card.src} alt={card.alt} className="w-full h-auto object-contain" />
-                </motion.button>
-              ))}
-            </div>
-          </div>
-
-          {/* Smart Workout Plan */}
-          <div className="px-4 mt-4">
-            <motion.button
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              whileTap={{ scale: 0.96 }}
-              className="relative w-full rounded-3xl overflow-hidden"
-            >
-              <img src={smartWorkoutPlan} alt="Smart workout plan" className="w-full h-auto object-contain" />
-            </motion.button>
-          </div>
-
-          {/* Fitness Programs Section */}
-          <div className="px-4 mt-10">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Fitness Programs</h2>
-              <ArrowRight className="w-5 h-5 text-white/60" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {fitnessPrograms.map((program, idx) => (
-                <motion.button
-                  key={program.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-30px" }}
-                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1], delay: idx * 0.04 }}
-                  whileTap={{ scale: 0.96 }}
-                  className="relative aspect-[4/5] rounded-2xl overflow-hidden"
-                >
-                  <img src={program.image} alt={`Fitness program ${program.id}`} className="w-full h-full object-cover" />
-                </motion.button>
-              ))}
-            </div>
-          </div>
-
-          {/* Clear All Activities Option */}
-          {photos.length > 0 && (
-            <div className="px-4 mt-10 mb-4">
-              <motion.button
-                whileTap={{ scale: 0.98 }}
-                onClick={async () => {
-                  if (isClearing) return;
-                  const confirm = window.confirm('Are you sure you want to clear all logged activities? This cannot be undone.');
-                  if (!confirm) return;
-                  setIsClearing(true);
-                  const success = await clearAllActivities();
-                  setIsClearing(false);
-                  if (success) {
-                    toast.success('All activities cleared');
-                  } else {
-                    toast.error('Failed to clear activities');
-                  }
-                }}
-                disabled={isClearing}
-                className="w-full py-3 px-4 rounded-2xl bg-white/[0.06] backdrop-blur-xl border border-white/[0.1] flex items-center justify-center gap-2 text-red-400/80 hover:bg-red-500/10 hover:border-red-500/20 transition-colors disabled:opacity-50"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span className="text-sm font-medium">{isClearing ? 'Clearing...' : 'Clear All Activities'}</span>
-              </motion.button>
-            </div>
-          )}
         </div>
       </PullToRefresh>
       {/* Bottom Navigation is now rendered globally in App.tsx */}
