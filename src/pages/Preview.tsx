@@ -713,8 +713,11 @@ const Preview = () => {
   // Handle activity selection (including cricket sub-options)
   const handleActivitySelection = (selectedActivity: string) => {
     triggerHaptic('medium');
-    setCustomMetrics(null); // Reset custom metrics for known activities
+    setCustomMetrics(null);
     setActivity(selectedActivity);
+    // Reset metric values when activity changes
+    setDuration('');
+    setPr('');
     setFlowStep('template');
   };
 
@@ -730,9 +733,12 @@ const Preview = () => {
         secondaryUnit: 'wkts',
       });
     } else {
-      setCustomMetrics(null); // Use default cricket config (Runs)
+      setCustomMetrics(null);
     }
     setActivity('Cricket');
+    // Reset metric values when activity changes
+    setDuration('');
+    setPr('');
     setFlowStep('template');
   };
 
@@ -740,11 +746,14 @@ const Preview = () => {
   const handleCustomActivityConfirm = (name: string) => {
     triggerHaptic('medium');
     setActivity(name);
+    // Reset metric values when activity changes
+    setDuration('');
+    setPr('');
     setShowCustomActivityInput(false);
     setFlowStep('template');
-    // Fire and forget AI suggestion
     fetchAiMetrics(name);
   };
+
 
   // Activity Selection Step - Show as bottom sheet over media preview
   if (flowStep === 'activity') {
@@ -1358,9 +1367,12 @@ const Preview = () => {
                             setShowCustomActivityInput(true);
                             setCustomActivityName('');
                           } else {
-                            // Cricket: just select it directly, sub-option is on preview page
+                            // Cricket: select directly, sub-option on preview page
                             setCustomMetrics(null);
                             setActivity(activityOption.name);
+                            // Reset metric values when activity changes
+                            setDuration('');
+                            setPr('');
                             setEditingField(null);
                           }
                         }}
