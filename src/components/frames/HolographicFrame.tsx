@@ -214,7 +214,7 @@ const HolographicFrame = ({
           style={{
             zIndex: 13,
             right: 0,
-            bottom: hasMetric2 ? '22%' : '11%',
+            bottom: hasMetric2 ? '12%' : '1%',
             width: '32%',
             height: hasMetric2 ? '12%' : '20%',
             paddingTop: '2%',
