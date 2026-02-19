@@ -116,19 +116,66 @@ const TokenFrame = ({
         }}
       />
 
-      {/* Layer 4: Duck + rings stamp seal — overlays on the photo */}
+      {/* Layer 4: Duck + rings stamp seal — bottom-left, inside gray strip */}
       <img
         src={tokenDuckRing}
         alt=""
         className="absolute pointer-events-none"
         style={{
-          bottom: '20%',
+          bottom: '2%',
           left: '3%',
-          width: '22%',
+          width: '20%',
           zIndex: 10,
           objectFit: 'contain',
         }}
       />
+
+      {/* Layer 5: Activity name + metrics — right side of gray strip */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          bottom: '2%',
+          left: '26%',
+          right: '4%',
+          height: '11%',
+          zIndex: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'flex-end',
+          gap: '2px',
+        }}
+      >
+        <div
+          style={{
+            color: '#1a1a1a',
+            fontSize: 'clamp(9px, 3vw, 13px)',
+            fontWeight: 800,
+            fontFamily: 'Arial Black, Arial, sans-serif',
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase',
+            lineHeight: 1.1,
+            textAlign: 'right',
+          }}
+        >
+          {activity || 'Activity'}
+        </div>
+        {metricsLine ? (
+          <div
+            style={{
+              color: '#555',
+              fontSize: 'clamp(7px, 2.2vw, 10px)',
+              fontWeight: 600,
+              fontFamily: 'Arial, sans-serif',
+              letterSpacing: '0.02em',
+              textAlign: 'right',
+              lineHeight: 1.2,
+            }}
+          >
+            {metricsLine}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 };
