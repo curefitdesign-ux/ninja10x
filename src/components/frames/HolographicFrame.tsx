@@ -32,6 +32,10 @@ const HolographicFrame = ({
   const metricLabel = label1 || 'Distance';
   const durationLabel = label2 || 'Duration';
 
+  const hasMetric1 = !!duration;
+  const hasMetric2 = !!pr;
+  const metricCount = (hasMetric1 ? 1 : 0) + (hasMetric2 ? 1 : 0);
+
   useEffect(() => {
     if (isVideo && videoRef.current) {
       videoRef.current.load();
@@ -86,7 +90,7 @@ const HolographicFrame = ({
         )}
       </div>
 
-      {/* ── Layer 3: Holographic overlay with multiply blend — white = transparent (shows photo), colors = frame ── */}
+      {/* ── Layer 3: Holographic overlay — NO opacity, pure multiply blend ── */}
       <img
         src={holographicOverlay}
         alt=""
@@ -95,11 +99,11 @@ const HolographicFrame = ({
           zIndex: 2,
           objectFit: 'fill',
           mixBlendMode: 'multiply',
+          opacity: 1,
         }}
       />
 
       {/* ── Layer 4: Header bar — "CULT NINJA — ACTIVITY" ── */}
-      {/* Positioned in the top gray-blue strip above the photo window */}
       <div
         className="absolute top-0 left-0 right-0 flex items-center"
         style={{
@@ -155,117 +159,102 @@ const HolographicFrame = ({
         </span>
       </div>
 
-      {/* ── Layer 6: Metric boxes — bottom-right, in the holographic cutout area ── */}
-      <div
-        className="absolute flex flex-col"
-        style={{
-          zIndex: 10,
-          bottom: '2%',
-          right: '4%',
-          width: '38%',
-          gap: '3%',
-        }}
-      >
-        {/* Box 1: Duration */}
-        {duration && (
-          <div
-            style={{
-              border: '2px solid #c8956a',
-              borderRadius: '4px',
-              padding: '6px 10px 4px',
-              backgroundColor: 'rgba(240, 200, 170, 0.15)',
-            }}
-          >
-            <div
-              style={{
-                fontFamily: "'Arial Black', 'Montserrat', sans-serif",
-                fontWeight: 900,
-                fontSize: 'clamp(18px, 6.5vw, 30px)',
-                color: '#000000',
-                lineHeight: 1,
-                letterSpacing: '-0.02em',
-              }}
-            >
-              {duration.replace(/[^0-9:/.]/g, '') || duration}
-            </div>
-            <div
-              style={{
-                fontFamily: "'Arial', 'Helvetica', sans-serif",
-                fontWeight: 700,
-                fontSize: 'clamp(6px, 2vw, 8px)',
-                color: '#000000',
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                marginTop: '2px',
-              }}
-            >
-              HRS | {durationLabel.toUpperCase()}
-            </div>
-          </div>
-        )}
-
-        {/* Box 2: PR / Metric */}
-        {pr && (
-          <div
-            style={{
-              border: '2px solid #000000',
-              borderRadius: '4px',
-              backgroundColor: '#000000',
-              padding: '6px 10px 4px',
-            }}
-          >
-            <div
-              style={{
-                fontFamily: "'Arial Black', 'Montserrat', sans-serif",
-                fontWeight: 900,
-                fontSize: 'clamp(18px, 6.5vw, 30px)',
-                color: '#ffffff',
-                lineHeight: 1,
-                letterSpacing: '-0.02em',
-              }}
-            >
-              {pr}
-            </div>
-            <div
-              style={{
-                fontFamily: "'Arial', 'Helvetica', sans-serif",
-                fontWeight: 700,
-                fontSize: 'clamp(6px, 2vw, 8px)',
-                color: '#ffffff',
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase',
-                marginTop: '2px',
-              }}
-            >
-              {metricLabel}
-            </div>
-          </div>
-        )}
-
-        {/* Fallback when no metrics entered — show placeholder boxes */}
-        {!duration && !pr && (
-          <>
-            <div
-              style={{
-                border: '2px solid #c8956a',
-                borderRadius: '4px',
-                padding: '10px',
-                backgroundColor: 'rgba(240, 200, 170, 0.15)',
-                height: '60px',
-              }}
-            />
+      {/* ── Layer 6: Metric boxes — stack dynamically as user adds metrics ── */}
+      {metricCount > 0 && (
+        <div
+          className="absolute flex flex-col"
+          style={{
+            zIndex: 10,
+            bottom: '2%',
+            right: '4%',
+            width: '38%',
+            gap: '0px',
+          }}
+        >
+          {/* Box 1: Duration — white bg with chamfered top-left corner, black border */}
+          {hasMetric1 && (
             <div
               style={{
                 border: '2px solid #000000',
-                borderRadius: '4px',
-                backgroundColor: '#000000',
-                padding: '10px',
-                height: '60px',
+                borderBottom: hasMetric2 ? '1px solid #000000' : '2px solid #000000',
+                padding: '6px 10px 5px',
+                backgroundColor: '#ffffff',
+                clipPath: metricCount === 1
+                  ? 'polygon(16px 0%, 100% 0%, 100% 100%, 0% 100%, 0% 16px)'
+                  : 'polygon(16px 0%, 100% 0%, 100% 100%, 0% 100%, 0% 16px)',
               }}
-            />
-          </>
-        )}
-      </div>
+            >
+              <div
+                style={{
+                  fontFamily: "'Arial Black', 'Montserrat', sans-serif",
+                  fontWeight: 900,
+                  fontSize: 'clamp(18px, 6.5vw, 30px)',
+                  color: '#000000',
+                  lineHeight: 1,
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                {duration.replace(/[^0-9:/.]/g, '') || duration}
+              </div>
+              <div
+                style={{
+                  fontFamily: "'Arial', 'Helvetica', sans-serif",
+                  fontWeight: 700,
+                  fontSize: 'clamp(6px, 2vw, 8px)',
+                  color: '#000000',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  marginTop: '2px',
+                }}
+              >
+                HRS | {durationLabel.toUpperCase()}
+              </div>
+            </div>
+          )}
+
+          {/* Box 2: PR / Metric — solid black bg, white text, rounded bottom-right */}
+          {hasMetric2 && (
+            <div
+              style={{
+                border: '2px solid #000000',
+                borderTop: hasMetric1 ? 'none' : '2px solid #000000',
+                backgroundColor: '#000000',
+                padding: '6px 10px 5px',
+                borderRadius: hasMetric1 ? '0 0 6px 0' : '0 0 6px 0',
+                clipPath: !hasMetric1
+                  ? 'polygon(16px 0%, 100% 0%, 100% 100%, 0% 100%, 0% 16px)'
+                  : undefined,
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: "'Arial Black', 'Montserrat', sans-serif",
+                  fontWeight: 900,
+                  fontSize: 'clamp(18px, 6.5vw, 30px)',
+                  color: '#ffffff',
+                  lineHeight: 1,
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                {pr}
+              </div>
+              <div
+                style={{
+                  fontFamily: "'Arial', 'Helvetica', sans-serif",
+                  fontWeight: 700,
+                  fontSize: 'clamp(6px, 2vw, 8px)',
+                  color: 'rgba(255,255,255,0.85)',
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                  marginTop: '2px',
+                }}
+              >
+                {metricLabel.toUpperCase()}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
