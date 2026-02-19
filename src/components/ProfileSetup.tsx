@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useProfile, Profile } from '@/hooks/use-profile';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
+import AvatarCropper from '@/components/AvatarCropper';
 
 // Import Netflix-style preset avatars
 import avatarRed from '@/assets/avatars/avatar-red.png';
@@ -48,6 +49,7 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
   const [customAvatarPreview, setCustomAvatarPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Pre-fill data in edit mode
@@ -81,43 +83,31 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
       return;
     }
 
-    // Read file and navigate to cropper
     const reader = new FileReader();
-    reader.onload = (e) => {
-      const imageData = e.target?.result as string;
-      // Navigate to avatar cropper with the image
-      navigate('/avatar-crop', { 
-        state: { 
-          imageData,
-          returnTo: '/profile-setup' + (editMode ? '?edit=true' : ''),
-        }
-      });
+    reader.onload = (ev) => {
+      const imageData = ev.target?.result as string;
+      setCropImageSrc(imageData);
     };
     reader.readAsDataURL(file);
+    // Reset input so same file can be selected again
+    if (e.target) e.target.value = '';
   };
 
-  // Check for cropped image from camera/cropper
-  useEffect(() => {
-    const handleCroppedImage = () => {
-      const croppedImage = sessionStorage.getItem('croppedAvatarImage');
-      if (croppedImage) {
-        // Convert base64 to file
-        fetch(croppedImage)
-          .then(res => res.blob())
-          .then(blob => {
-            const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
-            setCustomAvatarFile(file);
-            setCustomAvatarPreview(croppedImage);
-            setSelectedAvatar(null);
-            sessionStorage.removeItem('croppedAvatarImage');
-          });
-      }
-    };
+  const handleCropConfirm = (croppedDataUrl: string) => {
+    fetch(croppedDataUrl)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
+        setCustomAvatarFile(file);
+        setCustomAvatarPreview(croppedDataUrl);
+        setSelectedAvatar(null);
+        setCropImageSrc(null);
+      });
+  };
 
-    handleCroppedImage();
-    window.addEventListener('focus', handleCroppedImage);
-    return () => window.removeEventListener('focus', handleCroppedImage);
-  }, []);
+  const handleCropCancel = () => {
+    setCropImageSrc(null);
+  };
 
   const selectPresetAvatar = (avatarId: string) => {
     setSelectedAvatar(avatarId);
@@ -434,6 +424,24 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
           </span>
         </motion.button>
       </div>
+
+      {/* Inline Avatar Cropper overlay — no navigation needed */}
+      <AnimatePresence>
+        {cropImageSrc && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50"
+          >
+            <AvatarCropper
+              imageSrc={cropImageSrc}
+              onConfirm={handleCropConfirm}
+              onCancel={handleCropCancel}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
