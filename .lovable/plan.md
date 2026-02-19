@@ -1,83 +1,106 @@
 
-## New "Token" Frame Template — Postage Stamp Style
+## Rebuilding TokenFrame with Real Assets
 
-### What We're Building
-A new 7th sharing frame template called **"Token"** — styled as a collectible postage stamp. It matches the reference image exactly:
+### What We're Doing
+Replacing all the programmatic CSS/SVG attempts (perforations, bird SVG paths) with the three real design assets the user has provided:
 
-- **White/light gray background** (`#f0f0f0`)
-- **Perforated/scalloped stamp edges** all around (created with CSS `radial-gradient` punch-out border technique — no image asset needed)
-- **"CULT NINJA"** in bold Montserrat-style uppercase dark blue (`#0a5278`) at the top
-- **"Journey"** in italic serif script below it (Playfair Display-like using a serif italic font)
-- **Full photo** taking up ~65% of the card height, edge-to-edge with small margin
-- **Circular stamp seal** in the bottom-left corner of the photo — shows "WEEK {N} | DAY {N}" text rotating around a bird SVG icon
-- **Activity name** in large bold Montserrat dark blue at the bottom
-- **Metrics** in gray Montserrat below the activity name (e.g., "02 HRS | 05 PERSONAL BEST SCORE")
+1. **`token.png`** — The complete stamp frame image (gray background, perforated scalloped edges, "CULT NINJA / Journey" header text) used as a transparent overlay on top of the user's photo — exactly how `TicketFrame` uses `ticket-frame.png`
+2. **`Container-7.png`** — The actual cult.fit bird mascot icon for the stamp seal center
+3. **`2-2.png`** — The double concentric circle rings for the stamp seal
 
-### Technical Approach
-
-#### 1. Create `src/components/frames/TokenFrame.tsx`
-A new React component with these sections:
+### Layout Architecture (matching the reference image exactly)
 
 ```text
 +------------------------------------------+
-| [scalloped border all around via CSS]    |
-|  CULT NINJA        <-- bold blue caps    |
-|  Journey           <-- italic serif      |
-|  +------------------------------------+  |
-|  |                                    |  |
-|  |       USER PHOTO                   |  |
-|  | [stamp seal]                       |  |
-|  +------------------------------------+  |
-|  SWIMMING          <-- bold blue caps   |
-|  02 HRS | 05 PERSONAL BEST SCORE        |
+| token.png overlaid on top (z=10)         |
+|  ┌── photo fills full card (z=0) ──┐     |
+|  │                                  │     |
+|  │      USER PHOTO (full bleed)     │     |
+|  │                                  │     |
+|  └──────────────────────────────────┘     |
+|                                           |
+| [circles + bird seal — bottom-left, z=20] |
+| SWIMMING          <-- bold blue caps      |
+| 02 HRS | 05 PERSONAL BEST SCORE          |
 +------------------------------------------+
 ```
 
-**Stamp edge CSS technique:** Use `radial-gradient` repeated along all 4 edges to punch out semi-circles, creating the classic perforated stamp look — no PNG asset required.
+The `token.png` frame already contains:
+- The perforated stamp border
+- The gray background
+- "CULT NINJA" header text in navy blue
+- "Journey" italic script text
+- A transparent/white center window where the photo shows through
 
-**Stamp seal SVG:** Inline SVG with circular text using `<textPath>` on a `<circle>` path, repeating "WEEK {N} · DAY {N} ·" around the circumference, with a bird/dove icon in the center (simple SVG path).
+### Files to Change
 
-**Props interface** — matches all existing frames:
-```typescript
-interface TokenFrameProps {
-  imageUrl: string;
-  isVideo?: boolean;
-  activity: string;
-  week: number;
-  day: number;
-  duration: string;
-  pr: string;
-  imagePosition: { x: number; y: number };
-  imageScale: number;
-  label1?: string;
-  label2?: string;
-}
+**Step 1 — Copy assets to project:**
+- `user-uploads://token.png` → `src/assets/frames/token-bg.png`
+- `user-uploads://Container-7.png` → `src/assets/frames/token-bird.png`
+- `user-uploads://2-2.png` → `src/assets/frames/token-circles.png`
+
+**Step 2 — Rewrite `src/components/frames/TokenFrame.tsx`:**
+
+Remove all the complex programmatic code (PerforationBorder, PerforationRows, TopBottomHoles, LeftRightHoles, CircularStampSeal SVG with manual path). Replace with:
+
+```tsx
+import tokenBg from '@/assets/frames/token-bg.png';
+import tokenBird from '@/assets/frames/token-bird.png';
+import tokenCircles from '@/assets/frames/token-circles.png';
+
+const TokenFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ... }) => {
+  return (
+    <div className="w-[90%] mx-auto aspect-[9/16] overflow-hidden relative">
+      
+      {/* Layer 0: Full-bleed user photo (fills entire card) */}
+      <div className="absolute inset-0 z-0">
+        <img/video src={imageUrl} ... />
+      </div>
+
+      {/* Layer 1: Stamp frame overlay — token.png covers the card,
+          the frame's white center window reveals the photo underneath */}
+      <img
+        src={tokenBg}
+        className="absolute inset-0 w-full h-full z-10 pointer-events-none"
+        style={{ objectFit: 'fill' }}
+      />
+
+      {/* Layer 2: Stamp seal — circles + bird, bottom-left area */}
+      <div className="absolute z-20" style={{ bottom: '16%', left: '4%', width: '22%' }}>
+        {/* Circles ring behind bird */}
+        <img src={tokenCircles} className="absolute inset-0 w-full h-full" style={{ objectFit: 'contain' }} />
+        {/* Bird mascot centered inside rings */}
+        <img src={tokenBird} className="relative w-[55%] h-auto mx-auto block" style={{ marginTop: '22%' }} />
+      </div>
+
+      {/* Layer 3: Activity name + metrics in the bottom gray strip */}
+      <div className="absolute z-20 bottom-0 left-0 right-0 text-center" style={{ paddingBottom: '4%' }}>
+        <div style={{ fontFamily: 'Montserrat bold', color: '#0a5278', textTransform: 'uppercase' }}>
+          {activity}
+        </div>
+        <div style={{ color: '#808080', fontSize: 'small' }}>
+          {metricsLine}
+        </div>
+      </div>
+    </div>
+  );
+};
 ```
 
-#### 2. Register in `src/pages/Preview.tsx`
-Four changes needed:
+### Key Positioning Details
+Looking at `token.png` reference image carefully:
+- The frame has a **top gray strip** (~20% height) containing "CULT NINJA / Journey" — already baked into the PNG
+- The **photo window** is the white/transparent middle area (~55% height)
+- There is a **bottom gray strip** (~25% height) below the photo for activity name + metrics
+- The stamp seal sits at the **bottom-left of the bottom gray strip**, overlapping slightly with the photo boundary
 
-1. **Import** `TokenFrame` at the top
-2. **Add `'token'` to the `FRAMES` constant** — `['shaky', 'journal', 'vogue', 'fitness', 'ticket', 'token']`
-3. **Add `token` to `FRAME_COLORS`** with a blue/navy accent matching the stamp palette:
-   ```typescript
-   token: {
-     accent: 'rgba(10, 82, 120, 0.45)',
-     gradient: 'linear-gradient(160deg, rgba(15, 100, 145, 0.35) 0%, rgba(5, 40, 60, 0.6) 100%)'
-   }
-   ```
-4. **Add `case 'token'`** in `renderFrame()` switch and in the 3 JSX conditional render spots (main preview, off-screen capture div, and carousel thumbnails)
+The `token.png` overlay uses `objectFit: 'fill'` to stretch to fill the 9:16 container, matching exactly how `TicketFrame` handles `ticket-frame.png`.
 
-### Files to Create/Edit
-- **NEW** `src/components/frames/TokenFrame.tsx`
-- **EDIT** `src/pages/Preview.tsx` (4 small changes)
+### What Gets Removed
+- `PerforationBorder` component (400+ lines of programmatic circles)
+- `PerforationRows`, `TopBottomHoles`, `LeftRightHoles` sub-components
+- `CircularStampSeal` SVG with manual bird path
+- All the complex CSS mask attempts
+- The Google Fonts `<link>` tag (fonts already in token.png image)
 
-### Design Details
-- Background: `#e8e8e8` (light stamp gray)
-- Stamp holes: `radial-gradient` 8px circles punched from the background along all edges
-- Top header text: `#0a5278` dark navy blue, Montserrat-weight bold uppercase ~52px
-- "Journey": `#1a1a1a` black italic serif ~36px
-- Photo: takes 60–65% height, 4px margin on sides
-- Circular stamp text: white text on transparent SVG, 90px circle at 40px from bottom-left of photo
-- Activity name: `#0a5278` bold uppercase Montserrat ~44px
-- Metrics: `#808080` gray medium ~16px, formatted as `{duration} | {pr} {metricLabel}`
+The result will be pixel-perfect to the reference design with far simpler code (~80 lines vs ~484 lines).
