@@ -9,10 +9,11 @@ import JournalFrame from '@/components/frames/JournalFrame';
 import VogueFrame from '@/components/frames/VogueFrame';
 import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
+import TokenFrame from '@/components/frames/TokenFrame';
 import ReelProgressPill from '@/components/ReelProgressPill';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 
-type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
+type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket' | 'token';
 
 interface FrameProps {
   imageUrl: string;
@@ -438,6 +439,8 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
         return <FitnessFrame {...frameProps} />;
       case 'ticket':
         return <TicketFrame {...frameProps} />;
+      case 'token':
+        return <TokenFrame {...frameProps} />;
       default:
         return (
           <img

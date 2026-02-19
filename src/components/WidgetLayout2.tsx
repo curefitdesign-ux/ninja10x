@@ -6,19 +6,20 @@ import JournalFrame from '@/components/frames/JournalFrame';
 import VogueFrame from '@/components/frames/VogueFrame';
 import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
+import TokenFrame from '@/components/frames/TokenFrame';
 
 interface Photo {
   id: string;
   storageUrl: string;
   isVideo?: boolean;
   activity?: string;
-  frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
+  frame?: 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket' | 'token';
   duration?: string;
   pr?: string;
   dayNumber: number;
 }
 
-type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket';
+type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket' | 'token';
 
 const isVideoUrl = (url: string) => {
   return url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
@@ -49,6 +50,7 @@ const renderInFrame = (photo: Photo, containerWidth: number = 180) => {
       case 'vogue': return <VogueFrame {...frameProps} />;
       case 'fitness': return <FitnessFrame {...frameProps} />;
       case 'ticket': return <TicketFrame {...frameProps} />;
+      case 'token': return <TokenFrame {...frameProps} />;
       default: return <ShakyFrame {...frameProps} />;
     }
   };
