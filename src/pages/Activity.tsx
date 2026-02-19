@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import TagembedWidget from "@/components/TagembedWidget";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -431,6 +432,31 @@ const Activity = () => {
                   onPlayReel={handlePlayReel}
                 />
               )}
+            </motion.div>
+          </div>
+
+          {/* Wall of Ninjas */}
+          <div className="px-4 mt-10 pb-28">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: 0.18 }}
+              className="mb-5"
+            >
+              <h2 className="text-xl font-semibold text-white">Wall of Ninja's</h2>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1], delay: 0.24 }}
+              className="rounded-2xl overflow-hidden"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                minHeight: "500px",
+              }}
+            >
+              <TagembedWidget />
             </motion.div>
           </div>
 
