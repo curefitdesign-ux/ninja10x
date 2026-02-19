@@ -509,7 +509,7 @@ const Preview = () => {
   useEffect(() => {
     if (!imageUrl || isVideo) return;
     const img = new Image();
-    img.crossOrigin = 'anonymous';
+    // Do NOT set crossOrigin for local blob/data URLs — it causes CORS errors and breaks rendering
     img.onload = () => {
       const canvas = document.createElement('canvas');
       // Tiny resolution - will be blurred anyway
