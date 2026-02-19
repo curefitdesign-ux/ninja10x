@@ -1,7 +1,6 @@
 import { useRef, useEffect } from 'react';
 import tokenBg from '@/assets/frames/token-bg.png';
 import tokenDuckRing from '@/assets/frames/token-duck-ring.png';
-import tokenCultNinjaText from '@/assets/frames/token-cult-ninja-text.png';
 
 interface TokenFrameProps {
   imageUrl: string;
@@ -45,11 +44,13 @@ const TokenFrame = ({
     .join(' | ');
 
   return (
+    // No overflow-hidden on outer — allows shadow to render uncropped
+    // No background — stamp bg PNG provides all the gray/white surface
     <div
-      className="w-[90%] mx-auto aspect-[9/16] overflow-hidden relative"
-      style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.28)' }}
+      className="w-[90%] mx-auto aspect-[9/16] relative"
+      style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.32))' }}
     >
-      {/* Layer 0: Stamp frame background — gray bg + perforated edges + header area */}
+      {/* Layer 0: Stamp frame background — gray bg + perforated edges + baked CULT NINJA text */}
       <img
         src={tokenBg}
         alt=""
@@ -62,14 +63,14 @@ const TokenFrame = ({
         }}
       />
 
-      {/* Layer 1: User photo/video — fills the inner photo window of the stamp */}
+      {/* Layer 1: User photo/video — starts halfway below the CULT NINJA text area */}
       <div
         className="absolute overflow-hidden"
         style={{
-          top: '20%',
-          left: '6%',
-          right: '6%',
-          bottom: '22%',
+          top: '27%',
+          left: '6.5%',
+          right: '6.5%',
+          bottom: '23%',
           zIndex: 10,
         }}
       >
@@ -98,27 +99,13 @@ const TokenFrame = ({
         )}
       </div>
 
-      {/* Layer 2: CULT NINJA Journey text — overlaid on top of the photo (top area) */}
-      <img
-        src={tokenCultNinjaText}
-        alt="CULT NINJA Journey"
-        className="absolute pointer-events-none"
-        style={{
-          top: '3%',
-          left: '8%',
-          width: '60%',
-          zIndex: 20,
-          objectFit: 'contain',
-        }}
-      />
-
-      {/* Layer 3: Duck + rings stamp seal — bottom-left, overlapping photo/strip boundary */}
+      {/* Layer 2: Duck + rings stamp seal — bottom-left, at photo/strip boundary */}
       <img
         src={tokenDuckRing}
         alt=""
         className="absolute pointer-events-none"
         style={{
-          bottom: '19%',
+          bottom: '20%',
           left: '3%',
           width: '22%',
           zIndex: 20,
@@ -126,9 +113,9 @@ const TokenFrame = ({
         }}
       />
 
-      {/* Layer 4: Activity name + metrics — bottom gray strip, right-aligned */}
+      {/* Layer 3: Activity name + metrics — bottom gray strip, right-aligned */}
       <div
-        className="absolute right-0 text-right"
+        className="absolute text-right"
         style={{
           bottom: '3%',
           right: '7%',
