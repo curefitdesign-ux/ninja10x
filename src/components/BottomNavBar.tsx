@@ -1,13 +1,20 @@
-// v4 – liquid glass nav with teal activity glow
+// v5 – matches new reference design: Home, Fitness, Activity (active), Store, Pilates
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Dumbbell, ShoppingBag, Waves, Activity } from "lucide-react";
+import { Home, Dumbbell, ShoppingBag, Waves } from "lucide-react";
+
+// Custom Activity pulse icon
+const ActivityIcon = ({ color, size }: { color: string; size: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+  </svg>
+);
 
 const navItems = [
   { id: "home", label: "Home", path: "/", Icon: Home },
   { id: "fitness", label: "Fitness", path: "/", Icon: Dumbbell },
-  { id: "activity", label: "Activity", path: "/", Icon: Activity },
+  { id: "activity", label: "Activity", path: "/", Icon: null },
   { id: "store", label: "Store", path: "/", Icon: ShoppingBag },
   { id: "pilates", label: "Pilates", path: "/", Icon: Waves },
 ];
@@ -40,70 +47,85 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
       className="fixed bottom-0 left-0 right-0"
       style={{
         zIndex: 9999,
-        background: "rgba(10, 7, 32, 0.10)",
-        backdropFilter: "blur(40px) saturate(180%)",
-        WebkitBackdropFilter: "blur(40px) saturate(180%)",
-        borderTop: "1px solid rgba(255, 255, 255, 0.08)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 -8px 32px rgba(10, 7, 32, 0.08)",
+        background: "rgba(20, 18, 42, 0.92)",
+        backdropFilter: "blur(24px) saturate(180%)",
+        WebkitBackdropFilter: "blur(24px) saturate(180%)",
+        borderTop: "1px solid rgba(255, 255, 255, 0.07)",
       }}
     >
       <div
-        className="flex items-end justify-around px-1"
-        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 6px), 6px)" }}
+        className="flex items-end justify-around px-2"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 8px), 8px)", paddingTop: "4px" }}
       >
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
           const isActivity = item.id === "activity";
 
-          const iconColor = isActivity && isActive
-            ? TEAL
-            : isActive
+          const iconColor = isActive && !isActivity
             ? "#ffffff"
-            : "rgba(180, 160, 220, 0.5)";
+            : !isActive
+            ? "rgba(180, 160, 220, 0.45)"
+            : TEAL;
 
-          const labelColor = isActivity && isActive
-            ? TEAL
-            : isActive
+          const labelColor = isActive && !isActivity
             ? "#ffffff"
-            : "rgba(180, 160, 220, 0.5)";
+            : !isActive
+            ? "rgba(180, 160, 220, 0.45)"
+            : TEAL;
 
+          if (isActivity) {
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item)}
+                className="flex flex-col items-center relative"
+                style={{ paddingBottom: 2, marginTop: -12 }}
+              >
+                {/* Floating pill circle */}
+                <div
+                  className="flex items-center justify-center rounded-full"
+                  style={{
+                    width: 52,
+                    height: 52,
+                    background: isActive
+                      ? "linear-gradient(135deg, #3B82F6 0%, #6366F1 100%)"
+                      : "rgba(255,255,255,0.08)",
+                    boxShadow: isActive
+                      ? "0 4px 20px rgba(99, 102, 241, 0.55)"
+                      : "none",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                  }}
+                >
+                  <ActivityIcon color="#ffffff" size={24} />
+                </div>
+                <span
+                  className="text-[10px] mt-1.5 tracking-wide font-semibold"
+                  style={{ color: isActive ? TEAL : "rgba(180,160,220,0.45)" }}
+                >
+                  {item.label}
+                </span>
+              </button>
+            );
+          }
+
+          const IconComp = item.Icon!;
           return (
             <button
               key={item.id}
               onClick={() => handleNavClick(item)}
-              className="pressable flex flex-col items-center pt-2 pb-1 px-3 relative"
+              className="flex flex-col items-center pt-2 pb-1 px-2"
             >
-              <div className="relative flex items-center justify-center">
-                {/* Subtle teal glow behind active activity icon */}
-                {isActive && isActivity && (
-                  <div
-                    className="absolute rounded-full pointer-events-none"
-                    style={{
-                      inset: "-8px",
-                      background: "radial-gradient(ellipse at center, rgba(15, 228, 152, 0.22) 0%, rgba(0, 190, 255, 0.10) 55%, transparent 80%)",
-                      filter: "blur(6px)",
-                    }}
-                  />
-                )}
-                <item.Icon
-                  className="transition-all duration-150 relative z-10"
-                  style={{
-                    width: isActivity ? "26px" : "22px",
-                    height: isActivity ? "26px" : "22px",
-                    color: iconColor,
-                    strokeWidth: isActive ? 2.2 : 1.6,
-                    filter: isActivity && isActive
-                      ? "drop-shadow(0 0 5px rgba(15, 228, 152, 0.55))"
-                      : "none",
-                  }}
-                />
-              </div>
-              <span
-                className="text-[10px] mt-1 tracking-wide transition-colors duration-150"
+              <IconComp
                 style={{
-                  color: labelColor,
-                  fontWeight: isActive ? 600 : 400,
+                  width: 22,
+                  height: 22,
+                  color: iconColor,
+                  strokeWidth: isActive ? 2.2 : 1.6,
                 }}
+              />
+              <span
+                className="text-[10px] mt-1 tracking-wide"
+                style={{ color: labelColor, fontWeight: isActive ? 600 : 400 }}
               >
                 {item.label}
               </span>
