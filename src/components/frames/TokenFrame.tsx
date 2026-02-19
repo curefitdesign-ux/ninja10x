@@ -100,18 +100,19 @@ const TokenFrame = ({
         )}
       </div>
 
-      {/* Layer 3: CULT NINJA JOURNEY text — half-overlays the top edge of the media */}
+      {/* Layer 3: CULT NINJA JOURNEY text — above media, center-aligned, smaller */}
       <img
         src={tokenCultNinjaText}
         alt=""
         className="absolute pointer-events-none"
         style={{
-          top: '7%',
-          left: '7%',
-          right: '7%',
+          top: '2%',
+          left: '10%',
+          right: '10%',
+          width: '80%',
           zIndex: 5,
           objectFit: 'contain',
-          objectPosition: 'left',
+          objectPosition: 'center',
         }}
       />
 
@@ -128,46 +129,6 @@ const TokenFrame = ({
           objectFit: 'contain',
         }}
       />
-
-      {/* Layer 4: Activity name + metrics — bottom gray strip, right-aligned */}
-      <div
-        className="absolute text-right"
-        style={{
-          bottom: '3%',
-          right: '7%',
-          paddingBottom: '2%',
-          zIndex: 10,
-        }}
-      >
-        <div
-          style={{
-            fontFamily: "'Montserrat', 'Arial Black', sans-serif",
-            fontWeight: 800,
-            fontSize: 'clamp(16px, 6vw, 26px)',
-            color: '#0a5278',
-            textTransform: 'uppercase',
-            letterSpacing: '0.01em',
-            lineHeight: 1.1,
-          }}
-        >
-          {activity || 'Activity'}
-        </div>
-        {metricsLine ? (
-          <div
-            style={{
-              fontFamily: "'Montserrat', Arial, sans-serif",
-              fontWeight: 600,
-              fontSize: 'clamp(7px, 2.4vw, 10px)',
-              color: '#555',
-              letterSpacing: '0.04em',
-              marginTop: 3,
-              lineHeight: 1.3,
-            }}
-          >
-            {metricsLine}
-          </div>
-        ) : null}
-      </div>
     </div>
   );
 };
