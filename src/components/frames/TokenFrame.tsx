@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import tokenBg from '@/assets/frames/token-bg.png';
 import tokenDuckRing from '@/assets/frames/token-duck-ring.png';
-
+import tokenCultNinjaText from '@/assets/frames/token-cult-ninja-text.png';
 
 interface TokenFrameProps {
   imageUrl: string;
@@ -31,7 +31,6 @@ const TokenFrame = ({
   label2,
 }: TokenFrameProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const durationLabel = label2 || 'Duration';
   const metricLabel = label1 || 'Metric';
 
   useEffect(() => {
@@ -50,7 +49,7 @@ const TokenFrame = ({
       className="w-[90%] mx-auto aspect-[9/16] overflow-hidden relative"
       style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.28)' }}
     >
-      {/* Layer 0: Stamp frame background — gray bg + perforated edges */}
+      {/* Layer 0: Stamp frame background — gray bg + perforated edges + header area */}
       <img
         src={tokenBg}
         alt=""
@@ -63,11 +62,11 @@ const TokenFrame = ({
         }}
       />
 
-      {/* Layer 1: User photo/video — clipped inside the stamp window area */}
+      {/* Layer 1: User photo/video — fills the inner photo window of the stamp */}
       <div
         className="absolute overflow-hidden"
         style={{
-          top: '18%',
+          top: '20%',
           left: '6%',
           right: '6%',
           bottom: '22%',
@@ -99,6 +98,19 @@ const TokenFrame = ({
         )}
       </div>
 
+      {/* Layer 2: CULT NINJA Journey text — overlaid on top of the photo (top area) */}
+      <img
+        src={tokenCultNinjaText}
+        alt="CULT NINJA Journey"
+        className="absolute pointer-events-none"
+        style={{
+          top: '3%',
+          left: '8%',
+          width: '60%',
+          zIndex: 20,
+          objectFit: 'contain',
+        }}
+      />
 
       {/* Layer 3: Duck + rings stamp seal — bottom-left, overlapping photo/strip boundary */}
       <img
@@ -106,7 +118,7 @@ const TokenFrame = ({
         alt=""
         className="absolute pointer-events-none"
         style={{
-          bottom: '18%',
+          bottom: '19%',
           left: '3%',
           width: '22%',
           zIndex: 20,
@@ -114,11 +126,12 @@ const TokenFrame = ({
         }}
       />
 
-      {/* Layer 4: Activity name + metrics — bottom gray strip */}
+      {/* Layer 4: Activity name + metrics — bottom gray strip, right-aligned */}
       <div
-        className="absolute left-0 right-0 text-center"
+        className="absolute right-0 text-right"
         style={{
           bottom: '3%',
+          right: '7%',
           paddingBottom: '2%',
           zIndex: 20,
         }}
@@ -127,10 +140,10 @@ const TokenFrame = ({
           style={{
             fontFamily: "'Montserrat', 'Arial Black', sans-serif",
             fontWeight: 800,
-            fontSize: 'clamp(20px, 7vw, 32px)',
+            fontSize: 'clamp(16px, 6vw, 26px)',
             color: '#0a5278',
             textTransform: 'uppercase',
-            letterSpacing: '0.02em',
+            letterSpacing: '0.01em',
             lineHeight: 1.1,
           }}
         >
@@ -141,10 +154,10 @@ const TokenFrame = ({
             style={{
               fontFamily: "'Montserrat', Arial, sans-serif",
               fontWeight: 600,
-              fontSize: 'clamp(8px, 2.8vw, 12px)',
+              fontSize: 'clamp(7px, 2.4vw, 10px)',
               color: '#555',
-              letterSpacing: '0.05em',
-              marginTop: 4,
+              letterSpacing: '0.04em',
+              marginTop: 3,
               lineHeight: 1.3,
             }}
           >
