@@ -326,29 +326,32 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
           )}
         </div>
 
-        {/* Upload Photo Button */}
+        {/* Upload Photo Button — use <label> so tap goes directly to native picker on iOS */}
         <div className="flex justify-center mb-5">
           <input
             ref={fileInputRef}
+            id="avatar-upload-input"
             type="file"
             accept="image/*"
             onChange={handleFileSelect}
             className="hidden"
-          />
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => fileInputRef.current?.click()}
             disabled={loading}
-            className="px-6 py-3 rounded-xl flex items-center gap-2 transition-all"
+          />
+          <motion.label
+            htmlFor="avatar-upload-input"
+            whileTap={{ scale: 0.98 }}
+            className="px-6 py-3 rounded-xl flex items-center gap-2 transition-all cursor-pointer"
             style={{
               background: 'rgba(255, 255, 255, 0.08)',
               backdropFilter: 'blur(20px)',
               border: '1px solid rgba(255, 255, 255, 0.15)',
+              opacity: loading ? 0.5 : 1,
+              pointerEvents: loading ? 'none' : 'auto',
             }}
           >
             <Camera className="w-5 h-5 text-white/80" />
             <span className="text-white/80 font-medium">Upload Photo</span>
-          </motion.button>
+          </motion.label>
         </div>
 
         {/* Or Divider */}
