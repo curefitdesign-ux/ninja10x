@@ -718,7 +718,13 @@ const Preview = () => {
           label2={activityLabels.primaryUnit}
         />;
       case 'holographic':
-        return <HolographicFrame {...frameProps} />;
+        return <HolographicFrame 
+          {...frameProps} 
+          label1={activityLabels.secondaryUnit}
+          label2={activityLabels.primaryUnit}
+          label1Name={activityLabels.secondaryMetric}
+          label2Name={activityLabels.primaryMetric}
+        />;
     }
   };
 
