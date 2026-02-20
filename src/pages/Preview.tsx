@@ -755,24 +755,27 @@ const Preview = () => {
   };
 
 
-  // Activity Selection Step — small card photo at top, glass sheet from bottom
+  // Activity Selection Step — small card photo floats above glass sheet
   if (flowStep === 'activity') {
     return (
       <div
         className="fixed inset-0 w-full touch-manipulation overflow-hidden"
         style={{ height: '100dvh', minHeight: '-webkit-fill-available', background: '#0a0a14' }}
       >
-        {/* ── BLURRED BACKGROUND IMAGE ── */}
+        {/* ── LAYER 0: BLURRED BACKGROUND IMAGE ── */}
         {imageUrl && (
-          <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+          <div
+            className="absolute inset-0 pointer-events-none overflow-hidden"
+            style={{ zIndex: 0 }}
+          >
             {isVideo ? (
               <video
                 src={imageUrl}
                 className="w-full h-full object-cover"
                 style={{
-                  position: 'absolute', inset: 0,
-                  filter: 'blur(48px) brightness(0.30) saturate(1.4)',
-                  transform: 'scale(1.2)',
+                  filter: 'blur(55px) brightness(0.35) saturate(1.4)',
+                  transform: 'scale(1.25)',
+                  transformOrigin: 'center center',
                 }}
                 autoPlay muted loop playsInline
               />
@@ -780,43 +783,23 @@ const Preview = () => {
               <img
                 src={imageUrl}
                 alt=""
+                className="w-full h-full object-cover"
                 style={{
-                  position: 'absolute', inset: 0,
-                  width: '100%', height: '100%',
-                  objectFit: 'cover',
-                  filter: 'blur(48px) brightness(0.30) saturate(1.4)',
-                  transform: 'scale(1.2)',
+                  filter: 'blur(55px) brightness(0.35) saturate(1.4)',
+                  transform: 'scale(1.25)',
+                  transformOrigin: 'center center',
                 }}
               />
             )}
+            {/* Dark overlay on top of blur */}
+            <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.25)' }} />
           </div>
         )}
 
-        {/* ── SMALL CARD PHOTO — centered at top ── */}
-        <div className="flex justify-center items-start" style={{ paddingTop: 'max(env(safe-area-inset-top, 32px), 32px)' }}>
-          <motion.div
-            layoutId="preview-media-card"
-            className="overflow-hidden"
-            style={{
-              width: '42vw',
-              aspectRatio: '9/16',
-              borderRadius: 20,
-              boxShadow: '0 12px 48px rgba(0,0,0,0.65)',
-            }}
-            transition={{ type: 'spring', stiffness: 260, damping: 28 }}
-          >
-            {isVideo ? (
-              <video src={imageUrl || ''} className="w-full h-full object-cover" autoPlay muted loop playsInline />
-            ) : (
-              <img src={imageUrl || ''} alt="Preview" className="w-full h-full object-cover" />
-            )}
-          </motion.div>
-        </div>
-
-        {/* ── GLASS ACTIVITY SHEET — edge-to-edge, slides up from bottom ── */}
+        {/* ── LAYER 10: GLASS ACTIVITY SHEET — behind card ── */}
         <motion.div
           className="absolute left-0 right-0 bottom-0 overflow-hidden"
-          initial={{ y: 80, opacity: 0 }}
+          initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30, delay: 0.05 }}
           style={{
@@ -861,7 +844,7 @@ const Preview = () => {
             {/* Activity Grid — 4 cols, scrollable */}
             <div
               className="grid grid-cols-4 gap-x-3 gap-y-4 overflow-y-auto overscroll-contain"
-              style={{ maxHeight: '55dvh', WebkitOverflowScrolling: 'touch' }}
+              style={{ maxHeight: '50dvh', WebkitOverflowScrolling: 'touch' }}
             >
               {activityOptions.map((activityOption, index) => {
                 const IconComp = activityOption.icon;
@@ -878,14 +861,13 @@ const Preview = () => {
                         handleActivitySelection(activityOption.name);
                       }
                     }}
-                    className="flex flex-col items-center gap-2 tap-bounce"
+                    className="flex flex-col items-center gap-2 active:scale-95 transition-transform"
                   >
                     <div
                       className="w-[62px] h-[62px] rounded-[18px] flex items-center justify-center"
                       style={{
                         background: 'rgba(255,255,255,0.09)',
                         border: '1px solid rgba(255,255,255,0.12)',
-                        color: 'rgba(255,255,255,0.9)',
                       }}
                     >
                       <IconComp
@@ -894,7 +876,8 @@ const Preview = () => {
                         size={26}
                         strokeWidth={1.5}
                         stroke="rgba(255,255,255,0.9)"
-                        style={{ color: 'rgba(255,255,255,0.9)', display: 'block' }}
+                        color="rgba(255,255,255,0.9)"
+                        style={{ color: 'rgba(255,255,255,0.9)', display: 'block', fill: 'none' }}
                       />
                     </div>
                     <span className="text-white/70 text-[10px] text-center leading-tight">{activityOption.name}</span>
@@ -903,6 +886,65 @@ const Preview = () => {
               })}
             </div>
           </div>
+        </motion.div>
+
+        {/* ── LAYER 20: FLOATING MEDIA CARD — above the glass sheet ── */}
+        <motion.div
+          className="absolute flex flex-col items-center"
+          style={{
+            top: 'max(env(safe-area-inset-top, 24px), 24px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 20,
+          }}
+          initial={{ opacity: 0, scale: 0.88, y: -12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 280, damping: 28, delay: 0.08 }}
+        >
+          <motion.div
+            layoutId="preview-media-card"
+            className="overflow-hidden"
+            style={{
+              width: '38vw',
+              aspectRatio: '9/16',
+              borderRadius: 18,
+              boxShadow: '0 16px 56px rgba(0,0,0,0.75), 0 4px 16px rgba(0,0,0,0.5)',
+              border: '1.5px solid rgba(255,255,255,0.18)',
+            }}
+            transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+          >
+            {isVideo ? (
+              <video src={imageUrl || ''} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+            ) : (
+              <img src={imageUrl || ''} alt="Preview" className="w-full h-full object-cover" />
+            )}
+          </motion.div>
+
+          {/* Re-crop / Re-trim button below the card */}
+          <motion.button
+            className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+            style={{
+              background: 'rgba(255,255,255,0.10)',
+              border: '1px solid rgba(255,255,255,0.18)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+            }}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.28, duration: 0.22 }}
+            onClick={() => {
+              if (mediaSource === 'camera') {
+                navigate('/camera', { state: { dayNumber }, replace: false });
+              } else {
+                navigate('/gallery', { state: { dayNumber }, replace: false });
+              }
+            }}
+          >
+            <ImageIcon className="w-3 h-3 text-white/80" />
+            <span className="text-white/80 text-[11px] font-medium">
+              {isVideo ? 'Re-trim' : 'Re-crop'}
+            </span>
+          </motion.button>
         </motion.div>
 
       </div>
