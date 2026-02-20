@@ -360,7 +360,8 @@ const ImmersiveHomeLayout = ({
               currentDay={photos.length}
               currentWeek={currentWeek > 4 ? 4 : currentWeek}
               onMascotTap={() => {
-                if (latestPhoto) handlePhotoTap(latestPhoto);
+                triggerHaptic('medium');
+                setShowMediaSheet(true);
               }}
             />
           </motion.div>

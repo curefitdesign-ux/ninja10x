@@ -270,16 +270,23 @@ const CircularProgressRing = ({
         <div className="absolute w-1.5 h-1 rounded-sm bg-teal-400/65" style={{ top: '54%', right: '35%', transform: 'rotate(-45deg)' }} />
       </div>
       
-      {/* Mascot - tappable */}
+      {/* Inner circle - fully tappable to open gallery */}
       <motion.button
-        className="absolute inset-0 flex items-center justify-center cursor-pointer"
+        className="absolute flex items-center justify-center cursor-pointer rounded-full"
+        style={{
+          top: '50%',
+          left: '50%',
+          width: ringRadius * 2 - strokeWidth * 2 - 8,
+          height: ringRadius * 2 - strokeWidth * 2 - 8,
+          transform: 'translate(-50%, -50%)',
+        }}
         onClick={onMascotTap}
         whileTap={{ scale: 0.95 }}
       >
         <img 
           src={mascotSrc || curoMascot} 
           alt={mascotAlt || "Curo mascot"} 
-          className="w-36 h-36 object-contain"
+          className="w-36 h-36 object-contain pointer-events-none"
           style={{ 
             marginTop: '-6px',
             filter: 'drop-shadow(0 6px 16px rgba(139, 92, 246, 0.25))'
