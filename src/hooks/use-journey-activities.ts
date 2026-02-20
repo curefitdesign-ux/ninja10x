@@ -184,15 +184,27 @@ export function useJourneyActivities() {
       return null;
     };
 
-    const storageUrl = await uploadAsset(input.displayUrl, `activity-display-${Date.now()}`, input.isVideo || false);
+    // Run both uploads in parallel when they are different assets (saves ~50% of upload time)
+    const isSameAsset = input.originalUrl === input.displayUrl;
+    const ts = Date.now();
+
+    let storageUrl: string | null;
+    let originalUrl: string | null;
+
+    if (isSameAsset) {
+      storageUrl = await uploadAsset(input.displayUrl, `activity-display-${ts}`, input.isVideo || false);
+      originalUrl = storageUrl;
+    } else {
+      [storageUrl, originalUrl] = await Promise.all([
+        uploadAsset(input.displayUrl, `activity-display-${ts}`, input.isVideo || false),
+        uploadAsset(input.originalUrl, `activity-original-${ts}`, input.isVideo || false),
+      ]);
+    }
+
     if (!storageUrl) {
       console.error('Failed to upload display asset');
       return null;
     }
-
-    const originalUrl = input.originalUrl === input.displayUrl
-      ? storageUrl
-      : await uploadAsset(input.originalUrl, `activity-original-${Date.now()}`, input.isVideo || false);
 
     if (!originalUrl) {
       console.error('Failed to upload original asset');

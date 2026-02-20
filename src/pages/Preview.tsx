@@ -353,17 +353,17 @@ const Preview = () => {
     if (!captureRef.current) return null;
 
     try {
-      // scale: 1.5 keeps quality high while being ~2.7x faster than scale: 2
+      // scale: 1.0 is the fastest option — sufficient quality for sharing
       const canvas = await html2canvas(captureRef.current, {
         backgroundColor: null,
-        scale: 1.5,
+        scale: 1.0,
         useCORS: true,
         allowTaint: true,
         logging: false,
         imageTimeout: 5000,
       });
-      // JPEG at 0.92 quality — 40–60% smaller file, indistinguishable visually
-      return canvas.toDataURL('image/jpeg', 0.92);
+      // JPEG at 0.88 quality — smaller file, fast upload
+      return canvas.toDataURL('image/jpeg', 0.88);
     } catch (error) {
       console.error('Error capturing frame:', error);
       return null;
@@ -685,8 +685,10 @@ const Preview = () => {
     pr,
     imagePosition,
     imageScale,
-    label1: activityLabels.secondaryMetric, // metric name for secondary (e.g., 'Distance', 'Sets', 'Runs')
-    label2: activityLabels.primaryMetric,   // metric name for primary (e.g., 'Duration')
+    // TokenFrame uses units (e.g. 'km', 'min') for its "Value + Unit" bottom strip
+    // All other frames use metric names (e.g. 'Distance', 'Duration') as labels
+    label1: activityLabels.secondaryUnit,   // unit for secondary (e.g., 'km', 'sets', 'runs')
+    label2: activityLabels.primaryUnit,     // unit for primary (e.g., 'min')
   };
 
   const renderFrame = () => {
