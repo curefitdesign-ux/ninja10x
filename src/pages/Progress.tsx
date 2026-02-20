@@ -18,34 +18,36 @@ import engineBadgeImg from "@/assets/progress/engine-badge.png";
 import SharedImageTransition from "@/components/SharedImageTransition";
 import { isVideoUrl } from "@/lib/media";
 
-// Tile positions — Day 1 at TOP-LEFT, Day 12 at BOTTOM (journey flows downward)
-// S-curve diagonal: Week 1 sweeps left→right, Week 2 sweeps right→left, etc.
-// Positions tuned pixel-perfectly to match reference design (IMG_0392)
+// Tile positions — pixel-perfect match to reference design (IMG_0392)
+// The tile area starts after the story strip. Top 0% = top of tile area, 100% = bottom.
+// S-curve: Week 1 left→right, Week 2 right→left, Week 3 left→right, Week 4 right→left
 const TILE_POSITIONS = [
-  // Week 1 — sweeping left→right (Day 1 top-left)
-  { left: 30, top: 4  },  // Day 1  ← engine badge sits here
-  { left: 44, top: 11 },  // Day 2
-  { left: 58, top: 18 },  // Day 3  ← milestone (BUILD STRENGTH line)
+  // Week 1 — sweeping left→right
+  { left: 30, top: 7  },  // Day 1  (engine badge overlaps from above)
+  { left: 44, top: 14 },  // Day 2
+  { left: 58, top: 21 },  // Day 3
   // Week 2 — sweeping right→left
-  { left: 65, top: 26 },  // Day 4
-  { left: 52, top: 33 },  // Day 5
-  { left: 38, top: 40 },  // Day 6  ← milestone (INCREASE STAMINA line)
+  { left: 65, top: 30 },  // Day 4
+  { left: 51, top: 37 },  // Day 5
+  { left: 37, top: 44 },  // Day 6
   // Week 3 — sweeping left→right
-  { left: 30, top: 48 },  // Day 7
-  { left: 44, top: 55 },  // Day 8
-  { left: 58, top: 62 },  // Day 9  ← milestone (BUILD ENERGY line)
+  { left: 30, top: 53 },  // Day 7
+  { left: 44, top: 60 },  // Day 8
+  { left: 58, top: 67 },  // Day 9
   // Week 4 — sweeping right→left
-  { left: 65, top: 69 },  // Day 10
-  { left: 52, top: 76 },  // Day 11
-  { left: 38, top: 83 },  // Day 12 ← milestone (CONQUER WILL POWER line)
+  { left: 65, top: 75 },  // Day 10
+  { left: 51, top: 82 },  // Day 11
+  { left: 37, top: 89 },  // Day 12
 ];
 
-// Labels appear at the START of each week group (aligned with Day 1, 4, 7, 10 tiles)
+// Labels appear beside the first tile of each week group.
+// "right" labels: text on right side of screen, line extends left
+// "left" labels: text on left side of screen, line extends right
 const LABELS = [
-  { tileIndex: 0, text: ["BUILD", "STRENGTH"],     side: "right" as const, top: 4,  left: 63 },
-  { tileIndex: 3, text: ["INCREASE", "STAMINA"],   side: "left"  as const, top: 26, left: 2  },
-  { tileIndex: 6, text: ["BUILD", "ENERGY"],       side: "right" as const, top: 48, left: 63 },
-  { tileIndex: 9, text: ["CONQUER", "WILL POWER"], side: "left"  as const, top: 69, left: 2  },
+  { tileIndex: 0, text: ["BUILD", "STRENGTH"],     side: "right" as const, top: 5,  left: 63 },
+  { tileIndex: 3, text: ["INCREASE", "STAMINA"],   side: "left"  as const, top: 28, left: 2  },
+  { tileIndex: 6, text: ["BUILD", "ENERGY"],       side: "right" as const, top: 51, left: 63 },
+  { tileIndex: 9, text: ["CONQUER", "WILL POWER"], side: "left"  as const, top: 73, left: 2  },
 ];
 
 const Progress = () => {
@@ -516,17 +518,17 @@ const Progress = () => {
           opacity: contentOpacity,
         }}
       >
-        {/* Engine Badge - positioned ON Day 1 tile (top-left, ~30% left, ~4% top) */}
+        {/* Engine Badge — sits on top of Day 1 tile (left ~30%, top ~7% of tile area) */}
         <AnimatePresence>
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "17%", top: "-1%", width: "28%", aspectRatio: "1" }}
+              style={{ left: "14%", top: "-2%", width: "32%", aspectRatio: "1" }}
               initial={{ opacity: 0, scale: 0.6, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.4 }}
             >
-              <img src={engineBadgeImg} alt="Engine Badge" className="w-full h-full object-contain" style={{ opacity: 0.85 }} />
+              <img src={engineBadgeImg} alt="Engine Badge" className="w-full h-full object-contain" style={{ opacity: 0.9 }} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -621,12 +623,12 @@ const Progress = () => {
           </motion.div>
         ))}
 
-        {/* Bottom Base Platform - aligned under Day 12 tile (left: ~38%, bottom) */}
+        {/* Bottom Base Platform — sits below Day 12 tile (left ~37%, bottom of tile area) */}
         <AnimatePresence>
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "28%", bottom: "2%", width: "50%", aspectRatio: "2.5" }}
+              style={{ left: "22%", bottom: "1%", width: "55%", aspectRatio: "2.5" }}
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7 }}
