@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { X, ChevronLeft, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause } from 'lucide-react';
@@ -555,7 +556,11 @@ const Reel = () => {
     if (hasWeekRecap) return;
     
     // Don't start timer until media is loaded (check via loadedMediaUrl)
-    const currentMediaUrl = currentActivity?.storageUrl || currentActivity?.originalUrl || '';
+    // For live-frame activities, use originalUrl; otherwise use storageUrl
+    const activityHasLiveFrame = !!(currentActivity?.frame && currentActivity.frame !== 'recap' && currentActivity?.originalUrl);
+    const currentMediaUrl = activityHasLiveFrame
+      ? (currentActivity?.originalUrl || currentActivity?.storageUrl || '')
+      : (currentActivity?.storageUrl || currentActivity?.originalUrl || '');
     if (isPaused || loading || !currentActivity || loadedMediaUrl !== currentMediaUrl || !currentMediaUrl) {
       return;
     }
@@ -1077,10 +1082,14 @@ const Reel = () => {
     );
   }
 
-  // Use storageUrl (templated/framed screenshot) for display, fall back to originalUrl
-  const mediaUrl = currentActivity.storageUrl || currentActivity.originalUrl || '';
-  // Determine media type from the actual URL extension ONLY — storageUrl for video activities
-  // is a .jpg/.png screenshot (the framed capture), so we must not rely on the is_video DB flag here.
+  // For activities with a frame: use the raw originalUrl for live frame rendering (pixel-perfect).
+  // For recap videos or activities without a frame: fall back to storageUrl (pre-rendered JPEG/video).
+  const hasLiveFrame = !!(currentActivity.frame && currentActivity.frame !== 'recap' && currentActivity.originalUrl);
+  const mediaUrl = hasLiveFrame
+    ? (currentActivity.originalUrl || currentActivity.storageUrl || '')
+    : (currentActivity.storageUrl || currentActivity.originalUrl || '');
+  // Determine media type from actual URL extension — must not use is_video DB flag because
+  // storageUrl for video activities is a .jpg screenshot (framed capture).
   const isVideo = isVideoUrl(mediaUrl);
   // Derived: media is "loaded" once the browser has fetched and decoded this specific URL
   const mediaLoaded = loadedMediaUrl === mediaUrl && mediaUrl.length > 0;
@@ -1391,39 +1400,30 @@ const Reel = () => {
                               background: 'linear-gradient(135deg, hsl(var(--muted)) 0%, hsl(var(--background)) 100%)',
                             }}
                           >
-                            {/* Animated loading spinner */}
                             <div className="relative w-16 h-16">
                               <svg className="absolute inset-0 w-full h-full animate-spin" viewBox="0 0 64 64">
-                                <circle
-                                  cx="32"
-                                  cy="32"
-                                  r="28"
-                                  fill="none"
-                                  stroke="hsl(var(--foreground) / 0.1)"
-                                  strokeWidth="4"
-                                />
-                                <circle
-                                  cx="32"
-                                  cy="32"
-                                  r="28"
-                                  fill="none"
-                                  stroke="hsl(var(--primary))"
-                                  strokeWidth="4"
-                                  strokeLinecap="round"
-                                  strokeDasharray={`${2 * Math.PI * 28 * 0.3} ${2 * Math.PI * 28 * 0.7}`}
-                                />
+                                <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--foreground) / 0.1)" strokeWidth="4" />
+                                <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--primary))" strokeWidth="4" strokeLinecap="round"
+                                  strokeDasharray={`${2 * Math.PI * 28 * 0.3} ${2 * Math.PI * 28 * 0.7}`} />
                               </svg>
                             </div>
-                            
                             <div className="text-center px-8">
-                              <p className="text-foreground font-semibold text-lg mb-2">
-                                Generating your AI recap...
-                              </p>
-                              <p className="text-muted-foreground text-sm">
-                                This usually takes 1-2 minutes
-                              </p>
+                              <p className="text-foreground font-semibold text-lg mb-2">Generating your AI recap...</p>
+                              <p className="text-muted-foreground text-sm">This usually takes 1-2 minutes</p>
                             </div>
                           </div>
+                        ) : hasLiveFrame ? (
+                          // Live frame render — pixel-perfect at any resolution
+                          <StoryFrameRenderer
+                            imageUrl={mediaUrl}
+                            isVideo={currentActivity.isVideo}
+                            activity={currentActivity.activity}
+                            frame={currentActivity.frame}
+                            duration={currentActivity.duration}
+                            pr={currentActivity.pr}
+                            dayNumber={currentActivity.dayNumber}
+                            onLoad={() => setLoadedMediaUrl(mediaUrl)}
+                          />
                         ) : isVideo ? (
                           <video
                             ref={videoRef}
@@ -1475,38 +1475,6 @@ const Reel = () => {
                         )}
                       </motion.div>
                     </AnimatePresence>
-                    {/* Segmented progress bar at top of card - GPU accelerated */}
-                    {currentGroup && currentGroup.activities.length > 0 && (
-                      <div className="absolute top-2 left-2 right-2 flex gap-1 z-20">
-                        {currentGroup.activities.map((_, idx) => {
-                          const isCurrentSegment = idx === currentActivityIndex;
-                          const isViewed = idx < currentActivityIndex;
-                          const progress = isViewed ? 1 : isCurrentSegment ? autoAdvanceProgress : 0;
-                          
-                          return (
-                            <div
-                              key={idx}
-                              className="flex-1 h-[3px] rounded-full overflow-hidden"
-                              style={{
-                                background: 'rgba(255,255,255,0.25)',
-                              }}
-                            >
-                              <div
-                                className="h-full w-full rounded-full"
-                                style={{
-                                  background: 'rgba(255,255,255,0.9)',
-                                  transform: `scaleX(${progress})`,
-                                  transformOrigin: 'left',
-                                  transition: isCurrentSegment ? 'none' : 'transform 0.3s ease',
-                                  willChange: 'transform',
-                                }}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                    
 
                     {/* Share button - inside card, bottom-right */}
                     {!shouldShowLocked && (
