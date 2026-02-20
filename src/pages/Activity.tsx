@@ -337,26 +337,55 @@ const Activity = () => {
             {/* Spacer */}
             <div className="flex-1" />
             
-            {/* Notification Bell - Right */}
-            <motion.button
-              onClick={() => setShowNotifications(true)}
-              className="relative w-10 h-10 rounded-full flex items-center justify-center"
-              style={{
-                background: 'rgba(255, 255, 255, 0.08)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.2)',
-              }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Bell className="w-5 h-5 text-white/70" />
-              {notificationCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-[9px] font-bold text-white flex items-center justify-center">
-                  {notificationCount > 9 ? '9+' : notificationCount}
-                </span>
-              )}
-            </motion.button>
+          {/* Notification Bell - Right */}
+            <div className="flex flex-col items-end gap-1">
+              <motion.button
+                onClick={() => { setShowNotifications(true); setNotificationCount(0); }}
+                className="relative w-10 h-10 rounded-full flex items-center justify-center"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.2)',
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Bell className="w-5 h-5 text-white/70" />
+                {notificationCount > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-[9px] font-bold text-white flex items-center justify-center"
+                  >
+                    {notificationCount > 9 ? '9+' : notificationCount}
+                  </motion.span>
+                )}
+              </motion.button>
+
+              {/* Notification count pill below bell */}
+              <AnimatePresence>
+                {notificationCount > 0 && (
+                  <motion.button
+                    initial={{ opacity: 0, y: -6, scale: 0.85 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -4, scale: 0.85 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+                    onClick={() => { setShowNotifications(true); setNotificationCount(0); }}
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-full"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(249,115,22,0.25), rgba(236,72,153,0.25))',
+                      border: '1px solid rgba(249,115,22,0.4)',
+                      backdropFilter: 'blur(20px)',
+                    }}
+                  >
+                    <span className="text-[10px] font-semibold" style={{ background: 'linear-gradient(90deg, #F97316, #EC4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                      {notificationCount} new
+                    </span>
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
           
           {/* Stats Header - hidden for clean layout */}
