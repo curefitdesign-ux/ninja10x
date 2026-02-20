@@ -466,35 +466,41 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
         className="absolute bottom-0 left-0 right-0 px-6 z-10"
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 20px)' }}
       >
-        {/* Zoom and rotation controls - only for images */}
-        {!isVideo && (
-          <div className="flex justify-center gap-4 mb-6">
-            <button 
-              onClick={handleZoomOut} 
-              className="p-3 bg-white/10 backdrop-blur-sm rounded-full active:scale-95 transition-transform"
-            >
-              <ZoomOut className="w-6 h-6 text-white" />
-            </button>
-            <button 
-              onClick={handleRotateLeft} 
-              className="p-3 bg-white/10 backdrop-blur-sm rounded-full active:scale-95 transition-transform"
-            >
-              <RotateCcw className="w-6 h-6 text-white" />
-            </button>
-            <button 
-              onClick={handleRotateRight}
-              className="p-3 bg-white/10 backdrop-blur-sm rounded-full active:scale-95 transition-transform"
-            >
-              <RotateCw className="w-6 h-6 text-white" />
-            </button>
-            <button 
-              onClick={handleZoomIn} 
-              className="p-3 bg-white/10 backdrop-blur-sm rounded-full active:scale-95 transition-transform"
-            >
-              <ZoomIn className="w-6 h-6 text-white" />
-            </button>
-          </div>
-        )}
+        {/* Zoom controls — shown for both images and videos, rotation only for images */}
+        <div className="flex justify-center gap-4 mb-6">
+          <button 
+            onClick={handleZoomOut} 
+            className="p-3 bg-white/10 backdrop-blur-sm rounded-full active:scale-95 transition-transform"
+            title="Zoom out"
+          >
+            <ZoomOut className="w-6 h-6 text-white" />
+          </button>
+          {!isVideo && (
+            <>
+              <button 
+                onClick={handleRotateLeft} 
+                className="p-3 bg-white/10 backdrop-blur-sm rounded-full active:scale-95 transition-transform"
+                title="Rotate left"
+              >
+                <RotateCcw className="w-6 h-6 text-white" />
+              </button>
+              <button 
+                onClick={handleRotateRight}
+                className="p-3 bg-white/10 backdrop-blur-sm rounded-full active:scale-95 transition-transform"
+                title="Rotate right"
+              >
+                <RotateCw className="w-6 h-6 text-white" />
+              </button>
+            </>
+          )}
+          <button 
+            onClick={handleZoomIn} 
+            className="p-3 bg-white/10 backdrop-blur-sm rounded-full active:scale-95 transition-transform"
+            title="Zoom in"
+          >
+            <ZoomIn className="w-6 h-6 text-white" />
+          </button>
+        </div>
         
         <div className="flex items-center justify-between">
           {/* Retake button */}
