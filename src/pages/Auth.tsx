@@ -149,7 +149,7 @@ const Auth = () => {
   }
 
   if (showProfileSetup) {
-    return <ProfileSetup onComplete={handleProfileComplete} onBack={() => setShowProfileSetup(false)} />;
+    return <ProfileSetup onComplete={handleProfileComplete} />;
   }
 
   return (

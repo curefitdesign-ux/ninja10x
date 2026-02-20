@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Camera, X, Eye, EyeOff, LogOut, ChevronLeft } from 'lucide-react';
+import { Check, Camera, X, Eye, EyeOff, LogOut } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 
 import { supabase } from '@/integrations/supabase/client';
@@ -253,8 +253,8 @@ const ProfileSetupPage = () => {
           paddingBottom: 'max(env(safe-area-inset-bottom), 32px)',
         }}
       >
-        {/* Back button for new setup / Close button for edit mode */}
-        {editMode ? (
+        {/* Close button for edit mode */}
+        {editMode && (
           <button
             onClick={() => navigate('/', { replace: true })}
             className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center z-20 active:scale-95 transition-transform"
@@ -266,23 +266,6 @@ const ProfileSetupPage = () => {
             }}
           >
             <X className="w-5 h-5 text-white/70" />
-          </button>
-        ) : (
-          <button
-            onClick={() => navigate('/auth', { replace: true })}
-            className="absolute top-4 left-4 flex items-center gap-1 z-20 active:scale-95 transition-transform"
-            style={{ marginTop: 'max(env(safe-area-inset-top), 12px)' }}
-          >
-            <div
-              className="w-9 h-9 rounded-full flex items-center justify-center"
-              style={{
-                background: 'rgba(255,255,255,0.10)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.15)',
-              }}
-            >
-              <ChevronLeft className="w-5 h-5 text-white/80" />
-            </div>
           </button>
         )}
 

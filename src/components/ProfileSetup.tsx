@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Camera, X, ChevronLeft } from 'lucide-react';
+import { Check, Camera, X, ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
@@ -9,12 +9,13 @@ import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import AvatarCropper from '@/components/AvatarCropper';
 
+
 // New 3D character preset avatars
 import presetOrange from '@/assets/avatars/preset-orange.png';
 import presetRedgirl from '@/assets/avatars/preset-redgirl.png';
 import presetEdgy from '@/assets/avatars/preset-edgy.png';
 
-// Fallback color avatars
+// Fallback to color avatars for remaining slots
 import avatarRed from '@/assets/avatars/avatar-red.png';
 import avatarBlue from '@/assets/avatars/avatar-blue.png';
 import avatarPurple from '@/assets/avatars/avatar-purple.png';
@@ -42,12 +43,11 @@ const nameSchema = z.string().trim().min(2, 'Name must be at least 2 characters'
 
 interface ProfileSetupProps {
   onComplete: () => void;
-  onBack?: () => void;
   editMode?: boolean;
   existingProfile?: Profile | null;
 }
 
-const ProfileSetup = ({ onComplete, onBack, editMode = false, existingProfile }: ProfileSetupProps) => {
+const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: ProfileSetupProps) => {
   const { user } = useAuth();
   const { updateProfile } = useProfile();
   const navigate = useNavigate();
@@ -60,6 +60,8 @@ const ProfileSetup = ({ onComplete, onBack, editMode = false, existingProfile }:
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [showPhotoSheet, setShowPhotoSheet] = useState(false);
+  const heroInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   // Pre-fill data in edit mode
@@ -72,7 +74,6 @@ const ProfileSetup = ({ onComplete, onBack, editMode = false, existingProfile }:
       );
       if (presetMatch) {
         setSelectedAvatar(presetMatch.id);
-        setHeroPhotoPreview(presetMatch.src);
       } else if (storedUrl) {
         setCustomAvatarPreview(storedUrl);
         setHeroPhotoPreview(storedUrl);
@@ -80,14 +81,25 @@ const ProfileSetup = ({ onComplete, onBack, editMode = false, existingProfile }:
     }
   }, [editMode, existingProfile]);
 
-  // Handle file selected from camera — opens cropper
-  const handlePhotoFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle file selected from gallery/camera (for hero/avatar combined)
+  const handleMediaSelected = (file: File | null, dataUrl: string) => {
+    if (!file && !dataUrl) return;
+    // Open cropper with the selected image
+    setCropImageSrc(dataUrl || '');
+    setShowPhotoSheet(false);
+  };
+
+  // Handle native file input for hero photo (gallery fallback)
+  const handleHeroFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return; }
     if (file.size > 20 * 1024 * 1024) { toast.error('Image must be less than 20MB'); return; }
     const reader = new FileReader();
-    reader.onload = (ev) => setCropImageSrc(ev.target?.result as string);
+    reader.onload = (ev) => {
+      const imageData = ev.target?.result as string;
+      setCropImageSrc(imageData);
+    };
     reader.readAsDataURL(file);
     if (e.target) e.target.value = '';
   };
@@ -189,53 +201,30 @@ const ProfileSetup = ({ onComplete, onBack, editMode = false, existingProfile }:
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 flex flex-col overflow-hidden"
-      style={{ height: '100dvh' }}
+      style={{ background: '#0a0a12', height: '100dvh' }}
     >
-      {/* ─── FULL-SCREEN BLURRED BACKGROUND ─── */}
-      {/* Dark base layer always present */}
-      <div
-        className="absolute inset-0"
-        style={{ background: 'linear-gradient(180deg, #1a0d38 0%, #0a0a12 100%)', zIndex: 0 }}
-      />
-      {/* Blurred version of the selected avatar/photo fills the whole screen */}
-      <AnimatePresence>
-        {heroImage && (
-          <motion.div
-            key={heroImage.slice(-40)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="absolute inset-0 pointer-events-none"
-            style={{ zIndex: 1 }}
-          >
-            <img
-              src={heroImage}
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ filter: 'blur(48px) saturate(190%)', transform: 'scale(1.2)' }}
-            />
-            {/* 10% black overlay over the blurred bg */}
-            <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.10)' }} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* ─── HERO PHOTO — full bleed top ~62% of screen, tappable to open camera/gallery ─── */}
+      <div className="absolute inset-x-0 top-0" style={{ height: '62%' }}>
 
-      {/* ─── HERO PHOTO — full bleed top ~62%, tap to open camera directly ─── */}
-      <div className="absolute inset-x-0 top-0" style={{ height: '62%', zIndex: 2 }}>
-
-        {/* Camera input — tap this label directly opens the camera */}
+        {/* Hidden native file input (fallback) */}
         <input
-          ref={cameraInputRef}
-          id="hero-camera-input"
+          ref={heroInputRef}
+          id="hero-upload-input"
           type="file"
           accept="image/*"
-          capture="environment"
-          onChange={handlePhotoFileSelect}
+          onChange={handleHeroFileSelect}
           className="hidden"
         />
 
-        <label htmlFor="hero-camera-input" className="block w-full h-full cursor-pointer relative">
+        {/* Full-bleed square photo area — tappable */}
+        <label
+          htmlFor="hero-upload-input"
+          className="block w-full h-full cursor-pointer relative"
+          onClick={(e) => {
+            e.preventDefault();
+            setShowPhotoSheet(true);
+          }}
+        >
           {heroImage ? (
             <img
               src={heroImage}
@@ -244,24 +233,27 @@ const ProfileSetup = ({ onComplete, onBack, editMode = false, existingProfile }:
               style={{ display: 'block' }}
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-4">
+            <div
+              className="w-full h-full flex flex-col items-center justify-center gap-4"
+              style={{ background: 'linear-gradient(180deg, #1e1040 0%, #0d0820 100%)' }}
+            >
               <motion.div
                 className="w-20 h-20 rounded-3xl flex items-center justify-center"
                 style={{
-                  background: 'rgba(255,255,255,0.07)',
-                  border: '1.5px dashed rgba(255,255,255,0.3)',
-                  backdropFilter: 'blur(12px)',
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1.5px dashed rgba(255,255,255,0.25)',
+                  backdropFilter: 'blur(10px)',
                 }}
                 animate={{ scale: [1, 1.04, 1] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <Camera className="w-9 h-9 text-white/60" />
+                <Camera className="w-9 h-9 text-white/40" />
               </motion.div>
-              <p className="text-white/50 text-sm tracking-wide font-medium">Tap to add your photo</p>
+              <p className="text-white/35 text-sm tracking-wide">Tap to add your photo</p>
             </div>
           )}
 
-          {/* Edit icon overlay when photo is set */}
+          {/* Edit icon overlay when photo exists */}
           {heroImage && (
             <div
               className="absolute bottom-4 right-4 w-9 h-9 rounded-full flex items-center justify-center"
@@ -276,17 +268,17 @@ const ProfileSetup = ({ onComplete, onBack, editMode = false, existingProfile }:
           )}
         </label>
 
-        {/* Glass gradient mask — bottom of hero melts into bottom panel */}
+        {/* Glass gradient mask — bottom of hero */}
         <div
           className="absolute inset-x-0 bottom-0 pointer-events-none"
           style={{
-            height: '55%',
-            background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0.85) 85%, rgba(0,0,0,0.95) 100%)',
+            height: '50%',
+            background: 'linear-gradient(to bottom, transparent 0%, rgba(10,10,18,0.55) 45%, rgba(10,10,18,0.92) 80%, #0a0a12 100%)',
           }}
         />
 
-        {/* Back button (new setup) / Close button (edit mode) */}
-        {editMode ? (
+        {/* Close button (edit mode only) */}
+        {editMode && (
           <motion.button
             onClick={handleClose}
             whileTap={{ scale: 0.95 }}
@@ -302,31 +294,15 @@ const ProfileSetup = ({ onComplete, onBack, editMode = false, existingProfile }:
           >
             <X className="w-4 h-4 text-white" />
           </motion.button>
-        ) : onBack ? (
-          <motion.button
-            onClick={onBack}
-            whileTap={{ scale: 0.95 }}
-            className="absolute w-9 h-9 rounded-full flex items-center justify-center"
-            style={{
-              top: '48px',
-              left: '16px',
-              background: 'rgba(0,0,0,0.45)',
-              backdropFilter: 'blur(16px)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              zIndex: 5,
-            }}
-          >
-            <ChevronLeft className="w-5 h-5 text-white" />
-          </motion.button>
-        ) : null}
+        )}
       </div>
 
-      {/* ─── BOTTOM PANEL — floats over blurred bg ─── */}
+      {/* ─── BOTTOM PANEL ─── */}
       <div
         className="absolute inset-x-0 bottom-0 flex flex-col"
-        style={{ top: '56%', zIndex: 3 }}
+        style={{ top: '56%', zIndex: 10 }}
       >
-        {/* Name input */}
+        {/* Name input — large, centered */}
         <div className="flex flex-col items-center px-6 mt-4">
           <input
             type="text"
@@ -335,20 +311,20 @@ const ProfileSetup = ({ onComplete, onBack, editMode = false, existingProfile }:
             placeholder="Your Name"
             disabled={loading}
             maxLength={50}
-            className="w-full text-center text-white text-3xl font-bold bg-transparent outline-none placeholder:text-white/30 border-0"
-            style={{ caretColor: 'white', textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}
+            className="w-full text-center text-white text-3xl font-bold bg-transparent outline-none placeholder:text-white/25 border-0"
+            style={{ caretColor: 'white' }}
           />
           {nameError && <p className="text-red-400 text-xs mt-1">{nameError}</p>}
         </div>
 
         {/* Divider */}
         <div className="flex items-center gap-3 px-6 mt-5 mb-3">
-          <div className="flex-1 h-px bg-white/15" />
-          <span className="text-white/40 text-xs tracking-wide uppercase">Choose avatar</span>
-          <div className="flex-1 h-px bg-white/15" />
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-white/30 text-xs tracking-wide uppercase">Choose avatar</span>
+          <div className="flex-1 h-px bg-white/10" />
         </div>
 
-        {/* Preset avatar tiles — horizontal scroll, square */}
+        {/* Preset Avatars — horizontal scrollable row, square tiles */}
         <div className="px-4 mb-5">
           <div
             className="flex gap-2.5 overflow-x-auto pb-1"
@@ -363,13 +339,14 @@ const ProfileSetup = ({ onComplete, onBack, editMode = false, existingProfile }:
                 className="relative flex-shrink-0"
                 style={{ width: 60, height: 60 }}
               >
+                {/* Square tile */}
                 <div
                   className="w-full h-full overflow-hidden"
                   style={{
                     borderRadius: 12,
                     border: selectedAvatar === avatar.id
                       ? '2.5px solid #34d399'
-                      : '2px solid rgba(255,255,255,0.15)',
+                      : '2px solid rgba(255,255,255,0.1)',
                     boxShadow: selectedAvatar === avatar.id
                       ? '0 0 14px rgba(52,211,153,0.45)'
                       : 'none',
@@ -409,11 +386,11 @@ const ProfileSetup = ({ onComplete, onBack, editMode = false, existingProfile }:
             style={{
               background: hasAvatarSelected && displayName.trim()
                 ? 'linear-gradient(135deg, #F97316 0%, #EC4899 100%)'
-                : 'rgba(255,255,255,0.10)',
+                : 'rgba(255,255,255,0.08)',
               border: '1px solid rgba(255,255,255,0.12)',
               boxShadow: hasAvatarSelected && displayName.trim()
                 ? '0 8px 28px rgba(249,115,22,0.3), inset 0 1px 0 rgba(255,255,255,0.2)'
-                : 'inset 0 1px 1px rgba(255,255,255,0.08)',
+                : 'inset 0 1px 1px rgba(255,255,255,0.1)',
             }}
           >
             <motion.div
@@ -428,6 +405,101 @@ const ProfileSetup = ({ onComplete, onBack, editMode = false, existingProfile }:
           </motion.button>
         </div>
       </div>
+
+      {/* Inline Camera / Gallery picker sheet */}
+      <AnimatePresence>
+        {showPhotoSheet && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black z-40"
+              onClick={() => setShowPhotoSheet(false)}
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+              className="fixed inset-x-0 bottom-0 z-50 flex flex-col gap-3 p-5 pb-10"
+              style={{
+                background: 'rgba(18,14,32,0.96)',
+                backdropFilter: 'blur(40px)',
+                borderTop: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '24px 24px 0 0',
+              }}
+            >
+              <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-2" />
+              <p className="text-white/60 text-xs uppercase tracking-widest text-center mb-1">Add Profile Photo</p>
+
+              {/* Camera option */}
+              <label
+                htmlFor="camera-capture-input"
+                className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform"
+                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}
+                onClick={() => setShowPhotoSheet(false)}
+              >
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'rgba(249,115,22,0.15)' }}>
+                  <Camera className="w-5 h-5 text-orange-400" />
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">Take Photo</p>
+                  <p className="text-white/40 text-xs">Open camera</p>
+                </div>
+              </label>
+              <input
+                id="camera-capture-input"
+                type="file"
+                accept="image/*"
+                capture="user"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = (ev) => setCropImageSrc(ev.target?.result as string);
+                  reader.readAsDataURL(file);
+                  if (e.target) e.target.value = '';
+                }}
+                className="hidden"
+              />
+
+              {/* Gallery option */}
+              <label
+                htmlFor="gallery-select-input"
+                className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform"
+                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}
+                onClick={() => setShowPhotoSheet(false)}
+              >
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'rgba(139,92,246,0.15)' }}>
+                  <ImageIcon className="w-5 h-5 text-purple-400" />
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">Choose from Gallery</p>
+                  <p className="text-white/40 text-xs">Pick from your photos</p>
+                </div>
+              </label>
+              <input
+                id="gallery-select-input"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = (ev) => {
+                    setCropImageSrc(ev.target?.result as string);
+                    setShowPhotoSheet(false);
+                  };
+                  reader.readAsDataURL(file);
+                  if (e.target) e.target.value = '';
+                }}
+                className="hidden"
+              />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Inline Avatar Cropper overlay */}
       <AnimatePresence>
