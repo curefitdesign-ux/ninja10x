@@ -685,10 +685,9 @@ const Preview = () => {
     pr,
     imagePosition,
     imageScale,
-    // TokenFrame uses units (e.g. 'km', 'min') for its "Value + Unit" bottom strip
-    // All other frames use metric names (e.g. 'Distance', 'Duration') as labels
-    label1: activityLabels.secondaryUnit,   // unit for secondary (e.g., 'km', 'sets', 'runs')
-    label2: activityLabels.primaryUnit,     // unit for primary (e.g., 'min')
+    // All frames (except Token) use metric names as labels (e.g. 'Distance', 'Duration')
+    label1: activityLabels.secondaryMetric,  // metric name for secondary (e.g. 'Distance', 'Sets')
+    label2: activityLabels.primaryMetric,    // metric name for primary (e.g. 'Duration')
   };
 
   const renderFrame = () => {
