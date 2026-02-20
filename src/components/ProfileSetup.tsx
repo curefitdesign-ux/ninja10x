@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Camera, X } from 'lucide-react';
+import { Check, Camera, X, ImageIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,24 +47,30 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [customAvatarFile, setCustomAvatarFile] = useState<File | null>(null);
   const [customAvatarPreview, setCustomAvatarPreview] = useState<string | null>(null);
+  // Hero photo — the full-bleed background image
+  const [heroPhotoFile, setHeroPhotoFile] = useState<File | null>(null);
+  const [heroPhotoPreview, setHeroPhotoPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [cropMode, setCropMode] = useState<'avatar' | 'hero'>('avatar');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const heroInputRef = useRef<HTMLInputElement>(null);
 
   // Pre-fill data in edit mode
   useEffect(() => {
     if (editMode && existingProfile) {
       setDisplayName(existingProfile.display_name);
-      // Check if avatar is a preset key (e.g. 'avatar-red') or a custom upload URL
       const storedUrl = existingProfile.avatar_url;
-      const presetMatch = PRESET_AVATARS.find(a => 
+      const presetMatch = PRESET_AVATARS.find(a =>
         storedUrl === `avatar-${a.id}` || storedUrl.includes(`avatar-${a.id}`)
       );
       if (presetMatch) {
         setSelectedAvatar(presetMatch.id);
       } else if (storedUrl) {
         setCustomAvatarPreview(storedUrl);
+        // Also use as hero if no dedicated hero
+        setHeroPhotoPreview(storedUrl);
       }
     }
   }, [editMode, existingProfile]);
@@ -72,24 +78,34 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB');
-      return;
-    }
-
+    if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error('Image must be less than 10MB'); return; }
     const reader = new FileReader();
     reader.onload = (ev) => {
       const imageData = ev.target?.result as string;
+      setCropMode('avatar');
       setCropImageSrc(imageData);
     };
     reader.readAsDataURL(file);
-    // Reset input so same file can be selected again
+    if (e.target) e.target.value = '';
+  };
+
+  const handleHeroFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return; }
+    if (file.size > 20 * 1024 * 1024) { toast.error('Image must be less than 20MB'); return; }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const imageData = ev.target?.result as string;
+      // Use directly without crop for hero photo (full bleed)
+      setHeroPhotoPreview(imageData);
+      // Convert blob to File
+      fetch(imageData).then(r => r.blob()).then(blob => {
+        setHeroPhotoFile(new File([blob], 'hero.jpg', { type: 'image/jpeg' }));
+      });
+    };
+    reader.readAsDataURL(file);
     if (e.target) e.target.value = '';
   };
 
@@ -100,24 +116,31 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
         const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
         setCustomAvatarFile(file);
         setCustomAvatarPreview(croppedDataUrl);
+        // Also set as hero if none chosen
+        if (!heroPhotoPreview) {
+          setHeroPhotoPreview(croppedDataUrl);
+          setHeroPhotoFile(file);
+        }
         setSelectedAvatar(null);
         setCropImageSrc(null);
       });
   };
 
-  const handleCropCancel = () => {
-    setCropImageSrc(null);
-  };
+  const handleCropCancel = () => setCropImageSrc(null);
 
   const selectPresetAvatar = (avatarId: string) => {
     setSelectedAvatar(avatarId);
     setCustomAvatarFile(null);
     setCustomAvatarPreview(null);
+    // Use preset as hero background too if no dedicated hero
+    const preset = PRESET_AVATARS.find(a => a.id === avatarId);
+    if (preset && !heroPhotoFile) {
+      setHeroPhotoPreview(preset.src);
+    }
   };
 
   const hasAvatarSelected = selectedAvatar !== null || customAvatarFile !== null || customAvatarPreview !== null;
 
-  // Get current avatar preview
   const getCurrentAvatarPreview = () => {
     if (customAvatarPreview) return customAvatarPreview;
     if (selectedAvatar) {
@@ -128,75 +151,45 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
   };
 
   const currentAvatar = getCurrentAvatarPreview();
+  const heroImage = heroPhotoPreview || currentAvatar;
 
   const handleSubmit = async () => {
     const nameResult = nameSchema.safeParse(displayName);
-    if (!nameResult.success) {
-      setNameError(nameResult.error.errors[0].message);
-      return;
-    }
-
-    if (!hasAvatarSelected) {
-      toast.error('Please select an avatar');
-      return;
-    }
-
-    if (!user) {
-      toast.error('No user logged in');
-      return;
-    }
+    if (!nameResult.success) { setNameError(nameResult.error.errors[0].message); return; }
+    if (!hasAvatarSelected) { toast.error('Please select an avatar'); return; }
+    if (!user) { toast.error('No user logged in'); return; }
 
     setLoading(true);
-
     try {
       let avatarUrl: string;
 
       if (customAvatarFile) {
-        // Upload custom avatar to storage
         const fileExt = customAvatarFile.name.split('.').pop();
         const fileName = `${user.id}/avatar.${fileExt}`;
-
         const { error: uploadError } = await supabase.storage
           .from('journey-uploads')
           .upload(fileName, customAvatarFile, { upsert: true });
-
         if (uploadError) throw uploadError;
-
-        const { data: urlData } = supabase.storage
-          .from('journey-uploads')
-          .getPublicUrl(fileName);
-
+        const { data: urlData } = supabase.storage.from('journey-uploads').getPublicUrl(fileName);
         avatarUrl = urlData.publicUrl;
       } else if (selectedAvatar) {
-        // Save the stable key (e.g. 'avatar-red') not the Vite-hashed path.
-        // ProfileAvatar resolves the key back to the correct hashed asset URL at render time.
         avatarUrl = `avatar-${selectedAvatar}`;
       } else {
-        // Keep existing custom avatar
         avatarUrl = customAvatarPreview || '';
       }
 
       if (editMode) {
-        // Update existing profile
-        await updateProfile({
+        await updateProfile({ display_name: displayName.trim(), avatar_url: avatarUrl });
+        toast.success('Profile updated!');
+      } else {
+        const { error: insertError } = await supabase.from('profiles').insert({
+          user_id: user.id,
           display_name: displayName.trim(),
           avatar_url: avatarUrl,
         });
-        toast.success('Profile updated!');
-      } else {
-        // Create profile in database
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: user.id,
-            display_name: displayName.trim(),
-            avatar_url: avatarUrl,
-          });
-
         if (insertError) throw insertError;
         toast.success('Profile created!');
       }
-
       onComplete();
     } catch (error: any) {
       console.error('Error saving profile:', error);
@@ -207,9 +200,7 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
   };
 
   const handleClose = () => {
-    if (editMode) {
-      navigate(-1);
-    }
+    if (editMode) navigate(-1);
   };
 
   return (
@@ -217,218 +208,225 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen flex flex-col p-4 relative overflow-hidden"
-      style={{ background: '#0a0a12' }}
+      className="fixed inset-0 flex flex-col overflow-hidden"
+      style={{ background: '#0a0a12', height: '100dvh' }}
     >
-      {/* Animated gradient orbs background */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <motion.div
-          className="absolute w-[300px] h-[300px] rounded-full"
+      {/* ─── HERO PHOTO — full bleed, top ~58% of screen ─── */}
+      <div className="absolute inset-x-0 top-0" style={{ height: '60%' }}>
+        {heroImage ? (
+          <img
+            src={heroImage}
+            alt="Profile hero"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          /* Empty state — tap to add cover photo */
+          <div
+            className="w-full h-full flex flex-col items-center justify-center gap-3"
+            style={{ background: 'linear-gradient(180deg, #1a1030 0%, #0d0818 100%)' }}
+          >
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center"
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px dashed rgba(255,255,255,0.2)' }}
+            >
+              <ImageIcon className="w-7 h-7 text-white/30" />
+            </div>
+            <p className="text-white/30 text-sm">Add a cover photo</p>
+          </div>
+        )}
+
+        {/* Glass gradient mask at the bottom of hero image */}
+        <div
+          className="absolute inset-x-0 bottom-0"
           style={{
-            background: 'radial-gradient(circle, hsl(160, 84%, 39%) 0%, transparent 70%)',
-            filter: 'blur(80px)',
-            top: '-10%',
-            left: '-15%',
-            opacity: 0.35,
+            height: '55%',
+            background: 'linear-gradient(to bottom, transparent 0%, rgba(10,10,18,0.6) 50%, rgba(10,10,18,0.95) 85%, #0a0a12 100%)',
           }}
-          animate={{ x: [0, 30, 0], y: [0, 20, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         />
-        <motion.div
-          className="absolute w-[250px] h-[250px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, hsl(280, 60%, 50%) 0%, transparent 70%)',
-            filter: 'blur(70px)',
-            bottom: '10%',
-            right: '-10%',
-            opacity: 0.25,
-          }}
-          animate={{ x: [0, -20, 0], y: [0, -30, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        />
+
+        {/* Change cover photo button — top right of image */}
+        <div className="absolute top-safe-top right-4" style={{ top: '48px' }}>
+          <input
+            ref={heroInputRef}
+            id="hero-upload-input"
+            type="file"
+            accept="image/*"
+            onChange={handleHeroFileSelect}
+            className="hidden"
+          />
+          {editMode && (
+            <motion.button
+              onClick={handleClose}
+              whileTap={{ scale: 0.95 }}
+              className="w-9 h-9 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.15)' }}
+            >
+              <X className="w-4 h-4 text-white" />
+            </motion.button>
+          )}
+        </div>
       </div>
 
-      {/* Close button for edit mode */}
-      {editMode && (
-        <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          onClick={handleClose}
-          className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full flex items-center justify-center"
-          style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(10px)',
-          }}
-        >
-          <X className="w-5 h-5 text-white/70" />
-        </motion.button>
-      )}
-
-      <div className="flex-1 flex flex-col max-w-md mx-auto w-full relative z-10 pt-8">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-white mb-1">
-            {editMode ? 'Edit your profile' : 'Complete Your Profile'}
-          </h1>
-          <p className="text-white/50 text-sm">
-            {editMode ? 'Choose a photo that represents you!' : 'Add your name and choose an avatar'}
-          </p>
-        </div>
-
-        {/* Large Avatar Preview */}
-        <div className="flex justify-center mb-3">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', delay: 0.1 }}
-            className="relative"
-          >
-            <div 
-              className="w-36 h-36 rounded-full overflow-hidden flex items-center justify-center"
+      {/* ─── BOTTOM GLASS PANEL ─── */}
+      <div
+        className="absolute inset-x-0 bottom-0 flex flex-col"
+        style={{ top: '52%', zIndex: 10 }}
+      >
+        {/* Small circular avatar — sits at the very top of the panel, overlapping the hero */}
+        <div className="flex justify-center" style={{ marginTop: '-36px' }}>
+          <div className="relative">
+            <div
+              className="w-[72px] h-[72px] rounded-full overflow-hidden flex items-center justify-center"
               style={{
-                background: currentAvatar ? 'transparent' : 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
-                border: '3px solid rgba(255, 255, 255, 0.2)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                border: '3px solid rgba(255,255,255,0.3)',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+                background: currentAvatar ? 'transparent' : 'rgba(255,255,255,0.08)',
               }}
             >
               {currentAvatar ? (
-                <img 
-                  src={currentAvatar} 
-                  alt="Avatar preview" 
-                  className="w-full h-full object-cover"
-                />
+                <img src={currentAvatar} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
-                  <Camera className="w-8 h-8 text-white/40" />
-                </div>
+                <Camera className="w-7 h-7 text-white/40" />
               )}
             </div>
-          </motion.div>
+            {/* Upload avatar tap target */}
+            <input
+              ref={fileInputRef}
+              id="avatar-upload-input"
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+              disabled={loading}
+            />
+            <label
+              htmlFor="avatar-upload-input"
+              className="absolute inset-0 rounded-full cursor-pointer"
+              style={{ zIndex: 2 }}
+            />
+          </div>
         </div>
 
-        {/* Name Input — below avatar pic */}
-        <div className="mb-5">
-          <Input
-            id="displayName"
+        {/* Name + Upload hint */}
+        <div className="flex flex-col items-center mt-3 px-6">
+          {/* Name input — large, centered */}
+          <input
             type="text"
             value={displayName}
-            onChange={(e) => {
-              setDisplayName(e.target.value);
-              if (nameError) setNameError(null);
-            }}
-            placeholder="Your name"
-            className="h-12 text-white placeholder:text-white/30 rounded-xl focus:border-emerald-400/50 focus:ring-emerald-400/20 text-center bg-transparent border-0 border-b border-white/20 rounded-none text-lg font-medium"
+            onChange={(e) => { setDisplayName(e.target.value); if (nameError) setNameError(null); }}
+            placeholder="Your Name"
             disabled={loading}
             maxLength={50}
+            className="w-full text-center text-white text-3xl font-bold bg-transparent outline-none placeholder:text-white/25 border-0"
+            style={{ caretColor: 'white' }}
           />
-          {nameError && (
-            <p className="text-red-400 text-xs mt-1 text-center">{nameError}</p>
-          )}
+          {nameError && <p className="text-red-400 text-xs mt-1">{nameError}</p>}
+
+          {/* Upload photo label */}
+          <label
+            htmlFor="hero-upload-input"
+            className="mt-1 text-white/40 text-sm cursor-pointer active:text-white/70 transition-colors"
+          >
+            {heroImage ? 'Change cover photo' : 'Add cover photo'}
+          </label>
         </div>
 
-        {/* Upload Photo Button — use <label> so tap goes directly to native picker on iOS */}
-        <div className="flex justify-center mb-5">
-          <input
-            ref={fileInputRef}
-            id="avatar-upload-input"
-            type="file"
-            accept="image/*"
-            onChange={handleFileSelect}
-            className="hidden"
-            disabled={loading}
-          />
-          <motion.label
+        {/* Divider */}
+        <div className="flex items-center gap-3 px-6 mt-4 mb-3">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-white/30 text-xs tracking-wide uppercase">Choose avatar</span>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
+
+        {/* Preset Avatars — horizontal scrollable row */}
+        <div className="px-4 mb-5">
+          <div className="flex gap-3 overflow-x-auto pb-1 justify-center" style={{ scrollbarWidth: 'none' }}>
+            {PRESET_AVATARS.map((avatar) => (
+              <motion.button
+                key={avatar.id}
+                whileTap={{ scale: 0.92 }}
+                onClick={() => selectPresetAvatar(avatar.id)}
+                disabled={loading}
+                className="relative flex-shrink-0"
+                style={{ width: 52, height: 52 }}
+              >
+                <div
+                  className="w-full h-full rounded-full overflow-hidden"
+                  style={{
+                    border: selectedAvatar === avatar.id
+                      ? '2.5px solid #34d399'
+                      : '2px solid rgba(255,255,255,0.12)',
+                    boxShadow: selectedAvatar === avatar.id ? '0 0 12px rgba(52,211,153,0.4)' : 'none',
+                  }}
+                >
+                  <img src={avatar.src} alt={`Avatar ${avatar.id}`} className="w-full h-full object-cover" />
+                </div>
+                <AnimatePresence>
+                  {selectedAvatar === avatar.id && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0 }}
+                      className="absolute inset-0 rounded-full flex items-center justify-center bg-black/40"
+                    >
+                      <Check className="w-4 h-4 text-emerald-400" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+
+        {/* Upload Photo button */}
+        <div className="px-6 mb-4">
+          <label
             htmlFor="avatar-upload-input"
-            whileTap={{ scale: 0.98 }}
-            className="px-6 py-3 rounded-xl flex items-center gap-2 transition-all cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl cursor-pointer active:scale-[0.98] transition-transform"
             style={{
-              background: 'rgba(255, 255, 255, 0.08)',
+              background: 'rgba(255,255,255,0.07)',
               backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
+              border: '1px solid rgba(255,255,255,0.12)',
               opacity: loading ? 0.5 : 1,
               pointerEvents: loading ? 'none' : 'auto',
             }}
           >
-            <Camera className="w-5 h-5 text-white/80" />
-            <span className="text-white/80 font-medium">Upload Photo</span>
-          </motion.label>
+            <Camera className="w-4 h-4 text-white/60" />
+            <span className="text-white/70 text-sm font-medium">Upload custom photo</span>
+          </label>
         </div>
 
-        {/* Or Divider */}
-        <div className="flex items-center gap-4 mb-4">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="text-white/40 text-sm">or choose a preset</span>
-          <div className="flex-1 h-px bg-white/10" />
-        </div>
-
-        {/* Preset Avatars Grid - 4 columns */}
-        <div className="grid grid-cols-4 gap-3 mb-6">
-          {PRESET_AVATARS.map((avatar) => (
-            <motion.button
-              key={avatar.id}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => selectPresetAvatar(avatar.id)}
-              disabled={loading}
-              className={`relative aspect-square rounded-full overflow-hidden border-2 transition-all ${
-                selectedAvatar === avatar.id
-                  ? 'border-green-500 ring-2 ring-green-500/30'
-                  : 'border-transparent hover:border-white/30'
-              }`}
-            >
-              <img
-                src={avatar.src}
-                alt={`Avatar ${avatar.id}`}
-                className="w-full h-full object-cover"
-              />
-              <AnimatePresence>
-                {selectedAvatar === avatar.id && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0 }}
-                    className="absolute inset-0 flex items-center justify-center bg-black/40"
-                  >
-                    <Check className="w-6 h-6 text-green-400" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.button>
-          ))}
-        </div>
-
-        {/* Submit Button */}
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          onClick={handleSubmit}
-          disabled={loading || !displayName.trim() || !hasAvatarSelected}
-          className="w-full py-4 rounded-2xl font-semibold text-white transition-all duration-200 disabled:opacity-50 relative overflow-hidden"
-          style={{
-            background: hasAvatarSelected && displayName.trim()
-              ? 'linear-gradient(135deg, hsl(160, 84%, 39%) 0%, hsl(172, 66%, 50%) 100%)'
-              : 'rgba(255, 255, 255, 0.08)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            boxShadow: hasAvatarSelected && displayName.trim()
-              ? '0 8px 24px rgba(52, 211, 153, 0.25), inset 0 1px 0 rgba(255,255,255,0.2)'
-              : 'inset 0 1px 1px rgba(255,255,255,0.1)',
-          }}
-        >
-          {/* Shimmer effect */}
-          <motion.div
-            className="absolute inset-0 opacity-30"
+        {/* Submit CTA */}
+        <div className="px-6 pb-8">
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={handleSubmit}
+            disabled={loading || !displayName.trim() || !hasAvatarSelected}
+            className="w-full py-4 rounded-2xl font-semibold text-white transition-all duration-200 disabled:opacity-40 relative overflow-hidden"
             style={{
-              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+              background: hasAvatarSelected && displayName.trim()
+                ? 'linear-gradient(135deg, hsl(160, 84%, 39%) 0%, hsl(172, 66%, 50%) 100%)'
+                : 'rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              boxShadow: hasAvatarSelected && displayName.trim()
+                ? '0 8px 24px rgba(52,211,153,0.25), inset 0 1px 0 rgba(255,255,255,0.2)'
+                : 'inset 0 1px 1px rgba(255,255,255,0.1)',
             }}
-            animate={{ x: ['-100%', '200%'] }}
-            transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }}
-          />
-          <span className="relative z-10">
-            {loading ? (editMode ? 'Saving...' : 'Creating Profile...') : (editMode ? 'Save Changes' : 'Continue')}
-          </span>
-        </motion.button>
+          >
+            <motion.div
+              className="absolute inset-0 opacity-30"
+              style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)' }}
+              animate={{ x: ['-100%', '200%'] }}
+              transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }}
+            />
+            <span className="relative z-10">
+              {loading ? (editMode ? 'Saving...' : 'Creating Profile...') : (editMode ? 'Save Changes' : 'Continue')}
+            </span>
+          </motion.button>
+        </div>
       </div>
 
-      {/* Inline Avatar Cropper overlay — no navigation needed */}
+      {/* Inline Avatar Cropper overlay */}
       <AnimatePresence>
         {cropImageSrc && (
           <motion.div
