@@ -244,7 +244,7 @@ const HolographicFrame = ({
           >
             {durationRaw}
           </div>
-          {/* Unit | Label subtext */}
+          {/* Unit | Label subtext — shifted left by 10px */}
           <div
             style={{
               fontFamily: "'Arial', 'Helvetica', sans-serif",
@@ -254,6 +254,7 @@ const HolographicFrame = ({
               letterSpacing: '0.04em',
               textTransform: 'uppercase',
               marginTop: '3px',
+              marginLeft: '-10px',
               whiteSpace: 'nowrap',
               lineHeight: 1.1,
             }}
@@ -263,7 +264,7 @@ const HolographicFrame = ({
         </div>
       )}
 
-      {/* BOX 2 text: Large number + white label subtext — shifted slightly down */}
+      {/* BOX 2 text: Large number + white label subtext */}
       {hasMetric2 && (
         <div
           className="absolute"
@@ -281,7 +282,7 @@ const HolographicFrame = ({
             paddingRight: '4%',
           }}
         >
-          {/* Large bold number */}
+          {/* Large bold number — shifted down by 5px */}
           <div
             style={{
               fontFamily: "'Arial Black', 'Impact', sans-serif",
@@ -291,11 +292,12 @@ const HolographicFrame = ({
               lineHeight: 1,
               letterSpacing: '-0.02em',
               whiteSpace: 'nowrap',
+              marginTop: '5px',
             }}
           >
             {prValue}
           </div>
-          {/* White label subtext */}
+          {/* White label subtext — shifted down by 1px extra */}
           <div
             style={{
               fontFamily: "'Arial Black', 'Arial', sans-serif",
@@ -304,7 +306,7 @@ const HolographicFrame = ({
               color: '#ffffff',
               letterSpacing: '0.02em',
               textTransform: 'capitalize',
-              marginTop: '4px',
+              marginTop: '5px',
               whiteSpace: 'nowrap',
               lineHeight: 1.2,
             }}
