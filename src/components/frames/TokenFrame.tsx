@@ -1,7 +1,6 @@
 import { useRef, useEffect } from 'react';
 import tokenBg from '@/assets/frames/token-bg.png';
-import tokenDuckRing from '@/assets/frames/token-duck-ring.png';
-import tokenCultNinjaText from '@/assets/frames/token-cult-ninja-text.png';
+import tokenBadge from '@/assets/frames/token-badge.png';
 
 interface TokenFrameProps {
   imageUrl: string;
@@ -31,7 +30,6 @@ const TokenFrame = ({
   label2,
 }: TokenFrameProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const metricLabel = label1 || 'Metric';
 
   useEffect(() => {
     if (isVideo && videoRef.current) {
@@ -40,36 +38,73 @@ const TokenFrame = ({
     }
   }, [isVideo, imageUrl]);
 
-  const metricsLine = [duration, pr ? `${pr} ${metricLabel}` : '']
-    .filter(Boolean)
-    .join(' | ');
+  // Metric labels
+  const metric1Label = label1 || 'Hrs';
+  const metric2Label = label2 || (pr ? 'Laps' : '');
+
+  // Format duration value (strip units if present)
+  const durationValue = duration ? duration.replace(/[^0-9:]/g, '').padStart(2, '0') : '';
+  const prValue = pr ? pr.replace(/[^0-9]/g, '').padStart(2, '0') : '';
 
   return (
-    // No overflow-hidden on outer — allows drop-shadow to render uncropped on perforated edges
-    <div
-      className="w-[90%] mx-auto aspect-[9/16] relative"
-    >
-      {/* Layer 1: Stamp frame background — perforated edges + CULT NINJA header + gray strip */}
+    // No overflow-hidden on outer — allows drop-shadow on perforated edges
+    <div className="w-[90%] mx-auto aspect-[9/16] relative">
+
+      {/* ── STAMP FRAME BACKGROUND ── */}
       <img
         src={tokenBg}
         alt=""
         className="absolute inset-0 pointer-events-none"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'fill',
-          zIndex: 1,
-        }}
+        style={{ width: '100%', height: '100%', objectFit: 'fill', zIndex: 1 }}
       />
 
-      {/* Layer 2: User photo/video — clipped to inner photo window, no background/shadow */}
+      {/* ── TOP HEADER STRIP (Activity name + subtitle) ── */}
+      <div
+        className="absolute left-0 right-0 flex flex-col items-center"
+        style={{ top: '2%', zIndex: 10, paddingLeft: '8%', paddingRight: '8%' }}
+      >
+        {/* Activity name — large serif bold, navy blue */}
+        <div
+          style={{
+            fontFamily: "'Georgia', 'Times New Roman', serif",
+            fontWeight: 900,
+            fontSize: 'clamp(28px, 10vw, 52px)',
+            color: '#0a4a72',
+            textTransform: 'capitalize',
+            letterSpacing: '-0.01em',
+            lineHeight: 1,
+            textAlign: 'center',
+            fontStyle: 'italic',
+          }}
+        >
+          {activity || 'Activity'}
+        </div>
+
+        {/* CULT NINJA JOURNEY subtitle */}
+        <div
+          style={{
+            fontFamily: "'Arial', sans-serif",
+            fontWeight: 700,
+            fontSize: 'clamp(7px, 2.5vw, 11px)',
+            color: '#4a7a9b',
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            marginTop: '2px',
+            textAlign: 'center',
+          }}
+        >
+          · CULT NINJA JOURNEY ·
+        </div>
+      </div>
+
+      {/* ── USER PHOTO / VIDEO (inner window) ── */}
       <div
         className="absolute overflow-hidden"
         style={{
-          top: '10%',
+          top: '17%',
           left: '7%',
           right: '7%',
-          bottom: '15%',
+          bottom: '14%',
           zIndex: 2,
           borderRadius: '2px',
           background: 'transparent',
@@ -101,74 +136,72 @@ const TokenFrame = ({
         )}
       </div>
 
-      {/* Layer 3: CULT NINJA JOURNEY text — centered, smaller size */}
+      {/* ── STAMP BADGE (bottom-left of photo, overlapping) ── */}
       <img
-        src={tokenCultNinjaText}
+        src={tokenBadge}
         alt=""
         className="absolute pointer-events-none"
         style={{
-          top: '2%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '70%',
-          zIndex: 5,
-          objectFit: 'contain',
-        }}
-      />
-
-      {/* Layer 4: Duck + rings stamp seal — overlays on the photo */}
-      <img
-        src={tokenDuckRing}
-        alt=""
-        className="absolute pointer-events-none"
-        style={{
-          bottom: '20%',
-          left: '3%',
-          width: '22%',
+          bottom: '18%',
+          left: '5%',
+          width: '24%',
           zIndex: 10,
           objectFit: 'contain',
+          opacity: 0.85,
         }}
       />
 
-      {/* Layer 4: Activity name + metrics — bottom gray strip, right-aligned */}
+      {/* ── BOTTOM METRICS STRIP ── */}
       <div
-        className="absolute text-right"
+        className="absolute left-0 right-0 flex items-end justify-between"
         style={{
-          bottom: '3%',
-          right: '7%',
-          paddingBottom: '2%',
+          bottom: '0%',
+          height: '14%',
+          paddingLeft: '8%',
+          paddingRight: '8%',
+          paddingBottom: '3%',
           zIndex: 10,
         }}
       >
-        <div
-          style={{
-            fontFamily: "'Montserrat', 'Arial Black', sans-serif",
-            fontWeight: 800,
-            fontSize: 'clamp(16px, 6vw, 26px)',
-            color: '#0a5278',
-            textTransform: 'uppercase',
-            letterSpacing: '0.01em',
-            lineHeight: 1.1,
-          }}
-        >
-          {activity || 'Activity'}
-        </div>
-        {metricsLine ? (
-          <div
-            style={{
-              fontFamily: "'Montserrat', Arial, sans-serif",
-              fontWeight: 600,
-              fontSize: 'clamp(7px, 2.4vw, 10px)',
-              color: '#555',
-              letterSpacing: '0.04em',
-              marginTop: 3,
-              lineHeight: 1.3,
-            }}
-          >
-            {metricsLine}
+        {/* Left metric — duration */}
+        {durationValue ? (
+          <div style={{ textAlign: 'left' }}>
+            <span
+              style={{
+                fontFamily: "'Arial Black', 'Arial', sans-serif",
+                fontWeight: 900,
+                fontSize: 'clamp(18px, 7vw, 34px)',
+                color: '#0a4a72',
+                letterSpacing: '-0.01em',
+                lineHeight: 1,
+              }}
+            >
+              {durationValue}{' '}
+              <span style={{ fontSize: 'clamp(14px, 5vw, 26px)' }}>{metric1Label}</span>
+            </span>
+          </div>
+        ) : null}
+
+        {/* Right metric — pr / laps */}
+        {prValue ? (
+          <div style={{ textAlign: 'right' }}>
+            <span
+              style={{
+                fontFamily: "'Arial Black', 'Arial', sans-serif",
+                fontWeight: 900,
+                fontSize: 'clamp(18px, 7vw, 34px)',
+                color: '#0a4a72',
+                letterSpacing: '-0.01em',
+                lineHeight: 1,
+              }}
+            >
+              {prValue}{' '}
+              <span style={{ fontSize: 'clamp(14px, 5vw, 26px)' }}>{metric2Label}</span>
+            </span>
           </div>
         ) : null}
       </div>
+
     </div>
   );
 };
