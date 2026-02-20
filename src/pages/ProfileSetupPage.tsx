@@ -227,9 +227,9 @@ const ProfileSetupPage = () => {
         className="hidden"
       />
 
-      {/* ── HERO — full-bleed top 62%, tap to open camera ── */}
-      <div className="absolute inset-x-0 top-0 z-10" style={{ height: '62%' }}>
-        <div className="block w-full h-full cursor-pointer relative" onClick={handleHeroTap}>
+      {/* ── HERO — square format, tap to open camera ── */}
+      <div className="absolute inset-x-0 top-0 z-10" style={{ width: '100%', aspectRatio: '1/1' }}>
+        <div className="block w-full h-full cursor-pointer relative overflow-hidden" onClick={handleHeroTap}>
           {heroImage ? (
             <img src={heroImage} alt="Profile photo" className="w-full h-full object-cover" />
           ) : (
@@ -266,48 +266,15 @@ const ProfileSetupPage = () => {
               <Camera className="w-4 h-4 text-white" />
             </div>
           )}
-        </div>
 
-        {/* Progressive blur from bottom — 5 layers, increasing blur + 10% black tint at base */}
-        <div className="absolute inset-x-0 bottom-0 pointer-events-none" style={{ height: '90%' }}>
-          {/* Layer 1 — feather start */}
-          <div className="absolute inset-0" style={{
-            backdropFilter: 'blur(2px)',
-            WebkitBackdropFilter: 'blur(2px)',
-            maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
-          }} />
-          {/* Layer 2 */}
-          <div className="absolute inset-x-0 bottom-0" style={{ height: '75%',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
-          }} />
-          {/* Layer 3 */}
-          <div className="absolute inset-x-0 bottom-0" style={{ height: '55%',
-            backdropFilter: 'blur(22px)',
-            WebkitBackdropFilter: 'blur(22px)',
-            maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
-          }} />
-          {/* Layer 4 */}
-          <div className="absolute inset-x-0 bottom-0" style={{ height: '35%',
-            backdropFilter: 'blur(40px)',
-            WebkitBackdropFilter: 'blur(40px)',
-            maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
-          }} />
-          {/* Layer 5 — heaviest blur at very bottom */}
-          <div className="absolute inset-x-0 bottom-0" style={{ height: '18%',
-            backdropFilter: 'blur(60px)',
-            WebkitBackdropFilter: 'blur(60px)',
-          }} />
-          {/* 10% black tint — only at the very bottom to match background colour */}
-          <div className="absolute inset-x-0 bottom-0" style={{
-            height: '50%',
-            background: 'linear-gradient(to bottom, transparent 0%, rgba(10,10,18,0.10) 100%)',
-          }} />
+          {/* Clean gradient mask from bottom — no blur, pure colour fade */}
+          <div
+            className="absolute inset-x-0 bottom-0 pointer-events-none"
+            style={{
+              height: '55%',
+              background: 'linear-gradient(to bottom, transparent 0%, rgba(10,10,18,0.55) 65%, rgba(10,10,18,1) 100%)',
+            }}
+          />
         </div>
 
         {/* ✕ Close / Back button — always visible (top-right) */}
