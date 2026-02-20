@@ -797,23 +797,23 @@ const Preview = () => {
           </div>
         )}
 
-        {/* ── LAYER 2: ACTUAL CROPPED IMAGE — centered in the visible top area above the sheet ── */}
+        {/* ── LAYER 2: ACTUAL CROPPED IMAGE — larger, centered in top 38dvh ── */}
         {(croppedImageUrl || imageUrl) && (
           <div
             className="absolute left-0 right-0 pointer-events-none flex items-center justify-center"
             style={{
               top: 0,
-              height: '20dvh',
+              height: '38dvh',
               zIndex: 10,
             }}
           >
             <div
               style={{
-                height: 'calc(20dvh - 20px)',
+                height: 'calc(38dvh - 28px)',
                 aspectRatio: '9 / 16',
-                borderRadius: 12,
+                borderRadius: 16,
                 overflow: 'hidden',
-                boxShadow: '0 8px 40px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.18)',
+                boxShadow: '0 12px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.20)',
               }}
             >
               {isVideo ? (
@@ -835,27 +835,28 @@ const Preview = () => {
           </div>
         )}
 
-        {/* ── LAYER 50: GLASS ACTIVITY SHEET — on top of everything ── */}
+        {/* ── LAYER 3 (z:50): GLASS ACTIVITY SHEET — true translucent, max 62dvh ── */}
         <motion.div
           className="absolute left-0 right-0 bottom-0 flex flex-col"
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 320, damping: 32, delay: 0.04 }}
           style={{
-            maxHeight: '80dvh',
+            maxHeight: '62dvh',
             borderRadius: '28px 28px 0 0',
-            background: 'rgba(10, 8, 28, 0.72)',
-            backdropFilter: 'blur(60px) saturate(200%)',
-            WebkitBackdropFilter: 'blur(60px) saturate(200%)',
+            /* True translucent liquid glass — no heavy dark fill */
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(60px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(60px) saturate(180%)',
             border: '1px solid rgba(255,255,255,0.10)',
             borderBottom: 'none',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 -20px 60px rgba(0,0,0,0.5)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 -20px 60px rgba(0,0,0,0.35)',
             zIndex: 50,
           }}
         >
           {/* Drag handle */}
           <div className="flex justify-center pt-3 pb-0 flex-shrink-0">
-            <div className="w-9 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.22)' }} />
+            <div className="w-9 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.25)' }} />
           </div>
 
           {/* Header row */}
@@ -863,7 +864,7 @@ const Preview = () => {
             <button
               onClick={handleCloseWithoutSaving}
               className="w-9 h-9 flex items-center justify-center rounded-full flex-shrink-0 active:scale-95 transition-transform"
-              style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.14)' }}
+              style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.16)' }}
             >
               <X className="w-4 h-4 text-white/80" />
             </button>
@@ -884,7 +885,6 @@ const Preview = () => {
               flex: '1 1 auto',
               WebkitOverflowScrolling: 'touch',
               paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
-              // Enable momentum scrolling on iOS
               overflowY: 'scroll',
             }}
           >
@@ -906,24 +906,26 @@ const Preview = () => {
                     }}
                     className="flex flex-col items-center gap-2 active:scale-95 transition-transform"
                   >
+                    {/* Icon tile — explicit color on wrapper so currentColor resolves for Lucide icons */}
                     <div
                       className="w-[62px] h-[62px] rounded-[18px] flex items-center justify-center flex-shrink-0"
                       style={{
-                        background: 'rgba(255,255,255,0.10)',
-                        border: '1px solid rgba(255,255,255,0.14)',
+                        background: 'rgba(255,255,255,0.12)',
+                        border: '1px solid rgba(255,255,255,0.18)',
+                        color: 'rgba(255,255,255,0.90)',
                       }}
                     >
                       <IconComp
-                        size={26}
-                        width={26}
-                        height={26}
+                        size={28}
+                        width={28}
+                        height={28}
                         strokeWidth={1.5}
-                        color="rgba(255,255,255,0.85)"
-                        stroke="rgba(255,255,255,0.85)"
-                        style={{ color: 'rgba(255,255,255,0.85)', fill: 'none', display: 'block', flexShrink: 0 }}
+                        color="rgba(255,255,255,0.90)"
+                        stroke="rgba(255,255,255,0.90)"
+                        style={{ color: 'rgba(255,255,255,0.90)', fill: 'none', display: 'block', flexShrink: 0 }}
                       />
                     </div>
-                    <span className="text-white/70 text-[10px] text-center leading-tight w-full">{activityOption.name}</span>
+                    <span className="text-white/75 text-[10px] text-center leading-tight w-full">{activityOption.name}</span>
                   </motion.button>
                 );
               })}
@@ -934,6 +936,7 @@ const Preview = () => {
       </div>
     );
   }
+
 
 
 
