@@ -12,6 +12,8 @@ const Gallery = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasTriggeredRef = useRef(false);
   const pickerOpenedRef = useRef(false);
+  // Guard: once a file is selected, never auto-navigate back
+  const fileSelectedRef = useRef(false);
 
   const dayNumber = (location.state as { dayNumber?: number })?.dayNumber || 1;
 
@@ -27,15 +29,16 @@ const Gallery = () => {
       });
     }
 
-    // When the window regains focus after the picker closes without selection, go back.
+    // When the window regains focus after the picker closes WITHOUT selection, go back.
     // Delay so onChange fires first if a file was picked.
     const handleFocus = () => {
       if (!pickerOpenedRef.current) return;
+      // Wait long enough for onChange to fire and set fileSelectedRef
       setTimeout(() => {
-        if (!(fileInputRef.current?.files?.length)) {
+        if (!fileSelectedRef.current) {
           navigate(-1);
         }
-      }, 500);
+      }, 600);
     };
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
@@ -45,6 +48,8 @@ const Gallery = () => {
     pickerOpenedRef.current = false;
     const file = e.target.files?.[0];
     if (file) {
+      // Mark file as selected BEFORE setting state to prevent focus handler race
+      fileSelectedRef.current = true;
       const isVideo = file.type.startsWith('video/');
       const url = URL.createObjectURL(file);
       setSelectedMedia({ url, isVideo });
@@ -69,7 +74,19 @@ const Gallery = () => {
 
   const handleCropCancel = () => {
     setSelectedMedia(null);
+    fileSelectedRef.current = false;
     navigate(-1);
+  };
+
+  const handleRetake = () => {
+    setSelectedMedia(null);
+    fileSelectedRef.current = false;
+    hasTriggeredRef.current = false;
+    pickerOpenedRef.current = false;
+    requestAnimationFrame(() => {
+      fileInputRef.current?.click();
+      pickerOpenedRef.current = true;
+    });
   };
 
   const handleCancel = () => {
@@ -84,15 +101,7 @@ const Gallery = () => {
         isVideo={selectedMedia.isVideo}
         onConfirm={handleCropConfirm}
         onCancel={handleCropCancel}
-        onRetake={() => {
-          setSelectedMedia(null);
-          hasTriggeredRef.current = false;
-          pickerOpenedRef.current = false;
-          requestAnimationFrame(() => {
-            fileInputRef.current?.click();
-            pickerOpenedRef.current = true;
-          });
-        }}
+        onRetake={handleRetake}
       />
     );
   }
