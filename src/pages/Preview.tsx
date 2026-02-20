@@ -151,6 +151,8 @@ const Preview = () => {
   
   // Template state
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  // croppedImageUrl = the 9:16 cropped version for display; imageUrl = original for blur bg
+  const [croppedImageUrl, setCroppedImageUrl] = useState<string | null>(null);
   const [isVideo, setIsVideo] = useState(false);
   const [activity, setActivity] = useState<string | null>(null);
   // Start with empty values - only show on card if user enters data
@@ -234,6 +236,7 @@ const Preview = () => {
     } | null;
 
     const mediaUrl = state?.originalUrl || state?.imageUrl;
+    const croppedUrl = state?.imageUrl || state?.originalUrl;
 
     console.info('[journey-debug] Preview: init', {
       hasState: !!state,
@@ -248,6 +251,7 @@ const Preview = () => {
     // Coming from camera or gallery with media - go to activity selection first
     if (mediaUrl && (state?.fromCamera || state?.fromGallery)) {
       setImageUrl(mediaUrl);
+      setCroppedImageUrl(croppedUrl || null);
       setIsVideo(state.isVideo ?? isVideoUrl(mediaUrl));
       setActivity(null);
       setMediaSource(state.fromCamera ? 'camera' : 'gallery');
@@ -762,7 +766,7 @@ const Preview = () => {
         className="fixed inset-0 w-full touch-manipulation overflow-hidden"
         style={{ height: '100dvh', minHeight: '-webkit-fill-available', background: '#0a0a14' }}
       >
-        {/* ── LAYER 0: FULL-SCREEN BLURRED BACKGROUND IMAGE ── */}
+        {/* ── LAYER 1: FULL-SCREEN BLURRED BACKGROUND IMAGE ── */}
         {imageUrl && (
           <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
             {isVideo ? (
@@ -770,8 +774,8 @@ const Preview = () => {
                 src={imageUrl}
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{
-                  filter: 'blur(48px) brightness(0.45) saturate(1.6)',
-                  transform: 'scale(1.15)',
+                  filter: 'blur(55px) brightness(0.35) saturate(1.6)',
+                  transform: 'scale(1.2)',
                   transformOrigin: 'center center',
                 }}
                 autoPlay muted loop playsInline
@@ -782,14 +786,52 @@ const Preview = () => {
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{
-                  filter: 'blur(48px) brightness(0.45) saturate(1.6)',
-                  transform: 'scale(1.15)',
+                  filter: 'blur(55px) brightness(0.35) saturate(1.6)',
+                  transform: 'scale(1.2)',
                   transformOrigin: 'center center',
                 }}
               />
             )}
             {/* Dark veil */}
-            <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.18)' }} />
+            <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.25)' }} />
+          </div>
+        )}
+
+        {/* ── LAYER 2: ACTUAL CROPPED IMAGE — centered in the visible top area above the sheet ── */}
+        {(croppedImageUrl || imageUrl) && (
+          <div
+            className="absolute left-0 right-0 pointer-events-none flex items-center justify-center"
+            style={{
+              top: 0,
+              height: '20dvh',
+              zIndex: 10,
+            }}
+          >
+            <div
+              style={{
+                height: 'calc(20dvh - 20px)',
+                aspectRatio: '9 / 16',
+                borderRadius: 12,
+                overflow: 'hidden',
+                boxShadow: '0 8px 40px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.18)',
+              }}
+            >
+              {isVideo ? (
+                <video
+                  src={croppedImageUrl || imageUrl || ''}
+                  className="w-full h-full"
+                  style={{ objectFit: 'cover' }}
+                  autoPlay muted loop playsInline
+                />
+              ) : (
+                <img
+                  src={croppedImageUrl || imageUrl || ''}
+                  alt="Preview"
+                  className="w-full h-full"
+                  style={{ objectFit: 'cover' }}
+                />
+              )}
+            </div>
           </div>
         )}
 
