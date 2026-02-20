@@ -255,7 +255,7 @@ const HolographicFrame = ({
               textAlign: 'left',
             }}
           >
-            MIN | {durationLabel.toUpperCase()}
+            {durationLabel.toUpperCase()}
           </div>
         </div>
       )}
