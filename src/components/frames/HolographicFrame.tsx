@@ -13,8 +13,10 @@ interface HolographicFrameProps {
   pr: string;
   imagePosition: { x: number; y: number };
   imageScale: number;
-  label1?: string;   // secondary metric name (e.g. "Distance")
-  label2?: string;   // primary metric name  (e.g. "Duration")
+  label1?: string;        // secondary metric unit (e.g. "km") — used for box 2 subtext
+  label2?: string;        // primary metric unit (e.g. "min") — combined with label2Name for box 1
+  label1Name?: string;    // secondary metric name (e.g. "Distance") — for box 2 label
+  label2Name?: string;    // primary metric name  (e.g. "Duration") — for box 1 "UNIT | NAME"
 }
 
 /**
