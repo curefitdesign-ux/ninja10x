@@ -18,31 +18,31 @@ import engineBadgeImg from "@/assets/progress/engine-badge.png";
 import SharedImageTransition from "@/components/SharedImageTransition";
 import { isVideoUrl } from "@/lib/media";
 
-// Tile positions — Day 1 at TOP, Day 12 at BOTTOM (journey flows downward)
-// S-curve diagonal: Week 1 sweeps right, Week 2 sweeps back left, etc.
+// Tile positions — Day 1 at TOP-LEFT, Day 12 at BOTTOM (journey flows downward)
+// S-curve diagonal: Week 1 sweeps left→right, Week 2 sweeps right→left, etc.
 const TILE_POSITIONS = [
-  // Week 1 — right side of screen, sweeping right→left
-  { left: 68, top: 3  },  // Day 1
-  { left: 57, top: 10 },  // Day 2
-  { left: 46, top: 17 },  // Day 3
-  // Week 2 — center, continuing left→right
-  { left: 38, top: 24 },  // Day 4
-  { left: 48, top: 31 },  // Day 5
-  { left: 60, top: 38 },  // Day 6
-  // Week 3 — right side, sweeping right→left
-  { left: 68, top: 45 },  // Day 7
-  { left: 57, top: 52 },  // Day 8
-  { left: 46, top: 59 },  // Day 9
-  // Week 4 — center-left, continuing down
-  { left: 38, top: 66 },  // Day 10
-  { left: 48, top: 73 },  // Day 11
-  { left: 58, top: 80 },  // Day 12
+  // Week 1 — left side, sweeping left→right (Day 1 top-left, Day 3 top-right)
+  { left: 28, top: 3  },  // Day 1
+  { left: 42, top: 10 },  // Day 2
+  { left: 56, top: 17 },  // Day 3  ← milestone
+  // Week 2 — right side, sweeping right→left
+  { left: 64, top: 24 },  // Day 4
+  { left: 50, top: 31 },  // Day 5
+  { left: 38, top: 38 },  // Day 6  ← milestone
+  // Week 3 — left side, sweeping left→right
+  { left: 30, top: 45 },  // Day 7
+  { left: 44, top: 52 },  // Day 8
+  { left: 58, top: 59 },  // Day 9  ← milestone
+  // Week 4 — right→left going down
+  { left: 66, top: 66 },  // Day 10
+  { left: 52, top: 73 },  // Day 11
+  { left: 40, top: 80 },  // Day 12 ← milestone
 ];
 
 const LABELS = [
-  { tileIndex: 0, text: ["BUILD", "STRENGTH"],    side: "right" as const, top: 3,  left: 74 },
+  { tileIndex: 0, text: ["BUILD", "STRENGTH"],    side: "right" as const, top: 3,  left: 62 },
   { tileIndex: 3, text: ["INCREASE", "STAMINA"],  side: "left"  as const, top: 24, left: 2  },
-  { tileIndex: 6, text: ["BUILD", "ENERGY"],      side: "right" as const, top: 45, left: 74 },
+  { tileIndex: 6, text: ["BUILD", "ENERGY"],      side: "right" as const, top: 45, left: 62 },
   { tileIndex: 9, text: ["CONQUER", "WILL POWER"],side: "left"  as const, top: 66, left: 2  },
 ];
 
@@ -514,12 +514,12 @@ const Progress = () => {
           opacity: contentOpacity,
         }}
       >
-        {/* Engine Badge - positioned close to first tile */}
+        {/* Engine Badge - positioned above/near Day 1 tile (top-left) */}
         <AnimatePresence>
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "6%", top: "2%", width: "22%", aspectRatio: "1" }}
+              style={{ left: "8%", top: "0%", width: "26%", aspectRatio: "1" }}
               initial={{ opacity: 0, scale: 0.6, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.4 }}
@@ -590,8 +590,8 @@ const Progress = () => {
         {LABELS.map((label, idx) => (
           <motion.div
             key={idx}
-            className={`absolute ${label.side === "left" ? "text-left" : "text-right"}`}
-            style={{ top: `${label.top}%`, left: `${label.left}%`, width: label.side === "left" ? "26%" : "22%" }}
+          className={`absolute ${label.side === "left" ? "text-left" : "text-right"}`}
+            style={{ top: `${label.top}%`, left: `${label.left}%`, width: label.side === "left" ? "28%" : "24%" }}
             initial={{ opacity: 0, x: label.side === "left" ? -20 : 20 }}
             animate={showTiles ? { opacity: 1, x: 0 } : {}}
             transition={{ delay: 0.5 + idx * 0.08 }}
@@ -608,12 +608,12 @@ const Progress = () => {
             <div 
               className="absolute h-px"
               style={{
-                top: "32px",
+                top: "30px",
                 ...(label.side === "left" 
-                  ? { left: 0, right: "-150%", background: "linear-gradient(90deg, #FFF 0%, rgba(255,255,255,0) 100%)" }
-                  : { right: 0, left: "-150%", background: "linear-gradient(270deg, #FFF 0%, rgba(255,255,255,0) 100%)" }
+                  ? { left: 0, right: "-120%", background: "linear-gradient(90deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%)" }
+                  : { right: 0, left: "-120%", background: "linear-gradient(270deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%)" }
                 ),
-                opacity: 0.2,
+                opacity: 0.35,
               }}
             />
           </motion.div>
