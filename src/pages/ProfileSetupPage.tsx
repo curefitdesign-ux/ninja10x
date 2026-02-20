@@ -231,7 +231,15 @@ const ProfileSetupPage = () => {
       <div className="absolute inset-x-0 top-0 z-10" style={{ width: '100%', aspectRatio: '1/1' }}>
         <div className="block w-full h-full cursor-pointer relative overflow-hidden" onClick={handleHeroTap}>
           {heroImage ? (
-            <img src={heroImage} alt="Profile photo" className="w-full h-full object-cover" />
+            <img
+              src={heroImage}
+              alt="Profile photo"
+              className="w-full h-full object-cover"
+              style={{
+                maskImage: 'linear-gradient(to bottom, black 35%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to bottom, black 35%, transparent 100%)',
+              }}
+            />
           ) : (
             <div
               className="w-full h-full flex flex-col items-center justify-center gap-4"
@@ -267,14 +275,6 @@ const ProfileSetupPage = () => {
             </div>
           )}
 
-          {/* Clean gradient mask from bottom — no blur, pure colour fade */}
-          <div
-            className="absolute inset-x-0 bottom-0 pointer-events-none"
-            style={{
-              height: '55%',
-              background: 'linear-gradient(to bottom, transparent 0%, rgba(10,10,18,0.55) 65%, rgba(10,10,18,1) 100%)',
-            }}
-          />
         </div>
 
         {/* ✕ Close / Back button — always visible (top-right) */}
