@@ -456,15 +456,10 @@ const Activity = () => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1], delay: 0.24 }}
-              className="rounded-2xl overflow-hidden"
-              style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                minHeight: "500px",
-              }}
             >
               <TagembedWidget />
             </motion.div>
+
 
             {/* VIEW MORE glass CTA */}
             <motion.div
