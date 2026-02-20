@@ -16,6 +16,10 @@ import avatarRunner from '@/assets/avatars/runner.png';
 import avatarSwimmer from '@/assets/avatars/swimmer.png';
 import avatarWeightlifter from '@/assets/avatars/weightlifter.png';
 import avatarYogi from '@/assets/avatars/yogi.png';
+// New 3D character presets
+import presetOrangeChar from '@/assets/avatars/preset-orange.png';
+import presetRedgirlChar from '@/assets/avatars/preset-redgirl.png';
+import presetEdgyChar from '@/assets/avatars/preset-edgy.png';
 
 // Map avatar color names to their imported paths
 const AVATAR_MAP: Record<string, string> = {
@@ -33,6 +37,10 @@ const AVATAR_MAP: Record<string, string> = {
   'swimmer': avatarSwimmer,
   'weightlifter': avatarWeightlifter,
   'yogi': avatarYogi,
+  // New 3D character presets
+  'preset-orange': presetOrangeChar,
+  'preset-redgirl': presetRedgirlChar,
+  'preset-edgy': presetEdgyChar,
 };
 
 // Resolve avatar URL - handles Vite-hashed paths stored in DB
