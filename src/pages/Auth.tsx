@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import ProfileSetup from '@/components/ProfileSetup';
 import cultLogo from '@/assets/cult-logo.svg';
 
 const emailSchema = z.string().email('Please enter a valid email address');
@@ -19,7 +18,6 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [checkingProfile, setCheckingProfile] = useState(false);
 
   useEffect(() => {
@@ -51,7 +49,7 @@ const Auth = () => {
     if (profile) {
       navigate('/');
     } else {
-      setShowProfileSetup(true);
+      navigate('/profile-setup', { replace: true });
     }
     setCheckingProfile(false);
   };
@@ -131,10 +129,6 @@ const Auth = () => {
     }
   };
 
-  const handleProfileComplete = () => {
-    navigate('/');
-  };
-
   if (checkingProfile) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a0a 0%, #0d3b3b 50%, #2d8a8a 100%)' }}>
@@ -146,10 +140,6 @@ const Auth = () => {
         />
       </div>
     );
-  }
-
-  if (showProfileSetup) {
-    return <ProfileSetup onComplete={handleProfileComplete} />;
   }
 
   return (
