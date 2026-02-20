@@ -121,11 +121,9 @@ const HolographicFrame = ({
         style={{ zIndex: 2, objectFit: 'fill' }}
       />
 
-      {/* ── LAYER 3: Header "CULT NINJA — {ACTIVITY}"
-          Matches reference: very large black bold text across the full top strip.
-          Top strip height = ~13% of card. ── */}
+      {/* ── LAYER 3: Activity name — centered, larger, no "CULT NINJA" prefix ── */}
       <div
-        className="absolute left-0 right-0 top-0 flex items-center"
+        className="absolute left-0 right-0 top-0 flex items-center justify-center"
         style={{
           zIndex: 10,
           height: '13%',
@@ -138,7 +136,7 @@ const HolographicFrame = ({
           style={{
             fontFamily: "'Arial Black', 'Impact', 'Helvetica Neue', sans-serif",
             fontWeight: 900,
-            fontSize: 'clamp(8px, 3.5cqw, 16px)',
+            fontSize: 'clamp(10px, 4.5cqw, 20px)',
             color: '#000000',
             textTransform: 'uppercase',
             letterSpacing: '-0.02em',
@@ -146,11 +144,10 @@ const HolographicFrame = ({
             whiteSpace: 'nowrap',
             overflow: 'visible',
             textOverflow: 'clip',
-            display: 'block',
-            width: '100%',
+            textAlign: 'center',
           }}
         >
-          CULT NINJA — {activity || 'Activity'}
+          {activity || 'Activity'}
         </span>
       </div>
 
@@ -207,17 +204,14 @@ const HolographicFrame = ({
         />
       )}
 
-      {/* ── LAYER 6a: Metric 1 TEXT (duration) ──
-          Positioned over the WHITE box in the bottom-right.
-          When both metrics: white box = bottom 12%–24% zone.
-          When only metric 1: white box = bottom ~0–20% zone. ── */}
+      {/* ── LAYER 6a: Metric 1 TEXT (duration) — moved RIGHT +10px, DOWN +50px ── */}
       {hasMetric1 && (
         <div
           className="absolute flex flex-col justify-start"
           style={{
             zIndex: 13,
-            right: 0,
-            bottom: '21%',
+            right: '-10px',
+            bottom: 'calc(21% - 50px)',
             width: '32%',
             height: '12%',
             paddingTop: '2%',
@@ -225,7 +219,6 @@ const HolographicFrame = ({
             paddingRight: '2%',
           }}
         >
-          {/* Large numeric value */}
           <div
             style={{
               fontFamily: "'Arial Black', 'Impact', sans-serif",
@@ -240,7 +233,6 @@ const HolographicFrame = ({
           >
             {durationValue}
           </div>
-          {/* Small label — left-aligned, no truncation */}
           <div
             style={{
               fontFamily: "'Arial', 'Helvetica', sans-serif",
@@ -260,13 +252,13 @@ const HolographicFrame = ({
         </div>
       )}
 
-      {/* ── LAYER 6b: Metric 2 NUMBER (pr value) — black text, 5% from bottom ── */}
+      {/* ── LAYER 6b: Metric 2 NUMBER (pr value) — moved RIGHT +10px ── */}
       {hasMetric2 && (
         <div
           className="absolute flex flex-col justify-end"
           style={{
             zIndex: 13,
-            right: 0,
+            right: '-10px',
             bottom: '9%',
             width: '32%',
             height: '7%',
@@ -291,14 +283,14 @@ const HolographicFrame = ({
         </div>
       )}
 
-      {/* ── LAYER 6c: Metric 2 SUBTEXT (label) — white text, 4% from bottom ── */}
+      {/* ── LAYER 6c: Metric 2 SUBTEXT (Distance label) — moved RIGHT +10px, DOWN +10px ── */}
       {hasMetric2 && (
         <div
           className="absolute flex flex-col justify-start"
           style={{
             zIndex: 13,
-            right: 0,
-            bottom: '4%',
+            right: '-10px',
+            bottom: 'calc(4% - 10px)',
             width: '32%',
             height: '5%',
             paddingLeft: '6%',
