@@ -271,12 +271,59 @@ const ProfileSetupPage = () => {
           )}
         </div>
 
-        {/* Gradient mask — hero fades into bottom panel */}
+        {/* Progressive blur mask — stacked layers with increasing blur + CSS mask */}
+        {/* Layer 1: lightest blur, covers bottom 60% */}
         <div
           className="absolute inset-x-0 bottom-0 pointer-events-none"
           style={{
-            height: '50%',
-            background: 'linear-gradient(to bottom, transparent 0%, rgba(10,10,18,0.55) 45%, rgba(10,10,18,0.92) 80%, #0a0a12 100%)',
+            height: '60%',
+            backdropFilter: 'blur(2px)',
+            WebkitBackdropFilter: 'blur(2px)',
+            maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
+          }}
+        />
+        {/* Layer 2: medium-low blur, covers bottom 48% */}
+        <div
+          className="absolute inset-x-0 bottom-0 pointer-events-none"
+          style={{
+            height: '48%',
+            backdropFilter: 'blur(5px)',
+            WebkitBackdropFilter: 'blur(5px)',
+            maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
+          }}
+        />
+        {/* Layer 3: medium blur, covers bottom 36% */}
+        <div
+          className="absolute inset-x-0 bottom-0 pointer-events-none"
+          style={{
+            height: '36%',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
+          }}
+        />
+        {/* Layer 4: heavy blur, covers bottom 24% */}
+        <div
+          className="absolute inset-x-0 bottom-0 pointer-events-none"
+          style={{
+            height: '24%',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
+          }}
+        />
+        {/* Layer 5: heaviest blur + dark tint, fully opaque at very bottom */}
+        <div
+          className="absolute inset-x-0 bottom-0 pointer-events-none"
+          style={{
+            height: '14%',
+            backdropFilter: 'blur(36px)',
+            WebkitBackdropFilter: 'blur(36px)',
+            background: 'linear-gradient(to bottom, transparent 0%, rgba(10,10,18,0.85) 100%)',
           }}
         />
 
