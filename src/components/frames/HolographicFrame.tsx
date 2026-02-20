@@ -218,7 +218,7 @@ const HolographicFrame = ({
           style={{
             zIndex: 13,
             bottom: '18%',
-            right: '0%',
+            right: '10px',
             width: '30%',
             height: '13%',
             display: 'flex',
@@ -297,7 +297,7 @@ const HolographicFrame = ({
           >
             {prValue}
           </div>
-          {/* White label subtext — shifted down by 1px extra */}
+          {/* White label subtext — 10px down, 5px left */}
           <div
             style={{
               fontFamily: "'Arial Black', 'Arial', sans-serif",
@@ -306,7 +306,8 @@ const HolographicFrame = ({
               color: '#ffffff',
               letterSpacing: '0.02em',
               textTransform: 'capitalize',
-              marginTop: '5px',
+              marginTop: '15px',
+              marginLeft: '-5px',
               whiteSpace: 'nowrap',
               lineHeight: 1.2,
             }}
