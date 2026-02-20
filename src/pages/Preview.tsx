@@ -867,19 +867,21 @@ const Preview = () => {
             <div className="w-9 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.25)' }} />
           </div>
 
-          {/* Header row */}
-          <div className="flex items-center gap-3 px-5 pt-4 pb-4 flex-shrink-0">
-            <button
-              onClick={handleCloseWithoutSaving}
-              className="w-9 h-9 flex items-center justify-center rounded-full flex-shrink-0 active:scale-95 transition-transform"
-              style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.16)' }}
-            >
-              <X className="w-4 h-4 text-white/80" />
-            </button>
+          {/* Close button — floats OUTSIDE the sheet, above the drag handle */}
+          <button
+            onClick={handleCloseWithoutSaving}
+            className="absolute -top-12 left-4 w-9 h-9 flex items-center justify-center rounded-full active:scale-95 transition-transform"
+            style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.20)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+          >
+            <X className="w-4 h-4 text-white/80" />
+          </button>
+
+          {/* Header — centered title */}
+          <div className="flex items-center justify-center px-5 pt-4 pb-4 flex-shrink-0">
             <motion.h2
-              className="text-white text-xl font-bold"
-              initial={{ opacity: 0, x: -6 }}
-              animate={{ opacity: 1, x: 0 }}
+              className="text-white text-xl font-bold text-center"
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.10, duration: 0.22 }}
             >
               Choose your activity
