@@ -702,7 +702,19 @@ const Preview = () => {
       case 'ticket':
         return <TicketFrame {...frameProps} />;
       case 'token':
-        return <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} />;
+        return <TokenFrame
+          imageUrl={imageUrl || ''}
+          isVideo={isVideo}
+          activity={activity || 'Activity'}
+          week={calculatedWeek}
+          day={dayNumber}
+          duration={duration}
+          pr={pr}
+          imagePosition={imagePosition}
+          imageScale={imageScale}
+          label1={activityLabels.secondaryUnit}
+          label2={activityLabels.primaryUnit}
+        />;
       case 'holographic':
         return <HolographicFrame {...frameProps} />;
     }
