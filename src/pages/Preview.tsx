@@ -827,17 +827,17 @@ const Preview = () => {
           </motion.div>
         </div>
         
-        {/* Full-screen sheet for Activity Selection */}
+        {/* Activity Selection Bottom Sheet — max 80vh, sized to content */}
         <motion.div
-          className="fixed inset-0 z-30"
+          className="fixed bottom-0 left-0 right-0 z-30"
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
           <div 
-            className="glass-sheet h-full px-5 flex flex-col"
+            className="glass-sheet max-h-[80vh] px-5 flex flex-col overflow-y-auto rounded-t-3xl"
             style={{
-              paddingTop: 'max(env(safe-area-inset-top, 20px), 20px)',
+              paddingTop: '20px',
               paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
             }}
           >
@@ -1309,14 +1309,14 @@ const Preview = () => {
         )}
       </AnimatePresence>
 
-      {/* Activity Selection Bottom Sheet — full screen */}
+      {/* Activity Selection Bottom Sheet — max 80vh, content-sized */}
       <AnimatePresence>
         {editingField === 'activity' && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50"
+            className="fixed inset-0 z-50 flex flex-col justify-end"
           >
             {/* Backdrop */}
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setEditingField(null)} />
@@ -1327,13 +1327,13 @@ const Preview = () => {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="absolute inset-0"
+              className="relative w-full max-h-[80vh] flex flex-col rounded-t-3xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               <div 
-                className="glass-sheet h-full px-5 pt-4 flex flex-col"
+                className="glass-sheet w-full px-5 pt-4 flex flex-col overflow-y-auto"
                 style={{
-                  paddingTop: 'max(env(safe-area-inset-top, 20px), 20px)',
+                  paddingTop: '20px',
                   paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
                 }}
               >
