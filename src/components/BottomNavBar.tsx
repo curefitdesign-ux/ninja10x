@@ -40,10 +40,24 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
       className="fixed bottom-0 left-0 right-0"
       style={{
         zIndex: 9999,
-        background: "rgba(10, 7, 32, 0.10)",
-        backdropFilter: "blur(40px) saturate(180%)",
-        WebkitBackdropFilter: "blur(40px) saturate(180%)",
-        borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+        borderRadius: "20px 20px 0 0",
+        overflow: "hidden",
+        /* Liquid glass: dark base + frosted surface + inner highlight */
+        background: `
+          linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.07) 0%,
+            rgba(10, 7, 32, 0.30) 100%
+          )
+        `,
+        backdropFilter: "blur(48px) saturate(190%)",
+        WebkitBackdropFilter: "blur(48px) saturate(190%)",
+        borderTop: "1px solid rgba(255, 255, 255, 0.13)",
+        boxShadow: `
+          inset 0 1px 0 rgba(255, 255, 255, 0.12),
+          0 -8px 32px rgba(0, 0, 0, 0.35),
+          0 -2px 8px rgba(0, 0, 0, 0.20)
+        `,
       }}
     >
       <div
