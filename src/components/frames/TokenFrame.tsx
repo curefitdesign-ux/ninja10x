@@ -38,13 +38,13 @@ const TokenFrame = ({
     }
   }, [isVideo, imageUrl]);
 
-  // Metric labels
-  const metric1Label = label1 || 'Hrs';
-  const metric2Label = label2 || (pr ? 'Laps' : '');
+  // Units passed directly (e.g. 'min', 'km', 'laps', 'sets')
+  const durationUnit = label2 || 'min';
+  const prUnit = label1 || '';
 
-  // Format duration value (strip units if present)
-  const durationValue = duration ? duration.replace(/[^0-9:]/g, '').padStart(2, '0') : '';
-  const prValue = pr ? pr.replace(/[^0-9]/g, '').padStart(2, '0') : '';
+  // Strip any non-numeric chars from raw values, keep them clean
+  const durationValue = duration ? duration.replace(/[^0-9:]/g, '') : '';
+  const prValue = pr ? pr.replace(/[^0-9.]/g, '') : '';
 
   return (
     // No overflow-hidden on outer — allows drop-shadow on perforated edges
@@ -136,22 +136,22 @@ const TokenFrame = ({
         )}
       </div>
 
-      {/* ── STAMP BADGE (bottom-left of photo, overlapping) ── */}
+      {/* ── STAMP BADGE (bottom-left of photo, overlapping) — larger ── */}
       <img
         src={tokenBadge}
         alt=""
         className="absolute pointer-events-none"
         style={{
-          bottom: '18%',
-          left: '5%',
-          width: '24%',
+          bottom: '16%',
+          left: '3%',
+          width: '34%',
           zIndex: 10,
           objectFit: 'contain',
           opacity: 0.85,
         }}
       />
 
-      {/* ── BOTTOM METRICS STRIP ── */}
+      {/* ── BOTTOM METRICS STRIP — value + unit only ── */}
       <div
         className="absolute left-0 right-0 flex items-end justify-between"
         style={{
@@ -163,9 +163,9 @@ const TokenFrame = ({
           zIndex: 10,
         }}
       >
-        {/* Left metric — duration */}
+        {/* Left metric — duration value + unit (e.g. "45 min") */}
         {durationValue ? (
-          <div style={{ textAlign: 'left' }}>
+          <div style={{ textAlign: 'left', lineHeight: 1 }}>
             <span
               style={{
                 fontFamily: "'Arial Black', 'Arial', sans-serif",
@@ -173,18 +173,29 @@ const TokenFrame = ({
                 fontSize: 'clamp(18px, 7vw, 34px)',
                 color: '#0a4a72',
                 letterSpacing: '-0.01em',
-                lineHeight: 1,
               }}
             >
-              {durationValue}{' '}
-              <span style={{ fontSize: 'clamp(14px, 5vw, 26px)' }}>{metric1Label}</span>
+              {durationValue}
             </span>
+            {durationUnit && (
+              <span
+                style={{
+                  fontFamily: "'Arial Black', 'Arial', sans-serif",
+                  fontWeight: 900,
+                  fontSize: 'clamp(14px, 5vw, 26px)',
+                  color: '#0a4a72',
+                  marginLeft: '4px',
+                }}
+              >
+                {durationUnit}
+              </span>
+            )}
           </div>
         ) : null}
 
-        {/* Right metric — pr / laps */}
-        {prValue ? (
-          <div style={{ textAlign: 'right' }}>
+        {/* Right metric — pr value + unit (e.g. "05 km", "12 laps") */}
+        {prValue && prUnit ? (
+          <div style={{ textAlign: 'right', lineHeight: 1 }}>
             <span
               style={{
                 fontFamily: "'Arial Black', 'Arial', sans-serif",
@@ -192,11 +203,20 @@ const TokenFrame = ({
                 fontSize: 'clamp(18px, 7vw, 34px)',
                 color: '#0a4a72',
                 letterSpacing: '-0.01em',
-                lineHeight: 1,
               }}
             >
-              {prValue}{' '}
-              <span style={{ fontSize: 'clamp(14px, 5vw, 26px)' }}>{metric2Label}</span>
+              {prValue}
+            </span>
+            <span
+              style={{
+                fontFamily: "'Arial Black', 'Arial', sans-serif",
+                fontWeight: 900,
+                fontSize: 'clamp(14px, 5vw, 26px)',
+                color: '#0a4a72',
+                marginLeft: '4px',
+              }}
+            >
+              {prUnit}
             </span>
           </div>
         ) : null}
