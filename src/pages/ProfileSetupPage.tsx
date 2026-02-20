@@ -181,36 +181,29 @@ const ProfileSetupPage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 flex flex-col overflow-hidden"
-      style={{ background: '#0a0a12', height: '100dvh' }}
+      className="fixed inset-0 flex flex-col overflow-y-auto"
+      style={{ background: '#0a0a12', height: '100dvh', WebkitOverflowScrolling: 'touch' }}
     >
-      {/* ── Ambient blurred background (shows when avatar/photo selected) ── */}
-      <AnimatePresence>
-        {heroImage && (
-          <motion.div
-            key={heroImage}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="absolute inset-0 z-0"
-          >
-            <img
+      {/* ── Ambient blurred background (always visible) ── */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <AnimatePresence>
+          {heroImage && (
+            <motion.img
+              key={heroImage}
               src={heroImage}
               alt=""
-              className="w-full h-full object-cover"
-              style={{ filter: 'blur(72px) saturate(1.6)', transform: 'scale(1.25)' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.6 }}
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ filter: 'blur(72px) saturate(1.6) brightness(0.55)', transform: 'scale(1.25)' }}
             />
-            {/* No black overlay — just a soft bottom-fade into the dark panel */}
-            <div
-              className="absolute inset-0"
-              style={{
-                background: 'linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(10,10,18,0.55) 55%, rgba(10,10,18,0.92) 100%)',
-              }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+        {/* Dark veil so content is always readable */}
+        <div className="absolute inset-0" style={{ background: 'rgba(10,10,18,0.45)' }} />
+      </div>
 
       {/* Hidden camera file input */}
       <input
@@ -223,7 +216,7 @@ const ProfileSetupPage = () => {
       />
 
       {/* ── HERO — square format, tap to open camera ── */}
-      <div className="absolute inset-x-0 top-0 z-10" style={{ width: '100%', aspectRatio: '1/1' }}>
+      <div className="relative z-10 w-full flex-shrink-0" style={{ aspectRatio: '1/1' }}>
         <div className="block w-full h-full cursor-pointer relative overflow-hidden" onClick={handleHeroTap}>
           {heroImage ? (
             <img
@@ -231,14 +224,14 @@ const ProfileSetupPage = () => {
               alt="Profile photo"
               className="w-full h-full object-cover"
               style={{
-                maskImage: 'linear-gradient(to bottom, black 35%, transparent 100%)',
-                WebkitMaskImage: 'linear-gradient(to bottom, black 35%, transparent 100%)',
+                maskImage: 'linear-gradient(to bottom, black 55%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to bottom, black 55%, transparent 100%)',
               }}
             />
           ) : (
             <div
               className="w-full h-full flex flex-col items-center justify-center gap-4"
-              style={{ background: 'linear-gradient(180deg, rgba(42,27,78,0.9) 0%, rgba(10,7,32,0.95) 100%)' }}
+              style={{ background: 'linear-gradient(180deg, rgba(42,27,78,0.6) 0%, rgba(10,7,32,0.3) 100%)' }}
             >
               <motion.div
                 className="w-20 h-20 rounded-3xl flex items-center justify-center"
@@ -269,7 +262,6 @@ const ProfileSetupPage = () => {
               <Camera className="w-4 h-4 text-white" />
             </div>
           )}
-
         </div>
 
         {/* ✕ Close / Back button — always visible (top-right) */}
@@ -300,8 +292,8 @@ const ProfileSetupPage = () => {
         </motion.button>
       </div>
 
-      {/* ── BOTTOM PANEL ── */}
-      <div className="absolute inset-x-0 bottom-0 flex flex-col z-10" style={{ top: 'calc(56% - 100px)' }}>
+      {/* ── BOTTOM PANEL — flows naturally below hero ── */}
+      <div className="relative z-10 flex flex-col flex-1">
         {/* Name input */}
         <div className="flex flex-col items-center px-6 mt-4">
           <input
