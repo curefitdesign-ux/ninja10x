@@ -437,14 +437,21 @@ const Activity = () => {
 
           {/* Wall of Ninjas */}
           <div className="px-4 mt-10 pb-28">
+            {/* Centered heading */}
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: 0.18 }}
-              className="mb-5"
+              className="flex flex-col items-center mb-6"
             >
-              <h2 className="text-xl font-semibold text-white">Wall of Ninja's</h2>
+              <h2 className="text-2xl font-bold text-white tracking-tight text-center">Wall of Ninja's</h2>
+              <div
+                className="mt-1.5 h-0.5 w-12 rounded-full"
+                style={{ background: "linear-gradient(90deg, #F97316, #EC4899)" }}
+              />
             </motion.div>
+
+            {/* Tagembed widget */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -457,6 +464,52 @@ const Activity = () => {
               }}
             >
               <TagembedWidget />
+            </motion.div>
+
+            {/* VIEW MORE glass CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1], delay: 0.35 }}
+              className="flex justify-center mt-5"
+            >
+              <motion.a
+                href="https://one-million-habits.lovable.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                whileTap={{ scale: 0.96 }}
+                className="flex items-center gap-2 px-7 py-3 rounded-full text-sm font-semibold tracking-widest uppercase select-none"
+                style={{
+                  background: "rgba(255, 255, 255, 0.08)",
+                  backdropFilter: "blur(48px) saturate(190%)",
+                  WebkitBackdropFilter: "blur(48px) saturate(190%)",
+                  border: "1px solid rgba(255, 255, 255, 0.18)",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.14), 0 4px 24px rgba(0,0,0,0.25)",
+                  color: "rgba(255,255,255,0.92)",
+                  letterSpacing: "0.12em",
+                }}
+              >
+                <span
+                  style={{
+                    background: "linear-gradient(90deg, #F97316, #EC4899)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                    fontWeight: 700,
+                  }}
+                >
+                  VIEW MORE
+                </span>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="arrow-grad" x1="0" y1="0" x2="14" y2="0" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#F97316"/>
+                      <stop offset="1" stopColor="#EC4899"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M2 7h10M8 3l4 4-4 4" stroke="url(#arrow-grad)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </motion.a>
             </motion.div>
           </div>
 
