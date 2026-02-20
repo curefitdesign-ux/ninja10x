@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import holographicOverlay from '@/assets/frames/holographic-overlay.png';
+import holographicOverlay from '@/assets/frames/holographic-overlay-new.png';
 import metric1Png from '@/assets/frames/metric-1.png';
 import metric2Png from '@/assets/frames/metric-2.png';
 
@@ -18,21 +18,20 @@ interface HolographicFrameProps {
 }
 
 /**
- * Holographic Frame — pixel-perfect match to reference design.
+ * Holographic Frame — pixel-perfect match to reference design (Frame_2147223513).
  *
- * PNG Layer logic:
- *  - hasMetric1 only  → metric-1.png (single white chamfered box)
- *  - hasMetric1+2     → metric-2.png (white box + black box — both in one PNG)
- *  - !hasMetric1      → no metric PNG shown
+ * Metric box layout (bottom-right corner):
+ *  BOX 1 (white/salmon chamfered): large bold NUMBER + "UNIT | LABEL" subtext
+ *  BOX 2 (dark):                   large bold NUMBER + white label subtext below
  *
  * Layer stack (bottom → top):
  *  0. Holographic gradient base
  *  1. User media
- *  2. Holographic overlay PNG (no blend mode)
- *  3. Header "CULT NINJA — {ACTIVITY}"  — large, fills top strip
- *  4. Sidebar "*** WEEK N / DAY N ***"  — rotated, medium size
+ *  2. Holographic overlay PNG
+ *  3. Activity header
+ *  4. Sidebar week/day text
  *  5. Metric PNG (conditional)
- *  6. Metric text overlays
+ *  6. Metric text overlays (pixel-perfect inside boxes)
  */
 const HolographicFrame = ({
   imageUrl,
@@ -57,10 +56,16 @@ const HolographicFrame = ({
   const hasMetric2 = !!pr;
 
   // Strip letters/units from duration value for display (e.g. "30 min" → "30")
-  const durationValue = duration.replace(/[a-zA-Z\s]/g, '') || duration;
+  const durationRaw = duration.replace(/[a-zA-Z\s]/g, '').trim() || duration;
+  // Extract unit from duration string (e.g. "30 min" → "min", "2 hrs" → "hrs")
+  const durationUnit = duration.replace(/[^a-zA-Z]/g, '').trim().toUpperCase() || '';
+  // Subtext for metric 1 box: "HRS | DURATION" style
+  const metric1Subtext = durationUnit
+    ? `${durationUnit} | ${durationLabel.toUpperCase()}`
+    : durationLabel.toUpperCase();
 
-  // Strip units from pr/secondary metric value for display (e.g. "10.5km" → "10.5", "3 sets" → "3")
-  const prValue = pr.replace(/[a-zA-Z\s]/g, '') || pr;
+  // Strip units from pr/secondary metric value for display
+  const prValue = pr.replace(/[a-zA-Z\s]/g, '').trim() || pr;
 
   useEffect(() => {
     if (isVideo && videoRef.current) {
@@ -72,7 +77,7 @@ const HolographicFrame = ({
   return (
     <div
       className="w-[90%] mx-auto aspect-[9/16] relative overflow-hidden"
-      style={{ borderRadius: '0px' }}
+      style={{ borderRadius: '0px', containerType: 'size' }}
     >
       {/* ── LAYER 0: Holographic gradient base ── */}
       <div
@@ -113,7 +118,7 @@ const HolographicFrame = ({
         )}
       </div>
 
-      {/* ── LAYER 2: Holographic overlay PNG — no blend mode ── */}
+      {/* ── LAYER 2: Holographic overlay PNG ── */}
       <img
         src={holographicOverlay}
         alt=""
@@ -121,13 +126,13 @@ const HolographicFrame = ({
         style={{ zIndex: 2, objectFit: 'fill' }}
       />
 
-      {/* ── LAYER 3: Activity name — centered, larger, no "CULT NINJA" prefix ── */}
+      {/* ── LAYER 3: Activity name — large bold header at top ── */}
       <div
         className="absolute left-0 right-0 top-0 flex items-center justify-center"
         style={{
           zIndex: 10,
           height: '13%',
-          paddingLeft: '4%',
+          paddingLeft: '10%',
           paddingRight: '3%',
           overflow: 'hidden',
         }}
@@ -136,7 +141,7 @@ const HolographicFrame = ({
           style={{
             fontFamily: "'Arial Black', 'Impact', 'Helvetica Neue', sans-serif",
             fontWeight: 900,
-            fontSize: 'clamp(10px, 4.5cqw, 20px)',
+            fontSize: 'clamp(10px, 4.5cqw, 22px)',
             color: '#000000',
             textTransform: 'uppercase',
             letterSpacing: '-0.02em',
@@ -151,8 +156,7 @@ const HolographicFrame = ({
         </span>
       </div>
 
-      {/* ── LAYER 4: Left sidebar "*** WEEK N / DAY N ***"
-          Rotated -90°, medium-large, in the left cyan strip. ── */}
+      {/* ── LAYER 4: Left sidebar "*** WEEK N / DAY N ***" rotated ── */}
       <div
         className="absolute flex items-center justify-center"
         style={{
@@ -167,7 +171,6 @@ const HolographicFrame = ({
           style={{
             fontFamily: "'Arial', 'Helvetica', sans-serif",
             fontWeight: 900,
-            // Medium size — clearly readable like reference
             fontSize: 'clamp(5.5px, 2cqw, 9px)',
             color: '#000000',
             textTransform: 'uppercase',
@@ -182,11 +185,7 @@ const HolographicFrame = ({
         </span>
       </div>
 
-      {/* ── LAYER 5: Metric PNG ──
-          Logic:
-          - metric-1.png: single white chamfered box → shown when ONLY duration
-          - metric-2.png: white box + black box  → shown when BOTH metrics exist
-          Both PNGs are full-card size; boxes sit in the bottom-right corner. ── */}
+      {/* ── LAYER 5: Metric PNG ── */}
       {hasMetric1 && (
         <img
           src={metric1Png}
@@ -204,21 +203,97 @@ const HolographicFrame = ({
         />
       )}
 
-      {/* ── LAYER 6a: Metric 1 TEXT (duration) — moved RIGHT +10px, DOWN +50px ── */}
+      {/*
+        ── LAYER 6: Metric text overlays ──
+        Reference image analysis (Frame_2147223513.png):
+        
+        BOX 1 (white/salmon, top box):
+          - Positioned: bottom ~21% of card, right edge ~0%, width ~30%
+          - Large bold number centered in box (e.g. "02")
+          - Subtext below: "HRS | DURATION" in small caps
+          
+        BOX 2 (dark, bottom box):
+          - Positioned: bottom ~8% of card, right edge ~0%, width ~30%
+          - Large bold number (e.g. "05/10")
+          - Subtext below in white: "Personal Best" / metric label
+          
+        Both boxes have ~5% left padding from their left edge (which starts ~70% from left)
+        The box right edge aligns with card right edge.
+      */}
+
+      {/* BOX 1 text: Large number + unit | label subtext */}
       {hasMetric1 && (
         <div
-          className="absolute flex flex-col justify-start"
+          className="absolute"
           style={{
             zIndex: 13,
-            right: '-10px',
-            bottom: 'calc(21% - 50px)',
-            width: '32%',
+            // Box 1 sits at bottom: ~21% of card height, right edge flush with card
+            bottom: '21%',
+            right: '0%',
+            width: '30%',
             height: '12%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            paddingLeft: '8%',
+            paddingRight: '4%',
             paddingTop: '2%',
-            paddingLeft: '6%',
-            paddingRight: '2%',
           }}
         >
+          {/* Large bold number */}
+          <div
+            style={{
+              fontFamily: "'Arial Black', 'Impact', sans-serif",
+              fontWeight: 900,
+              fontSize: 'clamp(18px, 8cqw, 42px)',
+              color: '#000000',
+              lineHeight: 1,
+              letterSpacing: '-0.02em',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {durationRaw}
+          </div>
+          {/* Unit | Label subtext */}
+          <div
+            style={{
+              fontFamily: "'Arial', 'Helvetica', sans-serif",
+              fontWeight: 700,
+              fontSize: 'clamp(4px, 1.6cqw, 8px)',
+              color: '#000000',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              marginTop: '3px',
+              whiteSpace: 'nowrap',
+              lineHeight: 1.1,
+            }}
+          >
+            {metric1Subtext}
+          </div>
+        </div>
+      )}
+
+      {/* BOX 2 text: Large number + white label subtext */}
+      {hasMetric2 && (
+        <div
+          className="absolute"
+          style={{
+            zIndex: 13,
+            // Box 2 sits at bottom: ~8% of card height, right edge flush with card
+            bottom: '8%',
+            right: '0%',
+            width: '30%',
+            height: '13%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            paddingLeft: '8%',
+            paddingRight: '4%',
+          }}
+        >
+          {/* Large bold number */}
           <div
             style={{
               fontFamily: "'Arial Black', 'Impact', sans-serif",
@@ -228,88 +303,22 @@ const HolographicFrame = ({
               lineHeight: 1,
               letterSpacing: '-0.02em',
               whiteSpace: 'nowrap',
-              overflow: 'visible',
-            }}
-          >
-            {durationValue}
-          </div>
-          <div
-            style={{
-              fontFamily: "'Arial', 'Helvetica', sans-serif",
-              fontWeight: 700,
-              fontSize: 'clamp(4px, 1.4cqw, 7px)',
-              color: '#000000',
-              letterSpacing: '0.03em',
-              textTransform: 'uppercase',
-              marginTop: '2px',
-              whiteSpace: 'nowrap',
-              overflow: 'visible',
-              textAlign: 'left',
-            }}
-          >
-            {durationLabel.toUpperCase()}
-          </div>
-        </div>
-      )}
-
-      {/* ── LAYER 6b: Metric 2 NUMBER (pr value) — moved RIGHT +10px ── */}
-      {hasMetric2 && (
-        <div
-          className="absolute flex flex-col justify-end"
-          style={{
-            zIndex: 13,
-            right: '-10px',
-            bottom: '9%',
-            width: '32%',
-            height: '7%',
-            paddingLeft: '6%',
-            paddingRight: '2%',
-          }}
-        >
-          <div
-            style={{
-              fontFamily: "'Arial Black', 'Impact', sans-serif",
-              fontWeight: 900,
-              fontSize: 'clamp(14px, 6cqw, 32px)',
-              color: '#000000',
-              lineHeight: 1,
-              letterSpacing: '-0.02em',
-              whiteSpace: 'nowrap',
-              overflow: 'visible',
             }}
           >
             {prValue}
           </div>
-        </div>
-      )}
-
-      {/* ── LAYER 6c: Metric 2 SUBTEXT (Distance label) — moved RIGHT +10px, DOWN +10px ── */}
-      {hasMetric2 && (
-        <div
-          className="absolute flex flex-col justify-start"
-          style={{
-            zIndex: 13,
-            right: '-10px',
-            bottom: 'calc(4% - 10px)',
-            width: '32%',
-            height: '5%',
-            paddingLeft: '6%',
-            paddingRight: '2%',
-            paddingTop: '1%',
-          }}
-        >
+          {/* White label subtext */}
           <div
             style={{
-              fontFamily: "'Arial Black', 'Impact', sans-serif",
+              fontFamily: "'Arial Black', 'Arial', sans-serif",
               fontWeight: 900,
-              fontSize: 'clamp(4px, 1.6cqw, 8px)',
+              fontSize: 'clamp(4px, 1.7cqw, 9px)',
               color: '#ffffff',
-              letterSpacing: '0.01em',
+              letterSpacing: '0.02em',
               textTransform: 'capitalize',
+              marginTop: '4px',
+              whiteSpace: 'nowrap',
               lineHeight: 1.2,
-              whiteSpace: 'normal',
-              wordBreak: 'break-word',
-              overflow: 'visible',
             }}
           >
             {metricLabel}
