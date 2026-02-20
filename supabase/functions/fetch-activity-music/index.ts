@@ -1,3 +1,5 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
@@ -17,7 +19,6 @@ function parseCsv(csv: string): Array<Record<string, string>> {
   const lines = csv.split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) return [];
 
-  // Split respecting quoted fields
   const splitLine = (line: string): string[] =>
     line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/g).map(c => c.trim().replace(/^"|"$/g, ''));
 
@@ -58,10 +59,8 @@ async function fetchSheetTracks(): Promise<Array<Record<string, string>>> {
   return rows;
 }
 
-// Build a compact text summary of the sheet library for the AI prompt
 function buildSheetLibraryContext(tracks: Array<Record<string, string>>): string {
   return tracks.map((t, i) => {
-    // Adapt to whatever columns exist in the sheet
     const parts = Object.entries(t)
       .filter(([, v]) => v)
       .map(([k, v]) => `${k}:${v}`)
@@ -84,6 +83,29 @@ const FALLBACK_LIBRARY = [
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // ── Authentication check ──
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return new Response(
+      JSON.stringify({ error: 'Missing authorization' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
+  }
+
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+  );
+
+  const token = authHeader.replace('Bearer ', '');
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+  if (claimsError || !claimsData?.claims) {
+    return new Response(
+      JSON.stringify({ error: 'Invalid authorization' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
   }
 
   try {
@@ -183,7 +205,6 @@ Return ONLY the track index number (e.g. "5"). Nothing else.`;
             const selectedRow = sheetTracks[parsed];
             console.log(`[AI Music] ✨ Selected track #${parsed} from sheet:`, JSON.stringify(selectedRow));
 
-            // Find a URL column (adapt to whatever the sheet columns are named)
             const urlKey = Object.keys(selectedRow).find(k =>
               k.includes('url') || k.includes('link') || k.includes('mp3') || k.includes('source') || k.includes('audio')
             );
