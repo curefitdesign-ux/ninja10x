@@ -888,39 +888,62 @@ const Preview = () => {
           </div>
         </motion.div>
 
-        {/* ── LAYER 20: FLOATING MEDIA CARD — above the glass sheet ── */}
+        {/* ── LAYER 20: FLOATING MEDIA CARD — centered in free space above glass sheet ── */}
+        {/* The sheet takes ~80vh, leaving ~20vh free at top. We center the card in that space. */}
         <motion.div
           className="absolute flex flex-col items-center"
           style={{
-            top: 'max(env(safe-area-inset-top, 24px), 24px)',
-            left: '50%',
-            transform: 'translateX(-50%)',
+            /* Vertically center the card in the free space above the sheet.
+               Sheet occupies bottom ~80%, free zone is top ~20dvh.
+               We place card at top 50% of that free zone, shifting up by half the card height.
+               Using CSS to anchor to top of free zone + center vertically. */
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: '80%', // matches sheet height cap
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
             zIndex: 20,
           }}
-          initial={{ opacity: 0, scale: 0.88, y: -12 }}
+          initial={{ opacity: 0, scale: 0.88, y: -16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 280, damping: 28, delay: 0.08 }}
         >
           <motion.div
             layoutId="preview-media-card"
-            className="overflow-hidden"
+            className="overflow-hidden flex-shrink-0"
             style={{
-              width: '38vw',
+              /* 9:16 card — use height-based sizing to fit cleanly in free zone */
+              height: '17dvh',
               aspectRatio: '9/16',
-              borderRadius: 18,
-              boxShadow: '0 16px 56px rgba(0,0,0,0.75), 0 4px 16px rgba(0,0,0,0.5)',
-              border: '1.5px solid rgba(255,255,255,0.18)',
+              borderRadius: 14,
+              background: '#000',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.85), 0 6px 20px rgba(0,0,0,0.6)',
+              border: '1.5px solid rgba(255,255,255,0.22)',
             }}
             transition={{ type: 'spring', stiffness: 260, damping: 28 }}
           >
             {isVideo ? (
-              <video src={imageUrl || ''} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+              <video
+                src={imageUrl || ''}
+                className="w-full h-full"
+                style={{ objectFit: 'contain' }}
+                autoPlay muted loop playsInline
+              />
             ) : (
-              <img src={imageUrl || ''} alt="Preview" className="w-full h-full object-cover" />
+              <img
+                src={imageUrl || ''}
+                alt="Preview"
+                className="w-full h-full"
+                style={{ objectFit: 'contain' }}
+              />
             )}
           </motion.div>
 
-          {/* Re-crop / Re-trim button below the card */}
+          {/* Re-crop / Re-trim pill below the card */}
           <motion.button
             className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
             style={{
@@ -946,6 +969,7 @@ const Preview = () => {
             </span>
           </motion.button>
         </motion.div>
+
 
       </div>
     );
