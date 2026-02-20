@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
 import { z } from 'zod';
-import AvatarCropper from '@/components/AvatarCropper';
+
 
 // New 3D character preset avatars
 import presetOrange from '@/assets/avatars/preset-orange.png';
@@ -58,7 +58,7 @@ const ProfileSetupPage = () => {
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   // Redirect if profile already exists and not in edit mode
@@ -98,25 +98,16 @@ const ProfileSetupPage = () => {
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return; }
     if (file.size > 20 * 1024 * 1024) { toast.error('Image must be less than 20MB'); return; }
+    // Use image directly — no crop tool
+    setCustomAvatarFile(file);
     const reader = new FileReader();
-    reader.onload = (ev) => setCropImageSrc(ev.target?.result as string);
+    reader.onload = (ev) => {
+      setCustomAvatarPreview(ev.target?.result as string);
+      setSelectedAvatar(null);
+    };
     reader.readAsDataURL(file);
     if (e.target) e.target.value = '';
   };
-
-  const handleCropConfirm = (croppedDataUrl: string) => {
-    fetch(croppedDataUrl)
-      .then(res => res.blob())
-      .then(blob => {
-        const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
-        setCustomAvatarFile(file);
-        setCustomAvatarPreview(croppedDataUrl);
-        setSelectedAvatar(null);
-        setCropImageSrc(null);
-      });
-  };
-
-  const handleCropCancel = () => setCropImageSrc(null);
 
   const selectPresetAvatar = (avatarId: string) => {
     setSelectedAvatar(avatarId);
@@ -459,14 +450,6 @@ const ProfileSetupPage = () => {
         </div>
       </div>
 
-      {/* Inline Avatar Cropper */}
-      <AnimatePresence>
-        {cropImageSrc && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50">
-            <AvatarCropper imageSrc={cropImageSrc} onConfirm={handleCropConfirm} onCancel={handleCropCancel} />
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 };
