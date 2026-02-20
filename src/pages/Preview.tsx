@@ -1122,7 +1122,7 @@ const Preview = () => {
                         {frame === 'fitness' && <FitnessFrame {...frameProps} />}
                         {frame === 'ticket' && <TicketFrame {...frameProps} />}
                         {frame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} />}
-                        {frame === 'holographic' && <HolographicFrame {...frameProps} />}
+                        {frame === 'holographic' && <HolographicFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
                       </div>
                     </motion.div>
                 );
