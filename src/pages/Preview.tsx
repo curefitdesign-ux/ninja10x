@@ -685,8 +685,8 @@ const Preview = () => {
     pr,
     imagePosition,
     imageScale,
-    label1: activityLabels.secondaryUnit, // unit for secondary metric (e.g., 'km', 'laps', 'sets')
-    label2: activityLabels.primaryUnit,   // unit for primary metric (e.g., 'min')
+    label1: activityLabels.secondaryMetric, // metric name for secondary (e.g., 'Distance', 'Sets', 'Runs')
+    label2: activityLabels.primaryMetric,   // metric name for primary (e.g., 'Duration')
   };
 
   const renderFrame = () => {
