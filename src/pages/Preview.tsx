@@ -755,100 +755,84 @@ const Preview = () => {
   };
 
 
-  // Activity Selection Step — media fills top portion, sheet slides from below
+  // Activity Selection Step — small card photo at top, glass sheet from bottom
   if (flowStep === 'activity') {
     return (
       <div
-        className="fixed inset-0 w-full bg-[#0a0a14] touch-manipulation overflow-hidden"
-        style={{ height: '100dvh', minHeight: '-webkit-fill-available' }}
+        className="fixed inset-0 w-full touch-manipulation overflow-hidden"
+        style={{ height: '100dvh', minHeight: '-webkit-fill-available', background: '#0a0a14' }}
       >
-        {/* ── FULL-BLEED BLURRED BACKGROUND ── */}
-        {!isVideo && (
-          <img
-            src={lowResBackground || imageUrl || ''}
-            alt=""
-            className="fixed inset-0 w-full h-full pointer-events-none"
-            style={{ objectFit: 'cover', filter: 'blur(60px) brightness(0.4) saturate(1.4)', zIndex: 0, transform: 'scale(1.15)' }}
-          />
-        )}
+        {/* ── SMALL CARD PHOTO — centered at top ── */}
+        <div className="flex justify-center items-start pt-8" style={{ paddingTop: 'max(env(safe-area-inset-top, 32px), 32px)' }}>
+          <motion.div
+            layoutId="preview-media-card"
+            className="overflow-hidden"
+            style={{
+              width: '38vw',
+              aspectRatio: '9/16',
+              borderRadius: 20,
+              boxShadow: '0 8px 40px rgba(0,0,0,0.55)',
+            }}
+            transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+          >
+            {isVideo ? (
+              <video src={imageUrl || ''} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+            ) : (
+              <img src={imageUrl || ''} alt="Preview" className="w-full h-full object-cover" />
+            )}
+          </motion.div>
+        </div>
 
-        {/* ── LARGE MEDIA PREVIEW (top ~38% of screen) ── */}
+        {/* ── GLASS ACTIVITY SHEET — slides up from bottom ── */}
         <motion.div
-          layoutId="preview-media-card"
-          className="absolute left-0 right-0 top-0 overflow-hidden"
-          style={{ height: '42dvh', zIndex: 5 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 28 }}
-        >
-          {isVideo ? (
-            <video
-              src={imageUrl || ''}
-              className="w-full h-full object-cover"
-              autoPlay
-              muted
-              loop
-              playsInline
-            />
-          ) : (
-            <img
-              src={imageUrl || ''}
-              alt="Preview"
-              className="w-full h-full object-cover"
-            />
-          )}
-          {/* Progressive blur fade at the bottom of media */}
-          <div className="absolute inset-x-0 bottom-0 pointer-events-none" style={{ height: '50%', zIndex: 2 }}>
-            {[4, 10, 20, 36].map((blur, i) => (
-              <div
-                key={blur}
-                className="absolute inset-x-0 bottom-0"
-                style={{
-                  height: `${100 - i * 18}%`,
-                  backdropFilter: `blur(${blur}px)`,
-                  WebkitBackdropFilter: `blur(${blur}px)`,
-                  maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
-                  WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
-                }}
-              />
-            ))}
-          </div>
-        </motion.div>
-
-        {/* ── ACTIVITY SELECTION BOTTOM SHEET ── */}
-        <motion.div
-          className="absolute left-0 right-0 bottom-0"
-          initial={{ y: 60, opacity: 0 }}
+          className="absolute left-4 right-4 bottom-4 overflow-hidden"
+          initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 320, damping: 32, delay: 0.08 }}
-          style={{ top: '38dvh', zIndex: 10 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30, delay: 0.05 }}
+          style={{
+            borderRadius: 28,
+            background: 'rgba(255,255,255,0.06)',
+            backdropFilter: 'blur(48px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(48px) saturate(180%)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
+            zIndex: 10,
+            maxHeight: '72dvh',
+          }}
         >
           <div
-            className="w-full h-full flex flex-col px-5 pt-5 pb-safe"
-            style={{
-              background: 'linear-gradient(180deg, rgba(10,10,20,0.0) 0%, rgba(10,10,20,0.92) 8%, rgba(10,10,20,0.97) 100%)',
-              paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
-              backdropFilter: 'blur(0px)',
-            }}
+            className="flex flex-col px-5 pt-4"
+            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 20px)' }}
           >
-            {/* Header — title only, no X button */}
-            <motion.h2
-              className="text-white text-xl font-bold mb-5"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.14, duration: 0.28 }}
-            >
-              Choose your activity
-            </motion.h2>
+            {/* Header row — X + title */}
+            <div className="flex items-center gap-3 mb-5">
+              <button
+                onClick={handleCloseWithoutSaving}
+                className="w-9 h-9 flex items-center justify-center rounded-full flex-shrink-0"
+                style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.12)' }}
+              >
+                <X className="w-4 h-4 text-white/80" />
+              </button>
+              <motion.h2
+                className="text-white text-xl font-bold"
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.12, duration: 0.24 }}
+              >
+                Choose your activity
+              </motion.h2>
+            </div>
 
-            {/* Activity Grid — 4 cols, staggered entrance */}
-            <div className="flex-1 grid grid-cols-4 gap-x-3 gap-y-4 content-start overflow-y-auto">
+            {/* Activity Grid — 4 cols, scrollable */}
+            <div className="grid grid-cols-4 gap-x-3 gap-y-4 overflow-y-auto" style={{ maxHeight: '54dvh' }}>
               {activityOptions.map((activityOption, index) => {
                 const IconComp = activityOption.icon;
                 return (
                   <motion.button
                     key={activityOption.name}
-                    initial={{ opacity: 0, y: 16, scale: 0.90 }}
+                    initial={{ opacity: 0, y: 12, scale: 0.92 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 340, damping: 26, delay: 0.16 + index * 0.022 }}
+                    transition={{ type: 'spring', stiffness: 340, damping: 26, delay: 0.10 + index * 0.022 }}
                     onClick={() => {
                       if (activityOption.isCustom) {
                         setShowCustomActivityInput(true);
@@ -858,8 +842,9 @@ const Preview = () => {
                     }}
                     className="flex flex-col items-center gap-2 tap-bounce"
                   >
-                    <div className="w-[62px] h-[62px] rounded-[18px] flex items-center justify-center overflow-hidden"
-                      style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.10)' }}
+                    <div
+                      className="w-[62px] h-[62px] rounded-[18px] flex items-center justify-center"
+                      style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.10)' }}
                     >
                       {activityOption.name === 'Running' ? <Footprints className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
                        activityOption.name === 'Cycling' ? <Bike className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
@@ -880,7 +865,7 @@ const Preview = () => {
                        activityOption.name === 'Burn' ? <Flame className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
                        <IconComp className="w-6 h-6 text-white/80" strokeWidth={1.5} />}
                     </div>
-                    <span className="text-white/80 text-[10px] text-center leading-tight">{activityOption.name}</span>
+                    <span className="text-white/70 text-[10px] text-center leading-tight">{activityOption.name}</span>
                   </motion.button>
                 );
               })}
