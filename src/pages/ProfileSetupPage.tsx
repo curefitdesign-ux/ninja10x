@@ -206,16 +206,22 @@ const ProfileSetupPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.5 }}
             className="absolute inset-0 z-0"
           >
             <img
               src={heroImage}
               alt=""
               className="w-full h-full object-cover"
-              style={{ filter: 'blur(48px)', transform: 'scale(1.15)' }}
+              style={{ filter: 'blur(72px) saturate(1.6)', transform: 'scale(1.25)' }}
             />
-            <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.55)' }} />
+            {/* No black overlay — just a soft bottom-fade into the dark panel */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(10,10,18,0.55) 55%, rgba(10,10,18,0.92) 100%)',
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -272,34 +278,34 @@ const ProfileSetupPage = () => {
         </div>
 
         {/* iOS-style progressive blur — pure blur only, no color overlay */}
-        <div className="absolute inset-x-0 bottom-0 pointer-events-none" style={{ height: '70%' }}>
+        <div className="absolute inset-x-0 bottom-0 pointer-events-none" style={{ height: '80%' }}>
           <div className="absolute inset-0" style={{
-            backdropFilter: 'blur(2px)',
-            WebkitBackdropFilter: 'blur(2px)',
+            backdropFilter: 'blur(3px)',
+            WebkitBackdropFilter: 'blur(3px)',
             maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
           }} />
-          <div className="absolute inset-x-0 bottom-0" style={{ height: '80%',
-            backdropFilter: 'blur(6px)',
-            WebkitBackdropFilter: 'blur(6px)',
+          <div className="absolute inset-x-0 bottom-0" style={{ height: '82%',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
             maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
           }} />
-          <div className="absolute inset-x-0 bottom-0" style={{ height: '60%',
-            backdropFilter: 'blur(14px)',
-            WebkitBackdropFilter: 'blur(14px)',
+          <div className="absolute inset-x-0 bottom-0" style={{ height: '62%',
+            backdropFilter: 'blur(22px)',
+            WebkitBackdropFilter: 'blur(22px)',
             maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
           }} />
-          <div className="absolute inset-x-0 bottom-0" style={{ height: '40%',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
+          <div className="absolute inset-x-0 bottom-0" style={{ height: '42%',
+            backdropFilter: 'blur(38px)',
+            WebkitBackdropFilter: 'blur(38px)',
             maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
           }} />
-          <div className="absolute inset-x-0 bottom-0" style={{ height: '20%',
-            backdropFilter: 'blur(40px)',
-            WebkitBackdropFilter: 'blur(40px)',
+          <div className="absolute inset-x-0 bottom-0" style={{ height: '22%',
+            backdropFilter: 'blur(60px)',
+            WebkitBackdropFilter: 'blur(60px)',
           }} />
         </div>
 
