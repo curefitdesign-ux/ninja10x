@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import holographicOverlay from '@/assets/frames/holographic-overlay-new.png';
+import holographicOverlay from '@/assets/frames/holographic-overlay.png';
 import metric1Png from '@/assets/frames/metric-1.png';
 import metric2Png from '@/assets/frames/metric-2.png';
 
@@ -149,7 +149,7 @@ const HolographicFrame = ({
           style={{
             fontFamily: "'Arial Black', 'Impact', 'Helvetica Neue', sans-serif",
             fontWeight: 900,
-            fontSize: 'clamp(10px, 4.5cqw, 22px)',
+            fontSize: 'clamp(14px, 6.5cqw, 32px)',
             color: '#000000',
             textTransform: 'uppercase',
             letterSpacing: '-0.02em',
@@ -211,35 +211,16 @@ const HolographicFrame = ({
         />
       )}
 
-      {/*
-        ── LAYER 6: Metric text overlays ──
-        Reference image analysis (Frame_2147223513.png):
-        
-        BOX 1 (white/salmon, top box):
-          - Positioned: bottom ~21% of card, right edge ~0%, width ~30%
-          - Large bold number centered in box (e.g. "02")
-          - Subtext below: "HRS | DURATION" in small caps
-          
-        BOX 2 (dark, bottom box):
-          - Positioned: bottom ~8% of card, right edge ~0%, width ~30%
-          - Large bold number (e.g. "05/10")
-          - Subtext below in white: "Personal Best" / metric label
-          
-        Both boxes have ~5% left padding from their left edge (which starts ~70% from left)
-        The box right edge aligns with card right edge.
-      */}
-
-      {/* BOX 1 text: Large number + unit | label subtext */}
+      {/* BOX 1 text: Large number + unit | label subtext — shifted slightly down */}
       {hasMetric1 && (
         <div
           className="absolute"
           style={{
             zIndex: 13,
-            // Box 1 sits at bottom: ~21% of card height, right edge flush with card
-            bottom: '21%',
+            bottom: '18%',
             right: '0%',
             width: '30%',
-            height: '12%',
+            height: '13%',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'flex-start',
@@ -254,7 +235,7 @@ const HolographicFrame = ({
             style={{
               fontFamily: "'Arial Black', 'Impact', sans-serif",
               fontWeight: 900,
-              fontSize: 'clamp(18px, 8cqw, 42px)',
+              fontSize: 'clamp(22px, 10cqw, 52px)',
               color: '#000000',
               lineHeight: 1,
               letterSpacing: '-0.02em',
@@ -268,7 +249,7 @@ const HolographicFrame = ({
             style={{
               fontFamily: "'Arial', 'Helvetica', sans-serif",
               fontWeight: 700,
-              fontSize: 'clamp(4px, 1.6cqw, 8px)',
+              fontSize: 'clamp(6px, 2.2cqw, 11px)',
               color: '#000000',
               letterSpacing: '0.04em',
               textTransform: 'uppercase',
@@ -282,17 +263,16 @@ const HolographicFrame = ({
         </div>
       )}
 
-      {/* BOX 2 text: Large number + white label subtext */}
+      {/* BOX 2 text: Large number + white label subtext — shifted slightly down */}
       {hasMetric2 && (
         <div
           className="absolute"
           style={{
             zIndex: 13,
-            // Box 2 sits at bottom: ~8% of card height, right edge flush with card
-            bottom: '8%',
+            bottom: '5%',
             right: '0%',
             width: '30%',
-            height: '13%',
+            height: '14%',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'flex-start',
@@ -306,7 +286,7 @@ const HolographicFrame = ({
             style={{
               fontFamily: "'Arial Black', 'Impact', sans-serif",
               fontWeight: 900,
-              fontSize: 'clamp(16px, 7cqw, 36px)',
+              fontSize: 'clamp(20px, 9cqw, 46px)',
               color: '#000000',
               lineHeight: 1,
               letterSpacing: '-0.02em',
@@ -320,7 +300,7 @@ const HolographicFrame = ({
             style={{
               fontFamily: "'Arial Black', 'Arial', sans-serif",
               fontWeight: 900,
-              fontSize: 'clamp(4px, 1.7cqw, 9px)',
+              fontSize: 'clamp(6px, 2.2cqw, 11px)',
               color: '#ffffff',
               letterSpacing: '0.02em',
               textTransform: 'capitalize',
