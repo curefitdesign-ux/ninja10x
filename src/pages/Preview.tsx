@@ -1039,7 +1039,7 @@ const Preview = () => {
                 {currentFrame === 'vogue' && <VogueFrame {...frameProps} />}
                 {currentFrame === 'fitness' && <FitnessFrame {...frameProps} />}
                 {currentFrame === 'ticket' && <TicketFrame {...frameProps} />}
-                {currentFrame === 'token' && <TokenFrame {...frameProps} />}
+                {currentFrame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} />}
                 {currentFrame === 'holographic' && <HolographicFrame {...frameProps} />}
               </div>
             </div>
@@ -1111,7 +1111,7 @@ const Preview = () => {
                         {frame === 'vogue' && <VogueFrame {...frameProps} />}
                         {frame === 'fitness' && <FitnessFrame {...frameProps} />}
                         {frame === 'ticket' && <TicketFrame {...frameProps} />}
-                        {frame === 'token' && <TokenFrame {...frameProps} />}
+                        {frame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} />}
                         {frame === 'holographic' && <HolographicFrame {...frameProps} />}
                       </div>
                     </motion.div>
