@@ -268,35 +268,45 @@ const ProfileSetupPage = () => {
           )}
         </div>
 
-        {/* iOS-style progressive blur — pure blur only, no color overlay */}
-        <div className="absolute inset-x-0 bottom-0 pointer-events-none" style={{ height: '80%' }}>
+        {/* Progressive blur from bottom — 5 layers, increasing blur + 10% black tint at base */}
+        <div className="absolute inset-x-0 bottom-0 pointer-events-none" style={{ height: '90%' }}>
+          {/* Layer 1 — feather start */}
           <div className="absolute inset-0" style={{
-            backdropFilter: 'blur(3px)',
-            WebkitBackdropFilter: 'blur(3px)',
+            backdropFilter: 'blur(2px)',
+            WebkitBackdropFilter: 'blur(2px)',
             maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
           }} />
-          <div className="absolute inset-x-0 bottom-0" style={{ height: '82%',
+          {/* Layer 2 */}
+          <div className="absolute inset-x-0 bottom-0" style={{ height: '75%',
             backdropFilter: 'blur(10px)',
             WebkitBackdropFilter: 'blur(10px)',
             maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
           }} />
-          <div className="absolute inset-x-0 bottom-0" style={{ height: '62%',
+          {/* Layer 3 */}
+          <div className="absolute inset-x-0 bottom-0" style={{ height: '55%',
             backdropFilter: 'blur(22px)',
             WebkitBackdropFilter: 'blur(22px)',
             maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
           }} />
-          <div className="absolute inset-x-0 bottom-0" style={{ height: '42%',
-            backdropFilter: 'blur(38px)',
-            WebkitBackdropFilter: 'blur(38px)',
+          {/* Layer 4 */}
+          <div className="absolute inset-x-0 bottom-0" style={{ height: '35%',
+            backdropFilter: 'blur(40px)',
+            WebkitBackdropFilter: 'blur(40px)',
             maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
             WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
           }} />
-          <div className="absolute inset-x-0 bottom-0" style={{ height: '22%',
+          {/* Layer 5 — heaviest blur at very bottom */}
+          <div className="absolute inset-x-0 bottom-0" style={{ height: '18%',
             backdropFilter: 'blur(60px)',
             WebkitBackdropFilter: 'blur(60px)',
+          }} />
+          {/* 10% black tint — only at the very bottom to match background colour */}
+          <div className="absolute inset-x-0 bottom-0" style={{
+            height: '50%',
+            background: 'linear-gradient(to bottom, transparent 0%, rgba(10,10,18,0.10) 100%)',
           }} />
         </div>
 
