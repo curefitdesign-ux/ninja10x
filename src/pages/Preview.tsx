@@ -762,16 +762,37 @@ const Preview = () => {
         className="fixed inset-0 w-full touch-manipulation overflow-hidden"
         style={{ height: '100dvh', minHeight: '-webkit-fill-available', background: '#0a0a14' }}
       >
+        {/* ── BLURRED BACKGROUND IMAGE ── */}
+        {imageUrl && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {isVideo ? (
+              <video
+                src={imageUrl}
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ filter: 'blur(55px) brightness(0.35) saturate(1.3)', transform: 'scale(1.15)' }}
+                autoPlay muted loop playsInline
+              />
+            ) : (
+              <img
+                src={lowResBackground || imageUrl}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ filter: 'blur(55px) brightness(0.35) saturate(1.3)', transform: 'scale(1.15)' }}
+              />
+            )}
+          </div>
+        )}
+
         {/* ── SMALL CARD PHOTO — centered at top ── */}
-        <div className="flex justify-center items-start pt-8" style={{ paddingTop: 'max(env(safe-area-inset-top, 32px), 32px)' }}>
+        <div className="flex justify-center items-start" style={{ paddingTop: 'max(env(safe-area-inset-top, 32px), 32px)' }}>
           <motion.div
             layoutId="preview-media-card"
             className="overflow-hidden"
             style={{
-              width: '38vw',
+              width: '42vw',
               aspectRatio: '9/16',
               borderRadius: 20,
-              boxShadow: '0 8px 40px rgba(0,0,0,0.55)',
+              boxShadow: '0 12px 48px rgba(0,0,0,0.65)',
             }}
             transition={{ type: 'spring', stiffness: 260, damping: 28 }}
           >
@@ -783,33 +804,38 @@ const Preview = () => {
           </motion.div>
         </div>
 
-        {/* ── GLASS ACTIVITY SHEET — slides up from bottom ── */}
+        {/* ── GLASS ACTIVITY SHEET — edge-to-edge, slides up from bottom ── */}
         <motion.div
-          className="absolute left-4 right-4 bottom-4 overflow-hidden"
+          className="absolute left-0 right-0 bottom-0 overflow-hidden"
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30, delay: 0.05 }}
           style={{
-            borderRadius: 28,
-            background: 'rgba(255,255,255,0.06)',
-            backdropFilter: 'blur(48px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(48px) saturate(180%)',
-            border: '1px solid rgba(255,255,255,0.10)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
+            borderRadius: '28px 28px 0 0',
+            background: 'rgba(255,255,255,0.04)',
+            backdropFilter: 'blur(60px) saturate(200%)',
+            WebkitBackdropFilter: 'blur(60px) saturate(200%)',
+            border: '1px solid rgba(255,255,255,0.09)',
+            borderBottom: 'none',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10)',
             zIndex: 10,
-            maxHeight: '72dvh',
           }}
         >
+          {/* Drag handle */}
+          <div className="flex justify-center pt-3 pb-0">
+            <div className="w-9 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.18)' }} />
+          </div>
+
           <div
-            className="flex flex-col px-5 pt-4"
-            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 20px)' }}
+            className="flex flex-col px-5 pt-3"
+            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)' }}
           >
             {/* Header row — X + title */}
             <div className="flex items-center gap-3 mb-5">
               <button
                 onClick={handleCloseWithoutSaving}
                 className="w-9 h-9 flex items-center justify-center rounded-full flex-shrink-0"
-                style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.12)' }}
+                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
               >
                 <X className="w-4 h-4 text-white/80" />
               </button>
@@ -824,7 +850,10 @@ const Preview = () => {
             </div>
 
             {/* Activity Grid — 4 cols, scrollable */}
-            <div className="grid grid-cols-4 gap-x-3 gap-y-4 overflow-y-auto" style={{ maxHeight: '54dvh' }}>
+            <div
+              className="grid grid-cols-4 gap-x-3 gap-y-4 overflow-y-auto overscroll-contain"
+              style={{ maxHeight: '55dvh', WebkitOverflowScrolling: 'touch' }}
+            >
               {activityOptions.map((activityOption, index) => {
                 const IconComp = activityOption.icon;
                 return (
@@ -844,26 +873,14 @@ const Preview = () => {
                   >
                     <div
                       className="w-[62px] h-[62px] rounded-[18px] flex items-center justify-center"
-                      style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.10)' }}
+                      style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.12)' }}
                     >
-                      {activityOption.name === 'Running' ? <Footprints className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
-                       activityOption.name === 'Cycling' ? <Bike className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
-                       activityOption.name === 'Trekking' ? <MountainSnow className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
-                       activityOption.name === 'Yoga' ? <PersonStanding className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
-                       activityOption.name === 'GYM' ? <Dumbbell className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
-                       activityOption.name === 'Cricket' ? <IconComp className="w-6 h-6 text-white/80" /> :
-                       activityOption.name === 'Badminton' ? <IconComp className="w-6 h-6 text-white/80" /> :
-                       activityOption.name === 'Tennis' ? <IconComp className="w-6 h-6 text-white/80" /> :
-                       activityOption.name === 'Boxing' ? <IconComp className="w-6 h-6 text-white/80" /> :
-                       activityOption.name === 'Football' ? <IconComp className="w-6 h-6 text-white/80" /> :
-                       activityOption.name === 'Basketball' ? <IconComp className="w-6 h-6 text-white/80" /> :
-                       activityOption.name === 'Swimming' ? <Waves className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
-                       activityOption.name === 'Stair Climbing' ? <ArrowUpFromLine className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
-                       activityOption.name === 'Skipping Rope' ? <SkipForward className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
-                       activityOption.name === 'HRX Session' ? <Zap className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
-                       activityOption.name === 'Strength' ? <Weight className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
-                       activityOption.name === 'Burn' ? <Flame className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
-                       <IconComp className="w-6 h-6 text-white/80" strokeWidth={1.5} />}
+                      <IconComp
+                        className="w-6 h-6"
+                        style={{ color: 'rgba(255,255,255,0.85)' }}
+                        strokeWidth={1.5}
+                        size={24}
+                      />
                     </div>
                     <span className="text-white/70 text-[10px] text-center leading-tight">{activityOption.name}</span>
                   </motion.button>
