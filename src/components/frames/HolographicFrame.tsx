@@ -217,7 +217,7 @@ const HolographicFrame = ({
           style={{
             zIndex: 13,
             right: 0,
-            bottom: 'calc(21% - 10px)',
+            bottom: '21%',
             width: '32%',
             height: '12%',
             paddingTop: '2%',
@@ -245,11 +245,11 @@ const HolographicFrame = ({
             style={{
               fontFamily: "'Arial', 'Helvetica', sans-serif",
               fontWeight: 700,
-              fontSize: 'clamp(7px, 2.2cqw, 11px)',
+              fontSize: 'clamp(4px, 1.4cqw, 7px)',
               color: '#000000',
               letterSpacing: '0.03em',
               textTransform: 'uppercase',
-              marginTop: '3px',
+              marginTop: '2px',
               whiteSpace: 'nowrap',
               overflow: 'visible',
               textAlign: 'left',
