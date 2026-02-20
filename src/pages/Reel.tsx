@@ -114,8 +114,8 @@ const Reel = () => {
   const autoAdvanceStartRef = useRef<number>(0);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // Media loading state - timer only starts after media loads
-  const [mediaLoaded, setMediaLoaded] = useState(false);
+  // Media loading state - track by URL so cached images don't get overwritten by useEffect reset
+  const [loadedMediaUrl, setLoadedMediaUrl] = useState<string>('');
   
   // Audio state for video playback
   const [isMuted, setIsMuted] = useState(true);
@@ -539,9 +539,8 @@ const Reel = () => {
   const isStoryLocked = !isOwnStory && (!profile?.stories_public || !hasPublicActivity);
   const isPaused = showReactsSheet || showSendReactionSheet || showDeleteConfirm || showMakePublicSheet || showProgressOverlay || isStoryLocked;
   
-  // Reset mediaLoaded and duration when activity changes
+  // Reset progress/duration when activity changes (NOT mediaLoaded — that's URL-keyed to avoid race condition)
   useEffect(() => {
-    setMediaLoaded(false);
     setAutoAdvanceProgress(0);
     setAutoAdvanceDuration(DEFAULT_ADVANCE_DURATION); // Reset to default, will be updated when video loads
   }, [currentUserIndex, currentActivityIndex]);
@@ -555,8 +554,9 @@ const Reel = () => {
     // Don't run auto-advance in recap viewer mode
     if (hasWeekRecap) return;
     
-    // Don't start timer until media is loaded
-    if (isPaused || loading || !currentActivity || !mediaLoaded) {
+    // Don't start timer until media is loaded (check via loadedMediaUrl)
+    const currentMediaUrl = currentActivity?.storageUrl || currentActivity?.originalUrl || '';
+    if (isPaused || loading || !currentActivity || loadedMediaUrl !== currentMediaUrl || !currentMediaUrl) {
       return;
     }
     
@@ -581,7 +581,7 @@ const Reel = () => {
         clearInterval(autoAdvanceTimerRef.current);
       }
     };
-  }, [currentUserIndex, currentActivityIndex, isPaused, loading, currentActivity, cycleActivity, mediaLoaded, hasWeekRecap, autoAdvanceDuration]);
+  }, [currentUserIndex, currentActivityIndex, isPaused, loading, currentActivity, loadedMediaUrl, cycleActivity, hasWeekRecap, autoAdvanceDuration]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -1082,6 +1082,8 @@ const Reel = () => {
   // Determine media type from the actual URL extension ONLY — storageUrl for video activities
   // is a .jpg/.png screenshot (the framed capture), so we must not rely on the is_video DB flag here.
   const isVideo = isVideoUrl(mediaUrl);
+  // Derived: media is "loaded" once the browser has fetched and decoded this specific URL
+  const mediaLoaded = loadedMediaUrl === mediaUrl && mediaUrl.length > 0;
   const currentReactions = localReactions[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS }, reactorProfiles: [] };
   
   // Week recap is generating if it's a recap story with no valid video URL
@@ -1441,7 +1443,7 @@ const Reel = () => {
                             muted={isMuted}
                             playsInline
                             onLoadedData={(e) => {
-                              setMediaLoaded(true);
+                              setLoadedMediaUrl(mediaUrl);
                               const vid = e.currentTarget;
                               if (vid.duration && isFinite(vid.duration) && vid.duration > 0) {
                                 const videoDurationMs = Math.ceil(vid.duration * 1000);
@@ -1463,7 +1465,7 @@ const Reel = () => {
                               opacity: mediaLoaded ? 1 : 0,
                               transition: 'opacity 0.2s ease',
                             }}
-                            onLoad={() => setMediaLoaded(true)}
+                            onLoad={() => setLoadedMediaUrl(mediaUrl)}
                             onError={(e) => {
                               const img = e.currentTarget;
                               if (!img.dataset.retried) {
