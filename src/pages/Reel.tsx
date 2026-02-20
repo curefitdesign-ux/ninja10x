@@ -1319,7 +1319,7 @@ const Reel = () => {
         {/* MAIN CONTENT ZONE - flexible middle section, card-style with padding */}
         <div
           className="flex-1 flex items-center justify-center z-30 relative px-4 py-2"
-          style={{ background: 'transparent', overflow: 'visible' }}
+          style={{ background: 'transparent', overflow: 'hidden' }}
         >
           {/* Card container with shake animation */}
           <motion.div 
@@ -1357,13 +1357,15 @@ const Reel = () => {
                       background: 'transparent',
                     }}
                   >
-                    {/* Card — 9:16 aspect ratio, rounded corners, contained */}
+                    {/* Card — 9:16 aspect ratio, constrained to available space */}
                     <div
                       className="relative overflow-hidden"
                       style={{
                         aspectRatio: '9/16',
-                        height: '100%',
+                        maxHeight: '100%',
                         maxWidth: '100%',
+                        width: 'auto',
+                        height: 'auto',
                         borderRadius: '20px',
                         background: 'transparent',
                         boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
