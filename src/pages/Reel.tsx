@@ -1571,25 +1571,24 @@ const Reel = () => {
                       </div>
                     )}
                     
-                    {/* Floating 3D emoji reactions - inside image container */}
-                    {!shouldShowLocked && (
-                      <Floating3DEmojis 
-                        reactions={activeReactionTypes}
-                        newReaction={null}
-                        isPaused={isPaused}
-                      />
-                    )}
-                    
-                    {/* iMessage-style emoji rain on story load */}
-                    {!shouldShowLocked && (
-                      <StoryEmojiRain
-                        triggerKey={contentKey}
-                        reactions={activeReactionTypes}
-                        active={mediaLoaded && activeReactionTypes.length > 0}
-                      />
-                    )}
-                    
                     </div>{/* end 9:16 card */}
+
+                    {/* Floating 3D emoji reactions - OUTSIDE overflow-hidden card so they aren't clipped */}
+                    {!shouldShowLocked && (
+                      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 25, overflow: 'hidden', borderRadius: '20px' }}>
+                        <Floating3DEmojis 
+                          reactions={activeReactionTypes}
+                          newReaction={null}
+                          isPaused={isPaused}
+                        />
+                        {/* iMessage-style emoji rain on story load */}
+                        <StoryEmojiRain
+                          triggerKey={contentKey}
+                          reactions={activeReactionTypes}
+                          active={mediaLoaded && activeReactionTypes.length > 0}
+                        />
+                      </div>
+                    )}
                   </div>
                 );
               })()}
