@@ -718,7 +718,13 @@ const Preview = () => {
           label2={activityLabels.primaryUnit}
         />;
       case 'holographic':
-        return <HolographicFrame {...frameProps} />;
+        return <HolographicFrame 
+          {...frameProps} 
+          label1={activityLabels.secondaryUnit}
+          label2={activityLabels.primaryUnit}
+          label1Name={activityLabels.secondaryMetric}
+          label2Name={activityLabels.primaryMetric}
+        />;
     }
   };
 
@@ -1044,7 +1050,7 @@ const Preview = () => {
                 {currentFrame === 'fitness' && <FitnessFrame {...frameProps} />}
                 {currentFrame === 'ticket' && <TicketFrame {...frameProps} />}
                 {currentFrame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} />}
-                {currentFrame === 'holographic' && <HolographicFrame {...frameProps} />}
+                {currentFrame === 'holographic' && <HolographicFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
               </div>
             </div>
           ) : (
@@ -1116,7 +1122,7 @@ const Preview = () => {
                         {frame === 'fitness' && <FitnessFrame {...frameProps} />}
                         {frame === 'ticket' && <TicketFrame {...frameProps} />}
                         {frame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} />}
-                        {frame === 'holographic' && <HolographicFrame {...frameProps} />}
+                        {frame === 'holographic' && <HolographicFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
                       </div>
                     </motion.div>
                 );
