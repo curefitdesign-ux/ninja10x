@@ -20,30 +20,32 @@ import { isVideoUrl } from "@/lib/media";
 
 // Tile positions — Day 1 at TOP-LEFT, Day 12 at BOTTOM (journey flows downward)
 // S-curve diagonal: Week 1 sweeps left→right, Week 2 sweeps right→left, etc.
+// Positions tuned pixel-perfectly to match reference design (IMG_0392)
 const TILE_POSITIONS = [
-  // Week 1 — left side, sweeping left→right (Day 1 top-left, Day 3 top-right)
-  { left: 28, top: 3  },  // Day 1
-  { left: 42, top: 10 },  // Day 2
-  { left: 56, top: 17 },  // Day 3  ← milestone
-  // Week 2 — right side, sweeping right→left
-  { left: 64, top: 24 },  // Day 4
-  { left: 50, top: 31 },  // Day 5
-  { left: 38, top: 38 },  // Day 6  ← milestone
-  // Week 3 — left side, sweeping left→right
-  { left: 30, top: 45 },  // Day 7
-  { left: 44, top: 52 },  // Day 8
-  { left: 58, top: 59 },  // Day 9  ← milestone
-  // Week 4 — right→left going down
-  { left: 66, top: 66 },  // Day 10
-  { left: 52, top: 73 },  // Day 11
-  { left: 40, top: 80 },  // Day 12 ← milestone
+  // Week 1 — sweeping left→right (Day 1 top-left)
+  { left: 30, top: 4  },  // Day 1  ← engine badge sits here
+  { left: 44, top: 11 },  // Day 2
+  { left: 58, top: 18 },  // Day 3  ← milestone (BUILD STRENGTH line)
+  // Week 2 — sweeping right→left
+  { left: 65, top: 26 },  // Day 4
+  { left: 52, top: 33 },  // Day 5
+  { left: 38, top: 40 },  // Day 6  ← milestone (INCREASE STAMINA line)
+  // Week 3 — sweeping left→right
+  { left: 30, top: 48 },  // Day 7
+  { left: 44, top: 55 },  // Day 8
+  { left: 58, top: 62 },  // Day 9  ← milestone (BUILD ENERGY line)
+  // Week 4 — sweeping right→left
+  { left: 65, top: 69 },  // Day 10
+  { left: 52, top: 76 },  // Day 11
+  { left: 38, top: 83 },  // Day 12 ← milestone (CONQUER WILL POWER line)
 ];
 
+// Labels appear at the START of each week group (aligned with Day 1, 4, 7, 10 tiles)
 const LABELS = [
-  { tileIndex: 0, text: ["BUILD", "STRENGTH"],    side: "right" as const, top: 3,  left: 62 },
-  { tileIndex: 3, text: ["INCREASE", "STAMINA"],  side: "left"  as const, top: 24, left: 2  },
-  { tileIndex: 6, text: ["BUILD", "ENERGY"],      side: "right" as const, top: 45, left: 62 },
-  { tileIndex: 9, text: ["CONQUER", "WILL POWER"],side: "left"  as const, top: 66, left: 2  },
+  { tileIndex: 0, text: ["BUILD", "STRENGTH"],     side: "right" as const, top: 4,  left: 63 },
+  { tileIndex: 3, text: ["INCREASE", "STAMINA"],   side: "left"  as const, top: 26, left: 2  },
+  { tileIndex: 6, text: ["BUILD", "ENERGY"],       side: "right" as const, top: 48, left: 63 },
+  { tileIndex: 9, text: ["CONQUER", "WILL POWER"], side: "left"  as const, top: 69, left: 2  },
 ];
 
 const Progress = () => {
@@ -514,17 +516,17 @@ const Progress = () => {
           opacity: contentOpacity,
         }}
       >
-        {/* Engine Badge - positioned above/near Day 1 tile (top-left) */}
+        {/* Engine Badge - positioned ON Day 1 tile (top-left, ~30% left, ~4% top) */}
         <AnimatePresence>
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "8%", top: "0%", width: "26%", aspectRatio: "1" }}
+              style={{ left: "17%", top: "-1%", width: "28%", aspectRatio: "1" }}
               initial={{ opacity: 0, scale: 0.6, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.4 }}
             >
-              <img src={engineBadgeImg} alt="Engine Badge" className="w-full h-full object-contain" style={{ opacity: 0.7 }} />
+              <img src={engineBadgeImg} alt="Engine Badge" className="w-full h-full object-contain" style={{ opacity: 0.85 }} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -619,12 +621,12 @@ const Progress = () => {
           </motion.div>
         ))}
 
-        {/* Bottom Base Platform - increased size and positioned near last tile */}
+        {/* Bottom Base Platform - aligned under Day 12 tile (left: ~38%, bottom) */}
         <AnimatePresence>
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "35%", bottom: "3%", width: "46%", aspectRatio: "2.5" }}
+              style={{ left: "28%", bottom: "2%", width: "50%", aspectRatio: "2.5" }}
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7 }}
