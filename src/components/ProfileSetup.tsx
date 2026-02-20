@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Camera, X } from 'lucide-react';
+import { Check, Camera, X, ChevronLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
@@ -42,11 +42,12 @@ const nameSchema = z.string().trim().min(2, 'Name must be at least 2 characters'
 
 interface ProfileSetupProps {
   onComplete: () => void;
+  onBack?: () => void;
   editMode?: boolean;
   existingProfile?: Profile | null;
 }
 
-const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: ProfileSetupProps) => {
+const ProfileSetup = ({ onComplete, onBack, editMode = false, existingProfile }: ProfileSetupProps) => {
   const { user } = useAuth();
   const { updateProfile } = useProfile();
   const navigate = useNavigate();
@@ -284,8 +285,8 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
           }}
         />
 
-        {/* Close button (edit mode only) */}
-        {editMode && (
+        {/* Back button (new setup) / Close button (edit mode) */}
+        {editMode ? (
           <motion.button
             onClick={handleClose}
             whileTap={{ scale: 0.95 }}
@@ -301,7 +302,23 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
           >
             <X className="w-4 h-4 text-white" />
           </motion.button>
-        )}
+        ) : onBack ? (
+          <motion.button
+            onClick={onBack}
+            whileTap={{ scale: 0.95 }}
+            className="absolute w-9 h-9 rounded-full flex items-center justify-center"
+            style={{
+              top: '48px',
+              left: '16px',
+              background: 'rgba(0,0,0,0.45)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              zIndex: 5,
+            }}
+          >
+            <ChevronLeft className="w-5 h-5 text-white" />
+          </motion.button>
+        ) : null}
       </div>
 
       {/* ─── BOTTOM PANEL — floats over blurred bg ─── */}
