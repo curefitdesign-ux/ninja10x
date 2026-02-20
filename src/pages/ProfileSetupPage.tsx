@@ -12,32 +12,27 @@ import { z } from 'zod';
 
 
 // New 3D character preset avatars
-import presetOrange from '@/assets/avatars/preset-orange.png';
-import presetRedgirl from '@/assets/avatars/preset-redgirl.png';
-import presetEdgy from '@/assets/avatars/preset-edgy.png';
-
-// Fallback color avatars
-import avatarRed from '@/assets/avatars/avatar-red.png';
-import avatarBlue from '@/assets/avatars/avatar-blue.png';
-import avatarPurple from '@/assets/avatars/avatar-purple.png';
-import avatarGreen from '@/assets/avatars/avatar-green.png';
-import avatarOrange from '@/assets/avatars/avatar-orange.png';
-import avatarTeal from '@/assets/avatars/avatar-teal.png';
-import avatarPink from '@/assets/avatars/avatar-pink.png';
-import avatarYellow from '@/assets/avatars/avatar-yellow.png';
+import charOrangeBoy from '@/assets/avatars/char-orange-boy.jpg';
+import charGlassesGirl from '@/assets/avatars/char-glasses-girl.jpg';
+import charEdgyGirl from '@/assets/avatars/char-edgy-girl.jpg';
+// Sport avatars as remaining presets
+import avatarBoxer from '@/assets/avatars/boxer.png';
+import avatarCyclist from '@/assets/avatars/cyclist.png';
+import avatarRunner from '@/assets/avatars/runner.png';
+import avatarSwimmer from '@/assets/avatars/swimmer.png';
+import avatarWeightlifter from '@/assets/avatars/weightlifter.png';
+import avatarYogi from '@/assets/avatars/yogi.png';
 
 const PRESET_AVATARS = [
-  { id: 'preset-orange', src: presetOrange },
-  { id: 'preset-redgirl', src: presetRedgirl },
-  { id: 'preset-edgy', src: presetEdgy },
-  { id: 'red', src: avatarRed },
-  { id: 'blue', src: avatarBlue },
-  { id: 'purple', src: avatarPurple },
-  { id: 'green', src: avatarGreen },
-  { id: 'orange', src: avatarOrange },
-  { id: 'teal', src: avatarTeal },
-  { id: 'pink', src: avatarPink },
-  { id: 'yellow', src: avatarYellow },
+  { id: 'char-orange-boy', src: charOrangeBoy },
+  { id: 'char-glasses-girl', src: charGlassesGirl },
+  { id: 'char-edgy-girl', src: charEdgyGirl },
+  { id: 'boxer', src: avatarBoxer },
+  { id: 'cyclist', src: avatarCyclist },
+  { id: 'runner', src: avatarRunner },
+  { id: 'swimmer', src: avatarSwimmer },
+  { id: 'weightlifter', src: avatarWeightlifter },
+  { id: 'yogi', src: avatarYogi },
 ];
 
 const nameSchema = z.string().trim().min(2, 'Name must be at least 2 characters').max(50, 'Name too long');

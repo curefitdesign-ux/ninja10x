@@ -1,7 +1,18 @@
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
-// Import preset avatars to create a mapping for Vite-hashed paths
+// New 3D character preset avatars
+import charOrangeBoy from '@/assets/avatars/char-orange-boy.jpg';
+import charGlassesGirl from '@/assets/avatars/char-glasses-girl.jpg';
+import charEdgyGirl from '@/assets/avatars/char-edgy-girl.jpg';
+// Sport avatars
+import avatarBoxer from '@/assets/avatars/boxer.png';
+import avatarCyclist from '@/assets/avatars/cyclist.png';
+import avatarRunner from '@/assets/avatars/runner.png';
+import avatarSwimmer from '@/assets/avatars/swimmer.png';
+import avatarWeightlifter from '@/assets/avatars/weightlifter.png';
+import avatarYogi from '@/assets/avatars/yogi.png';
+// Legacy color avatars (backward compat with existing DB values)
 import avatarRed from '@/assets/avatars/avatar-red.png';
 import avatarBlue from '@/assets/avatars/avatar-blue.png';
 import avatarPurple from '@/assets/avatars/avatar-purple.png';
@@ -10,19 +21,25 @@ import avatarOrange from '@/assets/avatars/avatar-orange.png';
 import avatarTeal from '@/assets/avatars/avatar-teal.png';
 import avatarPink from '@/assets/avatars/avatar-pink.png';
 import avatarYellow from '@/assets/avatars/avatar-yellow.png';
-import avatarBoxer from '@/assets/avatars/boxer.png';
-import avatarCyclist from '@/assets/avatars/cyclist.png';
-import avatarRunner from '@/assets/avatars/runner.png';
-import avatarSwimmer from '@/assets/avatars/swimmer.png';
-import avatarWeightlifter from '@/assets/avatars/weightlifter.png';
-import avatarYogi from '@/assets/avatars/yogi.png';
-// New 3D character presets
+// Legacy 3D presets (backward compat)
 import presetOrangeChar from '@/assets/avatars/preset-orange.png';
 import presetRedgirlChar from '@/assets/avatars/preset-redgirl.png';
 import presetEdgyChar from '@/assets/avatars/preset-edgy.png';
 
-// Map avatar color names to their imported paths
+// Map avatar keys to their imported paths
 const AVATAR_MAP: Record<string, string> = {
+  // New 3D characters
+  'char-orange-boy': charOrangeBoy,
+  'char-glasses-girl': charGlassesGirl,
+  'char-edgy-girl': charEdgyGirl,
+  // Sport avatars
+  'boxer': avatarBoxer,
+  'cyclist': avatarCyclist,
+  'runner': avatarRunner,
+  'swimmer': avatarSwimmer,
+  'weightlifter': avatarWeightlifter,
+  'yogi': avatarYogi,
+  // Legacy color avatars
   'avatar-red': avatarRed,
   'avatar-blue': avatarBlue,
   'avatar-purple': avatarPurple,
@@ -31,13 +48,7 @@ const AVATAR_MAP: Record<string, string> = {
   'avatar-teal': avatarTeal,
   'avatar-pink': avatarPink,
   'avatar-yellow': avatarYellow,
-  'boxer': avatarBoxer,
-  'cyclist': avatarCyclist,
-  'runner': avatarRunner,
-  'swimmer': avatarSwimmer,
-  'weightlifter': avatarWeightlifter,
-  'yogi': avatarYogi,
-  // New 3D character presets
+  // Legacy 3D presets
   'preset-orange': presetOrangeChar,
   'preset-redgirl': presetRedgirlChar,
   'preset-edgy': presetEdgyChar,
