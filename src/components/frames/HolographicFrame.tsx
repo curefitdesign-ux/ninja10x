@@ -47,24 +47,30 @@ const HolographicFrame = ({
   imageScale,
   label1,
   label2,
+  label1Name,
+  label2Name,
 }: HolographicFrameProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // label2 = primary (Duration), label1 = secondary (Distance, Runs, etc.)
-  const durationLabel = label2 || 'Duration';
-  const metricLabel   = label1 || 'Distance';
+  // Box 1 (top, light box): shows duration value + "UNIT | METRIC NAME"
+  // label2 = primary unit (e.g. "min"), label2Name = primary metric name (e.g. "Duration")
+  const durationMetricName = label2Name || 'Duration';
+  const durationUnit = label2?.toUpperCase() || '';
+  
+  // Box 2 (bottom, dark box): shows pr value + metric name label
+  // label1 = secondary unit (e.g. "km"), label1Name = secondary metric name (e.g. "Distance")
+  const metricLabel = label1Name || label1 || 'Distance';
 
   const hasMetric1 = !!duration;
   const hasMetric2 = !!pr;
 
   // Strip letters/units from duration value for display (e.g. "30 min" → "30")
   const durationRaw = duration.replace(/[a-zA-Z\s]/g, '').trim() || duration;
-  // Extract unit from duration string (e.g. "30 min" → "min", "2 hrs" → "hrs")
-  const durationUnit = duration.replace(/[^a-zA-Z]/g, '').trim().toUpperCase() || '';
-  // Subtext for metric 1 box: "HRS | DURATION" style
+
+  // Subtext for metric 1 box: "MIN | DURATION" style matching reference
   const metric1Subtext = durationUnit
-    ? `${durationUnit} | ${durationLabel.toUpperCase()}`
-    : durationLabel.toUpperCase();
+    ? `${durationUnit} | ${durationMetricName.toUpperCase()}`
+    : durationMetricName.toUpperCase();
 
   // Strip units from pr/secondary metric value for display
   const prValue = pr.replace(/[a-zA-Z\s]/g, '').trim() || pr;
