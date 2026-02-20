@@ -28,6 +28,10 @@ interface FrameProps {
   imageScale: number;
   label1: string;
   label2: string;
+  label1Unit?: string;
+  label2Unit?: string;
+  label1Name?: string;
+  label2Name?: string;
 }
 
 interface ShareSheetProps {
@@ -443,7 +447,13 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
       case 'token':
         return <TokenFrame {...frameProps} />;
       case 'holographic':
-        return <HolographicFrame {...frameProps} />;
+        return <HolographicFrame 
+          {...frameProps}
+          label1={frameProps.label1Unit ?? frameProps.label1}
+          label2={frameProps.label2Unit ?? frameProps.label2}
+          label1Name={frameProps.label1Name}
+          label2Name={frameProps.label2Name}
+        />;
       default:
         return (
           <img

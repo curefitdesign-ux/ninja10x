@@ -688,6 +688,11 @@ const Preview = () => {
     // All frames (except Token) use metric names as labels (e.g. 'Distance', 'Duration')
     label1: activityLabels.secondaryMetric,  // metric name for secondary (e.g. 'Distance', 'Sets')
     label2: activityLabels.primaryMetric,    // metric name for primary (e.g. 'Duration')
+    // Extra fields for Holographic frame (unit values + names)
+    label1Unit: activityLabels.secondaryUnit,
+    label2Unit: activityLabels.primaryUnit,
+    label1Name: activityLabels.secondaryMetric,
+    label2Name: activityLabels.primaryMetric,
   };
 
   const renderFrame = () => {
