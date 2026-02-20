@@ -556,10 +556,21 @@ const Progress = () => {
                 transform: 'translateX(-50%)',
               }}
               initial={{ opacity: 0, y: 40, scale: 0.7 }}
-              animate={showTiles ? { opacity: 1, y: 0, scale: 1 } : {}}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ type: "spring", stiffness: 200, damping: 22, delay: index * 0.035 }}
             >
-              <img src={isActive ? tileActiveImg : tileInactiveImg} alt={`Day ${day}`} className="w-full h-full object-contain relative z-10" />
+              <img
+                src={isActive ? tileActiveImg : tileInactiveImg}
+                alt={`Day ${day}`}
+                className="w-full h-full object-contain relative z-10"
+                onError={(e) => {
+                  // Fallback to inactive tile if active tile image fails to load
+                  const img = e.currentTarget;
+                  if (img.src !== tileInactiveImg) {
+                    img.src = tileInactiveImg;
+                  }
+                }}
+              />
               
               {/* User profile avatar ONLY on the latest completed tile - positioned on TOP of tile */}
               {isLatestTile && profile && (
@@ -597,7 +608,7 @@ const Progress = () => {
           className={`absolute ${label.side === "left" ? "text-left" : "text-right"}`}
             style={{ top: `${label.top}%`, left: `${label.left}%`, width: label.side === "left" ? "28%" : "24%" }}
             initial={{ opacity: 0, x: label.side === "left" ? -20 : 20 }}
-            animate={showTiles ? { opacity: 1, x: 0 } : {}}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5 + idx * 0.08 }}
           >
             {label.text.map((line, i) => (
@@ -622,6 +633,8 @@ const Progress = () => {
             />
           </motion.div>
         ))}
+
+
 
         {/* Bottom Base Platform — sits below Day 12 tile (left ~37%, bottom of tile area) */}
         <AnimatePresence>
