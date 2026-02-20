@@ -755,189 +755,139 @@ const Preview = () => {
   };
 
 
-  // Activity Selection Step - Show as bottom sheet over media preview
+  // Activity Selection Step — media fills top portion, sheet slides from below
   if (flowStep === 'activity') {
     return (
-      <div 
-        className="fixed inset-0 w-full bg-black touch-manipulation overflow-hidden" 
-        style={{ 
-          height: '100dvh',
-          minHeight: '-webkit-fill-available',
-        }}
+      <div
+        className="fixed inset-0 w-full bg-[#0a0a14] touch-manipulation overflow-hidden"
+        style={{ height: '100dvh', minHeight: '-webkit-fill-available' }}
       >
-        {/* Blurred background image - use img tag to avoid CSS bg blob URL issues */}
+        {/* ── FULL-BLEED BLURRED BACKGROUND ── */}
         {!isVideo && (
           <img
             src={lowResBackground || imageUrl || ''}
             alt=""
-            className="fixed inset-0 w-full h-full scale-150 pointer-events-none"
-            style={{ objectFit: 'cover', filter: 'blur(80px) brightness(0.5)', zIndex: 0 }}
+            className="fixed inset-0 w-full h-full pointer-events-none"
+            style={{ objectFit: 'cover', filter: 'blur(60px) brightness(0.4) saturate(1.4)', zIndex: 0, transform: 'scale(1.15)' }}
           />
         )}
-        
-        {/* Dark gradient overlay */}
-        <div className="fixed inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/80 pointer-events-none" style={{ zIndex: 1 }} />
-        
-        {/* Header */}
-        <div 
-          className="relative z-20 flex items-center justify-between px-5 py-4"
-          style={{ paddingTop: 'max(env(safe-area-inset-top, 16px), 16px)' }}
-        >
-          <button 
-            onClick={() => navigate('/gallery', { state: { dayNumber }, replace: true })}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm"
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
-          <div className="w-10 h-10" /> {/* Spacer */}
-        </div>
 
-        {/* Media Preview - small peek above the 80% sheet */}
-        <div className="relative z-10 flex items-end justify-center px-6" style={{ height: '20dvh', paddingBottom: '8px' }}>
-          <motion.div 
-            layoutId="preview-media-card"
-            className="relative overflow-hidden rounded-xl"
-            style={{ 
-              width: 'min(28vw, 110px)',
-              aspectRatio: '9/16',
-              boxShadow: '0 0 0 1px rgba(255,255,255,0.12), 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.18)',
-            }}
-            initial={{ scale: 0.88, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 280, damping: 26 }}
-          >
-            {isVideo ? (
-              <video
-                src={imageUrl || ''}
-                className="w-full h-full object-cover"
-                autoPlay
-                muted
-                loop
-                playsInline
-              />
-            ) : (
-              <img
-                src={imageUrl || ''}
-                alt="Preview"
-                className="w-full h-full object-cover"
-              />
-            )}
-            {/* Edge reflection */}
-            <div className="absolute inset-0 pointer-events-none rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.05) 100%)', border: '1px solid rgba(255,255,255,0.14)' }} />
-          </motion.div>
-        </div>
-        
-        {/* Activity Selection Bottom Sheet — max 80vh, sized to content */}
+        {/* ── LARGE MEDIA PREVIEW (top ~38% of screen) ── */}
         <motion.div
-          className="fixed bottom-0 left-0 right-0 z-30"
-          initial={{ y: '100%' }}
-          animate={{ y: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          layoutId="preview-media-card"
+          className="absolute left-0 right-0 top-0 overflow-hidden"
+          style={{ height: '42dvh', zIndex: 5 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 28 }}
         >
-          <div 
-            className="glass-sheet max-h-[80vh] px-5 flex flex-col overflow-y-auto rounded-t-3xl"
+          {isVideo ? (
+            <video
+              src={imageUrl || ''}
+              className="w-full h-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+            />
+          ) : (
+            <img
+              src={imageUrl || ''}
+              alt="Preview"
+              className="w-full h-full object-cover"
+            />
+          )}
+          {/* Progressive blur fade at the bottom of media */}
+          <div className="absolute inset-x-0 bottom-0 pointer-events-none" style={{ height: '50%', zIndex: 2 }}>
+            {[4, 10, 20, 36].map((blur, i) => (
+              <div
+                key={blur}
+                className="absolute inset-x-0 bottom-0"
+                style={{
+                  height: `${100 - i * 18}%`,
+                  backdropFilter: `blur(${blur}px)`,
+                  WebkitBackdropFilter: `blur(${blur}px)`,
+                  maskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
+                  WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 100%)',
+                }}
+              />
+            ))}
+          </div>
+        </motion.div>
+
+        {/* ── ACTIVITY SELECTION BOTTOM SHEET ── */}
+        <motion.div
+          className="absolute left-0 right-0 bottom-0"
+          initial={{ y: 60, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 32, delay: 0.08 }}
+          style={{ top: '38dvh', zIndex: 10 }}
+        >
+          <div
+            className="w-full h-full flex flex-col px-5 pt-5 pb-safe"
             style={{
-              paddingTop: '20px',
+              background: 'linear-gradient(180deg, rgba(10,10,20,0.0) 0%, rgba(10,10,20,0.92) 8%, rgba(10,10,20,0.97) 100%)',
               paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
+              backdropFilter: 'blur(0px)',
             }}
           >
-            {/* Header row */}
-            <div className="flex items-center justify-between mb-6">
-              <button
-                onClick={() => navigate('/gallery', { state: { dayNumber }, replace: true })}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm"
-              >
-                <X className="w-5 h-5 text-white" />
-              </button>
-              <h2 className="text-white text-xl font-bold">Choose your activity</h2>
-              <div className="w-10 h-10" />
-            </div>
-            
-            {/* Activity Grid - 4 columns, fills remaining space */}
+            {/* Header — title only, no X button */}
+            <motion.h2
+              className="text-white text-xl font-bold mb-5"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.14, duration: 0.28 }}
+            >
+              Choose your activity
+            </motion.h2>
+
+            {/* Activity Grid — 4 cols, staggered entrance */}
             <div className="flex-1 grid grid-cols-4 gap-x-3 gap-y-4 content-start overflow-y-auto">
               {activityOptions.map((activityOption, index) => {
-                const isOther = 'isCustom' in activityOption && activityOption.isCustom;
+                const IconComp = activityOption.icon;
                 return (
                   <motion.button
                     key={activityOption.name}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.015 }}
-                    whileTap={{ scale: 0.92 }}
+                    initial={{ opacity: 0, y: 16, scale: 0.90 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 340, damping: 26, delay: 0.16 + index * 0.022 }}
                     onClick={() => {
-                      if (isOther) {
-                        triggerHaptic('medium');
+                      if (activityOption.isCustom) {
                         setShowCustomActivityInput(true);
-                        setCustomActivityName('');
                       } else {
-                        // Cricket: select directly, sub-option is on the preview/data card
                         handleActivitySelection(activityOption.name);
                       }
                     }}
-                    className="flex flex-col items-center gap-1.5"
+                    className="flex flex-col items-center gap-2 tap-bounce"
                   >
-                    <div 
-                      className="w-[62px] h-[62px] rounded-[18px] flex items-center justify-center overflow-hidden"
-                      style={{ 
-                        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 100%)',
-                        backdropFilter: 'blur(16px)',
-                        border: '1px solid rgba(255, 255, 255, 0.18)',
-                        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 16px rgba(0,0,0,0.15)',
-                      }}
+                    <div className="w-[62px] h-[62px] rounded-[18px] flex items-center justify-center overflow-hidden"
+                      style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.10)' }}
                     >
-                      {(() => {
-                        const IconComp = activityOption.icon;
-                        return <IconComp className="w-6 h-6 text-white/80" strokeWidth={1.5} />;
-                      })()}
+                      {activityOption.name === 'Running' ? <Footprints className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
+                       activityOption.name === 'Cycling' ? <Bike className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
+                       activityOption.name === 'Trekking' ? <MountainSnow className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
+                       activityOption.name === 'Yoga' ? <PersonStanding className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
+                       activityOption.name === 'GYM' ? <Dumbbell className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
+                       activityOption.name === 'Cricket' ? <IconComp className="w-6 h-6 text-white/80" /> :
+                       activityOption.name === 'Badminton' ? <IconComp className="w-6 h-6 text-white/80" /> :
+                       activityOption.name === 'Tennis' ? <IconComp className="w-6 h-6 text-white/80" /> :
+                       activityOption.name === 'Boxing' ? <IconComp className="w-6 h-6 text-white/80" /> :
+                       activityOption.name === 'Football' ? <IconComp className="w-6 h-6 text-white/80" /> :
+                       activityOption.name === 'Basketball' ? <IconComp className="w-6 h-6 text-white/80" /> :
+                       activityOption.name === 'Swimming' ? <Waves className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
+                       activityOption.name === 'Stair Climbing' ? <ArrowUpFromLine className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
+                       activityOption.name === 'Skipping Rope' ? <SkipForward className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
+                       activityOption.name === 'HRX Session' ? <Zap className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
+                       activityOption.name === 'Strength' ? <Weight className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
+                       activityOption.name === 'Burn' ? <Flame className="w-6 h-6 text-white/80" strokeWidth={1.5} /> :
+                       <IconComp className="w-6 h-6 text-white/80" strokeWidth={1.5} />}
                     </div>
-                    <span className="text-white/90 text-[10px] font-semibold text-center leading-tight">
-                      {activityOption.name}
-                    </span>
+                    <span className="text-white/80 text-[10px] text-center leading-tight">{activityOption.name}</span>
                   </motion.button>
                 );
               })}
             </div>
-
-            {/* Custom Activity Name Input */}
-            <AnimatePresence>
-              {showCustomActivityInput && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mt-4 overflow-hidden"
-                >
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={customActivityName}
-                      onChange={(e) => setCustomActivityName(e.target.value)}
-                      placeholder="Enter activity name..."
-                      autoFocus
-                      className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/40 text-base focus:outline-none focus:border-white/40"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && customActivityName.trim()) {
-                          handleCustomActivityConfirm(customActivityName.trim());
-                        }
-                      }}
-                    />
-                    <button
-                      onClick={() => {
-                        if (customActivityName.trim()) {
-                          handleCustomActivityConfirm(customActivityName.trim());
-                        }
-                      }}
-                      disabled={!customActivityName.trim()}
-                      className="bg-white/20 hover:bg-white/30 disabled:opacity-40 px-4 rounded-xl flex items-center justify-center transition-colors"
-                    >
-                      <Check className="w-5 h-5 text-white" />
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
         </motion.div>
+
       </div>
     );
   }
@@ -1338,15 +1288,8 @@ const Preview = () => {
                 }}
               >
                 {/* Header row */}
-                <div className="flex items-center justify-between mb-6">
-                  <button
-                    onClick={() => { setEditingField(null); setShowCustomActivityInput(false); }}
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-sm"
-                  >
-                    <X className="w-5 h-5 text-white" />
-                  </button>
+                <div className="mb-5">
                   <h2 className="text-white text-xl font-bold">Change activity</h2>
-                  <div className="w-10 h-10" />
                 </div>
                 
                 {/* Activity Grid - 4 columns, fills remaining space */}
