@@ -764,20 +764,29 @@ const Preview = () => {
       >
         {/* ── BLURRED BACKGROUND IMAGE ── */}
         {imageUrl && (
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
             {isVideo ? (
               <video
                 src={imageUrl}
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ filter: 'blur(55px) brightness(0.35) saturate(1.3)', transform: 'scale(1.15)' }}
+                className="w-full h-full object-cover"
+                style={{
+                  position: 'absolute', inset: 0,
+                  filter: 'blur(48px) brightness(0.30) saturate(1.4)',
+                  transform: 'scale(1.2)',
+                }}
                 autoPlay muted loop playsInline
               />
             ) : (
               <img
-                src={lowResBackground || imageUrl}
+                src={imageUrl}
                 alt=""
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ filter: 'blur(55px) brightness(0.35) saturate(1.3)', transform: 'scale(1.15)' }}
+                style={{
+                  position: 'absolute', inset: 0,
+                  width: '100%', height: '100%',
+                  objectFit: 'cover',
+                  filter: 'blur(48px) brightness(0.30) saturate(1.4)',
+                  transform: 'scale(1.2)',
+                }}
               />
             )}
           </div>
@@ -873,13 +882,19 @@ const Preview = () => {
                   >
                     <div
                       className="w-[62px] h-[62px] rounded-[18px] flex items-center justify-center"
-                      style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.12)' }}
+                      style={{
+                        background: 'rgba(255,255,255,0.09)',
+                        border: '1px solid rgba(255,255,255,0.12)',
+                        color: 'rgba(255,255,255,0.9)',
+                      }}
                     >
                       <IconComp
-                        className="w-6 h-6"
-                        style={{ color: 'rgba(255,255,255,0.85)' }}
+                        width={26}
+                        height={26}
+                        size={26}
                         strokeWidth={1.5}
-                        size={24}
+                        stroke="rgba(255,255,255,0.9)"
+                        style={{ color: 'rgba(255,255,255,0.9)', display: 'block' }}
                       />
                     </div>
                     <span className="text-white/70 text-[10px] text-center leading-tight">{activityOption.name}</span>
