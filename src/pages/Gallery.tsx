@@ -3,36 +3,50 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import ImageCropper from '@/components/ImageCropper';
 
 /**
- * Gallery page - Opens native file picker directly
- * After selection, shows ImageCropper for 9:16 crop before Preview.
+ * Gallery page - Opens native file picker directly.
+ * After selection, shows ImageCropper for 9:16 crop before going to Preview.
  */
 const Gallery = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasTriggeredRef = useRef(false);
-  
+  const pickerOpenedRef = useRef(false);
+
   const dayNumber = (location.state as { dayNumber?: number })?.dayNumber || 1;
 
   // Crop state
   const [selectedMedia, setSelectedMedia] = useState<{ url: string; isVideo: boolean } | null>(null);
 
   useEffect(() => {
-    // Trigger file picker immediately on mount (only once)
     if (!hasTriggeredRef.current && fileInputRef.current) {
       hasTriggeredRef.current = true;
       requestAnimationFrame(() => {
         fileInputRef.current?.click();
+        pickerOpenedRef.current = true;
       });
     }
+
+    // When the window regains focus after the picker closes without selection, go back.
+    // Delay so onChange fires first if a file was picked.
+    const handleFocus = () => {
+      if (!pickerOpenedRef.current) return;
+      setTimeout(() => {
+        if (!(fileInputRef.current?.files?.length)) {
+          navigate(-1);
+        }
+      }, 500);
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    pickerOpenedRef.current = false;
     const file = e.target.files?.[0];
     if (file) {
       const isVideo = file.type.startsWith('video/');
       const url = URL.createObjectURL(file);
-      // Show cropper before going to preview
       setSelectedMedia({ url, isVideo });
     } else {
       navigate(-1);
@@ -54,9 +68,7 @@ const Gallery = () => {
   };
 
   const handleCropCancel = () => {
-    // Reset and re-trigger picker
     setSelectedMedia(null);
-    hasTriggeredRef.current = false;
     navigate(-1);
   };
 
@@ -64,7 +76,7 @@ const Gallery = () => {
     navigate(-1);
   };
 
-  // Show cropper if media selected
+  // Show cropper immediately when media is selected
   if (selectedMedia) {
     return (
       <ImageCropper
@@ -75,8 +87,10 @@ const Gallery = () => {
         onRetake={() => {
           setSelectedMedia(null);
           hasTriggeredRef.current = false;
+          pickerOpenedRef.current = false;
           requestAnimationFrame(() => {
             fileInputRef.current?.click();
+            pickerOpenedRef.current = true;
           });
         }}
       />
@@ -84,14 +98,15 @@ const Gallery = () => {
   }
 
   return (
-    <div 
+    <div
       className="fixed inset-0 flex items-center justify-center"
-      style={{ 
+      style={{
         background: 'rgba(0,0,0,0.95)',
         height: '100dvh',
         minHeight: '-webkit-fill-available',
       }}
     >
+      {/* Hidden file input - always mounted to receive onChange */}
       <input
         ref={fileInputRef}
         type="file"
@@ -99,9 +114,8 @@ const Gallery = () => {
         capture={undefined}
         className="hidden"
         onChange={handleFileChange}
-        onBlur={handleCancel}
       />
-      
+
       <div className="flex flex-col items-center gap-4">
         <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" />
         <p className="text-white/50 text-sm">Select a photo or video...</p>

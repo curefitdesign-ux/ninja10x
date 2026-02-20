@@ -755,26 +755,23 @@ const Preview = () => {
   };
 
 
-  // Activity Selection Step — small card photo floats above glass sheet
+  // Activity Selection Step — blurred media fills background, sheet slides up from bottom
   if (flowStep === 'activity') {
     return (
       <div
         className="fixed inset-0 w-full touch-manipulation overflow-hidden"
         style={{ height: '100dvh', minHeight: '-webkit-fill-available', background: '#0a0a14' }}
       >
-        {/* ── LAYER 0: BLURRED BACKGROUND IMAGE ── */}
+        {/* ── LAYER 0: FULL-SCREEN BLURRED BACKGROUND IMAGE ── */}
         {imageUrl && (
-          <div
-            className="absolute inset-0 pointer-events-none overflow-hidden"
-            style={{ zIndex: 0 }}
-          >
+          <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
             {isVideo ? (
               <video
                 src={imageUrl}
-                className="w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover"
                 style={{
-                  filter: 'blur(55px) brightness(0.35) saturate(1.4)',
-                  transform: 'scale(1.25)',
+                  filter: 'blur(48px) brightness(0.45) saturate(1.6)',
+                  transform: 'scale(1.15)',
                   transformOrigin: 'center center',
                 }}
                 autoPlay muted loop playsInline
@@ -783,77 +780,81 @@ const Preview = () => {
               <img
                 src={imageUrl}
                 alt=""
-                className="w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover"
                 style={{
-                  filter: 'blur(55px) brightness(0.35) saturate(1.4)',
-                  transform: 'scale(1.25)',
+                  filter: 'blur(48px) brightness(0.45) saturate(1.6)',
+                  transform: 'scale(1.15)',
                   transformOrigin: 'center center',
                 }}
               />
             )}
-            {/* Dark overlay on top of blur */}
-            <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.25)' }} />
+            {/* Dark veil */}
+            <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.18)' }} />
           </div>
         )}
 
-        {/* ── LAYER 10: GLASS ACTIVITY SHEET — behind card ── */}
+        {/* ── LAYER 50: GLASS ACTIVITY SHEET — on top of everything ── */}
         <motion.div
-          className="absolute left-0 right-0 bottom-0 overflow-hidden"
-          initial={{ y: 100, opacity: 0 }}
+          className="absolute left-0 right-0 bottom-0 flex flex-col"
+          initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30, delay: 0.05 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 32, delay: 0.04 }}
           style={{
+            maxHeight: '80dvh',
             borderRadius: '28px 28px 0 0',
-            background: 'rgba(255,255,255,0.04)',
+            background: 'rgba(10, 8, 28, 0.72)',
             backdropFilter: 'blur(60px) saturate(200%)',
             WebkitBackdropFilter: 'blur(60px) saturate(200%)',
-            border: '1px solid rgba(255,255,255,0.09)',
+            border: '1px solid rgba(255,255,255,0.10)',
             borderBottom: 'none',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10)',
-            zIndex: 10,
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 -20px 60px rgba(0,0,0,0.5)',
+            zIndex: 50,
           }}
         >
           {/* Drag handle */}
-          <div className="flex justify-center pt-3 pb-0">
-            <div className="w-9 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.18)' }} />
+          <div className="flex justify-center pt-3 pb-0 flex-shrink-0">
+            <div className="w-9 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.22)' }} />
           </div>
 
-          <div
-            className="flex flex-col px-5 pt-3"
-            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)' }}
-          >
-            {/* Header row — X + title */}
-            <div className="flex items-center gap-3 mb-5">
-              <button
-                onClick={handleCloseWithoutSaving}
-                className="w-9 h-9 flex items-center justify-center rounded-full flex-shrink-0"
-                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
-              >
-                <X className="w-4 h-4 text-white/80" />
-              </button>
-              <motion.h2
-                className="text-white text-xl font-bold"
-                initial={{ opacity: 0, x: -6 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.12, duration: 0.24 }}
-              >
-                Choose your activity
-              </motion.h2>
-            </div>
-
-            {/* Activity Grid — 4 cols, scrollable */}
-            <div
-              className="grid grid-cols-4 gap-x-3 gap-y-4 overflow-y-auto overscroll-contain"
-              style={{ maxHeight: '50dvh', WebkitOverflowScrolling: 'touch' }}
+          {/* Header row */}
+          <div className="flex items-center gap-3 px-5 pt-4 pb-4 flex-shrink-0">
+            <button
+              onClick={handleCloseWithoutSaving}
+              className="w-9 h-9 flex items-center justify-center rounded-full flex-shrink-0 active:scale-95 transition-transform"
+              style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.14)' }}
             >
+              <X className="w-4 h-4 text-white/80" />
+            </button>
+            <motion.h2
+              className="text-white text-xl font-bold"
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.10, duration: 0.22 }}
+            >
+              Choose your activity
+            </motion.h2>
+          </div>
+
+          {/* Activity Grid — scrollable, takes remaining space */}
+          <div
+            className="overflow-y-auto overscroll-contain px-5"
+            style={{
+              flex: '1 1 auto',
+              WebkitOverflowScrolling: 'touch',
+              paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
+              // Enable momentum scrolling on iOS
+              overflowY: 'scroll',
+            }}
+          >
+            <div className="grid grid-cols-4 gap-x-3 gap-y-5">
               {activityOptions.map((activityOption, index) => {
                 const IconComp = activityOption.icon;
                 return (
                   <motion.button
                     key={activityOption.name}
-                    initial={{ opacity: 0, y: 12, scale: 0.92 }}
+                    initial={{ opacity: 0, y: 14, scale: 0.90 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 340, damping: 26, delay: 0.10 + index * 0.022 }}
+                    transition={{ type: 'spring', stiffness: 340, damping: 26, delay: 0.08 + index * 0.018 }}
                     onClick={() => {
                       if (activityOption.isCustom) {
                         setShowCustomActivityInput(true);
@@ -864,23 +865,23 @@ const Preview = () => {
                     className="flex flex-col items-center gap-2 active:scale-95 transition-transform"
                   >
                     <div
-                      className="w-[62px] h-[62px] rounded-[18px] flex items-center justify-center"
+                      className="w-[62px] h-[62px] rounded-[18px] flex items-center justify-center flex-shrink-0"
                       style={{
-                        background: 'rgba(255,255,255,0.09)',
-                        border: '1px solid rgba(255,255,255,0.12)',
+                        background: 'rgba(255,255,255,0.10)',
+                        border: '1px solid rgba(255,255,255,0.14)',
                       }}
                     >
                       <IconComp
+                        size={26}
                         width={26}
                         height={26}
-                        size={26}
                         strokeWidth={1.5}
-                        stroke="rgba(255,255,255,0.9)"
-                        color="rgba(255,255,255,0.9)"
-                        style={{ color: 'rgba(255,255,255,0.9)', display: 'block', fill: 'none' }}
+                        color="rgba(255,255,255,0.85)"
+                        stroke="rgba(255,255,255,0.85)"
+                        style={{ color: 'rgba(255,255,255,0.85)', fill: 'none', display: 'block', flexShrink: 0 }}
                       />
                     </div>
-                    <span className="text-white/70 text-[10px] text-center leading-tight">{activityOption.name}</span>
+                    <span className="text-white/70 text-[10px] text-center leading-tight w-full">{activityOption.name}</span>
                   </motion.button>
                 );
               })}
@@ -888,92 +889,10 @@ const Preview = () => {
           </div>
         </motion.div>
 
-        {/* ── LAYER 20: FLOATING MEDIA CARD — centered in free space above glass sheet ── */}
-        {/* The sheet takes ~80vh, leaving ~20vh free at top. We center the card in that space. */}
-        <motion.div
-          className="absolute flex flex-col items-center"
-          style={{
-            /* Vertically center the card in the free space above the sheet.
-               Sheet occupies bottom ~80%, free zone is top ~20dvh.
-               We place card at top 50% of that free zone, shifting up by half the card height.
-               Using CSS to anchor to top of free zone + center vertically. */
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: '80%', // matches sheet height cap
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'column',
-            paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
-            zIndex: 20,
-          }}
-          initial={{ opacity: 0, scale: 0.88, y: -16 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 280, damping: 28, delay: 0.08 }}
-        >
-          <motion.div
-            layoutId="preview-media-card"
-            className="overflow-hidden flex-shrink-0"
-            style={{
-              /* 9:16 card — use height-based sizing to fit cleanly in free zone */
-              height: '17dvh',
-              aspectRatio: '9/16',
-              borderRadius: 14,
-              background: '#000',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.85), 0 6px 20px rgba(0,0,0,0.6)',
-              border: '1.5px solid rgba(255,255,255,0.22)',
-            }}
-            transition={{ type: 'spring', stiffness: 260, damping: 28 }}
-          >
-            {isVideo ? (
-              <video
-                src={imageUrl || ''}
-                className="w-full h-full"
-                style={{ objectFit: 'contain' }}
-                autoPlay muted loop playsInline
-              />
-            ) : (
-              <img
-                src={imageUrl || ''}
-                alt="Preview"
-                className="w-full h-full"
-                style={{ objectFit: 'contain' }}
-              />
-            )}
-          </motion.div>
-
-          {/* Re-crop / Re-trim pill below the card */}
-          <motion.button
-            className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-            style={{
-              background: 'rgba(255,255,255,0.10)',
-              border: '1px solid rgba(255,255,255,0.18)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-            }}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.28, duration: 0.22 }}
-            onClick={() => {
-              if (mediaSource === 'camera') {
-                navigate('/camera', { state: { dayNumber }, replace: false });
-              } else {
-                navigate('/gallery', { state: { dayNumber }, replace: false });
-              }
-            }}
-          >
-            <ImageIcon className="w-3 h-3 text-white/80" />
-            <span className="text-white/80 text-[11px] font-medium">
-              {isVideo ? 'Re-trim' : 'Re-crop'}
-            </span>
-          </motion.button>
-        </motion.div>
-
-
       </div>
     );
   }
+
 
 
 
