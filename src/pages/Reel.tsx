@@ -1364,10 +1364,8 @@ const Reel = () => {
                       className="relative overflow-hidden"
                       style={{
                         aspectRatio: '9/16',
-                        maxHeight: '100%',
+                        height: '100%',       /* Drives sizing — width auto-calculated from aspect-ratio */
                         maxWidth: '100%',
-                        width: 'auto',
-                        height: 'auto',
                         borderRadius: '20px',
                         background: 'transparent',
                         boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
