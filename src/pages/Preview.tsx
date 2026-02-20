@@ -797,19 +797,15 @@ const Preview = () => {
           </div>
         )}
 
-        {/* ── LAYER 2: ACTUAL CROPPED IMAGE — larger, centered in top 38dvh ── */}
+        {/* ── LAYER 2: ACTUAL CROPPED IMAGE — centered in screen, behind the sheet ── */}
         {(croppedImageUrl || imageUrl) && (
           <div
-            className="absolute left-0 right-0 pointer-events-none flex items-center justify-center"
-            style={{
-              top: 0,
-              height: '38dvh',
-              zIndex: 10,
-            }}
+            className="absolute inset-0 pointer-events-none flex items-center justify-center"
+            style={{ zIndex: 10, paddingBottom: '55dvh' }}
           >
             <div
               style={{
-                height: 'calc(38dvh - 28px)',
+                height: 'calc(45dvh - 28px)',
                 aspectRatio: '9 / 16',
                 borderRadius: 16,
                 overflow: 'hidden',
@@ -835,16 +831,16 @@ const Preview = () => {
           </div>
         )}
 
-        {/* ── LAYER 3 (z:50): GLASS ACTIVITY SHEET — true translucent, max 62dvh ── */}
+        {/* ── LAYER 3 (z:50): GLASS ACTIVITY SHEET — overlaps media, no scroll ── */}
         <motion.div
           className="absolute left-0 right-0 bottom-0 flex flex-col"
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 320, damping: 32, delay: 0.04 }}
           style={{
-            maxHeight: '62dvh',
+            /* Tall enough to show all 18 icons without scroll, overlaps media card bottom */
+            height: 'auto',
             borderRadius: '28px 28px 0 0',
-            /* True translucent liquid glass — no heavy dark fill */
             background: 'rgba(255, 255, 255, 0.05)',
             backdropFilter: 'blur(60px) saturate(180%)',
             WebkitBackdropFilter: 'blur(60px) saturate(180%)',
@@ -878,25 +874,22 @@ const Preview = () => {
             </motion.h2>
           </div>
 
-          {/* Activity Grid — scrollable, takes remaining space */}
-          <div
-            className="overflow-y-auto overscroll-contain px-5"
+          {/* Activity Grid — NO scroll, NO per-icon stagger (stagger + overflow causes hidden icons) */}
+          <motion.div
+            className="px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.22, delay: 0.12 }}
             style={{
-              flex: '1 1 auto',
-              WebkitOverflowScrolling: 'touch',
-              paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
-              overflowY: 'scroll',
+              paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 20px)',
             }}
           >
-            <div className="grid grid-cols-4 gap-x-3 gap-y-5">
-              {activityOptions.map((activityOption, index) => {
+            <div className="grid grid-cols-4 gap-x-2 gap-y-4">
+              {activityOptions.map((activityOption) => {
                 const IconComp = activityOption.icon;
                 return (
-                  <motion.button
+                  <button
                     key={activityOption.name}
-                    initial={{ opacity: 0, y: 14, scale: 0.90 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 340, damping: 26, delay: 0.08 + index * 0.018 }}
                     onClick={() => {
                       if (activityOption.isCustom) {
                         setShowCustomActivityInput(true);
@@ -904,33 +897,31 @@ const Preview = () => {
                         handleActivitySelection(activityOption.name);
                       }
                     }}
-                    className="flex flex-col items-center gap-2 active:scale-95 transition-transform"
+                    className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
                   >
-                    {/* Icon tile — explicit color on wrapper so currentColor resolves for Lucide icons */}
+                    {/* Icon tile */}
                     <div
-                      className="w-[62px] h-[62px] rounded-[18px] flex items-center justify-center flex-shrink-0"
+                      className="w-[58px] h-[58px] rounded-[16px] flex items-center justify-center flex-shrink-0"
                       style={{
                         background: 'rgba(255,255,255,0.12)',
                         border: '1px solid rgba(255,255,255,0.18)',
-                        color: 'rgba(255,255,255,0.90)',
+                        color: '#fff',
                       }}
                     >
                       <IconComp
-                        size={28}
-                        width={28}
-                        height={28}
+                        size={26}
                         strokeWidth={1.5}
-                        color="rgba(255,255,255,0.90)"
-                        stroke="rgba(255,255,255,0.90)"
-                        style={{ color: 'rgba(255,255,255,0.90)', fill: 'none', display: 'block', flexShrink: 0 }}
+                        color="#fff"
+                        stroke="#fff"
+                        style={{ color: '#fff', fill: 'none' }}
                       />
                     </div>
                     <span className="text-white/75 text-[10px] text-center leading-tight w-full">{activityOption.name}</span>
-                  </motion.button>
+                  </button>
                 );
               })}
             </div>
-          </div>
+          </motion.div>
         </motion.div>
 
       </div>
