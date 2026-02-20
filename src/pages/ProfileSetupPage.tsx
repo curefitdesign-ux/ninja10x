@@ -301,7 +301,7 @@ const ProfileSetupPage = () => {
       </div>
 
       {/* ── BOTTOM PANEL ── */}
-      <div className="absolute inset-x-0 bottom-0 flex flex-col z-10" style={{ top: '56%' }}>
+      <div className="absolute inset-x-0 bottom-0 flex flex-col z-10" style={{ top: 'calc(56% - 100px)' }}>
         {/* Name input */}
         <div className="flex flex-col items-center px-6 mt-4">
           <input
