@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Camera, X, ImageIcon } from 'lucide-react';
+import { Check, Camera, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
@@ -60,8 +60,6 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
-  const [showPhotoSheet, setShowPhotoSheet] = useState(false);
-  const heroInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   // Pre-fill data in edit mode
@@ -81,12 +79,9 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
     }
   }, [editMode, existingProfile]);
 
-  // Handle file selected from gallery/camera (for hero/avatar combined)
-  const handleMediaSelected = (file: File | null, dataUrl: string) => {
-    if (!file && !dataUrl) return;
-    // Open cropper with the selected image
-    setCropImageSrc(dataUrl || '');
-    setShowPhotoSheet(false);
+  // Tap the hero → directly open camera
+  const handleHeroTap = () => {
+    cameraInputRef.current?.click();
   };
 
   // Handle native file input for hero photo (gallery fallback)
@@ -203,27 +198,46 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
       className="fixed inset-0 flex flex-col overflow-hidden"
       style={{ background: '#0a0a12', height: '100dvh' }}
     >
-      {/* ─── HERO PHOTO — full bleed top ~62% of screen, tappable to open camera/gallery ─── */}
-      <div className="absolute inset-x-0 top-0" style={{ height: '62%' }}>
+      {/* ─── BLURRED BACKGROUND — shows selected avatar/photo with blur + 10% black overlay ─── */}
+      <AnimatePresence>
+        {heroImage && (
+          <motion.div
+            key={heroImage}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="absolute inset-0 z-0"
+          >
+            <img
+              src={heroImage}
+              alt=""
+              className="w-full h-full object-cover"
+              style={{ filter: 'blur(48px)', transform: 'scale(1.15)' }}
+            />
+            {/* 10% black overlay */}
+            <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.55)' }} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* Hidden native file input (fallback) */}
+      {/* ─── HERO PHOTO — full bleed top ~62% of screen, tap to open camera directly ─── */}
+      <div className="absolute inset-x-0 top-0 z-10" style={{ height: '62%' }}>
+
+        {/* Hidden camera file input — opens native camera directly */}
         <input
-          ref={heroInputRef}
-          id="hero-upload-input"
+          ref={cameraInputRef}
           type="file"
           accept="image/*"
+          capture="user"
           onChange={handleHeroFileSelect}
           className="hidden"
         />
 
-        {/* Full-bleed square photo area — tappable */}
-        <label
-          htmlFor="hero-upload-input"
+        {/* Full-bleed square photo area — tappable → opens camera */}
+        <div
           className="block w-full h-full cursor-pointer relative"
-          onClick={(e) => {
-            e.preventDefault();
-            setShowPhotoSheet(true);
-          }}
+          onClick={handleHeroTap}
         >
           {heroImage ? (
             <img
@@ -233,9 +247,10 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
               style={{ display: 'block' }}
             />
           ) : (
+            /* Default empty state */
             <div
               className="w-full h-full flex flex-col items-center justify-center gap-4"
-              style={{ background: 'linear-gradient(180deg, #1e1040 0%, #0d0820 100%)' }}
+              style={{ background: 'linear-gradient(180deg, rgba(42,27,78,0.9) 0%, rgba(10,7,32,0.95) 100%)' }}
             >
               <motion.div
                 className="w-20 h-20 rounded-3xl flex items-center justify-center"
@@ -266,9 +281,9 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
               <Camera className="w-4 h-4 text-white" />
             </div>
           )}
-        </label>
+        </div>
 
-        {/* Glass gradient mask — bottom of hero */}
+        {/* Glass gradient mask — bottom of hero fades into content */}
         <div
           className="absolute inset-x-0 bottom-0 pointer-events-none"
           style={{
@@ -299,8 +314,8 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
 
       {/* ─── BOTTOM PANEL ─── */}
       <div
-        className="absolute inset-x-0 bottom-0 flex flex-col"
-        style={{ top: '56%', zIndex: 10 }}
+        className="absolute inset-x-0 bottom-0 flex flex-col z-10"
+        style={{ top: '56%' }}
       >
         {/* Name input — large, centered */}
         <div className="flex flex-col items-center px-6 mt-4">
@@ -339,7 +354,6 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
                 className="relative flex-shrink-0"
                 style={{ width: 60, height: 60 }}
               >
-                {/* Square tile */}
                 <div
                   className="w-full h-full overflow-hidden"
                   style={{
@@ -405,101 +419,6 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
           </motion.button>
         </div>
       </div>
-
-      {/* Inline Camera / Gallery picker sheet */}
-      <AnimatePresence>
-        {showPhotoSheet && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.6 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black z-40"
-              onClick={() => setShowPhotoSheet(false)}
-            />
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-              className="fixed inset-x-0 bottom-0 z-50 flex flex-col gap-3 p-5 pb-10"
-              style={{
-                background: 'rgba(18,14,32,0.96)',
-                backdropFilter: 'blur(40px)',
-                borderTop: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '24px 24px 0 0',
-              }}
-            >
-              <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-2" />
-              <p className="text-white/60 text-xs uppercase tracking-widest text-center mb-1">Add Profile Photo</p>
-
-              {/* Camera option */}
-              <label
-                htmlFor="camera-capture-input"
-                className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform"
-                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}
-                onClick={() => setShowPhotoSheet(false)}
-              >
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'rgba(249,115,22,0.15)' }}>
-                  <Camera className="w-5 h-5 text-orange-400" />
-                </div>
-                <div>
-                  <p className="text-white font-semibold text-sm">Take Photo</p>
-                  <p className="text-white/40 text-xs">Open camera</p>
-                </div>
-              </label>
-              <input
-                id="camera-capture-input"
-                type="file"
-                accept="image/*"
-                capture="user"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = (ev) => setCropImageSrc(ev.target?.result as string);
-                  reader.readAsDataURL(file);
-                  if (e.target) e.target.value = '';
-                }}
-                className="hidden"
-              />
-
-              {/* Gallery option */}
-              <label
-                htmlFor="gallery-select-input"
-                className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform"
-                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}
-                onClick={() => setShowPhotoSheet(false)}
-              >
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'rgba(139,92,246,0.15)' }}>
-                  <ImageIcon className="w-5 h-5 text-purple-400" />
-                </div>
-                <div>
-                  <p className="text-white font-semibold text-sm">Choose from Gallery</p>
-                  <p className="text-white/40 text-xs">Pick from your photos</p>
-                </div>
-              </label>
-              <input
-                id="gallery-select-input"
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = (ev) => {
-                    setCropImageSrc(ev.target?.result as string);
-                    setShowPhotoSheet(false);
-                  };
-                  reader.readAsDataURL(file);
-                  if (e.target) e.target.value = '';
-                }}
-                className="hidden"
-              />
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
       {/* Inline Avatar Cropper overlay */}
       <AnimatePresence>
