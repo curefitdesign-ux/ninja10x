@@ -2,9 +2,12 @@
  * StoryFrameRenderer
  * Renders the live frame component in the Reel/story viewer — pixel-perfect at any size.
  * Uses the raw original media + saved frame/activity metadata instead of a JPEG screenshot.
+ *
+ * IMPORTANT: Props passed to each frame component MUST match exactly what Preview.tsx passes.
+ * Preview passes raw duration/pr strings (no formatting), and uses getActivityConfig for labels.
  */
 import { lazy, Suspense, useEffect } from 'react';
-import { buildTemplateContext } from '@/lib/activity-context';
+import { getActivityConfig } from '@/lib/activity-context';
 
 const ShakyFrame = lazy(() => import('@/components/frames/ShakyFrame'));
 const VogueFrame = lazy(() => import('@/components/frames/VogueFrame'));
@@ -36,28 +39,30 @@ export default function StoryFrameRenderer({
   dayNumber = 1,
   onLoad,
 }: StoryFrameRendererProps) {
-  const ctx = buildTemplateContext({ activity, dayNumber, duration, pr });
+  // Use the SAME config lookup as Preview.tsx (getActivityConfig)
+  const config = getActivityConfig(activity);
+  const week = Math.ceil(dayNumber / 3);
 
+  // Match Preview.tsx frameProps exactly:
+  //   label1: config.secondaryMetric   (e.g. 'Distance', 'Sets')
+  //   label2: config.primaryMetric     (e.g. 'Duration')
   const sharedProps = {
     imageUrl,
     isVideo,
-    activity: ctx.activity,
-    week: ctx.week,
-    day: ctx.dayInWeek,
-    duration: ctx.duration,
-    pr: ctx.pr,
+    activity: activity || 'Activity',
+    week,
+    day: dayNumber,
+    duration,          // RAW value — no formatting (matches Preview)
+    pr,                // RAW value — no formatting (matches Preview)
     imagePosition: { x: 0, y: 0 },
     imageScale: 1,
-    label1: ctx.metricLabel,
-    label2: ctx.durationLabel,
+    label1: config.secondaryMetric,
+    label2: config.primaryMetric,
   };
 
-  // Signal that the frame is "loaded" immediately on mount — React renders synchronously
-  // so there's no network load event like <img onLoad>. We use a short delay to let
-  // the frame's inner <img> tag finish painting before notifying the parent.
+  // Signal that the frame is "loaded" immediately on mount
   useEffect(() => {
     if (!onLoad) return;
-    // Use rAF so the frame's inner <img> has had a chance to layout
     const id = requestAnimationFrame(() => onLoad());
     return () => cancelAnimationFrame(id);
   }, [imageUrl, onLoad]);
@@ -77,14 +82,20 @@ export default function StoryFrameRenderer({
             case 'journal 2':   return <Journal2Frame {...sharedProps} />;
             case 'fitness':     return <FitnessFrame {...sharedProps} />;
             case 'ticket':      return <TicketFrame {...sharedProps} />;
-            case 'token':       return <TokenFrame {...sharedProps} />;
+            case 'token':       return (
+              <TokenFrame
+                {...sharedProps}
+                label1={config.secondaryUnit}
+                label2={config.primaryUnit}
+              />
+            );
             case 'holographic': return (
               <HolographicFrame
                 {...sharedProps}
-                label1={ctx.metricUnit}
-                label2={ctx.durationLabel === 'Duration' ? 'min' : ''}
-                label1Name={ctx.metricLabel}
-                label2Name={ctx.durationLabel}
+                label1={config.secondaryUnit}
+                label2={config.primaryUnit}
+                label1Name={config.secondaryMetric}
+                label2Name={config.primaryMetric}
               />
             );
             default:            return <ShakyFrame {...sharedProps} />;
