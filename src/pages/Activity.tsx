@@ -3,7 +3,7 @@ import TagembedWidget from "@/components/TagembedWidget";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Trash2 } from "lucide-react";
+import { Bell, Trash2, Globe, Lock } from "lucide-react";
 import CircularProgressRing from "@/components/CircularProgressRing";
 import GradientMeshBackground from "@/components/GradientMeshBackground";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -12,6 +12,7 @@ import CommunityJourneyFeed from "@/components/CommunityJourneyFeed";
 import ProfileMenu from "@/components/ProfileMenu";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
 import NotificationSheet, { Notification } from "@/components/NotificationSheet";
+import MakePublicSheet from "@/components/MakePublicSheet";
 import { ActivityPageSkeleton } from "@/components/SkeletonLoaders";
 import { useJourneyActivities } from "@/hooks/use-journey-activities";
 import { useProfile } from "@/hooks/use-profile";
@@ -60,6 +61,8 @@ const Activity = () => {
   const { activities, loading, refresh, clearAllActivities } = useJourneyActivities();
   const { profile } = useProfile();
   const [isClearing, setIsClearing] = useState(false);
+  const [showMakePublicSheet, setShowMakePublicSheet] = useState(false);
+  const isUserPublic = !!profile?.stories_public;
   
   // Media source sheet state for first-time upload
   const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
@@ -652,6 +655,39 @@ const Activity = () => {
         accept="image/*,video/*"
         className="hidden"
         onChange={handleFileSelect}
+      />
+
+      {/* Sticky Make Public CTA — always visible when profile is private */}
+      {!isUserPublic && (
+        <motion.div
+          className="fixed left-0 right-0 z-40 px-5 pb-2"
+          style={{ bottom: 80 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+        >
+          <button
+            onClick={() => setShowMakePublicSheet(true)}
+            className="w-full py-3.5 rounded-2xl font-semibold text-white text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            style={{
+              background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+              boxShadow: '0 4px 24px rgba(139,92,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+            }}
+          >
+            <Globe className="w-4.5 h-4.5" />
+            Make Profile Public to See Others
+          </button>
+        </motion.div>
+      )}
+
+      {/* Make Public Sheet */}
+      <MakePublicSheet
+        isOpen={showMakePublicSheet}
+        onClose={() => setShowMakePublicSheet(false)}
+        onMakePublic={() => {
+          setShowMakePublicSheet(false);
+        }}
+        onKeepPrivate={() => setShowMakePublicSheet(false)}
       />
     </div>
   );
