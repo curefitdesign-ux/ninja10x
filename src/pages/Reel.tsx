@@ -1377,7 +1377,6 @@ const Reel = () => {
                         maxWidth: '100%',
                         borderRadius: '20px',
                         background: 'transparent',
-                        boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
                       }}
                     >
                     <AnimatePresence mode="popLayout">
