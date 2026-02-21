@@ -28,16 +28,19 @@ const UserStackedCard = ({
   index,
   isLocked,
   onTap,
+  needsUpload,
 }: {
   group: UserStoryGroup;
   isOwn: boolean;
   index: number;
   isLocked: boolean;
   onTap: () => void;
+  needsUpload: boolean;
 }) => {
   const getDisplayActivities = (activities: LocalActivity[]): (LocalActivity | null)[] => {
     if (activities.length === 0) return [null, null, null];
     if (!isOwn) {
+      // Show latest activities for other users (visible even when locked)
       const sorted = [...activities].sort((a, b) => b.dayNumber - a.dayNumber);
       const top3 = sorted.slice(0, 3);
       while (top3.length < 3) top3.push(null as any);
@@ -60,6 +63,9 @@ const UserStackedCard = ({
   const cardWidth = 68;
   const cardHeight = 96;
   const hasNoActivities = group.activities.length === 0;
+
+  // If own user needs to upload next day, show upload overlay on full card
+  const showUploadOverlay = isOwn && needsUpload && !hasNoActivities;
 
   return (
     <motion.button
@@ -149,12 +155,34 @@ const UserStackedCard = ({
                   <Lock className="w-4 h-4 text-white/50" strokeWidth={1.5} />
                 </div>
               )}
-              {idx === 0 && !isLocked && (
+              {/* Upload overlay for next day */}
+              {showUploadOverlay && idx === 0 && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center"
+                  style={{ background: 'rgba(0,0,0,0.45)', zIndex: 6 }}
+                >
+                  <motion.div
+                    className="flex flex-col items-center gap-1"
+                    animate={{ scale: [1, 1.12, 1], opacity: [0.8, 1, 0.8] }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{
+                        background: 'rgba(52,211,153,0.2)',
+                        border: '1.5px solid rgba(52,211,153,0.5)',
+                      }}
+                    >
+                      <Plus className="w-4 h-4 text-emerald-400" strokeWidth={2.5} />
+                    </div>
+                    <span className="text-emerald-400/80 text-[7px] font-semibold">Log Day</span>
+                  </motion.div>
+                </div>
+              )}
+              {idx === 0 && !isLocked && !showUploadOverlay && (
                 <div className="absolute inset-0 pointer-events-none"
                   style={{ background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.5) 100%)' }}
                 />
               )}
-              {idx === 0 && !isLocked && (
+              {idx === 0 && !isLocked && !showUploadOverlay && (
                 <div className="absolute bottom-1 left-1 right-1" style={{ zIndex: 5 }}>
                   <p className="text-[7px] text-white/60 font-medium">Week {Math.ceil(activity.dayNumber / 3)}</p>
                   <p className="text-[8px] text-white font-semibold truncate">{activity.activity || 'Activity'}</p>
@@ -163,6 +191,27 @@ const UserStackedCard = ({
             </motion.div>
           );
         })}
+
+        {/* + circle badge on top-left for own card with activities */}
+        {isOwn && !hasNoActivities && (
+          <motion.div
+            className="absolute flex items-center justify-center rounded-full"
+            style={{
+              top: -4,
+              left: -4,
+              width: 20,
+              height: 20,
+              zIndex: 10,
+              background: 'linear-gradient(135deg, rgba(52,211,153,0.9), rgba(16,185,129,0.9))',
+              border: '1.5px solid rgba(255,255,255,0.3)',
+              boxShadow: '0 2px 8px rgba(52,211,153,0.4)',
+            }}
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <Plus className="w-3 h-3 text-white" strokeWidth={3} />
+          </motion.div>
+        )}
       </div>
 
       {/* Avatar + name */}
@@ -290,6 +339,8 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap, onLogActivity }: Community
         {sortedGroups.map((group, idx) => {
           const isOwn = user?.id === group.userId;
           const isLocked = !isOwn && !isUserPublic && group.activities.length > 0;
+          // Own user needs upload if they have activities but haven't completed the current week slot
+          const ownNeedsUpload = isOwn && group.activities.length > 0 && group.activities.length < 12;
           return (
             <div key={group.userId} style={{ scrollSnapAlign: 'start' }}>
               <UserStackedCard
@@ -297,6 +348,7 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap, onLogActivity }: Community
                 isOwn={isOwn}
                 isLocked={isLocked}
                 index={idx}
+                needsUpload={ownNeedsUpload}
                 onTap={() => handleUserTap(group, isLocked)}
               />
             </div>
