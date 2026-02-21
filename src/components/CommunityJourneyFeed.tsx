@@ -70,8 +70,8 @@ const UserStackedCard = ({
         {cards.map((activity, idx) => {
           const stackStyles: Record<number, React.CSSProperties> = {
             0: { zIndex: 3, transform: 'rotate(0deg) translateY(0px)' },
-            1: { zIndex: 2, transform: 'rotate(-4deg) translateX(-4px) translateY(3px) scale(0.96)' },
-            2: { zIndex: 1, transform: 'rotate(4deg) translateX(4px) translateY(6px) scale(0.92)' },
+            1: { zIndex: 2, transform: 'rotate(-6deg) translateX(-8px) translateY(6px) scale(0.95)' },
+            2: { zIndex: 1, transform: 'rotate(6deg) translateX(8px) translateY(10px) scale(0.90)' },
           };
           const style = stackStyles[idx] || stackStyles[2];
 
