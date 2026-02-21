@@ -319,33 +319,23 @@ const Reel = () => {
   const isLatestActivity = currentActivity?.dayNumber === maxDayNumber;
   const canEdit = isOwnStory && isWithin24Hours && isLatestActivity && !isWeekRecapStory;
 
-  // Navigate between activities within current user (tap to cycle)
+  // Navigate between activities within current user only (tap to cycle — stays within same user)
   const cycleActivity = useCallback(() => {
     if (!currentGroup) return;
     
     if (currentActivityIndex < currentGroup.activities.length - 1) {
-      // More activities in this user's story
       setCurrentActivityIndex(prev => prev + 1);
-    } else {
-      // Finished this user's stories, move to next user
-      if (currentUserIndex < effectiveUserGroups.length - 1) {
-        setCurrentUserIndex(prev => prev + 1);
-        setCurrentActivityIndex(0);
-      }
     }
-  }, [currentGroup, currentActivityIndex, currentUserIndex, effectiveUserGroups.length]);
+    // Don't auto-advance to next user — user must swipe to change users
+  }, [currentGroup, currentActivityIndex]);
 
-  // Navigate to previous activity
+  // Navigate to previous activity within current user only
   const prevActivity = useCallback(() => {
     if (currentActivityIndex > 0) {
       setCurrentActivityIndex(prev => prev - 1);
-    } else if (currentUserIndex > 0) {
-      // Go to previous user's last activity
-      const prevUser = effectiveUserGroups[currentUserIndex - 1];
-      setCurrentUserIndex(prev => prev - 1);
-      setCurrentActivityIndex(prevUser ? prevUser.activities.length - 1 : 0);
     }
-  }, [currentActivityIndex, currentUserIndex, effectiveUserGroups]);
+    // Don't go to previous user — user must swipe to change users
+  }, [currentActivityIndex]);
 
   // Navigate between users (horizontal swipe)
   const goNextUser = useCallback(() => {
@@ -1359,7 +1349,7 @@ const Reel = () => {
           className="flex-1 flex items-center justify-center z-30 relative py-2"
           style={{ background: 'transparent', overflow: 'hidden' }}
         >
-          {/* Previous user peek card - 5% visible on left */}
+          {/* Previous user peek card - 20% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
             const prevGroup = effectiveUserGroups[prevIdx];
@@ -1368,32 +1358,33 @@ const Reel = () => {
             if (!prevMedia) return null;
             return (
               <motion.div
+                key={`peek-left-${prevIdx}`}
                 className="absolute left-0 top-0 bottom-0 flex items-center cursor-pointer"
-                style={{ width: '8%', zIndex: 20 }}
+                style={{ width: '12%', zIndex: 20 }}
                 onClick={goPrevUser}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 25 }}
               >
                 <div
-                  className="w-full h-[70%] overflow-hidden"
+                  className="w-full h-[75%] overflow-hidden"
                   style={{
-                    borderRadius: '0 16px 16px 0',
-                    background: 'rgba(0,0,0,0.3)',
+                    borderRadius: '0 14px 14px 0',
+                    background: 'rgba(0,0,0,0.4)',
                   }}
                 >
                   <img
                     src={prevMedia}
-                    alt="Previous"
+                    alt="Previous user"
                     className="w-full h-full object-cover"
-                    style={{ opacity: 0.5, filter: 'blur(1px)' }}
+                    style={{ opacity: 0.45, filter: 'blur(1px) brightness(0.7)' }}
                   />
                 </div>
               </motion.div>
             );
           })()}
 
-          {/* Next user peek card - 5% visible on right */}
+          {/* Next user peek card - 20% visible on right */}
           {effectiveUserGroups.length > 1 && (() => {
             const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
             const nextGroup = effectiveUserGroups[nextIdx];
@@ -1402,25 +1393,26 @@ const Reel = () => {
             if (!nextMedia) return null;
             return (
               <motion.div
+                key={`peek-right-${nextIdx}`}
                 className="absolute right-0 top-0 bottom-0 flex items-center cursor-pointer"
-                style={{ width: '8%', zIndex: 20 }}
+                style={{ width: '12%', zIndex: 20 }}
                 onClick={goNextUser}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 25 }}
               >
                 <div
-                  className="w-full h-[70%] overflow-hidden"
+                  className="w-full h-[75%] overflow-hidden"
                   style={{
-                    borderRadius: '16px 0 0 16px',
-                    background: 'rgba(0,0,0,0.3)',
+                    borderRadius: '14px 0 0 14px',
+                    background: 'rgba(0,0,0,0.4)',
                   }}
                 >
                   <img
                     src={nextMedia}
-                    alt="Next"
+                    alt="Next user"
                     className="w-full h-full object-cover"
-                    style={{ opacity: 0.5, filter: 'blur(1px)' }}
+                    style={{ opacity: 0.45, filter: 'blur(1px) brightness(0.7)' }}
                   />
                 </div>
               </motion.div>
@@ -1431,7 +1423,7 @@ const Reel = () => {
           <motion.div 
             className="relative flex items-center justify-center"
             style={{ 
-              width: '84%',
+              width: '76%',
               height: '100%',
               x: dragX,
               opacity: cardOpacity,
