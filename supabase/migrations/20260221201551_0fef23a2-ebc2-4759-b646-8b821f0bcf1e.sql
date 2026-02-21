@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ALTER COLUMN stories_public SET DEFAULT false;
