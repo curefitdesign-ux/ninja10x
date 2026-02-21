@@ -14,8 +14,28 @@ import NotificationSheet, { Notification } from "@/components/NotificationSheet"
 import { ActivityPageSkeleton } from "@/components/SkeletonLoaders";
 import { useJourneyActivities } from "@/hooks/use-journey-activities";
 import { useProfile } from "@/hooks/use-profile";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { JourneyActivity } from "@/services/journey-service";
 import { toast } from "sonner";
+
+// Reaction assets
+import fireImg from '@/assets/reactions/fire-new.png';
+import clapImg from '@/assets/reactions/clap-hands.png';
+import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
+import wowImg from '@/assets/reactions/wow.png';
+import flexImg from '@/assets/reactions/flex.png';
+import trophyImg from '@/assets/reactions/dumbbells.png';
+import runnerImg from '@/assets/reactions/runner.png';
+import energyImg from '@/assets/reactions/energy.png';
+import timerImg from '@/assets/reactions/stopwatch.png';
+import heartImg from '@/assets/reactions/heart-workout.png';
+
+const REACTION_IMAGES: Record<string, string> = {
+  heart: heartImg, fire: fireImg, clap: clapImg, fistbump: fistbumpImg,
+  wow: wowImg, flex: flexImg, trophy: trophyImg, runner: runnerImg,
+  energy: energyImg, timer: timerImg,
+};
 import confetti from "canvas-confetti";
 
 // Activity icons
@@ -48,6 +68,40 @@ const Activity = () => {
   // Notification state
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [latestReactor, setLatestReactor] = useState<{
+    name: string; avatarUrl: string; reactionType: string;
+  } | null>(null);
+  const { user } = useAuth();
+  const myActivityIdsRef = useRef<Set<string>>(new Set());
+
+  // Fetch user's activity IDs + subscribe for reactor info
+  useEffect(() => {
+    if (!user) return;
+    const fetchIds = async () => {
+      const { data } = await supabase
+        .from('journey_activities').select('id').eq('user_id', user.id);
+      if (data) myActivityIdsRef.current = new Set(data.map(a => a.id));
+    };
+    fetchIds();
+
+    const ch = supabase.channel('header-reactor-pill')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity_reactions' },
+        async (payload) => {
+          const r = payload.new as { activity_id: string; user_id: string; reaction_type: string };
+          if (myActivityIdsRef.current.has(r.activity_id) && r.user_id !== user.id) {
+            const { data: p } = await supabase
+              .from('profiles').select('display_name, avatar_url').eq('user_id', r.user_id).maybeSingle();
+            setLatestReactor({
+              name: p?.display_name || 'Someone',
+              avatarUrl: p?.avatar_url || '',
+              reactionType: r.reaction_type,
+            });
+            setNotificationCount(prev => prev + 1);
+          }
+        })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user]);
   
   // Convert to LoggedPhoto shape for PhotoLoggingWidget
   const photos: LoggedPhoto[] = activities.map(a => ({
@@ -329,63 +383,103 @@ const Activity = () => {
       
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="relative z-10 pb-32 pt-2">
-          {/* Header Row: Profile Left - Notification Right */}
-          <div className="px-4 pt-3 flex items-center justify-between">
+          {/* Header Row: Profile Left - Pill Center - Notification Right */}
+          <div className="px-4 pt-3 flex items-center justify-between gap-2">
             {/* Profile Menu - Left */}
             <ProfileMenu />
             
-            {/* Spacer */}
-            <div className="flex-1" />
-            
-          {/* Notification Bell - Right */}
-            <div className="flex flex-col items-end gap-1">
-              <motion.button
-                onClick={() => { setShowNotifications(true); setNotificationCount(0); }}
-                className="relative w-10 h-10 rounded-full flex items-center justify-center"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.2)',
-                }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Bell className="w-5 h-5 text-white/70" />
-                {notificationCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-[9px] font-bold text-white flex items-center justify-center"
-                  >
-                    {notificationCount > 9 ? '9+' : notificationCount}
-                  </motion.span>
-                )}
-              </motion.button>
-
-              {/* Notification count pill below bell */}
+            {/* Center: Glassmorphic reactor pill */}
+            <div className="flex-1 flex justify-center">
               <AnimatePresence>
-                {notificationCount > 0 && (
+                {notificationCount > 0 && latestReactor && (
                   <motion.button
-                    initial={{ opacity: 0, y: -6, scale: 0.85 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -4, scale: 0.85 }}
+                    initial={{ opacity: 0, scale: 0.8, y: -8 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.85, y: -6 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-                    onClick={() => { setShowNotifications(true); setNotificationCount(0); }}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded-full"
+                    onClick={() => { setShowNotifications(true); setNotificationCount(0); setLatestReactor(null); }}
+                    className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(249,115,22,0.25), rgba(236,72,153,0.25))',
-                      border: '1px solid rgba(249,115,22,0.4)',
-                      backdropFilter: 'blur(20px)',
+                      background: 'rgba(255, 255, 255, 0.10)',
+                      backdropFilter: 'blur(40px) saturate(180%)',
+                      WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                      border: '1px solid rgba(255, 255, 255, 0.14)',
+                      boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.12), 0 6px 20px rgba(0,0,0,0.25)',
                     }}
+                    whileTap={{ scale: 0.96 }}
                   >
-                    <span className="text-[10px] font-semibold" style={{ background: 'linear-gradient(90deg, #F97316, #EC4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                      {notificationCount} new
+                    {/* Reactor avatar */}
+                    <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0"
+                      style={{
+                        border: '1.5px solid rgba(255,255,255,0.2)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                      }}
+                    >
+                      <img
+                        src={latestReactor.avatarUrl}
+                        alt={latestReactor.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                    </div>
+
+                    {/* Name */}
+                    <span className="text-[11px] font-semibold text-white/90 truncate max-w-[80px]">
+                      {latestReactor.name}
                     </span>
+
+                    {/* Reaction emoji */}
+                    <motion.img
+                      src={REACTION_IMAGES[latestReactor.reactionType] || fireImg}
+                      alt={latestReactor.reactionType}
+                      className="w-5 h-5 object-contain flex-shrink-0"
+                      initial={{ scale: 0, rotate: -15 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 18, delay: 0.1 }}
+                      style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}
+                    />
+
+                    {/* Count badge if > 1 */}
+                    {notificationCount > 1 && (
+                      <span className="text-[9px] font-bold rounded-full px-1.5 py-0.5"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(249,115,22,0.4), rgba(236,72,153,0.4))',
+                          color: 'white',
+                        }}
+                      >
+                        +{notificationCount - 1}
+                      </span>
+                    )}
                   </motion.button>
                 )}
               </AnimatePresence>
             </div>
+            
+            {/* Notification Bell - Right */}
+            <motion.button
+              onClick={() => { setShowNotifications(true); setNotificationCount(0); setLatestReactor(null); }}
+              className="relative w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.2)',
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Bell className="w-5 h-5 text-white/70" />
+              {notificationCount > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold text-white flex items-center justify-center"
+                  style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                >
+                  {notificationCount > 9 ? '9+' : notificationCount}
+                </motion.span>
+              )}
+            </motion.button>
           </div>
           
           {/* Stats Header - hidden for clean layout */}
