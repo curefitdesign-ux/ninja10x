@@ -15,6 +15,7 @@ import FitnessFrame from '@/components/frames/FitnessFrame';
 import TicketFrame from '@/components/frames/TicketFrame';
 import TokenFrame from '@/components/frames/TokenFrame';
 import HolographicFrame from '@/components/frames/HolographicFrame';
+import ScrapbookFrame from '@/components/frames/ScrapbookFrame';
 import ContextualNumericKeyboard from '@/components/ContextualNumericKeyboard';
 import { getActivityConfig } from '@/lib/activity-context';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
@@ -25,7 +26,7 @@ import { useJourneyActivities } from '@/hooks/use-journey-activities';
 
 import { toast } from 'sonner';
 
-const FRAMES = ['token', 'holographic', 'shaky', 'journal', 'vogue', 'fitness', 'ticket'] as const;
+const FRAMES = ['token', 'holographic', 'shaky', 'journal', 'scrapbook', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
 
 // Activity options with minimal line icons
@@ -116,6 +117,10 @@ const FRAME_COLORS: Record<FrameType, { accent: string; gradient: string }> = {
   holographic: {
     accent: 'rgba(120, 60, 200, 0.50)',
     gradient: 'linear-gradient(160deg, rgba(180, 60, 255, 0.35) 0%, rgba(0, 120, 255, 0.35) 50%, rgba(255, 60, 180, 0.3) 100%)',
+  },
+  scrapbook: {
+    accent: 'rgba(124, 92, 252, 0.45)',
+    gradient: 'linear-gradient(160deg, rgba(140, 110, 255, 0.35) 0%, rgba(60, 50, 40, 0.5) 100%)',
   },
 };
 
@@ -729,6 +734,8 @@ const Preview = () => {
           label1Name={activityLabels.secondaryMetric}
           label2Name={activityLabels.primaryMetric}
         />;
+      case 'scrapbook':
+        return <ScrapbookFrame {...frameProps} />;
     }
   };
 
@@ -1127,6 +1134,7 @@ const Preview = () => {
                         {frame === 'ticket' && <TicketFrame {...frameProps} />}
                         {frame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} />}
                         {frame === 'holographic' && <HolographicFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
+                        {frame === 'scrapbook' && <ScrapbookFrame {...frameProps} />}
                       </div>
                     </motion.div>
                 );

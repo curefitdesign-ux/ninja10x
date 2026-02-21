@@ -17,6 +17,7 @@ const FitnessFrame = lazy(() => import('@/components/frames/FitnessFrame'));
 const TicketFrame = lazy(() => import('@/components/frames/TicketFrame'));
 const TokenFrame = lazy(() => import('@/components/frames/TokenFrame'));
 const HolographicFrame = lazy(() => import('@/components/frames/HolographicFrame'));
+const ScrapbookFrame = lazy(() => import('@/components/frames/ScrapbookFrame'));
 
 interface StoryFrameRendererProps {
   imageUrl: string;         // originalUrl — raw media
@@ -98,6 +99,7 @@ export default function StoryFrameRenderer({
                 label2Name={config.primaryMetric}
               />
             );
+            case 'scrapbook':   return <ScrapbookFrame {...sharedProps} />;
             default:            return <ShakyFrame {...sharedProps} />;
           }
         })()}
