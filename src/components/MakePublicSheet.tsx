@@ -64,14 +64,16 @@ export default function MakePublicSheet({
   if (inline) {
     return (
       <motion.div
-        className="fixed bottom-0 left-0 right-0 z-40"
+        className="fixed left-0 right-0"
         style={{
+          bottom: 72,
+          zIndex: 10000,
           borderTopLeftRadius: 32,
           borderTopRightRadius: 32,
           background: 'linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
           backdropFilter: 'blur(80px) saturate(200%)',
           WebkitBackdropFilter: 'blur(80px) saturate(200%)',
-          paddingBottom: 'max(calc(env(safe-area-inset-bottom, 20px) + 72px), 92px)',
+          paddingBottom: 16,
           boxShadow: '0 -8px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12)',
           borderTop: '1px solid rgba(255,255,255,0.1)',
         }}
