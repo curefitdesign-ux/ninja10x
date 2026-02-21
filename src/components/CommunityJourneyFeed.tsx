@@ -163,11 +163,6 @@ const UserStackedCard = ({
                   </motion.div>
                 </div>
               )}
-              {idx === 0 && !isLocked && !showUploadOverlay && (
-                <div className="absolute bottom-1 left-1 right-1" style={{ zIndex: 5 }}>
-                  <p className="text-[8px] text-white font-semibold truncate drop-shadow-md">{activity.activity || 'Activity'}</p>
-                </div>
-              )}
             </motion.div>
           );
         })}
