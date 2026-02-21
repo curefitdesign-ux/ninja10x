@@ -658,16 +658,19 @@ const Activity = () => {
         onChange={handleFileSelect}
       />
 
-      {/* Single Make Public Sheet — shows as inline (no backdrop) when private, or as modal when triggered by tap */}
-      <MakePublicSheet
-        isOpen={!isUserPublic || showMakePublicSheet}
-        onClose={() => setShowMakePublicSheet(false)}
-        onMakePublic={() => {
-          setShowMakePublicSheet(false);
-        }}
-        onKeepPrivate={() => setShowMakePublicSheet(false)}
-        inline={!isUserPublic && !showMakePublicSheet}
-      />
+      {/* Single Make Public Sheet — rendered via portal to escape transform containers */}
+      {createPortal(
+        <MakePublicSheet
+          isOpen={!isUserPublic || showMakePublicSheet}
+          onClose={() => setShowMakePublicSheet(false)}
+          onMakePublic={() => {
+            setShowMakePublicSheet(false);
+          }}
+          onKeepPrivate={() => setShowMakePublicSheet(false)}
+          inline={!isUserPublic && !showMakePublicSheet}
+        />,
+        document.body
+      )}
     </div>
   );
 };
