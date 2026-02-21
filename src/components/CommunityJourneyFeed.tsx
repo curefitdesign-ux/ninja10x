@@ -288,11 +288,14 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap, onLogActivity, onLockedTap
       user_reacted: false,
     }));
 
+    // Navigate to reel with the specific user's first activity for deep-linking
+    const latestActivity = group.activities[0];
     navigate('/reel', {
       state: {
         activities,
         initialIndex: 0,
         sourceUserId: group.userId,
+        activityId: latestActivity?.id,
       },
     });
   };
