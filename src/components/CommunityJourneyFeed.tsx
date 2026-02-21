@@ -26,31 +26,34 @@ const UserStackedCard = ({
   isLocked: boolean;
   onTap: () => void;
 }) => {
-  const getActiveWeekActivities = (activities: LocalActivity[]): LocalActivity[] => {
-    if (activities.length === 0) return [];
+  // For non-own users, just show the latest activity as the top card
+  const getDisplayActivities = (activities: LocalActivity[]): (LocalActivity | null)[] => {
+    if (activities.length === 0) return [null, null, null];
+    if (!isOwn) {
+      // Show latest 3 activities (most recent first as top card)
+      const sorted = [...activities].sort((a, b) => b.dayNumber - a.dayNumber);
+      const top3 = sorted.slice(0, 3);
+      while (top3.length < 3) top3.push(null as any);
+      return top3;
+    }
+    // Own user: show active week slots
     const sorted = [...activities].sort((a, b) => a.dayNumber - b.dayNumber);
     const latestDay = sorted[sorted.length - 1].dayNumber;
     const activeWeek = Math.ceil(latestDay / 3);
     const weekStart = (activeWeek - 1) * 3 + 1;
     const weekEnd = activeWeek * 3;
-    return sorted.filter(a => a.dayNumber >= weekStart && a.dayNumber <= weekEnd);
+    const weekActivities = sorted.filter(a => a.dayNumber >= weekStart && a.dayNumber <= weekEnd);
+    const slots: (LocalActivity | null)[] = [0, 1, 2].map(i => {
+      const dayNum = weekStart + i;
+      return weekActivities.find(a => a.dayNumber === dayNum) || null;
+    });
+    return [...slots].reverse();
   };
 
-  const weekActivities = getActiveWeekActivities(group.activities);
-  const latestDay = group.activities.length > 0
-    ? Math.max(...group.activities.map(a => a.dayNumber))
-    : 0;
-  const activeWeek = latestDay > 0 ? Math.ceil(latestDay / 3) : 1;
-  const weekStart = (activeWeek - 1) * 3 + 1;
+  const cards = getDisplayActivities(group.activities);
 
-  const slots: (LocalActivity | null)[] = [0, 1, 2].map(i => {
-    const dayNum = weekStart + i;
-    return weekActivities.find(a => a.dayNumber === dayNum) || null;
-  });
-  const cards = [...slots].reverse();
-
-  const cardWidth = 76;
-  const cardHeight = 108;
+  const cardWidth = 68;
+  const cardHeight = 96;
   const hasNoActivities = group.activities.length === 0;
 
   return (
@@ -128,26 +131,15 @@ const UserStackedCard = ({
                 style={{
                   filter: isBehindCard
                     ? 'blur(4px) brightness(0.6)'
-                    : isLocked && !isOwn
-                      ? 'blur(12px) brightness(0.5)'
-                      : 'none',
+                    : 'none',
                 }}
               />
-              {/* Lock overlay for non-public users viewing others */}
-              {isLocked && !isOwn && idx === 0 && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1"
-                  style={{ background: 'rgba(0,0,0,0.3)' }}
-                >
-                  <Lock className="w-4 h-4 text-white/50" strokeWidth={1.5} />
-                  <span className="text-white/40 text-[7px] font-medium">Share to unlock</span>
-                </div>
-              )}
-              {idx === 0 && !isLocked && (
+              {idx === 0 && (
                 <div className="absolute inset-0 pointer-events-none"
                   style={{ background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.5) 100%)' }}
                 />
               )}
-              {idx === 0 && !isLocked && (
+              {idx === 0 && (
                 <div className="absolute bottom-1 left-1 right-1" style={{ zIndex: 5 }}>
                   <p className="text-[7px] text-white/60 font-medium">Week {Math.ceil(activity.dayNumber / 3)}</p>
                   <p className="text-[8px] text-white font-semibold truncate">{activity.activity || 'Activity'}</p>
@@ -159,9 +151,9 @@ const UserStackedCard = ({
       </div>
 
       {/* Avatar + name — shifted up 10px to overlap card */}
-      <div className="flex flex-col items-center gap-0.5" style={{ marginTop: -10 }}>
+      <div className="flex flex-col items-center gap-0.5 relative" style={{ marginTop: -10 }}>
         <div
-          className="rounded-full overflow-hidden"
+          className="rounded-full overflow-hidden relative"
           style={{
             width: 32,
             height: 32,
@@ -179,6 +171,14 @@ const UserStackedCard = ({
             name={group.displayName || 'User'}
             size={28}
           />
+          {/* Lock badge on other users' avatars when locked */}
+          {isLocked && !isOwn && (
+            <div className="absolute inset-0 flex items-center justify-center rounded-full"
+              style={{ background: 'rgba(0,0,0,0.5)', zIndex: 11 }}
+            >
+              <Lock className="w-3 h-3 text-white/70" strokeWidth={2} />
+            </div>
+          )}
         </div>
         <span className="text-[9px] text-white/60 font-medium truncate max-w-[70px]">
           {isOwn ? 'You' : group.displayName?.split(' ')[0] || 'User'}
@@ -275,8 +275,8 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap, onLogActivity }: Community
     <div className="w-full">
       <div
         ref={scrollRef}
-        className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 px-4"
-        style={{ scrollSnapType: 'x mandatory' }}
+        className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-2"
+        style={{ scrollSnapType: 'x mandatory', paddingLeft: '5%', paddingRight: 16 }}
       >
         {sortedGroups.map((group, idx) => {
           const isOwn = user?.id === group.userId;
