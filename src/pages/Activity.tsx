@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import TagembedWidget from "@/components/TagembedWidget";
-import { createPortal } from "react-dom";
+
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, Trash2, Globe, Lock } from "lucide-react";
@@ -658,19 +658,13 @@ const Activity = () => {
         onChange={handleFileSelect}
       />
 
-      {/* Single Make Public Sheet — rendered via portal to escape transform containers */}
-      {createPortal(
-        <MakePublicSheet
-          isOpen={!isUserPublic || showMakePublicSheet}
-          onClose={() => setShowMakePublicSheet(false)}
-          onMakePublic={() => {
-            setShowMakePublicSheet(false);
-          }}
-          onKeepPrivate={() => setShowMakePublicSheet(false)}
-          inline={!isUserPublic && !showMakePublicSheet}
-        />,
-        document.body
-      )}
+      {/* Make Public Sheet — only triggered on locked card tap */}
+      <MakePublicSheet
+        isOpen={showMakePublicSheet}
+        onClose={() => setShowMakePublicSheet(false)}
+        onMakePublic={() => setShowMakePublicSheet(false)}
+        onKeepPrivate={() => setShowMakePublicSheet(false)}
+      />
     </div>
   );
 };
