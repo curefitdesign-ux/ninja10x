@@ -18,36 +18,34 @@ import engineBadgeImg from "@/assets/progress/engine-badge.png";
 import SharedImageTransition from "@/components/SharedImageTransition";
 import { isVideoUrl } from "@/lib/media";
 
-// Tile positions — pixel-perfect match to reference design (IMG_0392)
-// The tile area starts after the story strip. Top 0% = top of tile area, 100% = bottom.
-// S-curve: Week 1 left→right, Week 2 right→left, Week 3 left→right, Week 4 right→left
+// Tile positions — bottom-to-top S-curve matching Figma reference
+// Day 1 starts at bottom (near base platform), Day 12 at top (near engine badge)
+// S-curve: Week 1 right→left ↑, Week 2 left→right ↑, Week 3 right→left ↑, Week 4 left→right ↑
 const TILE_POSITIONS = [
-  // Week 1 — sweeping left→right
-  { left: 30, top: 7  },  // Day 1  (engine badge overlaps from above)
-  { left: 44, top: 14 },  // Day 2
-  { left: 58, top: 21 },  // Day 3
-  // Week 2 — sweeping right→left
-  { left: 65, top: 30 },  // Day 4
-  { left: 51, top: 37 },  // Day 5
-  { left: 37, top: 44 },  // Day 6
-  // Week 3 — sweeping left→right
-  { left: 30, top: 53 },  // Day 7
-  { left: 44, top: 60 },  // Day 8
-  { left: 58, top: 67 },  // Day 9
-  // Week 4 — sweeping right→left
-  { left: 65, top: 75 },  // Day 10
-  { left: 51, top: 82 },  // Day 11
-  { left: 37, top: 89 },  // Day 12
+  // Week 1 — bottom, sweeping right→left going up (CONQUER WILL POWER)
+  { left: 58, top: 89 },  // Day 1  (near base platform)
+  { left: 44, top: 82 },  // Day 2
+  { left: 30, top: 75 },  // Day 3
+  // Week 2 — sweeping left→right going up (BUILD ENERGY)
+  { left: 37, top: 66 },  // Day 4
+  { left: 51, top: 59 },  // Day 5
+  { left: 65, top: 52 },  // Day 6
+  // Week 3 — sweeping right→left going up (INCREASE STAMINA)
+  { left: 58, top: 43 },  // Day 7
+  { left: 44, top: 36 },  // Day 8
+  { left: 30, top: 29 },  // Day 9
+  // Week 4 — sweeping left→right going up (BUILD STRENGTH)
+  { left: 37, top: 20 },  // Day 10
+  { left: 51, top: 13 },  // Day 11
+  { left: 65, top: 6  },  // Day 12 (near engine badge)
 ];
 
-// Labels appear beside the first tile of each week group.
-// "right" labels: text on right side of screen, line extends left
-// "left" labels: text on left side of screen, line extends right
+// Labels — positioned between week groups, bottom to top
 const LABELS = [
-  { tileIndex: 0, text: ["BUILD", "STRENGTH"],     side: "right" as const, top: 5,  left: 63 },
-  { tileIndex: 3, text: ["INCREASE", "STAMINA"],   side: "left"  as const, top: 28, left: 2  },
-  { tileIndex: 6, text: ["BUILD", "ENERGY"],       side: "right" as const, top: 51, left: 63 },
-  { tileIndex: 9, text: ["CONQUER", "WILL POWER"], side: "left"  as const, top: 73, left: 2  },
+  { tileIndex: 0, text: ["CONQUER", "WILL POWER"], side: "left"  as const, top: 73, left: 2  },
+  { tileIndex: 3, text: ["BUILD", "ENERGY"],       side: "right" as const, top: 50, left: 63 },
+  { tileIndex: 6, text: ["INCREASE", "STAMINA"],   side: "left"  as const, top: 27, left: 2  },
+  { tileIndex: 9, text: ["BUILD", "STRENGTH"],     side: "right" as const, top: 4,  left: 63 },
 ];
 
 const Progress = () => {
@@ -518,7 +516,7 @@ const Progress = () => {
           opacity: contentOpacity,
         }}
       >
-        {/* Engine Badge — sits on top of Day 1 tile (left ~30%, top ~7% of tile area) */}
+        {/* Engine Badge — sits near Day 12 at the top-left */}
         <AnimatePresence>
           {showContent && (
             <motion.div
@@ -555,7 +553,7 @@ const Progress = () => {
                 aspectRatio: "1",
                 transform: 'translateX(-50%)',
               }}
-              initial={{ opacity: 0, y: 40, scale: 0.7 }}
+              initial={{ opacity: 0, y: -40, scale: 0.7 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ type: "spring", stiffness: 200, damping: 22, delay: index * 0.035 }}
             >
@@ -572,12 +570,12 @@ const Progress = () => {
                 }}
               />
               
-              {/* User profile avatar ONLY on the latest completed tile - positioned on TOP of tile */}
+              {/* User profile avatar centered ON the tile */}
               {isLatestTile && profile && (
                 <motion.div
                   className="absolute"
                   style={{
-                    top: '-14px',
+                    top: '-55%',
                     left: '50%',
                     transform: 'translateX(-50%)',
                     zIndex: 20,
@@ -636,12 +634,12 @@ const Progress = () => {
 
 
 
-        {/* Bottom Base Platform — sits below Day 12 tile (left ~37%, bottom of tile area) */}
+        {/* Bottom Base Platform — sits below Day 1 tile at the bottom */}
         <AnimatePresence>
           {showContent && (
             <motion.div
               className="absolute"
-              style={{ left: "22%", bottom: "1%", width: "55%", aspectRatio: "2.5" }}
+              style={{ left: "22%", bottom: "0%", width: "55%", aspectRatio: "2.5" }}
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7 }}
