@@ -1645,7 +1645,7 @@ const Reel = () => {
                               boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
                             }}
                           >
-                            Share my progress
+                            View Post
                           </button>
                         </div>
                       </div>
@@ -1866,7 +1866,7 @@ const Reel = () => {
               }}
             >
               <ChevronUp className="w-5 h-5 text-white/60" />
-              <span className="text-white/80 text-sm font-medium">View Post</span>
+              <span className="text-white/80 text-sm font-medium">View Progress</span>
             </button>
           </motion.div>
         </div>
