@@ -16,6 +16,7 @@ import TicketFrame from '@/components/frames/TicketFrame';
 import TokenFrame from '@/components/frames/TokenFrame';
 import HolographicFrame from '@/components/frames/HolographicFrame';
 import ScrapbookFrame from '@/components/frames/ScrapbookFrame';
+import ArcadeFrame from '@/components/frames/ArcadeFrame';
 import ContextualNumericKeyboard from '@/components/ContextualNumericKeyboard';
 import { getActivityConfig } from '@/lib/activity-context';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
@@ -26,7 +27,7 @@ import { useJourneyActivities } from '@/hooks/use-journey-activities';
 
 import { toast } from 'sonner';
 
-const FRAMES = ['token', 'holographic', 'shaky', 'journal', 'scrapbook', 'vogue', 'fitness', 'ticket'] as const;
+const FRAMES = ['token', 'holographic', 'shaky', 'journal', 'scrapbook', 'arcade', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
 
 // Activity options with minimal line icons
@@ -121,6 +122,10 @@ const FRAME_COLORS: Record<FrameType, { accent: string; gradient: string }> = {
   scrapbook: {
     accent: 'rgba(124, 92, 252, 0.45)',
     gradient: 'linear-gradient(160deg, rgba(140, 110, 255, 0.35) 0%, rgba(60, 50, 40, 0.5) 100%)',
+  },
+  arcade: {
+    accent: 'rgba(0, 0, 0, 0.65)',
+    gradient: 'linear-gradient(160deg, rgba(20, 20, 30, 0.5) 0%, rgba(0, 0, 0, 0.7) 100%)',
   },
 };
 
@@ -736,6 +741,8 @@ const Preview = () => {
         />;
       case 'scrapbook':
         return <ScrapbookFrame {...frameProps} />;
+      case 'arcade':
+        return <ArcadeFrame {...frameProps} />;
     }
   };
 
