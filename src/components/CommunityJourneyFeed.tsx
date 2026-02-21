@@ -95,8 +95,9 @@ const UserStackedCard = ({
           }
 
           return (
-            <div
+            <motion.div
               key={activity.id}
+              layoutId={idx === 0 ? `story-card-${group.userId}` : undefined}
               className="absolute inset-0 rounded-xl overflow-hidden"
               style={{
                 ...style,
@@ -126,7 +127,7 @@ const UserStackedCard = ({
                   <p className="text-[9px] text-white font-semibold truncate">{activity.activity || 'Activity'}</p>
                 </div>
               )}
-            </div>
+            </motion.div>
           );
         })}
       </div>
@@ -205,6 +206,7 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap }: CommunityJourneyFeedProp
       state: {
         activities,
         initialIndex: 0,
+        sourceUserId: group.userId,
       },
     });
   };
