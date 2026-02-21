@@ -49,7 +49,7 @@ const UserStackedCard = ({
 
   const cards = getDisplayActivities(group.activities);
   const cardWidth = 68;
-  const cardHeight = 96;
+  const cardHeight = 121; // 9:16 aspect ratio to match template frames
   const hasNoActivities = group.activities.length === 0;
 
   // Never show upload overlay on stacked cards if activity is already logged
@@ -164,13 +164,8 @@ const UserStackedCard = ({
                 </div>
               )}
               {idx === 0 && !isLocked && !showUploadOverlay && (
-                <div className="absolute inset-0 pointer-events-none"
-                  style={{ background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.5) 100%)' }}
-                />
-              )}
-              {idx === 0 && !isLocked && !showUploadOverlay && (
                 <div className="absolute bottom-1 left-1 right-1" style={{ zIndex: 5 }}>
-                  <p className="text-[8px] text-white font-semibold truncate">{activity.activity || 'Activity'}</p>
+                  <p className="text-[8px] text-white font-semibold truncate drop-shadow-md">{activity.activity || 'Activity'}</p>
                 </div>
               )}
             </motion.div>
