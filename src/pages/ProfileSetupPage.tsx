@@ -69,7 +69,7 @@ const ProfileSetupPage = () => {
     if (isInitialized) return;
     if (editMode && profile) {
       setDisplayName(profile.display_name);
-      setStoriesPublic(profile.stories_public ?? true);
+      setStoriesPublic(profile.stories_public ?? false);
       const storedUrl = profile.avatar_url;
       const presetMatch = PRESET_AVATARS.find(a =>
         storedUrl === a.id || storedUrl.includes(a.id)

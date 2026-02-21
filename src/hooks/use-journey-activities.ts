@@ -530,7 +530,7 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
     profileMap.set(p.user_id, { 
       display_name: p.display_name, 
       avatar_url: p.avatar_url,
-      stories_public: p.stories_public ?? true,
+      stories_public: p.stories_public ?? false,
     });
   }
 
