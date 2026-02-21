@@ -66,24 +66,24 @@ const UserStackedCard = ({
       transition={{ duration: 0.4, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
     >
       {/* Stacked cards */}
-      <div className="relative" style={{ width: cardWidth, height: cardHeight + 10 }}>
+      <div className="relative" style={{ width: cardWidth, height: cardHeight + 12 }}>
         {cards.map((activity, idx) => {
           const stackStyles: Record<number, React.CSSProperties> = {
-            0: { zIndex: 3, transform: 'rotate(0deg) translateY(0px)' },
-            1: { zIndex: 2, transform: 'rotate(-7deg) translateX(-7px) translateY(5px)' },
-            2: { zIndex: 1, transform: 'rotate(7deg) translateX(7px) translateY(9px)' },
+            0: { zIndex: 3, transform: 'translateY(0px) scale(1)' },
+            1: { zIndex: 2, transform: 'translateY(-6px) scale(0.94)' },
+            2: { zIndex: 1, transform: 'translateY(-11px) scale(0.88)' },
           };
           const style = stackStyles[idx] || stackStyles[2];
-          const isBehindCard = idx > 0;
 
           if (!activity) {
             const isTopEmpty = idx === 0 && isOwn && hasNoActivities;
             return (
               <div
                 key={`empty-${idx}`}
-                className="absolute inset-0 rounded-md overflow-hidden flex flex-col items-center justify-center gap-1"
+                className="absolute inset-x-0 bottom-0 rounded-md overflow-hidden flex flex-col items-center justify-center gap-1"
                 style={{
                   ...style,
+                  height: cardHeight,
                   ...liquidGlassCard,
                   background: isTopEmpty ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.04)',
                   border: isTopEmpty ? '2px dashed rgba(52,211,153,0.4)' : '1px solid rgba(255,255,255,0.08)',
@@ -109,18 +109,16 @@ const UserStackedCard = ({
             <motion.div
               key={activity.id}
               layoutId={idx === 0 ? `story-card-${group.userId}` : undefined}
-              className="absolute inset-0 rounded-md overflow-hidden"
+              className="absolute inset-x-0 bottom-0 rounded-md overflow-hidden"
               style={{
                 ...style,
-                ...liquidGlassCard,
+                height: cardHeight,
                 border: isOwn && idx === 0
                   ? '2px solid rgba(52,211,153,0.5)'
-                  : idx === 0 ? '1.5px solid rgba(255,255,255,0.15)' : '1px solid rgba(255,255,255,0.08)',
+                  : '1px solid rgba(255,255,255,0.12)',
                 boxShadow: isOwn && idx === 0
-                  ? '0 6px 24px rgba(52,211,153,0.2), 0 0 12px rgba(52,211,153,0.15), inset 0 1px 0 rgba(255,255,255,0.1)'
-                  : idx === 0
-                    ? '0 6px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)'
-                    : '0 3px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
+                  ? '0 4px 16px rgba(52,211,153,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+                  : '0 2px 8px rgba(0,0,0,0.3)',
               }}
             >
               <img
@@ -128,10 +126,10 @@ const UserStackedCard = ({
                 alt={activity.activity || 'Activity'}
                 className="w-full h-full object-cover"
                 style={{
-                  filter: isBehindCard
-                    ? 'blur(2px) brightness(0.7)'
-                    : isLocked
-                      ? 'blur(10px) brightness(0.5)'
+                  filter: isLocked
+                    ? 'blur(10px) brightness(0.5)'
+                    : idx > 0
+                      ? 'brightness(0.85)'
                       : 'none',
                 }}
               />
