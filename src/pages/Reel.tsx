@@ -399,6 +399,13 @@ const Reel = () => {
   }, [currentUserIndex, currentActivityIndex]);
 
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    // If story is locked, open Make Public sheet on any tap
+    const locked = !isOwnStory && !profile?.stories_public;
+    if (locked) {
+      setShowMakePublicSheet(true);
+      return;
+    }
+
     const now = Date.now();
     if (now - lastTap < 300) {
       // Double tap -> heart reaction
@@ -421,7 +428,7 @@ const Reel = () => {
       }
     }
     setLastTap(now);
-  }, [lastTap, cycleActivity, prevActivity, isOwnStory]);
+  }, [lastTap, cycleActivity, prevActivity, isOwnStory, profile?.stories_public]);
 
   const handleNavigateToProgress = () => {
     setIsTransitioning(true);
@@ -1505,16 +1512,21 @@ const Reel = () => {
                           </div>
                         ) : hasLiveFrame ? (
                           // Live frame render — pixel-perfect at any resolution
-                          <StoryFrameRenderer
-                            imageUrl={mediaUrl}
-                            isVideo={currentActivity.isVideo}
-                            activity={currentActivity.activity}
-                            frame={currentActivity.frame}
-                            duration={currentActivity.duration}
-                            pr={currentActivity.pr}
-                            dayNumber={currentActivity.dayNumber}
-                            onLoad={() => setLoadedMediaUrl(mediaUrl)}
-                          />
+                          <div style={{ 
+                            width: '100%', height: '100%', 
+                            filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                          }}>
+                            <StoryFrameRenderer
+                              imageUrl={mediaUrl}
+                              isVideo={currentActivity.isVideo}
+                              activity={currentActivity.activity}
+                              frame={currentActivity.frame}
+                              duration={currentActivity.duration}
+                              pr={currentActivity.pr}
+                              dayNumber={currentActivity.dayNumber}
+                              onLoad={() => setLoadedMediaUrl(mediaUrl)}
+                            />
+                          </div>
                         ) : isVideo ? (
                           <video
                             ref={videoRef}
@@ -1587,7 +1599,11 @@ const Reel = () => {
                     {/* Lock overlay for locked content */}
                     {shouldShowLocked && (
                       <div
-                        className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-3xl"
+                        className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-3xl cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowMakePublicSheet(true);
+                        }}
                       >
                         <div
                           className="flex flex-col items-center gap-3"
@@ -1614,10 +1630,7 @@ const Reel = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              const latestActivity = myActivities[myActivities.length - 1];
-                              if (latestActivity) {
-                                setShowMakePublicSheet(true);
-                              }
+                              setShowMakePublicSheet(true);
                             }}
                             className="mt-2 px-6 py-2.5 rounded-full font-semibold text-sm active:scale-95 transition-transform"
                             style={{
