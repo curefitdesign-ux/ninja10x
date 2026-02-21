@@ -1157,7 +1157,7 @@ const Reel = () => {
             <div className="flex-1 overflow-hidden mx-2">
               <div 
                 ref={avatarStripRef}
-                className={`flex items-center gap-2 overflow-x-auto scrollbar-hide ${effectiveUserGroups.length === 1 ? 'justify-center' : ''}`}
+                className="flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center"
                 style={{ 
                   WebkitOverflowScrolling: 'touch',
                   scrollbarWidth: 'none',
