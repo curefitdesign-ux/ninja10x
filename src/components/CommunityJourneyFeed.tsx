@@ -303,7 +303,7 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap, onLogActivity, onLockedTap
     <div className="w-full">
       <div
         ref={scrollRef}
-        className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-2"
+        className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
         style={{ scrollSnapType: 'x mandatory', paddingLeft: '5%', paddingRight: 16 }}
       >
         {sortedGroups.map((group, idx) => {
