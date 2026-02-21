@@ -70,8 +70,8 @@ const UserStackedCard = ({
         {cards.map((activity, idx) => {
           const stackStyles: Record<number, React.CSSProperties> = {
             0: { zIndex: 3, transform: 'rotate(0deg) translateY(0px)' },
-            1: { zIndex: 2, transform: 'rotate(-5deg) translateX(-5px) translateY(4px)' },
-            2: { zIndex: 1, transform: 'rotate(5deg) translateX(5px) translateY(7px)' },
+            1: { zIndex: 2, transform: 'rotate(-7deg) translateX(-7px) translateY(5px)' },
+            2: { zIndex: 1, transform: 'rotate(7deg) translateX(7px) translateY(9px)' },
           };
           const style = stackStyles[idx] || stackStyles[2];
           const isBehindCard = idx > 0;
@@ -81,7 +81,7 @@ const UserStackedCard = ({
             return (
               <div
                 key={`empty-${idx}`}
-                className="absolute inset-0 rounded-lg overflow-hidden flex flex-col items-center justify-center gap-1"
+                className="absolute inset-0 rounded-md overflow-hidden flex flex-col items-center justify-center gap-1"
                 style={{
                   ...style,
                   ...liquidGlassCard,
@@ -109,7 +109,7 @@ const UserStackedCard = ({
             <motion.div
               key={activity.id}
               layoutId={idx === 0 ? `story-card-${group.userId}` : undefined}
-              className="absolute inset-0 rounded-lg overflow-hidden"
+              className="absolute inset-0 rounded-md overflow-hidden"
               style={{
                 ...style,
                 ...liquidGlassCard,
@@ -129,7 +129,7 @@ const UserStackedCard = ({
                 className="w-full h-full object-cover"
                 style={{
                   filter: isBehindCard
-                    ? 'blur(4px) brightness(0.6)'
+                    ? 'blur(2px) brightness(0.7)'
                     : isLocked
                       ? 'blur(10px) brightness(0.5)'
                       : 'none',
