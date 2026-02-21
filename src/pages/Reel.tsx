@@ -76,6 +76,7 @@ const Reel = () => {
   const deepLinkDayNumber = navState.dayNumber as number | undefined;
   const weekRecapVideoFromNav = navState.weekRecapVideo as string | undefined;
   const weekRecapNumber = navState.weekNumber as number | undefined;
+  const sourceUserId = navState.sourceUserId as string | undefined;
   
   // Determine navigation intent:
   // - hasDeepLink: user tapped a specific story card (should open THAT story, never recap)
@@ -1353,16 +1354,84 @@ const Reel = () => {
             </div>
           </div>
 
-        {/* MAIN CONTENT ZONE - flexible middle section, card-style with padding */}
+        {/* MAIN CONTENT ZONE - flexible middle section with peek cards */}
         <div
-          className="flex-1 flex items-center justify-center z-30 relative px-4 py-2"
+          className="flex-1 flex items-center justify-center z-30 relative py-2"
           style={{ background: 'transparent', overflow: 'hidden' }}
         >
+          {/* Previous user peek card - 5% visible on left */}
+          {effectiveUserGroups.length > 1 && (() => {
+            const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
+            const prevGroup = effectiveUserGroups[prevIdx];
+            const prevActivity = prevGroup?.activities[prevGroup.activities.length - 1];
+            const prevMedia = prevActivity?.storageUrl || prevActivity?.originalUrl;
+            if (!prevMedia) return null;
+            return (
+              <motion.div
+                className="absolute left-0 top-0 bottom-0 flex items-center cursor-pointer"
+                style={{ width: '8%', zIndex: 20 }}
+                onClick={goPrevUser}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <div
+                  className="w-full h-[70%] overflow-hidden"
+                  style={{
+                    borderRadius: '0 16px 16px 0',
+                    background: 'rgba(0,0,0,0.3)',
+                  }}
+                >
+                  <img
+                    src={prevMedia}
+                    alt="Previous"
+                    className="w-full h-full object-cover"
+                    style={{ opacity: 0.5, filter: 'blur(1px)' }}
+                  />
+                </div>
+              </motion.div>
+            );
+          })()}
+
+          {/* Next user peek card - 5% visible on right */}
+          {effectiveUserGroups.length > 1 && (() => {
+            const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
+            const nextGroup = effectiveUserGroups[nextIdx];
+            const nextActivity = nextGroup?.activities[nextGroup.activities.length - 1];
+            const nextMedia = nextActivity?.storageUrl || nextActivity?.originalUrl;
+            if (!nextMedia) return null;
+            return (
+              <motion.div
+                className="absolute right-0 top-0 bottom-0 flex items-center cursor-pointer"
+                style={{ width: '8%', zIndex: 20 }}
+                onClick={goNextUser}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <div
+                  className="w-full h-[70%] overflow-hidden"
+                  style={{
+                    borderRadius: '16px 0 0 16px',
+                    background: 'rgba(0,0,0,0.3)',
+                  }}
+                >
+                  <img
+                    src={nextMedia}
+                    alt="Next"
+                    className="w-full h-full object-cover"
+                    style={{ opacity: 0.5, filter: 'blur(1px)' }}
+                  />
+                </div>
+              </motion.div>
+            );
+          })()}
+
           {/* Card container with shake animation */}
           <motion.div 
             className="relative flex items-center justify-center"
             style={{ 
-              width: '100%',
+              width: '84%',
               height: '100%',
               x: dragX,
               opacity: cardOpacity,
@@ -1395,15 +1464,17 @@ const Reel = () => {
                     }}
                   >
                     {/* Card — 9:16 aspect ratio, constrained to available space */}
-                    <div
+                    <motion.div
+                      layoutId={sourceUserId ? `story-card-${currentGroup?.userId}` : undefined}
                       className="relative overflow-hidden"
                       style={{
                         aspectRatio: '9/16',
-                        height: '100%',       /* Drives sizing — width auto-calculated from aspect-ratio */
+                        height: '100%',
                         maxWidth: '100%',
                         borderRadius: '20px',
                         background: 'transparent',
                       }}
+                      transition={{ type: 'spring', stiffness: 280, damping: 30, duration: 0.5 }}
                     >
                     <AnimatePresence mode="popLayout">
                       <motion.div
@@ -1566,7 +1637,7 @@ const Reel = () => {
                       </div>
                     )}
                     
-                    </div>{/* end 9:16 card */}
+                    </motion.div>{/* end 9:16 card */}
 
                     {/* Floating 3D emoji reactions - OUTSIDE overflow-hidden card so they aren't clipped */}
                     {!shouldShowLocked && (
