@@ -7,7 +7,8 @@ import { Bell, Trash2 } from "lucide-react";
 import CircularProgressRing from "@/components/CircularProgressRing";
 import GradientMeshBackground from "@/components/GradientMeshBackground";
 import PullToRefresh from "@/components/PullToRefresh";
-import PhotoLoggingWidget, { LoggedPhoto } from "@/components/PhotoLoggingWidget";
+import { LoggedPhoto } from "@/components/PhotoLoggingWidget";
+import CommunityJourneyFeed from "@/components/CommunityJourneyFeed";
 import ProfileMenu from "@/components/ProfileMenu";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
 import NotificationSheet, { Notification } from "@/components/NotificationSheet";
@@ -538,23 +539,13 @@ const Activity = () => {
             </motion.div>
           </div>
 
-          {/* Photo Logging Widget */}
+          {/* Community Journey Feed */}
           <div className="mt-8">
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: 0.18 }}>
-              {loading ? (
-                <div className="flex items-center justify-center h-40">
-                  <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
-                </div>
-              ) : (
-                <PhotoLoggingWidget 
-                  photos={photos}
-                  currentWeek={currentWeek}
-                  currentDay={currentDay}
-                  onPhotoTap={handlePhotoTap}
-                  onPhotoAdd={handlePhotoAdd}
-                  onPlayReel={handlePlayReel}
-                />
-              )}
+              <CommunityJourneyFeed
+                myPhotos={photos}
+                onPhotoTap={handlePhotoTap}
+              />
             </motion.div>
           </div>
 
