@@ -12,10 +12,11 @@ import TicketFrame from '@/components/frames/TicketFrame';
 import TokenFrame from '@/components/frames/TokenFrame';
 import HolographicFrame from '@/components/frames/HolographicFrame';
 import ScrapbookFrame from '@/components/frames/ScrapbookFrame';
+import ArcadeFrame from '@/components/frames/ArcadeFrame';
 import ReelProgressPill from '@/components/ReelProgressPill';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 
-type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket' | 'token' | 'holographic' | 'scrapbook';
+type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket' | 'token' | 'holographic' | 'scrapbook' | 'arcade';
 
 interface FrameProps {
   imageUrl: string;
@@ -457,6 +458,8 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
         />;
       case 'scrapbook':
         return <ScrapbookFrame {...frameProps} />;
+      case 'arcade':
+        return <ArcadeFrame {...frameProps} />;
       default:
         return (
           <img
