@@ -264,7 +264,7 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap, onLogActivity }: Community
       return;
     }
 
-    // Locked: open the make-public sheet
+    // Locked: just show the make-public sheet (the parent page renders the inline one)
     if (isLocked) {
       setShowMakePublicSheet(true);
       return;
