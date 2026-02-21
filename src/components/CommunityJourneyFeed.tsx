@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
+import { useProfile } from '@/hooks/use-profile';
 import { fetchAllActivitiesGroupedByUser, type UserStoryGroup, type LocalActivity } from '@/hooks/use-journey-activities';
 import ProfileAvatar from '@/components/ProfileAvatar';
 
@@ -68,19 +70,25 @@ const UserStackedCard = ({
           const style = stackStyles[idx] || stackStyles[2];
 
           if (!activity) {
+            const isTopEmpty = idx === 0 && isOwn && group.activities.length === 0;
             return (
               <div
                 key={`empty-${idx}`}
-                className="absolute inset-0 rounded-lg overflow-hidden flex items-center justify-center"
+                className="absolute inset-0 rounded-lg overflow-hidden flex flex-col items-center justify-center gap-1"
                 style={{
                   ...style,
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px dashed rgba(255,255,255,0.12)',
+                  background: isTopEmpty ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.04)',
+                  border: isTopEmpty ? '2px dashed rgba(52,211,153,0.4)' : '1px dashed rgba(255,255,255,0.12)',
                 }}
               >
-                {idx === 0 && (
+                {isTopEmpty ? (
+                  <>
+                    <Plus className="w-5 h-5 text-emerald-400/70" strokeWidth={2} />
+                    <span className="text-emerald-400/60 text-[8px] font-semibold">Log Activity</span>
+                  </>
+                ) : idx === 0 ? (
                   <span className="text-white/20 text-[8px] font-medium">Not logged</span>
-                )}
+                ) : null}
               </div>
             );
           }
@@ -156,6 +164,7 @@ const UserStackedCard = ({
 const CommunityJourneyFeed = ({ myPhotos, onPhotoTap }: CommunityJourneyFeedProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { profile } = useProfile();
   const [groups, setGroups] = useState<UserStoryGroup[]>([]);
   const [loaded, setLoaded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -167,15 +176,23 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap }: CommunityJourneyFeedProp
     });
   }, []);
 
-  // Sort: own user in center-ish position for scroll, but we'll scroll to center them
+  // Ensure own user is always present and first
   const sortedGroups = (() => {
     if (!user) return groups;
     const myIdx = groups.findIndex(g => g.userId === user.id);
-    if (myIdx < 0) return groups;
-    // Put own user first so we can scroll to center
-    const own = groups[myIdx];
-    const others = groups.filter((_, i) => i !== myIdx);
-    return [own, ...others];
+    if (myIdx >= 0) {
+      const own = groups[myIdx];
+      const others = groups.filter((_, i) => i !== myIdx);
+      return [own, ...others];
+    }
+    // User has no activities — inject a placeholder group
+    const ownGroup: UserStoryGroup = {
+      userId: user.id,
+      displayName: profile?.display_name || 'You',
+      avatarUrl: profile?.avatar_url || '',
+      activities: [],
+    };
+    return [ownGroup, ...groups];
   })();
 
   // Scroll to center own card on load
@@ -201,6 +218,14 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap }: CommunityJourneyFeedProp
   }
 
   const handleUserTap = (group: UserStoryGroup) => {
+    // If user has no activities, trigger the upload flow
+    if (group.activities.length === 0) {
+      if (onPhotoTap) {
+        onPhotoTap(null); // signal to open media source sheet
+      }
+      return;
+    }
+
     const activities = group.activities.map(a => ({
       id: a.id,
       user_id: a.userId || '',
