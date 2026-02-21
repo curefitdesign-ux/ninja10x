@@ -338,7 +338,7 @@ const Progress = () => {
                 publicFeed.map((photo, index) => {
                   const isOwnStory = user && photo.userId === user.id;
                   // Lock content if user's profile is private OR they haven't shared any public activity
-                  const shouldBlur = !isOwnStory && (!profile?.stories_public || !hasPublicActivity);
+                  const shouldBlur = !isOwnStory && !profile?.stories_public;
                   
                    return (
                     <motion.button
