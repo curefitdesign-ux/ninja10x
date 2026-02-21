@@ -366,8 +366,10 @@ const Reel = () => {
     // Horizontal swipe between users
     if (Math.abs(offset.x) > SWIPE_THRESHOLD || Math.abs(velocity.x) > 500) {
       if (offset.x < 0) {
+        setSwipeDirection('left');
         goNextUser();
       } else {
+        setSwipeDirection('right');
         goPrevUser();
       }
     }
@@ -387,6 +389,7 @@ const Reel = () => {
 
   const [lastTap, setLastTap] = useState(0);
   const [userTransitionFlash, setUserTransitionFlash] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right'>('left');
   const prevUserIndexRef = useRef(currentUserIndex);
   
   // Flash highlight and scroll active avatar into view when switching users
@@ -1495,16 +1498,30 @@ const Reel = () => {
                       }}
                       transition={{ type: 'spring', stiffness: 280, damping: 30, duration: 0.5 }}
                     >
-                    <AnimatePresence mode="popLayout">
+                    <AnimatePresence mode="popLayout" custom={swipeDirection}>
                       <motion.div
                         key={contentKey}
+                        custom={swipeDirection}
                         className="absolute inset-0 flex items-center justify-center"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                        variants={{
+                          enter: (dir: string) => ({ 
+                            opacity: 0, 
+                            x: dir === 'left' ? 60 : -60,
+                            scale: 0.97,
+                          }),
+                          center: { opacity: 1, x: 0, scale: 1 },
+                          exit: (dir: string) => ({ 
+                            opacity: 0, 
+                            x: dir === 'left' ? -60 : 60,
+                            scale: 0.97,
+                          }),
+                        }}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
                         transition={{ 
-                          duration: 0.15, 
-                          ease: 'easeOut',
+                          duration: 0.28, 
+                          ease: [0.22, 1, 0.36, 1],
                         }}
                       >
                         {isRecapGenerating ? (
