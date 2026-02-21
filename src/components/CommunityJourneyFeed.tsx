@@ -6,12 +6,21 @@ import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
 import { fetchAllActivitiesGroupedByUser, type UserStoryGroup, type LocalActivity } from '@/hooks/use-journey-activities';
 import ProfileAvatar from '@/components/ProfileAvatar';
+import MakePublicSheet from '@/components/MakePublicSheet';
 
 interface CommunityJourneyFeedProps {
   myPhotos: { id: string; storageUrl: string; originalUrl?: string; isVideo?: boolean; activity?: string; frame?: string; dayNumber: number }[];
   onPhotoTap?: (photo: any) => void;
   onLogActivity?: () => void;
 }
+
+// Liquid glass style for each card
+const liquidGlassCard: React.CSSProperties = {
+  backdropFilter: 'blur(16px) saturate(180%)',
+  WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+  boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+  border: '1px solid rgba(255,255,255,0.1)',
+};
 
 const UserStackedCard = ({
   group,
@@ -26,17 +35,14 @@ const UserStackedCard = ({
   isLocked: boolean;
   onTap: () => void;
 }) => {
-  // For non-own users, just show the latest activity as the top card
   const getDisplayActivities = (activities: LocalActivity[]): (LocalActivity | null)[] => {
     if (activities.length === 0) return [null, null, null];
     if (!isOwn) {
-      // Show latest 3 activities (most recent first as top card)
       const sorted = [...activities].sort((a, b) => b.dayNumber - a.dayNumber);
       const top3 = sorted.slice(0, 3);
       while (top3.length < 3) top3.push(null as any);
       return top3;
     }
-    // Own user: show active week slots
     const sorted = [...activities].sort((a, b) => a.dayNumber - b.dayNumber);
     const latestDay = sorted[sorted.length - 1].dayNumber;
     const activeWeek = Math.ceil(latestDay / 3);
@@ -51,7 +57,6 @@ const UserStackedCard = ({
   };
 
   const cards = getDisplayActivities(group.activities);
-
   const cardWidth = 68;
   const cardHeight = 96;
   const hasNoActivities = group.activities.length === 0;
@@ -85,10 +90,9 @@ const UserStackedCard = ({
                 className="absolute inset-0 rounded-lg overflow-hidden flex flex-col items-center justify-center gap-1"
                 style={{
                   ...style,
+                  ...liquidGlassCard,
                   background: isTopEmpty ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.04)',
-                  border: isTopEmpty ? '2px dashed rgba(52,211,153,0.4)' : '1px dashed rgba(255,255,255,0.12)',
-                  backdropFilter: isBehindCard ? 'blur(6px)' : undefined,
-                  WebkitBackdropFilter: isBehindCard ? 'blur(6px)' : undefined,
+                  border: isTopEmpty ? '2px dashed rgba(52,211,153,0.4)' : '1px solid rgba(255,255,255,0.08)',
                 }}
               >
                 {isTopEmpty ? (
@@ -114,14 +118,15 @@ const UserStackedCard = ({
               className="absolute inset-0 rounded-lg overflow-hidden"
               style={{
                 ...style,
+                ...liquidGlassCard,
                 border: isOwn && idx === 0
                   ? '2px solid rgba(52,211,153,0.5)'
                   : idx === 0 ? '1.5px solid rgba(255,255,255,0.15)' : '1px solid rgba(255,255,255,0.08)',
                 boxShadow: isOwn && idx === 0
-                  ? '0 6px 24px rgba(52,211,153,0.2), 0 0 12px rgba(52,211,153,0.15)'
+                  ? '0 6px 24px rgba(52,211,153,0.2), 0 0 12px rgba(52,211,153,0.15), inset 0 1px 0 rgba(255,255,255,0.1)'
                   : idx === 0
-                    ? '0 6px 20px rgba(0,0,0,0.4)'
-                    : '0 3px 10px rgba(0,0,0,0.3)',
+                    ? '0 6px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)'
+                    : '0 3px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
               }}
             >
               <img
@@ -131,15 +136,25 @@ const UserStackedCard = ({
                 style={{
                   filter: isBehindCard
                     ? 'blur(4px) brightness(0.6)'
-                    : 'none',
+                    : isLocked
+                      ? 'blur(10px) brightness(0.5)'
+                      : 'none',
                 }}
               />
-              {idx === 0 && (
+              {/* Lock overlay on locked stories */}
+              {isLocked && idx === 0 && (
+                <div className="absolute inset-0 flex items-center justify-center"
+                  style={{ background: 'rgba(0,0,0,0.2)' }}
+                >
+                  <Lock className="w-4 h-4 text-white/50" strokeWidth={1.5} />
+                </div>
+              )}
+              {idx === 0 && !isLocked && (
                 <div className="absolute inset-0 pointer-events-none"
                   style={{ background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.5) 100%)' }}
                 />
               )}
-              {idx === 0 && (
+              {idx === 0 && !isLocked && (
                 <div className="absolute bottom-1 left-1 right-1" style={{ zIndex: 5 }}>
                   <p className="text-[7px] text-white/60 font-medium">Week {Math.ceil(activity.dayNumber / 3)}</p>
                   <p className="text-[8px] text-white font-semibold truncate">{activity.activity || 'Activity'}</p>
@@ -150,7 +165,7 @@ const UserStackedCard = ({
         })}
       </div>
 
-      {/* Avatar + name — shifted up 10px to overlap card */}
+      {/* Avatar + name */}
       <div className="flex flex-col items-center gap-0.5 relative" style={{ marginTop: -10 }}>
         <div
           className="rounded-full overflow-hidden relative"
@@ -171,14 +186,6 @@ const UserStackedCard = ({
             name={group.displayName || 'User'}
             size={28}
           />
-          {/* Lock badge on other users' avatars when locked */}
-          {isLocked && !isOwn && (
-            <div className="absolute inset-0 flex items-center justify-center rounded-full"
-              style={{ background: 'rgba(0,0,0,0.5)', zIndex: 11 }}
-            >
-              <Lock className="w-3 h-3 text-white/70" strokeWidth={2} />
-            </div>
-          )}
         </div>
         <span className="text-[9px] text-white/60 font-medium truncate max-w-[70px]">
           {isOwn ? 'You' : group.displayName?.split(' ')[0] || 'User'}
@@ -195,8 +202,8 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap, onLogActivity }: Community
   const [groups, setGroups] = useState<UserStoryGroup[]>([]);
   const [loaded, setLoaded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [showMakePublicSheet, setShowMakePublicSheet] = useState(false);
 
-  // Privacy: user must be public to see others' content
   const isUserPublic = !!profile?.stories_public;
 
   useEffect(() => {
@@ -206,7 +213,6 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap, onLogActivity }: Community
     });
   }, []);
 
-  // Ensure own user is always present and first
   const sortedGroups = (() => {
     if (!user) return groups;
     const myIdx = groups.findIndex(g => g.userId === user.id);
@@ -241,8 +247,11 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap, onLogActivity }: Community
       return;
     }
 
-    // Don't navigate to reel if content is locked
-    if (isLocked) return;
+    // Locked: open the make-public sheet
+    if (isLocked) {
+      setShowMakePublicSheet(true);
+      return;
+    }
 
     const activities = group.activities.map(a => ({
       id: a.id,
@@ -300,6 +309,17 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap, onLogActivity }: Community
           </div>
         )}
       </div>
+
+      {/* Make Public Sheet — triggered when tapping locked stories */}
+      <MakePublicSheet
+        isOpen={showMakePublicSheet}
+        onClose={() => setShowMakePublicSheet(false)}
+        onMakePublic={() => {
+          setShowMakePublicSheet(false);
+          // Profile will auto-refresh on next render
+        }}
+        onKeepPrivate={() => setShowMakePublicSheet(false)}
+      />
     </div>
   );
 };
