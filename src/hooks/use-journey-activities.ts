@@ -615,13 +615,8 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
     userActivitiesMap.delete(user.id);
   }
 
-  // Add other users - only if their profile allows public stories
+  // Add other users - include ALL users (private ones will be shown blurred/locked in UI)
   for (const [userId, userActivities] of userActivitiesMap) {
-    const profile = profileMap.get(userId);
-    // Skip users who have set their profile to private (stories_public = false)
-    if (profile && profile.stories_public === false) {
-      continue;
-    }
     groups.push(processUserActivities(userId, userActivities));
   }
 

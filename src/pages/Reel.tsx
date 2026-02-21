@@ -287,21 +287,31 @@ const Reel = () => {
       return;
     }
     
-    // CASE 2: Default navigation - ALWAYS start with current user's own stories only
+    // CASE 2: sourceUserId — open specific user's stories (from stacked card tap)
+    if (sourceUserId) {
+      const targetIdx = effectiveUserGroups.findIndex(g => g.userId === sourceUserId);
+      if (targetIdx >= 0) {
+        setCurrentUserIndex(targetIdx);
+        setCurrentActivityIndex(0);
+        setNavigationInitialized(true);
+        return;
+      }
+    }
+    
+    // CASE 3: Default navigation - start with current user's own stories
     if (user) {
       const myIdx = effectiveUserGroups.findIndex(g => g.userId === user.id);
       if (myIdx >= 0) {
         setCurrentUserIndex(myIdx);
         setCurrentActivityIndex(0);
       } else {
-        // User has no activities — show empty state by keeping index 0
         setCurrentUserIndex(0);
         setCurrentActivityIndex(0);
       }
     }
     
     setNavigationInitialized(true);
-  }, [loading, effectiveUserGroups, navigationInitialized, hasDeepLink, deepLinkActivityId, deepLinkDayNumber, user]);
+  }, [loading, effectiveUserGroups, navigationInitialized, hasDeepLink, deepLinkActivityId, deepLinkDayNumber, sourceUserId, user]);
 
   const currentGroup = effectiveUserGroups[currentUserIndex];
   const currentActivity = currentGroup?.activities[currentActivityIndex];
