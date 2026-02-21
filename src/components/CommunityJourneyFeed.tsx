@@ -71,7 +71,7 @@ const UserStackedCard = ({
           const stackStyles: Record<number, React.CSSProperties> = {
             0: { zIndex: 3, transform: 'rotate(1deg)' },
             1: { zIndex: 2, transform: 'rotate(-8deg) translateX(-6px) translateY(2px)' },
-            2: { zIndex: 1, transform: 'rotate(10deg) translateX(5px) translateY(-3px)' },
+            2: { zIndex: 1, transform: 'rotate(10deg) translateX(8px) translateY(-3px) scale(0.9)' },
           };
           const style = stackStyles[idx] || stackStyles[2];
 
