@@ -537,7 +537,7 @@ const Reel = () => {
 
   // Auto-advance timer - pause when modals are open OR content is locked
   // Determine if story should be locked (user's profile is private OR they haven't shared any public activity)
-  const isStoryLocked = !isOwnStory && (!profile?.stories_public || !hasPublicActivity);
+  const isStoryLocked = !isOwnStory && !profile?.stories_public;
   const isPaused = showReactsSheet || showSendReactionSheet || showDeleteConfirm || showMakePublicSheet || showProgressOverlay || isStoryLocked;
   
   // Reset progress/duration when activity changes (NOT mediaLoaded — that's URL-keyed to avoid race condition)
@@ -1170,7 +1170,7 @@ const Reel = () => {
                     const currentIdx = idx === currentUserIndex ? currentActivityIndex : 0;
                     const isOwnProfile = user && group.userId === user.id;
                     // Stories are locked, but profile photos are ALWAYS visible
-                    const isStoryLocked = !isOwnProfile && !hasPublicActivity;
+                    const isStoryLocked = !isOwnProfile && !profile?.stories_public;
                     const avatarSize = isActive ? 48 : 40;
                     
                       return (
@@ -1354,7 +1354,7 @@ const Reel = () => {
               {/* Full templated image/video - with lock overlay for non-public users */}
               {(() => {
                 // Lock content if user's profile is private OR they haven't shared any public activity
-                const shouldShowLocked = !isOwnStory && (!profile?.stories_public || !hasPublicActivity);
+                const shouldShowLocked = !isOwnStory && !profile?.stories_public;
                 
                 // Generate unique key for transitions
                 const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
@@ -1594,7 +1594,7 @@ const Reel = () => {
         >
           {(() => {
             // Lock content if user's profile is private OR they haven't shared any public activity
-            const isContentLocked = !isOwnStory && (!profile?.stories_public || !hasPublicActivity);
+            const isContentLocked = !isOwnStory && !profile?.stories_public;
             
             return (
               <div 
