@@ -44,13 +44,13 @@ const UserStackedCard = ({
   // Show up to 3 cards, latest on top
   const cards = weekActivities.slice(-3).reverse();
 
-  const cardWidth = 140;
-  const cardHeight = 200;
+  const cardWidth = isOwn ? 130 : 100;
+  const cardHeight = isOwn ? 184 : 142;
 
   return (
     <motion.button
       className="flex-shrink-0 flex flex-col items-center gap-2"
-      style={{ width: cardWidth + 20 }}
+      style={{ width: cardWidth + 16 }}
       onClick={onTap}
       whileTap={{ scale: 0.96 }}
       initial={{ opacity: 0, scale: 0.85, y: 16 }}
@@ -62,7 +62,7 @@ const UserStackedCard = ({
         {cards.length === 0 ? (
           // Empty placeholder
           <div
-            className="absolute inset-0 rounded-2xl flex items-center justify-center"
+            className="absolute inset-0 rounded-xl flex items-center justify-center"
             style={{
               background: 'rgba(255,255,255,0.06)',
               backdropFilter: 'blur(20px)',
@@ -85,13 +85,17 @@ const UserStackedCard = ({
             return (
               <div
                 key={activity.id}
-                className="absolute inset-0 rounded-2xl overflow-hidden"
+                className="absolute inset-0 rounded-xl overflow-hidden"
                 style={{
                   ...style,
-                  border: idx === 0 ? '2px solid rgba(255,255,255,0.15)' : '1.5px solid rgba(255,255,255,0.08)',
-                  boxShadow: idx === 0
-                    ? '0 12px 40px rgba(0,0,0,0.5)'
-                    : '0 6px 20px rgba(0,0,0,0.3)',
+                  border: isOwn && idx === 0
+                    ? '2px solid rgba(52,211,153,0.5)'
+                    : idx === 0 ? '1.5px solid rgba(255,255,255,0.15)' : '1px solid rgba(255,255,255,0.08)',
+                  boxShadow: isOwn && idx === 0
+                    ? '0 12px 40px rgba(52,211,153,0.2), 0 0 20px rgba(52,211,153,0.15)'
+                    : idx === 0
+                      ? '0 10px 30px rgba(0,0,0,0.4)'
+                      : '0 4px 16px rgba(0,0,0,0.3)',
                 }}
               >
                 <img
