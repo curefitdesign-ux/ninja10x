@@ -29,23 +29,32 @@ const UserStackedCard = ({
   // Get active week: find the latest week that has activities
   const getActiveWeekActivities = (activities: LocalActivity[]): LocalActivity[] => {
     if (activities.length === 0) return [];
-    // Sort by day_number ascending
     const sorted = [...activities].sort((a, b) => a.dayNumber - b.dayNumber);
-    // Find latest active week
     const latestDay = sorted[sorted.length - 1].dayNumber;
     const activeWeek = Math.ceil(latestDay / 3);
-    // Get activities for that week
     const weekStart = (activeWeek - 1) * 3 + 1;
     const weekEnd = activeWeek * 3;
     return sorted.filter(a => a.dayNumber >= weekStart && a.dayNumber <= weekEnd);
   };
 
   const weekActivities = getActiveWeekActivities(group.activities);
-  // Show up to 3 cards, latest on top
-  const cards = weekActivities.slice(-3).reverse();
+  
+  // Always build 3 slots for the active week, fill with activity or null
+  const latestDay = group.activities.length > 0
+    ? Math.max(...group.activities.map(a => a.dayNumber))
+    : 0;
+  const activeWeek = latestDay > 0 ? Math.ceil(latestDay / 3) : 1;
+  const weekStart = (activeWeek - 1) * 3 + 1;
+  
+  const slots: (LocalActivity | null)[] = [0, 1, 2].map(i => {
+    const dayNum = weekStart + i;
+    return weekActivities.find(a => a.dayNumber === dayNum) || null;
+  });
+  // Reverse so latest is on top (index 0 = top card)
+  const cards = [...slots].reverse();
 
-  const cardWidth = isOwn ? 130 : 100;
-  const cardHeight = isOwn ? 184 : 142;
+  const cardWidth = 90;
+  const cardHeight = 128;
 
   return (
     <motion.button
@@ -57,78 +66,69 @@ const UserStackedCard = ({
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
     >
-      {/* Stacked cards */}
-      <div className="relative" style={{ width: cardWidth, height: cardHeight }}>
-        {cards.length === 0 ? (
-          // Empty placeholder
-          <div
-            className="absolute inset-0 rounded-xl flex items-center justify-center"
-            style={{
-              background: 'rgba(255,255,255,0.06)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255,255,255,0.1)',
-            }}
-          >
-            <span className="text-white/30 text-xs">No activity</span>
-          </div>
-        ) : (
-          cards.map((activity, idx) => {
-            // Stack offset: idx 0 = top (no offset), idx 1 = behind-left, idx 2 = behind-right
-            const stackStyles: Record<number, React.CSSProperties> = {
-              0: { zIndex: 3, transform: 'rotate(0deg) translateY(0px)' },
-              1: { zIndex: 2, transform: 'rotate(-5deg) translateX(-8px) translateY(6px)' },
-              2: { zIndex: 1, transform: 'rotate(5deg) translateX(8px) translateY(10px)' },
-            };
-            const style = stackStyles[idx] || stackStyles[2];
-            const displayUrl = activity.storageUrl;
+      {/* Stacked cards - always 3 */}
+      <div className="relative" style={{ width: cardWidth, height: cardHeight + 12 }}>
+        {cards.map((activity, idx) => {
+          const stackStyles: Record<number, React.CSSProperties> = {
+            0: { zIndex: 3, transform: 'rotate(0deg) translateY(0px)' },
+            1: { zIndex: 2, transform: 'rotate(-5deg) translateX(-6px) translateY(5px)' },
+            2: { zIndex: 1, transform: 'rotate(5deg) translateX(6px) translateY(9px)' },
+          };
+          const style = stackStyles[idx] || stackStyles[2];
 
+          if (!activity) {
             return (
               <div
-                key={activity.id}
-                className="absolute inset-0 rounded-xl overflow-hidden"
+                key={`empty-${idx}`}
+                className="absolute inset-0 rounded-xl overflow-hidden flex items-center justify-center"
                 style={{
                   ...style,
-                  border: isOwn && idx === 0
-                    ? '2px solid rgba(52,211,153,0.5)'
-                    : idx === 0 ? '1.5px solid rgba(255,255,255,0.15)' : '1px solid rgba(255,255,255,0.08)',
-                  boxShadow: isOwn && idx === 0
-                    ? '0 12px 40px rgba(52,211,153,0.2), 0 0 20px rgba(52,211,153,0.15)'
-                    : idx === 0
-                      ? '0 10px 30px rgba(0,0,0,0.4)'
-                      : '0 4px 16px rgba(0,0,0,0.3)',
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px dashed rgba(255,255,255,0.12)',
                 }}
               >
-                <img
-                  src={displayUrl}
-                  alt={activity.activity || 'Activity'}
-                  className="w-full h-full object-cover"
-                />
-                {/* Gradient overlay on top card only */}
                 {idx === 0 && (
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.5) 100%)',
-                    }}
-                  />
-                )}
-                {/* Week / Activity label on top card */}
-                {idx === 0 && (
-                  <div className="absolute bottom-2 left-2 right-2 flex items-end justify-between" style={{ zIndex: 5 }}>
-                    <div>
-                      <p className="text-[9px] text-white/60 font-medium">
-                        Week {Math.ceil(activity.dayNumber / 3)}
-                      </p>
-                      <p className="text-[10px] text-white font-semibold truncate">
-                        {activity.activity || 'Activity'}
-                      </p>
-                    </div>
-                  </div>
+                  <span className="text-white/20 text-[9px] font-medium">Not logged</span>
                 )}
               </div>
             );
-          })
-        )}
+          }
+
+          return (
+            <div
+              key={activity.id}
+              className="absolute inset-0 rounded-xl overflow-hidden"
+              style={{
+                ...style,
+                border: isOwn && idx === 0
+                  ? '2px solid rgba(52,211,153,0.5)'
+                  : idx === 0 ? '1.5px solid rgba(255,255,255,0.15)' : '1px solid rgba(255,255,255,0.08)',
+                boxShadow: isOwn && idx === 0
+                  ? '0 8px 30px rgba(52,211,153,0.2), 0 0 16px rgba(52,211,153,0.15)'
+                  : idx === 0
+                    ? '0 8px 24px rgba(0,0,0,0.4)'
+                    : '0 4px 12px rgba(0,0,0,0.3)',
+              }}
+            >
+              <img
+                src={activity.storageUrl}
+                alt={activity.activity || 'Activity'}
+                className="w-full h-full object-cover"
+              />
+              {idx === 0 && (
+                <div className="absolute inset-0 pointer-events-none"
+                  style={{ background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.5) 100%)' }}
+                />
+              )}
+              {idx === 0 && (
+                <div className="absolute bottom-1.5 left-1.5 right-1.5" style={{ zIndex: 5 }}>
+                  <p className="text-[8px] text-white/60 font-medium">Week {Math.ceil(activity.dayNumber / 3)}</p>
+                  <p className="text-[9px] text-white font-semibold truncate">{activity.activity || 'Activity'}</p>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Avatar + name below */}
