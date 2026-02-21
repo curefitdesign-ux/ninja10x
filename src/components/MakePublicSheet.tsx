@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
-import { Globe, Lock, Sparkles, Eye, X } from 'lucide-react';
+import { Globe, Lock, Sparkles, Eye, X, Check } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -34,19 +35,38 @@ export default function MakePublicSheet({
   thumbnailUrl,
 }: MakePublicSheetProps) {
 
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishSuccess, setPublishSuccess] = useState(false);
+
   const handleMakePublic = async () => {
+    setIsPublishing(true);
     triggerHaptic('success');
     savePublicPreference(true);
     
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
+      // Update profile to public
       await supabase
         .from('profiles')
         .update({ stories_public: true })
         .eq('user_id', user.id);
+      
+      // Make ALL user's activities public
+      await supabase
+        .from('journey_activities')
+        .update({ is_public: true })
+        .eq('user_id', user.id);
     }
     
-    onMakePublic();
+    setIsPublishing(false);
+    setPublishSuccess(true);
+    triggerHaptic('success');
+    
+    // Brief success state then close
+    setTimeout(() => {
+      setPublishSuccess(false);
+      onMakePublic();
+    }, 800);
   };
 
   const handleKeepPrivate = () => {
@@ -187,19 +207,39 @@ export default function MakePublicSheet({
 
               {/* Buttons */}
               <div className="space-y-2.5">
-                <button
+                <motion.button
                   onClick={handleMakePublic}
-                  className="w-full py-4 rounded-2xl font-semibold text-white text-base active:scale-[0.98] transition-all duration-200"
+                  disabled={isPublishing || publishSuccess}
+                  className="w-full py-4 rounded-2xl font-semibold text-white text-base transition-all duration-200"
                   style={{
-                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                    boxShadow: '0 4px 24px rgba(139,92,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+                    background: publishSuccess 
+                      ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                      : 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                    boxShadow: publishSuccess
+                      ? '0 4px 24px rgba(16,185,129,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                      : '0 4px 24px rgba(139,92,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
                   }}
+                  whileTap={{ scale: 0.97 }}
+                  animate={publishSuccess ? { scale: [1, 1.05, 1] } : {}}
+                  transition={{ duration: 0.3 }}
                 >
                   <div className="flex items-center justify-center gap-2">
-                    <Globe className="w-5 h-5" />
-                    Make Public
+                    {publishSuccess ? (
+                      <motion.div
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                      >
+                        <Check className="w-5 h-5" />
+                      </motion.div>
+                    ) : isPublishing ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Globe className="w-5 h-5" />
+                    )}
+                    {publishSuccess ? 'Public!' : isPublishing ? 'Publishing...' : 'Make Public'}
                   </div>
-                </button>
+                </motion.button>
 
                 <button
                   onClick={handleKeepPrivate}

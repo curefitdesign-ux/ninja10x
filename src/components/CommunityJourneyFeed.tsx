@@ -172,7 +172,6 @@ const UserStackedCard = ({
               )}
               {idx === 0 && !isLocked && !showUploadOverlay && (
                 <div className="absolute bottom-1 left-1 right-1" style={{ zIndex: 5 }}>
-                  <p className="text-[7px] text-white/60 font-medium">Week {Math.ceil(activity.dayNumber / 3)}</p>
                   <p className="text-[8px] text-white font-semibold truncate">{activity.activity || 'Activity'}</p>
                 </div>
               )}
