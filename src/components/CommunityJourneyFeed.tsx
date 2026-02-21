@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus } from 'lucide-react';
+import { Plus, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
 import { fetchAllActivitiesGroupedByUser, type UserStoryGroup, type LocalActivity } from '@/hooks/use-journey-activities';
@@ -16,11 +16,13 @@ const UserStackedCard = ({
   group,
   isOwn,
   index,
+  isLocked,
   onTap,
 }: {
   group: UserStoryGroup;
   isOwn: boolean;
   index: number;
+  isLocked: boolean;
   onTap: () => void;
 }) => {
   const getActiveWeekActivities = (activities: LocalActivity[]): LocalActivity[] => {
@@ -48,6 +50,7 @@ const UserStackedCard = ({
 
   const cardWidth = 76;
   const cardHeight = 108;
+  const hasNoActivities = group.activities.length === 0;
 
   return (
     <motion.button
@@ -68,9 +71,10 @@ const UserStackedCard = ({
             2: { zIndex: 1, transform: 'rotate(5deg) translateX(5px) translateY(7px)' },
           };
           const style = stackStyles[idx] || stackStyles[2];
+          const isBehindCard = idx > 0;
 
           if (!activity) {
-            const isTopEmpty = idx === 0 && isOwn && group.activities.length === 0;
+            const isTopEmpty = idx === 0 && isOwn && hasNoActivities;
             return (
               <div
                 key={`empty-${idx}`}
@@ -79,13 +83,19 @@ const UserStackedCard = ({
                   ...style,
                   background: isTopEmpty ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.04)',
                   border: isTopEmpty ? '2px dashed rgba(52,211,153,0.4)' : '1px dashed rgba(255,255,255,0.12)',
+                  backdropFilter: isBehindCard ? 'blur(6px)' : undefined,
+                  WebkitBackdropFilter: isBehindCard ? 'blur(6px)' : undefined,
                 }}
               >
                 {isTopEmpty ? (
-                  <>
+                  <motion.div
+                    className="flex flex-col items-center gap-1"
+                    animate={{ scale: [1, 1.08, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                  >
                     <Plus className="w-5 h-5 text-emerald-400/70" strokeWidth={2} />
                     <span className="text-emerald-400/60 text-[8px] font-semibold">Log Activity</span>
-                  </>
+                  </motion.div>
                 ) : idx === 0 ? (
                   <span className="text-white/20 text-[8px] font-medium">Not logged</span>
                 ) : null}
@@ -114,13 +124,29 @@ const UserStackedCard = ({
                 src={activity.storageUrl}
                 alt={activity.activity || 'Activity'}
                 className="w-full h-full object-cover"
+                style={{
+                  filter: isBehindCard
+                    ? 'blur(4px) brightness(0.6)'
+                    : isLocked && !isOwn
+                      ? 'blur(12px) brightness(0.5)'
+                      : 'none',
+                }}
               />
-              {idx === 0 && (
+              {/* Lock overlay for non-public users viewing others */}
+              {isLocked && !isOwn && idx === 0 && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1"
+                  style={{ background: 'rgba(0,0,0,0.3)' }}
+                >
+                  <Lock className="w-4 h-4 text-white/50" strokeWidth={1.5} />
+                  <span className="text-white/40 text-[7px] font-medium">Share to unlock</span>
+                </div>
+              )}
+              {idx === 0 && !isLocked && (
                 <div className="absolute inset-0 pointer-events-none"
                   style={{ background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.5) 100%)' }}
                 />
               )}
-              {idx === 0 && (
+              {idx === 0 && !isLocked && (
                 <div className="absolute bottom-1 left-1 right-1" style={{ zIndex: 5 }}>
                   <p className="text-[7px] text-white/60 font-medium">Week {Math.ceil(activity.dayNumber / 3)}</p>
                   <p className="text-[8px] text-white font-semibold truncate">{activity.activity || 'Activity'}</p>
@@ -169,6 +195,9 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap }: CommunityJourneyFeedProp
   const [loaded, setLoaded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Privacy: user must be public to see others' content
+  const isUserPublic = !!profile?.stories_public;
+
   useEffect(() => {
     fetchAllActivitiesGroupedByUser().then(data => {
       setGroups(data);
@@ -185,7 +214,6 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap }: CommunityJourneyFeedProp
       const others = groups.filter((_, i) => i !== myIdx);
       return [own, ...others];
     }
-    // User has no activities — inject a placeholder group
     const ownGroup: UserStoryGroup = {
       userId: user.id,
       displayName: profile?.display_name || 'You',
@@ -195,20 +223,6 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap }: CommunityJourneyFeedProp
     return [ownGroup, ...groups];
   })();
 
-  // Scroll to center own card on load
-  useEffect(() => {
-    if (loaded && scrollRef.current && sortedGroups.length > 0) {
-      // Own card is first; we want it centered
-      const container = scrollRef.current;
-      const cardWidth = 88; // cardWidth(76) + gap + padding
-      const containerWidth = container.clientWidth;
-      const scrollTo = 0; // It's first, so scroll a bit left to show peek
-      // Center it: scroll so card is in middle
-      const centerOffset = Math.max(0, (cardWidth / 2) - (containerWidth / 2) + cardWidth);
-      container.scrollLeft = 0; // starts at 0, own card is first with left padding creating peek space
-    }
-  }, [loaded, sortedGroups.length]);
-
   if (!loaded) {
     return (
       <div className="flex items-center justify-center h-48">
@@ -217,14 +231,16 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap }: CommunityJourneyFeedProp
     );
   }
 
-  const handleUserTap = (group: UserStoryGroup) => {
-    // If user has no activities, trigger the upload flow
+  const handleUserTap = (group: UserStoryGroup, isLocked: boolean) => {
     if (group.activities.length === 0) {
       if (onPhotoTap) {
-        onPhotoTap(null); // signal to open media source sheet
+        onPhotoTap(null);
       }
       return;
     }
+
+    // Don't navigate to reel if content is locked
+    if (isLocked) return;
 
     const activities = group.activities.map(a => ({
       id: a.id,
@@ -257,23 +273,24 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap }: CommunityJourneyFeedProp
     <div className="w-full">
       <div
         ref={scrollRef}
-        className="flex gap-2 overflow-x-auto scrollbar-hide pb-2"
-        style={{
-          scrollSnapType: 'x mandatory',
-          paddingLeft: 'calc(50% - 44px)',
-          paddingRight: 'calc(50% - 44px)',
-        }}
+        className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 px-4"
+        style={{ scrollSnapType: 'x mandatory' }}
       >
-        {sortedGroups.map((group, idx) => (
-          <div key={group.userId} style={{ scrollSnapAlign: 'center' }}>
-            <UserStackedCard
-              group={group}
-              isOwn={user?.id === group.userId}
-              index={idx}
-              onTap={() => handleUserTap(group)}
-            />
-          </div>
-        ))}
+        {sortedGroups.map((group, idx) => {
+          const isOwn = user?.id === group.userId;
+          const isLocked = !isOwn && !isUserPublic && group.activities.length > 0;
+          return (
+            <div key={group.userId} style={{ scrollSnapAlign: 'start' }}>
+              <UserStackedCard
+                group={group}
+                isOwn={isOwn}
+                isLocked={isLocked}
+                index={idx}
+                onTap={() => handleUserTap(group, isLocked)}
+              />
+            </div>
+          );
+        })}
 
         {sortedGroups.length === 0 && (
           <div className="flex items-center justify-center w-full py-12">
