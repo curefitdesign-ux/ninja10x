@@ -1381,15 +1381,21 @@ const Reel = () => {
                 <div
                   className="w-full h-[75%] overflow-hidden"
                   style={{
-                    borderRadius: '0 14px 14px 0',
-                    background: 'rgba(0,0,0,0.4)',
+                    borderRadius: '0 16px 16px 0',
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderLeft: 'none',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 32px rgba(0,0,0,0.3)',
                   }}
                 >
                   <img
                     src={prevMedia}
                     alt="Previous user"
                     className="w-full h-full object-cover"
-                    style={{ opacity: 0.45, filter: isPrevLocked ? 'blur(12px) brightness(0.4)' : 'blur(1px) brightness(0.7)' }}
+                    style={{ 
+                      opacity: isPrevLocked ? 0.35 : 0.5, 
+                      filter: isPrevLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
+                    }}
                   />
                 </div>
               </motion.div>
@@ -1418,15 +1424,21 @@ const Reel = () => {
                 <div
                   className="w-full h-[75%] overflow-hidden"
                   style={{
-                    borderRadius: '14px 0 0 14px',
-                    background: 'rgba(0,0,0,0.4)',
+                    borderRadius: '16px 0 0 16px',
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderRight: 'none',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 32px rgba(0,0,0,0.3)',
                   }}
                 >
                   <img
                     src={nextMedia}
                     alt="Next user"
                     className="w-full h-full object-cover"
-                    style={{ opacity: 0.45, filter: isNextLocked ? 'blur(12px) brightness(0.4)' : 'blur(1px) brightness(0.7)' }}
+                    style={{ 
+                      opacity: isNextLocked ? 0.35 : 0.5, 
+                      filter: isNextLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
+                    }}
                   />
                 </div>
               </motion.div>
