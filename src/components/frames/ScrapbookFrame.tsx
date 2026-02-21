@@ -40,10 +40,10 @@ const ScrapbookFrame = ({
 
   return (
     <div
-      className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative"
+      className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative flex flex-col"
       style={{
+        containerType: 'inline-size',
         background: '#e8e2d6',
-        // Subtle paper texture via repeating gradient noise
         backgroundImage: `
           url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E"),
           linear-gradient(180deg, #ede7db 0%, #e0d9cb 50%, #d8d1c3 100%)
@@ -51,72 +51,74 @@ const ScrapbookFrame = ({
       }}
     >
       {/* ── Top Handle Bar ── */}
-      <div className="flex justify-center" style={{ paddingTop: '3.5%' }}>
+      <div className="flex justify-center" style={{ paddingTop: '3%' }}>
         <div
           style={{
-            width: '18%',
-            height: '4px',
+            width: '16%',
+            height: '3.5px',
             borderRadius: '9999px',
-            background: 'rgba(180, 170, 155, 0.6)',
+            background: 'rgba(170, 162, 148, 0.55)',
           }}
         />
       </div>
 
       {/* ── "I DID {Activity} TODAY!" Header ── */}
-      <div style={{ padding: '5% 6% 0 6%' }}>
-        <div style={{ lineHeight: 0.95 }}>
-          <span
-            style={{
-              display: 'block',
-              fontFamily: "'Georgia', 'Times New Roman', serif",
-              fontWeight: 900,
-              fontStyle: 'italic',
-              fontSize: '11cqw',
-              color: '#1a1a1a',
-              letterSpacing: '-0.02em',
-              lineHeight: 1,
-            }}
-          >
-            I DID
-          </span>
-          <span
-            style={{
-              display: 'block',
-              fontFamily: "'Georgia', 'Brush Script MT', 'Segoe Script', cursive",
-              fontWeight: 700,
-              fontStyle: 'italic',
-              fontSize: '14cqw',
-              color: '#7C5CFC',
-              lineHeight: 1,
-              marginTop: '-1%',
-              marginLeft: '-1%',
-            }}
-          >
-            {activity}
-          </span>
-          <span
-            style={{
-              display: 'block',
-              fontFamily: "'Georgia', 'Times New Roman', serif",
-              fontWeight: 900,
-              fontStyle: 'italic',
-              fontSize: '11cqw',
-              color: '#1a1a1a',
-              letterSpacing: '-0.02em',
-              lineHeight: 1,
-              marginTop: '-1%',
-            }}
-          >
-            TODAY!
-          </span>
+      <div style={{ padding: '3.5% 5.5% 0 5.5%' }}>
+        {/* "I DID" - Heavy black italic with slight skew for 3D feel */}
+        <div
+          style={{
+            fontFamily: "'Impact', 'Arial Black', 'Helvetica Neue', sans-serif",
+            fontWeight: 900,
+            fontStyle: 'italic',
+            fontSize: '12cqw',
+            color: '#1a1a1a',
+            lineHeight: 0.95,
+            letterSpacing: '-0.01em',
+            transform: 'skewX(-3deg)',
+            textShadow: '2px 2px 0 rgba(180,170,150,0.4)',
+          }}
+        >
+          I DID
+        </div>
+        {/* Activity name - Large purple script/cursive */}
+        <div
+          style={{
+            fontFamily: "'Segoe Script', 'Brush Script MT', 'Dancing Script', cursive",
+            fontWeight: 700,
+            fontStyle: 'italic',
+            fontSize: '15cqw',
+            color: '#7C5CFC',
+            lineHeight: 0.9,
+            marginTop: '-2%',
+            marginLeft: '-0.5%',
+          }}
+        >
+          {activity}
+        </div>
+        {/* "TODAY!" - Same heavy black italic */}
+        <div
+          style={{
+            fontFamily: "'Impact', 'Arial Black', 'Helvetica Neue', sans-serif",
+            fontWeight: 900,
+            fontStyle: 'italic',
+            fontSize: '12cqw',
+            color: '#1a1a1a',
+            lineHeight: 0.95,
+            letterSpacing: '-0.01em',
+            transform: 'skewX(-3deg)',
+            textShadow: '2px 2px 0 rgba(180,170,150,0.4)',
+            marginTop: '-1.5%',
+          }}
+        >
+          TODAY!
         </div>
       </div>
 
       {/* ── Dashed Separator ── */}
-      <div style={{ padding: '2.5% 6% 0 6%' }}>
+      <div style={{ padding: '2% 5% 0 5%' }}>
         <div
           style={{
-            borderTop: '2px dashed rgba(140, 130, 115, 0.5)',
+            borderTop: '1.5px dashed rgba(130, 120, 105, 0.55)',
             width: '100%',
           }}
         />
@@ -127,16 +129,16 @@ const ScrapbookFrame = ({
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          padding: '2% 6% 2.5% 6%',
+          padding: '1.8% 5.5% 1.5% 5.5%',
         }}
       >
         <span
           style={{
-            fontFamily: "'Georgia', serif",
-            fontWeight: 600,
-            fontSize: '3.2cqw',
-            color: '#3a3530',
-            letterSpacing: '0.12em',
+            fontFamily: "'Georgia', 'Times New Roman', serif",
+            fontWeight: 700,
+            fontSize: '3cqw',
+            color: '#2e2a25',
+            letterSpacing: '0.16em',
             textTransform: 'uppercase',
           }}
         >
@@ -144,11 +146,11 @@ const ScrapbookFrame = ({
         </span>
         <span
           style={{
-            fontFamily: "'Georgia', serif",
-            fontWeight: 600,
-            fontSize: '3.2cqw',
-            color: '#3a3530',
-            letterSpacing: '0.12em',
+            fontFamily: "'Georgia', 'Times New Roman', serif",
+            fontWeight: 700,
+            fontSize: '3cqw',
+            color: '#2e2a25',
+            letterSpacing: '0.16em',
             textTransform: 'uppercase',
           }}
         >
@@ -156,15 +158,16 @@ const ScrapbookFrame = ({
         </span>
       </div>
 
-      {/* ── Photo Area ── */}
+      {/* ── Photo Area — takes remaining space ── */}
       <div
         style={{
-          margin: '0 5%',
-          borderRadius: '4px',
+          margin: '0 4.5%',
+          borderRadius: '3px',
           overflow: 'hidden',
-          aspectRatio: '4/5',
+          flex: 1,
           position: 'relative',
           background: '#000',
+          minHeight: 0,
         }}
       >
         {isVideo ? (
@@ -193,86 +196,91 @@ const ScrapbookFrame = ({
       </div>
 
       {/* ── Bottom Metrics ── */}
-      {(duration || pr) && (
-        <div style={{ padding: '0 6%', marginTop: 'auto' }}>
-          {/* Dashed separator above metrics */}
-          <div
-            style={{
-              borderTop: '2px dashed rgba(140, 130, 115, 0.5)',
-              width: '100%',
-              marginTop: '3%',
-              marginBottom: '2%',
-            }}
-          />
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'baseline',
-              paddingBottom: '4%',
-            }}
-          >
-            {duration && (
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '2%' }}>
-                <span
-                  style={{
-                    fontFamily: "'Georgia', serif",
-                    fontWeight: 700,
-                    fontSize: '2.8cqw',
-                    color: '#3a3530',
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {durationLabel} :
-                </span>
-                <span
-                  style={{
-                    fontFamily: "'Georgia', 'Brush Script MT', 'Segoe Script', cursive",
-                    fontWeight: 700,
-                    fontStyle: 'italic',
-                    fontSize: '7.5cqw',
-                    color: '#7C5CFC',
-                    lineHeight: 1,
-                    marginLeft: '4px',
-                  }}
-                >
-                  {duration}
-                </span>
-              </div>
-            )}
-            {pr && (
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '2%' }}>
-                <span
-                  style={{
-                    fontFamily: "'Georgia', serif",
-                    fontWeight: 700,
-                    fontSize: '2.8cqw',
-                    color: '#3a3530',
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {metricLabel} :
-                </span>
-                <span
-                  style={{
-                    fontFamily: "'Georgia', 'Brush Script MT', 'Segoe Script', cursive",
-                    fontWeight: 700,
-                    fontStyle: 'italic',
-                    fontSize: '7.5cqw',
-                    color: '#7C5CFC',
-                    lineHeight: 1,
-                    marginLeft: '4px',
-                  }}
-                >
-                  {pr}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <div style={{ padding: '0 5%', flexShrink: 0 }}>
+        {(duration || pr) ? (
+          <>
+            {/* Dashed separator */}
+            <div
+              style={{
+                borderTop: '1.5px dashed rgba(130, 120, 105, 0.55)',
+                width: '100%',
+                marginTop: '2.5%',
+              }}
+            />
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'baseline',
+                padding: '2% 0.5% 3% 0.5%',
+              }}
+            >
+              {duration && (
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                  <span
+                    style={{
+                      fontFamily: "'Georgia', 'Times New Roman', serif",
+                      fontWeight: 800,
+                      fontSize: '2.6cqw',
+                      color: '#2e2a25',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {durationLabel} :
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "'Segoe Script', 'Brush Script MT', 'Dancing Script', cursive",
+                      fontWeight: 700,
+                      fontStyle: 'italic',
+                      fontSize: '8cqw',
+                      color: '#7C5CFC',
+                      lineHeight: 1,
+                      marginLeft: '2px',
+                    }}
+                  >
+                    {duration}
+                  </span>
+                </div>
+              )}
+              {pr && (
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                  <span
+                    style={{
+                      fontFamily: "'Georgia', 'Times New Roman', serif",
+                      fontWeight: 800,
+                      fontSize: '2.6cqw',
+                      color: '#2e2a25',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {metricLabel} :
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "'Segoe Script', 'Brush Script MT', 'Dancing Script', cursive",
+                      fontWeight: 700,
+                      fontStyle: 'italic',
+                      fontSize: '8cqw',
+                      color: '#7C5CFC',
+                      lineHeight: 1,
+                      marginLeft: '2px',
+                    }}
+                  >
+                    {pr}
+                  </span>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <div style={{ height: '3%' }} />
+        )}
+      </div>
     </div>
   );
 };
