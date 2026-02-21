@@ -51,8 +51,8 @@ const UserStackedCard = ({
   const cardHeight = 96;
   const hasNoActivities = group.activities.length === 0;
 
-  // If own user needs to upload next day, show upload overlay on full card
-  const showUploadOverlay = isOwn && needsUpload && !hasNoActivities;
+  // Never show upload overlay on stacked cards if activity is already logged
+  const showUploadOverlay = false;
 
   return (
     <motion.button
@@ -179,26 +179,7 @@ const UserStackedCard = ({
           );
         })}
 
-        {/* + circle badge on top-left for own card with activities */}
-        {isOwn && !hasNoActivities && (
-          <motion.div
-            className="absolute flex items-center justify-center rounded-full"
-            style={{
-              top: -4,
-              left: -4,
-              width: 20,
-              height: 20,
-              zIndex: 10,
-              background: 'linear-gradient(135deg, rgba(52,211,153,0.9), rgba(16,185,129,0.9))',
-              border: '1.5px solid rgba(255,255,255,0.3)',
-              boxShadow: '0 2px 8px rgba(52,211,153,0.4)',
-            }}
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <Plus className="w-3 h-3 text-white" strokeWidth={3} />
-          </motion.div>
-        )}
+        {/* Removed green + badge — no longer needed */}
       </div>
 
       {/* Avatar + name */}
