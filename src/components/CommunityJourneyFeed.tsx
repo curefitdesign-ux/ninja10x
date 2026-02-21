@@ -39,24 +39,11 @@ const UserStackedCard = ({
 }) => {
   const getDisplayActivities = (activities: LocalActivity[]): (LocalActivity | null)[] => {
     if (activities.length === 0) return [null, null, null];
-    if (!isOwn) {
-      // Show latest activities for other users (visible even when locked)
-      const sorted = [...activities].sort((a, b) => b.dayNumber - a.dayNumber);
-      const top3 = sorted.slice(0, 3);
-      while (top3.length < 3) top3.push(null as any);
-      return top3;
-    }
-    const sorted = [...activities].sort((a, b) => a.dayNumber - b.dayNumber);
-    const latestDay = sorted[sorted.length - 1].dayNumber;
-    const activeWeek = Math.ceil(latestDay / 3);
-    const weekStart = (activeWeek - 1) * 3 + 1;
-    const weekEnd = activeWeek * 3;
-    const weekActivities = sorted.filter(a => a.dayNumber >= weekStart && a.dayNumber <= weekEnd);
-    const slots: (LocalActivity | null)[] = [0, 1, 2].map(i => {
-      const dayNum = weekStart + i;
-      return weekActivities.find(a => a.dayNumber === dayNum) || null;
-    });
-    return [...slots].reverse();
+    // For all users: show latest logged activities first (top card = most recent)
+    const sorted = [...activities].sort((a, b) => b.dayNumber - a.dayNumber);
+    const top3: (LocalActivity | null)[] = sorted.slice(0, 3);
+    while (top3.length < 3) top3.push(null);
+    return top3;
   };
 
   const cards = getDisplayActivities(group.activities);
