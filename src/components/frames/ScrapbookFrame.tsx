@@ -64,18 +64,15 @@ const ScrapbookFrame = ({
 
       {/* ── "I DID {Activity} TODAY!" Header ── */}
       <div style={{ padding: '3.5% 5.5% 0 5.5%' }}>
-        {/* "I DID" - Heavy black italic with slight skew for 3D feel */}
+        {/* "I DID" - Heavy black, no italic */}
         <div
           style={{
             fontFamily: "'Impact', 'Arial Black', 'Helvetica Neue', sans-serif",
             fontWeight: 900,
-            fontStyle: 'italic',
-            fontSize: '12cqw',
+            fontSize: '13cqw',
             color: '#1a1a1a',
             lineHeight: 0.95,
-            letterSpacing: '-0.01em',
-            transform: 'skewX(-3deg)',
-            textShadow: '2px 2px 0 rgba(180,170,150,0.4)',
+            letterSpacing: '-0.02em',
           }}
         >
           I DID
@@ -86,28 +83,25 @@ const ScrapbookFrame = ({
             fontFamily: "'Segoe Script', 'Brush Script MT', 'Dancing Script', cursive",
             fontWeight: 700,
             fontStyle: 'italic',
-            fontSize: '15cqw',
+            fontSize: '14cqw',
             color: '#7C5CFC',
-            lineHeight: 0.9,
-            marginTop: '-2%',
+            lineHeight: 0.85,
+            marginTop: '-1%',
             marginLeft: '-0.5%',
           }}
         >
           {activity}
         </div>
-        {/* "TODAY!" - Same heavy black italic */}
+        {/* "TODAY!" - Heavy black, no italic */}
         <div
           style={{
             fontFamily: "'Impact', 'Arial Black', 'Helvetica Neue', sans-serif",
             fontWeight: 900,
-            fontStyle: 'italic',
-            fontSize: '12cqw',
+            fontSize: '13cqw',
             color: '#1a1a1a',
             lineHeight: 0.95,
-            letterSpacing: '-0.01em',
-            transform: 'skewX(-3deg)',
-            textShadow: '2px 2px 0 rgba(180,170,150,0.4)',
-            marginTop: '-1.5%',
+            letterSpacing: '-0.02em',
+            marginTop: '-1%',
           }}
         >
           TODAY!
@@ -216,14 +210,14 @@ const ScrapbookFrame = ({
               }}
             >
               {duration && (
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
                   <span
                     style={{
                       fontFamily: "'Georgia', 'Times New Roman', serif",
-                      fontWeight: 800,
-                      fontSize: '2.6cqw',
+                      fontWeight: 700,
+                      fontSize: '2.2cqw',
                       color: '#2e2a25',
-                      letterSpacing: '0.1em',
+                      letterSpacing: '0.12em',
                       textTransform: 'uppercase',
                       whiteSpace: 'nowrap',
                     }}
@@ -235,7 +229,7 @@ const ScrapbookFrame = ({
                       fontFamily: "'Segoe Script', 'Brush Script MT', 'Dancing Script', cursive",
                       fontWeight: 700,
                       fontStyle: 'italic',
-                      fontSize: '8cqw',
+                      fontSize: '6.5cqw',
                       color: '#7C5CFC',
                       lineHeight: 1,
                       marginLeft: '2px',
@@ -246,14 +240,14 @@ const ScrapbookFrame = ({
                 </div>
               )}
               {pr && (
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
                   <span
                     style={{
                       fontFamily: "'Georgia', 'Times New Roman', serif",
-                      fontWeight: 800,
-                      fontSize: '2.6cqw',
+                      fontWeight: 700,
+                      fontSize: '2.2cqw',
                       color: '#2e2a25',
-                      letterSpacing: '0.1em',
+                      letterSpacing: '0.12em',
                       textTransform: 'uppercase',
                       whiteSpace: 'nowrap',
                     }}
@@ -265,7 +259,7 @@ const ScrapbookFrame = ({
                       fontFamily: "'Segoe Script', 'Brush Script MT', 'Dancing Script', cursive",
                       fontWeight: 700,
                       fontStyle: 'italic',
-                      fontSize: '8cqw',
+                      fontSize: '6.5cqw',
                       color: '#7C5CFC',
                       lineHeight: 1,
                       marginLeft: '2px',
