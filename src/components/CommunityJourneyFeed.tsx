@@ -10,6 +10,7 @@ import ProfileAvatar from '@/components/ProfileAvatar';
 interface CommunityJourneyFeedProps {
   myPhotos: { id: string; storageUrl: string; originalUrl?: string; isVideo?: boolean; activity?: string; frame?: string; dayNumber: number }[];
   onPhotoTap?: (photo: any) => void;
+  onLogActivity?: () => void;
 }
 
 const UserStackedCard = ({
@@ -187,7 +188,7 @@ const UserStackedCard = ({
   );
 };
 
-const CommunityJourneyFeed = ({ myPhotos, onPhotoTap }: CommunityJourneyFeedProps) => {
+const CommunityJourneyFeed = ({ myPhotos, onPhotoTap, onLogActivity }: CommunityJourneyFeedProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -232,9 +233,10 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap }: CommunityJourneyFeedProp
   }
 
   const handleUserTap = (group: UserStoryGroup, isLocked: boolean) => {
+    const isOwn = user?.id === group.userId;
     if (group.activities.length === 0) {
-      if (onPhotoTap) {
-        onPhotoTap(null);
+      if (isOwn && onLogActivity) {
+        onLogActivity();
       }
       return;
     }

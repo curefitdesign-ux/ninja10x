@@ -545,6 +545,10 @@ const Activity = () => {
               <CommunityJourneyFeed
                 myPhotos={photos}
                 onPhotoTap={handlePhotoTap}
+                onLogActivity={() => {
+                  setPendingDayNumber(photos.length + 1);
+                  setShowMediaSourceSheet(true);
+                }}
               />
             </motion.div>
           </div>
