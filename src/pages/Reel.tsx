@@ -1602,6 +1602,10 @@ const Reel = () => {
                     {shouldShowLocked && (
                       <div
                         className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-3xl cursor-pointer"
+                        style={{
+                          border: '1.5px solid rgba(255,255,255,0.15)',
+                          boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 8px 32px rgba(0,0,0,0.2)',
+                        }}
                         onClick={(e) => {
                           e.stopPropagation();
                           setShowMakePublicSheet(true);
@@ -1862,7 +1866,7 @@ const Reel = () => {
               }}
             >
               <ChevronUp className="w-5 h-5 text-white/60" />
-              <span className="text-white/80 text-sm font-medium">View Progress</span>
+              <span className="text-white/80 text-sm font-medium">View Post</span>
             </button>
           </motion.div>
         </div>
