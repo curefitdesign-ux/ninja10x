@@ -6,12 +6,13 @@ import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
 import { fetchAllActivitiesGroupedByUser, type UserStoryGroup, type LocalActivity } from '@/hooks/use-journey-activities';
 import ProfileAvatar from '@/components/ProfileAvatar';
-import MakePublicSheet from '@/components/MakePublicSheet';
+
 
 interface CommunityJourneyFeedProps {
   myPhotos: { id: string; storageUrl: string; originalUrl?: string; isVideo?: boolean; activity?: string; frame?: string; dayNumber: number }[];
   onPhotoTap?: (photo: any) => void;
   onLogActivity?: () => void;
+  onLockedTap?: () => void;
 }
 
 // Liquid glass style for each card
@@ -212,14 +213,13 @@ const UserStackedCard = ({
   );
 };
 
-const CommunityJourneyFeed = ({ myPhotos, onPhotoTap, onLogActivity }: CommunityJourneyFeedProps) => {
+const CommunityJourneyFeed = ({ myPhotos, onPhotoTap, onLogActivity, onLockedTap }: CommunityJourneyFeedProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile();
   const [groups, setGroups] = useState<UserStoryGroup[]>([]);
   const [loaded, setLoaded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [showMakePublicSheet, setShowMakePublicSheet] = useState(false);
 
   const isUserPublic = !!profile?.stories_public;
 
@@ -264,9 +264,9 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap, onLogActivity }: Community
       return;
     }
 
-    // Locked: just show the make-public sheet (the parent page renders the inline one)
+    // Locked: trigger parent's make-public sheet
     if (isLocked) {
-      setShowMakePublicSheet(true);
+      onLockedTap?.();
       return;
     }
 
@@ -330,16 +330,6 @@ const CommunityJourneyFeed = ({ myPhotos, onPhotoTap, onLogActivity }: Community
         )}
       </div>
 
-      {/* Make Public Sheet — triggered when tapping locked stories */}
-      <MakePublicSheet
-        isOpen={showMakePublicSheet}
-        onClose={() => setShowMakePublicSheet(false)}
-        onMakePublic={() => {
-          setShowMakePublicSheet(false);
-          // Profile will auto-refresh on next render
-        }}
-        onKeepPrivate={() => setShowMakePublicSheet(false)}
-      />
     </div>
   );
 };

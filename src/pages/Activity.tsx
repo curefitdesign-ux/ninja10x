@@ -552,6 +552,7 @@ const Activity = () => {
                   setPendingDayNumber(photos.length + 1);
                   setShowMediaSourceSheet(true);
                 }}
+                onLockedTap={() => setShowMakePublicSheet(true)}
               />
             </motion.div>
           </div>
@@ -657,27 +658,15 @@ const Activity = () => {
         onChange={handleFileSelect}
       />
 
-      {/* Make Public Sheet — always visible fixed when profile is private */}
-      {!isUserPublic && (
-        <MakePublicSheet
-          isOpen={true}
-          onClose={() => {}}
-          onMakePublic={() => {
-            // Profile will update via hook refresh
-          }}
-          onKeepPrivate={() => {}}
-          inline
-        />
-      )}
-
-      {/* Make Public Sheet — triggered from other interactions */}
+      {/* Single Make Public Sheet — shows as inline (no backdrop) when private, or as modal when triggered by tap */}
       <MakePublicSheet
-        isOpen={showMakePublicSheet && isUserPublic === true}
+        isOpen={!isUserPublic || showMakePublicSheet}
         onClose={() => setShowMakePublicSheet(false)}
         onMakePublic={() => {
           setShowMakePublicSheet(false);
         }}
         onKeepPrivate={() => setShowMakePublicSheet(false)}
+        inline={!isUserPublic && !showMakePublicSheet}
       />
     </div>
   );
