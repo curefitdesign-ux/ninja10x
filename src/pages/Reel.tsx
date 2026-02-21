@@ -319,15 +319,19 @@ const Reel = () => {
   const isLatestActivity = currentActivity?.dayNumber === maxDayNumber;
   const canEdit = isOwnStory && isWithin24Hours && isLatestActivity && !isWeekRecapStory;
 
-  // Navigate between activities within current user only (tap to cycle — stays within same user)
+  // Navigate between activities within current user only (tap to cycle)
+  // Auto-advance to next user when profile is public and all activities viewed
   const cycleActivity = useCallback(() => {
     if (!currentGroup) return;
     
     if (currentActivityIndex < currentGroup.activities.length - 1) {
       setCurrentActivityIndex(prev => prev + 1);
+    } else if (profile?.stories_public && effectiveUserGroups.length > 1) {
+      // Auto-advance to next user when public
+      setCurrentActivityIndex(0);
+      setCurrentUserIndex(prev => (prev + 1) % effectiveUserGroups.length);
     }
-    // Don't auto-advance to next user — user must swipe to change users
-  }, [currentGroup, currentActivityIndex]);
+  }, [currentGroup, currentActivityIndex, profile?.stories_public, effectiveUserGroups.length]);
 
   // Navigate to previous activity within current user only
   const prevActivity = useCallback(() => {
@@ -1368,11 +1372,11 @@ const Reel = () => {
               <motion.div
                 key={`peek-left-${prevIdx}`}
                 className="absolute left-0 top-0 bottom-0 flex items-center cursor-pointer"
-                style={{ width: '12%', zIndex: 20 }}
+                style={{ width: '8%', zIndex: 20 }}
                 onClick={goPrevUser}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 25 }}
+                initial={{ opacity: 0, x: -10, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ delay: 0.25, type: 'spring', stiffness: 180, damping: 22 }}
               >
                 <div
                   className="w-full h-[75%] overflow-hidden"
@@ -1405,11 +1409,11 @@ const Reel = () => {
               <motion.div
                 key={`peek-right-${nextIdx}`}
                 className="absolute right-0 top-0 bottom-0 flex items-center cursor-pointer"
-                style={{ width: '12%', zIndex: 20 }}
+                style={{ width: '8%', zIndex: 20 }}
                 onClick={goNextUser}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 25 }}
+                initial={{ opacity: 0, x: 10, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ delay: 0.25, type: 'spring', stiffness: 180, damping: 22 }}
               >
                 <div
                   className="w-full h-[75%] overflow-hidden"
@@ -1433,7 +1437,7 @@ const Reel = () => {
           <motion.div 
             className="relative flex items-center justify-center"
             style={{ 
-              width: '76%',
+              width: '84%',
               height: '100%',
               x: dragX,
               opacity: cardOpacity,
@@ -1579,22 +1583,7 @@ const Reel = () => {
                       </motion.div>
                     </AnimatePresence>
 
-                    {/* Share button - inside card, bottom-right */}
-                    {!shouldShowLocked && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleShareStory();
-                        }}
-                        className="absolute bottom-3 right-3 z-20 p-2.5 rounded-full active:scale-95 transition-transform"
-                        style={{
-                          background: 'rgba(0,0,0,0.5)',
-                          backdropFilter: 'blur(8px)',
-                        }}
-                      >
-                        <Share2 className="w-5 h-5 text-white" strokeWidth={1.5} />
-                      </button>
-                    )}
+                    {/* Share button removed from card — now in bottom zone */}
                     
                     {/* Lock overlay for locked content */}
                     {shouldShowLocked && (
@@ -1737,21 +1726,23 @@ const Reel = () => {
                     )}
                   </button>
                 )}
-                {/* Liquid glass reaction pill */}
-                <button
-                  onClick={() => isOwnStory ? (currentReactions.total > 0 && setShowReactsSheet(true)) : setShowSendReactionSheet(true)}
-                  className="relative overflow-hidden mb-2 active:scale-[0.97] transition-transform"
-                  style={{
-                    minWidth: currentReactions.total > 0 ? 200 : 180,
-                    height: 48,
-                    borderRadius: 24,
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    backdropFilter: 'blur(40px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-                  }}
-                >
+                {/* Reaction pill + Share icon row */}
+                <div className="flex items-center justify-center gap-3 mb-2 px-4">
+                  {/* Liquid glass reaction pill */}
+                  <button
+                    onClick={() => isOwnStory ? (currentReactions.total > 0 && setShowReactsSheet(true)) : setShowSendReactionSheet(true)}
+                    className="relative overflow-hidden active:scale-[0.97] transition-transform"
+                    style={{
+                      minWidth: currentReactions.total > 0 ? 180 : 160,
+                      height: 44,
+                      borderRadius: 22,
+                      background: 'rgba(255, 255, 255, 0.08)',
+                      backdropFilter: 'blur(40px) saturate(180%)',
+                      WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+                    }}
+                  >
                   {isOwnStory ? (
                     <div
                       className="flex items-center justify-center gap-3 h-full px-5"
@@ -1807,7 +1798,34 @@ const Reel = () => {
                       )}
                     </div>
                   )}
-                </button>
+                  </button>
+
+                  {/* Share button — aligned with reaction pill */}
+                  {!isStoryLocked && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleShareStory();
+                      }}
+                      className="shrink-0 active:scale-95 transition-transform"
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: 22,
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        backdropFilter: 'blur(40px) saturate(180%)',
+                        WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                        border: '1px solid rgba(255, 255, 255, 0.12)',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Share2 className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
+                    </button>
+                  )}
+                </div>
               </div>
             );
           })()}
