@@ -1303,9 +1303,8 @@ const Reel = () => {
             </div>
           </div>
 
-          {/* Row 2: Current user name/info */}
-          <div className="shrink-0 px-4 pb-2">
-            {/* User name and info */}
+          {/* Row 2: Current user name/info — centered */}
+          <div className="shrink-0 pb-2">
             <div className="flex items-center justify-center gap-2" style={{ height: 20 }}>
               <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
               <span className="text-white/40">•</span>
@@ -1318,9 +1317,9 @@ const Reel = () => {
           </div>
         </div>
 
-          {/* Instagram-style progress bar segments */}
-          <div className="shrink-0 px-4 pb-2">
-            <div className="flex gap-1" style={{ height: 3 }}>
+          {/* Instagram-style progress bar segments — constrained to story card width */}
+          <div className="shrink-0 pb-2 flex justify-center">
+            <div className="flex gap-1" style={{ height: 3, width: '76%' }}>
               {currentGroup && currentGroup.activities.map((_, segIdx) => {
                 const isCurrentSeg = segIdx === currentActivityIndex;
                 const isViewed = segIdx < currentActivityIndex;
@@ -1349,12 +1348,14 @@ const Reel = () => {
           className="flex-1 flex items-center justify-center z-30 relative py-2"
           style={{ background: 'transparent', overflow: 'hidden' }}
         >
-          {/* Previous user peek card - 20% visible on left */}
+          {/* Previous user peek card - 12% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
             const prevGroup = effectiveUserGroups[prevIdx];
             const prevActivity = prevGroup?.activities[prevGroup.activities.length - 1];
             const prevMedia = prevActivity?.storageUrl || prevActivity?.originalUrl;
+            const isPrevOwnStory = user && prevGroup?.userId === user.id;
+            const isPrevLocked = !isPrevOwnStory && !profile?.stories_public;
             if (!prevMedia) return null;
             return (
               <motion.div
@@ -1377,7 +1378,7 @@ const Reel = () => {
                     src={prevMedia}
                     alt="Previous user"
                     className="w-full h-full object-cover"
-                    style={{ opacity: 0.45, filter: 'blur(1px) brightness(0.7)' }}
+                    style={{ opacity: 0.45, filter: isPrevLocked ? 'blur(12px) brightness(0.4)' : 'blur(1px) brightness(0.7)' }}
                   />
                 </div>
               </motion.div>
@@ -1390,6 +1391,8 @@ const Reel = () => {
             const nextGroup = effectiveUserGroups[nextIdx];
             const nextActivity = nextGroup?.activities[nextGroup.activities.length - 1];
             const nextMedia = nextActivity?.storageUrl || nextActivity?.originalUrl;
+            const isNextOwnStory = user && nextGroup?.userId === user.id;
+            const isNextLocked = !isNextOwnStory && !profile?.stories_public;
             if (!nextMedia) return null;
             return (
               <motion.div
@@ -1412,7 +1415,7 @@ const Reel = () => {
                     src={nextMedia}
                     alt="Next user"
                     className="w-full h-full object-cover"
-                    style={{ opacity: 0.45, filter: 'blur(1px) brightness(0.7)' }}
+                    style={{ opacity: 0.45, filter: isNextLocked ? 'blur(12px) brightness(0.4)' : 'blur(1px) brightness(0.7)' }}
                   />
                 </div>
               </motion.div>
