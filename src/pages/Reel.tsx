@@ -2253,7 +2253,7 @@ const Reel = () => {
               boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
             }}
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'calc(100vh - 240px)', opacity: 1 }}
+            animate={{ height: 'calc(100vh - 56px)', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 28 }}
           >
@@ -2291,7 +2291,7 @@ const Reel = () => {
               </motion.div>
             </button>
 
-            <div className="overflow-hidden" style={{ height: 'calc(100vh - 240px - 72px)' }}>
+            <div className="overflow-hidden" style={{ height: 'calc(100vh - 56px - 72px)' }}>
               <ReelToProgressTransition
                 isOpen={true}
                 onClose={() => setShowProgressOverlay(false)}
