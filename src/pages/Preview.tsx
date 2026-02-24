@@ -411,6 +411,7 @@ const Preview = () => {
 
     // Freeze the frame selection BEFORE any async work — prevents scroll drift from changing it
     const frozenFrame = currentFrame;
+    console.info('[frame-debug] DONE tapped. currentFrame =', currentFrame, '| frozenFrame =', frozenFrame);
 
     triggerHaptic('light');
     handleTap('done-btn');
@@ -527,6 +528,7 @@ const Preview = () => {
       });
 
       if (closestFrame !== currentFrame) {
+        console.info('[frame-debug] Scroll detected frame change:', currentFrame, '->', closestFrame);
         setCurrentFrame(closestFrame);
       }
 
