@@ -1323,7 +1323,7 @@ const Reel = () => {
           </div>
 
           {/* Row 2: Current user name/info — centered */}
-          <div className="shrink-0 pb-0.5">
+          <div className="shrink-0 pb-2">
             <div className="flex items-center justify-center gap-2" style={{ height: 20 }}>
               <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
               <span className="text-white/40">•</span>
@@ -1337,7 +1337,7 @@ const Reel = () => {
         </div>
 
           {/* Instagram-style progress bar segments — constrained to story card width */}
-          <div className="shrink-0 pb-0 flex justify-center">
+          <div className="shrink-0 pb-2 flex justify-center">
             <div className="flex gap-1" style={{ height: 3, width: '76%' }}>
               {currentGroup && currentGroup.activities.map((_, segIdx) => {
                 const isCurrentSeg = segIdx === currentActivityIndex;
@@ -1722,7 +1722,7 @@ const Reel = () => {
 
         {/* FIXED BOTTOM ZONE - Reaction pill + View Progress - compact sticky */}
         <div 
-          className="shrink-0 z-40 flex flex-col items-center gap-0.5"
+          className="shrink-0 z-40 flex flex-col items-center gap-2"
           style={{
             paddingBottom: 'env(safe-area-inset-bottom, 0px)',
           }}
