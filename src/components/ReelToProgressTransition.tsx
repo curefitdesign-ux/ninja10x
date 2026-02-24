@@ -152,7 +152,23 @@ export default function ReelToProgressTransition({
                   minHeight: "160px",
                 }}
               >
-                <div className="flex items-start gap-5" style={{ minWidth: "max-content" }}>
+                <div className="relative flex items-start gap-5" style={{ minWidth: "max-content" }}>
+                  {/* Dashed thread connecting stacks */}
+                  <svg
+                    className="absolute pointer-events-none"
+                    style={{ top: "50px", left: "45px", width: "calc(100% - 90px)", height: "60px", zIndex: 0 }}
+                    preserveAspectRatio="none"
+                    viewBox="0 0 400 60"
+                    fill="none"
+                  >
+                    <path
+                      d="M0,30 C40,55 70,5 100,30 C130,55 160,5 200,30 C230,55 260,5 300,30 C330,55 360,5 400,30"
+                      stroke="rgba(255,255,255,0.12)"
+                      strokeWidth="1.5"
+                      strokeDasharray="6 4"
+                      fill="none"
+                    />
+                  </svg>
                   {weekStacks.map((ws, wIdx) => {
                     const lockColor = WEEK_LOCK_COLORS[wIdx];
                     const isGlowing = ws.isCurrentWeek;
