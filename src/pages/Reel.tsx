@@ -1314,7 +1314,7 @@ const Reel = () => {
             {/* Right side - Log Activity button */}
             <div className="flex items-center shrink-0">
               <button
-                onClick={() => navigate('/activity')}
+                onClick={() => navigate('/', { state: { triggerLog: true } })}
                 className="active:scale-[0.95] transition-transform flex items-center justify-center"
                 style={{
                   width: 40,
