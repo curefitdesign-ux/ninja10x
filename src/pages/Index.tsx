@@ -241,7 +241,7 @@ const Index = () => {
         }, 500);
       }
       
-      navigate('/', { replace: true, state: null });
+      navigate('/reel', { replace: true, state: null });
     }
   }, [location.state?.openCameraWithActivity, location.state?.captureMode, location.state?.instantCamera, navigate]);
 

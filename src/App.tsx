@@ -85,7 +85,7 @@ const ProfileSetupRouteWrapper = ({ children }: { children: React.ReactNode }) =
 
   // If profile exists and not in edit mode, redirect to home
   if (!needsSetup && !isEditMode) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/reel" replace />;
   }
   
   return <>{children}</>;
@@ -107,7 +107,7 @@ const AnimatedRoutes = () => {
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile-setup" element={<ProfileSetupRouteWrapper><ProfileSetupPage /></ProfileSetupRouteWrapper>} />
           <Route path="/avatar-crop" element={<ProtectedRoute><AvatarCrop /></ProtectedRoute>} />
-          <Route path="/" element={<ProtectedRoute><Activity /></ProtectedRoute>} />
+          <Route path="/" element={<Navigate to="/reel" replace />} />
           <Route path="/create" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
           <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
