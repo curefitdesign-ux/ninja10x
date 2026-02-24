@@ -182,7 +182,8 @@ body::after {
   html, body, #root {
     max-width: 430px;
     margin: 0 auto;
-    min-height: 100vh;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
     overflow-x: hidden;
   }
 }
