@@ -1220,7 +1220,7 @@ const Reel = () => {
                 const ownGroup = ownIdx >= 0 ? effectiveUserGroups[ownIdx] : null;
                 const ownActivityCount = ownGroup?.activities.length || 0;
                 const ownCurrentIdx = isOwnActive ? currentActivityIndex : 0;
-                const avatarSize = 40;
+                const avatarSize = 52;
 
                 return (
                   <button
