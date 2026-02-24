@@ -1197,9 +1197,98 @@ const Reel = () => {
             className="flex items-center justify-between px-3 shrink-0"
             style={{ height: 56 }}
           >
-            {/* Left side - Profile + Delete */}
+            {/* Left side - Profile with story ring + Delete */}
             <div className="flex items-center gap-1 shrink-0">
-              <ProfileMenu />
+              {(() => {
+                const ownIdx = effectiveUserGroups.findIndex(g => user && g.userId === user.id);
+                const isOwnActive = ownIdx >= 0 && ownIdx === currentUserIndex;
+                const ownGroup = ownIdx >= 0 ? effectiveUserGroups[ownIdx] : null;
+                const ownActivityCount = ownGroup?.activities.length || 0;
+                const ownCurrentIdx = isOwnActive ? currentActivityIndex : 0;
+                const avatarSize = 40;
+
+                return (
+                  <button
+                    onClick={() => {
+                      if (ownIdx >= 0) {
+                        setCurrentUserIndex(ownIdx);
+                        setCurrentActivityIndex(0);
+                      }
+                    }}
+                    className="relative active:scale-95 flex-shrink-0"
+                    style={{ width: avatarSize, height: avatarSize }}
+                  >
+                    {/* Story ring around profile avatar */}
+                    {ownGroup && ownActivityCount > 0 && (
+                      <svg
+                        className="absolute inset-0"
+                        style={{ width: avatarSize, height: avatarSize, transform: 'rotate(-90deg)' }}
+                        viewBox="0 0 100 100"
+                      >
+                        {Array.from({ length: ownActivityCount }).map((_, segIdx) => {
+                          const gapAngle = ownActivityCount > 1 ? 10 : 0;
+                          const totalGap = gapAngle * ownActivityCount;
+                          const segmentAngle = (360 - totalGap) / ownActivityCount;
+                          const startAngle = segIdx * (segmentAngle + gapAngle);
+                          const isCurrentSegment = isOwnActive && segIdx === ownCurrentIdx;
+                          const isSegmentViewed = isOwnActive && segIdx < ownCurrentIdx;
+                          const isSegmentUnviewed = !isOwnActive || segIdx > ownCurrentIdx;
+
+                          const radius = 44;
+                          const circumference = 2 * Math.PI * radius;
+                          const segmentLength = (segmentAngle / 360) * circumference;
+                          const offset = (startAngle / 360) * circumference;
+
+                          const progressLength = isCurrentSegment && autoAdvanceProgress > 0
+                            ? segmentLength
+                            : isCurrentSegment ? 0 : segmentLength;
+
+                          return (
+                            <g key={segIdx}>
+                              {isCurrentSegment && (
+                                <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
+                                  stroke="rgba(255,255,255,0.15)"
+                                  strokeDasharray={`${segmentLength} ${circumference}`}
+                                  strokeDashoffset={-offset} strokeLinecap="round"
+                                />
+                              )}
+                              <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
+                                stroke={isSegmentUnviewed && !isCurrentSegment ? 'rgba(255,255,255,0.25)' : 'url(#storyGradientOwn)'}
+                                strokeDasharray={`${isCurrentSegment ? progressLength : segmentLength} ${circumference}`}
+                                strokeDashoffset={-offset} strokeLinecap="round"
+                                style={{
+                                  filter: (isSegmentViewed || isCurrentSegment) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
+                                  transition: isCurrentSegment && autoAdvanceProgress > 0
+                                    ? `stroke-dasharray ${autoAdvanceDuration}ms linear`
+                                    : isCurrentSegment ? 'none' : 'stroke-dasharray 0.3s ease',
+                                }}
+                              />
+                            </g>
+                          );
+                        })}
+                        <defs>
+                          <linearGradient id="storyGradientOwn" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#FEDA75" />
+                            <stop offset="25%" stopColor="#FA7E1E" />
+                            <stop offset="50%" stopColor="#D62976" />
+                            <stop offset="75%" stopColor="#962FBF" />
+                            <stop offset="100%" stopColor="#4F5BD5" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                    )}
+                    <div className="relative" style={{ width: avatarSize, height: avatarSize, padding: 4 }}>
+                      <div className="w-full h-full rounded-full overflow-hidden">
+                        <ProfileAvatar
+                          src={profile?.avatar_url}
+                          name={profile?.display_name}
+                          size={avatarSize - 8}
+                        />
+                      </div>
+                    </div>
+                  </button>
+                );
+              })()}
               {canEdit && (
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
@@ -1223,6 +1312,8 @@ const Reel = () => {
               >
                 <div className="flex items-center gap-2 px-1">
                   {effectiveUserGroups.map((group, idx) => {
+                    // Skip own user — shown as fixed profile button on the left
+                    if (user && group.userId === user.id) return null;
                     const isActive = idx === currentUserIndex;
                     const activityCount = group.activities.length;
                     const currentIdx = idx === currentUserIndex ? currentActivityIndex : 0;
