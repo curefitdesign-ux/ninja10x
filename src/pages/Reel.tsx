@@ -212,11 +212,35 @@ const Reel = () => {
     loadActivities();
   }, [loadActivities]);
 
-  // No longer auto-inject week recaps into stories
-  // User must explicitly share/upload their recap before it appears in stories
+  // Inject a "log activity" placeholder card at the end of current user's group
   const effectiveUserGroups = useMemo(() => {
-    return userGroups;
-  }, [userGroups]);
+    if (!user || myActivities.length >= 12) return userGroups;
+    const nextDay = myActivities.length + 1;
+    return userGroups.map(group => {
+      if (group.userId === user.id) {
+        return {
+          ...group,
+          activities: [
+            ...group.activities,
+            {
+              id: 'log-activity',
+              dayNumber: nextDay,
+              storageUrl: '',
+              originalUrl: '',
+              activity: null,
+              duration: null,
+              pr: null,
+              frame: null,
+              isVideo: false,
+              isPublic: false,
+              createdAt: new Date().toISOString(),
+            },
+          ],
+        };
+      }
+      return group;
+    });
+  }, [userGroups, user, myActivities.length]);
 
   // MAIN NAVIGATION EFFECT: Determine where to land based on navigation intent
   // This runs once per navigation after data is loaded
@@ -1543,7 +1567,52 @@ const Reel = () => {
                           ease: [0.22, 1, 0.36, 1],
                         }}
                       >
-                        {isRecapGenerating ? (
+                        {currentActivity?.id === 'log-activity' ? (
+                          // "Log Your Activity" placeholder card
+                          <div 
+                            className="w-full h-full flex flex-col items-center justify-center cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowMediaSourceSheet(true);
+                            }}
+                            style={{
+                              background: 'radial-gradient(circle at 50% 50%, rgba(30,30,35,1) 0%, rgba(15,15,18,1) 100%)',
+                              backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
+                              backgroundSize: '16px 16px',
+                            }}
+                          >
+                            <div className="text-center px-6 mb-8">
+                              <h2 className="text-white font-black text-2xl tracking-tight uppercase leading-tight">
+                                Log Your
+                              </h2>
+                              <h2 className="text-white font-black text-2xl tracking-tight uppercase leading-tight">
+                                Today's Activity
+                              </h2>
+                              <p className="text-white/50 text-sm mt-2 tracking-widest uppercase">
+                                Week {week} | Day {dayInWeek}
+                              </p>
+                            </div>
+                            <div 
+                              className="relative flex items-center justify-center"
+                              style={{ width: 56, height: 56 }}
+                            >
+                              {/* Glow */}
+                              <div 
+                                className="absolute inset-0 rounded-full"
+                                style={{
+                                  background: 'radial-gradient(circle, rgba(15,228,152,0.35) 0%, transparent 70%)',
+                                  filter: 'blur(12px)',
+                                  transform: 'scale(2)',
+                                }}
+                              />
+                              {/* Plus icon */}
+                              <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                                <rect x="17" y="6" width="6" height="28" rx="3" fill="#0FE498" />
+                                <rect x="6" y="17" width="28" height="6" rx="3" fill="#0FE498" />
+                              </svg>
+                            </div>
+                          </div>
+                        ) : isRecapGenerating ? (
                           // Show generating placeholder for week recap
                           <div 
                             className="w-full h-full flex flex-col items-center justify-center gap-6"
