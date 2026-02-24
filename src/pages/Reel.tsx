@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
@@ -1963,7 +1964,7 @@ const Reel = () => {
         <div 
           className="shrink-0 z-40 flex flex-col items-center"
           style={{
-            paddingBottom: '72px',
+            paddingBottom: 'calc(72px + max(env(safe-area-inset-bottom, 6px), 6px) + 56px)',
           }}
         >
           {(() => {
@@ -2139,10 +2140,14 @@ const Reel = () => {
 
         </div>
 
-        {/* View Progress drawer handle — fixed right above nav bar */}
+
+        </div>
+
+      {/* View Progress drawer handle — portal to body, fixed flush above nav bar */}
+      {typeof document !== 'undefined' && createPortal(
         <div
           className="fixed left-0 right-0 z-[9998]"
-          style={{ bottom: '72px' }}
+          style={{ bottom: 'max(calc(env(safe-area-inset-bottom, 6px) + 56px), 62px)' }}
         >
           <button
             onClick={() => setShowProgressOverlay(true)}
@@ -2178,8 +2183,9 @@ const Reel = () => {
             </div>
             <ChevronUp className="w-5 h-5 text-white/40 shrink-0" />
           </button>
-        </div>
-      </div>
+        </div>,
+        document.body
+      )}
 
       {/* Reacts bottom sheet for own stories */}
       <AnimatePresence>
