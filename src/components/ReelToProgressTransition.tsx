@@ -43,12 +43,21 @@ interface Activity {
   createdAt?: string;
 }
 
+interface MyActivityWithMedia {
+  dayNumber: number;
+  id?: string;
+  storageUrl?: string;
+  originalUrl?: string;
+  isVideo?: boolean;
+  createdAt?: string;
+}
+
 interface ReelToProgressTransitionProps {
   isOpen: boolean;
   onClose: () => void;
   currentActivity: Activity | null;
   publicFeed: Activity[];
-  myActivities: { dayNumber: number }[];
+  myActivities: MyActivityWithMedia[];
   onStoryTap: (index: number, userId?: string, activityId?: string) => void;
   isInline?: boolean;
 }
@@ -67,27 +76,38 @@ export default function ReelToProgressTransition({
   const [expandingCardId, setExpandingCardId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Combine current activity with public feed and sort by latest first
+  // Use own activities for the story strip
   const allStories = (() => {
+    const ownWithMedia = myActivities
+      .filter(a => a.storageUrl)
+      .map(a => ({
+        id: a.id || `day-${a.dayNumber}`,
+        storageUrl: a.storageUrl || '',
+        originalUrl: a.originalUrl,
+        isVideo: a.isVideo,
+        dayNumber: a.dayNumber,
+        createdAt: a.createdAt,
+      } as Activity));
+
+    if (ownWithMedia.length > 0) {
+      return ownWithMedia.sort((a, b) => {
+        if (a.createdAt && b.createdAt) {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        return b.dayNumber - a.dayNumber;
+      });
+    }
+
+    // Fallback to public feed if no own media
     const stories: Activity[] = [];
-    
-    // Add public feed items first
     publicFeed.forEach(item => {
-      if (!stories.some(s => s.id === item.id)) {
-        stories.push(item);
-      }
+      if (!stories.some(s => s.id === item.id)) stories.push(item);
     });
-    
-    // Add current activity if not already in list
     if (currentActivity && !stories.some(s => s.id === currentActivity.id)) {
       stories.unshift(currentActivity);
     }
-    
-    // Sort by createdAt or dayNumber (latest first)
     return stories.sort((a, b) => {
-      if (a.createdAt && b.createdAt) {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      }
+      if (a.createdAt && b.createdAt) return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       return b.dayNumber - a.dayNumber;
     });
   })();
