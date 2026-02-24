@@ -184,105 +184,123 @@ export default function ReelToProgressTransition({
                       >
 
                         {/* Fanned card stack */}
-                        <motion.button
-                          className="relative cursor-pointer"
-                          style={{
-                            width: "80px",
-                            height: "100px",
-                            ...(isGlowing ? {
-                              filter: "drop-shadow(0 0 20px rgba(140,100,220,0.5))",
-                            } : {}),
-                          }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => {
-                            if (isGlowing && onLogActivity) {
-                              onLogActivity();
-                            }
-                          }}
-                        >
-                          {/* Card 3 (back-right) */}
-                          <div
-                            className="absolute rounded-xl overflow-hidden"
-                            style={{
-                              width: "52px", height: "72px",
-                              top: "8px", left: "30px",
-                              transform: "rotate(8deg)",
-                              border: "1.5px solid rgba(255,255,255,0.15)",
-                              background: ws.activitiesInWeek[2]?.storageUrl
-                                ? undefined
-                                : ws.isLocked
-                                  ? "linear-gradient(135deg, rgba(40,35,55,0.9), rgba(20,18,30,0.95))"
-                                  : isGlowing
-                                    ? "linear-gradient(135deg, rgba(120,90,180,0.4), rgba(80,60,140,0.3))"
-                                    : "linear-gradient(135deg, rgba(60,55,75,0.6), rgba(30,28,40,0.7))",
-                            }}
-                          >
-                            {ws.activitiesInWeek[2]?.storageUrl ? (
-                              <img src={ws.activitiesInWeek[2].storageUrl} className="w-full h-full object-cover" alt="" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <Lock size={14} style={{ color: lockColor, opacity: 0.7 }} />
-                              </div>
-                            )}
-                          </div>
+                        {(() => {
+                          const hasPhotos = ws.activitiesInWeek.some(a => a?.storageUrl);
+                          const spreadWidth = hasPhotos ? "130px" : "80px";
+                          // Spread positions when photos exist
+                          const card1Pos = hasPhotos
+                            ? { top: "10px", left: "0px", rotate: "-4deg" }
+                            : { top: "12px", left: "13px", rotate: "1deg" };
+                          const card2Pos = hasPhotos
+                            ? { top: "6px", left: "38px", rotate: "2deg" }
+                            : { top: "6px", left: "-2px", rotate: "-6deg" };
+                          const card3Pos = hasPhotos
+                            ? { top: "10px", left: "76px", rotate: "6deg" }
+                            : { top: "8px", left: "30px", rotate: "8deg" };
 
-                          {/* Card 2 (back-left) */}
-                          <div
-                            className="absolute rounded-xl overflow-hidden"
-                            style={{
-                              width: "52px", height: "72px",
-                              top: "6px", left: "-2px",
-                              transform: "rotate(-6deg)",
-                              border: "1.5px solid rgba(255,255,255,0.15)",
-                              background: ws.activitiesInWeek[1]?.storageUrl
-                                ? undefined
-                                : ws.isLocked
-                                  ? "linear-gradient(135deg, rgba(40,35,55,0.9), rgba(20,18,30,0.95))"
-                                  : isGlowing
-                                    ? "linear-gradient(135deg, rgba(120,90,180,0.4), rgba(80,60,140,0.3))"
-                                    : "linear-gradient(135deg, rgba(60,55,75,0.6), rgba(30,28,40,0.7))",
-                            }}
-                          >
-                            {ws.activitiesInWeek[1]?.storageUrl ? (
-                              <img src={ws.activitiesInWeek[1].storageUrl} className="w-full h-full object-cover" alt="" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <Lock size={14} style={{ color: lockColor, opacity: 0.7 }} />
+                          return (
+                            <motion.button
+                              className="relative cursor-pointer"
+                              style={{
+                                width: spreadWidth,
+                                height: "100px",
+                                ...(isGlowing ? {
+                                  filter: "drop-shadow(0 0 20px rgba(140,100,220,0.5))",
+                                } : {}),
+                              }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => {
+                                if (isGlowing && onLogActivity) {
+                                  onLogActivity();
+                                }
+                              }}
+                            >
+                              {/* Card 3 (back-right / rightmost when spread) */}
+                              <div
+                                className="absolute rounded-xl overflow-hidden"
+                                style={{
+                                  width: "52px", height: "72px",
+                                  top: card3Pos.top, left: card3Pos.left,
+                                  transform: `rotate(${card3Pos.rotate})`,
+                                  border: "1.5px solid rgba(255,255,255,0.15)",
+                                  background: ws.activitiesInWeek[2]?.storageUrl
+                                    ? undefined
+                                    : ws.isLocked
+                                      ? "linear-gradient(135deg, rgba(40,35,55,0.9), rgba(20,18,30,0.95))"
+                                      : isGlowing
+                                        ? "linear-gradient(135deg, rgba(120,90,180,0.4), rgba(80,60,140,0.3))"
+                                        : "linear-gradient(135deg, rgba(60,55,75,0.6), rgba(30,28,40,0.7))",
+                                }}
+                              >
+                                {ws.activitiesInWeek[2]?.storageUrl ? (
+                                  <img src={ws.activitiesInWeek[2].storageUrl} className="w-full h-full object-cover" alt="" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Lock size={14} style={{ color: lockColor, opacity: 0.7 }} />
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
 
-                          {/* Card 1 (front-center) */}
-                          <div
-                            className="absolute rounded-xl overflow-hidden"
-                            style={{
-                              width: "54px", height: "74px",
-                              top: "12px", left: "13px",
-                              transform: "rotate(1deg)",
-                              border: isGlowing ? "1.5px solid rgba(180,150,240,0.35)" : "1.5px solid rgba(255,255,255,0.15)",
-                              background: ws.activitiesInWeek[0]?.storageUrl
-                                ? undefined
-                                : ws.isLocked
-                                  ? "linear-gradient(135deg, rgba(40,35,55,0.9), rgba(20,18,30,0.95))"
-                                  : isGlowing
-                                    ? "linear-gradient(135deg, rgba(120,90,180,0.5), rgba(90,70,160,0.4))"
-                                    : "linear-gradient(135deg, rgba(60,55,75,0.6), rgba(30,28,40,0.7))",
-                              zIndex: 2,
-                            }}
-                          >
-                            {ws.activitiesInWeek[0]?.storageUrl ? (
-                              <img src={ws.activitiesInWeek[0].storageUrl} className="w-full h-full object-cover" alt="" />
-                            ) : isGlowing ? (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <Plus size={18} className="text-white/60" />
+                              {/* Card 2 (middle when spread) */}
+                              <div
+                                className="absolute rounded-xl overflow-hidden"
+                                style={{
+                                  width: "52px", height: "72px",
+                                  top: card2Pos.top, left: card2Pos.left,
+                                  transform: `rotate(${card2Pos.rotate})`,
+                                  border: "1.5px solid rgba(255,255,255,0.15)",
+                                  zIndex: 1,
+                                  background: ws.activitiesInWeek[1]?.storageUrl
+                                    ? undefined
+                                    : ws.isLocked
+                                      ? "linear-gradient(135deg, rgba(40,35,55,0.9), rgba(20,18,30,0.95))"
+                                      : isGlowing
+                                        ? "linear-gradient(135deg, rgba(120,90,180,0.4), rgba(80,60,140,0.3))"
+                                        : "linear-gradient(135deg, rgba(60,55,75,0.6), rgba(30,28,40,0.7))",
+                                }}
+                              >
+                                {ws.activitiesInWeek[1]?.storageUrl ? (
+                                  <img src={ws.activitiesInWeek[1].storageUrl} className="w-full h-full object-cover" alt="" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Lock size={14} style={{ color: lockColor, opacity: 0.7 }} />
+                                  </div>
+                                )}
                               </div>
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <Lock size={16} style={{ color: lockColor }} />
+
+                              {/* Card 1 (front-left / leftmost when spread) */}
+                              <div
+                                className="absolute rounded-xl overflow-hidden"
+                                style={{
+                                  width: "54px", height: "74px",
+                                  top: card1Pos.top, left: card1Pos.left,
+                                  transform: `rotate(${card1Pos.rotate})`,
+                                  border: isGlowing ? "1.5px solid rgba(180,150,240,0.35)" : "1.5px solid rgba(255,255,255,0.15)",
+                                  background: ws.activitiesInWeek[0]?.storageUrl
+                                    ? undefined
+                                    : ws.isLocked
+                                      ? "linear-gradient(135deg, rgba(40,35,55,0.9), rgba(20,18,30,0.95))"
+                                      : isGlowing
+                                        ? "linear-gradient(135deg, rgba(120,90,180,0.5), rgba(90,70,160,0.4))"
+                                        : "linear-gradient(135deg, rgba(60,55,75,0.6), rgba(30,28,40,0.7))",
+                                  zIndex: 2,
+                                }}
+                              >
+                                {ws.activitiesInWeek[0]?.storageUrl ? (
+                                  <img src={ws.activitiesInWeek[0].storageUrl} className="w-full h-full object-cover" alt="" />
+                                ) : isGlowing ? (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Plus size={18} className="text-white/60" />
+                                  </div>
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Lock size={16} style={{ color: lockColor }} />
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
-                        </motion.button>
+                            </motion.button>
+                          );
+                        })()}
 
                         {/* Week label */}
                         <span className="text-[9px] font-bold tracking-widest text-white/40 uppercase">
