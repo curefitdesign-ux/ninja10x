@@ -231,7 +231,7 @@ export default function ReelToProgressTransition({
               {showTiles && (
                 <motion.div
                   className="absolute"
-                  style={{ left: "-17%", bottom: "4%", width: "65%", maxWidth: "260px" }}
+                  style={{ left: "-17%", bottom: "6%", width: "65%", maxWidth: "260px" }}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.25 }}
