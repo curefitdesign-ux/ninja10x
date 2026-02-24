@@ -2082,7 +2082,7 @@ const Reel = () => {
 
                   {/* Share & Delete buttons — aligned with reaction pill */}
                   <div className="flex items-center gap-2 shrink-0">
-                    {!isStoryLocked && (
+                    {canEdit && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
