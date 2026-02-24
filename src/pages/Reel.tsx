@@ -227,31 +227,43 @@ const Reel = () => {
     if (loggedToday) return userGroups;
 
     const nextDay = myActivities.length + 1;
-    return userGroups.map(group => {
-      if (group.userId === user.id) {
-        return {
-          ...group,
-          activities: [
-            ...group.activities,
-            {
-              id: 'log-activity',
-              dayNumber: nextDay,
-              storageUrl: '',
-              originalUrl: '',
-              activity: null,
-              duration: null,
-              pr: null,
-              frame: null,
-              isVideo: false,
-              isPublic: false,
-              createdAt: new Date().toISOString(),
-            },
-          ],
-        };
-      }
-      return group;
-    });
-  }, [userGroups, user, myActivities]);
+    const logActivityEntry = {
+      id: 'log-activity',
+      dayNumber: nextDay,
+      storageUrl: '',
+      originalUrl: '',
+      activity: null,
+      duration: null,
+      pr: null,
+      frame: null,
+      isVideo: false,
+      isPublic: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Check if user already has a group
+    const hasGroup = userGroups.some(g => g.userId === user.id);
+    if (hasGroup) {
+      return userGroups.map(group => {
+        if (group.userId === user.id) {
+          return {
+            ...group,
+            activities: [...group.activities, logActivityEntry],
+          };
+        }
+        return group;
+      });
+    }
+
+    // User has no group (0 activities) — create one with just the placeholder
+    const newGroup: UserStoryGroup = {
+      userId: user.id,
+      displayName: profile?.display_name || 'You',
+      avatarUrl: profile?.avatar_url || '',
+      activities: [logActivityEntry],
+    };
+    return [newGroup, ...userGroups];
+  }, [userGroups, user, myActivities, profile]);
 
   // MAIN NAVIGATION EFFECT: Determine where to land based on navigation intent
   // This runs once per navigation after data is loaded
