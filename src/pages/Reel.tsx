@@ -1980,7 +1980,7 @@ const Reel = () => {
               boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
             }}
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: '70vh', opacity: 1 }}
+            animate={{ height: '85vh', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 28 }}
           >
@@ -1996,7 +1996,7 @@ const Reel = () => {
               <span className="text-white/80 text-sm font-medium">Close</span>
             </button>
 
-            <div className="overflow-hidden" style={{ height: 'calc(70vh - 48px)' }}>
+            <div className="overflow-hidden" style={{ height: 'calc(85vh - 48px)' }}>
               <ReelToProgressTransition
                 isOpen={true}
                 onClose={() => setShowProgressOverlay(false)}
