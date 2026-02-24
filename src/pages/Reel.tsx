@@ -561,44 +561,35 @@ const Reel = () => {
     setAutoAdvanceDuration(DEFAULT_ADVANCE_DURATION); // Reset to default, will be updated when video loads
   }, [currentUserIndex, currentActivityIndex]);
   
+  // Auto-advance: only fire a SINGLE timeout to cycle, no interval for progress
   useEffect(() => {
-    // Clear any existing timer
     if (autoAdvanceTimerRef.current) {
-      clearInterval(autoAdvanceTimerRef.current);
+      clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
     }
     
-    // Don't run auto-advance in recap viewer mode
     if (hasWeekRecap) return;
     
-    // Don't start timer until media is loaded (check via loadedMediaUrl)
-    // For live-frame activities, use originalUrl; otherwise use storageUrl
     const activityHasLiveFrame = !!(currentActivity?.frame && currentActivity.frame !== 'recap' && currentActivity?.originalUrl);
     const currentMediaUrl = activityHasLiveFrame
       ? (currentActivity?.originalUrl || currentActivity?.storageUrl || '')
       : (currentActivity?.storageUrl || currentActivity?.originalUrl || '');
     if (isPaused || loading || !currentActivity || loadedMediaUrl !== currentMediaUrl || !currentMediaUrl) {
+      setAutoAdvanceProgress(0);
       return;
     }
     
-    // Reset progress when starting timer
-    setAutoAdvanceProgress(0);
+    // Signal CSS animation to start
+    setAutoAdvanceProgress(1);
     autoAdvanceStartRef.current = Date.now();
     
-    // Update progress every 50ms for smooth animation
-    autoAdvanceTimerRef.current = setInterval(() => {
-      const elapsed = Date.now() - autoAdvanceStartRef.current;
-      const progress = Math.min(elapsed / autoAdvanceDuration, 1);
-      setAutoAdvanceProgress(progress);
-      
-      if (progress >= 1) {
-        // Auto-advance to next story
-        cycleActivity();
-      }
-    }, 50);
+    autoAdvanceTimerRef.current = setTimeout(() => {
+      cycleActivity();
+    }, autoAdvanceDuration);
     
     return () => {
       if (autoAdvanceTimerRef.current) {
-        clearInterval(autoAdvanceTimerRef.current);
+        clearTimeout(autoAdvanceTimerRef.current);
       }
     };
   }, [currentUserIndex, currentActivityIndex, isPaused, loading, currentActivity, loadedMediaUrl, cycleActivity, hasWeekRecap, autoAdvanceDuration]);
@@ -1228,10 +1219,10 @@ const Reel = () => {
                             const segmentLength = (segmentAngle / 360) * circumference;
                             const offset = (startAngle / 360) * circumference;
                             
-                            // For the current segment, show progress animation
-                            const progressLength = isCurrentSegment 
-                              ? segmentLength * autoAdvanceProgress 
-                              : segmentLength;
+                            // For the current segment, use CSS animation instead of state-driven progress
+                            const progressLength = isCurrentSegment && autoAdvanceProgress > 0
+                              ? segmentLength  // Full length — CSS transition handles the animation
+                              : isCurrentSegment ? 0 : segmentLength;
                             
                             return (
                               <g key={segIdx}>
@@ -1270,7 +1261,9 @@ const Reel = () => {
                                     filter: !isStoryLocked && (isSegmentViewed || isCurrentSegment) 
                                       ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' 
                                       : 'none',
-                                    transition: isCurrentSegment ? 'none' : 'stroke-dasharray 0.3s ease',
+                                    transition: isCurrentSegment && autoAdvanceProgress > 0
+                                      ? `stroke-dasharray ${autoAdvanceDuration}ms linear`
+                                      : isCurrentSegment ? 'none' : 'stroke-dasharray 0.3s ease',
                                   }}
                                 />
                               </g>
@@ -1356,9 +1349,11 @@ const Reel = () => {
                     <div
                       className="h-full rounded-full"
                       style={{
-                        width: isViewed ? '100%' : isCurrentSeg ? `${autoAdvanceProgress * 100}%` : '0%',
+                        width: isViewed ? '100%' : isCurrentSeg && autoAdvanceProgress > 0 ? '100%' : isCurrentSeg ? '0%' : '0%',
                         background: 'linear-gradient(90deg, #FEDA75, #FA7E1E, #D62976)',
-                        transition: isCurrentSeg ? 'none' : 'width 0.3s ease',
+                        transition: isCurrentSeg && autoAdvanceProgress > 0
+                          ? `width ${autoAdvanceDuration}ms linear`
+                          : isCurrentSeg ? 'none' : 'width 0.3s ease',
                       }}
                     />
                   </div>
