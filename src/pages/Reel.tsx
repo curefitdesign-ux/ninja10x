@@ -1252,7 +1252,7 @@ const Reel = () => {
                                   strokeDashoffset={-offset} strokeLinecap="round"
                                 />
                               )}
-                              <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
+                              <circle key={`own-seg-${segIdx}-${currentActivityIndex}`} cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
                                 stroke={isSegmentUnviewed && !isCurrentSegment ? 'rgba(255,255,255,0.25)' : 'url(#storyGradientOwn)'}
                                 strokeDasharray={`${isCurrentSegment ? progressLength : segmentLength} ${circumference}`}
                                 strokeDashoffset={-offset} strokeLinecap="round"
