@@ -1311,13 +1311,23 @@ const Reel = () => {
               </div>
             </div>
             
-            {/* Right side - Close button */}
+            {/* Right side - Log Activity card */}
             <div className="flex items-center shrink-0">
               <button
-                onClick={handleClose}
-                className="text-white/80 hover:text-white transition-colors p-2 min-w-[40px] min-h-[40px] flex items-center justify-center"
+                onClick={() => navigate('/activity')}
+                className="flex flex-col items-center justify-center active:scale-[0.95] transition-transform"
+                style={{
+                  width: 52,
+                  height: 72,
+                  borderRadius: 14,
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  border: '1.5px dashed rgba(255, 255, 255, 0.2)',
+                }}
               >
-                <X className="w-6 h-6" strokeWidth={1.5} />
+                <span className="text-white/70 text-2xl font-light leading-none">+</span>
+                <span className="text-white/50 text-[8px] mt-1 font-medium">Log</span>
               </button>
             </div>
           </div>
