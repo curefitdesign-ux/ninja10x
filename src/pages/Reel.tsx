@@ -1591,47 +1591,34 @@ const Reel = () => {
                         }}
                       >
                         {currentActivity?.id === 'log-activity' ? (
-                          // "Log Your Activity" placeholder card
+                          // "Log Your Activity" placeholder card — clean white with glowing green plus
                           <div 
-                            className="w-full h-full flex flex-col items-center justify-center cursor-pointer"
+                            className="w-full h-full flex items-center justify-center cursor-pointer rounded-2xl"
                             onClick={(e) => {
                               e.stopPropagation();
                               setShowMediaSourceSheet(true);
                             }}
                             style={{
-                              background: 'radial-gradient(circle at 50% 50%, rgba(30,30,35,1) 0%, rgba(15,15,18,1) 100%)',
-                              backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
-                              backgroundSize: '16px 16px',
+                              background: 'linear-gradient(180deg, #f8f8fa 0%, #ffffff 100%)',
                             }}
                           >
-                            <div className="text-center px-6 mb-8">
-                              <h2 className="text-white font-black text-2xl tracking-tight uppercase leading-tight">
-                                Log Your
-                              </h2>
-                              <h2 className="text-white font-black text-2xl tracking-tight uppercase leading-tight">
-                                Today's Activity
-                              </h2>
-                              <p className="text-white/50 text-sm mt-2 tracking-widest uppercase">
-                                Week {week} | Day {dayInWeek}
-                              </p>
-                            </div>
                             <div 
                               className="relative flex items-center justify-center"
-                              style={{ width: 56, height: 56 }}
+                              style={{ width: 64, height: 64 }}
                             >
                               {/* Glow */}
                               <div 
                                 className="absolute inset-0 rounded-full"
                                 style={{
-                                  background: 'radial-gradient(circle, rgba(15,228,152,0.35) 0%, transparent 70%)',
-                                  filter: 'blur(12px)',
-                                  transform: 'scale(2)',
+                                  background: 'radial-gradient(circle, rgba(15,228,152,0.4) 0%, transparent 65%)',
+                                  filter: 'blur(16px)',
+                                  transform: 'scale(2.5)',
                                 }}
                               />
                               {/* Plus icon */}
-                              <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                                <rect x="17" y="6" width="6" height="28" rx="3" fill="#0FE498" />
-                                <rect x="6" y="17" width="28" height="6" rx="3" fill="#0FE498" />
+                              <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+                                <rect x="18.5" y="5" width="7" height="34" rx="3.5" fill="#0FE498" />
+                                <rect x="5" y="18.5" width="34" height="7" rx="3.5" fill="#0FE498" />
                               </svg>
                             </div>
                           </div>
