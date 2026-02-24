@@ -147,7 +147,7 @@ export default function ReelToProgressTransition({
                 className="flex-shrink-0 w-full overflow-x-auto scrollbar-hide overscroll-x-contain"
                 style={{
                   paddingTop: "8px",
-                  paddingInline: "4vw",
+                  paddingInline: "20px",
                   paddingBottom: "12px",
                   minHeight: "160px",
                 }}
