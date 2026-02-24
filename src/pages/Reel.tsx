@@ -1768,7 +1768,7 @@ const Reel = () => {
                   </button>
                 )}
                 {/* Reaction pill + Share icon row */}
-                <div className="flex items-center justify-center gap-3 mb-2 px-4">
+                <div className="flex items-center justify-center gap-3 px-4" style={{ marginTop: '-12px', marginBottom: '0px' }}>
                   {/* Liquid glass reaction pill */}
                   <button
                     onClick={() => isOwnStory ? (currentReactions.total > 0 && setShowReactsSheet(true)) : setShowSendReactionSheet(true)}
