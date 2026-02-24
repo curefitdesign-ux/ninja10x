@@ -39,7 +39,7 @@ const Journal2Frame = ({ imageUrl, activity, week, day, duration, pr, imagePosit
           alt="Activity"
           className="w-full h-full object-cover"
           style={{
-            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+            transform: (imagePosition.x || imagePosition.y || imageScale !== 1) ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` : `scale(${imageScale})`,
           }}
         />
         
