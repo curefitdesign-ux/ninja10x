@@ -1311,23 +1311,23 @@ const Reel = () => {
               </div>
             </div>
             
-            {/* Right side - Log Activity card */}
+            {/* Right side - Log Activity button */}
             <div className="flex items-center shrink-0">
               <button
                 onClick={() => navigate('/activity')}
-                className="flex flex-col items-center justify-center active:scale-[0.95] transition-transform"
+                className="active:scale-[0.95] transition-transform flex items-center justify-center"
                 style={{
-                  width: 52,
-                  height: 72,
-                  borderRadius: 14,
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  backdropFilter: 'blur(20px)',
-                  WebkitBackdropFilter: 'blur(20px)',
-                  border: '1.5px dashed rgba(255, 255, 255, 0.2)',
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(40px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
                 }}
               >
-                <span className="text-white/70 text-2xl font-light leading-none">+</span>
-                <span className="text-white/50 text-[8px] mt-1 font-medium">Log</span>
+                <span className="text-white/80 text-xl font-light leading-none">+</span>
               </button>
             </div>
           </div>
