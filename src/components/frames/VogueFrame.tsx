@@ -28,7 +28,7 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
   }, [isVideo, imageUrl]);
 
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden bg-black shadow-2xl relative">
+    <div className="w-full h-full rounded-[24px] overflow-hidden bg-black shadow-2xl relative">
       {/* Background image or video filling the frame */}
       <div className="absolute inset-0 overflow-hidden">
         {isVideo ? (
