@@ -10,25 +10,25 @@ import basePlatformImg from '@/assets/progress/base-platform.png';
 
 // Tile positions for progress view
 const TILE_POSITIONS = [
-  { left: 34, top: 13 },
-  { left: 42, top: 18 },
-  { left: 50, top: 23 },
-  { left: 58, top: 28 },
-  { left: 50, top: 33 },
-  { left: 42, top: 38 },
-  { left: 34, top: 43 },
-  { left: 42, top: 48 },
-  { left: 50, top: 53 },
-  { left: 58, top: 58 },
-  { left: 50, top: 63 },
-  { left: 42, top: 68 },
+  { left: 34, top: 18 },
+  { left: 42, top: 23 },
+  { left: 50, top: 28 },
+  { left: 58, top: 33 },
+  { left: 50, top: 38 },
+  { left: 42, top: 43 },
+  { left: 34, top: 48 },
+  { left: 42, top: 53 },
+  { left: 50, top: 58 },
+  { left: 58, top: 63 },
+  { left: 50, top: 68 },
+  { left: 42, top: 73 },
 ];
 
 const LABELS = [
-  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 13, left: 70 },
-  { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 28, left: 6 },
-  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 43, left: 70 },
-  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 68, left: 6 },
+  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 18, left: 70 },
+  { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 33, left: 6 },
+  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 48, left: 70 },
+  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 73, left: 6 },
 ];
 
 interface Activity {
