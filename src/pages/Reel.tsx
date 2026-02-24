@@ -1736,7 +1736,7 @@ const Reel = () => {
         <div 
           className="shrink-0 z-40 flex flex-col items-center"
           style={{
-            paddingBottom: '70px',
+            paddingBottom: '64px',
           }}
         >
           {(() => {
@@ -1889,7 +1889,7 @@ const Reel = () => {
         {/* View Progress drawer handle — fixed right above nav bar */}
         <div
           className="fixed left-0 right-0 z-[9998]"
-          style={{ bottom: '70px' }}
+          style={{ bottom: '64px' }}
         >
           <button
             onClick={() => setShowProgressOverlay(true)}
