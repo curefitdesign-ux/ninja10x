@@ -5,6 +5,7 @@ import { CricketBatBall, BoxingGlove, FootballIcon, Shuttlecock, BasketballIcon,
 import ShareSheet from '@/components/ShareSheet';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
@@ -414,17 +415,16 @@ const Preview = () => {
     const frozenFrame = currentFrame;
     console.info('[frame-debug] DONE tapped. currentFrame =', currentFrame, '| frozenFrame =', frozenFrame);
 
-    // Set the capture frame so the offscreen render target uses the frozen frame
-    setCaptureFrame(frozenFrame);
+    // Set the capture frame synchronously so the offscreen render target updates immediately
+    flushSync(() => {
+      setCaptureFrame(frozenFrame);
+    });
 
     triggerHaptic('light');
     handleTap('done-btn');
     setIsSaving(true);
 
-    // Wait one frame for React to render the capture target with the frozen frame
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-
-    // Capture the framed image
+    // Capture the framed image (offscreen target already shows the frozen frame)
     const finalUrl = await captureFramedImage();
     const shareAssetUrl = finalUrl || imageUrl;
     
