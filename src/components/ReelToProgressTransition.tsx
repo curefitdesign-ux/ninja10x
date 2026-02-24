@@ -9,28 +9,26 @@ import engineBadgeImg from '@/assets/progress/engine-badge.png';
 import basePlatformImg from '@/assets/progress/base-platform.png';
 
 // Tile positions for progress view
-// Tile positions indexed 0-11: index 0 = Day 12 (top/trophy), index 11 = Day 1 (bottom/platform)
-// Zigzag from bottom-right up to top-left matching the reference design
 const TILE_POSITIONS = [
-  { left: 36, top: 20 },  // Day 12 — near trophy
-  { left: 42, top: 26 },  // Day 11
-  { left: 48, top: 32 },  // Day 10
-  { left: 60, top: 36 },  // Day 9 — far right (crystal milestone)
-  { left: 52, top: 42 },  // Day 8
-  { left: 44, top: 42 },  // Day 7 — same row as 8
-  { left: 36, top: 48 },  // Day 6
-  { left: 28, top: 54 },  // Day 5 — far left
-  { left: 36, top: 60 },  // Day 4
-  { left: 44, top: 60 },  // Day 3 — same row as 4
-  { left: 52, top: 66 },  // Day 2
-  { left: 44, top: 74 },  // Day 1 — near base platform
+  { left: 34, top: 8 },
+  { left: 42, top: 13 },
+  { left: 50, top: 18 },
+  { left: 58, top: 23 },
+  { left: 50, top: 28 },
+  { left: 42, top: 33 },
+  { left: 34, top: 38 },
+  { left: 42, top: 43 },
+  { left: 50, top: 48 },
+  { left: 58, top: 53 },
+  { left: 50, top: 58 },
+  { left: 42, top: 63 },
 ];
 
 const LABELS = [
-  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 6, left: 56 },
-  { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 46, left: 4 },
-  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 64, left: 64 },
-  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 82, left: 4 },
+  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 8, left: 70 },
+  { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 23, left: 6 },
+  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 38, left: 70 },
+  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 63, left: 6 },
 ];
 
 interface Activity {
@@ -190,7 +188,7 @@ export default function ReelToProgressTransition({
               {showTiles && (
                 <motion.div
                   className="absolute"
-                  style={{ left: "10%", top: "2%", width: "34%", aspectRatio: "1" }}
+                  style={{ left: "10%", top: "-1%", width: "32%", aspectRatio: "1" }}
                   initial={{ opacity: 0, scale: 0.5 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.1 }}
@@ -233,7 +231,7 @@ export default function ReelToProgressTransition({
               {showTiles && (
                 <motion.div
                   className="absolute"
-                  style={{ left: "10%", bottom: "0%", width: "70%", maxWidth: "280px" }}
+                  style={{ left: "5%", bottom: "2%", width: "65%", maxWidth: "260px" }}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.25 }}
@@ -432,7 +430,7 @@ export default function ReelToProgressTransition({
                   {showTiles && (
                     <motion.div
                       className="absolute"
-                      style={{ left: "10%", top: "2%", width: "34%", aspectRatio: "1" }}
+                      style={{ left: "10%", top: "-1%", width: "32%", aspectRatio: "1" }}
                       initial={{ opacity: 0, scale: 0.5, y: 50 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.5, y: 50 }}
@@ -506,7 +504,7 @@ export default function ReelToProgressTransition({
                   {showTiles && (
                     <motion.div
                       className="absolute"
-                      style={{ left: "10%", bottom: "0%", width: "70%", maxWidth: "280px" }}
+                      style={{ left: "10%", bottom: "2%", width: "80%", maxWidth: "320px" }}
                       initial={{ opacity: 0, y: 60, scale: 0.9 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 40, scale: 0.9 }}
