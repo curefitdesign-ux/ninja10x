@@ -50,6 +50,7 @@ interface ReelToProgressTransitionProps {
   publicFeed: Activity[];
   myActivities: { dayNumber: number }[];
   onStoryTap: (index: number, userId?: string, activityId?: string) => void;
+  isInline?: boolean;
 }
 
 export default function ReelToProgressTransition({
@@ -59,6 +60,7 @@ export default function ReelToProgressTransition({
   publicFeed,
   myActivities,
   onStoryTap,
+  isInline = false,
 }: ReelToProgressTransitionProps) {
   const [showTiles, setShowTiles] = useState(false);
   const [showStories, setShowStories] = useState(false);
@@ -115,6 +117,134 @@ export default function ReelToProgressTransition({
 
   const getDayFromIndex = (index: number) => 12 - index;
   const isTileActive = (dayNumber: number) => myActivities.some(a => a.dayNumber === dayNumber);
+
+  if (isInline) {
+    // Inline mode: render content directly without fixed overlay
+    return (
+      <div className="flex flex-col h-full overflow-hidden">
+        <LayoutGroup>
+          <div className="flex-1 flex flex-col">
+            {/* Story strip */}
+            {showStories && (
+              <div
+                className="flex-shrink-0 w-full overflow-x-auto scrollbar-hide overscroll-x-contain"
+                style={{
+                  paddingTop: "8px",
+                  paddingInline: "4vw",
+                  paddingBottom: "12px",
+                  minHeight: "120px",
+                }}
+              >
+                <div className="flex items-end gap-3">
+                  {allStories.slice(0, 8).map((story, index) => {
+                    const isExpanding = expandingCardId === story.id;
+                    const storyMediaUrl = story.originalUrl || story.storageUrl;
+                    const storyIsVideo = story.isVideo || isVideoUrl(storyMediaUrl);
+                    
+                    return (
+                      <motion.button
+                        key={story.id}
+                        className="relative flex-shrink-0 overflow-hidden cursor-pointer"
+                        style={{
+                          width: "64px",
+                          height: "90px",
+                          borderRadius: "12px",
+                          boxShadow: index === 0 
+                            ? "0 8px 24px rgba(100, 70, 180, 0.4)"
+                            : "0 4px 16px rgba(0,0,0,0.25)",
+                          border: index === 0 
+                            ? "2px solid rgba(160, 120, 220, 0.35)"
+                            : "1px solid rgba(255,255,255,0.1)",
+                          zIndex: 10 - index,
+                        }}
+                        onClick={() => handleStoryTap(story, index)}
+                        initial={{ opacity: 0, x: 30, scale: 0.8 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 350, damping: 35, delay: index * 0.03 }}
+                      >
+                        {storyIsVideo ? (
+                          <video src={storyMediaUrl} className="w-full h-full object-cover" muted playsInline loop autoPlay preload="metadata" />
+                        ) : (
+                          <img src={storyMediaUrl} alt={`Day ${story.dayNumber}`} className="w-full h-full object-cover" />
+                        )}
+                        {story.avatarUrl && (
+                          <div className="absolute bottom-1 left-1">
+                            <ProfileAvatar src={story.avatarUrl} name={story.displayName || ''} size={20} style={{ border: '2px solid rgba(255,255,255,0.6)' }} />
+                          </div>
+                        )}
+                        <div className="absolute bottom-1 right-1 px-1 py-0.5 rounded-full text-white font-semibold text-[8px]" style={{ background: "rgba(0,0,0,0.5)" }}>
+                          D{story.dayNumber}
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Progress tiles */}
+            <div className="flex-1 relative w-full overflow-hidden" style={{ maxWidth: "430px", marginInline: "auto" }}>
+              {showTiles && (
+                <motion.div
+                  className="absolute"
+                  style={{ left: "10%", top: "-1%", width: "32%", aspectRatio: "1" }}
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.1 }}
+                >
+                  <img src={engineBadgeImg} alt="Engine Badge" className="w-full h-full object-contain" style={{ opacity: 0.7 }} />
+                </motion.div>
+              )}
+
+              {TILE_POSITIONS.map((pos, index) => {
+                const day = getDayFromIndex(index);
+                const isActive = isTileActive(day);
+                return (
+                  <motion.div
+                    key={day}
+                    className="absolute"
+                    style={{ left: `${pos.left}%`, top: `${pos.top}%`, width: "11%", aspectRatio: "1", transform: 'translateX(-50%)' }}
+                    initial={{ opacity: 0, y: -40, scale: 0.5 }}
+                    animate={showTiles ? { opacity: 1, y: 0, scale: 1 } : {}}
+                    transition={{ type: "spring", stiffness: 300, damping: 24, delay: index * 0.02 }}
+                  >
+                    <img src={isActive ? tileActiveImg : tileInactiveImg} alt={`Day ${day}`} className="w-full h-full object-contain" />
+                  </motion.div>
+                );
+              })}
+
+              {LABELS.map((label, idx) => (
+                <motion.div
+                  key={idx}
+                  className="absolute flex flex-col"
+                  style={{ left: `${label.left}%`, top: `${label.top}%`, textAlign: label.side === "left" ? "right" : "left", alignItems: label.side === "left" ? "flex-end" : "flex-start" }}
+                  initial={{ opacity: 0, x: label.side === "left" ? -20 : 20 }}
+                  animate={showTiles ? { opacity: 1, x: 0 } : {}}
+                  transition={{ type: "spring", stiffness: 200, damping: 22, delay: 0.2 + idx * 0.05 }}
+                >
+                  <span className="text-white/50 text-[10px] font-bold tracking-widest">{label.text[0]}</span>
+                  <span className="text-white/80 text-xs font-bold">{label.text[1]}</span>
+                </motion.div>
+              ))}
+
+              {showTiles && (
+                <motion.div
+                  className="absolute"
+                  style={{ left: "10%", bottom: "2%", width: "80%", maxWidth: "320px" }}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.25 }}
+                >
+                  <img src={basePlatformImg} alt="Base" className="w-full object-contain" style={{ opacity: 0.85 }} />
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </LayoutGroup>
+      </div>
+    );
+  }
 
   return (
     <AnimatePresence>
