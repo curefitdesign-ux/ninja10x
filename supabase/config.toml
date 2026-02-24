@@ -1,10 +1,1 @@
-project_id = "kzyxdwufopmghuefoxfn"
-
-[functions.generate-fitness-reel]
-verify_jwt = false
-
-[functions.elevenlabs-tts]
-verify_jwt = false
-
-[functions.fetch-activity-music]
-verify_jwt = false
+project_id = "wxbsgdlwcbvgitkfnqii"
