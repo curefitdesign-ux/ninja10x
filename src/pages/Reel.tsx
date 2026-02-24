@@ -2148,7 +2148,7 @@ const Reel = () => {
             onClick={() => setShowProgressOverlay(true)}
             className="w-full flex items-center gap-3 px-5 active:scale-[0.98] transition-transform"
             style={{
-              height: 96,
+              height: 72,
               background: 'rgba(255, 255, 255, 0.06)',
               backdropFilter: 'blur(40px) saturate(180%)',
               WebkitBackdropFilter: 'blur(40px) saturate(180%)',
