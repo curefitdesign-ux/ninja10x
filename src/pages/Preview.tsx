@@ -189,6 +189,7 @@ const Preview = () => {
   // Micro celebration after save
   const [showMicroCelebration, setShowMicroCelebration] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [captureFrame, setCaptureFrame] = useState<FrameType | null>(null);
   const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
   const [showCustomActivityInput, setShowCustomActivityInput] = useState(false);
   const [customActivityName, setCustomActivityName] = useState('');
@@ -413,9 +414,15 @@ const Preview = () => {
     const frozenFrame = currentFrame;
     console.info('[frame-debug] DONE tapped. currentFrame =', currentFrame, '| frozenFrame =', frozenFrame);
 
+    // Set the capture frame so the offscreen render target uses the frozen frame
+    setCaptureFrame(frozenFrame);
+
     triggerHaptic('light');
     handleTap('done-btn');
     setIsSaving(true);
+
+    // Wait one frame for React to render the capture target with the frozen frame
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
     // Capture the framed image
     const finalUrl = await captureFramedImage();
@@ -711,8 +718,8 @@ const Preview = () => {
     label2Name: activityLabels.primaryMetric,
   };
 
-  const renderFrame = () => {
-    switch (currentFrame) {
+  const renderFrame = (overrideFrame?: FrameType) => {
+    switch (overrideFrame || currentFrame) {
       case 'shaky':
         return <ShakyFrame {...frameProps} />;
       case 'journal':
@@ -1024,9 +1031,9 @@ const Preview = () => {
         <div
           ref={captureRef}
           aria-hidden
-          className="fixed left-[-10000px] top-0 w-[360px] pointer-events-none"
-        >
-          {renderFrame()}
+           className="fixed left-[-10000px] top-0 w-[360px] pointer-events-none"
+         >
+           {renderFrame(captureFrame || currentFrame)}
         </div>
 
         {/* Header - fixed height */}
