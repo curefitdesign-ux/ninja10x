@@ -17,7 +17,7 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("activity");
 
-  const hiddenPaths = ["/auth", "/profile-setup", "/avatar-crop", "/camera", "/preview", "/gallery", "/reel", "/progress"];
+  const hiddenPaths = ["/auth", "/profile-setup", "/avatar-crop", "/camera", "/preview", "/gallery", "/progress"];
   const shouldHide = hidden || hiddenPaths.some(path => location.pathname.startsWith(path));
 
   if (shouldHide) return null;
