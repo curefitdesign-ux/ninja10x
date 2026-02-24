@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronLeft, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, CalendarDays } from 'lucide-react';
+import { X, ChevronLeft, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, CalendarDays, MoreVertical, UserPen, LogOut, Plus } from 'lucide-react';
 import PullToRefresh from '@/components/PullToRefresh';
 import ProfileMenu from '@/components/ProfileMenu';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
@@ -143,6 +143,7 @@ const Reel = () => {
   // Privacy sheet state
   const [showMakePublicSheet, setShowMakePublicSheet] = useState(false);
   const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
+  const [showEllipsisMenu, setShowEllipsisMenu] = useState(false);
 
   // Recap viewer state
   const [isAddingToStories, setIsAddingToStories] = useState(false);
@@ -1198,7 +1199,6 @@ const Reel = () => {
           >
             {/* Left side - Delete button */}
             <div className="flex items-center gap-1 shrink-0">
-              <ProfileMenu />
               {canEdit && (
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
@@ -1360,10 +1360,10 @@ const Reel = () => {
               </div>
             </div>
             
-            {/* Right side - Log Activity button */}
-            <div className="flex items-center shrink-0">
+            {/* Right side - Ellipsis menu */}
+            <div className="flex items-center shrink-0 relative">
               <button
-                onClick={() => setShowMediaSourceSheet(true)}
+                onClick={() => setShowEllipsisMenu(prev => !prev)}
                 className="active:scale-[0.95] transition-transform flex items-center justify-center"
                 style={{
                   width: 40,
@@ -1376,8 +1376,70 @@ const Reel = () => {
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
                 }}
               >
-                <span className="text-white/80 text-xl font-light leading-none">+</span>
+                <MoreVertical className="w-5 h-5 text-white/80" strokeWidth={1.5} />
               </button>
+
+              <AnimatePresence>
+                {showEllipsisMenu && (
+                  <>
+                    <motion.div
+                      className="fixed inset-0 z-40"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={() => setShowEllipsisMenu(false)}
+                    />
+                    <motion.div
+                      className="absolute right-0 top-full mt-2 w-52 z-50 rounded-2xl overflow-hidden"
+                      style={{
+                        background: 'rgba(20, 20, 30, 0.95)',
+                        backdropFilter: 'blur(40px) saturate(180%)',
+                        border: '1px solid rgba(255, 255, 255, 0.12)',
+                        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
+                      }}
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div className="py-1">
+                        <motion.button
+                          onClick={() => { setShowEllipsisMenu(false); setShowMediaSourceSheet(true); }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+                          whileHover={{ x: 2 }}
+                        >
+                          <Plus className="w-4 h-4 text-emerald-400" />
+                          <span className="text-sm">Log Activity</span>
+                        </motion.button>
+                        <motion.button
+                          onClick={() => { setShowEllipsisMenu(false); navigate('/profile-setup?edit=true'); }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+                          whileHover={{ x: 2 }}
+                        >
+                          <UserPen className="w-4 h-4 text-emerald-400" />
+                          <span className="text-sm">Edit Profile</span>
+                        </motion.button>
+                        <motion.button
+                          onClick={async () => {
+                            setShowEllipsisMenu(false);
+                            try {
+                              const { signOut } = await import('@/hooks/use-auth').then(m => ({ signOut: () => supabase.auth.signOut() }));
+                              await signOut();
+                              toast.success('Logged out successfully');
+                              navigate('/auth');
+                            } catch { toast.error('Failed to log out'); }
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-red-400 hover:bg-red-500/5 transition-colors"
+                          whileHover={{ x: 2 }}
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span className="text-sm">Log Out</span>
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
