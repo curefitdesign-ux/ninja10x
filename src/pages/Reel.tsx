@@ -2317,8 +2317,9 @@ const Reel = () => {
                   userId: p.userId,
                   createdAt: p.createdAt,
                 }))}
-                myActivities={myActivities.map(a => ({ dayNumber: a.dayNumber }))}
+                myActivities={myActivities.map(a => ({ dayNumber: a.dayNumber, storageUrl: a.storageUrl, originalUrl: a.originalUrl }))}
                 onStoryTap={handleProgressStoryTap}
+                onLogActivity={() => setShowMediaSourceSheet(true)}
                 isInline={true}
               />
             </div>

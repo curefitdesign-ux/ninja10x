@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Plus, Lock } from 'lucide-react';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import { isVideoUrl } from '@/lib/media';
 import tileActiveImg from '@/assets/progress/tile-active-new.png';
@@ -48,8 +48,9 @@ interface ReelToProgressTransitionProps {
   onClose: () => void;
   currentActivity: Activity | null;
   publicFeed: Activity[];
-  myActivities: { dayNumber: number }[];
+  myActivities: { dayNumber: number; storageUrl?: string; originalUrl?: string }[];
   onStoryTap: (index: number, userId?: string, activityId?: string) => void;
+  onLogActivity?: () => void;
   isInline?: boolean;
 }
 
@@ -60,6 +61,7 @@ export default function ReelToProgressTransition({
   publicFeed,
   myActivities,
   onStoryTap,
+  onLogActivity,
   isInline = false,
 }: ReelToProgressTransitionProps) {
   const [showTiles, setShowTiles] = useState(false);
@@ -118,13 +120,28 @@ export default function ReelToProgressTransition({
   const getDayFromIndex = (index: number) => 12 - index;
   const isTileActive = (dayNumber: number) => myActivities.some(a => a.dayNumber === dayNumber);
 
+  // Build week stacks data
+  const WEEK_LOCK_COLORS = ['rgba(180,160,220,0.8)', '#F59E0B', '#D946EF', '#22C55E'];
+  const weekStacks = useMemo(() => {
+    return [1, 2, 3, 4].map(week => {
+      const startDay = (week - 1) * 3 + 1;
+      const days = [startDay, startDay + 1, startDay + 2];
+      const activitiesInWeek = days.map(d => myActivities.find(a => a.dayNumber === d));
+      const completedCount = activitiesInWeek.filter(Boolean).length;
+      const totalActivities = myActivities.length;
+      const isCurrentWeek = totalActivities >= startDay - 1 && totalActivities < startDay + 3;
+      const isLocked = totalActivities < startDay - 1;
+      return { week, days, activitiesInWeek, completedCount, isCurrentWeek, isLocked };
+    });
+  }, [myActivities]);
+
   if (isInline) {
     // Inline mode: render content directly without fixed overlay
     return (
       <div className="flex flex-col h-full overflow-hidden">
         <LayoutGroup>
           <div className="flex-1 flex flex-col">
-            {/* Story strip */}
+            {/* Week Progress Stacks */}
             {showStories && (
               <div
                 className="flex-shrink-0 w-full overflow-x-auto scrollbar-hide overscroll-x-contain"
@@ -132,51 +149,134 @@ export default function ReelToProgressTransition({
                   paddingTop: "8px",
                   paddingInline: "4vw",
                   paddingBottom: "12px",
-                  minHeight: "120px",
+                  minHeight: "160px",
                 }}
               >
-                <div className="flex items-end gap-3">
-                  {allStories.slice(0, 8).map((story, index) => {
-                    const isExpanding = expandingCardId === story.id;
-                    const storyMediaUrl = story.originalUrl || story.storageUrl;
-                    const storyIsVideo = story.isVideo || isVideoUrl(storyMediaUrl);
-                    
+                <div className="flex items-start gap-5" style={{ minWidth: "max-content" }}>
+                  {weekStacks.map((ws, wIdx) => {
+                    const lockColor = WEEK_LOCK_COLORS[wIdx];
+                    const isGlowing = ws.isCurrentWeek;
+
                     return (
-                      <motion.button
-                        key={story.id}
-                        className="relative flex-shrink-0 overflow-hidden cursor-pointer"
-                        style={{
-                          width: "64px",
-                          height: "90px",
-                          borderRadius: "12px",
-                          boxShadow: index === 0 
-                            ? "0 8px 24px rgba(100, 70, 180, 0.4)"
-                            : "0 4px 16px rgba(0,0,0,0.25)",
-                          border: index === 0 
-                            ? "2px solid rgba(160, 120, 220, 0.35)"
-                            : "1px solid rgba(255,255,255,0.1)",
-                          zIndex: 10 - index,
-                        }}
-                        onClick={() => handleStoryTap(story, index)}
-                        initial={{ opacity: 0, x: 30, scale: 0.8 }}
-                        animate={{ opacity: 1, x: 0, scale: 1 }}
-                        whileTap={{ scale: 0.95 }}
-                        transition={{ type: "spring", stiffness: 350, damping: 35, delay: index * 0.03 }}
+                      <motion.div
+                        key={ws.week}
+                        className="flex flex-col items-center gap-2 flex-shrink-0"
+                        style={{ width: "90px" }}
+                        initial={{ opacity: 0, y: 20, scale: 0.85 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 28, delay: wIdx * 0.06 }}
                       >
-                        {storyIsVideo ? (
-                          <video src={storyMediaUrl} className="w-full h-full object-cover" muted playsInline loop autoPlay preload="metadata" />
-                        ) : (
-                          <img src={storyMediaUrl} alt={`Day ${story.dayNumber}`} className="w-full h-full object-cover" />
-                        )}
-                        {story.avatarUrl && (
-                          <div className="absolute bottom-1 left-1">
-                            <ProfileAvatar src={story.avatarUrl} name={story.displayName || ''} size={20} style={{ border: '2px solid rgba(255,255,255,0.6)' }} />
+                        {/* Header text */}
+                        <span className="text-[10px] font-medium text-center leading-tight" style={{ color: isGlowing ? 'rgba(200,180,255,0.9)' : 'rgba(255,255,255,0.35)', minHeight: '24px' }}>
+                          {isGlowing ? "What activity\ndid you do today?" : ws.isLocked ? "Coming soon" : ws.completedCount === 3 ? "Complete!" : `${ws.completedCount}/3 done`}
+                        </span>
+
+                        {/* Fanned card stack */}
+                        <motion.button
+                          className="relative cursor-pointer"
+                          style={{
+                            width: "80px",
+                            height: "100px",
+                            ...(isGlowing ? {
+                              filter: "drop-shadow(0 0 20px rgba(140,100,220,0.5))",
+                            } : {}),
+                          }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => {
+                            if (isGlowing && onLogActivity) {
+                              onLogActivity();
+                            }
+                          }}
+                        >
+                          {/* Card 3 (back-right) */}
+                          <div
+                            className="absolute rounded-xl overflow-hidden"
+                            style={{
+                              width: "52px", height: "72px",
+                              top: "8px", left: "30px",
+                              transform: "rotate(8deg)",
+                              border: "1.5px solid rgba(255,255,255,0.15)",
+                              background: ws.activitiesInWeek[2]?.storageUrl
+                                ? undefined
+                                : ws.isLocked
+                                  ? "linear-gradient(135deg, rgba(40,35,55,0.9), rgba(20,18,30,0.95))"
+                                  : isGlowing
+                                    ? "linear-gradient(135deg, rgba(120,90,180,0.4), rgba(80,60,140,0.3))"
+                                    : "linear-gradient(135deg, rgba(60,55,75,0.6), rgba(30,28,40,0.7))",
+                            }}
+                          >
+                            {ws.activitiesInWeek[2]?.storageUrl ? (
+                              <img src={ws.activitiesInWeek[2].storageUrl} className="w-full h-full object-cover" alt="" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Lock size={14} style={{ color: lockColor, opacity: 0.7 }} />
+                              </div>
+                            )}
                           </div>
-                        )}
-                        <div className="absolute bottom-1 right-1 px-1 py-0.5 rounded-full text-white font-semibold text-[8px]" style={{ background: "rgba(0,0,0,0.5)" }}>
-                          D{story.dayNumber}
-                        </div>
-                      </motion.button>
+
+                          {/* Card 2 (back-left) */}
+                          <div
+                            className="absolute rounded-xl overflow-hidden"
+                            style={{
+                              width: "52px", height: "72px",
+                              top: "6px", left: "-2px",
+                              transform: "rotate(-6deg)",
+                              border: "1.5px solid rgba(255,255,255,0.15)",
+                              background: ws.activitiesInWeek[1]?.storageUrl
+                                ? undefined
+                                : ws.isLocked
+                                  ? "linear-gradient(135deg, rgba(40,35,55,0.9), rgba(20,18,30,0.95))"
+                                  : isGlowing
+                                    ? "linear-gradient(135deg, rgba(120,90,180,0.4), rgba(80,60,140,0.3))"
+                                    : "linear-gradient(135deg, rgba(60,55,75,0.6), rgba(30,28,40,0.7))",
+                            }}
+                          >
+                            {ws.activitiesInWeek[1]?.storageUrl ? (
+                              <img src={ws.activitiesInWeek[1].storageUrl} className="w-full h-full object-cover" alt="" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Lock size={14} style={{ color: lockColor, opacity: 0.7 }} />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Card 1 (front-center) */}
+                          <div
+                            className="absolute rounded-xl overflow-hidden"
+                            style={{
+                              width: "54px", height: "74px",
+                              top: "12px", left: "13px",
+                              transform: "rotate(1deg)",
+                              border: isGlowing ? "1.5px solid rgba(180,150,240,0.35)" : "1.5px solid rgba(255,255,255,0.15)",
+                              background: ws.activitiesInWeek[0]?.storageUrl
+                                ? undefined
+                                : ws.isLocked
+                                  ? "linear-gradient(135deg, rgba(40,35,55,0.9), rgba(20,18,30,0.95))"
+                                  : isGlowing
+                                    ? "linear-gradient(135deg, rgba(120,90,180,0.5), rgba(90,70,160,0.4))"
+                                    : "linear-gradient(135deg, rgba(60,55,75,0.6), rgba(30,28,40,0.7))",
+                              zIndex: 2,
+                            }}
+                          >
+                            {ws.activitiesInWeek[0]?.storageUrl ? (
+                              <img src={ws.activitiesInWeek[0].storageUrl} className="w-full h-full object-cover" alt="" />
+                            ) : isGlowing ? (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Plus size={18} className="text-white/60" />
+                              </div>
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Lock size={16} style={{ color: lockColor }} />
+                              </div>
+                            )}
+                          </div>
+                        </motion.button>
+
+                        {/* Week label */}
+                        <span className="text-[9px] font-bold tracking-widest text-white/40 uppercase">
+                          WEEK {String(ws.week).padStart(2, '0')} | {String(ws.completedCount).padStart(2, '0')}
+                        </span>
+                      </motion.div>
                     );
                   })}
                 </div>
