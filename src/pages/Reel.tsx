@@ -1549,33 +1549,6 @@ const Reel = () => {
           </div>
         </div>
 
-          {/* Instagram-style progress bar segments — constrained to story card width */}
-          <div className="shrink-0 pb-2 flex justify-center">
-            <div className="flex gap-1" style={{ height: 3, width: '76%' }}>
-              {currentGroup && currentGroup.activities.map((_, segIdx) => {
-                const isCurrentSeg = segIdx === currentActivityIndex;
-                const isViewed = segIdx < currentActivityIndex;
-                return (
-                  <div
-                    key={segIdx}
-                    className="flex-1 rounded-full overflow-hidden"
-                    style={{ background: 'rgba(255,255,255,0.2)' }}
-                  >
-                    <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: isViewed ? '100%' : isCurrentSeg && autoAdvanceProgress > 0 ? '100%' : isCurrentSeg ? '0%' : '0%',
-                        background: 'linear-gradient(90deg, #FEDA75, #FA7E1E, #D62976)',
-                        transition: isCurrentSeg && autoAdvanceProgress > 0
-                          ? `width ${autoAdvanceDuration}ms linear`
-                          : isCurrentSeg ? 'none' : 'width 0.3s ease',
-                      }}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
 
         {/* MAIN CONTENT ZONE - flexible middle section with peek cards */}
         <div
