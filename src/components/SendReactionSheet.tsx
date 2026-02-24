@@ -277,7 +277,7 @@ export default function SendReactionSheet({
 
           {/* Container with subtle grid background */}
           <div 
-            className="relative h-[180px] w-full rounded-2xl overflow-hidden"
+            className="relative h-[220px] w-full rounded-2xl overflow-hidden"
             style={{
               background: 'rgba(255, 255, 255, 0.03)',
               backgroundImage: `
