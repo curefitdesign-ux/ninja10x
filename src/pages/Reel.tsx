@@ -1304,14 +1304,7 @@ const Reel = () => {
                   </button>
                 );
               })()}
-              {canEdit && (
-                <button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="p-2 transition-colors rounded-full text-white/80 hover:text-red-400 min-w-[40px] min-h-[40px] flex items-center justify-center active:scale-95"
-                >
-                  <Trash2 className="w-5 h-5" strokeWidth={1.5} />
-                </button>
-              )}
+              {/* Delete button moved to bottom next to share */}
             </div>
 
             {/* Center - User avatars strip - SCROLLABLE horizontally */}
@@ -2087,31 +2080,57 @@ const Reel = () => {
                   )}
                   </button>
 
-                  {/* Share button — aligned with reaction pill */}
-                  {!isStoryLocked && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleShareStory();
-                      }}
-                      className="shrink-0 active:scale-95 transition-transform"
-                      style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 22,
-                        background: 'rgba(255, 255, 255, 0.08)',
-                        backdropFilter: 'blur(40px) saturate(180%)',
-                        WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                        border: '1px solid rgba(255, 255, 255, 0.12)',
-                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <Share2 className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
-                    </button>
-                  )}
+                  {/* Share & Delete buttons — aligned with reaction pill */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {!isStoryLocked && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleShareStory();
+                        }}
+                        className="shrink-0 active:scale-95 transition-transform"
+                        style={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: 22,
+                          background: 'rgba(255, 255, 255, 0.08)',
+                          backdropFilter: 'blur(40px) saturate(180%)',
+                          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Share2 className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
+                      </button>
+                    )}
+                    {canEdit && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowDeleteConfirm(true);
+                        }}
+                        className="shrink-0 active:scale-95 transition-transform"
+                        style={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: 22,
+                          background: 'rgba(255, 255, 255, 0.08)',
+                          backdropFilter: 'blur(40px) saturate(180%)',
+                          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Trash2 className="w-[18px] h-[18px] text-white/60" strokeWidth={1.5} />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             );
