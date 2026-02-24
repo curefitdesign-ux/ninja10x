@@ -1591,34 +1591,46 @@ const Reel = () => {
                         }}
                       >
                         {currentActivity?.id === 'log-activity' ? (
-                          // "Log Your Activity" placeholder card — clean white with glowing green plus
+                          // "Log Your Activity" placeholder card — dark with dot grid + green plus
                           <div 
-                            className="w-full h-full flex items-center justify-center cursor-pointer rounded-2xl"
+                            className="w-full h-full flex flex-col items-center justify-center cursor-pointer relative overflow-hidden"
                             onClick={(e) => {
                               e.stopPropagation();
                               setShowMediaSourceSheet(true);
                             }}
                             style={{
-                              background: 'linear-gradient(180deg, #f8f8fa 0%, #ffffff 100%)',
+                              background: 'linear-gradient(180deg, rgba(28,28,32,1) 0%, rgba(18,18,22,1) 100%)',
+                              border: '1px solid rgba(255,255,255,0.08)',
+                              borderRadius: 20,
                             }}
                           >
-                            <div 
-                              className="relative flex items-center justify-center"
-                              style={{ width: 64, height: 64 }}
-                            >
-                              {/* Glow */}
-                              <div 
-                                className="absolute inset-0 rounded-full"
-                                style={{
-                                  background: 'radial-gradient(circle, rgba(15,228,152,0.4) 0%, transparent 65%)',
-                                  filter: 'blur(16px)',
-                                  transform: 'scale(2.5)',
-                                }}
-                              />
-                              {/* Plus icon */}
-                              <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
-                                <rect x="18.5" y="5" width="7" height="34" rx="3.5" fill="#0FE498" />
-                                <rect x="5" y="18.5" width="34" height="7" rx="3.5" fill="#0FE498" />
+                            {/* Dot grid pattern */}
+                            <div className="absolute inset-0" style={{
+                              backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
+                              backgroundSize: '20px 20px',
+                            }} />
+                            {/* Text */}
+                            <div className="text-center px-6 mb-10 relative z-10">
+                              <h2 className="text-foreground font-black text-2xl tracking-tight uppercase leading-tight">
+                                Log Your
+                              </h2>
+                              <h2 className="text-foreground font-black text-2xl tracking-tight uppercase leading-tight">
+                                Today's Activity
+                              </h2>
+                              <p className="text-muted-foreground text-sm mt-3 tracking-[0.2em] uppercase">
+                                Week {week} | Day {dayInWeek}
+                              </p>
+                            </div>
+                            {/* Glowing plus */}
+                            <div className="relative flex items-center justify-center z-10" style={{ width: 64, height: 64 }}>
+                              <div className="absolute inset-0 rounded-full" style={{
+                                background: 'radial-gradient(circle, rgba(15,228,152,0.4) 0%, transparent 65%)',
+                                filter: 'blur(16px)',
+                                transform: 'scale(2.5)',
+                              }} />
+                              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                                <rect x="20" y="6" width="8" height="36" rx="4" fill="#0FE498" />
+                                <rect x="6" y="20" width="36" height="8" rx="4" fill="#0FE498" />
                               </svg>
                             </div>
                           </div>
