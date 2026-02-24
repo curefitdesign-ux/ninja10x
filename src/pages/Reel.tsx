@@ -2010,7 +2010,7 @@ const Reel = () => {
                 <div className="flex items-center justify-center gap-3 px-4" style={{ marginTop: '-12px', marginBottom: '0px' }}>
                   {/* Liquid glass reaction pill */}
                   <button
-                    onClick={() => isOwnStory ? (currentReactions.total > 0 ? setShowReactsSheet(true) : setShowProgressOverlay(true)) : setShowSendReactionSheet(true)}
+                    onClick={() => isOwnStory ? (currentReactions.total > 0 && setShowReactsSheet(true)) : setShowSendReactionSheet(true)}
                     className="relative overflow-hidden active:scale-[0.97] transition-transform"
                     style={{
                       minWidth: currentReactions.total > 0 ? 180 : 160,
@@ -2041,8 +2041,8 @@ const Reel = () => {
                         </>
                       ) : (
                         <>
-                          <ChevronUp className="w-4 h-4 text-white/50" />
-                          <span className="text-white/60 text-sm font-medium">View progress so far</span>
+                          <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain opacity-40" />
+                          <span className="text-white/50 text-sm font-medium">No reacts yet</span>
                         </>
                       )}
                     </div>
