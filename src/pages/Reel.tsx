@@ -1884,81 +1884,27 @@ const Reel = () => {
           })()}
 
 
-          {/* View Progress drawer */}
-          <motion.div
-            className="w-full overflow-hidden"
-            animate={{ 
-              height: showProgressOverlay ? '70vh' : 48,
-            }}
-            transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+          {/* View Progress drawer handle — always visible */}
+          <button
+            onClick={() => setShowProgressOverlay(!showProgressOverlay)}
+            className="w-full flex items-center justify-center gap-2 active:bg-white/5 transition-colors"
             style={{
-              background: showProgressOverlay 
-                ? 'linear-gradient(180deg, rgba(58,42,99,0.95) 0%, rgba(26,21,48,0.98) 45%, rgba(6,6,8,1) 100%)'
-                : 'rgba(255, 255, 255, 0.04)',
+              height: 48,
+              background: 'rgba(255, 255, 255, 0.04)',
               backdropFilter: 'blur(40px) saturate(180%)',
               WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              borderTopLeftRadius: showProgressOverlay ? 24 : 0,
-              borderTopRightRadius: showProgressOverlay ? 24 : 0,
             }}
           >
-            {/* Handle / toggle bar */}
-            <button
-              onClick={() => setShowProgressOverlay(!showProgressOverlay)}
-              className="w-full flex items-center justify-center gap-2 active:bg-white/5 transition-colors"
-              style={{ height: 48 }}
+            <motion.div
+              animate={{ rotate: showProgressOverlay ? 180 : 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             >
-              <motion.div
-                animate={{ rotate: showProgressOverlay ? 180 : 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              >
-                <ChevronUp className="w-5 h-5 text-white/60" />
-              </motion.div>
-              <span className="text-white/80 text-sm font-medium">
-                {showProgressOverlay ? 'Close' : 'View Progress'}
-              </span>
-            </button>
-
-            {/* Drawer content — progress tiles + stories */}
-            {showProgressOverlay && (
-              <motion.div
-                className="flex-1 overflow-hidden"
-                style={{ height: 'calc(70vh - 48px)' }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1, duration: 0.2 }}
-              >
-                <ReelToProgressTransition
-                  isOpen={true}
-                  onClose={() => setShowProgressOverlay(false)}
-                  currentActivity={currentActivity ? {
-                    id: currentActivity.id,
-                    storageUrl: currentActivity.storageUrl,
-                    originalUrl: currentActivity.originalUrl,
-                    isVideo: currentActivity.isVideo,
-                    dayNumber: currentActivity.dayNumber,
-                    avatarUrl: currentGroup?.avatarUrl,
-                    displayName: currentGroup?.displayName,
-                    userId: currentGroup?.userId,
-                    createdAt: currentActivity.createdAt,
-                  } : null}
-                  publicFeed={publicFeed.map(p => ({
-                    id: p.id,
-                    storageUrl: p.storageUrl,
-                    originalUrl: p.originalUrl,
-                    isVideo: p.isVideo,
-                    dayNumber: p.dayNumber,
-                    avatarUrl: p.avatarUrl,
-                    displayName: p.displayName,
-                    userId: p.userId,
-                    createdAt: p.createdAt,
-                  }))}
-                  myActivities={myActivities.map(a => ({ dayNumber: a.dayNumber }))}
-                  onStoryTap={handleProgressStoryTap}
-                  isInline={true}
-                />
-              </motion.div>
-            )}
-          </motion.div>
+              <ChevronUp className="w-5 h-5 text-white/60" />
+            </motion.div>
+            <span className="text-white/80 text-sm font-medium">
+              {showProgressOverlay ? 'Close' : 'View Progress'}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -2019,7 +1965,71 @@ const Reel = () => {
         )}
       </AnimatePresence>
 
-      {/* Progress overlay removed — now inline in drawer above */}
+      {/* Progress drawer overlay */}
+      <AnimatePresence>
+        {showProgressOverlay && (
+          <motion.div
+            className="fixed left-0 right-0 z-50 overflow-hidden"
+            style={{
+              bottom: 0,
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              background: 'linear-gradient(180deg, rgba(58,42,99,0.97) 0%, rgba(26,21,48,0.99) 45%, rgba(6,6,8,1) 100%)',
+              backdropFilter: 'blur(60px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(60px) saturate(200%)',
+              boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
+            }}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: '70vh', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+          >
+            {/* Drawer handle inside overlay */}
+            <button
+              onClick={() => setShowProgressOverlay(false)}
+              className="w-full flex items-center justify-center gap-2 active:bg-white/5 transition-colors"
+              style={{ height: 48 }}
+            >
+              <motion.div animate={{ rotate: 180 }}>
+                <ChevronUp className="w-5 h-5 text-white/60" />
+              </motion.div>
+              <span className="text-white/80 text-sm font-medium">Close</span>
+            </button>
+
+            <div className="overflow-hidden" style={{ height: 'calc(70vh - 48px)' }}>
+              <ReelToProgressTransition
+                isOpen={true}
+                onClose={() => setShowProgressOverlay(false)}
+                currentActivity={currentActivity ? {
+                  id: currentActivity.id,
+                  storageUrl: currentActivity.storageUrl,
+                  originalUrl: currentActivity.originalUrl,
+                  isVideo: currentActivity.isVideo,
+                  dayNumber: currentActivity.dayNumber,
+                  avatarUrl: currentGroup?.avatarUrl,
+                  displayName: currentGroup?.displayName,
+                  userId: currentGroup?.userId,
+                  createdAt: currentActivity.createdAt,
+                } : null}
+                publicFeed={publicFeed.map(p => ({
+                  id: p.id,
+                  storageUrl: p.storageUrl,
+                  originalUrl: p.originalUrl,
+                  isVideo: p.isVideo,
+                  dayNumber: p.dayNumber,
+                  avatarUrl: p.avatarUrl,
+                  displayName: p.displayName,
+                  userId: p.userId,
+                  createdAt: p.createdAt,
+                }))}
+                myActivities={myActivities.map(a => ({ dayNumber: a.dayNumber }))}
+                onStoryTap={handleProgressStoryTap}
+                isInline={true}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Delete confirmation dialog - Liquid glass design */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
