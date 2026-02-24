@@ -7,7 +7,7 @@ import { Home, Dumbbell, ShoppingBag, Waves, Activity } from "lucide-react";
 const navItems = [
   { id: "home", label: "Home", path: "/", Icon: Home },
   { id: "fitness", label: "Fitness", path: "/", Icon: Dumbbell },
-  { id: "activity", label: "Activity", path: "/", Icon: Activity },
+  { id: "activity", label: "Activity", path: "/reel", Icon: Activity },
   { id: "store", label: "Store", path: "/", Icon: ShoppingBag },
   { id: "pilates", label: "Pilates", path: "/", Icon: Waves },
 ];

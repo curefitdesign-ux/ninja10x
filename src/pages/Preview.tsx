@@ -325,7 +325,7 @@ const Preview = () => {
     }
     
     // No existing data and no session state - redirect to home
-    navigate('/', { replace: true });
+    navigate('/reel', { replace: true });
   }, []);
 
   // Persist state to sessionStorage ALWAYS when we have image and activity
@@ -383,7 +383,7 @@ const Preview = () => {
   // Handle removing the current image - redirect to home
   const handleRemoveImage = () => {
     triggerHaptic('medium');
-    navigate('/', { replace: true });
+    navigate('/reel', { replace: true });
   };
 
   // Handle deleting the activity from DB (only for review mode)
@@ -397,7 +397,7 @@ const Preview = () => {
     
     if (success) {
       toast.success(`Day ${dayNumber} removed`);
-      navigate('/', { replace: true, state: null });
+      navigate('/reel', { replace: true, state: null });
     } else {
       toast.error('Failed to delete. Please try again.');
     }
@@ -472,7 +472,7 @@ const Preview = () => {
     sessionStorage.removeItem(PREVIEW_STATE_KEY);
     
     setTimeout(() => {
-      navigate('/', { replace: true, state: null });
+      navigate('/reel', { replace: true, state: null });
     }, 400);
   };
 
@@ -488,7 +488,7 @@ const Preview = () => {
     
     setIsExiting(true);
     setTimeout(() => {
-      navigate('/', { replace: true, state: null });
+      navigate('/reel', { replace: true, state: null });
     }, 400);
   };
 

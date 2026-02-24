@@ -241,7 +241,7 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
     
     // Wait for animation, then navigate to Activity page (/)
     setTimeout(() => {
-      navigate('/', {
+      navigate('/reel', {
         replace: true,
         state: {
           fromShare: true,

@@ -43,7 +43,7 @@ const Camera = () => {
   };
 
   const handleClose = useCallback(() => {
-    navigate('/', { replace: true });
+    navigate('/reel', { replace: true });
   }, [navigate]);
 
   // Show cropper after capture

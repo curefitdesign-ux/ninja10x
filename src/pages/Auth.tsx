@@ -47,7 +47,7 @@ const Auth = () => {
       .maybeSingle();
 
     if (profile) {
-      navigate('/');
+      navigate('/reel');
     } else {
       navigate('/profile-setup', { replace: true });
     }

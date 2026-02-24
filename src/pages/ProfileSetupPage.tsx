@@ -60,7 +60,7 @@ const ProfileSetupPage = () => {
   useEffect(() => {
     if (profileLoading) return;
     if (!editMode && !needsSetup && profile) {
-      navigate('/', { replace: true });
+      navigate('/reel', { replace: true });
     }
   }, [editMode, needsSetup, profile, navigate, profileLoading]);
 
@@ -158,7 +158,7 @@ const ProfileSetupPage = () => {
         });
         if (insertError) throw insertError;
         toast.success('Profile created!');
-        navigate('/', { replace: true });
+        navigate('/reel', { replace: true });
       }
     } catch (error: any) {
       console.error('Error saving profile:', error);

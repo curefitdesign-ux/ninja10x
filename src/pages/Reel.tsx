@@ -19,6 +19,7 @@ import SendReactionSheet from '@/components/SendReactionSheet';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import ReelToProgressTransition from '@/components/ReelToProgressTransition';
 import MakePublicSheet from '@/components/MakePublicSheet';
+import MediaSourceSheet from '@/components/MediaSourceSheet';
 import StoryHint, { useStoryNudgeAnimation } from '@/components/StoryHint';
 import { ReelViewerSkeleton } from '@/components/SkeletonLoaders';
 import { uploadToStorage } from '@/services/storage-service';
@@ -141,7 +142,8 @@ const Reel = () => {
   
   // Privacy sheet state
   const [showMakePublicSheet, setShowMakePublicSheet] = useState(false);
-  
+  const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
+
   // Recap viewer state
   const [isAddingToStories, setIsAddingToStories] = useState(false);
   const [showDeleteRecapConfirm, setShowDeleteRecapConfirm] = useState(false);
@@ -514,7 +516,7 @@ const Reel = () => {
   };
 
   const handleClose = () => {
-    navigate('/', { replace: true });
+    navigate('/reel', { replace: true });
   };
 
   const handleDeleteActivity = async () => {
@@ -766,7 +768,7 @@ const Reel = () => {
     
     setShowDeleteRecapConfirm(false);
     toast.success('Recap deleted');
-    navigate('/', { replace: true });
+    navigate('/reel', { replace: true });
   }, [weekRecapNumber, navigate, user?.id]);
 
   // Handler: Download recap video
@@ -1314,7 +1316,7 @@ const Reel = () => {
             {/* Right side - Log Activity button */}
             <div className="flex items-center shrink-0">
               <button
-                onClick={() => navigate('/', { state: { triggerLog: true } })}
+                onClick={() => setShowMediaSourceSheet(true)}
                 className="active:scale-[0.95] transition-transform flex items-center justify-center"
                 style={{
                   width: 40,
@@ -2105,6 +2107,11 @@ const Reel = () => {
           loadActivities();
         }}
         onKeepPrivate={() => setShowMakePublicSheet(false)}
+      />
+      <MediaSourceSheet
+        isOpen={showMediaSourceSheet}
+        onClose={() => setShowMediaSourceSheet(false)}
+        dayNumber={myActivities.length + 1}
       />
     </DynamicBlurBackground>
   );
