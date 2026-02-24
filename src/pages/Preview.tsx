@@ -409,6 +409,9 @@ const Preview = () => {
   const handleSaveWithTemplate = async () => {
     if (!imageUrl || !activity) return;
 
+    // Freeze the frame selection BEFORE any async work — prevents scroll drift from changing it
+    const frozenFrame = currentFrame;
+
     triggerHaptic('light');
     handleTap('done-btn');
     setIsSaving(true);
@@ -422,7 +425,7 @@ const Preview = () => {
       dayNumber,
       isVideo,
       activity,
-      frame: currentFrame,
+      frame: frozenFrame,
     });
     
     const saved = await upsertActivity({
@@ -430,7 +433,7 @@ const Preview = () => {
       originalUrl: imageUrl,
       isVideo,
       activity,
-      frame: currentFrame,
+      frame: frozenFrame,
       duration,
       pr,
       dayNumber,
@@ -496,8 +499,9 @@ const Preview = () => {
   };
 
   // Handle scroll to update current frame
+  // IMPORTANT: Skip frame updates while saving to prevent scroll drift from overriding the selected frame
   const handleScroll = useCallback(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || isSaving) return;
 
     if (scrollRaf.current) {
       cancelAnimationFrame(scrollRaf.current);
@@ -505,7 +509,7 @@ const Preview = () => {
 
     scrollRaf.current = requestAnimationFrame(() => {
       const container = containerRef.current;
-      if (!container) return;
+      if (!container || isSaving) return;
 
       const centerX = container.scrollLeft + container.clientWidth / 2;
       let closestFrame: FrameType = currentFrame;
@@ -528,7 +532,7 @@ const Preview = () => {
 
       setScrollProgress(container.scrollLeft);
     });
-  }, [currentFrame]);
+  }, [currentFrame, isSaving]);
 
   // Generate low-res background for performance
   useEffect(() => {
