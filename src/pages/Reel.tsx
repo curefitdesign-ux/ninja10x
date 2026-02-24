@@ -1734,9 +1734,9 @@ const Reel = () => {
 
         {/* FIXED BOTTOM ZONE - Reaction pill + View Progress - compact sticky */}
         <div 
-          className="shrink-0 z-40 flex flex-col items-center gap-2"
+          className="shrink-0 z-40 flex flex-col items-center"
           style={{
-            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+            paddingBottom: '72px',
           }}
         >
           {(() => {
