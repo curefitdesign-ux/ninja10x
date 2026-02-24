@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { X, ChevronLeft, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause } from 'lucide-react';
 import PullToRefresh from '@/components/PullToRefresh';
+import ProfileMenu from '@/components/ProfileMenu';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
@@ -1147,7 +1148,8 @@ const Reel = () => {
             style={{ height: 56 }}
           >
             {/* Left side - Delete button */}
-            <div className="w-10 shrink-0">
+            <div className="flex items-center gap-1 shrink-0">
+              <ProfileMenu />
               {canEdit && (
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
