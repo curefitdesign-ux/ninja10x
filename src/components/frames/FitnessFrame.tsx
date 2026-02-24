@@ -30,7 +30,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
   }, [isVideo, imageUrl]);
 
   return (
-    <div className="w-full h-full rounded-[20px] overflow-hidden shadow-2xl relative" style={{ background: '#6B6B2A' }}>
+    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[20px] overflow-hidden shadow-2xl relative" style={{ background: '#6B6B2A' }}>
       {/* Grid background */}
       <div className="absolute inset-0">
         <div 

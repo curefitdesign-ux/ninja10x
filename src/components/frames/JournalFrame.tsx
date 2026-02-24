@@ -42,7 +42,7 @@ const JournalFrame = ({
   }, [isVideo, imageUrl]);
 
   return (
-    <div className="w-full h-full rounded-[24px] overflow-hidden shadow-2xl relative">
+    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative">
       {/* Background image */}
       <img 
         src={journalBg}

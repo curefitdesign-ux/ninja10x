@@ -48,7 +48,7 @@ const TokenFrame = ({
 
   return (
     // No overflow-hidden on outer — allows drop-shadow on perforated edges
-    <div className="w-full h-full relative">
+    <div className="w-[90%] mx-auto aspect-[9/16] relative">
 
       {/* ── STAMP FRAME BACKGROUND ── */}
       <img
