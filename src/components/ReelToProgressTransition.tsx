@@ -156,7 +156,7 @@ export default function ReelToProgressTransition({
                   {/* Dashed thread connecting stacks */}
                   <svg
                     className="absolute pointer-events-none"
-                    style={{ top: "40px", left: "45px", width: "calc(100% - 90px)", height: "60px", zIndex: 0 }}
+                    style={{ top: "30px", left: "45px", width: "calc(100% - 90px)", height: "60px", zIndex: 0 }}
                     preserveAspectRatio="none"
                     viewBox="0 0 400 60"
                     fill="none"
