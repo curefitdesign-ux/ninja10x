@@ -896,7 +896,7 @@ const Reel = () => {
         </div>
 
         {/* Video Player Card */}
-        <div className="relative z-10 flex-1 flex flex-col px-6 pb-3 min-h-0" style={{ marginTop: '-12px' }}>
+        <div className="relative z-10 flex-1 flex flex-col px-6 pb-3 min-h-0" style={{ marginTop: '-20px' }}>
           <div
             className="flex-1 relative rounded-3xl overflow-hidden min-h-0 max-w-[323px] mx-auto w-full"
             style={{
