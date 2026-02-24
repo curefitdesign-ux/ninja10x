@@ -1197,8 +1197,9 @@ const Reel = () => {
             className="flex items-center justify-between px-3 shrink-0"
             style={{ height: 56 }}
           >
-            {/* Left side - Delete button */}
+            {/* Left side - Profile + Delete */}
             <div className="flex items-center gap-1 shrink-0">
+              <ProfileMenu />
               {canEdit && (
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
