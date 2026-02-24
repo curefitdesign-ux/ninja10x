@@ -122,14 +122,14 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
                 src={imageUrl}
                 autoPlay loop muted playsInline
                 className="absolute inset-0 w-full h-full object-cover"
-                style={{ transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` }}
+                style={{ transform: (imagePosition.x || imagePosition.y || imageScale !== 1) ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` : `scale(${imageScale})` }}
               />
             ) : (
               <img 
                 src={imageUrl}
                 alt="Activity"
                 className="absolute inset-0 w-full h-full object-cover"
-                style={{ transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` }}
+                style={{ transform: (imagePosition.x || imagePosition.y || imageScale !== 1) ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` : `scale(${imageScale})` }}
               />
             )}
           </div>

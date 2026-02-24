@@ -43,7 +43,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
             style={{
-              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+              transform: (imagePosition.x || imagePosition.y || imageScale !== 1) ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` : `scale(${imageScale})`,
             }}
           />
         ) : (
@@ -52,7 +52,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
             alt="Activity"
             className="absolute inset-0 w-full h-full object-cover"
             style={{
-              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
+              transform: (imagePosition.x || imagePosition.y || imageScale !== 1) ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` : `scale(${imageScale})`,
             }}
           />
         )}

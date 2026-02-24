@@ -57,7 +57,7 @@ export default function StoryFrameRenderer({
     duration,          // RAW value — no formatting (matches Preview)
     pr,                // RAW value — no formatting (matches Preview)
     imagePosition: { x: 0, y: 0 },
-    imageScale: 1,
+    imageScale: 1.02,  // Slight overscale to prevent sub-pixel black gaps
     label1: config.secondaryMetric,
     label2: config.primaryMetric,
   };
