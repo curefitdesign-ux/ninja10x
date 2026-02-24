@@ -166,10 +166,6 @@ export default function ReelToProgressTransition({
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         transition={{ type: "spring", stiffness: 300, damping: 28, delay: wIdx * 0.06 }}
                       >
-                        {/* Header text */}
-                        <span className="text-[10px] font-medium text-center leading-tight" style={{ color: isGlowing ? 'rgba(200,180,255,0.9)' : 'rgba(255,255,255,0.35)', minHeight: '24px' }}>
-                          {isGlowing ? "What activity\ndid you do today?" : ws.isLocked ? "Coming soon" : ws.completedCount === 3 ? "Complete!" : `${ws.completedCount}/3 done`}
-                        </span>
 
                         {/* Fanned card stack */}
                         <motion.button
