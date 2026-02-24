@@ -9,28 +9,28 @@ import engineBadgeImg from '@/assets/progress/engine-badge.png';
 import basePlatformImg from '@/assets/progress/base-platform.png';
 
 // Tile positions for progress view
-// Tile positions: bottom (Day 1) to top (Day 12), zigzagging upward
-// Day 1 starts near the base platform, Day 12 ends at the engine badge
+// Tile positions indexed 0-11: index 0 = Day 12 (top/trophy), index 11 = Day 1 (bottom/platform)
+// Zigzag from bottom-right up to top-left matching the reference design
 const TILE_POSITIONS = [
-  { left: 42, top: 88 },  // Day 12 (index 0 → getDayFromIndex = 12)
-  { left: 34, top: 83 },  // Day 11
-  { left: 42, top: 78 },  // Day 10
-  { left: 50, top: 73 },  // Day 9
-  { left: 42, top: 68 },  // Day 8
-  { left: 34, top: 63 },  // Day 7
-  { left: 42, top: 58 },  // Day 6
-  { left: 50, top: 53 },  // Day 5
-  { left: 58, top: 48 },  // Day 4
-  { left: 50, top: 43 },  // Day 3
-  { left: 42, top: 38 },  // Day 2
-  { left: 34, top: 33 },  // Day 1
+  { left: 36, top: 20 },  // Day 12 — near trophy
+  { left: 42, top: 26 },  // Day 11
+  { left: 48, top: 32 },  // Day 10
+  { left: 60, top: 36 },  // Day 9 — far right (crystal milestone)
+  { left: 52, top: 42 },  // Day 8
+  { left: 44, top: 42 },  // Day 7 — same row as 8
+  { left: 36, top: 48 },  // Day 6
+  { left: 28, top: 54 },  // Day 5 — far left
+  { left: 36, top: 60 },  // Day 4
+  { left: 44, top: 60 },  // Day 3 — same row as 4
+  { left: 52, top: 66 },  // Day 2
+  { left: 44, top: 74 },  // Day 1 — near base platform
 ];
 
 const LABELS = [
-  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 4, left: 56 },
-  { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 50, left: 6 },
-  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 68, left: 66 },
-  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 88, left: 6 },
+  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 6, left: 56 },
+  { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 46, left: 4 },
+  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 64, left: 64 },
+  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 82, left: 4 },
 ];
 
 interface Activity {
@@ -190,7 +190,7 @@ export default function ReelToProgressTransition({
               {showTiles && (
                 <motion.div
                   className="absolute"
-                  style={{ left: "12%", top: "-2%", width: "32%", aspectRatio: "1" }}
+                  style={{ left: "10%", top: "2%", width: "34%", aspectRatio: "1" }}
                   initial={{ opacity: 0, scale: 0.5 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.1 }}
@@ -233,7 +233,7 @@ export default function ReelToProgressTransition({
               {showTiles && (
                 <motion.div
                   className="absolute"
-                  style={{ left: "5%", bottom: "-2%", width: "75%", maxWidth: "300px" }}
+                  style={{ left: "10%", bottom: "0%", width: "70%", maxWidth: "280px" }}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.25 }}
@@ -432,7 +432,7 @@ export default function ReelToProgressTransition({
                   {showTiles && (
                     <motion.div
                       className="absolute"
-                      style={{ left: "12%", top: "-2%", width: "32%", aspectRatio: "1" }}
+                      style={{ left: "10%", top: "2%", width: "34%", aspectRatio: "1" }}
                       initial={{ opacity: 0, scale: 0.5, y: 50 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.5, y: 50 }}
@@ -506,7 +506,7 @@ export default function ReelToProgressTransition({
                   {showTiles && (
                     <motion.div
                       className="absolute"
-                      style={{ left: "5%", bottom: "-2%", width: "75%", maxWidth: "300px" }}
+                      style={{ left: "10%", bottom: "0%", width: "70%", maxWidth: "280px" }}
                       initial={{ opacity: 0, y: 60, scale: 0.9 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 40, scale: 0.9 }}
