@@ -114,6 +114,8 @@ const Reel = () => {
   const DEFAULT_ADVANCE_DURATION = 10000; // 10 seconds for images
   const [autoAdvanceDuration, setAutoAdvanceDuration] = useState(DEFAULT_ADVANCE_DURATION);
   const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
+  // Delayed mirror of autoAdvanceProgress for the own-profile ring (needs 2-frame render for CSS transition)
+  const [ownRingProgress, setOwnRingProgress] = useState(0);
   const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoAdvanceStartRef = useRef<number>(0);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -611,6 +613,19 @@ const Reel = () => {
     setAutoAdvanceProgress(0);
     setAutoAdvanceDuration(DEFAULT_ADVANCE_DURATION); // Reset to default, will be updated when video loads
   }, [currentUserIndex, currentActivityIndex]);
+
+  // Mirror autoAdvanceProgress with a 1-frame delay for the own-profile ring CSS transition
+  useEffect(() => {
+    if (autoAdvanceProgress === 0) {
+      setOwnRingProgress(0);
+    } else {
+      // Delay by 1 frame so DOM renders at 0 first, then animates to 1
+      const raf = requestAnimationFrame(() => {
+        setOwnRingProgress(1);
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [autoAdvanceProgress]);
   
   // Auto-advance: only fire a SINGLE timeout to cycle, no interval for progress
   useEffect(() => {
@@ -1239,7 +1254,7 @@ const Reel = () => {
                           const segmentLength = (segmentAngle / 360) * circumference;
                           const offset = (startAngle / 360) * circumference;
 
-                          const progressLength = isCurrentSegment && autoAdvanceProgress > 0
+                          const progressLength = isCurrentSegment && ownRingProgress > 0
                             ? segmentLength
                             : isCurrentSegment ? 0 : segmentLength;
 
@@ -1252,13 +1267,13 @@ const Reel = () => {
                                   strokeDashoffset={-offset} strokeLinecap="round"
                                 />
                               )}
-                              <circle key={`own-seg-${segIdx}-${currentActivityIndex}`} cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
+                              <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
                                 stroke={isSegmentUnviewed && !isCurrentSegment ? 'rgba(255,255,255,0.25)' : 'url(#storyGradientOwn)'}
                                 strokeDasharray={`${isCurrentSegment ? progressLength : segmentLength} ${circumference}`}
                                 strokeDashoffset={-offset} strokeLinecap="round"
                                 style={{
                                   filter: (isSegmentViewed || isCurrentSegment) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
-                                  transition: isCurrentSegment && autoAdvanceProgress > 0
+                                  transition: isCurrentSegment && ownRingProgress > 0
                                     ? `stroke-dasharray ${autoAdvanceDuration}ms linear`
                                     : isCurrentSegment ? 'none' : 'stroke-dasharray 0.3s ease',
                                 }}
