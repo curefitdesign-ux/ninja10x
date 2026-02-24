@@ -2228,9 +2228,9 @@ const Reel = () => {
               bottom: 0,
               borderTopLeftRadius: 24,
               borderTopRightRadius: 24,
-              background: 'rgba(0, 0, 0, 0.5)',
-              backdropFilter: 'blur(40px)',
-              WebkitBackdropFilter: 'blur(40px)',
+              background: 'linear-gradient(180deg, rgba(58,42,99,0.97) 0%, rgba(26,21,48,0.99) 45%, rgba(6,6,8,1) 100%)',
+              backdropFilter: 'blur(60px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(60px) saturate(200%)',
               boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
             }}
             initial={{ height: 0, opacity: 0 }}
@@ -2287,8 +2287,18 @@ const Reel = () => {
                   userId: currentGroup?.userId,
                   createdAt: currentActivity.createdAt,
                 } : null}
-                publicFeed={[]}
-                myActivities={myActivities.map(a => ({ dayNumber: a.dayNumber, id: a.id, storageUrl: a.storageUrl, originalUrl: a.originalUrl, isVideo: a.isVideo, createdAt: a.createdAt }))}
+                publicFeed={publicFeed.map(p => ({
+                  id: p.id,
+                  storageUrl: p.storageUrl,
+                  originalUrl: p.originalUrl,
+                  isVideo: p.isVideo,
+                  dayNumber: p.dayNumber,
+                  avatarUrl: p.avatarUrl,
+                  displayName: p.displayName,
+                  userId: p.userId,
+                  createdAt: p.createdAt,
+                }))}
+                myActivities={myActivities.map(a => ({ dayNumber: a.dayNumber }))}
                 onStoryTap={handleProgressStoryTap}
                 isInline={true}
               />
