@@ -131,7 +131,7 @@ export default function ReactsSoFarSheet({
 
       {/* Bottom sheet */}
       <motion.div
-        className="fixed bottom-0 left-0 right-0 z-50 overflow-hidden"
+        className="fixed left-0 right-0 z-50 overflow-hidden"
         style={{
           borderTopLeftRadius: 24,
           borderTopRightRadius: 24,
@@ -140,6 +140,7 @@ export default function ReactsSoFarSheet({
           WebkitBackdropFilter: 'blur(40px)',
           maxHeight: '60vh',
           paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)',
+          bottom: '72px',
         }}
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
