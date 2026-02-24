@@ -204,6 +204,7 @@ export default function ReelToProgressTransition({
                               style={{
                                 width: spreadWidth,
                                 height: "100px",
+                                padding: "20px",
                                 ...(isGlowing ? {
                                   filter: "drop-shadow(0 0 20px rgba(140,100,220,0.5))",
                                 } : {}),
