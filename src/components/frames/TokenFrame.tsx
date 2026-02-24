@@ -38,19 +38,23 @@ const TokenFrame = ({
     }
   }, [isVideo, imageUrl]);
 
-  // Units passed directly (e.g. 'min', 'km', 'laps', 'sets')
   const durationUnit = label2 || 'min';
   const prUnit = label1 || '';
-
-  // Strip any non-numeric chars from raw values, keep them clean
   const durationValue = duration ? duration.replace(/[^0-9:]/g, '') : '';
   const prValue = pr ? pr.replace(/[^0-9.]/g, '') : '';
 
   return (
-    // No overflow-hidden on outer — allows drop-shadow on perforated edges
-    <div className="w-[90%] mx-auto aspect-[9/16] relative">
-
-      {/* ── USER PHOTO / VIDEO (inner window) — rendered FIRST, behind frame ── */}
+    <div
+      className="w-[90%] mx-auto relative"
+      style={{
+        aspectRatio: '9 / 16',
+        backgroundImage: `url(${tokenBg})`,
+        backgroundSize: '100% 100%',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* ── USER PHOTO / VIDEO — clipped inside the stamp window ── */}
       <div
         className="absolute overflow-hidden"
         style={{
@@ -58,10 +62,7 @@ const TokenFrame = ({
           left: '7%',
           right: '7%',
           bottom: '14%',
-          zIndex: 1,
           borderRadius: '2px',
-          background: 'transparent',
-          boxShadow: 'none',
         }}
       >
         {isVideo ? (
@@ -74,7 +75,7 @@ const TokenFrame = ({
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
             style={{
-              transform: (imagePosition.x || imagePosition.y || imageScale !== 1) ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` : `scale(${imageScale})`,
+              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
             }}
           />
         ) : (
@@ -83,24 +84,16 @@ const TokenFrame = ({
             alt="Activity"
             className="absolute inset-0 w-full h-full object-cover"
             style={{
-              transform: (imagePosition.x || imagePosition.y || imageScale !== 1) ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` : `scale(${imageScale})`,
+              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
             }}
           />
         )}
       </div>
 
-      {/* ── STAMP FRAME OVERLAY — on top of photo so perforated edges mask the image ── */}
-      <img
-        src={tokenBg}
-        alt=""
-        className="absolute inset-0 pointer-events-none"
-        style={{ width: '100%', height: '100%', objectFit: 'fill', zIndex: 2 }}
-      />
-
-      {/* ── TOP HEADER STRIP (Activity name + subtitle) ── */}
+      {/* ── TOP HEADER (Activity name + subtitle) ── */}
       <div
         className="absolute left-0 right-0 flex flex-col items-center"
-        style={{ top: '2%', zIndex: 10, paddingLeft: '8%', paddingRight: '8%' }}
+        style={{ top: '2%', zIndex: 5, paddingLeft: '8%', paddingRight: '8%' }}
       >
         <div
           style={{
@@ -133,7 +126,7 @@ const TokenFrame = ({
         </div>
       </div>
 
-      {/* ── STAMP BADGE (bottom-left of photo, overlapping) — larger ── */}
+      {/* ── STAMP BADGE ── */}
       <img
         src={tokenBadge}
         alt=""
@@ -142,13 +135,13 @@ const TokenFrame = ({
           bottom: '16%',
           left: '3%',
           width: '34%',
-          zIndex: 10,
+          zIndex: 5,
           objectFit: 'contain',
           opacity: 0.85,
         }}
       />
 
-      {/* ── BOTTOM METRICS STRIP — value + unit only ── */}
+      {/* ── BOTTOM METRICS ── */}
       <div
         className="absolute left-0 right-0 flex items-end justify-between"
         style={{
@@ -157,68 +150,33 @@ const TokenFrame = ({
           paddingLeft: '8%',
           paddingRight: '8%',
           paddingBottom: '3%',
-          zIndex: 10,
+          zIndex: 5,
         }}
       >
-        {/* Left metric — duration value + unit (e.g. "45 min") */}
         {durationValue ? (
           <div style={{ textAlign: 'left', lineHeight: 1 }}>
-            <span
-              style={{
-                fontFamily: "'Arial Black', 'Arial', sans-serif",
-                fontWeight: 900,
-                fontSize: 'clamp(18px, 7vw, 34px)',
-                color: '#0a4a72',
-                letterSpacing: '-0.01em',
-              }}
-            >
+            <span style={{ fontFamily: "'Arial Black', 'Arial', sans-serif", fontWeight: 900, fontSize: 'clamp(18px, 7vw, 34px)', color: '#0a4a72' }}>
               {durationValue}
             </span>
             {durationUnit && (
-              <span
-                style={{
-                  fontFamily: "'Arial Black', 'Arial', sans-serif",
-                  fontWeight: 900,
-                  fontSize: 'clamp(14px, 5vw, 26px)',
-                  color: '#0a4a72',
-                  marginLeft: '4px',
-                }}
-              >
+              <span style={{ fontFamily: "'Arial Black', 'Arial', sans-serif", fontWeight: 900, fontSize: 'clamp(14px, 5vw, 26px)', color: '#0a4a72', marginLeft: '4px' }}>
                 {durationUnit}
               </span>
             )}
           </div>
         ) : null}
 
-        {/* Right metric — pr value + unit (e.g. "05 km", "12 laps") */}
         {prValue && prUnit ? (
           <div style={{ textAlign: 'right', lineHeight: 1 }}>
-            <span
-              style={{
-                fontFamily: "'Arial Black', 'Arial', sans-serif",
-                fontWeight: 900,
-                fontSize: 'clamp(18px, 7vw, 34px)',
-                color: '#0a4a72',
-                letterSpacing: '-0.01em',
-              }}
-            >
+            <span style={{ fontFamily: "'Arial Black', 'Arial', sans-serif", fontWeight: 900, fontSize: 'clamp(18px, 7vw, 34px)', color: '#0a4a72' }}>
               {prValue}
             </span>
-            <span
-              style={{
-                fontFamily: "'Arial Black', 'Arial', sans-serif",
-                fontWeight: 900,
-                fontSize: 'clamp(14px, 5vw, 26px)',
-                color: '#0a4a72',
-                marginLeft: '4px',
-              }}
-            >
+            <span style={{ fontFamily: "'Arial Black', 'Arial', sans-serif", fontWeight: 900, fontSize: 'clamp(14px, 5vw, 26px)', color: '#0a4a72', marginLeft: '4px' }}>
               {prUnit}
             </span>
           </div>
         ) : null}
       </div>
-
     </div>
   );
 };
