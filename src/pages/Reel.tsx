@@ -212,9 +212,20 @@ const Reel = () => {
     loadActivities();
   }, [loadActivities]);
 
-  // Inject a "log activity" placeholder card at the end of current user's group
+  // Inject a "log activity" placeholder card only if user hasn't logged today
   const effectiveUserGroups = useMemo(() => {
     if (!user || myActivities.length >= 12) return userGroups;
+    
+    // Check if user already logged an activity today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const loggedToday = myActivities.some(a => {
+      const actDate = new Date(a.createdAt);
+      actDate.setHours(0, 0, 0, 0);
+      return actDate.getTime() === today.getTime();
+    });
+    if (loggedToday) return userGroups;
+
     const nextDay = myActivities.length + 1;
     return userGroups.map(group => {
       if (group.userId === user.id) {
@@ -240,7 +251,7 @@ const Reel = () => {
       }
       return group;
     });
-  }, [userGroups, user, myActivities.length]);
+  }, [userGroups, user, myActivities]);
 
   // MAIN NAVIGATION EFFECT: Determine where to land based on navigation intent
   // This runs once per navigation after data is loaded
