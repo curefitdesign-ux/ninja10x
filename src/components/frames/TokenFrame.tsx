@@ -50,54 +50,7 @@ const TokenFrame = ({
     // No overflow-hidden on outer — allows drop-shadow on perforated edges
     <div className="w-[90%] mx-auto aspect-[9/16] relative">
 
-      {/* ── STAMP FRAME BACKGROUND ── */}
-      <img
-        src={tokenBg}
-        alt=""
-        className="absolute inset-0 pointer-events-none"
-        style={{ width: '100%', height: '100%', objectFit: 'fill', zIndex: 1 }}
-      />
-
-      {/* ── TOP HEADER STRIP (Activity name + subtitle) ── */}
-      <div
-        className="absolute left-0 right-0 flex flex-col items-center"
-        style={{ top: '2%', zIndex: 10, paddingLeft: '8%', paddingRight: '8%' }}
-      >
-        {/* Activity name — large serif bold, navy blue */}
-        <div
-          style={{
-            fontFamily: "'Georgia', 'Times New Roman', serif",
-            fontWeight: 900,
-            fontSize: 'clamp(28px, 10vw, 52px)',
-            color: '#0a4a72',
-            textTransform: 'capitalize',
-            letterSpacing: '-0.01em',
-            lineHeight: 1,
-            textAlign: 'center',
-            fontStyle: 'italic',
-          }}
-        >
-          {activity || 'Activity'}
-        </div>
-
-        {/* CULT NINJA JOURNEY subtitle */}
-        <div
-          style={{
-            fontFamily: "'Arial', sans-serif",
-            fontWeight: 700,
-            fontSize: 'clamp(7px, 2.5vw, 11px)',
-            color: '#4a7a9b',
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            marginTop: '2px',
-            textAlign: 'center',
-          }}
-        >
-          · CULT NINJA JOURNEY ·
-        </div>
-      </div>
-
-      {/* ── USER PHOTO / VIDEO (inner window) ── */}
+      {/* ── USER PHOTO / VIDEO (inner window) — rendered FIRST, behind frame ── */}
       <div
         className="absolute overflow-hidden"
         style={{
@@ -105,7 +58,7 @@ const TokenFrame = ({
           left: '7%',
           right: '7%',
           bottom: '14%',
-          zIndex: 2,
+          zIndex: 1,
           borderRadius: '2px',
           background: 'transparent',
           boxShadow: 'none',
@@ -134,6 +87,50 @@ const TokenFrame = ({
             }}
           />
         )}
+      </div>
+
+      {/* ── STAMP FRAME OVERLAY — on top of photo so perforated edges mask the image ── */}
+      <img
+        src={tokenBg}
+        alt=""
+        className="absolute inset-0 pointer-events-none"
+        style={{ width: '100%', height: '100%', objectFit: 'fill', zIndex: 2 }}
+      />
+
+      {/* ── TOP HEADER STRIP (Activity name + subtitle) ── */}
+      <div
+        className="absolute left-0 right-0 flex flex-col items-center"
+        style={{ top: '2%', zIndex: 10, paddingLeft: '8%', paddingRight: '8%' }}
+      >
+        <div
+          style={{
+            fontFamily: "'Georgia', 'Times New Roman', serif",
+            fontWeight: 900,
+            fontSize: 'clamp(28px, 10vw, 52px)',
+            color: '#0a4a72',
+            textTransform: 'capitalize',
+            letterSpacing: '-0.01em',
+            lineHeight: 1,
+            textAlign: 'center',
+            fontStyle: 'italic',
+          }}
+        >
+          {activity || 'Activity'}
+        </div>
+        <div
+          style={{
+            fontFamily: "'Arial', sans-serif",
+            fontWeight: 700,
+            fontSize: 'clamp(7px, 2.5vw, 11px)',
+            color: '#4a7a9b',
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            marginTop: '2px',
+            textAlign: 'center',
+          }}
+        >
+          · CULT NINJA JOURNEY ·
+        </div>
       </div>
 
       {/* ── STAMP BADGE (bottom-left of photo, overlapping) — larger ── */}
