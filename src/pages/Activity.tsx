@@ -145,6 +145,14 @@ const Activity = () => {
   // Success animation states
   const [celebrateSuccess, setCelebrateSuccess] = useState(false);
 
+  // Handle triggerLog from Reel page "+" button
+  useEffect(() => {
+    if (location.state?.triggerLog) {
+      setPendingDayNumber(photos.length + 1);
+      setShowMediaSourceSheet(true);
+      navigate('/', { replace: true, state: null });
+    }
+  }, [location.state?.triggerLog, photos.length, navigate]);
 
   // Transition states
   const [transitionFromProgress, setTransitionFromProgress] = useState(false);
