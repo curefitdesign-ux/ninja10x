@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronLeft, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause } from 'lucide-react';
+import { X, ChevronLeft, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, CalendarDays } from 'lucide-react';
 import PullToRefresh from '@/components/PullToRefresh';
 import ProfileMenu from '@/components/ProfileMenu';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
@@ -1884,26 +1884,40 @@ const Reel = () => {
           })()}
 
 
-          {/* View Progress drawer handle — always visible */}
+          {/* View Progress drawer handle — collapsed state, stuck above nav */}
           <button
-            onClick={() => setShowProgressOverlay(!showProgressOverlay)}
-            className="w-full flex items-center justify-center gap-2 active:bg-white/5 transition-colors"
+            onClick={() => setShowProgressOverlay(true)}
+            className="w-full flex items-center gap-3 px-5 active:scale-[0.98] transition-transform"
             style={{
-              height: 48,
-              background: 'rgba(255, 255, 255, 0.04)',
+              height: 72,
+              background: 'rgba(255, 255, 255, 0.06)',
               backdropFilter: 'blur(40px) saturate(180%)',
               WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderBottom: 'none',
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1)',
             }}
           >
-            <motion.div
-              animate={{ rotate: showProgressOverlay ? 180 : 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            <div
+              className="flex items-center justify-center shrink-0"
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                background: 'rgba(255,255,255,0.08)',
+              }}
             >
-              <ChevronUp className="w-5 h-5 text-white/60" />
-            </motion.div>
-            <span className="text-white/80 text-sm font-medium">
-              {showProgressOverlay ? 'Close' : 'View Progress'}
-            </span>
+              <CalendarDays className="w-5 h-5 text-white/70" strokeWidth={1.5} />
+            </div>
+            <div className="flex-1 text-left">
+              <div className="text-white font-semibold text-[15px]">View My Progress</div>
+              <div className="text-white/50 text-xs">
+                You stayed active for Week {week} | Day {dayInWeek}
+              </div>
+            </div>
+            <ChevronUp className="w-5 h-5 text-white/40 shrink-0" />
           </button>
         </div>
       </div>
@@ -1984,19 +1998,41 @@ const Reel = () => {
             exit={{ height: 0, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 28 }}
           >
-            {/* Drawer handle inside overlay */}
+            {/* Drawer header — same as collapsed but chevron rotated */}
             <button
               onClick={() => setShowProgressOverlay(false)}
-              className="w-full flex items-center justify-center gap-2 active:bg-white/5 transition-colors"
-              style={{ height: 48 }}
+              className="w-full flex items-center gap-3 px-5 active:scale-[0.98] transition-transform"
+              style={{
+                height: 72,
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+              }}
             >
-              <motion.div animate={{ rotate: 180 }}>
-                <ChevronUp className="w-5 h-5 text-white/60" />
+              <div
+                className="flex items-center justify-center shrink-0"
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 12,
+                  background: 'rgba(255,255,255,0.08)',
+                }}
+              >
+                <CalendarDays className="w-5 h-5 text-white/70" strokeWidth={1.5} />
+              </div>
+              <div className="flex-1 text-left">
+                <div className="text-white font-semibold text-[15px]">View My Progress</div>
+                <div className="text-white/50 text-xs">
+                  You stayed active for Week {week} | Day {dayInWeek}
+                </div>
+              </div>
+              <motion.div
+                animate={{ rotate: 180 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              >
+                <ChevronUp className="w-5 h-5 text-white/40 shrink-0" />
               </motion.div>
-              <span className="text-white/80 text-sm font-medium">Close</span>
             </button>
 
-            <div className="overflow-hidden" style={{ height: 'calc(85vh - 48px)' }}>
+            <div className="overflow-hidden" style={{ height: 'calc(85vh - 72px)' }}>
               <ReelToProgressTransition
                 isOpen={true}
                 onClose={() => setShowProgressOverlay(false)}
