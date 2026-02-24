@@ -1884,7 +1884,13 @@ const Reel = () => {
           })()}
 
 
-          {/* View Progress drawer handle — collapsed state, stuck above nav */}
+        </div>
+
+        {/* View Progress drawer handle — fixed right above nav bar */}
+        <div
+          className="fixed left-0 right-0 z-[9998]"
+          style={{ bottom: '72px' }}
+        >
           <button
             onClick={() => setShowProgressOverlay(true)}
             className="w-full flex items-center gap-3 px-5 active:scale-[0.98] transition-transform"
