@@ -18,7 +18,7 @@ const Journal2Frame = ({ imageUrl, activity, week, day, duration, pr, imagePosit
   const metricLabel = label1 || 'Metric';
   const durationLabel = label2 || 'Duration';
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden bg-white shadow-2xl relative">
+    <div className="w-full h-full rounded-[24px] overflow-hidden bg-white shadow-2xl relative">
       {/* Paperclip - positioned at top center, overlapping the image */}
       <div className="absolute top-[-20px] left-1/2 -translate-x-1/2 z-20 w-16 h-24">
         <img 
