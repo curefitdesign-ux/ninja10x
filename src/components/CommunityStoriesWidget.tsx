@@ -32,9 +32,16 @@ const CommunityStoriesWidget = () => {
 
   useEffect(() => {
     fetchPublicFeed().then(activities => {
-      // Filter out current user's activities
+      // Filter out current user's activities, then keep only the latest per user
       const others = activities.filter(a => a.userId !== user?.id);
-      setCommunityActivities(others.slice(0, 8));
+      const latestByUser = new Map<string, LocalActivity>();
+      for (const a of others) {
+        const existing = latestByUser.get(a.userId);
+        if (!existing || new Date(a.createdAt) > new Date(existing.createdAt)) {
+          latestByUser.set(a.userId, a);
+        }
+      }
+      setCommunityActivities(Array.from(latestByUser.values()).slice(0, 8));
       setLoaded(true);
     });
   }, [user?.id]);
