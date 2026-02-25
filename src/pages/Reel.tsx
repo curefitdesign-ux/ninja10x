@@ -245,28 +245,17 @@ const Reel = () => {
       createdAt: new Date().toISOString(),
     };
 
-    // Check if user already has a group
-    const hasGroup = userGroups.some(g => g.userId === user.id);
-    if (hasGroup) {
-      return userGroups.map(group => {
-        if (group.userId === user.id) {
-          return {
-            ...group,
-            activities: [...group.activities, logActivityEntry],
-          };
-        }
-        return group;
-      });
-    }
-
-    // User has no group (0 activities) — create one with just the placeholder
-    const newGroup: UserStoryGroup = {
+    // When user hasn't logged today, show ONLY the placeholder — not their past stories
+    const myPlaceholderGroup: UserStoryGroup = {
       userId: user.id,
       displayName: profile?.display_name || 'You',
       avatarUrl: profile?.avatar_url || '',
       activities: [logActivityEntry],
     };
-    return [newGroup, ...userGroups];
+
+    // Remove user's existing group (past stories) and prepend placeholder-only group
+    const othersGroups = userGroups.filter(g => g.userId !== user.id);
+    return [myPlaceholderGroup, ...othersGroups];
   }, [userGroups, user, myActivities, profile]);
 
   // MAIN NAVIGATION EFFECT: Determine where to land based on navigation intent
