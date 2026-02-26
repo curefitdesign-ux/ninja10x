@@ -53,7 +53,7 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
       className="fixed left-1/2 -translate-x-1/2"
       style={{
         bottom: "calc(max(env(safe-area-inset-bottom, 10px), 10px) + 16px)",
-        zIndex: 9999,
+        zIndex: 40,
       }}
     >
       {/* Outer container with frosted glass */}
