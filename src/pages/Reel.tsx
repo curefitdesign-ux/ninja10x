@@ -1513,7 +1513,7 @@ const Reel = () => {
           }}
         >
           {/* Reel cards fill the available middle container space */}
-          <div className="relative flex-1 min-h-0 flex items-center justify-center py-0">
+          <div className="relative flex-1 min-h-0 flex items-center justify-center">
           {/* Previous user peek card - 12% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
@@ -1605,7 +1605,7 @@ const Reel = () => {
             className="relative flex items-center justify-center"
             style={{ 
               width: '70%',
-              height: '100%',
+              height: 'calc(100% - 60px)',
               x: dragX,
               opacity: cardOpacity,
               rotateY: cardRotate,
@@ -1685,7 +1685,7 @@ const Reel = () => {
                               setShowMediaSourceSheet(true);
                             }}
                             style={{
-                              height: '100%',
+                              height: '70%',
                               background: 'linear-gradient(180deg, rgba(28,28,32,1) 0%, rgba(18,18,22,1) 100%)',
                               border: '1px solid rgba(255,255,255,0.08)',
                               borderRadius: 20,
@@ -1911,7 +1911,7 @@ const Reel = () => {
             </div>
 
             {/* React row sits below the reel card with a fixed 10px gap */}
-            <div className="shrink-0 flex flex-col items-center pb-28">
+            <div className="shrink-0 flex flex-col items-center pb-4">
           {(() => {
             // Lock content if user's profile is private OR they haven't shared any public activity
             const isContentLocked = !isOwnStory && !profile?.stories_public;
