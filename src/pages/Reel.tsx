@@ -1131,11 +1131,11 @@ const Reel = () => {
 
   return (
     <DynamicBlurBackground imageUrl={mediaUrl}>
-      {/* Fixed height container - no vertical scroll */}
+      {/* Single viewport — 3 zones: top 20% header, center 60% content, bottom 20% nav space */}
       <div 
-        className="fixed top-0 left-0 right-0 flex flex-col"
+        className="fixed inset-0 flex flex-col"
         style={{ 
-          bottom: '80px',
+          height: '100dvh',
           overflow: 'hidden',
         }}
       >
@@ -1146,11 +1146,12 @@ const Reel = () => {
           onNudge={triggerShake}
         />
 
-        {/* FIXED HEADER ZONE - Single row: delete, avatars, close + user name below */}
+        {/* TOP ZONE — 20% — profile strip + user name */}
         <div 
-          className="shrink-0 z-50 flex flex-col"
+          className="z-50 flex flex-col justify-end"
           style={{ 
-            paddingTop: 'max(env(safe-area-inset-top, 20px), 20px)',
+            height: '20%',
+            paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
           }}
         >
           {/* Row 1: Delete + Avatars + Close - all in one row */}
@@ -1503,10 +1504,10 @@ const Reel = () => {
           </div>
         </div>
 
-        {/* MAIN CONTENT ZONE - flexible middle section with peek cards */}
+        {/* CENTER ZONE — 60% — story cards + react button */}
         <div
-          className="flex items-center justify-center z-30 relative flex-1 min-h-0"
-          style={{ background: 'transparent', overflow: 'hidden' }}
+          className="flex items-center justify-center z-30 relative"
+          style={{ height: '60%', overflow: 'hidden' }}
         >
           {/* Previous user peek card - 12% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
@@ -1904,11 +1905,11 @@ const Reel = () => {
           )}
         </div>
 
-        {/* FIXED BOTTOM ZONE - Reaction pill + View Progress - compact sticky */}
+        {/* BOTTOM ZONE — 20% — reserved for floating nav bar */}
         <div 
-          className="shrink-0 z-40 flex flex-col items-center"
+          className="z-40 flex flex-col items-center justify-start"
           style={{
-            paddingBottom: '8px',
+            height: '20%',
           }}
         >
           {(() => {
