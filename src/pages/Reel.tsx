@@ -1491,7 +1491,7 @@ const Reel = () => {
           </div>
 
           {/* Row 2: Current user name/info — centered */}
-          <div className="shrink-0 pb-2">
+          <div className="shrink-0 pb-1">
             <div className="flex items-center justify-center gap-2" style={{ height: 20 }}>
               <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
               <span className="text-white/40">•</span>
@@ -1507,8 +1507,8 @@ const Reel = () => {
 
         {/* MAIN CONTENT ZONE - flexible middle section with peek cards */}
         <div
-          className="flex items-center justify-center z-30 relative flex-1"
-          style={{ background: 'transparent', overflow: 'hidden', minHeight: '50vh', height: '65dvh' }}
+          className="flex items-center justify-center z-30 relative flex-1 min-h-0 py-2"
+          style={{ background: 'transparent', overflow: 'hidden' }}
         >
           {/* Previous user peek card - 12% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
@@ -1908,7 +1908,7 @@ const Reel = () => {
 
         {/* FIXED BOTTOM ZONE - Reaction pill + View Progress - compact sticky */}
         <div 
-          className="shrink-0 z-40 flex flex-col items-center"
+          className="shrink-0 z-40 flex flex-col items-center pt-2"
           style={{
             paddingBottom: 'calc(max(env(safe-area-inset-bottom, 12px), 12px) + 66px)',
           }}
