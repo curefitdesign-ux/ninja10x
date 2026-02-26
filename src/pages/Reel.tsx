@@ -1909,8 +1909,8 @@ const Reel = () => {
           )}
             </div>
 
-            {/* React row is inside the middle container with 20px spacing below cards */}
-            <div className="absolute left-0 right-0 bottom-20 flex flex-col items-center">
+            {/* React row is inside the middle container; lifted +80px on iPad/desktop */}
+            <div className="absolute left-0 right-0 bottom-20 md:bottom-40 flex flex-col items-center">
           {(() => {
             // Lock content if user's profile is private OR they haven't shared any public activity
             const isContentLocked = !isOwnStory && !profile?.stories_public;
