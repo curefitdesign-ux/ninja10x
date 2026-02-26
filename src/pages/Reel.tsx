@@ -1685,7 +1685,7 @@ const Reel = () => {
                               setShowMediaSourceSheet(true);
                             }}
                             style={{
-                              height: '70%',
+                              height: '100%',
                               background: 'linear-gradient(180deg, rgba(28,28,32,1) 0%, rgba(18,18,22,1) 100%)',
                               border: '1px solid rgba(255,255,255,0.08)',
                               borderRadius: 20,
