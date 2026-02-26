@@ -226,7 +226,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25 }}
-          className="fixed inset-0 z-[100] flex flex-col"
+          className="fixed inset-0 z-50 flex flex-col"
           style={{ height: '100dvh' }}
         >
           {/* Full-screen blur background */}
