@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import { Map, BarChart3 } from "lucide-react";
 import { useState } from "react";
-import { createPortal } from "react-dom";
+
 import { useNavigate, useLocation } from "react-router-dom";
 
 const BackIcon = ({ className }: { className?: string }) => (
@@ -151,7 +151,7 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
     </div>
   );
 
-  return typeof document !== "undefined" ? createPortal(nav, document.body) : nav;
+  return nav;
 };
 
 export default BottomNavBar;

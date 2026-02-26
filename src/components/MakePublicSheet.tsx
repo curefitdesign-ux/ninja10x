@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
+import { usePortalContainer } from '@/hooks/use-portal-container';
 import { Globe, Lock, Sparkles, Eye, X, Check } from 'lucide-react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,6 +36,7 @@ export default function MakePublicSheet({
   thumbnailUrl,
 }: MakePublicSheetProps) {
 
+  const portalContainer = usePortalContainer();
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);
 
@@ -264,6 +266,6 @@ export default function MakePublicSheet({
         </>
       )}
     </AnimatePresence>,
-    document.body
+    portalContainer
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { usePortalContainer } from '@/hooks/use-portal-container';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
@@ -79,6 +80,7 @@ const playNotificationSound = () => {
 
 export default function ReactionNotificationPill() {
   const { user } = useAuth();
+  const portalContainer = usePortalContainer();
   const [notification, setNotification] = useState<ReactionNotification | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [showNotificationSheet, setShowNotificationSheet] = useState(false);
@@ -261,7 +263,7 @@ export default function ReactionNotificationPill() {
             </motion.div>
           </motion.div>
         </AnimatePresence>,
-        document.body
+        portalContainer
       )}
     </>
   );

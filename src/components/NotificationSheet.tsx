@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { usePortalContainer } from '@/hooks/use-portal-container';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft } from 'lucide-react';
@@ -69,6 +70,7 @@ interface NotificationSheetProps {
 export default function NotificationSheet({ isOpen, onClose, onNotificationCountChange, onLatestNotificationChange }: NotificationSheetProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const portalContainer = usePortalContainer();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const userActivitiesRef = useRef<Set<string>>(new Set());
 
@@ -353,5 +355,5 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
 
   // Portal to body to avoid being clipped by transformed/scroll containers on mobile.
   if (typeof document === 'undefined') return null;
-  return createPortal(ui, document.body);
+  return createPortal(ui, portalContainer);
 }
