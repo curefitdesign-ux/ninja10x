@@ -1632,7 +1632,7 @@ const Reel = () => {
                     className="relative flex items-center justify-center"
                     style={{ 
                       width: '100%',
-                      height: '100%',
+                      maxHeight: '100%',
                       background: 'transparent',
                     }}
                   >
