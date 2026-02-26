@@ -1514,7 +1514,7 @@ const Reel = () => {
         >
           <div className="h-full min-h-0 flex flex-col relative">
             {/* Reel cards fill the available middle container space */}
-            <div className="relative flex-1 min-h-0 flex items-center justify-center" style={{ maxHeight: '70vh' }}>
+            <div className="relative flex-1 min-h-0 flex items-center justify-center" style={{ maxHeight: 'min(70vh, calc(100% - 60px))' }}>
           {/* Previous user peek card - 12% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
