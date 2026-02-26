@@ -1131,12 +1131,12 @@ const Reel = () => {
 
   return (
     <DynamicBlurBackground imageUrl={mediaUrl}>
-      {/* Single viewport — 3 zones: top 20% header, center 60% content, bottom 20% nav space */}
+      {/* Single viewport — no scroll. Top: profile, Center: flex-1 card, Bottom: react + nav space */}
       <div 
-        className="fixed inset-0 flex flex-col"
+        className="absolute inset-0 flex flex-col"
         style={{ 
-          height: '100dvh',
           overflow: 'hidden',
+          touchAction: 'none',
         }}
       >
         {/* Story Hint - one-time tutorial with shake nudge */}
@@ -1146,12 +1146,11 @@ const Reel = () => {
           onNudge={triggerShake}
         />
 
-        {/* TOP ZONE — 20% — profile strip + user name */}
+        {/* TOP ZONE — fixed height — profile strip + user name */}
         <div 
-          className="z-50 flex flex-col justify-end"
+          className="z-50 flex flex-col justify-end shrink-0"
           style={{ 
-            height: '12%',
-            paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
+            paddingTop: 'max(env(safe-area-inset-top, 8px), 8px)',
           }}
         >
           {/* Row 1: Delete + Avatars + Close - all in one row */}
@@ -1504,10 +1503,10 @@ const Reel = () => {
           </div>
         </div>
 
-        {/* CENTER ZONE — 60% — story cards + react button */}
+        {/* CENTER ZONE — fills remaining space — story cards + react button */}
         <div
-          className="flex items-center justify-center z-30 relative"
-          style={{ height: '70%', overflow: 'hidden' }}
+          className="flex-1 flex items-center justify-center z-30 relative min-h-0"
+          style={{ overflow: 'hidden' }}
         >
           {/* Previous user peek card - 12% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
@@ -1905,11 +1904,12 @@ const Reel = () => {
           )}
         </div>
 
-        {/* BOTTOM ZONE — 20% — reserved for floating nav bar */}
+        {/* BOTTOM ZONE — fixed height — react pill + space for floating nav */}
         <div 
-          className="z-40 flex flex-col items-center justify-start"
+          className="z-40 flex flex-col items-center justify-start shrink-0"
           style={{
-            height: '18%',
+            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 10px), 10px) + 70px)',
+            paddingTop: 8,
           }}
         >
           {(() => {
@@ -1953,7 +1953,7 @@ const Reel = () => {
                   </button>
                 )}
                 {/* Reaction pill + Share icon row */}
-                <div className="flex items-center justify-center gap-3 px-4" style={{ marginTop: '-12px', marginBottom: '0px' }}>
+                <div className="flex items-center justify-center gap-3 px-4">
                   {/* Liquid glass reaction pill */}
                   <button
                     onClick={() => isOwnStory ? (currentReactions.total > 0 && setShowReactsSheet(true)) : setShowSendReactionSheet(true)}
