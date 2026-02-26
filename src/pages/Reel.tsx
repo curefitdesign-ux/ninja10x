@@ -1920,7 +1920,7 @@ const Reel = () => {
                 className="w-full flex flex-col items-center"
                 style={{
                   pointerEvents: isContentLocked ? 'none' : 'auto',
-                  opacity: (isTransitioning || isContentLocked) ? 0 : 1,
+                  opacity: isTransitioning ? 0 : 1,
                   transform: isTransitioning ? 'translateY(-100px)' : 'translateY(0)',
                   transition: 'opacity 0.2s ease, transform 0.2s ease',
                 }}
