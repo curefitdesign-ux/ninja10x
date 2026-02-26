@@ -1510,9 +1510,9 @@ const Reel = () => {
             paddingBottom: 'calc(max(env(safe-area-inset-bottom, 10px), 10px) + 108px)',
           }}
         >
-          <div className="h-full min-h-0 flex flex-col">
+          <div className="h-full min-h-0 flex flex-col relative">
             {/* Reel cards fill the available middle container space */}
-            <div className="relative flex-1 min-h-0 flex items-center justify-center">
+            <div className="relative flex-1 min-h-0 flex items-center justify-center pb-5">
           {/* Previous user peek card - 12% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
@@ -1910,7 +1910,7 @@ const Reel = () => {
             </div>
 
             {/* React row is inside the middle container with 20px spacing below cards */}
-            <div className="shrink-0 pt-5 flex flex-col items-center">
+            <div className="absolute left-0 right-0 bottom-20 flex flex-col items-center">
           {(() => {
             // Lock content if user's profile is private OR they haven't shared any public activity
             const isContentLocked = !isOwnStory && !profile?.stories_public;
