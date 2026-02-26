@@ -1629,10 +1629,9 @@ const Reel = () => {
                 
                 return (
                   <div
-                    className="relative flex items-center justify-center"
+                    className="relative flex-1 min-h-0 flex items-center justify-center"
                     style={{ 
                       width: '100%',
-                      maxHeight: '100%',
                       background: 'transparent',
                     }}
                   >
