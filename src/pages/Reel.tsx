@@ -1957,7 +1957,7 @@ const Reel = () => {
                 <div className="flex items-center justify-center gap-3 px-4">
                   {/* Liquid glass reaction pill */}
                   <button
-                    onClick={() => isOwnStory ? (currentReactions.total > 0 && setShowReactsSheet(true)) : setShowSendReactionSheet(true)}
+                    onClick={() => (isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true))}
                     className="relative overflow-hidden active:scale-[0.97] transition-transform"
                     style={{
                       minWidth: currentReactions.total > 0 ? 180 : 160,
@@ -2090,65 +2090,61 @@ const Reel = () => {
       {/* Progress drawer removed — now a standalone page via nav */}
 
       {/* Reacts bottom sheet for own stories */}
-      <AnimatePresence>
-        {showReactsSheet &&
-          createPortal(
-            <ReactsSoFarSheet
-              activityId={currentActivity?.id || ''}
-              total={currentReactions.total}
-              reactions={currentReactions.reactions}
-              reactorProfiles={currentReactions.reactorProfiles}
-              onClose={() => setShowReactsSheet(false)}
-              onReactionRemoved={loadActivities}
-            />,
-            portalContainer,
-          )}
-      </AnimatePresence>
+      {showReactsSheet &&
+        createPortal(
+          <ReactsSoFarSheet
+            activityId={currentActivity?.id || ''}
+            total={currentReactions.total}
+            reactions={currentReactions.reactions}
+            reactorProfiles={currentReactions.reactorProfiles}
+            onClose={() => setShowReactsSheet(false)}
+            onReactionRemoved={loadActivities}
+          />,
+          portalContainer,
+        )}
 
       {/* Send reaction sheet for all stories */}
-      <AnimatePresence>
-        {showSendReactionSheet &&
-          createPortal(
-            <SendReactionSheet
-              activityId={currentActivity?.id}
-              currentUserId={user?.id}
-              onReact={handleReact}
-              onClose={() => setShowSendReactionSheet(false)}
-              onViewReactions={() => {
-                setShowSendReactionSheet(false);
-                setShowReactsSheet(true);
-              }}
-              onReactionRemoved={(reactionType) => {
-                // Update local state without reloading
-                setLocalReactions(prev => {
-                  const existing = prev[currentActivity!.id];
-                  if (!existing) return prev;
-                  
-                  const newReactions = { ...existing.reactions };
-                  if (newReactions[reactionType]) {
-                    newReactions[reactionType] = {
-                      ...newReactions[reactionType],
-                      count: Math.max(0, newReactions[reactionType].count - 1),
-                      userReacted: false,
-                    };
-                  }
-                  
-                  return {
-                    ...prev,
-                    [currentActivity!.id]: {
-                      total: Math.max(0, existing.total - 1),
-                      reactions: newReactions,
-                      reactorProfiles: existing.reactorProfiles.filter(p => p.userId !== user?.id),
-                    },
+      {showSendReactionSheet &&
+        createPortal(
+          <SendReactionSheet
+            activityId={currentActivity?.id}
+            currentUserId={user?.id}
+            onReact={handleReact}
+            onClose={() => setShowSendReactionSheet(false)}
+            onViewReactions={() => {
+              setShowSendReactionSheet(false);
+              setShowReactsSheet(true);
+            }}
+            onReactionRemoved={(reactionType) => {
+              // Update local state without reloading
+              setLocalReactions(prev => {
+                const existing = prev[currentActivity!.id];
+                if (!existing) return prev;
+
+                const newReactions = { ...existing.reactions };
+                if (newReactions[reactionType]) {
+                  newReactions[reactionType] = {
+                    ...newReactions[reactionType],
+                    count: Math.max(0, newReactions[reactionType].count - 1),
+                    userReacted: false,
                   };
-                });
-              }}
-              totalReactions={currentReactions.total}
-              reactorProfiles={currentReactions.reactorProfiles}
-            />,
-            portalContainer,
-          )}
-      </AnimatePresence>
+                }
+
+                return {
+                  ...prev,
+                  [currentActivity!.id]: {
+                    total: Math.max(0, existing.total - 1),
+                    reactions: newReactions,
+                    reactorProfiles: existing.reactorProfiles.filter(p => p.userId !== user?.id),
+                  },
+                };
+              });
+            }}
+            totalReactions={currentReactions.total}
+            reactorProfiles={currentReactions.reactorProfiles}
+          />,
+          portalContainer,
+        )}
 
 
       {/* Delete confirmation dialog - Liquid glass design */}
