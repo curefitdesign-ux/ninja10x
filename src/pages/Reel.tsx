@@ -1133,9 +1133,9 @@ const Reel = () => {
     <DynamicBlurBackground imageUrl={mediaUrl}>
       {/* Fixed height container - no vertical scroll */}
       <div 
-        className="fixed inset-0 flex flex-col"
+        className="fixed top-0 left-0 right-0 flex flex-col"
         style={{ 
-          height: 'calc(100dvh - 80px)',
+          bottom: '80px',
           overflow: 'hidden',
         }}
       >
