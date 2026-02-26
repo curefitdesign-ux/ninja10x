@@ -52,7 +52,7 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
     <div
       className="fixed left-1/2 -translate-x-1/2"
       style={{
-        bottom: "max(env(safe-area-inset-bottom, 10px), 10px)",
+        bottom: "calc(max(env(safe-area-inset-bottom, 10px), 10px) + 16px)",
         zIndex: 9999,
       }}
     >
