@@ -1911,7 +1911,7 @@ const Reel = () => {
             </div>
 
             {/* React row sits below the reel card with a fixed 10px gap */}
-            <div className="shrink-0 flex flex-col items-center pb-4">
+            <div className="shrink-0 flex flex-col items-center pb-20">
           {(() => {
             // Lock content if user's profile is private OR they haven't shared any public activity
             const isContentLocked = !isOwnStory && !profile?.stories_public;
