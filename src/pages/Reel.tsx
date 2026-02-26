@@ -1605,7 +1605,7 @@ const Reel = () => {
             className="relative flex items-center justify-center"
             style={{ 
               width: '70%',
-              height: '100%',
+              height: 'calc(100% - 36px)',
               x: dragX,
               opacity: cardOpacity,
               rotateY: cardRotate,
@@ -1911,7 +1911,7 @@ const Reel = () => {
             </div>
 
             {/* React row sits below the reel card with a fixed 10px gap */}
-            <div className="shrink-0 flex flex-col items-center">
+            <div className="shrink-0 flex flex-col items-center pb-2">
           {(() => {
             // Lock content if user's profile is private OR they haven't shared any public activity
             const isContentLocked = !isOwnStory && !profile?.stories_public;
