@@ -1513,7 +1513,7 @@ const Reel = () => {
           }}
         >
           {/* Reel cards fill the available middle container space */}
-          <div className="relative flex-1 min-h-0 flex items-center justify-center">
+          <div className="relative flex items-center justify-center" style={{ height: '70vh' }}>
           {/* Previous user peek card - 12% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
@@ -1605,7 +1605,7 @@ const Reel = () => {
             className="relative flex items-center justify-center"
             style={{ 
               width: '70%',
-              height: 'calc(100% - 60px)',
+              height: '100%',
               x: dragX,
               opacity: cardOpacity,
               rotateY: cardRotate,
