@@ -1131,7 +1131,7 @@ const Reel = () => {
 
   return (
     <DynamicBlurBackground imageUrl={mediaUrl}>
-      {/* Single viewport — no scroll. Top: profile, Center: flex-1 card, Bottom: react + nav space */}
+      {/* Single viewport — no scroll */}
       <div 
         className="absolute inset-0 flex flex-col"
         style={{ 
@@ -1503,10 +1503,10 @@ const Reel = () => {
           </div>
         </div>
 
-        {/* CENTER ZONE — fills remaining space — story cards + react button */}
+        {/* CENTER ZONE — fills remaining space between profile and react pill */}
         <div
-          className="flex-1 flex items-center justify-center z-30 relative min-h-0"
-          style={{ overflow: 'hidden' }}
+          className="flex items-center justify-center z-30 relative"
+          style={{ flex: '1 1 0%', minHeight: 0, maxHeight: '100%' }}
         >
           {/* Previous user peek card - 12% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
@@ -1903,17 +1903,15 @@ const Reel = () => {
             </motion.button>
           )}
         </div>
+      </div>{/* end overflow:hidden flex container */}
 
-        {/* BOTTOM ZONE — fixed height — react pill + space for floating nav */}
-        <div 
-          className="z-40 flex flex-col items-center justify-start shrink-0"
-          style={{
-            /* Keep reaction row above floating nav across mobile + desktop/iPad framed mode */
-            minHeight: 168,
-            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 10px), 10px) + 108px)',
-            paddingTop: 8,
-          }}
-        >
+      {/* BOTTOM ZONE — positioned outside overflow:hidden, above nav bar */}
+      <div 
+        className="absolute left-0 right-0 z-50 flex flex-col items-center"
+        style={{
+          bottom: 90,
+        }}
+      >
           {(() => {
             // Lock content if user's profile is private OR they haven't shared any public activity
             const isContentLocked = !isOwnStory && !profile?.stories_public;
@@ -2083,9 +2081,6 @@ const Reel = () => {
               </div>
             );
           })()}
-
-
-        </div>
 
 
         </div>
