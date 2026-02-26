@@ -1513,7 +1513,7 @@ const Reel = () => {
           }}
         >
           {/* Reel cards fill the available middle container space */}
-          <div className="relative flex-1 min-h-0 flex flex-col items-center justify-center">
+          <div className="relative flex-1 min-h-0 flex items-center justify-center py-0">
           {/* Previous user peek card - 12% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
@@ -1629,9 +1629,10 @@ const Reel = () => {
                 
                 return (
                   <div
-                    className="relative flex-1 min-h-0 flex items-center justify-center"
+                    className="relative flex items-center justify-center"
                     style={{ 
                       width: '100%',
+                      height: '100%',
                       background: 'transparent',
                     }}
                   >
@@ -1907,9 +1908,10 @@ const Reel = () => {
               <ChevronRight className="w-7 h-7 text-white drop-shadow-lg" />
             </motion.button>
           )}
+            </div>
 
-            {/* React row inside the reel container */}
-            <div className="shrink-0 flex flex-col items-center pt-2">
+            {/* React row sits below the reel card with a fixed 10px gap */}
+            <div className="shrink-0 flex flex-col items-center pb-28">
           {(() => {
             // Lock content if user's profile is private OR they haven't shared any public activity
             const isContentLocked = !isOwnStory && !profile?.stories_public;
@@ -2080,7 +2082,6 @@ const Reel = () => {
             );
           })()}
             </div>
-          </div>{/* end reel card container */}
         </div>
       </div>{/* end overflow:hidden flex container */}
 
