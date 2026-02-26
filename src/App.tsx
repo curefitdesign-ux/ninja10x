@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-route
 import { LayoutGroup } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { PortalContainerProvider } from "@/hooks/use-portal-container";
 import NotificationCenter from "@/components/NotificationCenter";
 import ReactionNotificationPill from "@/components/ReactionNotificationPill";
 import BottomNavBar from "@/components/BottomNavBar";
@@ -125,6 +127,60 @@ const AnimatedRoutes = () => {
   );
 };
 
+const MobileFrame = ({ children }: { children: React.ReactNode }) => {
+  const isMobile = useIsMobile();
+  const [frameEl, setFrameEl] = useState<HTMLDivElement | null>(null);
+  const frameRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) setFrameEl(node);
+  }, []);
+
+  if (isMobile) {
+    return (
+      <PortalContainerProvider value={null}>
+        {children}
+      </PortalContainerProvider>
+    );
+  }
+
+  return (
+    <div
+      className="fixed inset-0 flex items-center justify-center"
+      style={{
+        background: "linear-gradient(135deg, #1a1625 0%, #0d0b14 50%, #161220 100%)",
+      }}
+    >
+      <div
+        className="relative flex-shrink-0 overflow-hidden"
+        style={{
+          width: 375,
+          height: 812,
+          borderRadius: 44,
+          boxShadow: `
+            0 0 0 1px rgba(255,255,255,0.08),
+            0 0 0 3px rgba(0,0,0,0.6),
+            0 0 0 4px rgba(255,255,255,0.05),
+            0 40px 80px rgba(0,0,0,0.6),
+            0 10px 30px rgba(0,0,0,0.4)
+          `,
+        }}
+      >
+        <div
+          ref={frameRef}
+          className="relative w-full h-full overflow-hidden"
+          style={{
+            borderRadius: 44,
+            transform: "translateZ(0)",
+          }}
+        >
+          <PortalContainerProvider value={frameEl}>
+            {children}
+          </PortalContainerProvider>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const App = () => {
   useEffect(() => enableAutoMotion(), []);
 
@@ -134,10 +190,12 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <NotificationCenter />
-          <ReactionNotificationPill />
-          <AnimatedRoutes />
-          <BottomNavBar />
+          <MobileFrame>
+            <NotificationCenter />
+            <ReactionNotificationPill />
+            <AnimatedRoutes />
+            <BottomNavBar />
+          </MobileFrame>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

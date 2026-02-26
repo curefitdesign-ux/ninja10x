@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
+import { usePortalContainer } from '@/hooks/use-portal-container';
 import { useRef } from 'react';
 import { Camera, Image, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +20,7 @@ interface MediaSourceSheetProps {
 const MediaSourceSheet = ({ isOpen, onClose, dayNumber, activity, preserveActivity }: MediaSourceSheetProps) => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const portalContainer = usePortalContainer();
 
   const handleCameraSelect = () => {
     triggerHaptic('medium');
@@ -223,7 +225,7 @@ const MediaSourceSheet = ({ isOpen, onClose, dayNumber, activity, preserveActivi
         </>
       )}
     </AnimatePresence>,
-    document.body
+    portalContainer
   );
 };
 

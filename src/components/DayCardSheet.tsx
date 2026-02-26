@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Camera, Image as ImageIcon, Play } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { usePortalContainer } from '@/hooks/use-portal-container';
 
 interface Photo {
   id: string;
@@ -34,6 +35,7 @@ const DayCardSheet = ({
   onViewActivity,
   layoutId,
 }: DayCardSheetProps) => {
+  const portalContainer = usePortalContainer();
   const content = (
     <AnimatePresence>
       {isOpen && (
@@ -212,7 +214,7 @@ const DayCardSheet = ({
     </AnimatePresence>
   );
 
-  return typeof document !== 'undefined' ? createPortal(content, document.body) : content;
+  return typeof document !== 'undefined' ? createPortal(content, portalContainer) : content;
 };
 
 export default DayCardSheet;
