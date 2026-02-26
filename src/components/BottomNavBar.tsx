@@ -61,9 +61,9 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
         className="relative"
         style={{
           borderRadius: 9999,
-          padding: 2,
-          /* Outer border gradient — subtle light edge */
-          background: "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.08) 100%)",
+          padding: 1,
+          /* Subtle outer border — thin light stroke */
+          background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%)",
         }}
       >
         {/* Inner glass surface */}
@@ -71,14 +71,12 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
           className="relative overflow-hidden"
           style={{
             borderRadius: 9999,
-            background: "linear-gradient(135deg, rgba(60,80,120,0.55) 0%, rgba(40,60,100,0.45) 40%, rgba(80,120,160,0.35) 100%)",
-            backdropFilter: "blur(48px) saturate(200%)",
-            WebkitBackdropFilter: "blur(48px) saturate(200%)",
+            background: "rgba(255, 255, 255, 0.03)",
+            backdropFilter: "blur(60px) saturate(200%)",
+            WebkitBackdropFilter: "blur(60px) saturate(200%)",
             boxShadow: `
-              inset 0 1px 1px rgba(255,255,255,0.15),
-              inset 0 -1px 1px rgba(0,0,0,0.1),
-              0 8px 32px rgba(0,0,0,0.4),
-              0 2px 8px rgba(0,0,0,0.2)
+              inset 0 1px 0 rgba(255,255,255,0.12),
+              inset 0 -0.5px 0 rgba(255,255,255,0.04)
             `,
           }}
         >
