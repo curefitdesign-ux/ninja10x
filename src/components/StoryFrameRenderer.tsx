@@ -71,7 +71,7 @@ export default function StoryFrameRenderer({
 
   return (
     <div
-      className="w-full h-full flex items-center justify-center"
+      className="absolute inset-0 flex items-center justify-center"
       style={{ background: 'transparent' }}
     >
       <Suspense fallback={null}>
