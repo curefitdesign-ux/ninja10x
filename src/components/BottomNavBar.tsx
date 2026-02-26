@@ -1,7 +1,22 @@
-// Floating glassmorphic pill nav — Back · Discover · My Progress
+// Floating glass tab bar — matches reference: Back circle | Discover | My Progress
+import { cn } from "@/lib/utils";
+import { Map, BarChart3 } from "lucide-react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ChevronLeft, Compass, BarChart3 } from "lucide-react";
+
+const BackIcon = ({ className }: { className?: string }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className={className}>
+    <circle cx="12" cy="12" r="11" stroke="currentColor" strokeWidth="1.5" />
+    <path d="M14 8L10 12L14 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const navTabs = [
+  { id: "home", icon: <BackIcon className="w-6 h-6" />, label: "Home" },
+  { id: "discover", icon: <Map className="w-5 h-5" />, label: "Discover" },
+  { id: "progress", icon: <BarChart3 className="w-5 h-5" />, label: "My Progress" },
+];
 
 const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
   const navigate = useNavigate();
@@ -12,127 +27,130 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
 
   if (shouldHide) return null;
 
-  const isDiscover = location.pathname === "/reel" || location.pathname === "/";
-  const isProgress = location.pathname === "/progress";
+  // Determine active tab from route
+  const activeTab = location.pathname === "/progress" ? "progress" : "discover";
+
+  const handleTabClick = (tabId: string) => {
+    if (tabId === "home") {
+      // Deep-link back to host app or go home
+      if (window.history.length > 1) {
+        navigate(-1);
+      } else {
+        navigate("/");
+      }
+      return;
+    }
+    if (tabId === "discover") {
+      if (location.pathname !== "/reel" && location.pathname !== "/") navigate("/reel");
+    }
+    if (tabId === "progress") {
+      if (location.pathname !== "/progress") navigate("/progress");
+    }
+  };
 
   const nav = (
-    <nav
+    <div
       className="fixed left-1/2 -translate-x-1/2"
       style={{
-        bottom: "max(env(safe-area-inset-bottom, 12px), 12px)",
+        bottom: "max(env(safe-area-inset-bottom, 10px), 10px)",
         zIndex: 9999,
-        borderRadius: 9999,
-        overflow: "hidden",
-        width: "min(340px, 88vw)",
-        /* Floating glassmorphic pill */
-        background: `linear-gradient(
-          135deg,
-          rgba(255, 255, 255, 0.12) 0%,
-          rgba(255, 255, 255, 0.05) 50%,
-          rgba(100, 140, 180, 0.08) 100%
-        )`,
-        backdropFilter: "blur(48px) saturate(190%)",
-        WebkitBackdropFilter: "blur(48px) saturate(190%)",
-        border: "1px solid rgba(255, 255, 255, 0.18)",
-        boxShadow: `
-          inset 0 1px 0 rgba(255, 255, 255, 0.2),
-          inset 0 -1px 0 rgba(255, 255, 255, 0.05),
-          0 8px 32px rgba(0, 0, 0, 0.35),
-          0 2px 8px rgba(0, 0, 0, 0.2)
-        `,
       }}
     >
+      {/* Outer container with frosted glass */}
       <div
-        className="flex items-center justify-between"
-        style={{ height: 54, paddingInline: 6 }}
+        className="relative"
+        style={{
+          borderRadius: 9999,
+          padding: 2,
+          /* Outer border gradient — subtle light edge */
+          background: "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.08) 100%)",
+        }}
       >
-        {/* Back button */}
-        <button
-          onClick={() => {
-            if (window.history.length > 1) {
-              navigate(-1);
-            } else {
-              navigate("/");
-            }
-          }}
-          className="flex items-center justify-center active:scale-[0.92] transition-transform"
-          style={{
-            width: 42,
-            height: 42,
-            borderRadius: 9999,
-            background: "rgba(255, 255, 255, 0.1)",
-            border: "1px solid rgba(255, 255, 255, 0.12)",
-          }}
-        >
-          <ChevronLeft
-            className="text-white/80"
-            style={{ width: 20, height: 20, strokeWidth: 2 }}
-          />
-        </button>
-
-        {/* Divider */}
+        {/* Inner glass surface */}
         <div
+          className="relative overflow-hidden"
           style={{
-            width: 1,
-            height: 28,
-            background: "rgba(255, 255, 255, 0.15)",
-            flexShrink: 0,
+            borderRadius: 9999,
+            background: "linear-gradient(135deg, rgba(60,80,120,0.55) 0%, rgba(40,60,100,0.45) 40%, rgba(80,120,160,0.35) 100%)",
+            backdropFilter: "blur(48px) saturate(200%)",
+            WebkitBackdropFilter: "blur(48px) saturate(200%)",
+            boxShadow: `
+              inset 0 1px 1px rgba(255,255,255,0.15),
+              inset 0 -1px 1px rgba(0,0,0,0.1),
+              0 8px 32px rgba(0,0,0,0.4),
+              0 2px 8px rgba(0,0,0,0.2)
+            `,
           }}
-        />
-
-        {/* Discover */}
-        <button
-          onClick={() => {
-            if (location.pathname !== "/reel") navigate("/reel");
-          }}
-          className="flex flex-col items-center gap-0.5 active:scale-[0.95] transition-transform flex-1"
         >
-          <Compass
+          {/* Inner top light beam */}
+          <div
+            className="absolute top-0 left-[15%] right-[15%] h-px pointer-events-none"
             style={{
-              width: 22,
-              height: 22,
-              color: isDiscover ? "#ffffff" : "rgba(180, 160, 220, 0.55)",
-              strokeWidth: isDiscover ? 2.2 : 1.6,
+              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)",
             }}
           />
-          <span
-            className="text-[11px] tracking-wide"
-            style={{
-              color: isDiscover ? "#ffffff" : "rgba(180, 160, 220, 0.55)",
-              fontWeight: isDiscover ? 700 : 400,
-            }}
-          >
-            Discover
-          </span>
-        </button>
 
-        {/* My Progress */}
-        <button
-          onClick={() => {
-            if (location.pathname !== "/progress") navigate("/progress");
-          }}
-          className="flex flex-col items-center gap-0.5 active:scale-[0.95] transition-transform flex-1"
-        >
-          <BarChart3
-            style={{
-              width: 22,
-              height: 22,
-              color: isProgress ? "#ffffff" : "rgba(180, 160, 220, 0.55)",
-              strokeWidth: isProgress ? 2.2 : 1.6,
-            }}
-          />
-          <span
-            className="text-[11px] tracking-wide"
-            style={{
-              color: isProgress ? "#ffffff" : "rgba(180, 160, 220, 0.55)",
-              fontWeight: isProgress ? 700 : 400,
-            }}
-          >
-            My Progress
-          </span>
-        </button>
+          {/* Tabs container */}
+          <div className="flex items-center px-2 py-2">
+            {navTabs.map((tab, index) => {
+              const isActive = activeTab === tab.id;
+              const isHome = tab.id === "home";
+
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabClick(tab.id)}
+                  className={cn(
+                    "relative flex flex-col items-center justify-center",
+                    "py-1 px-4 min-w-[70px]",
+                    "transition-all duration-300 ease-out",
+                    "focus:outline-none active:scale-[0.95]"
+                  )}
+                >
+                  {/* Vertical divider after Home */}
+                  {isHome && (
+                    <div
+                      className="absolute right-0 top-1/2 -translate-y-1/2"
+                      style={{
+                        width: 1,
+                        height: 28,
+                        background: "rgba(255,255,255,0.18)",
+                      }}
+                    />
+                  )}
+
+                  {/* Icon */}
+                  <div
+                    className="transition-all duration-300"
+                    style={{
+                      color: isActive
+                        ? "#ffffff"
+                        : "rgba(200, 210, 230, 0.6)",
+                      transform: isActive ? "scale(1.1)" : "scale(1)",
+                    }}
+                  >
+                    {tab.icon}
+                  </div>
+
+                  {/* Label */}
+                  <span
+                    className="text-[10px] mt-0.5 tracking-wide transition-all duration-300 whitespace-nowrap"
+                    style={{
+                      color: isActive
+                        ? "#ffffff"
+                        : "rgba(200, 210, 230, 0.5)",
+                      fontWeight: isActive ? 700 : 400,
+                    }}
+                  >
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
-    </nav>
+    </div>
   );
 
   return typeof document !== "undefined" ? createPortal(nav, document.body) : nav;
