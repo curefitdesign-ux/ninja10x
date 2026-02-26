@@ -1507,14 +1507,13 @@ const Reel = () => {
 
         {/* MIDDLE CONTAINER — flexes between profile strip and bottom nav */}
         <div
-          className="relative z-30 flex-1 min-h-0 px-3"
+          className="relative z-30 flex-1 min-h-0 px-3 flex flex-col"
           style={{
-            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 10px), 10px) + 108px)',
+            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 10px), 10px) + 72px)',
           }}
         >
-          <div className="h-full min-h-0 flex flex-col relative">
-            {/* Reel cards fill the available middle container space */}
-            <div className="relative flex-1 min-h-0 flex items-center justify-center" style={{ maxHeight: 'min(70vh, calc(100% - 60px))' }}>
+          {/* Reel cards fill the available middle container space */}
+          <div className="relative flex-1 min-h-0 flex items-center justify-center">
           {/* Previous user peek card - 12% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
@@ -2083,7 +2082,6 @@ const Reel = () => {
             );
           })()}
             </div>
-          </div>
         </div>
       </div>{/* end overflow:hidden flex container */}
 
