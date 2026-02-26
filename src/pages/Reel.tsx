@@ -10,6 +10,7 @@ import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/
 import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
+import { usePortalContainer } from '@/hooks/use-portal-container';
 import { fetchAllActivitiesGroupedByUser, fetchPublicFeed, UserStoryGroup, LocalActivity } from '@/hooks/use-journey-activities';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 import DynamicBlurBackground from '@/components/DynamicBlurBackground';
@@ -72,6 +73,7 @@ const Reel = () => {
   const location = useLocation();
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
+  const portalContainer = usePortalContainer();
   
   // Navigation state - extract once
   const navState = location.state || {};
@@ -2089,59 +2091,63 @@ const Reel = () => {
 
       {/* Reacts bottom sheet for own stories */}
       <AnimatePresence>
-        {showReactsSheet && (
-          <ReactsSoFarSheet
-            activityId={currentActivity?.id || ''}
-            total={currentReactions.total}
-            reactions={currentReactions.reactions}
-            reactorProfiles={currentReactions.reactorProfiles}
-            onClose={() => setShowReactsSheet(false)}
-            onReactionRemoved={loadActivities}
-          />
-        )}
+        {showReactsSheet &&
+          createPortal(
+            <ReactsSoFarSheet
+              activityId={currentActivity?.id || ''}
+              total={currentReactions.total}
+              reactions={currentReactions.reactions}
+              reactorProfiles={currentReactions.reactorProfiles}
+              onClose={() => setShowReactsSheet(false)}
+              onReactionRemoved={loadActivities}
+            />,
+            portalContainer,
+          )}
       </AnimatePresence>
 
       {/* Send reaction sheet for all stories */}
       <AnimatePresence>
-        {showSendReactionSheet && (
-          <SendReactionSheet
-            activityId={currentActivity?.id}
-            currentUserId={user?.id}
-            onReact={handleReact}
-            onClose={() => setShowSendReactionSheet(false)}
-            onViewReactions={() => {
-              setShowSendReactionSheet(false);
-              setShowReactsSheet(true);
-            }}
-            onReactionRemoved={(reactionType) => {
-              // Update local state without reloading
-              setLocalReactions(prev => {
-                const existing = prev[currentActivity!.id];
-                if (!existing) return prev;
-                
-                const newReactions = { ...existing.reactions };
-                if (newReactions[reactionType]) {
-                  newReactions[reactionType] = {
-                    ...newReactions[reactionType],
-                    count: Math.max(0, newReactions[reactionType].count - 1),
-                    userReacted: false,
+        {showSendReactionSheet &&
+          createPortal(
+            <SendReactionSheet
+              activityId={currentActivity?.id}
+              currentUserId={user?.id}
+              onReact={handleReact}
+              onClose={() => setShowSendReactionSheet(false)}
+              onViewReactions={() => {
+                setShowSendReactionSheet(false);
+                setShowReactsSheet(true);
+              }}
+              onReactionRemoved={(reactionType) => {
+                // Update local state without reloading
+                setLocalReactions(prev => {
+                  const existing = prev[currentActivity!.id];
+                  if (!existing) return prev;
+                  
+                  const newReactions = { ...existing.reactions };
+                  if (newReactions[reactionType]) {
+                    newReactions[reactionType] = {
+                      ...newReactions[reactionType],
+                      count: Math.max(0, newReactions[reactionType].count - 1),
+                      userReacted: false,
+                    };
+                  }
+                  
+                  return {
+                    ...prev,
+                    [currentActivity!.id]: {
+                      total: Math.max(0, existing.total - 1),
+                      reactions: newReactions,
+                      reactorProfiles: existing.reactorProfiles.filter(p => p.userId !== user?.id),
+                    },
                   };
-                }
-                
-                return {
-                  ...prev,
-                  [currentActivity!.id]: {
-                    total: Math.max(0, existing.total - 1),
-                    reactions: newReactions,
-                    reactorProfiles: existing.reactorProfiles.filter(p => p.userId !== user?.id),
-                  },
-                };
-              });
-            }}
-            totalReactions={currentReactions.total}
-            reactorProfiles={currentReactions.reactorProfiles}
-          />
-        )}
+                });
+              }}
+              totalReactions={currentReactions.total}
+              reactorProfiles={currentReactions.reactorProfiles}
+            />,
+            portalContainer,
+          )}
       </AnimatePresence>
 
 
