@@ -44,7 +44,7 @@ const DayCardSheet = ({
           <motion.div
             key="backdrop"
             className="fixed inset-0"
-            style={{ zIndex: 9990, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+            style={{ zIndex: 50, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -58,7 +58,7 @@ const DayCardSheet = ({
             layoutId={layoutId}
             className="fixed left-0 right-0 bottom-0 overflow-hidden"
             style={{
-              zIndex: 9991,
+              zIndex: 50,
               borderRadius: '28px 28px 0 0',
               background: 'linear-gradient(180deg, rgba(255,255,255,0.11) 0%, rgba(255,255,255,0.05) 100%)',
               backdropFilter: 'blur(60px) saturate(200%)',

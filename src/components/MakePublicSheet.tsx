@@ -87,7 +87,7 @@ export default function MakePublicSheet({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="fixed inset-0"
-            style={{ zIndex: 9998, background: 'rgba(0,0,0,0.6)' }}
+            style={{ zIndex: 50, background: 'rgba(0,0,0,0.6)' }}
             onClick={onClose}
           />
 
@@ -100,7 +100,7 @@ export default function MakePublicSheet({
             className="fixed left-0 right-0 rounded-t-3xl overflow-hidden"
             style={{
               bottom: 0,
-              zIndex: 9999,
+              zIndex: 50,
               background: 'linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
               backdropFilter: 'blur(60px) saturate(200%)',
               WebkitBackdropFilter: 'blur(60px) saturate(200%)',
