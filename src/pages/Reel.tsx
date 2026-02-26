@@ -1679,13 +1679,12 @@ const Reel = () => {
                         {currentActivity?.id === 'log-activity' ? (
                           // "Log Your Activity" placeholder card — dark with dot grid + green plus
                           <div 
-                            className="w-full flex flex-col items-center justify-center cursor-pointer relative overflow-hidden self-center"
+                            className="w-full h-full flex flex-col items-center justify-center cursor-pointer relative overflow-hidden self-center"
                             onClick={(e) => {
                               e.stopPropagation();
                               setShowMediaSourceSheet(true);
                             }}
                             style={{
-                              height: '70%',
                               background: 'linear-gradient(180deg, rgba(28,28,32,1) 0%, rgba(18,18,22,1) 100%)',
                               border: '1px solid rgba(255,255,255,0.08)',
                               borderRadius: 20,
