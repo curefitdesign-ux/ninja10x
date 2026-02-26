@@ -1135,8 +1135,7 @@ const Reel = () => {
       <div 
         className="fixed inset-0 flex flex-col"
         style={{ 
-          height: '100dvh',
-          minHeight: '-webkit-fill-available',
+          height: 'calc(100dvh - 80px)',
           overflow: 'hidden',
         }}
       >
