@@ -1504,7 +1504,6 @@ const Reel = () => {
           </div>
         </div>
 
-
         {/* MAIN CONTENT ZONE - flexible middle section with peek cards */}
         <div
           className="flex items-center justify-center z-30 relative flex-1 min-h-0"
