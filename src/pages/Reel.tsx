@@ -1628,14 +1628,7 @@ const Reel = () => {
                 const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
                 
                 return (
-                  <div
-                    className="relative flex items-center justify-center"
-                    style={{ 
-                      width: '100%',
-                      height: '100%',
-                      background: 'transparent',
-                    }}
-                  >
+                  <>
                     {/* Card — 9:16 aspect ratio, constrained to available space */}
                     <motion.div
                       layoutId={sourceUserId ? `story-card-${currentGroup?.userId}` : undefined}
@@ -1883,7 +1876,7 @@ const Reel = () => {
                         />
                       </div>
                     )}
-                  </div>
+                  </>
                 );
               })()}
           </motion.div>
