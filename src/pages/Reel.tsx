@@ -1507,8 +1507,8 @@ const Reel = () => {
 
         {/* MAIN CONTENT ZONE - flexible middle section with peek cards */}
         <div
-          className="flex items-center justify-center z-30 relative"
-          style={{ background: 'transparent', overflow: 'hidden', height: '65vh' }}
+          className="flex items-center justify-center z-30 relative flex-1"
+          style={{ background: 'transparent', overflow: 'hidden', minHeight: '50vh', height: '65dvh' }}
         >
           {/* Previous user peek card - 12% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
