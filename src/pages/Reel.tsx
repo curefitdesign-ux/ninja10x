@@ -1151,7 +1151,7 @@ const Reel = () => {
         <div 
           className="shrink-0 z-50 flex flex-col"
           style={{ 
-            paddingTop: '0px',
+            paddingTop: 'max(env(safe-area-inset-top, 20px), 20px)',
           }}
         >
           {/* Row 1: Delete + Avatars + Close - all in one row */}
