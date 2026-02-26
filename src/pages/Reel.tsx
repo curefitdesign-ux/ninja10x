@@ -1507,7 +1507,7 @@ const Reel = () => {
 
         {/* MAIN CONTENT ZONE - flexible middle section with peek cards */}
         <div
-          className="flex items-center justify-center z-30 relative flex-1 min-h-0 py-2"
+          className="flex items-center justify-center z-30 relative flex-1 min-h-0"
           style={{ background: 'transparent', overflow: 'hidden' }}
         >
           {/* Previous user peek card - 12% visible on left */}
@@ -1908,9 +1908,9 @@ const Reel = () => {
 
         {/* FIXED BOTTOM ZONE - Reaction pill + View Progress - compact sticky */}
         <div 
-          className="shrink-0 z-40 flex flex-col items-center -mt-2"
+          className="shrink-0 z-40 flex flex-col items-center"
           style={{
-            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 12px), 12px) + 66px)',
+            paddingBottom: '8px',
           }}
         >
           {(() => {
