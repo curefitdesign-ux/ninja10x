@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronLeft, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, CalendarDays, MoreVertical, UserPen, LogOut, Plus } from 'lucide-react';
+import { X, ChevronLeft, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, MoreVertical, UserPen, LogOut, Plus } from 'lucide-react';
 import PullToRefresh from '@/components/PullToRefresh';
 import ProfileMenu from '@/components/ProfileMenu';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
@@ -18,7 +18,7 @@ import StoryEmojiRain from '@/components/StoryEmojiRain';
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
 import SendReactionSheet from '@/components/SendReactionSheet';
 import ProfileAvatar from '@/components/ProfileAvatar';
-import ReelToProgressTransition from '@/components/ReelToProgressTransition';
+
 import MakePublicSheet from '@/components/MakePublicSheet';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
 import StoryHint, { useStoryNudgeAnimation } from '@/components/StoryHint';
@@ -132,12 +132,7 @@ const Reel = () => {
 
   // Bottom sheet states and transition animations
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [showProgressOverlay, setShowProgressOverlay] = useState(false);
   const bottomSheetY = useMotionValue(0);
-  const bottomSheetOpacity = useTransform(bottomSheetY, [-200, 0], [0, 1]);
-  const contentScale = useTransform(bottomSheetY, [-200, 0], [0.75, 1]);
-  const contentOpacity = useTransform(bottomSheetY, [-100, 0], [0, 1]);
-  const contentY = useTransform(bottomSheetY, [-200, 0], [50, 0]);
 
   // Data for progress overlay
   const { activities: myActivities, deleteActivity, hasPublicActivity, makeActivityPublic } = useJourneyActivities();
@@ -428,17 +423,7 @@ const Reel = () => {
     }
   }, [goNextUser, goPrevUser]);
 
-  // Bottom sheet drag handling - opens progress overlay instead of navigating
-  const handleBottomSheetDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.y < -100 || info.velocity.y < -500) {
-      setIsTransitioning(true);
-      // Open progress overlay with animation
-      setTimeout(() => {
-        setShowProgressOverlay(true);
-        setIsTransitioning(false);
-      }, 150);
-    }
-  }, []);
+  // Bottom sheet drag removed — progress is now a standalone page
 
   const [lastTap, setLastTap] = useState(0);
   const [userTransitionFlash, setUserTransitionFlash] = useState(false);
@@ -490,35 +475,7 @@ const Reel = () => {
     setLastTap(now);
   }, [lastTap, cycleActivity, prevActivity, isOwnStory, profile?.stories_public]);
 
-  const handleNavigateToProgress = () => {
-    setIsTransitioning(true);
-    // Open progress overlay with smooth transition
-    setTimeout(() => {
-      setShowProgressOverlay(true);
-      setIsTransitioning(false);
-    }, 150);
-  };
-
-  const handleCloseProgressOverlay = () => {
-    setShowProgressOverlay(false);
-  };
-
-  const handleProgressStoryTap = (index: number, userId?: string, activityId?: string) => {
-    setShowProgressOverlay(false);
-    if (userId) {
-      const groupIdx = effectiveUserGroups.findIndex(g => g.userId === userId);
-      if (groupIdx >= 0) {
-        setCurrentUserIndex(groupIdx);
-        // If we have an activityId, jump to that exact activity
-        if (activityId) {
-          const actIdx = effectiveUserGroups[groupIdx].activities.findIndex(a => a.id === activityId);
-          setCurrentActivityIndex(actIdx >= 0 ? actIdx : 0);
-        } else {
-          setCurrentActivityIndex(0);
-        }
-      }
-    }
-  };
+  // Progress navigation removed — now a standalone page via bottom nav
 
   const handleReact = async (type: ReactionType) => {
     if (!currentActivity || isOwnStory) return; // Owners cannot react to their own activities
@@ -596,7 +553,7 @@ const Reel = () => {
   // Auto-advance timer - pause when modals are open OR content is locked
   // Determine if story should be locked (user's profile is private OR they haven't shared any public activity)
   const isStoryLocked = !isOwnStory && !profile?.stories_public;
-  const isPaused = showReactsSheet || showSendReactionSheet || showDeleteConfirm || showMakePublicSheet || showProgressOverlay || isStoryLocked;
+  const isPaused = showReactsSheet || showSendReactionSheet || showDeleteConfirm || showMakePublicSheet || isStoryLocked;
   
   // Reset progress/duration when activity changes (NOT mediaLoaded — that's URL-keyed to avoid race condition)
   useEffect(() => {
@@ -1953,7 +1910,7 @@ const Reel = () => {
         <div 
           className="shrink-0 z-40 flex flex-col items-center"
           style={{
-            paddingBottom: 'calc(72px + max(env(safe-area-inset-bottom, 6px), 6px) + 56px)',
+            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 12px), 12px) + 66px)',
           }}
         >
           {(() => {
@@ -2132,49 +2089,7 @@ const Reel = () => {
 
         </div>
 
-      {/* View Progress drawer handle — portal to body, fixed flush above nav bar */}
-      {typeof document !== 'undefined' && createPortal(
-        <div
-          className="fixed left-0 right-0 z-[9998]"
-          style={{ bottom: 'max(calc(env(safe-area-inset-bottom, 6px) + 56px), 62px)' }}
-        >
-          <button
-            onClick={() => setShowProgressOverlay(true)}
-            className="w-full flex items-center gap-3 px-5 active:scale-[0.98] transition-transform"
-            style={{
-              height: 72,
-              background: 'rgba(255, 255, 255, 0.06)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderBottom: 'none',
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1)',
-            }}
-          >
-            <div
-              className="flex items-center justify-center shrink-0"
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 12,
-                background: 'rgba(255,255,255,0.08)',
-              }}
-            >
-              <CalendarDays className="w-5 h-5 text-white/70" strokeWidth={1.5} />
-            </div>
-            <div className="flex-1 text-left">
-              <div className="text-white font-semibold text-[15px]">View My Progress</div>
-              <div className="text-white/50 text-xs">
-                You stayed active for Week {week} | Day {dayInWeek}
-              </div>
-            </div>
-            <ChevronUp className="w-5 h-5 text-white/40 shrink-0" />
-          </button>
-        </div>,
-        document.body
-      )}
+      {/* Progress drawer removed — now a standalone page via nav */}
 
       {/* Reacts bottom sheet for own stories */}
       <AnimatePresence>
@@ -2233,94 +2148,6 @@ const Reel = () => {
         )}
       </AnimatePresence>
 
-      {/* Progress drawer overlay */}
-      <AnimatePresence>
-        {showProgressOverlay && (
-          <motion.div
-            className="fixed left-0 right-0 z-50 overflow-hidden"
-            style={{
-              bottom: 0,
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              background: 'linear-gradient(180deg, rgba(58,42,99,0.97) 0%, rgba(26,21,48,0.99) 45%, rgba(6,6,8,1) 100%)',
-              backdropFilter: 'blur(60px) saturate(200%)',
-              WebkitBackdropFilter: 'blur(60px) saturate(200%)',
-              boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
-            }}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'calc(100dvh - 56px)', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 28 }}
-          >
-            {/* Drawer header — same as collapsed but chevron rotated */}
-            <button
-              onClick={() => setShowProgressOverlay(false)}
-              className="w-full flex items-center gap-3 px-5 active:scale-[0.98] transition-transform"
-              style={{
-                height: 72,
-                borderBottom: '1px solid rgba(255,255,255,0.06)',
-              }}
-            >
-              <div
-                className="flex items-center justify-center shrink-0"
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 12,
-                  background: 'rgba(255,255,255,0.08)',
-                }}
-              >
-                <CalendarDays className="w-5 h-5 text-white/70" strokeWidth={1.5} />
-              </div>
-              <div className="flex-1 text-left">
-                <div className="text-white font-semibold text-[15px]">View My Progress</div>
-                <div className="text-white/50 text-xs">
-                  You stayed active for Week {week} | Day {dayInWeek}
-                </div>
-              </div>
-              <motion.div
-                animate={{ rotate: 180 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              >
-                <ChevronUp className="w-5 h-5 text-white/40 shrink-0" />
-              </motion.div>
-            </button>
-
-            <div className="overflow-hidden" style={{ height: 'calc(100dvh - 56px - 72px)' }}>
-              <ReelToProgressTransition
-                isOpen={true}
-                onClose={() => setShowProgressOverlay(false)}
-                currentActivity={currentActivity ? {
-                  id: currentActivity.id,
-                  storageUrl: currentActivity.storageUrl,
-                  originalUrl: currentActivity.originalUrl,
-                  isVideo: currentActivity.isVideo,
-                  dayNumber: currentActivity.dayNumber,
-                  avatarUrl: currentGroup?.avatarUrl,
-                  displayName: currentGroup?.displayName,
-                  userId: currentGroup?.userId,
-                  createdAt: currentActivity.createdAt,
-                } : null}
-                publicFeed={publicFeed.map(p => ({
-                  id: p.id,
-                  storageUrl: p.storageUrl,
-                  originalUrl: p.originalUrl,
-                  isVideo: p.isVideo,
-                  dayNumber: p.dayNumber,
-                  avatarUrl: p.avatarUrl,
-                  displayName: p.displayName,
-                  userId: p.userId,
-                  createdAt: p.createdAt,
-                }))}
-                myActivities={myActivities.map(a => ({ dayNumber: a.dayNumber, storageUrl: a.storageUrl, originalUrl: a.originalUrl }))}
-                onStoryTap={handleProgressStoryTap}
-                onLogActivity={() => setShowMediaSourceSheet(true)}
-                isInline={true}
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Delete confirmation dialog - Liquid glass design */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>

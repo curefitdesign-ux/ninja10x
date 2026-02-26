@@ -1,128 +1,136 @@
-// v4 – liquid glass nav with teal activity glow
-import { useState } from "react";
+// Floating glassmorphic pill nav — Back · Discover · My Progress
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Dumbbell, ShoppingBag, Waves, Activity } from "lucide-react";
-
-const navItems = [
-  { id: "home", label: "Home", path: "/", Icon: Home },
-  { id: "fitness", label: "Fitness", path: "/", Icon: Dumbbell },
-  { id: "activity", label: "Activity", path: "/reel", Icon: Activity },
-  { id: "store", label: "Store", path: "/", Icon: ShoppingBag },
-  { id: "pilates", label: "Pilates", path: "/", Icon: Waves },
-];
+import { ChevronLeft, Compass, BarChart3 } from "lucide-react";
 
 const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState("activity");
 
-  const hiddenPaths = ["/auth", "/profile-setup", "/avatar-crop", "/camera", "/preview", "/gallery", "/progress"];
+  const hiddenPaths = ["/auth", "/profile-setup", "/avatar-crop", "/camera", "/preview", "/gallery"];
   const shouldHide = hidden || hiddenPaths.some(path => location.pathname.startsWith(path));
 
   if (shouldHide) return null;
 
-  const handleNavClick = (item: typeof navItems[0]) => {
-    setActiveTab(item.id);
-    if (item.id === "home") {
-      window.location.href = "curefit://hometab";
-      return;
-    }
-    if (item.path && location.pathname !== item.path) {
-      navigate(item.path);
-    }
-  };
-
-  const TEAL = "#0FE498";
+  const isDiscover = location.pathname === "/reel" || location.pathname === "/";
+  const isProgress = location.pathname === "/progress";
 
   const nav = (
     <nav
-      className="fixed bottom-0 left-0 right-0"
+      className="fixed left-1/2 -translate-x-1/2"
       style={{
+        bottom: "max(env(safe-area-inset-bottom, 12px), 12px)",
         zIndex: 9999,
-        borderRadius: "20px 20px 0 0",
+        borderRadius: 9999,
         overflow: "hidden",
-        /* Liquid glass: dark base + frosted surface + inner highlight */
-        background: `
-          linear-gradient(
-            180deg,
-            rgba(255, 255, 255, 0.07) 0%,
-            rgba(10, 7, 32, 0.30) 100%
-          )
-        `,
+        width: "min(340px, 88vw)",
+        /* Floating glassmorphic pill */
+        background: `linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.12) 0%,
+          rgba(255, 255, 255, 0.05) 50%,
+          rgba(100, 140, 180, 0.08) 100%
+        )`,
         backdropFilter: "blur(48px) saturate(190%)",
         WebkitBackdropFilter: "blur(48px) saturate(190%)",
-        borderTop: "1px solid rgba(255, 255, 255, 0.13)",
+        border: "1px solid rgba(255, 255, 255, 0.18)",
         boxShadow: `
-          inset 0 1px 0 rgba(255, 255, 255, 0.12),
-          0 -8px 32px rgba(0, 0, 0, 0.35),
-          0 -2px 8px rgba(0, 0, 0, 0.20)
+          inset 0 1px 0 rgba(255, 255, 255, 0.2),
+          inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+          0 8px 32px rgba(0, 0, 0, 0.35),
+          0 2px 8px rgba(0, 0, 0, 0.2)
         `,
       }}
     >
       <div
-        className="flex items-end justify-around px-1"
-        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 6px), 6px)" }}
+        className="flex items-center justify-between"
+        style={{ height: 54, paddingInline: 6 }}
       >
-        {navItems.map((item) => {
-          const isActive = activeTab === item.id;
-          const isActivity = item.id === "activity";
+        {/* Back button */}
+        <button
+          onClick={() => {
+            if (window.history.length > 1) {
+              navigate(-1);
+            } else {
+              navigate("/");
+            }
+          }}
+          className="flex items-center justify-center active:scale-[0.92] transition-transform"
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: 9999,
+            background: "rgba(255, 255, 255, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+          }}
+        >
+          <ChevronLeft
+            className="text-white/80"
+            style={{ width: 20, height: 20, strokeWidth: 2 }}
+          />
+        </button>
 
-          const iconColor = isActivity && isActive
-            ? TEAL
-            : isActive
-            ? "#ffffff"
-            : "rgba(180, 160, 220, 0.5)";
+        {/* Divider */}
+        <div
+          style={{
+            width: 1,
+            height: 28,
+            background: "rgba(255, 255, 255, 0.15)",
+            flexShrink: 0,
+          }}
+        />
 
-          const labelColor = isActivity && isActive
-            ? TEAL
-            : isActive
-            ? "#ffffff"
-            : "rgba(180, 160, 220, 0.5)";
+        {/* Discover */}
+        <button
+          onClick={() => {
+            if (location.pathname !== "/reel") navigate("/reel");
+          }}
+          className="flex flex-col items-center gap-0.5 active:scale-[0.95] transition-transform flex-1"
+        >
+          <Compass
+            style={{
+              width: 22,
+              height: 22,
+              color: isDiscover ? "#ffffff" : "rgba(180, 160, 220, 0.55)",
+              strokeWidth: isDiscover ? 2.2 : 1.6,
+            }}
+          />
+          <span
+            className="text-[11px] tracking-wide"
+            style={{
+              color: isDiscover ? "#ffffff" : "rgba(180, 160, 220, 0.55)",
+              fontWeight: isDiscover ? 700 : 400,
+            }}
+          >
+            Discover
+          </span>
+        </button>
 
-          return (
-            <button
-              key={item.id}
-              onClick={() => handleNavClick(item)}
-              className="pressable flex flex-col items-center pt-2 pb-1 px-3 relative"
-            >
-              <div className="relative flex items-center justify-center">
-                {/* Subtle teal glow behind active activity icon */}
-                {isActive && isActivity && (
-                  <div
-                    className="absolute rounded-full pointer-events-none"
-                    style={{
-                      inset: "-8px",
-                      background: "radial-gradient(ellipse at center, rgba(15, 228, 152, 0.22) 0%, rgba(0, 190, 255, 0.10) 55%, transparent 80%)",
-                      filter: "blur(6px)",
-                    }}
-                  />
-                )}
-                <item.Icon
-                  className="transition-all duration-150 relative z-10"
-                  style={{
-                    width: isActivity ? "26px" : "22px",
-                    height: isActivity ? "26px" : "22px",
-                    color: iconColor,
-                    strokeWidth: isActive ? 2.2 : 1.6,
-                    filter: isActivity && isActive
-                      ? "drop-shadow(0 0 5px rgba(15, 228, 152, 0.55))"
-                      : "none",
-                  }}
-                />
-              </div>
-              <span
-                className="text-[10px] mt-1 tracking-wide transition-colors duration-150"
-                style={{
-                  color: labelColor,
-                  fontWeight: isActive ? 600 : 400,
-                }}
-              >
-                {item.label}
-              </span>
-            </button>
-          );
-        })}
+        {/* My Progress */}
+        <button
+          onClick={() => {
+            if (location.pathname !== "/progress") navigate("/progress");
+          }}
+          className="flex flex-col items-center gap-0.5 active:scale-[0.95] transition-transform flex-1"
+        >
+          <BarChart3
+            style={{
+              width: 22,
+              height: 22,
+              color: isProgress ? "#ffffff" : "rgba(180, 160, 220, 0.55)",
+              strokeWidth: isProgress ? 2.2 : 1.6,
+            }}
+          />
+          <span
+            className="text-[11px] tracking-wide"
+            style={{
+              color: isProgress ? "#ffffff" : "rgba(180, 160, 220, 0.55)",
+              fontWeight: isProgress ? 700 : 400,
+            }}
+          >
+            My Progress
+          </span>
+        </button>
       </div>
     </nav>
   );
