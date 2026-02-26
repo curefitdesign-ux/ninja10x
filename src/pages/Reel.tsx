@@ -1908,7 +1908,9 @@ const Reel = () => {
         <div 
           className="z-40 flex flex-col items-center justify-start shrink-0"
           style={{
-            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 10px), 10px) + 70px)',
+            /* Keep reaction row above floating nav across mobile + desktop/iPad framed mode */
+            minHeight: 168,
+            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 10px), 10px) + 108px)',
             paddingTop: 8,
           }}
         >
