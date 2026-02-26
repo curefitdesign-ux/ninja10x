@@ -1628,7 +1628,14 @@ const Reel = () => {
                 const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
                 
                 return (
-                  <>
+                  <div
+                    className="relative flex items-center justify-center"
+                    style={{ 
+                      width: '100%',
+                      height: '100%',
+                      background: 'transparent',
+                    }}
+                  >
                     {/* Card — 9:16 aspect ratio, constrained to available space */}
                     <motion.div
                       layoutId={sourceUserId ? `story-card-${currentGroup?.userId}` : undefined}
@@ -1876,7 +1883,7 @@ const Reel = () => {
                         />
                       </div>
                     )}
-                  </>
+                  </div>
                 );
               })()}
           </motion.div>
@@ -1904,7 +1911,7 @@ const Reel = () => {
             </div>
 
             {/* React row sits below the reel card with a fixed 10px gap */}
-            <div className="shrink-0 flex flex-col items-center pb-4">
+            <div className="shrink-0 flex flex-col items-center pb-28">
           {(() => {
             // Lock content if user's profile is private OR they haven't shared any public activity
             const isContentLocked = !isOwnStory && !profile?.stories_public;
