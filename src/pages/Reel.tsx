@@ -1605,7 +1605,7 @@ const Reel = () => {
             className="relative flex items-center justify-center"
             style={{ 
               width: '70%',
-              height: 'calc(100% - 36px)',
+              height: 'calc(100% - 60px)',
               x: dragX,
               opacity: cardOpacity,
               rotateY: cardRotate,
