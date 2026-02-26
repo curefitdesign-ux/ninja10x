@@ -1150,7 +1150,7 @@ const Reel = () => {
         <div 
           className="z-50 flex flex-col justify-end"
           style={{ 
-            height: '20%',
+            height: '12%',
             paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
           }}
         >
@@ -1507,7 +1507,7 @@ const Reel = () => {
         {/* CENTER ZONE — 60% — story cards + react button */}
         <div
           className="flex items-center justify-center z-30 relative"
-          style={{ height: '60%', overflow: 'hidden' }}
+          style={{ height: '70%', overflow: 'hidden' }}
         >
           {/* Previous user peek card - 12% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
@@ -1909,7 +1909,7 @@ const Reel = () => {
         <div 
           className="z-40 flex flex-col items-center justify-start"
           style={{
-            height: '20%',
+            height: '18%',
           }}
         >
           {(() => {
