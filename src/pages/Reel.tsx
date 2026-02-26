@@ -1503,11 +1503,16 @@ const Reel = () => {
           </div>
         </div>
 
-        {/* CENTER ZONE — fills remaining space between profile and react pill */}
+        {/* MIDDLE CONTAINER — flexes between profile strip and bottom nav */}
         <div
-          className="flex items-center justify-center z-30 relative"
-          style={{ flex: '1 1 0%', minHeight: 0, maxHeight: '100%' }}
+          className="relative z-30 flex-1 min-h-0 px-3"
+          style={{
+            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 10px), 10px) + 108px)',
+          }}
         >
+          <div className="h-full min-h-0 flex flex-col">
+            {/* Reel cards fill the available middle container space */}
+            <div className="relative flex-1 min-h-0 flex items-center justify-center">
           {/* Previous user peek card - 12% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
@@ -1902,16 +1907,10 @@ const Reel = () => {
               <ChevronRight className="w-7 h-7 text-white drop-shadow-lg" />
             </motion.button>
           )}
-        </div>
-      </div>{/* end overflow:hidden flex container */}
+            </div>
 
-      {/* BOTTOM ZONE — positioned outside overflow:hidden, above nav bar */}
-      <div 
-        className="absolute left-0 right-0 z-50 flex flex-col items-center"
-        style={{
-          bottom: 90,
-        }}
-      >
+            {/* React row is inside the middle container with 20px spacing below cards */}
+            <div className="shrink-0 pt-5 flex flex-col items-center">
           {(() => {
             // Lock content if user's profile is private OR they haven't shared any public activity
             const isContentLocked = !isOwnStory && !profile?.stories_public;
@@ -2081,9 +2080,10 @@ const Reel = () => {
               </div>
             );
           })()}
-
-
+            </div>
+          </div>
         </div>
+      </div>{/* end overflow:hidden flex container */}
 
       {/* Progress drawer removed — now a standalone page via nav */}
 
