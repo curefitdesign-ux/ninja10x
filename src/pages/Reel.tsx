@@ -1131,8 +1131,19 @@ const Reel = () => {
   const HEADER_HEIGHT = 100; // Row: delete + avatars + close + user name
   const BOTTOM_HEIGHT = 100; // Reaction pill + view progress
 
+  const isLogActivityCard = currentActivity?.id === 'log-activity';
+
   return (
     <DynamicBlurBackground imageUrl={mediaUrl}>
+      {/* Purple gradient background for log-activity empty state (matches Progress page) */}
+      {isLogActivityCard && (
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            background: 'linear-gradient(180deg, #3A2A63 0%, #1A1530 45%, #060608 100%)',
+          }}
+        />
+      )}
       {/* Single viewport — no scroll */}
       <div 
         className="absolute inset-0 flex flex-col"
