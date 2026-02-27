@@ -1653,7 +1653,7 @@ const Reel = () => {
                       className="relative overflow-hidden"
                       style={{
                         aspectRatio: '9/16',
-                        height: '100%',
+                        height: '95%',
                         maxWidth: '100%',
                         borderRadius: '20px',
                         overflow: 'hidden',
@@ -1921,7 +1921,7 @@ const Reel = () => {
             </div>
 
             {/* React row sits below the reel card with a fixed 10px gap */}
-            <div className="shrink-0 flex flex-col items-center pt-3 pb-2">
+            <div className="shrink-0 flex flex-col items-center justify-center pt-3 pb-2" style={{ minHeight: 56 }}>
           {(() => {
             // Lock content if user's profile is private OR they haven't shared any public activity
             const isContentLocked = !isOwnStory && !profile?.stories_public;
