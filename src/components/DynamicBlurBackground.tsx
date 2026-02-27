@@ -37,7 +37,7 @@ export default function DynamicBlurBackground({ imageUrl, children }: DynamicBlu
   });
 
   return (
-    <div className="absolute inset-0">
+    <div className="absolute inset-0 overflow-hidden">
       {/* Crossfading blurred backgrounds — oversized to cover Safari overscroll */}
       <div className="absolute overflow-hidden" style={{ top: -50, bottom: -50, left: -50, right: -50 }}>
         <div style={layerStyle(layers[0], frontLayer === 'a')} />
