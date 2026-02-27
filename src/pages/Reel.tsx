@@ -1518,9 +1518,9 @@ const Reel = () => {
 
         {/* MIDDLE CONTAINER — flexes between profile strip and bottom nav */}
         <div
-          className="relative z-30 flex-1 min-h-0 flex flex-col pt-4"
+          className="relative z-30 flex-1 min-h-0 flex flex-col pt-1"
           style={{
-            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 10px), 10px) + 72px)',
+            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 6px), 6px) + 64px)',
           }}
         >
           {/* Reel cards fill the available middle container space */}
@@ -1616,7 +1616,7 @@ const Reel = () => {
             className="relative flex items-center justify-center"
             style={{ 
               width: '100%',
-              height: 'calc(100% - 16px)',
+              height: '100%',
               x: dragX,
               opacity: cardOpacity,
               rotateY: cardRotate,
@@ -1921,7 +1921,7 @@ const Reel = () => {
             </div>
 
             {/* React row sits below the reel card with a fixed 10px gap */}
-            <div className="shrink-0 flex flex-col items-center pt-4 pb-28">
+            <div className="shrink-0 flex flex-col items-center pt-3 pb-2">
           {(() => {
             // Lock content if user's profile is private OR they haven't shared any public activity
             const isContentLocked = !isOwnStory && !profile?.stories_public;
