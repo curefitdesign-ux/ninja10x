@@ -257,27 +257,30 @@ export default function ActivityGalleryOverlay({
 
               {/* Progress segments */}
               <div className="flex-1 flex items-center gap-1 mx-3">
-                {activities.filter(a => !a.isPlaceholder).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex-1 h-[3px] rounded-full overflow-hidden"
-                    style={{ background: 'rgba(255,255,255,0.15)' }}
-                  >
+                {activities.map((a, i) => {
+                  if (a.isPlaceholder) return null;
+                  const isCurrent = i === currentIndex;
+                  const isPast = i < currentIndex;
+                  return (
                     <div
-                      className="h-full rounded-full"
-                      style={{
-                        background: i < currentIndex ? 'rgba(255,255,255,0.9)'
-                          : i === currentIndex ? 'linear-gradient(90deg, #F97316, #EC4899)' 
-                          : 'transparent',
-                        width: i < currentIndex ? '100%'
-                          : i === currentIndex ? '100%' : '0%',
-                        transition: i === currentIndex && autoAdvanceProgress > 0
-                          ? `width ${AUTO_ADVANCE_MS}ms linear`
-                          : 'width 0.3s ease',
-                      }}
-                    />
-                  </div>
-                ))}
+                      key={i}
+                      className="flex-1 h-[3px] rounded-full overflow-hidden"
+                      style={{ background: 'rgba(255,255,255,0.15)' }}
+                    >
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          background: (isPast || isCurrent) ? 'rgba(255,255,255,0.9)' : 'transparent',
+                          width: isPast ? '100%'
+                            : isCurrent ? `${autoAdvanceProgress * 100}%` : '0%',
+                          transition: isCurrent && autoAdvanceProgress > 0
+                            ? `width ${AUTO_ADVANCE_MS}ms linear`
+                            : 'width 0.3s ease',
+                        }}
+                      />
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Close button */}
