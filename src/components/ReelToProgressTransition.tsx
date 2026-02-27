@@ -50,7 +50,7 @@ interface ReelToProgressTransitionProps {
   onClose: () => void;
   currentActivity: Activity | null;
   publicFeed: Activity[];
-  myActivities: { id?: string; dayNumber: number; storageUrl?: string; originalUrl?: string; isVideo?: boolean; activity?: string; frame?: string; duration?: string; pr?: string; reactionCount?: number; reactions?: Record<ReactionType, ActivityReaction> }[];
+  myActivities: { id?: string; dayNumber: number; storageUrl?: string; originalUrl?: string; isVideo?: boolean; activity?: string; frame?: string; duration?: string; pr?: string; createdAt?: string; reactionCount?: number; reactions?: Record<ReactionType, ActivityReaction> }[];
   onStoryTap: (index: number, userId?: string, activityId?: string) => void;
   onLogActivity?: () => void;
   isInline?: boolean;
@@ -418,13 +418,27 @@ export default function ReelToProgressTransition({
                 reactionCount: a.reactionCount,
                 reactions: a.reactions,
               })),
-            // Append empty state placeholder if journey isn't complete
-            ...(myActivities.length < 12 ? [{
-              id: 'log-next',
-              storageUrl: '',
-              dayNumber: myActivities.length + 1,
-              isPlaceholder: true,
-            }] : []),
+            // Append empty state placeholder only if journey isn't complete AND no activity logged in last 24h
+            ...(() => {
+              if (myActivities.length >= 12) return [];
+              const latest = myActivities
+                .filter(a => a.storageUrl)
+                .sort((a, b) => b.dayNumber - a.dayNumber)[0];
+              if (latest) {
+                // Check if the latest activity was created within the last 24 hours
+                const createdAt = latest.createdAt;
+                if (createdAt) {
+                  const hoursSince = (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60);
+                  if (hoursSince < 24) return [];
+                }
+              }
+              return [{
+                id: 'log-next',
+                storageUrl: '',
+                dayNumber: myActivities.length + 1,
+                isPlaceholder: true,
+              }];
+            })(),
           ]}
           initialIndex={galleryInitialIndex}
           onLogActivity={onLogActivity}
