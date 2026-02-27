@@ -123,7 +123,7 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
                       color: isActive
                         ? "#ffffff"
                         : "rgba(200, 210, 230, 0.6)",
-                      opacity: isActive ? 1 : 0.6,
+                      opacity: isActive ? 1 : 0.3,
                       transform: isActive ? "scale(1.1)" : "scale(1)",
                     }}
                   >
