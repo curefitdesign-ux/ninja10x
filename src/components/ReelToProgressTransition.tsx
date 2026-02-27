@@ -336,6 +336,7 @@ export default function ReelToProgressTransition({
 
             {/* Progress tiles */}
             <div className="flex-1 relative w-full overflow-visible" style={{ maxWidth: "430px", marginInline: "auto" }}>
+              <div className="absolute bottom-0 left-0 right-0" style={{ height: "100%" }}>
               {showTiles && (
                 <motion.div
                   className="absolute"
@@ -390,6 +391,7 @@ export default function ReelToProgressTransition({
                   <img src={basePlatformImg} alt="Base" className="w-full object-contain" style={{ opacity: 0.85 }} />
                 </motion.div>
               )}
+              </div>
             </div>
           </div>
         </LayoutGroup>
