@@ -151,8 +151,7 @@ export default function ActivityGalleryOverlay({
                   height: '70vh',
                   maxWidth: '100%',
                   borderRadius: '20px',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+                  border: 'none',
                 }}
                 initial={{ opacity: 0, scale: 0.95, x: 30 }}
                 animate={{ opacity: 1, scale: 1, x: 0 }}
