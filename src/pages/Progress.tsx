@@ -8,6 +8,7 @@ import MakePublicSheet, { hasUserChosenPublic } from "@/components/MakePublicShe
 import ReelToProgressTransition from "@/components/ReelToProgressTransition";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
 import SharedImageTransition from "@/components/SharedImageTransition";
+import ProfileMenu from "@/components/ProfileMenu";
 
 const Progress = () => {
   const navigate = useNavigate();
@@ -132,13 +133,15 @@ const Progress = () => {
 
       {/* Header */}
       <motion.div
-        className="flex-shrink-0 w-full flex items-center justify-center px-4"
+        className="flex-shrink-0 w-full flex items-center justify-between px-4"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 16px)', paddingBottom: 8 }}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
       >
+        <ProfileMenu />
         <span className="text-white font-bold text-[17px] tracking-tight">My Progress</span>
+        <div style={{ width: 36 }} /> {/* Spacer to center title */}
       </motion.div>
 
       {/* Main content — ReelToProgressTransition in inline mode */}
