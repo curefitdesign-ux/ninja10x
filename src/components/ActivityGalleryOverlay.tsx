@@ -151,7 +151,7 @@ export default function ActivityGalleryOverlay({
                 className="relative w-full overflow-hidden"
                 style={{
                   aspectRatio: '9/16',
-                  height: '70vh',
+                  height: '60vh',
                   maxWidth: '100%',
                   borderRadius: '20px',
                   border: 'none',
