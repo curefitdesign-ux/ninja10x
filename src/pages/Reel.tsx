@@ -1524,7 +1524,7 @@ const Reel = () => {
           }}
         >
           {/* Reel cards fill the available middle container space */}
-          <div className="relative min-h-0 flex items-center justify-center" style={{ height: '70%' }}>
+          <div className="relative min-h-0 flex items-center justify-center" style={{ height: '80%' }}>
           {/* Previous user peek card - 12% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
@@ -1615,7 +1615,7 @@ const Reel = () => {
           <motion.div 
             className="relative flex items-center justify-center"
             style={{ 
-              width: '70%',
+              width: '80%',
               height: 'calc(100% - 60px)',
               x: dragX,
               opacity: cardOpacity,
