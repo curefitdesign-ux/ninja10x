@@ -142,7 +142,7 @@ export default function ReelToProgressTransition({
   if (isInline) {
     // Inline mode: render content directly without fixed overlay
     return (
-      <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex flex-col h-full overflow-hidden justify-end">
         <LayoutGroup>
           <div className="flex-1 flex flex-col justify-end">
             {/* Week Progress Stacks */}
