@@ -235,6 +235,10 @@ export default function ReelToProgressTransition({
                               >
                                 {ws.activitiesInWeek[2]?.storageUrl ? (
                                   <img src={ws.activitiesInWeek[2].storageUrl} className="w-full h-full object-cover" alt="" />
+                                ) : isGlowing ? (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Plus size={14} className="text-white/50" />
+                                  </div>
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
                                     <Lock size={14} style={{ color: lockColor, opacity: 0.7 }} />
@@ -262,6 +266,10 @@ export default function ReelToProgressTransition({
                               >
                                 {ws.activitiesInWeek[1]?.storageUrl ? (
                                   <img src={ws.activitiesInWeek[1].storageUrl} className="w-full h-full object-cover" alt="" />
+                                ) : isGlowing ? (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Plus size={14} className="text-white/50" />
+                                  </div>
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
                                     <Lock size={14} style={{ color: lockColor, opacity: 0.7 }} />
