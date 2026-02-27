@@ -1615,8 +1615,8 @@ const Reel = () => {
           <motion.div 
             className="relative flex items-center justify-center"
             style={{ 
-              width: '80%',
-              height: 'calc(100% - 60px)',
+              width: '92%',
+              height: 'calc(100% - 16px)',
               x: dragX,
               opacity: cardOpacity,
               rotateY: cardRotate,
