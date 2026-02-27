@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Plus, UserPen, LogOut } from "lucide-react";
 import { useJourneyActivities, fetchPublicFeed, LocalActivity } from "@/hooks/use-journey-activities";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import MakePublicSheet, { hasUserChosenPublic } from "@/components/MakePublicSheet";
@@ -27,6 +28,7 @@ const Progress = () => {
   const [showMakePublicSheet, setShowMakePublicSheet] = useState(false);
   const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
   const [pendingDayNumber, setPendingDayNumber] = useState<number | null>(null);
+  const [showEllipsisMenu, setShowEllipsisMenu] = useState(false);
 
   // Transition state
   const [showTransitionIn, setShowTransitionIn] = useState(false);
@@ -149,12 +151,83 @@ const Progress = () => {
           />
         </div>
         <span className="text-white font-bold text-[17px] tracking-tight">My Progress</span>
-        {/* 3-dot menu button */}
-        <button className="w-9 h-9 flex items-center justify-center rounded-full active:scale-90 transition-transform"
-          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
-        >
-          <MoreVertical className="w-[18px] h-[18px] text-white/70" />
-        </button>
+        {/* Right side - Ellipsis menu */}
+        <div className="flex items-center shrink-0 relative">
+          <button
+            onClick={() => setShowEllipsisMenu(prev => !prev)}
+            className="active:scale-[0.95] transition-transform flex items-center justify-center"
+            style={{
+              width: 36, height: 36, borderRadius: 18,
+              background: 'rgba(255, 255, 255, 0.08)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+            }}
+          >
+            <MoreVertical className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
+          </button>
+
+          <AnimatePresence>
+            {showEllipsisMenu && (
+              <>
+                <motion.div
+                  className="fixed inset-0 z-40"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setShowEllipsisMenu(false)}
+                />
+                <motion.div
+                  className="absolute right-0 top-full mt-2 w-52 z-50 rounded-2xl overflow-hidden"
+                  style={{
+                    background: 'rgba(20, 20, 30, 0.95)',
+                    backdropFilter: 'blur(40px) saturate(180%)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
+                  }}
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="py-1">
+                    <motion.button
+                      onClick={() => { setShowEllipsisMenu(false); setShowMediaSourceSheet(true); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+                      whileHover={{ x: 2 }}
+                    >
+                      <Plus className="w-4 h-4 text-emerald-400" />
+                      <span className="text-sm">Log Activity</span>
+                    </motion.button>
+                    <motion.button
+                      onClick={() => { setShowEllipsisMenu(false); navigate('/profile-setup?edit=true'); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+                      whileHover={{ x: 2 }}
+                    >
+                      <UserPen className="w-4 h-4 text-emerald-400" />
+                      <span className="text-sm">Edit Profile</span>
+                    </motion.button>
+                    <motion.button
+                      onClick={async () => {
+                        setShowEllipsisMenu(false);
+                        try {
+                          await supabase.auth.signOut();
+                          navigate('/auth');
+                        } catch { /* ignore */ }
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-red-400 hover:bg-red-500/5 transition-colors"
+                      whileHover={{ x: 2 }}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="text-sm">Log Out</span>
+                    </motion.button>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
       </motion.div>
 
       {/* Main content — ReelToProgressTransition in inline mode */}
