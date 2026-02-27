@@ -1732,7 +1732,7 @@ const Reel = () => {
                         {currentActivity?.id === 'log-activity' ? (
                           // "Log Your Activity" placeholder card — dark with dot grid + green plus
                           <div 
-                            className="w-full h-full flex flex-col items-center justify-center cursor-pointer relative overflow-hidden self-center"
+                            className="w-[90%] aspect-[9/16] flex flex-col items-center justify-center cursor-pointer relative overflow-hidden self-center"
                             onClick={(e) => {
                               e.stopPropagation();
                               setShowMediaSourceSheet(true);
