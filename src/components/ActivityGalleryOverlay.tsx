@@ -226,6 +226,14 @@ export default function ActivityGalleryOverlay({
   const overlay = (
     <AnimatePresence>
       {isOpen && (
+        <motion.div
+          className="fixed inset-0"
+          style={{ zIndex: 60 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
         <DynamicBlurBackground imageUrl={mediaUrl}>
           <div
             className="absolute inset-0 flex flex-col"
@@ -571,6 +579,7 @@ export default function ActivityGalleryOverlay({
             </AlertDialogContent>
           </AlertDialog>
         </DynamicBlurBackground>
+        </motion.div>
       )}
     </AnimatePresence>
   );
