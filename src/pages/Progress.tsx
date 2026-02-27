@@ -143,7 +143,7 @@ const Progress = () => {
 
       {/* Main content — ReelToProgressTransition in inline mode */}
       <div
-        className="flex-1 overflow-hidden"
+        className="flex-1 overflow-y-auto overflow-x-hidden"
         style={{ paddingBottom: 'calc(max(env(safe-area-inset-bottom, 10px), 10px) + 70px)' }}
       >
         <ReelToProgressTransition
