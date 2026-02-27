@@ -235,9 +235,9 @@ export default function ReelToProgressTransition({
                                   width: "52px", height: "72px",
                                   top: card3Pos.top, left: card3Pos.left,
                                   transform: `rotate(${card3Pos.rotate})`,
-                                  border: "1.5px solid rgba(255,255,255,0.15)",
+                                  boxShadow: "0 0 0 1.5px rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.3)",
                                   background: ws.activitiesInWeek[2]?.storageUrl
-                                    ? undefined
+                                    ? '#000'
                                     : ws.isLocked
                                       ? "linear-gradient(135deg, rgba(40,35,55,0.9), rgba(20,18,30,0.95))"
                                       : isGlowing
@@ -246,7 +246,7 @@ export default function ReelToProgressTransition({
                                 }}
                               >
                                 {ws.activitiesInWeek[2]?.storageUrl ? (
-                                  <img src={ws.activitiesInWeek[2].originalUrl || ws.activitiesInWeek[2].storageUrl} className="w-full h-full object-cover" alt="" />
+                                  <img src={ws.activitiesInWeek[2].originalUrl || ws.activitiesInWeek[2].storageUrl} className="absolute inset-0 w-full h-full object-cover" alt="" />
                                 ) : isGlowing ? (
                                   <div className="w-full h-full flex items-center justify-center">
                                     <Plus size={14} className="text-white/50" />
@@ -265,10 +265,10 @@ export default function ReelToProgressTransition({
                                   width: "52px", height: "72px",
                                   top: card2Pos.top, left: card2Pos.left,
                                   transform: `rotate(${card2Pos.rotate})`,
-                                  border: "1.5px solid rgba(255,255,255,0.15)",
+                                  boxShadow: "0 0 0 1.5px rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.3)",
                                   zIndex: 1,
                                   background: ws.activitiesInWeek[1]?.storageUrl
-                                    ? undefined
+                                    ? '#000'
                                     : ws.isLocked
                                       ? "linear-gradient(135deg, rgba(40,35,55,0.9), rgba(20,18,30,0.95))"
                                       : isGlowing
@@ -277,7 +277,7 @@ export default function ReelToProgressTransition({
                                 }}
                               >
                                 {ws.activitiesInWeek[1]?.storageUrl ? (
-                                  <img src={ws.activitiesInWeek[1].originalUrl || ws.activitiesInWeek[1].storageUrl} className="w-full h-full object-cover" alt="" />
+                                  <img src={ws.activitiesInWeek[1].originalUrl || ws.activitiesInWeek[1].storageUrl} className="absolute inset-0 w-full h-full object-cover" alt="" />
                                 ) : isGlowing ? (
                                   <div className="w-full h-full flex items-center justify-center">
                                     <Plus size={14} className="text-white/50" />
@@ -296,9 +296,11 @@ export default function ReelToProgressTransition({
                                   width: "54px", height: "74px",
                                   top: card1Pos.top, left: card1Pos.left,
                                   transform: `rotate(${card1Pos.rotate})`,
-                                  border: isGlowing ? "1.5px solid rgba(180,150,240,0.35)" : "1.5px solid rgba(255,255,255,0.15)",
+                                  boxShadow: isGlowing
+                                    ? "0 0 0 1.5px rgba(180,150,240,0.4), 0 4px 12px rgba(0,0,0,0.3)"
+                                    : "0 0 0 1.5px rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.3)",
                                   background: ws.activitiesInWeek[0]?.storageUrl
-                                    ? undefined
+                                    ? '#000'
                                     : ws.isLocked
                                       ? "linear-gradient(135deg, rgba(40,35,55,0.9), rgba(20,18,30,0.95))"
                                       : isGlowing
@@ -308,7 +310,7 @@ export default function ReelToProgressTransition({
                                 }}
                               >
                                 {ws.activitiesInWeek[0]?.storageUrl ? (
-                                  <img src={ws.activitiesInWeek[0].originalUrl || ws.activitiesInWeek[0].storageUrl} className="w-full h-full object-cover" alt="" />
+                                  <img src={ws.activitiesInWeek[0].originalUrl || ws.activitiesInWeek[0].storageUrl} className="absolute inset-0 w-full h-full object-cover" alt="" />
                                 ) : isGlowing ? (
                                   <div className="w-full h-full flex items-center justify-center">
                                     <Plus size={18} className="text-white/60" />
