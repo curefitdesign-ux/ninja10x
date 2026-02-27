@@ -96,7 +96,7 @@ export default function ActivityGalleryOverlay({
         <motion.div
           className="fixed inset-0 z-[60] flex items-center justify-center"
           style={{
-            background: 'rgba(0, 0, 0, 0.85)',
+            background: 'rgba(0, 0, 0, 0.55)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
           }}
