@@ -142,9 +142,8 @@ export default function ReelToProgressTransition({
   if (isInline) {
     // Inline mode: render content directly without fixed overlay
     return (
-      <div className="flex flex-col h-full overflow-hidden justify-end">
-        <LayoutGroup>
-          <div className="flex-1 flex flex-col justify-end">
+      <div className="flex flex-col h-full overflow-hidden overflow-x-clip justify-end">
+        <div className="flex-1 flex flex-col justify-end">
             {/* Week Progress Stacks */}
             {showStories && (
               <div
@@ -396,7 +395,6 @@ export default function ReelToProgressTransition({
               </div>
             </div>
           </div>
-        </LayoutGroup>
 
         {/* Activity Gallery Overlay */}
         <ActivityGalleryOverlay

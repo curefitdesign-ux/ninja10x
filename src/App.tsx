@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
-import { LayoutGroup } from "framer-motion";
+
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -103,27 +103,25 @@ const AnimatedRoutes = () => {
   const location = useLocation();
   
   return (
-    <LayoutGroup>
-      <PageTransition key={location.pathname}>
-        <Routes location={location}>
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/profile-setup" element={<ProfileSetupRouteWrapper><ProfileSetupPage /></ProfileSetupRouteWrapper>} />
-          <Route path="/avatar-crop" element={<ProtectedRoute><AvatarCrop /></ProtectedRoute>} />
-          <Route path="/" element={<Navigate to="/reel" replace />} />
-          <Route path="/create" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-          <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
-          <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
-          <Route path="/camera" element={<ProtectedRoute><Camera /></ProtectedRoute>} />
-          <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
-          
-          <Route path="/reel" element={<ProtectedRoute><Reel /></ProtectedRoute>} />
-          <Route path="/reel-generation" element={<ProtectedRoute><ReelGeneration /></ProtectedRoute>} />
-          
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </PageTransition>
-    </LayoutGroup>
+    <PageTransition key={location.pathname}>
+      <Routes location={location}>
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/profile-setup" element={<ProfileSetupRouteWrapper><ProfileSetupPage /></ProfileSetupRouteWrapper>} />
+        <Route path="/avatar-crop" element={<ProtectedRoute><AvatarCrop /></ProtectedRoute>} />
+        <Route path="/" element={<Navigate to="/reel" replace />} />
+        <Route path="/create" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+        <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
+        <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
+        <Route path="/camera" element={<ProtectedRoute><Camera /></ProtectedRoute>} />
+        <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
+        
+        <Route path="/reel" element={<ProtectedRoute><Reel /></ProtectedRoute>} />
+        <Route path="/reel-generation" element={<ProtectedRoute><ReelGeneration /></ProtectedRoute>} />
+        
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </PageTransition>
   );
 };
 

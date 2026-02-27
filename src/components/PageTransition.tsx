@@ -29,7 +29,7 @@ const PageTransition = ({ children }: PageTransitionProps) => {
   }, []);
 
   // Skip transition overlay for full-screen immersive routes
-  const skipTransition = location.pathname === '/reel' || location.pathname === '/reel-generation';
+  const skipTransition = location.pathname === '/reel' || location.pathname === '/reel-generation' || location.pathname === '/progress';
 
   useEffect(() => {
     if (!isFirstMount.current && !skipTransition) {
