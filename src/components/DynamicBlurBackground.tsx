@@ -27,6 +27,7 @@ export default function DynamicBlurBackground({ imageUrl, children }: DynamicBlu
     position: 'absolute',
     inset: 0,
     backgroundImage: url ? `url(${url})` : 'none',
+    backgroundColor: url ? undefined : '#0a0720',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     filter: 'blur(60px) saturate(120%)',
