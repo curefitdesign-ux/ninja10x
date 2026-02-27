@@ -1782,7 +1782,7 @@ const Reel = () => {
                             }}
                             autoPlay
                             loop
-                            muted={isMuted}
+                            muted={true}
                             playsInline
                             onLoadedData={(e) => {
                               setLoadedMediaUrl(mediaUrl);
@@ -1936,32 +1936,6 @@ const Reel = () => {
                   transition: 'opacity 0.2s ease, transform 0.2s ease',
                 }}
               >
-                {/* Music toggle - centered, just above reactions pill */}
-                {isVideo && !isContentLocked && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsMuted(!isMuted);
-                      if (videoRef.current) {
-                        videoRef.current.muted = !isMuted;
-                      }
-                    }}
-                    className="mb-1.5 p-2.5 rounded-full active:scale-95 transition-transform"
-                    style={{
-                      background: 'rgba(255,255,255,0.1)',
-                      backdropFilter: 'blur(20px)',
-                      WebkitBackdropFilter: 'blur(20px)',
-                      border: '1px solid rgba(255,255,255,0.15)',
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15)',
-                    }}
-                  >
-                    {isMuted ? (
-                      <VolumeX className="w-5 h-5 text-white" />
-                    ) : (
-                      <Volume2 className="w-5 h-5 text-white" />
-                    )}
-                  </button>
-                )}
                 {/* Reaction pill + Share icon row */}
                 <div className="flex items-center justify-center gap-3 px-4">
                   {/* Liquid glass reaction pill */}
