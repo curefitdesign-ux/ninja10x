@@ -312,7 +312,16 @@ export default function ActivityGalleryOverlay({
                 paddingBottom: 'max(env(safe-area-inset-bottom, 6px), 6px)',
               }}
             >
-              <div className="relative min-h-0 flex-1 flex items-center justify-center" onClick={handleTap}>
+              <motion.div
+                className="relative min-h-0 flex-1 flex items-center justify-center"
+                onClick={handleTap}
+                onPanEnd={(_e, info: PanInfo) => {
+                  const swipeThreshold = 50;
+                  if (info.offset.x < -swipeThreshold) goNext();
+                  else if (info.offset.x > swipeThreshold) goPrev();
+                }}
+                style={{ touchAction: 'pan-y' }}
+              >
                 <div
                   className="relative flex items-center justify-center"
                   style={{ width: '100%', height: '100%' }}
@@ -413,7 +422,7 @@ export default function ActivityGalleryOverlay({
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
 
               {/* Bottom action row: reaction pill + share + delete */}
               <div className="shrink-0 flex flex-col items-center justify-center pt-3 pb-2" style={{ minHeight: 56 }}>
