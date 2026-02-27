@@ -1693,7 +1693,7 @@ const Reel = () => {
                       className="relative overflow-hidden"
                       style={{
                         aspectRatio: '9/16',
-                        height: isLogActivityCard ? '90%' : '95%',
+                        height: '90%',
                         maxWidth: '100%',
                         borderRadius: '20px',
                         overflow: 'hidden',
