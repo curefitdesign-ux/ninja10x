@@ -30,7 +30,7 @@ const LABELS = [
   { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 18, left: 70 },
   { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 33, left: 6 },
   { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 48, left: 70 },
-  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 73, left: 6 },
+  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 68, left: 6 },
 ];
 
 interface Activity {
