@@ -2,7 +2,9 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { X, Plus, Lock } from 'lucide-react';
 import ProfileAvatar from '@/components/ProfileAvatar';
+import ActivityGalleryOverlay from '@/components/ActivityGalleryOverlay';
 import { isVideoUrl } from '@/lib/media';
+import { ReactionType, ActivityReaction } from '@/services/journey-service';
 import tileActiveImg from '@/assets/progress/tile-active-new.png';
 import tileInactiveImg from '@/assets/progress/tile-inactive.png';
 import engineBadgeImg from '@/assets/progress/engine-badge.png';
@@ -48,7 +50,7 @@ interface ReelToProgressTransitionProps {
   onClose: () => void;
   currentActivity: Activity | null;
   publicFeed: Activity[];
-  myActivities: { dayNumber: number; storageUrl?: string; originalUrl?: string }[];
+  myActivities: { id?: string; dayNumber: number; storageUrl?: string; originalUrl?: string; isVideo?: boolean; activity?: string; duration?: string; pr?: string; reactionCount?: number; reactions?: Record<ReactionType, ActivityReaction> }[];
   onStoryTap: (index: number, userId?: string, activityId?: string) => void;
   onLogActivity?: () => void;
   isInline?: boolean;
@@ -67,6 +69,8 @@ export default function ReelToProgressTransition({
   const [showTiles, setShowTiles] = useState(false);
   const [showStories, setShowStories] = useState(false);
   const [expandingCardId, setExpandingCardId] = useState<string | null>(null);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Combine current activity with public feed and sort by latest first
@@ -211,7 +215,15 @@ export default function ReelToProgressTransition({
                               }}
                               whileTap={{ scale: 0.95 }}
                               onClick={() => {
-                                if (isGlowing && onLogActivity) {
+                                const hasPhotos = ws.activitiesInWeek.some(a => a?.storageUrl);
+                                if (hasPhotos) {
+                                  // Find index of first activity in this week within all uploaded activities
+                                  const uploaded = myActivities.filter(a => a.storageUrl);
+                                  const firstInWeek = ws.activitiesInWeek.find(a => a?.storageUrl);
+                                  const idx = firstInWeek ? uploaded.findIndex(a => a.dayNumber === firstInWeek.dayNumber) : 0;
+                                  setGalleryInitialIndex(Math.max(0, idx));
+                                  setGalleryOpen(true);
+                                } else if (isGlowing && onLogActivity) {
                                   onLogActivity();
                                 }
                               }}
@@ -381,6 +393,27 @@ export default function ReelToProgressTransition({
             </div>
           </div>
         </LayoutGroup>
+
+        {/* Activity Gallery Overlay */}
+        <ActivityGalleryOverlay
+          isOpen={galleryOpen}
+          onClose={() => setGalleryOpen(false)}
+          activities={myActivities
+            .filter(a => a.storageUrl)
+            .map(a => ({
+              id: a.id || `day-${a.dayNumber}`,
+              storageUrl: a.storageUrl!,
+              originalUrl: a.originalUrl,
+              isVideo: a.isVideo,
+              activity: a.activity,
+              duration: a.duration,
+              pr: a.pr,
+              dayNumber: a.dayNumber,
+              reactionCount: a.reactionCount,
+              reactions: a.reactions,
+            }))}
+          initialIndex={galleryInitialIndex}
+        />
       </div>
     );
   }
