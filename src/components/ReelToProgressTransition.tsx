@@ -144,7 +144,7 @@ export default function ReelToProgressTransition({
     return (
       <div className="flex flex-col h-full overflow-hidden">
         <LayoutGroup>
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col justify-end">
             {/* Week Progress Stacks */}
             {showStories && (
               <div
