@@ -335,7 +335,7 @@ export default function ReelToProgressTransition({
             )}
 
             {/* Progress tiles */}
-            <div className="flex-1 relative w-full overflow-hidden" style={{ maxWidth: "430px", marginInline: "auto" }}>
+            <div className="flex-1 relative w-full overflow-visible" style={{ maxWidth: "430px", marginInline: "auto" }}>
               {showTiles && (
                 <motion.div
                   className="absolute"
