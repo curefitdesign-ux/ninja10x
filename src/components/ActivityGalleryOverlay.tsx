@@ -4,6 +4,7 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
 import { ReactionType, ActivityReaction } from '@/services/journey-service';
+import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 
 import fireImg from '@/assets/reactions/fire-3d.png';
 import clapImg from '@/assets/reactions/clap-3d.png';
@@ -35,6 +36,7 @@ interface GalleryActivity {
   originalUrl?: string;
   isVideo?: boolean;
   activity?: string;
+  frame?: string;
   duration?: string;
   pr?: string;
   dayNumber: number;
@@ -143,9 +145,12 @@ export default function ActivityGalleryOverlay({
             <AnimatePresence mode="wait">
               <motion.div
                 key={current.id}
-                className="relative w-full rounded-2xl overflow-hidden"
+                className="relative w-full overflow-hidden"
                 style={{
-                  aspectRatio: '3/4',
+                  aspectRatio: '9/16',
+                  height: '70vh',
+                  maxWidth: '100%',
+                  borderRadius: '20px',
                   border: '1px solid rgba(255,255,255,0.1)',
                   boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
                 }}
@@ -154,10 +159,20 @@ export default function ActivityGalleryOverlay({
                 exit={{ opacity: 0, scale: 0.95, x: -30 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               >
-                {current.isVideo ? (
+                {current.frame ? (
+                  <StoryFrameRenderer
+                    imageUrl={current.originalUrl || current.storageUrl}
+                    isVideo={current.isVideo}
+                    activity={current.activity}
+                    frame={current.frame}
+                    duration={current.duration}
+                    pr={current.pr}
+                    dayNumber={current.dayNumber}
+                  />
+                ) : current.isVideo ? (
                   <video
                     src={current.originalUrl || current.storageUrl}
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover"
                     muted
                     playsInline
                     loop
@@ -167,49 +182,8 @@ export default function ActivityGalleryOverlay({
                   <img
                     src={current.storageUrl}
                     alt={`Day ${current.dayNumber}`}
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
-                )}
-
-                {/* Day badge */}
-                <div
-                  className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-white font-bold text-xs"
-                  style={{
-                    background: 'rgba(0,0,0,0.5)',
-                    backdropFilter: 'blur(8px)',
-                  }}
-                >
-                  Day {current.dayNumber}
-                </div>
-
-                {/* Activity type badge */}
-                {current.activity && (
-                  <div
-                    className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-white/90 font-medium text-xs capitalize"
-                    style={{
-                      background: 'rgba(255,255,255,0.1)',
-                      backdropFilter: 'blur(8px)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                    }}
-                  >
-                    {current.activity}
-                  </div>
-                )}
-
-                {/* Metrics row at bottom */}
-                {(current.duration || current.pr) && (
-                  <div className="absolute bottom-0 left-0 right-0 px-3 py-2.5 flex items-center gap-3"
-                    style={{
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)',
-                    }}
-                  >
-                    {current.duration && (
-                      <span className="text-white/90 text-xs font-medium">⏱ {current.duration}</span>
-                    )}
-                    {current.pr && (
-                      <span className="text-white/90 text-xs font-medium">🏅 {current.pr}</span>
-                    )}
-                  </div>
                 )}
               </motion.div>
             </AnimatePresence>
