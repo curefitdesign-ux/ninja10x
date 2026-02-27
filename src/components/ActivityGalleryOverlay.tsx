@@ -166,11 +166,11 @@ export default function ActivityGalleryOverlay({
   const week = Math.ceil(current.dayNumber / 3);
   const dayInWeek = ((current.dayNumber - 1) % 3) + 1;
 
-  // Can edit: latest activity only, within 24h
+  // Share is available on all activities; delete only on the latest
   const maxDayNumber = Math.max(...activities.filter(a => !a.isPlaceholder).map(a => a.dayNumber));
   const isLatest = current.dayNumber === maxDayNumber;
-  const isWithin24h = current.storageUrl ? true : false; // Activities in gallery are the user's own
-  const canEdit = isLatest && !current.isPlaceholder;
+  const canShare = !current.isPlaceholder;
+  const canDelete = isLatest && !current.isPlaceholder;
 
   const goNext = () => setCurrentIndex(i => Math.min(i + 1, activities.length - 1));
   const goPrev = () => setCurrentIndex(i => Math.max(i - 1, 0));
@@ -460,8 +460,8 @@ export default function ActivityGalleryOverlay({
                     </button>
 
                     {/* Share & Delete buttons */}
-                    {canEdit && (
-                      <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
+                      {canShare && (
                         <button
                           onClick={(e) => { e.stopPropagation(); handleShareStory(); }}
                           className="shrink-0 active:scale-95 transition-transform"
@@ -477,6 +477,8 @@ export default function ActivityGalleryOverlay({
                         >
                           <Share2 className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
                         </button>
+                      )}
+                      {canDelete && (
                         <button
                           onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(true); }}
                           className="shrink-0 active:scale-95 transition-transform"
@@ -492,8 +494,8 @@ export default function ActivityGalleryOverlay({
                         >
                           <Trash2 className="w-[18px] h-[18px] text-white/60" strokeWidth={1.5} />
                         </button>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
