@@ -1,7 +1,7 @@
 // Floating glass tab bar — matches reference: Back circle | Discover | My Progress
 import { cn } from "@/lib/utils";
+import { Map } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import discoverIcon from "@/assets/nav/discover-icon.png";
 import progressIcon from "@/assets/nav/progress-icon.png";
 
 const BackIcon = ({ className }: { className?: string }) => (
@@ -13,7 +13,7 @@ const BackIcon = ({ className }: { className?: string }) => (
 
 const navTabs = [
   { id: "home", icon: <BackIcon className="w-6 h-6" />, label: "Home" },
-  { id: "discover", icon: <img src={discoverIcon} alt="Discover" className="w-5 h-5 object-contain" />, label: "Discover" },
+  { id: "discover", icon: <Map className="w-5 h-5" />, label: "Discover" },
   { id: "progress", icon: <img src={progressIcon} alt="My Progress" className="w-5 h-5 object-contain" />, label: "My Progress" },
 ];
 
