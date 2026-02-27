@@ -156,7 +156,7 @@ export default function ReelToProgressTransition({
                   minHeight: "160px",
                 }}
               >
-                <div className="relative flex items-start" style={{ minWidth: "max-content", gap: "120px" }}>
+                <div className="relative flex items-start" style={{ minWidth: "max-content", gap: "80px" }}>
                   {/* Dashed thread connecting stacks */}
                   <svg
                     className="absolute pointer-events-none"
