@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { MoreVertical } from "lucide-react";
 import { useJourneyActivities, fetchPublicFeed, LocalActivity } from "@/hooks/use-journey-activities";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
@@ -8,7 +9,7 @@ import MakePublicSheet, { hasUserChosenPublic } from "@/components/MakePublicShe
 import ReelToProgressTransition from "@/components/ReelToProgressTransition";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
 import SharedImageTransition from "@/components/SharedImageTransition";
-import ProfileMenu from "@/components/ProfileMenu";
+import ProfileAvatar from "@/components/ProfileAvatar";
 
 const Progress = () => {
   const navigate = useNavigate();
@@ -139,9 +140,21 @@ const Progress = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
       >
-        <ProfileMenu />
+        {/* Profile avatar — no click action */}
+        <div className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-white/20">
+          <ProfileAvatar
+            src={profile?.avatar_url}
+            name={profile?.display_name}
+            size={36}
+          />
+        </div>
         <span className="text-white font-bold text-[17px] tracking-tight">My Progress</span>
-        <div style={{ width: 36 }} /> {/* Spacer to center title */}
+        {/* 3-dot menu button */}
+        <button className="w-9 h-9 flex items-center justify-center rounded-full active:scale-90 transition-transform"
+          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
+        >
+          <MoreVertical className="w-[18px] h-[18px] text-white/70" />
+        </button>
       </motion.div>
 
       {/* Main content — ReelToProgressTransition in inline mode */}
