@@ -402,22 +402,32 @@ export default function ReelToProgressTransition({
         <ActivityGalleryOverlay
           isOpen={galleryOpen}
           onClose={() => setGalleryOpen(false)}
-          activities={myActivities
-            .filter(a => a.storageUrl)
-            .map(a => ({
-              id: a.id || `day-${a.dayNumber}`,
-              storageUrl: a.storageUrl!,
-              originalUrl: a.originalUrl,
-              isVideo: a.isVideo,
-              activity: a.activity,
-              frame: a.frame,
-              duration: a.duration,
-              pr: a.pr,
-              dayNumber: a.dayNumber,
-              reactionCount: a.reactionCount,
-              reactions: a.reactions,
-            }))}
+          activities={[
+            ...myActivities
+              .filter(a => a.storageUrl)
+              .map(a => ({
+                id: a.id || `day-${a.dayNumber}`,
+                storageUrl: a.storageUrl!,
+                originalUrl: a.originalUrl,
+                isVideo: a.isVideo,
+                activity: a.activity,
+                frame: a.frame,
+                duration: a.duration,
+                pr: a.pr,
+                dayNumber: a.dayNumber,
+                reactionCount: a.reactionCount,
+                reactions: a.reactions,
+              })),
+            // Append empty state placeholder if journey isn't complete
+            ...(myActivities.length < 12 ? [{
+              id: 'log-next',
+              storageUrl: '',
+              dayNumber: myActivities.length + 1,
+              isPlaceholder: true,
+            }] : []),
+          ]}
           initialIndex={galleryInitialIndex}
+          onLogActivity={onLogActivity}
         />
       </div>
     );
