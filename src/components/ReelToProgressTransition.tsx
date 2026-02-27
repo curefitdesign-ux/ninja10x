@@ -50,7 +50,7 @@ interface ReelToProgressTransitionProps {
   onClose: () => void;
   currentActivity: Activity | null;
   publicFeed: Activity[];
-  myActivities: { id?: string; dayNumber: number; storageUrl?: string; originalUrl?: string; isVideo?: boolean; activity?: string; frame?: string; duration?: string; pr?: string; createdAt?: string; reactionCount?: number; reactions?: Record<ReactionType, ActivityReaction> }[];
+  myActivities: { id?: string; dayNumber: number; storageUrl?: string; originalUrl?: string; isVideo?: boolean; activity?: string; frame?: string; duration?: string; pr?: string; createdAt?: string; reactionCount?: number; reactions?: Record<ReactionType, ActivityReaction>; reactorProfiles?: { userId: string; displayName: string; avatarUrl?: string; reactionType?: ReactionType; createdAt?: string }[] }[];
   onStoryTap: (index: number, userId?: string, activityId?: string) => void;
   onLogActivity?: () => void;
   isInline?: boolean;
@@ -417,6 +417,7 @@ export default function ReelToProgressTransition({
                 dayNumber: a.dayNumber,
                 reactionCount: a.reactionCount,
                 reactions: a.reactions,
+                reactorProfiles: a.reactorProfiles,
               })),
             // Append empty state placeholder only if journey isn't complete AND no activity logged in last 24h
             ...(() => {
