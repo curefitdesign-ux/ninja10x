@@ -878,7 +878,7 @@ const Reel = () => {
           height: '100dvh',
           minHeight: '-webkit-fill-available',
           overflow: 'hidden',
-          background: 'linear-gradient(180deg, #0c0818 0%, #050208 100%)',
+          background: 'linear-gradient(180deg, #3A2A63 0%, #1A1530 45%, #060608 100%)',
         }}
       >
         {/* Dot grid background */}
