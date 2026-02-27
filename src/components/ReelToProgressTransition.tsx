@@ -143,6 +143,7 @@ export default function ReelToProgressTransition({
     // Inline mode: render content directly without fixed overlay
     return (
       <div className="flex flex-col h-full overflow-hidden justify-end">
+        <LayoutGroup>
           <div className="flex-1 flex flex-col justify-end">
             {/* Week Progress Stacks */}
             {showStories && (
@@ -389,12 +390,13 @@ export default function ReelToProgressTransition({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.25 }}
                 >
-                  <img src={basePlatformImg} alt="Base" className="w-full object-contain" style={{ opacity: 0.85, marginTop: 2, marginLeft: -2 }} />
+                  <img src={basePlatformImg} alt="Base" className="w-full object-contain" style={{ opacity: 0.85 }} />
                 </motion.div>
               )}
               </div>
             </div>
           </div>
+        </LayoutGroup>
 
         {/* Activity Gallery Overlay */}
         <ActivityGalleryOverlay
