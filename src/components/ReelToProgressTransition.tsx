@@ -389,7 +389,7 @@ export default function ReelToProgressTransition({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.25 }}
                 >
-                  <img src={basePlatformImg} alt="Base" className="w-full object-contain" style={{ opacity: 0.85, marginTop: 4 }} />
+                  <img src={basePlatformImg} alt="Base" className="w-full object-contain" style={{ opacity: 0.85, marginTop: 2, marginLeft: -2 }} />
                 </motion.div>
               )}
               </div>
