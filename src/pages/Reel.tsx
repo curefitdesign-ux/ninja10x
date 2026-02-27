@@ -1974,7 +1974,7 @@ const Reel = () => {
                 style={{
                   pointerEvents: isContentLocked ? 'none' : 'auto',
                   opacity: isTransitioning ? 0 : 1,
-                  transform: isTransitioning ? 'translateY(-124px)' : 'translateY(-24px)',
+                  transform: isTransitioning ? 'translateY(-132px)' : 'translateY(-32px)',
                   transition: 'opacity 0.2s ease, transform 0.2s ease',
                 }}
               >
