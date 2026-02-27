@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
 import { ReactionType, ActivityReaction } from '@/services/journey-service';
@@ -42,6 +42,7 @@ interface GalleryActivity {
   dayNumber: number;
   reactionCount?: number;
   reactions?: Record<ReactionType, ActivityReaction>;
+  isPlaceholder?: boolean;
 }
 
 interface ActivityGalleryOverlayProps {
@@ -49,6 +50,7 @@ interface ActivityGalleryOverlayProps {
   onClose: () => void;
   activities: GalleryActivity[];
   initialIndex?: number;
+  onLogActivity?: () => void;
 }
 
 export default function ActivityGalleryOverlay({
@@ -56,6 +58,7 @@ export default function ActivityGalleryOverlay({
   onClose,
   activities,
   initialIndex = 0,
+  onLogActivity,
 }: ActivityGalleryOverlayProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const portalContainer = usePortalContainer();
@@ -158,7 +161,47 @@ export default function ActivityGalleryOverlay({
                 exit={{ opacity: 0, scale: 0.95, x: -30 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               >
-                {current.frame ? (
+                {current.isPlaceholder ? (
+                  <div 
+                    className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClose();
+                      onLogActivity?.();
+                    }}
+                    style={{
+                      background: 'linear-gradient(180deg, rgba(28,28,32,1) 0%, rgba(18,18,22,1) 100%)',
+                      borderRadius: 20,
+                    }}
+                  >
+                    <div className="absolute inset-0" style={{
+                      backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
+                      backgroundSize: '20px 20px',
+                    }} />
+                    <div className="text-center px-6 mb-10 relative z-10">
+                      <h2 className="text-foreground font-black text-2xl tracking-tight uppercase leading-tight">
+                        Log Your
+                      </h2>
+                      <h2 className="text-foreground font-black text-2xl tracking-tight uppercase leading-tight">
+                        Today's Activity
+                      </h2>
+                      <p className="text-muted-foreground text-sm mt-3 tracking-[0.2em] uppercase">
+                        Day {current.dayNumber}
+                      </p>
+                    </div>
+                    <div className="relative flex items-center justify-center z-10" style={{ width: 64, height: 64 }}>
+                      <div className="absolute inset-0 rounded-full" style={{
+                        background: 'radial-gradient(circle, rgba(15,228,152,0.4) 0%, transparent 65%)',
+                        filter: 'blur(16px)',
+                        transform: 'scale(2.5)',
+                      }} />
+                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect x="20" y="6" width="8" height="36" rx="4" fill="#0FE498" />
+                        <rect x="6" y="20" width="36" height="8" rx="4" fill="#0FE498" />
+                      </svg>
+                    </div>
+                  </div>
+                ) : current.frame ? (
                   <StoryFrameRenderer
                     imageUrl={current.originalUrl || current.storageUrl}
                     isVideo={current.isVideo}
