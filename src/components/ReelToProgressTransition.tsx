@@ -190,16 +190,16 @@ export default function ReelToProgressTransition({
                         {/* Fanned card stack */}
                         {(() => {
                           const hasPhotos = ws.activitiesInWeek.some(a => a?.storageUrl);
-                          const spreadWidth = hasPhotos ? "130px" : "80px";
+                          const spreadWidth = hasPhotos ? "105px" : "80px";
                           // Spread positions when photos exist
                           const card1Pos = hasPhotos
                             ? { top: "10px", left: "0px", rotate: "-4deg" }
                             : { top: "12px", left: "13px", rotate: "1deg" };
                           const card2Pos = hasPhotos
-                            ? { top: "6px", left: "38px", rotate: "2deg" }
+                            ? { top: "6px", left: "26px", rotate: "2deg" }
                             : { top: "6px", left: "-2px", rotate: "-6deg" };
                           const card3Pos = hasPhotos
-                            ? { top: "10px", left: "76px", rotate: "6deg" }
+                            ? { top: "10px", left: "52px", rotate: "6deg" }
                             : { top: "8px", left: "30px", rotate: "8deg" };
 
                           return (
