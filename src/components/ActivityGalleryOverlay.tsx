@@ -258,9 +258,30 @@ export default function ActivityGalleryOverlay({
               {/* Progress segments */}
               <div className="flex-1 flex items-center gap-1 mx-3">
                 {activities.map((a, i) => {
-                  if (a.isPlaceholder) return null;
+                  const isPlaceholder = !!a.isPlaceholder;
                   const isCurrent = i === currentIndex;
                   const isPast = i < currentIndex;
+
+                  if (isPlaceholder) {
+                    return (
+                      <div
+                        key={i}
+                        className="flex items-center justify-center"
+                        style={{ width: 8 }}
+                      >
+                        <div
+                          className="rounded-full"
+                          style={{
+                            width: isCurrent ? 8 : 5,
+                            height: isCurrent ? 8 : 5,
+                            background: isCurrent ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.2)',
+                            transition: 'all 0.3s ease',
+                          }}
+                        />
+                      </div>
+                    );
+                  }
+
                   return (
                     <div
                       key={i}
