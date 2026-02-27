@@ -423,7 +423,10 @@ const Reel = () => {
         goPrevUser();
       }
     }
-  }, [goNextUser, goPrevUser]);
+
+    // Always hard-reset drag offset so container never stays shifted
+    dragX.set(0);
+  }, [goNextUser, goPrevUser, dragX]);
 
   // Bottom sheet drag removed — progress is now a standalone page
 
@@ -432,18 +435,32 @@ const Reel = () => {
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right'>('left');
   const prevUserIndexRef = useRef(currentUserIndex);
   
-  // Flash highlight and scroll active avatar into view when switching users
+  // Flash highlight + center active avatar ONLY when user changes
   useEffect(() => {
     if (currentUserIndex !== prevUserIndexRef.current) {
       setUserTransitionFlash(true);
       setTimeout(() => setUserTransitionFlash(false), 600);
       prevUserIndexRef.current = currentUserIndex;
+
+      // Scroll avatar strip directly to avoid viewport-level horizontal shift
+      if (activeAvatarRef.current && avatarStripRef.current) {
+        const strip = avatarStripRef.current;
+        const active = activeAvatarRef.current;
+        const stripRect = strip.getBoundingClientRect();
+        const activeRect = active.getBoundingClientRect();
+        const delta = (activeRect.left + activeRect.width / 2) - (stripRect.left + stripRect.width / 2);
+        strip.scrollTo({
+          left: strip.scrollLeft + delta,
+          behavior: 'smooth',
+        });
+      }
     }
-    // Scroll active avatar into view
-    if (activeAvatarRef.current) {
-      activeAvatarRef.current.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-    }
-  }, [currentUserIndex, currentActivityIndex]);
+  }, [currentUserIndex]);
+
+  // Defensive reset on every story/user step to prevent residual x-offset drift
+  useEffect(() => {
+    dragX.set(0);
+  }, [currentUserIndex, currentActivityIndex, dragX]);
 
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     // If story is locked, open Make Public sheet on any tap
@@ -1149,6 +1166,7 @@ const Reel = () => {
         className="absolute inset-0 flex flex-col"
         style={{ 
           overflow: 'hidden',
+          overflowX: 'clip',
           touchAction: 'none',
         }}
       >
@@ -1625,6 +1643,7 @@ const Reel = () => {
             animate={shakeAnimation}
             transition={shakeTransition}
             drag="x"
+            dragMomentum={false}
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.15}
             onDragEnd={handleHorizontalDragEnd}
