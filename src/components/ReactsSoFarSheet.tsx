@@ -140,7 +140,7 @@ export default function ReactsSoFarSheet({
           WebkitBackdropFilter: 'blur(40px)',
           maxHeight: '60vh',
           paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)',
-          bottom: '72px',
+          bottom: 0,
         }}
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
