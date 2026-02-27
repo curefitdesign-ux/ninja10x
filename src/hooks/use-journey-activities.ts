@@ -591,8 +591,13 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
     }
     
     // Sort by day_number descending for latest-first story progression
-    const dedupedActivities = Array.from(byDayNumber.values())
+    let dedupedActivities = Array.from(byDayNumber.values())
       .sort((a, b) => b.day_number - a.day_number);
+    
+    // For OTHER users (not current user), only keep the most recent activity
+    if (!user || userId !== user.id) {
+      dedupedActivities = dedupedActivities.slice(0, 1);
+    }
     
     return {
       userId,

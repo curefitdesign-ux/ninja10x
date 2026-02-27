@@ -213,45 +213,66 @@ const Reel = () => {
     loadActivities();
   }, [loadActivities]);
 
-  // Inject a "log activity" placeholder card only if user hasn't logged today
+  // For logged-in user: show today's story if uploaded, else empty state placeholder.
+  // For all other users: only their latest story (already handled in data layer).
   const effectiveUserGroups = useMemo(() => {
-    if (!user || myActivities.length >= 12) return userGroups;
-    
-    // Check if user already logged an activity today
+    if (!user) return userGroups;
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const loggedToday = myActivities.some(a => {
+
+    // Find today's activity from the user's own activities
+    const todayActivity = myActivities.find(a => {
       const actDate = new Date(a.createdAt);
       actDate.setHours(0, 0, 0, 0);
       return actDate.getTime() === today.getTime();
     });
-    if (loggedToday) return userGroups;
 
+    const othersGroups = userGroups.filter(g => g.userId !== user.id);
+
+    if (todayActivity) {
+      // Show ONLY today's story for the current user
+      const myGroup: UserStoryGroup = {
+        userId: user.id,
+        displayName: profile?.display_name || 'You',
+        avatarUrl: profile?.avatar_url || '',
+        activities: [todayActivity],
+      };
+      return [myGroup, ...othersGroups];
+    }
+
+    // Journey complete — no placeholder needed
+    if (myActivities.length >= 12) return [
+      ...(userGroups.find(g => g.userId === user.id) ? [{
+        userId: user.id,
+        displayName: profile?.display_name || 'You',
+        avatarUrl: profile?.avatar_url || '',
+        activities: [],
+      } as UserStoryGroup] : []),
+      ...othersGroups,
+    ];
+
+    // Empty state placeholder — user hasn't logged today
     const nextDay = myActivities.length + 1;
-    const logActivityEntry = {
-      id: 'log-activity',
-      dayNumber: nextDay,
-      storageUrl: '',
-      originalUrl: '',
-      activity: null,
-      duration: null,
-      pr: null,
-      frame: null,
-      isVideo: false,
-      isPublic: false,
-      createdAt: new Date().toISOString(),
-    };
-
-    // When user hasn't logged today, show ONLY the placeholder — not their past stories
     const myPlaceholderGroup: UserStoryGroup = {
       userId: user.id,
       displayName: profile?.display_name || 'You',
       avatarUrl: profile?.avatar_url || '',
-      activities: [logActivityEntry],
+      activities: [{
+        id: 'log-activity',
+        dayNumber: nextDay,
+        storageUrl: '',
+        originalUrl: '',
+        activity: null,
+        duration: null,
+        pr: null,
+        frame: null,
+        isVideo: false,
+        isPublic: false,
+        createdAt: new Date().toISOString(),
+      }],
     };
 
-    // Remove user's existing group (past stories) and prepend placeholder-only group
-    const othersGroups = userGroups.filter(g => g.userId !== user.id);
     return [myPlaceholderGroup, ...othersGroups];
   }, [userGroups, user, myActivities, profile]);
 
