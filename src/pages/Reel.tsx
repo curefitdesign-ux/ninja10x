@@ -1507,7 +1507,7 @@ const Reel = () => {
 
         {/* MIDDLE CONTAINER — flexes between profile strip and bottom nav */}
         <div
-          className="relative z-30 flex-1 min-h-0 px-3 flex flex-col"
+          className="relative z-30 flex-1 min-h-0 flex flex-col"
           style={{
             paddingBottom: 'calc(max(env(safe-area-inset-bottom, 10px), 10px) + 72px)',
           }}
