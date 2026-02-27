@@ -122,7 +122,8 @@ export default function ReactsSoFarSheet({
     <>
       {/* Backdrop */}
       <motion.div
-        className="fixed inset-0 bg-black/50 z-40"
+        className="fixed inset-0 bg-black/50"
+        style={{ zIndex: 70 }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -131,8 +132,9 @@ export default function ReactsSoFarSheet({
 
       {/* Bottom sheet */}
       <motion.div
-        className="fixed left-0 right-0 z-50 overflow-hidden"
+        className="fixed left-0 right-0 overflow-hidden"
         style={{
+          zIndex: 71,
           borderTopLeftRadius: 24,
           borderTopRightRadius: 24,
           background: 'linear-gradient(180deg, rgba(60, 55, 65, 0.98) 0%, rgba(40, 35, 45, 0.98) 100%)',

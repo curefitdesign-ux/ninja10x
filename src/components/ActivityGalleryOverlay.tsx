@@ -512,7 +512,7 @@ export default function ActivityGalleryOverlay({
                 reactorProfiles={currentReactions.reactorProfiles}
                 onClose={() => setShowReactsSheet(false)}
               />,
-              portalContainer,
+              document.body,
             )}
 
           {/* Delete confirmation */}
