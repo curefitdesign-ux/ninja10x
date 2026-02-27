@@ -246,7 +246,7 @@ export default function ReelToProgressTransition({
                                 }}
                               >
                                 {ws.activitiesInWeek[2]?.storageUrl ? (
-                                  <img src={ws.activitiesInWeek[2].storageUrl} className="w-full h-full object-cover" alt="" />
+                                  <img src={ws.activitiesInWeek[2].originalUrl || ws.activitiesInWeek[2].storageUrl} className="w-full h-full object-cover" alt="" />
                                 ) : isGlowing ? (
                                   <div className="w-full h-full flex items-center justify-center">
                                     <Plus size={14} className="text-white/50" />
@@ -277,7 +277,7 @@ export default function ReelToProgressTransition({
                                 }}
                               >
                                 {ws.activitiesInWeek[1]?.storageUrl ? (
-                                  <img src={ws.activitiesInWeek[1].storageUrl} className="w-full h-full object-cover" alt="" />
+                                  <img src={ws.activitiesInWeek[1].originalUrl || ws.activitiesInWeek[1].storageUrl} className="w-full h-full object-cover" alt="" />
                                 ) : isGlowing ? (
                                   <div className="w-full h-full flex items-center justify-center">
                                     <Plus size={14} className="text-white/50" />
@@ -308,7 +308,7 @@ export default function ReelToProgressTransition({
                                 }}
                               >
                                 {ws.activitiesInWeek[0]?.storageUrl ? (
-                                  <img src={ws.activitiesInWeek[0].storageUrl} className="w-full h-full object-cover" alt="" />
+                                  <img src={ws.activitiesInWeek[0].originalUrl || ws.activitiesInWeek[0].storageUrl} className="w-full h-full object-cover" alt="" />
                                 ) : isGlowing ? (
                                   <div className="w-full h-full flex items-center justify-center">
                                     <Plus size={18} className="text-white/60" />
