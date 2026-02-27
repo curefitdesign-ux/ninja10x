@@ -50,7 +50,7 @@ interface ReelToProgressTransitionProps {
   onClose: () => void;
   currentActivity: Activity | null;
   publicFeed: Activity[];
-  myActivities: { id?: string; dayNumber: number; storageUrl?: string; originalUrl?: string; isVideo?: boolean; activity?: string; duration?: string; pr?: string; reactionCount?: number; reactions?: Record<ReactionType, ActivityReaction> }[];
+  myActivities: { id?: string; dayNumber: number; storageUrl?: string; originalUrl?: string; isVideo?: boolean; activity?: string; frame?: string; duration?: string; pr?: string; reactionCount?: number; reactions?: Record<ReactionType, ActivityReaction> }[];
   onStoryTap: (index: number, userId?: string, activityId?: string) => void;
   onLogActivity?: () => void;
   isInline?: boolean;
@@ -408,6 +408,7 @@ export default function ReelToProgressTransition({
               originalUrl: a.originalUrl,
               isVideo: a.isVideo,
               activity: a.activity,
+              frame: a.frame,
               duration: a.duration,
               pr: a.pr,
               dayNumber: a.dayNumber,

@@ -161,7 +161,7 @@ const Progress = () => {
             userId: p.userId,
             createdAt: p.createdAt,
           }))}
-          myActivities={myActivities.map(a => ({ id: a.id, dayNumber: a.dayNumber, storageUrl: a.storageUrl, originalUrl: a.originalUrl, isVideo: a.isVideo, activity: a.activity, duration: a.duration, pr: a.pr, reactionCount: a.reactionCount, reactions: a.reactions }))}
+          myActivities={myActivities.map(a => ({ id: a.id, dayNumber: a.dayNumber, storageUrl: a.storageUrl, originalUrl: a.originalUrl, isVideo: a.isVideo, activity: a.activity, frame: a.frame, duration: a.duration, pr: a.pr, reactionCount: a.reactionCount, reactions: a.reactions }))}
           onStoryTap={handleStoryTap}
           onLogActivity={() => setShowMediaSourceSheet(true)}
           isInline={true}
