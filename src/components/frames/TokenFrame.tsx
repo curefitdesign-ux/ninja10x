@@ -121,7 +121,7 @@ const TokenFrame = ({
             color: '#4a7a9b',
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
-            marginTop: '2px',
+            marginTop: '5px',
             textAlign: 'center',
           }}
         >
