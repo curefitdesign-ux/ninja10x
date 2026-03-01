@@ -1,4 +1,8 @@
 import { useRef, useEffect } from 'react';
+// @ts-ignore
+import '@fontsource/dm-serif-display';
+// @ts-ignore
+import '@fontsource/rowdies/700.css';
 import tokenBg from '@/assets/frames/token-bg.png';
 import tokenBadge from '@/assets/frames/token-badge.png';
 
@@ -97,8 +101,8 @@ const TokenFrame = ({
       >
         <div
           style={{
-            fontFamily: "'Georgia', 'Times New Roman', serif",
-            fontWeight: 900,
+            fontFamily: "'DM Serif Display', Georgia, serif",
+            fontWeight: 400,
             fontSize: 'clamp(28px, 10vw, 52px)',
             color: '#0a4a72',
             textTransform: 'capitalize',
@@ -112,7 +116,7 @@ const TokenFrame = ({
         </div>
         <div
           style={{
-            fontFamily: "'Arial', sans-serif",
+            fontFamily: "'Rowdies', 'Arial', sans-serif",
             fontWeight: 700,
             fontSize: 'clamp(7px, 2.5vw, 11px)',
             color: '#4a7a9b',
@@ -155,14 +159,14 @@ const TokenFrame = ({
       >
         {durationValue ? (
           <div style={{ textAlign: 'left', lineHeight: 1.1 }}>
-            <div style={{ fontFamily: "'Arial', sans-serif", fontWeight: 700, fontSize: 'clamp(6px, 2.2vw, 10px)', color: '#4a7a9b', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '2px' }}>
-              {label2 ? `${label2}:` : 'DURATION:'}
+            <div style={{ fontFamily: "'Rowdies', 'Arial', sans-serif", fontWeight: 700, fontSize: 'clamp(6px, 2.2vw, 10px)', color: '#4a7a9b', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '2px' }}>
+              DURATION
             </div>
-            <span style={{ fontFamily: "'Arial Black', 'Arial', sans-serif", fontWeight: 900, fontSize: 'clamp(18px, 7vw, 34px)', color: '#0a4a72' }}>
+            <span style={{ fontFamily: "'Rowdies', 'Arial Black', sans-serif", fontWeight: 700, fontSize: 'clamp(14px, 5vw, 24px)', color: '#0a4a72' }}>
               {durationValue}
             </span>
             {durationUnit && (
-              <span style={{ fontFamily: "'Arial Black', 'Arial', sans-serif", fontWeight: 900, fontSize: 'clamp(14px, 5vw, 26px)', color: '#0a4a72', marginLeft: '4px' }}>
+              <span style={{ fontFamily: "'Rowdies', 'Arial Black', sans-serif", fontWeight: 700, fontSize: 'clamp(10px, 3.5vw, 18px)', color: '#0a4a72', marginLeft: '4px' }}>
                 {durationUnit}
               </span>
             )}
@@ -171,13 +175,13 @@ const TokenFrame = ({
 
         {prValue && prUnit ? (
           <div style={{ textAlign: 'right', lineHeight: 1.1 }}>
-            <div style={{ fontFamily: "'Arial', sans-serif", fontWeight: 700, fontSize: 'clamp(6px, 2.2vw, 10px)', color: '#4a7a9b', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '2px' }}>
-              {label1 ? `${label1.toUpperCase()}:` : 'PERSONAL BEST:'}
+            <div style={{ fontFamily: "'Rowdies', 'Arial', sans-serif", fontWeight: 700, fontSize: 'clamp(6px, 2.2vw, 10px)', color: '#4a7a9b', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '2px' }}>
+              {label1 ? label1.toUpperCase() : 'PERSONAL BEST'}
             </div>
-            <span style={{ fontFamily: "'Arial Black', 'Arial', sans-serif", fontWeight: 900, fontSize: 'clamp(18px, 7vw, 34px)', color: '#0a4a72' }}>
+            <span style={{ fontFamily: "'Rowdies', 'Arial Black', sans-serif", fontWeight: 700, fontSize: 'clamp(14px, 5vw, 24px)', color: '#0a4a72' }}>
               {prValue}
             </span>
-            <span style={{ fontFamily: "'Arial Black', 'Arial', sans-serif", fontWeight: 900, fontSize: 'clamp(14px, 5vw, 26px)', color: '#0a4a72', marginLeft: '4px' }}>
+            <span style={{ fontFamily: "'Rowdies', 'Arial Black', sans-serif", fontWeight: 700, fontSize: 'clamp(10px, 3.5vw, 18px)', color: '#0a4a72', marginLeft: '4px' }}>
               {prUnit}
             </span>
           </div>
