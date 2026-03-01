@@ -889,7 +889,7 @@ const Preview = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 320, damping: 32, delay: 0.04 }}
           style={{
-            bottom: 20,
+            bottom: 15,
             height: 'auto',
             borderRadius: '28px 28px 0 0',
             background: 'rgba(255, 255, 255, 0.05)',
