@@ -1202,7 +1202,7 @@ const Reel = () => {
         <div 
           className="z-50 flex flex-col justify-end shrink-0"
           style={{ 
-            paddingTop: 'max(env(safe-area-inset-top, 8px), 8px)',
+            paddingTop: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 20px)',
           }}
         >
           {/* Row 1: Delete + Avatars + Close - all in one row */}
