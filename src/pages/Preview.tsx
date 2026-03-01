@@ -884,12 +884,12 @@ const Preview = () => {
 
         {/* ── LAYER 3 (z:50): GLASS ACTIVITY SHEET — overlaps media, no scroll ── */}
         <motion.div
-          className="absolute left-0 right-0 bottom-0 flex flex-col"
+          className="absolute left-0 right-0 flex flex-col"
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 320, damping: 32, delay: 0.04 }}
           style={{
-            /* Tall enough to show all 18 icons without scroll, overlaps media card bottom */
+            bottom: 50,
             height: 'auto',
             borderRadius: '28px 28px 0 0',
             background: 'rgba(255, 255, 255, 0.05)',
