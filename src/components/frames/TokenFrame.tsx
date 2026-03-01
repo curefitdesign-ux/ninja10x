@@ -117,7 +117,7 @@ const TokenFrame = ({
           style={{
             fontFamily: "'Rowdies', 'Arial', sans-serif",
             fontWeight: 400,
-            fontSize: 'clamp(5px, 2vw, 8px)',
+            fontSize: 'clamp(3px, 1.5vw, 5px)',
             color: '#4a7a9b',
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
