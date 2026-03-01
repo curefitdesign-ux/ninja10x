@@ -121,7 +121,7 @@ const TokenFrame = ({
             fontWeight: 300,
             fontSize: 'clamp(4px, 1.6vw, 6px)',
             color: '#696760',
-            letterSpacing: '0.18em',
+            letterSpacing: '0.08em',
             textTransform: 'uppercase',
             marginTop: '5px',
             textAlign: 'center',
