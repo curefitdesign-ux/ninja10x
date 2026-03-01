@@ -97,13 +97,13 @@ const TokenFrame = ({
       {/* ── TOP HEADER (Activity name + subtitle) ── */}
       <div
         className="absolute left-0 right-0 flex flex-col items-center"
-        style={{ top: '2%', zIndex: 5, paddingLeft: '8%', paddingRight: '8%' }}
+        style={{ top: '3.5%', zIndex: 5, paddingLeft: '8%', paddingRight: '8%' }}
       >
         <div
           style={{
             fontFamily: "'DM Serif Display', Georgia, serif",
             fontWeight: 400,
-            fontSize: 'clamp(28px, 10vw, 52px)',
+            fontSize: 'clamp(25px, 9vw, 49px)',
             color: '#0a4a72',
             textTransform: 'capitalize',
             letterSpacing: '-0.01em',
@@ -117,7 +117,7 @@ const TokenFrame = ({
           style={{
             fontFamily: "'Rowdies', 'Arial', sans-serif",
             fontWeight: 400,
-            fontSize: 'clamp(3px, 1.5vw, 5px)',
+            fontSize: 'clamp(6px, 2vw, 8px)',
             color: '#4a7a9b',
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
@@ -158,7 +158,7 @@ const TokenFrame = ({
       >
         {durationValue ? (
           <div style={{ textAlign: 'left', lineHeight: 1.1 }}>
-            <div style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: 'clamp(6px, 2.2vw, 10px)', color: '#4a7a9b', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '2px' }}>
+            <div style={{ fontFamily: "'Rowdies', 'Arial', sans-serif", fontWeight: 400, fontSize: 'clamp(6px, 2.2vw, 10px)', color: '#4a7a9b', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '2px' }}>
               DURATION
             </div>
             <span style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: 'clamp(14px, 5vw, 24px)', color: '#0a4a72' }}>
