@@ -407,13 +407,38 @@ const Preview = () => {
     setIsDeleting(false);
   };
 
+  // Synchronously compute the closest frame from current scroll position
+  // This avoids the race condition where handleScroll's rAF hasn't fired yet
+  const getVisuallySelectedFrame = (): FrameType => {
+    const container = containerRef.current;
+    if (!container) return currentFrame;
+    
+    const centerX = container.scrollLeft + container.clientWidth / 2;
+    let closestFrame: FrameType = currentFrame;
+    let closestDistance = Number.POSITIVE_INFINITY;
+    
+    FRAMES.forEach((frame, index) => {
+      const el = frameItemRefs.current[index];
+      if (!el) return;
+      const itemCenter = el.offsetLeft + el.offsetWidth / 2;
+      const distance = Math.abs(itemCenter - centerX);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestFrame = frame;
+      }
+    });
+    
+    return closestFrame;
+  };
+
   // Save with template - save to backend then show confirmation screen
   const handleSaveWithTemplate = async () => {
     if (!imageUrl || !activity) return;
 
-    // Freeze the frame selection BEFORE any async work — prevents scroll drift from changing it
-    const frozenFrame = currentFrame;
-    console.info('[frame-debug] DONE tapped. currentFrame =', currentFrame, '| frozenFrame =', frozenFrame);
+    // Compute the ACTUAL visible frame from scroll position (bypasses rAF race condition)
+    const visualFrame = getVisuallySelectedFrame();
+    const frozenFrame = visualFrame;
+    console.info('[frame-debug] DONE tapped. currentFrame =', currentFrame, '| visualFrame =', visualFrame, '| frozenFrame =', frozenFrame);
 
     // Set the capture frame synchronously so the offscreen render target updates immediately
     flushSync(() => {
