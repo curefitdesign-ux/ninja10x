@@ -112,7 +112,7 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
     
     // Use 9:16 aspect ratio like the reel
     const cardWidth = isCenter ? 140 : 120;
-    const cardHeight = isCenter ? 248 : 213; // 9:16 ratio
+    const cardHeight = isCenter ? 228 : 196; // slightly shorter
 
     if (!photo) {
       return (
