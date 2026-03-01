@@ -122,7 +122,7 @@ const TokenFrame = ({
             textAlign: 'center',
           }}
         >
-          · CULT NINJA JOURNEY ·
+          · CULT NINJA JOURNEY | WEEK {week} | DAY {day} ·
         </div>
       </div>
 
@@ -154,7 +154,10 @@ const TokenFrame = ({
         }}
       >
         {durationValue ? (
-          <div style={{ textAlign: 'left', lineHeight: 1 }}>
+          <div style={{ textAlign: 'left', lineHeight: 1.1 }}>
+            <div style={{ fontFamily: "'Arial', sans-serif", fontWeight: 700, fontSize: 'clamp(6px, 2.2vw, 10px)', color: '#4a7a9b', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '2px' }}>
+              {label2 ? `${label2}:` : 'DURATION:'}
+            </div>
             <span style={{ fontFamily: "'Arial Black', 'Arial', sans-serif", fontWeight: 900, fontSize: 'clamp(18px, 7vw, 34px)', color: '#0a4a72' }}>
               {durationValue}
             </span>
@@ -167,7 +170,10 @@ const TokenFrame = ({
         ) : null}
 
         {prValue && prUnit ? (
-          <div style={{ textAlign: 'right', lineHeight: 1 }}>
+          <div style={{ textAlign: 'right', lineHeight: 1.1 }}>
+            <div style={{ fontFamily: "'Arial', sans-serif", fontWeight: 700, fontSize: 'clamp(6px, 2.2vw, 10px)', color: '#4a7a9b', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '2px' }}>
+              {label1 ? `${label1.toUpperCase()}:` : 'PERSONAL BEST:'}
+            </div>
             <span style={{ fontFamily: "'Arial Black', 'Arial', sans-serif", fontWeight: 900, fontSize: 'clamp(18px, 7vw, 34px)', color: '#0a4a72' }}>
               {prValue}
             </span>
