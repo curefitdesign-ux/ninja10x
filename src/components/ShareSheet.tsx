@@ -16,7 +16,7 @@ import ArcadeFrame from '@/components/frames/ArcadeFrame';
 import ReelProgressPill from '@/components/ReelProgressPill';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 
-type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket' | 'token' | 'holographic' | 'scrapbook' | 'arcade';
+type FrameType = 'shaky' | 'journal' | 'vogue' | 'fitness' | 'ticket' | 'token' | 'holographic' | 'scrapbook' | 'arcade' | 'bold';
 
 interface FrameProps {
   imageUrl: string;

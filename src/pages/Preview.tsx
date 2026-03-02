@@ -18,6 +18,7 @@ import TokenFrame from '@/components/frames/TokenFrame';
 import HolographicFrame from '@/components/frames/HolographicFrame';
 import ScrapbookFrame from '@/components/frames/ScrapbookFrame';
 import ArcadeFrame from '@/components/frames/ArcadeFrame';
+import BoldFrame from '@/components/frames/BoldFrame';
 import ContextualNumericKeyboard from '@/components/ContextualNumericKeyboard';
 import { getActivityConfig } from '@/lib/activity-context';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
@@ -28,7 +29,7 @@ import { useJourneyActivities } from '@/hooks/use-journey-activities';
 
 import { toast } from 'sonner';
 
-const FRAMES = ['token', 'holographic', 'shaky', 'journal', 'scrapbook', 'arcade', 'vogue', 'fitness', 'ticket'] as const;
+const FRAMES = ['token', 'holographic', 'shaky', 'journal', 'scrapbook', 'arcade', 'bold', 'vogue', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
 
 // Activity options with minimal line icons
@@ -127,6 +128,10 @@ const FRAME_COLORS: Record<FrameType, { accent: string; gradient: string }> = {
   arcade: {
     accent: 'rgba(0, 0, 0, 0.65)',
     gradient: 'linear-gradient(160deg, rgba(20, 20, 30, 0.5) 0%, rgba(0, 0, 0, 0.7) 100%)',
+  },
+  bold: {
+    accent: 'rgba(107, 78, 230, 0.45)',
+    gradient: 'linear-gradient(160deg, rgba(120, 90, 240, 0.35) 0%, rgba(50, 40, 100, 0.6) 100%)',
   },
 };
 
@@ -782,6 +787,8 @@ const Preview = () => {
         return <ScrapbookFrame {...frameProps} />;
       case 'arcade':
         return <ArcadeFrame {...frameProps} />;
+      case 'bold':
+        return <BoldFrame {...frameProps} />;
     }
   };
 

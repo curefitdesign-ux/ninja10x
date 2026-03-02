@@ -19,6 +19,7 @@ import TokenFrame from '@/components/frames/TokenFrame';
 import HolographicFrame from '@/components/frames/HolographicFrame';
 import ScrapbookFrame from '@/components/frames/ScrapbookFrame';
 import ArcadeFrame from '@/components/frames/ArcadeFrame';
+import BoldFrame from '@/components/frames/BoldFrame';
 
 interface StoryFrameRendererProps {
   imageUrl: string;         // originalUrl — raw media
@@ -102,6 +103,7 @@ export default function StoryFrameRenderer({
             );
             case 'scrapbook':   return <ScrapbookFrame {...sharedProps} />;
             case 'arcade':      return <ArcadeFrame {...sharedProps} />;
+            case 'bold':        return <BoldFrame {...sharedProps} />;
             default:            return <ShakyFrame {...sharedProps} />;
           }
         })()}
