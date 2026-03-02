@@ -1,5 +1,4 @@
 import { useRef, useEffect } from 'react';
-import arcadeCorner from '@/assets/frames/arcade-corner.png';
 
 interface ArcadeFrameProps {
   imageUrl: string;
@@ -82,7 +81,7 @@ const ArcadeFrame = ({
           position: 'relative',
           minHeight: 0,
           border: '1.5px solid rgba(255, 255, 255, 0.6)',
-          marginBottom: '-20px',
+          marginBottom: '0px',
         }}
       >
         {/* Journey info overlay — top-left inside photo */}
@@ -120,19 +119,6 @@ const ArcadeFrame = ({
           </div>
         </div>
 
-        {/* Corner decoration */}
-        <img
-          src={arcadeCorner}
-          alt=""
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-            width: '35%',
-            zIndex: 2,
-            pointerEvents: 'none',
-          }}
-        />
 
         {/* Media */}
         {isVideo ? (
