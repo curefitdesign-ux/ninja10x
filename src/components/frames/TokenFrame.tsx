@@ -105,7 +105,7 @@ const TokenFrame = ({
           style={{
             fontFamily: "'DM Serif Display', Georgia, serif",
             fontWeight: 400,
-            fontSize: 'clamp(25px, 9vw, 49px)',
+            fontSize: 'clamp(27px, 9.5vw, 51px)',
             color: '#0a4a72',
             textTransform: 'capitalize',
             letterSpacing: '-0.01em',
