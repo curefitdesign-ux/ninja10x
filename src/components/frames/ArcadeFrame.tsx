@@ -52,7 +52,7 @@ const ArcadeFrame = ({
       {/* ── Activity Name — large pixel font at top ── */}
       <div
         style={{
-          padding: '7% 5% 3% 5%',
+          padding: '6% 5% 2.5% 5%',
           flexShrink: 0,
         }}
       >
@@ -63,7 +63,7 @@ const ArcadeFrame = ({
             color: '#FFFFFF',
             lineHeight: 1.15,
             textTransform: 'uppercase',
-            letterSpacing: '0.02em',
+            letterSpacing: '0.12em',
             wordBreak: 'break-word',
             textAlign: 'center',
           }}
@@ -144,7 +144,7 @@ const ArcadeFrame = ({
       </div>
 
       {/* ── Bottom Metrics — stacked, left-aligned ── */}
-      <div style={{ padding: '3% 5% 4% 5%', flexShrink: 0 }}>
+      <div style={{ padding: '2.5% 5% 4% 5%', flexShrink: 0 }}>
         {(duration || pr) ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
             {/* Duration metric */}
@@ -152,13 +152,13 @@ const ArcadeFrame = ({
               <div>
                 <div
                   style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
-                    fontSize: '2.6cqw',
+                    fontFamily: "'Press Start 2P', monospace",
+                    fontSize: '2.4cqw',
                     fontWeight: 400,
-                    color: 'rgba(255, 255, 255, 0.7)',
+                    color: 'rgba(255, 255, 255, 0.75)',
                     textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    lineHeight: 1.4,
+                    letterSpacing: '0.06em',
+                    lineHeight: 1.6,
                   }}
                 >
                   {durationLabel}
@@ -166,11 +166,12 @@ const ArcadeFrame = ({
                 <div
                   style={{
                     fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
-                    fontSize: '8cqw',
+                    fontSize: '8.5cqw',
                     fontWeight: 700,
                     color: '#FFFFFF',
-                    lineHeight: 1.15,
+                    lineHeight: 1.1,
                     letterSpacing: '-0.01em',
+                    marginTop: '0.5%',
                   }}
                 >
                   {duration}
@@ -182,9 +183,9 @@ const ArcadeFrame = ({
             {duration && pr && (
               <div
                 style={{
-                  borderTop: '1px solid rgba(255, 255, 255, 0.3)',
-                  width: '55%',
-                  margin: '2% 0',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.35)',
+                  width: '50%',
+                  margin: '2.5% 0 1.5% 0',
                 }}
               />
             )}
@@ -194,13 +195,13 @@ const ArcadeFrame = ({
               <div>
                 <div
                   style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
-                    fontSize: '2.6cqw',
+                    fontFamily: "'Press Start 2P', monospace",
+                    fontSize: '2.4cqw',
                     fontWeight: 400,
-                    color: 'rgba(255, 255, 255, 0.7)',
+                    color: 'rgba(255, 255, 255, 0.75)',
                     textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    lineHeight: 1.4,
+                    letterSpacing: '0.06em',
+                    lineHeight: 1.6,
                   }}
                 >
                   {metricLabel}
@@ -208,11 +209,12 @@ const ArcadeFrame = ({
                 <div
                   style={{
                     fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
-                    fontSize: '8cqw',
+                    fontSize: '8.5cqw',
                     fontWeight: 700,
                     color: '#FFFFFF',
-                    lineHeight: 1.15,
+                    lineHeight: 1.1,
                     letterSpacing: '-0.01em',
+                    marginTop: '0.5%',
                   }}
                 >
                   {pr}
