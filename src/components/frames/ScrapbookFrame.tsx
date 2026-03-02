@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react';
+import '@fontsource/caveat/700.css';
 
 interface ScrapbookFrameProps {
   imageUrl: string;
@@ -64,23 +65,24 @@ const ScrapbookFrame = ({
 
       {/* ── "I DID {Activity} TODAY!" Header ── */}
       <div style={{ padding: '3.5% 5.5% 0 5.5%' }}>
-        {/* "I DID" - Heavy black, no italic */}
+        {/* "I DID" - Helvetica Neue Bold */}
         <div
           style={{
-            fontFamily: "'Impact', 'Arial Black', 'Helvetica Neue', sans-serif",
-            fontWeight: 900,
+            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+            fontWeight: 700,
             fontSize: '13cqw',
             color: '#1a1a1a',
             lineHeight: 0.95,
             letterSpacing: '-0.02em',
+            textTransform: 'uppercase',
           }}
         >
           I DID
         </div>
-        {/* Activity name - Large purple script/cursive */}
+        {/* Activity name - Caveat (Figma Hand alternative) */}
         <div
           style={{
-            fontFamily: "'Segoe Script', 'Brush Script MT', 'Dancing Script', cursive",
+            fontFamily: "'Caveat', cursive",
             fontWeight: 700,
             fontStyle: 'italic',
             fontSize: '14cqw',
@@ -92,15 +94,16 @@ const ScrapbookFrame = ({
         >
           {activity}
         </div>
-        {/* "TODAY!" - Heavy black, no italic */}
+        {/* "TODAY!" - Helvetica Neue Bold */}
         <div
           style={{
-            fontFamily: "'Impact', 'Arial Black', 'Helvetica Neue', sans-serif",
-            fontWeight: 900,
+            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+            fontWeight: 700,
             fontSize: '13cqw',
             color: '#1a1a1a',
             lineHeight: 0.95,
             letterSpacing: '-0.02em',
+            textTransform: 'uppercase',
             marginTop: '-1%',
           }}
         >
@@ -128,8 +131,8 @@ const ScrapbookFrame = ({
       >
         <span
           style={{
-            fontFamily: "'Georgia', 'Times New Roman', serif",
-            fontWeight: 700,
+            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+            fontWeight: 500,
             fontSize: '3cqw',
             color: '#2e2a25',
             letterSpacing: '0.16em',
@@ -140,8 +143,8 @@ const ScrapbookFrame = ({
         </span>
         <span
           style={{
-            fontFamily: "'Georgia', 'Times New Roman', serif",
-            fontWeight: 700,
+            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+            fontWeight: 500,
             fontSize: '3cqw',
             color: '#2e2a25',
             letterSpacing: '0.16em',
@@ -191,89 +194,86 @@ const ScrapbookFrame = ({
 
       {/* ── Bottom Metrics ── */}
       <div style={{ padding: '0 5%', flexShrink: 0 }}>
-        {(duration || pr) ? (
-          <>
-            {/* Dashed separator */}
-            <div
+        {/* Dashed separator */}
+        <div
+          style={{
+            borderTop: '1.5px dashed rgba(130, 120, 105, 0.55)',
+            width: '100%',
+            marginTop: '2.5%',
+          }}
+        />
+
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+            padding: '2% 0.5% 3% 0.5%',
+            minHeight: '8cqw',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
+            <span
               style={{
-                borderTop: '1.5px dashed rgba(130, 120, 105, 0.55)',
-                width: '100%',
-                marginTop: '2.5%',
-              }}
-            />
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'baseline',
-                padding: '2% 0.5% 3% 0.5%',
+                fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                fontWeight: 500,
+                fontSize: '2.2cqw',
+                color: '#2e2a25',
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
               }}
             >
-              {duration && (
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
-                  <span
-                    style={{
-                      fontFamily: "'Georgia', 'Times New Roman', serif",
-                      fontWeight: 700,
-                      fontSize: '2.2cqw',
-                      color: '#2e2a25',
-                      letterSpacing: '0.12em',
-                      textTransform: 'uppercase',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {durationLabel} :
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: "'Segoe Script', 'Brush Script MT', 'Dancing Script', cursive",
-                      fontWeight: 700,
-                      fontStyle: 'italic',
-                      fontSize: '6.5cqw',
-                      color: '#7C5CFC',
-                      lineHeight: 1,
-                      marginLeft: '2px',
-                    }}
-                  >
-                    {duration}
-                  </span>
-                </div>
-              )}
-              {pr && (
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
-                  <span
-                    style={{
-                      fontFamily: "'Georgia', 'Times New Roman', serif",
-                      fontWeight: 700,
-                      fontSize: '2.2cqw',
-                      color: '#2e2a25',
-                      letterSpacing: '0.12em',
-                      textTransform: 'uppercase',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {metricLabel} :
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: "'Segoe Script', 'Brush Script MT', 'Dancing Script', cursive",
-                      fontWeight: 700,
-                      fontStyle: 'italic',
-                      fontSize: '6.5cqw',
-                      color: '#7C5CFC',
-                      lineHeight: 1,
-                      marginLeft: '2px',
-                    }}
-                  >
-                    {pr}
-                  </span>
-                </div>
-              )}
+              {durationLabel} :
+            </span>
+            {duration ? (
+              <span
+                style={{
+                  fontFamily: "'Caveat', cursive",
+                  fontWeight: 700,
+                  fontStyle: 'italic',
+                  fontSize: '6.5cqw',
+                  color: '#7C5CFC',
+                  lineHeight: 1,
+                  marginLeft: '2px',
+                }}
+              >
+                {duration}
+              </span>
+            ) : null}
+          </div>
+
+          {pr ? (
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
+              <span
+                style={{
+                  fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  fontWeight: 500,
+                  fontSize: '2.2cqw',
+                  color: '#2e2a25',
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {metricLabel} :
+              </span>
+              <span
+                style={{
+                  fontFamily: "'Caveat', cursive",
+                  fontWeight: 700,
+                  fontStyle: 'italic',
+                  fontSize: '6.5cqw',
+                  color: '#7C5CFC',
+                  lineHeight: 1,
+                  marginLeft: '2px',
+                }}
+              >
+                {pr}
+              </span>
             </div>
-          </>
-        ) : (
-          <div style={{ height: '3%' }} />
-        )}
+          ) : null}
+        </div>
       </div>
     </div>
   );
