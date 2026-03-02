@@ -443,6 +443,7 @@ const Preview = () => {
     // Set the capture frame synchronously so the offscreen render target updates immediately
     flushSync(() => {
       setCaptureFrame(frozenFrame);
+      setCurrentFrame(frozenFrame);
     });
 
     triggerHaptic('light');
@@ -1594,7 +1595,7 @@ const Preview = () => {
           }}
           onSaveWithTemplate={handleFinalSave}
           dayNumber={dayNumber}
-          frameType={currentFrame}
+          frameType={captureFrame || currentFrame}
           frameProps={frameProps}
         />
       )}
