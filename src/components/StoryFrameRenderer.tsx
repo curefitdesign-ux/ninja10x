@@ -6,19 +6,19 @@
  * IMPORTANT: Props passed to each frame component MUST match exactly what Preview.tsx passes.
  * Preview passes raw duration/pr strings (no formatting), and uses getActivityConfig for labels.
  */
-import { lazy, Suspense, useEffect } from 'react';
+import { useEffect } from 'react';
 import { getActivityConfig } from '@/lib/activity-context';
 
-const ShakyFrame = lazy(() => import('@/components/frames/ShakyFrame'));
-const VogueFrame = lazy(() => import('@/components/frames/VogueFrame'));
-const JournalFrame = lazy(() => import('@/components/frames/JournalFrame'));
-const Journal2Frame = lazy(() => import('@/components/frames/Journal2Frame'));
-const FitnessFrame = lazy(() => import('@/components/frames/FitnessFrame'));
-const TicketFrame = lazy(() => import('@/components/frames/TicketFrame'));
-const TokenFrame = lazy(() => import('@/components/frames/TokenFrame'));
-const HolographicFrame = lazy(() => import('@/components/frames/HolographicFrame'));
-const ScrapbookFrame = lazy(() => import('@/components/frames/ScrapbookFrame'));
-const ArcadeFrame = lazy(() => import('@/components/frames/ArcadeFrame'));
+import ShakyFrame from '@/components/frames/ShakyFrame';
+import VogueFrame from '@/components/frames/VogueFrame';
+import JournalFrame from '@/components/frames/JournalFrame';
+import Journal2Frame from '@/components/frames/Journal2Frame';
+import FitnessFrame from '@/components/frames/FitnessFrame';
+import TicketFrame from '@/components/frames/TicketFrame';
+import TokenFrame from '@/components/frames/TokenFrame';
+import HolographicFrame from '@/components/frames/HolographicFrame';
+import ScrapbookFrame from '@/components/frames/ScrapbookFrame';
+import ArcadeFrame from '@/components/frames/ArcadeFrame';
 
 interface StoryFrameRendererProps {
   imageUrl: string;         // originalUrl — raw media
@@ -74,7 +74,7 @@ export default function StoryFrameRenderer({
       className="absolute inset-0 flex items-center justify-center"
       style={{ background: 'transparent' }}
     >
-      <Suspense fallback={null}>
+      <>
         {(() => {
           switch ((frame || 'shaky').toLowerCase()) {
             case 'shaky':       return <ShakyFrame {...sharedProps} />;
@@ -105,7 +105,7 @@ export default function StoryFrameRenderer({
             default:            return <ShakyFrame {...sharedProps} />;
           }
         })()}
-      </Suspense>
+      </>
     </div>
   );
 }
