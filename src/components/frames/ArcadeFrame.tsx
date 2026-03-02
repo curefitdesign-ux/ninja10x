@@ -64,7 +64,7 @@ const ArcadeFrame = ({
             color: '#FFFFFF',
             lineHeight: 1.1,
             textTransform: 'uppercase',
-            letterSpacing: '0.04em',
+            letterSpacing: '-0.02em',
             wordBreak: 'break-word',
             textAlign: 'center',
           }}
