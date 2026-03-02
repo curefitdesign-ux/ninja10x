@@ -167,7 +167,7 @@ const ScrapbookFrame = ({
           position: 'relative',
           background: '#000',
           minHeight: 0,
-          marginBottom: '-5px',
+          marginBottom: '5px',
         }}
       >
         {isVideo ? (
