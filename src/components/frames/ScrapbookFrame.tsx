@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import '@fontsource/caveat/700.css';
+import '@fontsource/bebas-neue/400.css';
 
 interface ScrapbookFrameProps {
   imageUrl: string;
@@ -73,7 +74,7 @@ const ScrapbookFrame = ({
             fontSize: '11.5cqw',
             color: '#1a1a1a',
             lineHeight: 0.95,
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.06em',
             textTransform: 'uppercase',
           }}
         >
@@ -85,11 +86,12 @@ const ScrapbookFrame = ({
             fontFamily: "'Caveat', cursive",
             fontWeight: 700,
             fontStyle: 'italic',
-            fontSize: '12.5cqw',
+            fontSize: '14cqw',
             color: '#7C5CFC',
             lineHeight: 0.85,
             marginTop: '-1%',
             marginLeft: '-0.5%',
+            transform: 'rotate(-1.5deg)',
           }}
         >
           {activity}
@@ -102,7 +104,7 @@ const ScrapbookFrame = ({
             fontSize: '11.5cqw',
             color: '#1a1a1a',
             lineHeight: 0.95,
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.06em',
             textTransform: 'uppercase',
             marginTop: '-1%',
           }}
@@ -165,6 +167,7 @@ const ScrapbookFrame = ({
           position: 'relative',
           background: '#000',
           minHeight: 0,
+          marginBottom: '-10px',
         }}
       >
         {isVideo ? (
@@ -216,11 +219,11 @@ const ScrapbookFrame = ({
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
               <span
                 style={{
-                  fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  fontWeight: 500,
-                  fontSize: '2.2cqw',
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontWeight: 400,
+                  fontSize: '3.5cqw',
                   color: '#2e2a25',
-                  letterSpacing: '0.12em',
+                  letterSpacing: '0.16em',
                   textTransform: 'uppercase',
                   whiteSpace: 'nowrap',
                 }}
@@ -247,11 +250,11 @@ const ScrapbookFrame = ({
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
               <span
                 style={{
-                  fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  fontWeight: 500,
-                  fontSize: '2.2cqw',
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontWeight: 400,
+                  fontSize: '3.5cqw',
                   color: '#2e2a25',
-                  letterSpacing: '0.12em',
+                  letterSpacing: '0.16em',
                   textTransform: 'uppercase',
                   whiteSpace: 'nowrap',
                 }}
