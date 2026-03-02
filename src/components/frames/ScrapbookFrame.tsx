@@ -135,7 +135,7 @@ const ScrapbookFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 500,
-            fontSize: '3cqw',
+            fontSize: '4.4cqw',
             color: '#2e2a25',
             letterSpacing: '0.16em',
             textTransform: 'uppercase',
@@ -147,7 +147,7 @@ const ScrapbookFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 500,
-            fontSize: '3cqw',
+            fontSize: '4.4cqw',
             color: '#2e2a25',
             letterSpacing: '0.16em',
             textTransform: 'uppercase',
@@ -160,7 +160,7 @@ const ScrapbookFrame = ({
       {/* ── Photo Area — takes remaining space ── */}
       <div
         style={{
-          margin: '10px 4.5% 0 4.5%',
+          margin: '15px 4.5% 0 4.5%',
           borderRadius: '3px',
           overflow: 'hidden',
           flex: 1,
