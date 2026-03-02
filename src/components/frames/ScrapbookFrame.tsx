@@ -70,7 +70,7 @@ const ScrapbookFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 700,
-            fontSize: '13cqw',
+            fontSize: '11.5cqw',
             color: '#1a1a1a',
             lineHeight: 0.95,
             letterSpacing: '-0.02em',
@@ -85,7 +85,7 @@ const ScrapbookFrame = ({
             fontFamily: "'Caveat', cursive",
             fontWeight: 700,
             fontStyle: 'italic',
-            fontSize: '14cqw',
+            fontSize: '12.5cqw',
             color: '#7C5CFC',
             lineHeight: 0.85,
             marginTop: '-1%',
@@ -99,7 +99,7 @@ const ScrapbookFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 700,
-            fontSize: '13cqw',
+            fontSize: '11.5cqw',
             color: '#1a1a1a',
             lineHeight: 0.95,
             letterSpacing: '-0.02em',
