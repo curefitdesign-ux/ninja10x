@@ -157,7 +157,7 @@ const BoldFrame = ({
           top: '35%',
           left: '5%',
           right: '5%',
-          bottom: '18%',
+          bottom: 'calc(18% + 20px)',
           borderRadius: '6px',
         }}
       >
