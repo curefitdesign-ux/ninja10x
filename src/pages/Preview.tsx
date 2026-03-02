@@ -999,6 +999,46 @@ const Preview = () => {
                 );
               })}
             </div>
+
+            {/* Custom Activity Name Input for "Other" */}
+            <AnimatePresence>
+              {showCustomActivityInput && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-4 overflow-hidden"
+                >
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={customActivityName}
+                      onChange={(e) => setCustomActivityName(e.target.value)}
+                      placeholder="Enter activity name..."
+                      autoFocus
+                      className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/40 text-base focus:outline-none focus:border-white/40"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && customActivityName.trim()) {
+                          handleCustomActivityConfirm(customActivityName.trim());
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        if (customActivityName.trim()) {
+                          triggerHaptic('medium');
+                          handleCustomActivityConfirm(customActivityName.trim());
+                        }
+                      }}
+                      disabled={!customActivityName.trim()}
+                      className="bg-white/20 hover:bg-white/30 disabled:opacity-40 px-4 rounded-xl flex items-center justify-center transition-colors"
+                    >
+                      <Check className="w-5 h-5 text-white" />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </motion.div>
 
