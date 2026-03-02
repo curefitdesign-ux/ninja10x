@@ -143,12 +143,15 @@ export function useJourneyActivities() {
     setLoading(false);
   }, []);
 
-  // Initial load + listen for auth changes
+  // Initial load + listen only for meaningful auth changes (sign in/out)
   useEffect(() => {
     loadActivities();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      loadActivities();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      // Only reload on actual sign-in/out, not token refreshes or duplicate events
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        loadActivities();
+      }
     });
 
     return () => {

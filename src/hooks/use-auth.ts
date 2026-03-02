@@ -9,9 +9,19 @@ export const useAuth = () => {
   const initialCheckDone = useRef(false);
 
   useEffect(() => {
+    // Track last session id to avoid duplicate re-renders
+    let lastSessionId: string | null = null;
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
+        // Skip duplicate SIGNED_IN events for same session
+        const sessionId = newSession?.access_token ?? null;
+        if (event === 'SIGNED_IN' && sessionId === lastSessionId) {
+          return;
+        }
+        lastSessionId = sessionId;
+
         console.log('[Auth] State change:', event, !!newSession);
         
         // Handle token refresh and session updates
