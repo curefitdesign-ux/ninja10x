@@ -65,6 +65,7 @@ const ArcadeFrame = ({
             textTransform: 'uppercase',
             letterSpacing: '0.02em',
             wordBreak: 'break-word',
+            textAlign: 'center',
           }}
         >
           {activity}
