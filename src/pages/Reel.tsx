@@ -1583,7 +1583,7 @@ const Reel = () => {
                 onClick={goPrevUser}
                 initial={{ opacity: 0, x: -10, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
-                transition={{ delay: 0.25, type: 'spring', stiffness: 180, damping: 22 }}
+                transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
               >
                 <div
                   className="w-full h-[55%] overflow-hidden"
@@ -1626,7 +1626,7 @@ const Reel = () => {
                 onClick={goNextUser}
                 initial={{ opacity: 0, x: 10, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
-                transition={{ delay: 0.25, type: 'spring', stiffness: 180, damping: 22 }}
+                transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
               >
                 <div
                   className="w-full h-[55%] overflow-hidden"
