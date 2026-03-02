@@ -128,7 +128,7 @@ const ScrapbookFrame = ({
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          padding: '1.8% 5.5% 1.5% 5.5%',
+          padding: '3.2% 5.5% 1.5% 5.5%',
         }}
       >
         <span
@@ -160,7 +160,7 @@ const ScrapbookFrame = ({
       {/* ── Photo Area — takes remaining space ── */}
       <div
         style={{
-          margin: '0 4.5%',
+          margin: '10px 4.5% 0 4.5%',
           borderRadius: '3px',
           overflow: 'hidden',
           flex: 1,
