@@ -89,7 +89,7 @@ const ScrapbookFrame = ({
             fontSize: '15.5cqw',
             color: '#7C5CFC',
             lineHeight: 0.85,
-            marginTop: '-3.5%',
+            marginTop: '-6%',
             marginLeft: '-0.5%',
             transform: 'rotate(-1.5deg)',
           }}
@@ -167,7 +167,7 @@ const ScrapbookFrame = ({
           position: 'relative',
           background: '#000',
           minHeight: 0,
-          marginBottom: '-20px',
+          marginBottom: '-30px',
         }}
       >
         {isVideo ? (
