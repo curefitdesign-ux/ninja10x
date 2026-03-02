@@ -212,21 +212,21 @@ const ScrapbookFrame = ({
             minHeight: '8cqw',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
-            <span
-              style={{
-                fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                fontWeight: 500,
-                fontSize: '2.2cqw',
-                color: '#2e2a25',
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {durationLabel} :
-            </span>
-            {duration ? (
+          {duration ? (
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
+              <span
+                style={{
+                  fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  fontWeight: 500,
+                  fontSize: '2.2cqw',
+                  color: '#2e2a25',
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {durationLabel} :
+              </span>
               <span
                 style={{
                   fontFamily: "'Caveat', cursive",
@@ -240,8 +240,8 @@ const ScrapbookFrame = ({
               >
                 {duration}
               </span>
-            ) : null}
-          </div>
+            </div>
+          ) : null}
 
           {pr ? (
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
