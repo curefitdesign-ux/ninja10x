@@ -176,10 +176,10 @@ const TokenFrame = ({
 
         {prValue && prUnit ? (
           <div style={{ textAlign: 'right', lineHeight: 1.1 }}>
-            <div style={{ fontFamily: "'Rowdies', 'Arial', sans-serif", fontWeight: 700, fontSize: 'clamp(6px, 2.2vw, 10px)', color: '#4a7a9b', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '2px' }}>
-              {label1 ? label1.toUpperCase() : 'PERSONAL BEST'}
+            <div style={{ fontFamily: "'Rowdies', 'Arial', sans-serif", fontWeight: 300, fontSize: 'clamp(6px, 2.2vw, 10px)', color: '#696760', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '2px' }}>
+              DISTANCE
             </div>
-            <span style={{ fontFamily: "'Rowdies', 'Arial Black', sans-serif", fontWeight: 700, fontSize: 'clamp(14px, 5vw, 24px)', color: '#0a4a72' }}>
+            <span style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: 'clamp(14px, 5vw, 24px)', color: '#0a4a72' }}>
               {prValue}
             </span>
             <span style={{ fontFamily: "'Rowdies', 'Arial Black', sans-serif", fontWeight: 700, fontSize: 'clamp(10px, 3.5vw, 18px)', color: '#0a4a72', marginLeft: '4px' }}>
