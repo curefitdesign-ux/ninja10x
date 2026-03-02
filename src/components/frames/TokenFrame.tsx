@@ -160,7 +160,7 @@ const TokenFrame = ({
       >
         {durationValue ? (
           <div style={{ textAlign: 'left', lineHeight: 1.1 }}>
-            <div style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: 'clamp(6px, 2.2vw, 10px)', color: '#696760', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '2px' }}>
+            <div style={{ fontFamily: "'Rowdies', 'Arial', sans-serif", fontWeight: 300, fontSize: 'clamp(6px, 2.2vw, 10px)', color: '#696760', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '2px' }}>
               DURATION
             </div>
             <span style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: 'clamp(14px, 5vw, 24px)', color: '#0a4a72' }}>
@@ -176,7 +176,7 @@ const TokenFrame = ({
 
         {prValue && prUnit ? (
           <div style={{ textAlign: 'right', lineHeight: 1.1 }}>
-            <div style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: 'clamp(6px, 2.2vw, 10px)', color: '#696760', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '2px' }}>
+            <div style={{ fontFamily: "'Rowdies', 'Arial', sans-serif", fontWeight: 300, fontSize: 'clamp(6px, 2.2vw, 10px)', color: '#696760', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '2px' }}>
               DISTANCE
             </div>
             <span style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: 'clamp(14px, 5vw, 24px)', color: '#0a4a72' }}>
