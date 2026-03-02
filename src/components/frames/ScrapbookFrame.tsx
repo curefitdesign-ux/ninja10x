@@ -160,7 +160,7 @@ const ScrapbookFrame = ({
       {/* ── Photo Area — takes remaining space ── */}
       <div
         style={{
-          margin: '15px 4.5% 0 4.5%',
+          margin: '5px 4.5% 0 4.5%',
           borderRadius: '3px',
           overflow: 'hidden',
           flex: 1,
@@ -196,7 +196,7 @@ const ScrapbookFrame = ({
       </div>
 
       {/* ── Bottom Metrics ── */}
-      <div style={{ padding: '0 5%', flexShrink: 0 }}>
+      <div style={{ padding: '0 5%', flexShrink: 0, marginTop: '-10px' }}>
         {/* Dashed separator */}
         <div
           style={{
