@@ -157,7 +157,7 @@ const BoldFrame = ({
           top: '35%',
           left: '5%',
           right: '5%',
-          bottom: '16%',
+          bottom: '18%',
           borderRadius: '6px',
         }}
       >
@@ -190,7 +190,7 @@ const BoldFrame = ({
       <div
         className="absolute left-0 right-0"
         style={{
-          bottom: '14%',
+          bottom: '16%',
           marginLeft: '5%',
           marginRight: '5%',
           borderTop: '2px dashed #b8b4a8',
@@ -202,7 +202,7 @@ const BoldFrame = ({
       <div
         className="absolute left-0 right-0 flex items-end justify-between"
         style={{
-          bottom: '4%',
+          bottom: '5%',
           paddingLeft: '7%',
           paddingRight: '7%',
           zIndex: 5,
