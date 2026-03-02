@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react';
+import arcadeCorner from '@/assets/frames/arcade-corner.png';
 
 interface ArcadeFrameProps {
   imageUrl: string;
@@ -46,10 +47,10 @@ const ArcadeFrame = ({
         background: '#000000',
       }}
     >
-      {/* ── Google Font import for pixel font ── */}
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');`}</style>
+      {/* ── Google Font import ── */}
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&family=Press+Start+2P&display=swap');`}</style>
 
-      {/* ── Activity Name — large pixel font at top ── */}
+      {/* ── Activity Name — Pixelify Sans at top ── */}
       <div
         style={{
           padding: '6% 5% 2.5% 5%',
@@ -58,12 +59,13 @@ const ArcadeFrame = ({
       >
         <div
           style={{
-            fontFamily: "'Press Start 2P', monospace",
-            fontSize: '11cqw',
+            fontFamily: "'Pixelify Sans', 'Press Start 2P', monospace",
+            fontSize: '14cqw',
+            fontWeight: 700,
             color: '#FFFFFF',
-            lineHeight: 1.15,
+            lineHeight: 1.1,
             textTransform: 'uppercase',
-            letterSpacing: '0.12em',
+            letterSpacing: '0.04em',
             wordBreak: 'break-word',
             textAlign: 'center',
           }}
@@ -80,6 +82,7 @@ const ArcadeFrame = ({
           position: 'relative',
           minHeight: 0,
           border: '1.5px solid rgba(255, 255, 255, 0.6)',
+          marginBottom: '-20px',
         }}
       >
         {/* Journey info overlay — top-left inside photo */}
@@ -116,6 +119,20 @@ const ArcadeFrame = ({
             WEEK {week} / DAY {day}
           </div>
         </div>
+
+        {/* Corner decoration */}
+        <img
+          src={arcadeCorner}
+          alt=""
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            width: '35%',
+            zIndex: 2,
+            pointerEvents: 'none',
+          }}
+        />
 
         {/* Media */}
         {isVideo ? (
