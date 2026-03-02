@@ -99,7 +99,7 @@ const TokenFrame = ({
       {/* ── TOP HEADER (Activity name + subtitle) ── */}
       <div
         className="absolute left-0 right-0 flex flex-col items-center"
-        style={{ top: '3.5%', zIndex: 5, paddingLeft: '8%', paddingRight: '8%' }}
+        style={{ top: 'calc(3.5% + 10px)', zIndex: 5, paddingLeft: '8%', paddingRight: '8%' }}
       >
         <div
           style={{
@@ -150,7 +150,7 @@ const TokenFrame = ({
       <div
         className="absolute left-0 right-0 flex items-end justify-between"
         style={{
-          bottom: '10px',
+          bottom: '20px',
           height: '14%',
           paddingLeft: '8%',
           paddingRight: '8%',
