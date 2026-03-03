@@ -65,7 +65,7 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
   return (
     <div className="w-full flex justify-center">
       <div
-        className="relative"
+        className="relative overflow-hidden"
         style={{ width: PATH_W, height: PATH_H }}
       >
         {/* Background pattern overlay */}
