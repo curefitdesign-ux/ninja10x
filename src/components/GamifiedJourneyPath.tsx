@@ -18,22 +18,12 @@ const PATH_H = 543;
 const TILE_W = 50;
 const TILE_H = 50;
 
-/**
- * 12-tile gamified journey path – pixel-perfect zigzag staircase.
- *
- * Layout (bottom → top):
- *   Week 1 (tiles 0-2): steps up-right
- *   Week 2 (tiles 3-5): steps up-left
- *   Week 3 (tiles 6-8): steps up-right
- *   Week 4 (tiles 9-11): steps up-left
- */
 export default function GamifiedJourneyPath({ completedActivities }: GamifiedJourneyPathProps) {
-  // Hard-coded tile positions for pixel-perfect placement within 380×543
   const tiles = useMemo(() => {
     const STEP_X = 50;
-    const STEP_Y = 34;
-    const startX = 128;
-    const startY = 468;
+    const STEP_Y = 28;
+    const startX = 28;
+    const startY = 440;
 
     const positions: { x: number; y: number; index: number; isWeekEnd: boolean; isFinal: boolean }[] = [];
 
