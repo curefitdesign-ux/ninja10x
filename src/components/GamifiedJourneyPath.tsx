@@ -64,7 +64,7 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
 
   // Lines removed per user request
   return (
-    <div className="w-full flex justify-center">
+    <div className="w-full flex justify-center" ref={ref}>
       <div
         className="relative overflow-hidden"
         style={{ width: PATH_W, height: PATH_H }}
