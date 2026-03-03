@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, Share2, Trash2, ChevronUp } from 'lucide-react';
+import { X, Share2, Pencil, ChevronUp } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
 import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
 import { ReactionType, ActivityReaction, sendReaction } from '@/services/journey-service';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
+import MediaSourceSheet from '@/components/MediaSourceSheet';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import DynamicBlurBackground from '@/components/DynamicBlurBackground';
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
@@ -15,16 +16,6 @@ import Floating3DEmojis from '@/components/Floating3DEmojis';
 import StoryEmojiRain from '@/components/StoryEmojiRain';
 import { isVideoUrl } from '@/lib/media';
 import { toast } from 'sonner';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 
 import fireEmoji from '@/assets/reactions/fire-3d.png';
 import clapEmoji from '@/assets/reactions/clap-3d.png';
@@ -84,12 +75,10 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const portalContainer = usePortalContainer();
   const { user } = useAuth();
-  const { deleteActivity } = useJourneyActivities();
 
   // Sheets
   const [showReactsSheet, setShowReactsSheet] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [showEditSheet, setShowEditSheet] = useState(false);
 
   // Local reactions state
   const [localReactions, setLocalReactions] = useState<Record<string, {
@@ -103,7 +92,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
   const [progressKey, setProgressKey] = useState(0);
   const autoAdvanceTimer = useRef<NodeJS.Timeout | null>(null);
-  const isPaused = showReactsSheet || showDeleteConfirm;
+  const isPaused = showReactsSheet || showEditSheet;
 
   // Media loading
   const [loadedMediaUrl, setLoadedMediaUrl] = useState('');
@@ -178,11 +167,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const week = Math.ceil(current.dayNumber / 3);
   const dayInWeek = ((current.dayNumber - 1) % 3) + 1;
 
-  // Share is available on all activities; delete only on the latest
-  const maxDayNumber = Math.max(...activities.filter(a => !a.isPlaceholder).map(a => a.dayNumber));
-  const isLatest = current.dayNumber === maxDayNumber;
+  // Edit is available on all non-placeholder activities
   const canShare = !current.isPlaceholder;
-  const canDelete = isLatest && !current.isPlaceholder;
+  const canEdit = !current.isPlaceholder;
 
   const goNext = () => setCurrentIndex(i => Math.min(i + 1, activities.length - 1));
   const goPrev = () => setCurrentIndex(i => Math.max(i - 1, 0));
@@ -221,19 +208,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     }
   };
 
-  const handleDeleteActivity = async () => {
-    setIsDeleting(true);
-    const success = await deleteActivity(current.dayNumber);
-    setIsDeleting(false);
-    setShowDeleteConfirm(false);
-    if (success) {
-      if (activities.length <= 1) {
-        onClose();
-      } else if (currentIndex >= activities.length - 1) {
-        setCurrentIndex(Math.max(0, activities.length - 2));
-      }
-    }
-  };
 
   const overlay = (
     <AnimatePresence>
@@ -523,9 +497,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           <Share2 className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
                         </button>
                       )}
-                      {canDelete && (
+                      {canEdit && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(true); }}
+                          onClick={(e) => { e.stopPropagation(); setShowEditSheet(true); }}
                           className="shrink-0 active:scale-95 transition-transform"
                           style={{
                             width: 44, height: 44, borderRadius: 22,
@@ -537,7 +511,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                           }}
                         >
-                          <Trash2 className="w-[18px] h-[18px] text-white/60" strokeWidth={1.5} />
+                          <Pencil className="w-[18px] h-[18px] text-white/70" strokeWidth={1.5} />
                         </button>
                       )}
                     </div>
@@ -560,71 +534,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               document.body,
             )}
 
-          {/* Delete confirmation */}
-          <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-            <AlertDialogContent
-              className="text-white max-w-[320px] rounded-3xl border-0 p-0 overflow-hidden"
-              style={{ background: 'transparent', boxShadow: 'none' }}
-            >
-              <div
-                className="relative rounded-3xl p-px overflow-hidden"
-                style={{
-                  background: 'linear-gradient(145deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.06) 40%, rgba(255,255,255,0.18) 70%, rgba(255,255,255,0.04) 100%)',
-                  boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 32px 64px rgba(0,0,0,0.6)',
-                }}
-              >
-                <div
-                  className="relative rounded-[23px] overflow-hidden"
-                  style={{
-                    background: 'rgba(30,28,40,0.35)',
-                    backdropFilter: 'blur(60px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(60px) saturate(180%)',
-                  }}
-                >
-                  <div className="absolute top-0 left-0 right-0 h-px" style={{
-                    background: 'linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.55) 40%, rgba(255,255,255,0.55) 60%, transparent 95%)',
-                  }} />
-                  <div className="absolute inset-0 pointer-events-none" style={{
-                    background: 'radial-gradient(ellipse at 50% 0%, rgba(160,120,240,0.18) 0%, transparent 60%)',
-                  }} />
-                  <div className="px-6 pt-7 pb-6">
-                    <AlertDialogHeader className="mb-5">
-                      <AlertDialogTitle className="text-white text-center text-[18px] font-bold tracking-tight">
-                        Delete this activity?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription className="text-center text-sm leading-relaxed mt-2" style={{ color: 'rgba(200,185,230,0.7)' }}>
-                        This will permanently remove Day {current.dayNumber} from your journey. This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter className="flex-row gap-3 sm:justify-center mt-1">
-                      <AlertDialogCancel
-                        className="flex-1 m-0 h-12 rounded-2xl text-white font-semibold text-[15px] active:scale-[0.97] transition-transform border-0 hover:bg-transparent focus:ring-0"
-                        style={{
-                          background: 'rgba(255,255,255,0.1)',
-                          backdropFilter: 'blur(20px)',
-                          WebkitBackdropFilter: 'blur(20px)',
-                        }}
-                        disabled={isDeleting}
-                      >
-                        Cancel
-                      </AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleDeleteActivity}
-                        className="flex-1 m-0 h-12 rounded-2xl text-white font-semibold text-[15px] active:scale-[0.97] transition-transform border-0"
-                        style={{
-                          background: 'linear-gradient(135deg, rgba(239,68,68,0.85) 0%, rgba(185,28,28,0.9) 100%)',
-                          boxShadow: 'inset 0 1px 0 rgba(255,150,150,0.3), 0 4px 16px rgba(239,68,68,0.35)',
-                        }}
-                        disabled={isDeleting}
-                      >
-                        {isDeleting ? 'Deleting...' : 'Delete'}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </div>
-                </div>
-              </div>
-            </AlertDialogContent>
-          </AlertDialog>
+          {/* Edit/Replace Sheet */}
+          <MediaSourceSheet
+            isOpen={showEditSheet}
+            onClose={() => setShowEditSheet(false)}
+            dayNumber={current.dayNumber}
+            activity={current.activity}
+            preserveActivity={true}
+          />
         </DynamicBlurBackground>
         </motion.div>
       )}
