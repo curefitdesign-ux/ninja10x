@@ -5,7 +5,7 @@ import ProfileAvatar from '@/components/ProfileAvatar';
 import ActivityGalleryOverlay from '@/components/ActivityGalleryOverlay';
 import { isVideoUrl } from '@/lib/media';
 import { ReactionType, ActivityReaction } from '@/services/journey-service';
-import journeyPathImg from '@/assets/progress/journey-path.png';
+import GamifiedJourneyPath from '@/components/GamifiedJourneyPath';
 
 
 interface Activity {
@@ -308,19 +308,12 @@ export default function ReelToProgressTransition({
               </div>
             )}
 
-            {/* Progress tiles - journey path image */}
-            <div className="w-full mx-auto" style={{ maxWidth: "370px", transform: "translateX(-6px)" }}>
-              {showTiles && (
-                <motion.img
-                  src={journeyPathImg}
-                  alt="Journey Path"
-                  className="w-full"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
-                />
-              )}
-            </div>
+            {/* Gamified Journey Path */}
+            {showTiles && (
+              <div className="w-full mx-auto px-4" style={{ maxWidth: "370px" }}>
+                <GamifiedJourneyPath completedActivities={myActivities.length} />
+              </div>
+            )}
           </div>
 
         {/* Activity Gallery Overlay */}
@@ -546,21 +539,14 @@ export default function ReelToProgressTransition({
                 )}
               </AnimatePresence>
 
-              {/* Progress tiles area */}
-              <motion.div 
-                className="w-full mx-auto" 
-                style={{ maxWidth: "370px", transform: "translateX(-6px)" }}
+              {/* Gamified Journey Path */}
+              <motion.div
+                className="w-full mx-auto px-4"
+                style={{ maxWidth: "370px" }}
                 animate={{ opacity: expandingCardId ? 0.3 : 1 }}
               >
                 {showTiles && (
-                  <motion.img
-                    src={journeyPathImg}
-                    alt="Journey Path"
-                    className="w-full"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3, delay: 0.15 }}
-                  />
+                  <GamifiedJourneyPath completedActivities={myActivities.length} />
                 )}
               </motion.div>
             </motion.div>
