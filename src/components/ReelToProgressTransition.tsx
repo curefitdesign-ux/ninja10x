@@ -5,10 +5,7 @@ import ProfileAvatar from '@/components/ProfileAvatar';
 import ActivityGalleryOverlay from '@/components/ActivityGalleryOverlay';
 import { isVideoUrl } from '@/lib/media';
 import { ReactionType, ActivityReaction } from '@/services/journey-service';
-import tileActiveImg from '@/assets/progress/tile-active-new.png';
-import tileInactiveImg from '@/assets/progress/tile-inactive.png';
-import engineBadgeImg from '@/assets/progress/engine-badge.png';
-import basePlatformImg from '@/assets/progress/base-platform.png';
+import journeyPathImg from '@/assets/progress/journey-path.png';
 
 // Tile positions for progress view
 const TILE_POSITIONS = [
