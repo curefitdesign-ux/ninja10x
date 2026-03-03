@@ -309,7 +309,7 @@ export default function ReelToProgressTransition({
             )}
 
             {/* Progress tiles - single image */}
-            <div className="flex-1 relative w-full overflow-visible flex items-end justify-center -mt-[50px]" style={{ maxWidth: "430px", marginInline: "auto" }}>
+            <div className="flex-1 relative w-full overflow-visible flex items-end justify-center -mt-[50px]" style={{ maxWidth: "420px", marginInline: "auto" }}>
               {showTiles && (
                 <motion.img
                   src={journeyPathImg}
@@ -549,7 +549,7 @@ export default function ReelToProgressTransition({
               {/* Progress tiles area */}
               <motion.div 
                 className="flex-1 relative w-full overflow-hidden flex items-end justify-center -mt-[50px]" 
-                style={{ maxWidth: "430px", marginInline: "auto" }}
+                style={{ maxWidth: "420px", marginInline: "auto" }}
                 animate={{ opacity: expandingCardId ? 0.3 : 1 }}
               >
                 {showTiles && (
