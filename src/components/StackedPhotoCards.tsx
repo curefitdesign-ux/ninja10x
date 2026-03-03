@@ -225,8 +225,9 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
           <motion.div
             className="absolute z-50 cursor-pointer"
             style={{ 
-              bottom: '22px', 
-              right: 'calc(50% - 100px)',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(30px, 50px)',
             }}
             onClick={handleEmptyCardTap}
             whileTap={{ scale: 0.9 }}
