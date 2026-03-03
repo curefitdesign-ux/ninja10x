@@ -620,4 +620,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   );
 
   return createPortal(overlay, portalContainer);
-}
+});
+
+export default ActivityGalleryOverlay;

@@ -268,4 +268,6 @@ const MakePublicSheet = forwardRef<HTMLDivElement, MakePublicSheetProps>(functio
     </AnimatePresence>,
     portalContainer
   );
-}
+});
+
+export default MakePublicSheet;
