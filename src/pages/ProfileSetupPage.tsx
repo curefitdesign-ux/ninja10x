@@ -305,7 +305,7 @@ const ProfileSetupPage = () => {
       {/* ── BOTTOM PANEL — flows naturally below hero ── */}
       <div className="relative z-10 flex flex-col flex-1">
         {/* Title + Subtitle */}
-        <div className="flex flex-col items-center px-6 mb-2" style={{ marginTop: '-50px' }}>
+        <div className="flex flex-col items-center px-6 mb-2" style={{ marginTop: '-80px' }}>
           <h1
             className="text-center font-black text-white uppercase leading-tight"
             style={{ fontSize: '2rem', letterSpacing: '-0.02em' }}
