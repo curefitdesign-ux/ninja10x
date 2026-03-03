@@ -84,43 +84,6 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
           }}
         />
 
-        {/* SVG connecting lines */}
-        <svg
-          className="absolute inset-0 pointer-events-none"
-          width={PATH_W}
-          height={PATH_H}
-          style={{ zIndex: 1 }}
-        >
-          {lines.map((line, i) => (
-            <line
-              key={i}
-              x1={line.x1}
-              y1={line.y1}
-              x2={line.x2}
-              y2={line.y2}
-              stroke={line.active ? 'rgba(160,120,255,0.5)' : 'rgba(255,255,255,0.1)'}
-              strokeWidth={line.active ? 2 : 1.5}
-              strokeDasharray={line.active ? 'none' : '5 4'}
-            />
-          ))}
-        </svg>
-
-        {/* Start ramp */}
-        <motion.img
-          src={startRampImg}
-          alt="Start"
-          className="absolute pointer-events-none"
-          style={{
-            width: 180,
-            height: 'auto',
-            left: rampX,
-            top: rampY,
-            zIndex: 1,
-          }}
-          initial={{ opacity: 0, scale: 0.92 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
-        />
 
         {/* Tiles + milestones */}
         {tiles.map((tile) => {
