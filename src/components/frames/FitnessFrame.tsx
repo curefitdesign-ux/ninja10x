@@ -108,7 +108,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       {/* Photo container - tilted with shadow */}
       <div 
         className="absolute z-10"
-        style={{ top: '22%', left: '50%', width: '58%', height: 'calc(44% + 25px)', transform: 'translateX(-50%) rotate(-8deg)' }}
+        style={{ top: '22%', left: '50%', width: '58%', height: 'calc(44% + 55px)', transform: 'translateX(-50%) rotate(-8deg)' }}
       >
         <div 
           className="absolute inset-0 rounded-[16px]"
