@@ -121,7 +121,7 @@ const Reel = () => {
   const [ownRingProgress, setOwnRingProgress] = useState(0);
   const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoAdvanceStartRef = useRef<number>(0);
-  const [isDeleting, setIsDeleting] = useState(false);
+  
   
   // Media loading state - track by URL so cached images don't get overwritten by useEffect reset
   const [loadedMediaUrl, setLoadedMediaUrl] = useState<string>('');
