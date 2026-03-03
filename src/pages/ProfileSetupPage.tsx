@@ -234,6 +234,7 @@ const ProfileSetupPage = () => {
               alt="Profile photo"
               className="w-full h-full object-cover"
               style={{
+                objectPosition: 'center 30px',
                 maskImage: 'linear-gradient(to bottom, black 55%, transparent 100%)',
                 WebkitMaskImage: 'linear-gradient(to bottom, black 55%, transparent 100%)',
               }}
