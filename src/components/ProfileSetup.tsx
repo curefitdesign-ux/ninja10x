@@ -154,7 +154,7 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
         const { data: urlData } = supabase.storage.from('journey-uploads').getPublicUrl(fileName);
         avatarUrl = urlData.publicUrl;
       } else if (selectedAvatar) {
-        avatarUrl = selectedAvatar.startsWith('preset-') ? selectedAvatar : `avatar-${selectedAvatar}`;
+        avatarUrl = selectedAvatar;
       } else {
         avatarUrl = customAvatarPreview || '';
       }
