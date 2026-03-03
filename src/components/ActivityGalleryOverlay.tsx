@@ -101,6 +101,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   // Auto-advance timer
   const AUTO_ADVANCE_MS = 10000;
   const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
+  const [progressKey, setProgressKey] = useState(0);
   const autoAdvanceTimer = useRef<NodeJS.Timeout | null>(null);
   const isPaused = showReactsSheet || showDeleteConfirm;
 
@@ -120,20 +121,25 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
         };
       }
       setLocalReactions(map);
+      // Force progress reset on open
+      setProgressKey(k => k + 1);
     }
   }, [isOpen, initialIndex, activities]);
 
-  // Reset progress on index change or open, then trigger fill after a frame
+  // Reset progress on index change
+  useEffect(() => {
+    setProgressKey(k => k + 1);
+  }, [currentIndex]);
+
+  // Animate progress bar after reset
   useEffect(() => {
     if (!isOpen) return;
     setAutoAdvanceProgress(0);
-    const raf = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setAutoAdvanceProgress(1);
-      });
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [currentIndex, isOpen]);
+    const timeout = setTimeout(() => {
+      setAutoAdvanceProgress(1);
+    }, 50);
+    return () => clearTimeout(timeout);
+  }, [progressKey, isOpen]);
 
   // Auto-advance timer
   useEffect(() => {
