@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-
+import startRampImg from '@/assets/progress/start-ramp-new.png';
 
 import tileActiveImg from '@/assets/progress/tile-active-glow.png';
 import tileInactiveImg from '@/assets/progress/tile-inactive-step.png';
@@ -84,6 +84,21 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
           }}
         />
 
+        {/* Start ramp – bottom left */}
+        <img
+          src={startRampImg}
+          alt=""
+          className="absolute pointer-events-none"
+          style={{
+            width: 220,
+            height: 'auto',
+            left: -20,
+            bottom: 0,
+            zIndex: 0,
+            opacity: 0.9,
+          }}
+        />
+
 
         {/* Tiles + milestones */}
         {tiles.map((tile) => {
@@ -101,10 +116,10 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
                   alt="Final Goal"
                   className="absolute pointer-events-none"
                   style={{
-                    width: 115,
+                    width: 100,
                     height: 'auto',
-                    left: tile.x + TILE_W / 2 - 57.5,
-                    top: tile.y - 95,
+                    left: tile.x + TILE_W / 2 - 50,
+                    top: tile.y - 85,
                     zIndex: 6,
                     opacity: isActive ? 1 : 0.85,
                     filter: isActive ? 'drop-shadow(0 0 14px rgba(255,200,50,0.4))' : 'none',
