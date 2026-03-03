@@ -264,7 +264,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   if (isPlaceholder) {
                     return (
                       <div
-                        key={i}
+                        key={a.id}
                         className="flex items-center justify-center"
                         style={{ width: 8 }}
                       >
@@ -283,19 +283,20 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                   return (
                     <div
-                      key={i}
+                      key={a.id}
                       className="flex-1 h-[3px] rounded-full overflow-hidden"
                       style={{ background: 'rgba(255,255,255,0.15)' }}
                     >
                       <div
+                        key={isCurrent ? `${a.id}-${progressRunKey}` : `${a.id}-static`}
                         className="h-full rounded-full"
                         style={{
                           background: (isPast || isCurrent) ? 'rgba(255,255,255,0.9)' : 'transparent',
                           width: isPast ? '100%'
                             : isCurrent ? `${autoAdvanceProgress * 100}%` : '0%',
-                          transition: isCurrent && autoAdvanceProgress > 0
-                            ? `width ${AUTO_ADVANCE_MS}ms linear`
-                            : 'width 0.3s ease',
+                          transition: isCurrent
+                            ? (autoAdvanceProgress > 0 ? `width ${AUTO_ADVANCE_MS}ms linear` : 'none')
+                            : 'none',
                         }}
                       />
                     </div>
