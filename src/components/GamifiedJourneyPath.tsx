@@ -187,11 +187,11 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
 
         {/* Level labels */}
         {[
-          { img: level1Img, tileIdx: 2 },
-          { img: level2Img, tileIdx: 5 },
-          { img: level3Img, tileIdx: 8 },
-          { img: level4Img, tileIdx: 11 },
-        ].map(({ img, tileIdx }) => {
+          { img: level1Img, tileIdx: 2, yOffset: 0 },
+          { img: level2Img, tileIdx: 5, yOffset: 0 },
+          { img: level3Img, tileIdx: 8, yOffset: 0 },
+          { img: level4Img, tileIdx: 11, yOffset: -5 },
+        ].map(({ img, tileIdx, yOffset }) => {
           const tile = tiles[tileIdx];
           const weekNum = Math.floor(tileIdx / 3);
           // W0,W2 go right, so label on left; W1,W3 go left, so label on right
@@ -206,7 +206,7 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
                 width: 350,
                 height: 'auto',
                 left: (PATH_W - 350) / 2,
-                top: tile.y + TILE_H / 2 - 22,
+                top: tile.y + TILE_H / 2 - 22 + yOffset,
                 zIndex: 8,
                 imageRendering: 'auto',
               }}
