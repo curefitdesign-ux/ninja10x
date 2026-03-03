@@ -84,7 +84,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
           CULT
         </h1>
         <h2 
-          className="text-[54px] font-black leading-[0.95] uppercase"
+          className="text-[59px] font-black leading-[0.95] uppercase"
           style={{ color: '#FFFFFF', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0px', textShadow: '3px 4px 8px rgba(0,0,0,0.5)', marginTop: '2px' }}
         >
           NINJA
