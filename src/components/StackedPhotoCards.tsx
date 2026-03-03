@@ -2,6 +2,7 @@ import { User, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
+import plusIcon from '@/assets/icons/plus-icon.png';
 import cyclingIcon from '@/assets/activities/cycling.png';
 import runningIcon from '@/assets/activities/running.png';
 import yogaIcon from '@/assets/activities/yoga.png';
@@ -202,6 +203,10 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
     );
   };
 
+  // Show plus icon when current week isn't complete and journey isn't done
+  const currentWeekPhotos = photos.length % 3;
+  const showPlusIcon = photos.length < 12 && photos.length > 0;
+
   return (
     <div
       className="relative w-full flex justify-center items-center"
@@ -213,6 +218,21 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
           <CardComponent photo={null} position={0} />
         ) : (
           displayPhotos.map((photo, idx) => <CardComponent key={photo.id} photo={photo} position={idx} />)
+        )}
+
+        {/* Plus icon to log next activity */}
+        {showPlusIcon && (
+          <motion.div
+            className="absolute z-50 cursor-pointer"
+            style={{ 
+              bottom: '22px', 
+              right: 'calc(50% - 100px)',
+            }}
+            onClick={handleEmptyCardTap}
+            whileTap={{ scale: 0.9 }}
+          >
+            <img src={plusIcon} alt="Add activity" className="w-8 h-8 drop-shadow-lg" />
+          </motion.div>
         )}
       </div>
     </div>
