@@ -2082,7 +2082,7 @@ const Reel = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setShowDeleteConfirm(true);
+                          setShowEditSheet(true);
                         }}
                         className="shrink-0 active:scale-95 transition-transform"
                         style={{
@@ -2099,7 +2099,7 @@ const Reel = () => {
                           justifyContent: 'center',
                         }}
                       >
-                        <Trash2 className="w-[18px] h-[18px] text-white/60" strokeWidth={1.5} />
+                        <Pencil className="w-[18px] h-[18px] text-white/70" strokeWidth={1.5} />
                       </button>
                     )}
                   </div>
