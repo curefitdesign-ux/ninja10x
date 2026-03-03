@@ -141,7 +141,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
         <div className="absolute left-3 z-20 space-y-1.5" style={{ bottom: '26%' }}>
           {pr && (
            <div className="p-1 animate-subtle-float" style={{ background: '#F45B4A', borderRadius: '2px', animationDelay: '0.2s' }}>
-              <span className="text-white font-bold text-[16px] uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '-0.5px' }}>
+              <span className="text-white font-normal text-[16px] uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '1.5px' }}>
                 {metricLabel} : {pr}
               </span>
             </div>
