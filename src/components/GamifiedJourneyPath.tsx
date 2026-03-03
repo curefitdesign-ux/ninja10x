@@ -142,9 +142,9 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
                     alt={`Week milestone`}
                     className="absolute pointer-events-none"
                     style={{
-                      width: 28,
+                      width: 31,
                       height: 'auto',
-                      left: tile.x + TILE_W / 2 - 14,
+                      left: tile.x + TILE_W / 2 - 15.5,
                       top: tile.y - 28,
                       zIndex: 5,
                       filter: isActive
