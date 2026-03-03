@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import startRampImg from '@/assets/progress/start-ramp-new.png';
 
@@ -18,7 +18,7 @@ const PATH_H = 543;
 const TILE_W = 50;
 const TILE_H = 50;
 
-export default function GamifiedJourneyPath({ completedActivities }: GamifiedJourneyPathProps) {
+const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>(function GamifiedJourneyPath({ completedActivities }, ref) {
   const tiles = useMemo(() => {
     const STEP_X = 50;
     const STEP_Y = 28;
@@ -64,7 +64,7 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
 
   // Lines removed per user request
   return (
-    <div className="w-full flex justify-center">
+    <div className="w-full flex justify-center" ref={ref}>
       <div
         className="relative overflow-hidden"
         style={{ width: PATH_W, height: PATH_H }}
@@ -189,13 +189,17 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
           style={{
             width: 36,
             height: 'auto',
+            left: vmanX,
+            top: vmanY,
             zIndex: 10,
           }}
-          initial={{ opacity: 0, scale: 0.5, left: vmanX, top: vmanY }}
-          animate={{ opacity: 1, scale: 1, left: vmanX, top: vmanY }}
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ type: 'spring', stiffness: 120, damping: 18 }}
         />
       </div>
     </div>
   );
-}
+});
+
+export default GamifiedJourneyPath;
