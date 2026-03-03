@@ -300,11 +300,15 @@ export default function ReelToProgressTransition({
                                 <div
                                   className="absolute z-10"
                                   style={{
-                                    bottom: '-6px',
-                                    right: hasPhotos ? '-4px' : '0px',
+                                    bottom: '-10px',
+                                    right: hasPhotos ? '-8px' : '-4px',
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onLogActivity?.();
                                   }}
                                 >
-                                  <img src={plusIconImg} alt="Add" className="w-6 h-6 drop-shadow-lg" />
+                                  <img src={plusIconImg} alt="Add" className="drop-shadow-lg" style={{ width: '34px', height: '34px' }} />
                                 </div>
                               )}
                             </motion.button>
