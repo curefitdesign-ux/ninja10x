@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { X, Share2, Trash2, ChevronUp } from 'lucide-react';
 import { createPortal } from 'react-dom';
@@ -74,13 +74,13 @@ interface ActivityGalleryOverlayProps {
   onLogActivity?: () => void;
 }
 
-export default function ActivityGalleryOverlay({
+const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlayProps>(function ActivityGalleryOverlay({
   isOpen,
   onClose,
   activities,
   initialIndex = 0,
   onLogActivity,
-}: ActivityGalleryOverlayProps) {
+}, _ref) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const portalContainer = usePortalContainer();
   const { user } = useAuth();
@@ -620,4 +620,6 @@ export default function ActivityGalleryOverlay({
   );
 
   return createPortal(overlay, portalContainer);
-}
+});
+
+export default ActivityGalleryOverlay;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
@@ -28,13 +28,13 @@ function savePublicPreference(isPublic: boolean) {
   }
 }
 
-export default function MakePublicSheet({ 
+const MakePublicSheet = forwardRef<HTMLDivElement, MakePublicSheetProps>(function MakePublicSheet({ 
   isOpen, 
   onClose, 
   onMakePublic,
   onKeepPrivate,
   thumbnailUrl,
-}: MakePublicSheetProps) {
+}, _ref) {
 
   const portalContainer = usePortalContainer();
   const [isPublishing, setIsPublishing] = useState(false);
@@ -268,4 +268,6 @@ export default function MakePublicSheet({
     </AnimatePresence>,
     portalContainer
   );
-}
+});
+
+export default MakePublicSheet;
