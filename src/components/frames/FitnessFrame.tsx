@@ -69,7 +69,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       {/* CONQUER WILL POWER tag */}
       <div className="absolute top-5 right-3 z-20 animate-subtle-pulse">
         <div className="px-2.5 py-1" style={{ background: '#F45B4A', borderRadius: '2px' }}>
-          <span className="text-white font-bold text-[9px] tracking-[0.08em]" style={{ fontFamily: 'system-ui, sans-serif' }}>
+          <span className="text-white font-bold text-[9px] uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '-0.5px' }}>
             CONQUER WILL POWER
           </span>
         </div>
@@ -141,14 +141,14 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
         <div className="absolute left-3 z-20 space-y-1.5" style={{ bottom: '26%' }}>
           {pr && (
             <div className="px-2.5 py-1 animate-subtle-float" style={{ background: '#F45B4A', borderRadius: '2px', animationDelay: '0.2s' }}>
-              <span className="text-white font-bold text-[11px]" style={{ fontFamily: 'system-ui, sans-serif' }}>
+              <span className="text-white font-bold text-[11px] uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '-0.5px' }}>
                 {metricLabel} : {pr}
               </span>
             </div>
           )}
           {duration && (
             <div className="px-2.5 py-1 animate-subtle-float" style={{ background: '#F45B4A', borderRadius: '2px', animationDelay: '0.4s' }}>
-              <span className="text-white font-bold text-[11px]" style={{ fontFamily: 'system-ui, sans-serif' }}>
+              <span className="text-white font-bold text-[11px] uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '-0.5px' }}>
                 {durationLabel} : {duration}
               </span>
             </div>
