@@ -2,6 +2,7 @@ import { User, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
+import plusIcon from '@/assets/icons/plus-icon.png';
 import cyclingIcon from '@/assets/activities/cycling.png';
 import runningIcon from '@/assets/activities/running.png';
 import yogaIcon from '@/assets/activities/yoga.png';
