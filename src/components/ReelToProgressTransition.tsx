@@ -539,21 +539,14 @@ export default function ReelToProgressTransition({
                 )}
               </AnimatePresence>
 
-              {/* Progress tiles area */}
-              <motion.div 
-                className="w-full mx-auto" 
-                style={{ maxWidth: "370px", transform: "translateX(-6px)" }}
+              {/* Gamified Journey Path */}
+              <motion.div
+                className="w-full mx-auto px-4"
+                style={{ maxWidth: "370px" }}
                 animate={{ opacity: expandingCardId ? 0.3 : 1 }}
               >
                 {showTiles && (
-                  <motion.img
-                    src={journeyPathImg}
-                    alt="Journey Path"
-                    className="w-full"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3, delay: 0.15 }}
-                  />
+                  <GamifiedJourneyPath completedActivities={myActivities.length} />
                 )}
               </motion.div>
             </motion.div>
