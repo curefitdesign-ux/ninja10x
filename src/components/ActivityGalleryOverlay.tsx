@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
 import { ReactionType, ActivityReaction, sendReaction } from '@/services/journey-service';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
+import MediaSourceSheet from '@/components/MediaSourceSheet';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import DynamicBlurBackground from '@/components/DynamicBlurBackground';
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
