@@ -84,7 +84,7 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
             width: 205,
             height: 'auto',
             left: -60,
-            bottom: -175,
+            bottom: -145,
             zIndex: 0,
             opacity: 0.9,
           }}
