@@ -8,6 +8,10 @@ import crystal5Img from '@/assets/progress/crystal-5.png';
 import finalGoalImg from '@/assets/progress/final-goal.png';
 import vmanImg from '@/assets/progress/vman.png';
 import journeyBgPattern from '@/assets/progress/journey-bg-pattern.png';
+import level1Img from '@/assets/progress/level-1.png';
+import level2Img from '@/assets/progress/level-2.png';
+import level3Img from '@/assets/progress/level-3.png';
+import level4Img from '@/assets/progress/level-4.png';
 
 interface GamifiedJourneyPathProps {
   completedActivities: number;
