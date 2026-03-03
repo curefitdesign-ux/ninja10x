@@ -110,8 +110,8 @@ const Reel = () => {
     reactorProfiles: ReactorProfile[];
   }>>({});
   
-  // Delete confirmation state
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  // Edit/replace sheet state
+  const [showEditSheet, setShowEditSheet] = useState(false);
   
   // Auto-advance timer state — dynamic duration based on media type
   const DEFAULT_ADVANCE_DURATION = 10000; // 10 seconds for images
