@@ -91,6 +91,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const AUTO_ADVANCE_MS = 10000;
   const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
   const autoAdvanceTimer = useRef<NodeJS.Timeout | null>(null);
+  const progressStartTimer = useRef<number | null>(null);
+  const [progressRunKey, setProgressRunKey] = useState(0);
   const isPaused = showReactsSheet || showEditSheet;
 
   // Media loading
