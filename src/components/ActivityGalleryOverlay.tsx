@@ -497,9 +497,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           <Share2 className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
                         </button>
                       )}
-                      {canDelete && (
+                      {canEdit && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(true); }}
+                          onClick={(e) => { e.stopPropagation(); setShowEditSheet(true); }}
                           className="shrink-0 active:scale-95 transition-transform"
                           style={{
                             width: 44, height: 44, borderRadius: 22,
@@ -511,7 +511,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                           }}
                         >
-                          <Trash2 className="w-[18px] h-[18px] text-white/60" strokeWidth={1.5} />
+                          <Pencil className="w-[18px] h-[18px] text-white/70" strokeWidth={1.5} />
                         </button>
                       )}
                     </div>
