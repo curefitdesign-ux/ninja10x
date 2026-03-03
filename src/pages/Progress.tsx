@@ -145,14 +145,21 @@ const Progress = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
       >
-        {/* Profile avatar — no click action */}
-        <div className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-white/20">
-          <ProfileAvatar
-            src={profile?.avatar_url}
-            name={profile?.display_name}
-            size={36}
-          />
-        </div>
+        {/* Back button */}
+        <button
+          onClick={() => navigate('/reel')}
+          className="flex items-center justify-center active:scale-[0.95] transition-transform"
+          style={{
+            width: 36, height: 36, borderRadius: 18,
+            background: 'rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(40px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+          }}
+        >
+          <ChevronLeft className="w-5 h-5 text-white/80" strokeWidth={2} />
+        </button>
         <span className="text-white font-bold text-[17px] tracking-tight">My Progress</span>
         {/* Right side - Ellipsis menu */}
         <div className="flex items-center shrink-0 relative">
