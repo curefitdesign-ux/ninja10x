@@ -6,6 +6,7 @@ import ActivityGalleryOverlay from '@/components/ActivityGalleryOverlay';
 import { isVideoUrl } from '@/lib/media';
 import { ReactionType, ActivityReaction } from '@/services/journey-service';
 import GamifiedJourneyPath from '@/components/GamifiedJourneyPath';
+import plusIconImg from '@/assets/icons/plus-icon.png';
 
 
 interface Activity {
