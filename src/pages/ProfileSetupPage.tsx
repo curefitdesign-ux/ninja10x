@@ -225,8 +225,8 @@ const ProfileSetupPage = () => {
         className="hidden"
       />
 
-      {/* ── HERO — square format, tap to open camera ── */}
-      <div className="relative z-10 w-full flex-shrink-0" style={{ aspectRatio: '3/4' }}>
+      {/* ── HERO — 3:4 format, tap to open camera ── */}
+      <div className="relative z-10 w-full flex-shrink-0" style={{ aspectRatio: '3 / 4', minHeight: '75vw' }}>
         <div className="block w-full h-full cursor-pointer relative overflow-hidden" onClick={handleHeroTap}>
           {heroImage ? (
             <img
