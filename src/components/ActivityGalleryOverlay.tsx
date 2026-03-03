@@ -74,13 +74,13 @@ interface ActivityGalleryOverlayProps {
   onLogActivity?: () => void;
 }
 
-export default function ActivityGalleryOverlay({
+const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlayProps>(function ActivityGalleryOverlay({
   isOpen,
   onClose,
   activities,
   initialIndex = 0,
   onLogActivity,
-}: ActivityGalleryOverlayProps) {
+}, _ref) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const portalContainer = usePortalContainer();
   const { user } = useAuth();

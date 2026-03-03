@@ -28,13 +28,13 @@ function savePublicPreference(isPublic: boolean) {
   }
 }
 
-export default function MakePublicSheet({ 
+const MakePublicSheet = forwardRef<HTMLDivElement, MakePublicSheetProps>(function MakePublicSheet({ 
   isOpen, 
   onClose, 
   onMakePublic,
   onKeepPrivate,
   thumbnailUrl,
-}: MakePublicSheetProps) {
+}, _ref) {
 
   const portalContainer = usePortalContainer();
   const [isPublishing, setIsPublishing] = useState(false);
