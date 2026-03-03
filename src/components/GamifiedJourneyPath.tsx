@@ -101,7 +101,7 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
                   alt="Final Goal"
                   className="absolute pointer-events-none"
                   style={{
-                    width: 115,
+                    width: 100,
                     height: 'auto',
                     left: tile.x + TILE_W / 2 - 57.5,
                     top: tile.y - 95,
