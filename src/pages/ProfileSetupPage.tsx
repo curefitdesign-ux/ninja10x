@@ -293,23 +293,42 @@ const ProfileSetupPage = () => {
 
       {/* ── BOTTOM PANEL — flows naturally below hero ── */}
       <div className="relative z-10 flex flex-col flex-1">
+        {/* Title + Subtitle */}
+        <div className="flex flex-col items-center px-6 mt-4 mb-2">
+          <h1
+            className="text-center font-black text-white uppercase leading-tight"
+            style={{ fontSize: '2rem', letterSpacing: '-0.02em' }}
+          >
+            India's Ultimate{'\n'}Habit Builder.
+          </h1>
+          <p className="text-white/50 text-base mt-3 text-center">What should we call you?</p>
+        </div>
+
         {/* Name input */}
-        <div className="flex flex-col items-center px-6 mt-4">
-          <input
-            type="text"
-            value={displayName}
-            onChange={(e) => { setDisplayName(e.target.value); if (nameError) setNameError(null); }}
-            placeholder="Your Name"
-            disabled={loading}
-            maxLength={50}
-            className="w-full text-center text-white text-3xl font-bold bg-transparent outline-none placeholder:text-white/25 border-0"
-            style={{ caretColor: 'white' }}
-          />
-          {nameError && <p className="text-red-400 text-xs mt-1">{nameError}</p>}
+        <div className="flex flex-col items-center px-6 mt-2 mb-4">
+          <div
+            className="w-full rounded-2xl overflow-hidden"
+            style={{
+              background: 'rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+          >
+            <input
+              type="text"
+              value={displayName}
+              onChange={(e) => { setDisplayName(e.target.value); if (nameError) setNameError(null); }}
+              placeholder="First Name"
+              disabled={loading}
+              maxLength={50}
+              className="w-full px-5 py-4 text-white text-lg bg-transparent outline-none placeholder:text-white/30 border-0"
+              style={{ caretColor: 'white' }}
+            />
+          </div>
+          {nameError && <p className="text-red-400 text-xs mt-1.5">{nameError}</p>}
         </div>
 
         {/* Divider */}
-        <div className="flex items-center gap-3 px-6 mt-5 mb-3">
+        <div className="flex items-center gap-3 px-6 mb-3">
           <div className="flex-1 h-px bg-white/10" />
           <span className="text-white/30 text-xs tracking-wide uppercase">Choose avatar</span>
           <div className="flex-1 h-px bg-white/10" />
