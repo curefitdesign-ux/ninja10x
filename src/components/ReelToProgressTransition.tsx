@@ -96,8 +96,6 @@ export default function ReelToProgressTransition({
     }, 250);
   }, [onStoryTap]);
 
-  const getDayFromIndex = (index: number) => 12 - index;
-  const isTileActive = (dayNumber: number) => myActivities.some(a => a.dayNumber === dayNumber);
 
   // Build week stacks data
   const WEEK_LOCK_COLORS = ['rgba(180,160,220,0.8)', '#F59E0B', '#D946EF', '#22C55E'];
