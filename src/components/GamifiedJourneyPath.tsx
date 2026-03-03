@@ -22,8 +22,8 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
   const tiles = useMemo(() => {
     const STEP_X = 50;
     const STEP_Y = 28;
-    const startX = 98;
-    const startY = 440;
+    const startX = 108;
+    const startY = 420;
 
     const positions: { x: number; y: number; index: number; isWeekEnd: boolean; isFinal: boolean }[] = [];
 
