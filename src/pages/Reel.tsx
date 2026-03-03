@@ -2035,7 +2035,7 @@ const Reel = () => {
                           background: 'rgba(255, 255, 255, 0.08)',
                           backdropFilter: 'blur(40px) saturate(180%)',
                           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                          border: '1px solid rgba(255, 255, 255, 0.06)',
                           boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
                           display: 'flex',
                           alignItems: 'center',
