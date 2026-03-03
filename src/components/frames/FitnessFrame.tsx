@@ -68,8 +68,8 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       
       {/* CONQUER WILL POWER tag */}
       <div className="absolute top-5 right-3 z-20 animate-subtle-pulse">
-        <div className="px-2.5 py-1" style={{ background: '#F45B4A', borderRadius: '2px' }}>
-          <span className="text-white font-bold text-[9px] uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '-0.5px' }}>
+        <div className="p-2" style={{ background: '#F45B4A', borderRadius: '2px' }}>
+          <span className="text-white font-bold text-[24px] uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '-0.5px' }}>
             CONQUER WILL POWER
           </span>
         </div>
@@ -79,13 +79,13 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       <div className="absolute top-12 left-4 z-20">
         <h1 
           className="text-[46px] font-black leading-[0.9] uppercase"
-          style={{ color: '#F4E14D', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '-5px', textShadow: '2px 3px 4px rgba(0,0,0,0.35)' }}
+          style={{ color: '#F4E14D', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '5px', textShadow: '2px 3px 4px rgba(0,0,0,0.35)' }}
         >
           CULT
         </h1>
         <h2 
           className="text-[54px] font-black leading-[0.95] uppercase"
-          style={{ color: '#FFFFFF', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '-5px', textShadow: '3px 4px 8px rgba(0,0,0,0.5)', marginTop: '10px' }}
+          style={{ color: '#FFFFFF', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '5px', textShadow: '3px 4px 8px rgba(0,0,0,0.5)', marginTop: '7px' }}
         >
           NINJA
         </h2>
@@ -140,15 +140,15 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       {(duration || pr) && (
         <div className="absolute left-3 z-20 space-y-1.5" style={{ bottom: '26%' }}>
           {pr && (
-            <div className="px-2.5 py-1 animate-subtle-float" style={{ background: '#F45B4A', borderRadius: '2px', animationDelay: '0.2s' }}>
-              <span className="text-white font-bold text-[11px] uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '-0.5px' }}>
+           <div className="p-2 animate-subtle-float" style={{ background: '#F45B4A', borderRadius: '2px', animationDelay: '0.2s' }}>
+              <span className="text-white font-bold text-[26px] uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '-0.5px' }}>
                 {metricLabel} : {pr}
               </span>
             </div>
           )}
           {duration && (
-            <div className="px-2.5 py-1 animate-subtle-float" style={{ background: '#F45B4A', borderRadius: '2px', animationDelay: '0.4s' }}>
-              <span className="text-white font-bold text-[11px] uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '-0.5px' }}>
+            <div className="p-2 animate-subtle-float" style={{ background: '#F45B4A', borderRadius: '2px', animationDelay: '0.4s' }}>
+              <span className="text-white font-bold text-[26px] uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '-0.5px' }}>
                 {durationLabel} : {duration}
               </span>
             </div>
