@@ -314,7 +314,7 @@ export default function ReelToProgressTransition({
                 <motion.img
                   src={journeyPathImg}
                   alt="Journey Path"
-                  className="w-[85%] h-full object-contain object-bottom mx-auto"
+                  className="w-full h-full object-contain object-bottom"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.1 }}
@@ -556,7 +556,7 @@ export default function ReelToProgressTransition({
                   <motion.img
                     src={journeyPathImg}
                     alt="Journey Path"
-                    className="w-[85%] h-full object-contain object-bottom mx-auto"
+                    className="w-full h-full object-contain object-bottom"
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.15 }}
