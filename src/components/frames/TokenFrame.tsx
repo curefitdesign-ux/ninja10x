@@ -54,6 +54,7 @@ const TokenFrame = ({
       className="w-[90%] mx-auto relative"
       style={{
         aspectRatio: '9 / 16',
+        containerType: 'inline-size',
         backgroundImage: `url(${tokenBg})`,
         backgroundSize: '100% 100%',
         backgroundRepeat: 'no-repeat',
@@ -105,7 +106,7 @@ const TokenFrame = ({
           style={{
             fontFamily: "'DM Serif Display', Georgia, serif",
             fontWeight: 400,
-            fontSize: 'clamp(25px, 9vw, 49px)',
+            fontSize: 'clamp(25px, 13cqw, 49px)',
             color: '#0a4a72',
             textTransform: 'capitalize',
             letterSpacing: '-0.01em',
@@ -119,7 +120,7 @@ const TokenFrame = ({
           style={{
             fontFamily: "'Rowdies', 'Arial', sans-serif",
             fontWeight: 300,
-            fontSize: 'clamp(10px, 2.4vw, 12px)',
+            fontSize: 'clamp(8px, 3.2cqw, 12px)',
             color: '#696760',
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
@@ -160,14 +161,14 @@ const TokenFrame = ({
       >
         {durationValue ? (
           <div style={{ textAlign: 'left', lineHeight: 1.1 }}>
-            <div style={{ fontFamily: "'Rowdies', 'Arial', sans-serif", fontWeight: 300, fontSize: 'clamp(8px, 2.6vw, 12px)', color: '#696760', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '2px' }}>
+            <div style={{ fontFamily: "'Rowdies', 'Arial', sans-serif", fontWeight: 300, fontSize: 'clamp(8px, 3.4cqw, 12px)', color: '#696760', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '2px' }}>
               DURATION
             </div>
-            <span style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: 'clamp(14px, 5vw, 24px)', color: '#0a4a72' }}>
+            <span style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: 'clamp(14px, 6.5cqw, 24px)', color: '#0a4a72' }}>
               {durationValue}
             </span>
             {durationUnit && (
-              <span style={{ fontFamily: "'Rowdies', 'Arial Black', sans-serif", fontWeight: 700, fontSize: 'clamp(10px, 3.5vw, 18px)', color: '#0a4a72', marginLeft: '4px' }}>
+              <span style={{ fontFamily: "'Rowdies', 'Arial Black', sans-serif", fontWeight: 700, fontSize: 'clamp(10px, 4.5cqw, 18px)', color: '#0a4a72', marginLeft: '4px' }}>
                 {durationUnit}
               </span>
             )}
@@ -176,13 +177,13 @@ const TokenFrame = ({
 
         {prValue && prUnit ? (
           <div style={{ textAlign: 'right', lineHeight: 1.1 }}>
-            <div style={{ fontFamily: "'Rowdies', 'Arial', sans-serif", fontWeight: 300, fontSize: 'clamp(8px, 2.6vw, 12px)', color: '#696760', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '2px' }}>
+            <div style={{ fontFamily: "'Rowdies', 'Arial', sans-serif", fontWeight: 300, fontSize: 'clamp(8px, 3.4cqw, 12px)', color: '#696760', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '2px' }}>
               DISTANCE
             </div>
-            <span style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: 'clamp(14px, 5vw, 24px)', color: '#0a4a72' }}>
+            <span style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: 'clamp(14px, 6.5cqw, 24px)', color: '#0a4a72' }}>
               {prValue}
             </span>
-            <span style={{ fontFamily: "'Rowdies', 'Arial Black', sans-serif", fontWeight: 700, fontSize: 'clamp(10px, 3.5vw, 18px)', color: '#0a4a72', marginLeft: '4px' }}>
+            <span style={{ fontFamily: "'Rowdies', 'Arial Black', sans-serif", fontWeight: 700, fontSize: 'clamp(10px, 4.5cqw, 18px)', color: '#0a4a72', marginLeft: '4px' }}>
               {prUnit}
             </span>
           </div>

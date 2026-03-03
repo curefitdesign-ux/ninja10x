@@ -49,6 +49,7 @@ const BoldFrame = ({
       style={{
         background: '#f0ede6',
         borderRadius: '16px',
+        containerType: 'inline-size',
       }}
     >
       {/* ── TOP HEADER — "I DID {activity} TODAY!" ── */}
@@ -66,7 +67,7 @@ const BoldFrame = ({
             style={{
               fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
               fontWeight: 700,
-              fontSize: 'clamp(28px, 10vw, 52px)',
+              fontSize: 'clamp(28px, 13cqw, 52px)',
               color: '#1a1a1a',
               textTransform: 'uppercase',
               letterSpacing: '-0.02em',
@@ -78,7 +79,7 @@ const BoldFrame = ({
             style={{
               fontFamily: "'Caveat', cursive",
               fontWeight: 700,
-              fontSize: 'clamp(32px, 11vw, 56px)',
+              fontSize: 'clamp(32px, 14.5cqw, 56px)',
               color: '#6B4EE6',
               textTransform: 'capitalize',
               lineHeight: 1,
@@ -91,7 +92,7 @@ const BoldFrame = ({
             style={{
               fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
               fontWeight: 700,
-              fontSize: 'clamp(28px, 10vw, 52px)',
+              fontSize: 'clamp(28px, 13cqw, 52px)',
               color: '#1a1a1a',
               textTransform: 'uppercase',
               letterSpacing: '-0.02em',
@@ -116,7 +117,7 @@ const BoldFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 500,
-            fontSize: 'clamp(7px, 2.2vw, 11px)',
+            fontSize: 'clamp(7px, 2.8cqw, 11px)',
             color: '#3a3a3a',
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
@@ -128,7 +129,7 @@ const BoldFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 500,
-            fontSize: 'clamp(7px, 2.2vw, 11px)',
+            fontSize: 'clamp(7px, 2.8cqw, 11px)',
             color: '#3a3a3a',
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
@@ -214,7 +215,7 @@ const BoldFrame = ({
               style={{
                 fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
                 fontWeight: 500,
-                fontSize: 'clamp(7px, 2.2vw, 11px)',
+                fontSize: 'clamp(7px, 2.8cqw, 11px)',
                 color: '#3a3a3a',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
@@ -226,7 +227,7 @@ const BoldFrame = ({
               style={{
                 fontFamily: "'Caveat', cursive",
                 fontWeight: 700,
-                fontSize: 'clamp(18px, 6vw, 30px)',
+                fontSize: 'clamp(18px, 7.8cqw, 30px)',
                 color: '#6B4EE6',
                 fontStyle: 'italic',
               }}
@@ -237,7 +238,7 @@ const BoldFrame = ({
               style={{
                 fontFamily: "'Caveat', cursive",
                 fontWeight: 700,
-                fontSize: 'clamp(14px, 4.5vw, 24px)',
+                fontSize: 'clamp(14px, 5.8cqw, 24px)',
                 color: '#6B4EE6',
                 fontStyle: 'italic',
               }}
@@ -253,7 +254,7 @@ const BoldFrame = ({
               style={{
                 fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
                 fontWeight: 500,
-                fontSize: 'clamp(7px, 2.2vw, 11px)',
+                fontSize: 'clamp(7px, 2.8cqw, 11px)',
                 color: '#3a3a3a',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
@@ -265,7 +266,7 @@ const BoldFrame = ({
               style={{
                 fontFamily: "'Caveat', cursive",
                 fontWeight: 700,
-                fontSize: 'clamp(18px, 6vw, 30px)',
+                fontSize: 'clamp(18px, 7.8cqw, 30px)',
                 color: '#6B4EE6',
                 fontStyle: 'italic',
               }}
@@ -276,7 +277,7 @@ const BoldFrame = ({
               style={{
                 fontFamily: "'Caveat', cursive",
                 fontWeight: 700,
-                fontSize: 'clamp(14px, 4.5vw, 24px)',
+                fontSize: 'clamp(14px, 5.8cqw, 24px)',
                 color: '#6B4EE6',
                 fontStyle: 'italic',
               }}

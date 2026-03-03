@@ -28,7 +28,7 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
   }, [isVideo, imageUrl]);
 
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden bg-black shadow-2xl relative">
+    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden bg-black shadow-2xl relative" style={{ containerType: 'inline-size' }}>
       {/* Background image or video filling the frame */}
       <div className="absolute inset-0 overflow-hidden">
         {isVideo ? (
@@ -61,7 +61,7 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
         <h1 
           className="font-black italic leading-[0.85] tracking-tighter animate-subtle-pulse uppercase"
           style={{
-            fontSize: 'clamp(40px, 14vw, 60px)',
+            fontSize: 'clamp(40px, 18cqw, 60px)',
             color: 'rgba(255,255,255,1)',
             textShadow: `
               3px 3px 0px rgba(0,0,0,0.3),
@@ -98,7 +98,7 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
               <p 
                 className="font-bold tracking-tight"
                 style={{
-                  fontSize: 'clamp(28px, 10vw, 40px)',
+                  fontSize: 'clamp(28px, 13cqw, 40px)',
                   color: 'rgba(255,255,255,0.9)',
                   textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
                 }}
@@ -119,7 +119,7 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
               <p 
                 className="font-bold tracking-tight"
                 style={{
-                  fontSize: 'clamp(28px, 10vw, 40px)',
+                  fontSize: 'clamp(28px, 13cqw, 40px)',
                   color: 'rgba(255,255,255,0.9)',
                   textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
                 }}
