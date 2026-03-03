@@ -17,7 +17,7 @@ interface MediaSourceSheetProps {
   preserveActivity?: boolean;
 }
 
-const MediaSourceSheet = ({ isOpen, onClose, dayNumber, activity, preserveActivity }: MediaSourceSheetProps) => {
+const MediaSourceSheet = forwardRef<HTMLDivElement, MediaSourceSheetProps>(function MediaSourceSheet({ isOpen, onClose, dayNumber, activity, preserveActivity }, _ref) {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const portalContainer = usePortalContainer();

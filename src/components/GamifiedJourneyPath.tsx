@@ -200,4 +200,6 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
       </div>
     </div>
   );
-}
+});
+
+export default GamifiedJourneyPath;
