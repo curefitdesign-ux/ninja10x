@@ -226,7 +226,7 @@ const ProfileSetupPage = () => {
       />
 
       {/* ── HERO — square format, tap to open camera ── */}
-      <div className="relative z-10 w-full flex-shrink-0" style={{ aspectRatio: '1/1' }}>
+      <div className="relative z-10 w-full flex-shrink-0" style={{ aspectRatio: '3/4' }}>
         <div className="block w-full h-full cursor-pointer relative overflow-hidden" onClick={handleHeroTap}>
           {heroImage ? (
             <img
@@ -234,7 +234,6 @@ const ProfileSetupPage = () => {
               alt="Profile photo"
               className="w-full h-full object-cover"
               style={{
-                objectPosition: 'center 30px',
                 maskImage: 'linear-gradient(to bottom, black 55%, transparent 100%)',
                 WebkitMaskImage: 'linear-gradient(to bottom, black 55%, transparent 100%)',
               }}
