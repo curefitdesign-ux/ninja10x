@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronLeft, ChevronUp, Trash2, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, MoreVertical, UserPen, LogOut, Plus } from 'lucide-react';
+import { X, ChevronLeft, ChevronUp, Pencil, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, MoreVertical, UserPen, LogOut, Plus } from 'lucide-react';
 import PullToRefresh from '@/components/PullToRefresh';
 import ProfileMenu from '@/components/ProfileMenu';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
@@ -110,8 +110,8 @@ const Reel = () => {
     reactorProfiles: ReactorProfile[];
   }>>({});
   
-  // Delete confirmation state
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  // Edit/replace sheet state
+  const [showEditSheet, setShowEditSheet] = useState(false);
   
   // Auto-advance timer state — dynamic duration based on media type
   const DEFAULT_ADVANCE_DURATION = 10000; // 10 seconds for images
@@ -121,7 +121,7 @@ const Reel = () => {
   const [ownRingProgress, setOwnRingProgress] = useState(0);
   const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoAdvanceStartRef = useRef<number>(0);
-  const [isDeleting, setIsDeleting] = useState(false);
+  
   
   // Media loading state - track by URL so cached images don't get overwritten by useEffect reset
   const [loadedMediaUrl, setLoadedMediaUrl] = useState<string>('');
@@ -137,7 +137,7 @@ const Reel = () => {
   const bottomSheetY = useMotionValue(0);
 
   // Data for progress overlay
-  const { activities: myActivities, deleteActivity, hasPublicActivity, makeActivityPublic } = useJourneyActivities();
+  const { activities: myActivities, hasPublicActivity, makeActivityPublic } = useJourneyActivities();
   const [publicFeed, setPublicFeed] = useState<LocalActivity[]>([]);
   
   // Privacy sheet state
@@ -556,44 +556,11 @@ const Reel = () => {
     navigate('/reel', { replace: true });
   };
 
-  const handleDeleteActivity = async () => {
-    if (!currentActivity) return;
-    
-    setIsDeleting(true);
-    const success = await deleteActivity(currentActivity.dayNumber);
-    setIsDeleting(false);
-    setShowDeleteConfirm(false);
-    
-    if (success) {
-      // Refresh the data
-      const groups = await fetchAllActivitiesGroupedByUser();
-      setUserGroups(groups);
-      
-      // If no more activities, go back
-      if (groups.length === 0 || !groups.some(g => g.activities.length > 0)) {
-        navigate(-1);
-        return;
-      }
-      
-      // If current user has no more activities, move to next user
-      const updatedGroup = groups[currentUserIndex];
-      if (!updatedGroup || updatedGroup.activities.length === 0) {
-        if (currentUserIndex > 0) {
-          setCurrentUserIndex(prev => prev - 1);
-        } else if (groups.length > 0) {
-          setCurrentUserIndex(0);
-        }
-        setCurrentActivityIndex(0);
-      } else if (currentActivityIndex >= updatedGroup.activities.length) {
-        setCurrentActivityIndex(Math.max(0, updatedGroup.activities.length - 1));
-      }
-    }
-  };
 
   // Auto-advance timer - pause when modals are open OR content is locked
   // Determine if story should be locked (user's profile is private OR they haven't shared any public activity)
   const isStoryLocked = !isOwnStory && !profile?.stories_public;
-  const isPaused = showReactsSheet || showSendReactionSheet || showDeleteConfirm || showMakePublicSheet || isStoryLocked;
+  const isPaused = showReactsSheet || showSendReactionSheet || showEditSheet || showMakePublicSheet || isStoryLocked;
   
   // Reset progress/duration when activity changes (NOT mediaLoaded — that's URL-keyed to avoid race condition)
   useEffect(() => {
@@ -2082,7 +2049,7 @@ const Reel = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setShowDeleteConfirm(true);
+                          setShowEditSheet(true);
                         }}
                         className="shrink-0 active:scale-95 transition-transform"
                         style={{
@@ -2099,7 +2066,7 @@ const Reel = () => {
                           justifyContent: 'center',
                         }}
                       >
-                        <Trash2 className="w-[18px] h-[18px] text-white/60" strokeWidth={1.5} />
+                        <Pencil className="w-[18px] h-[18px] text-white/70" strokeWidth={1.5} />
                       </button>
                     )}
                   </div>
@@ -2171,95 +2138,14 @@ const Reel = () => {
         )}
 
 
-      {/* Delete confirmation dialog - Liquid glass design */}
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent 
-          className="text-white max-w-[320px] rounded-3xl border-0 p-0 overflow-hidden"
-          style={{
-            background: 'transparent',
-            boxShadow: 'none',
-          }}
-        >
-          {/* Outer reflective border ring */}
-          <div
-            className="relative rounded-3xl p-px overflow-hidden"
-            style={{
-              background: 'linear-gradient(145deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.06) 40%, rgba(255,255,255,0.18) 70%, rgba(255,255,255,0.04) 100%)',
-              boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 32px 64px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.4)',
-            }}
-          >
-            {/* Glass inner surface — neutral clear glass, no color tint */}
-            <div
-              className="relative rounded-[23px] overflow-hidden"
-              style={{
-                background: 'rgba(30,28,40,0.35)',
-                backdropFilter: 'blur(60px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(60px) saturate(180%)',
-              }}
-            >
-              {/* Inner top light beam highlight */}
-              <div
-                className="absolute top-0 left-0 right-0 h-px"
-                style={{
-                  background: 'linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.55) 40%, rgba(255,255,255,0.55) 60%, transparent 95%)',
-                }}
-              />
-              {/* Subtle inner glow */}
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background: 'radial-gradient(ellipse at 50% 0%, rgba(160,120,240,0.18) 0%, transparent 60%)',
-                }}
-              />
-
-              <div className="px-6 pt-7 pb-6">
-                <AlertDialogHeader className="mb-5">
-                  <AlertDialogTitle className="text-white text-center text-[18px] font-bold tracking-tight">
-                    Delete this activity?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription
-                    className="text-center text-sm leading-relaxed mt-2"
-                    style={{ color: 'rgba(200,185,230,0.7)' }}
-                  >
-                    This will permanently remove Day {currentActivity?.dayNumber} from your journey. This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-
-                <AlertDialogFooter className="flex-row gap-3 sm:justify-center mt-1">
-                  {/* Cancel — ghost glass button */}
-                  <AlertDialogCancel
-                    className="flex-1 m-0 h-12 rounded-2xl text-white font-semibold text-[15px] active:scale-[0.97] transition-transform border-0 hover:bg-transparent focus:ring-0"
-                    style={{
-                      background: 'rgba(255,255,255,0.1)',
-                      backdropFilter: 'blur(20px)',
-                      WebkitBackdropFilter: 'blur(20px)',
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 1px 3px rgba(0,0,0,0.2)',
-                    }}
-                    disabled={isDeleting}
-                  >
-                    Cancel
-                  </AlertDialogCancel>
-
-                  {/* Delete — danger red glass button */}
-                  <AlertDialogAction
-                    onClick={handleDeleteActivity}
-                    className="flex-1 m-0 h-12 rounded-2xl text-white font-semibold text-[15px] active:scale-[0.97] transition-transform border-0"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(239,68,68,0.85) 0%, rgba(185,28,28,0.9) 100%)',
-                      backdropFilter: 'blur(20px)',
-                      WebkitBackdropFilter: 'blur(20px)',
-                      boxShadow: 'inset 0 1px 0 rgba(255,150,150,0.3), 0 4px 16px rgba(239,68,68,0.35)',
-                    }}
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? 'Deleting...' : 'Delete'}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </div>
-            </div>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Edit/Replace Sheet */}
+      <MediaSourceSheet
+        isOpen={showEditSheet}
+        onClose={() => setShowEditSheet(false)}
+        dayNumber={currentActivity?.dayNumber || 1}
+        activity={currentActivity?.activity || undefined}
+        preserveActivity={true}
+      />
       
       {/* Make Public Sheet */}
       <MakePublicSheet
