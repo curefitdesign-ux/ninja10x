@@ -43,7 +43,7 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
       if (i < 11) {
         const nextWeek = Math.floor((i + 1) / 3);
         const goingRight = nextWeek % 2 === 0;
-        const stepX = nextWeek === 3 ? STEP_X - 5 : STEP_X;
+        const stepX = nextWeek === 3 ? STEP_X - 15 : STEP_X;
         cx += goingRight ? stepX : -stepX;
         cy -= STEP_Y;
       }
