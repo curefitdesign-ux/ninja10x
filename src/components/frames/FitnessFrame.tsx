@@ -78,7 +78,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       {/* CULT NINJA title + actual activity name */}
       <div className="absolute top-12 left-4 z-20">
         <h1 
-          className="text-[46px] font-black leading-[0.9] uppercase"
+          className="text-[51px] font-black leading-[0.9] uppercase"
           style={{ color: '#F4E14D', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0px', textShadow: '2px 3px 4px rgba(0,0,0,0.35)' }}
         >
           CULT
