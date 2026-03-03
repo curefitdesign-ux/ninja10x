@@ -10,33 +10,27 @@ import { useNavigate } from 'react-router-dom';
 import AvatarCropper from '@/components/AvatarCropper';
 
 
-// New 3D character preset avatars
-import presetOrange from '@/assets/avatars/preset-orange.png';
-import presetRedgirl from '@/assets/avatars/preset-redgirl.png';
-import presetEdgy from '@/assets/avatars/preset-edgy.png';
-
-// Fallback to color avatars for remaining slots
-import avatarRed from '@/assets/avatars/avatar-red.png';
-import avatarBlue from '@/assets/avatars/avatar-blue.png';
-import avatarPurple from '@/assets/avatars/avatar-purple.png';
-import avatarGreen from '@/assets/avatars/avatar-green.png';
-import avatarOrange from '@/assets/avatars/avatar-orange.png';
-import avatarTeal from '@/assets/avatars/avatar-teal.png';
-import avatarPink from '@/assets/avatars/avatar-pink.png';
-import avatarYellow from '@/assets/avatars/avatar-yellow.png';
+// Curo mascot preset avatars
+import curoBoxing from '@/assets/avatars/curo-boxing.png';
+import curoCool from '@/assets/avatars/curo-cool.png';
+import curoHappy from '@/assets/avatars/curo-happy.png';
+import curoFire from '@/assets/avatars/curo-fire.png';
+import curoFierce from '@/assets/avatars/curo-fierce.png';
+import curoShy from '@/assets/avatars/curo-shy.png';
+import curoZen from '@/assets/avatars/curo-zen.png';
+import curoShocked from '@/assets/avatars/curo-shocked.png';
+import curoMusic from '@/assets/avatars/curo-music.png';
 
 const PRESET_AVATARS = [
-  { id: 'preset-orange', src: presetOrange },
-  { id: 'preset-redgirl', src: presetRedgirl },
-  { id: 'preset-edgy', src: presetEdgy },
-  { id: 'red', src: avatarRed },
-  { id: 'blue', src: avatarBlue },
-  { id: 'purple', src: avatarPurple },
-  { id: 'green', src: avatarGreen },
-  { id: 'orange', src: avatarOrange },
-  { id: 'teal', src: avatarTeal },
-  { id: 'pink', src: avatarPink },
-  { id: 'yellow', src: avatarYellow },
+  { id: 'curo-boxing', src: curoBoxing },
+  { id: 'curo-cool', src: curoCool },
+  { id: 'curo-happy', src: curoHappy },
+  { id: 'curo-fire', src: curoFire },
+  { id: 'curo-fierce', src: curoFierce },
+  { id: 'curo-shy', src: curoShy },
+  { id: 'curo-zen', src: curoZen },
+  { id: 'curo-shocked', src: curoShocked },
+  { id: 'curo-music', src: curoMusic },
 ];
 
 const nameSchema = z.string().trim().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters');
