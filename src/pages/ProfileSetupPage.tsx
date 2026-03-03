@@ -11,28 +11,27 @@ import { useProfile } from '@/hooks/use-profile';
 import { z } from 'zod';
 
 
-// New 3D character preset avatars
-import charOrangeBoy from '@/assets/avatars/char-orange-boy.jpg';
-import charGlassesGirl from '@/assets/avatars/char-glasses-girl.jpg';
-import charEdgyGirl from '@/assets/avatars/char-edgy-girl.jpg';
-// Sport avatars as remaining presets
-import avatarBoxer from '@/assets/avatars/boxer.png';
-import avatarCyclist from '@/assets/avatars/cyclist.png';
-import avatarRunner from '@/assets/avatars/runner.png';
-import avatarSwimmer from '@/assets/avatars/swimmer.png';
-import avatarWeightlifter from '@/assets/avatars/weightlifter.png';
-import avatarYogi from '@/assets/avatars/yogi.png';
+// Curo mascot preset avatars
+import curoBoxing from '@/assets/avatars/curo-boxing.png';
+import curoCool from '@/assets/avatars/curo-cool.png';
+import curoHappy from '@/assets/avatars/curo-happy.png';
+import curoFire from '@/assets/avatars/curo-fire.png';
+import curoFierce from '@/assets/avatars/curo-fierce.png';
+import curoShy from '@/assets/avatars/curo-shy.png';
+import curoZen from '@/assets/avatars/curo-zen.png';
+import curoShocked from '@/assets/avatars/curo-shocked.png';
+import curoMusic from '@/assets/avatars/curo-music.png';
 
 const PRESET_AVATARS = [
-  { id: 'char-orange-boy', src: charOrangeBoy },
-  { id: 'char-glasses-girl', src: charGlassesGirl },
-  { id: 'char-edgy-girl', src: charEdgyGirl },
-  { id: 'boxer', src: avatarBoxer },
-  { id: 'cyclist', src: avatarCyclist },
-  { id: 'runner', src: avatarRunner },
-  { id: 'swimmer', src: avatarSwimmer },
-  { id: 'weightlifter', src: avatarWeightlifter },
-  { id: 'yogi', src: avatarYogi },
+  { id: 'curo-boxing', src: curoBoxing },
+  { id: 'curo-cool', src: curoCool },
+  { id: 'curo-happy', src: curoHappy },
+  { id: 'curo-fire', src: curoFire },
+  { id: 'curo-fierce', src: curoFierce },
+  { id: 'curo-shy', src: curoShy },
+  { id: 'curo-zen', src: curoZen },
+  { id: 'curo-shocked', src: curoShocked },
+  { id: 'curo-music', src: curoMusic },
 ];
 
 const nameSchema = z.string().trim().min(2, 'Name must be at least 2 characters').max(50, 'Name too long');
