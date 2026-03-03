@@ -115,7 +115,7 @@ export default function ReelToProgressTransition({
   if (isInline) {
     // Inline mode: render content directly without fixed overlay
     return (
-      <div className="flex flex-col h-full overflow-hidden overflow-x-clip">
+      <div className="flex flex-col h-full overflow-y-auto overflow-x-clip">
         <div className="flex flex-col h-full">
             {/* Week Progress Stacks */}
             {showStories && (
@@ -310,7 +310,7 @@ export default function ReelToProgressTransition({
 
             {/* Gamified Journey Path */}
             {showTiles && (
-              <div className="w-full mx-auto px-4" style={{ maxWidth: "370px" }}>
+              <div className="w-full mx-auto" style={{ maxWidth: "400px" }}>
                 <GamifiedJourneyPath completedActivities={myActivities.length} />
               </div>
             )}
