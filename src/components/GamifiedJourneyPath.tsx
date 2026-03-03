@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 import tileActiveImg from '@/assets/progress/tile-active-glow.png';
 import tileInactiveImg from '@/assets/progress/tile-inactive-step.png';
-import weekCrystalImg from '@/assets/progress/week-crystal.png';
+import weekCrystalImg from '@/assets/progress/week-crystal-new.png';
 import finalGoalImg from '@/assets/progress/final-goal.png';
 import vmanImg from '@/assets/progress/vman.png';
 import journeyBgPattern from '@/assets/progress/journey-bg-pattern.png';
