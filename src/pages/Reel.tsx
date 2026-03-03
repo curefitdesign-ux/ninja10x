@@ -137,7 +137,7 @@ const Reel = () => {
   const bottomSheetY = useMotionValue(0);
 
   // Data for progress overlay
-  const { activities: myActivities, deleteActivity, hasPublicActivity, makeActivityPublic } = useJourneyActivities();
+  const { activities: myActivities, hasPublicActivity, makeActivityPublic } = useJourneyActivities();
   const [publicFeed, setPublicFeed] = useState<LocalActivity[]>([]);
   
   // Privacy sheet state
