@@ -67,7 +67,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       </div>
       
       {/* CONQUER WILL POWER tag */}
-      <div className="absolute top-5 right-3 z-20 animate-subtle-pulse">
+      <div className="absolute right-3 z-20 animate-subtle-pulse" style={{ top: 'calc(1.25rem + 20px)' }}>
         <div className="px-1.5 py-1" style={{ background: '#F45B4A', borderRadius: '2px' }}>
           <span className="text-white font-normal text-[14px] uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.5px' }}>
             CONQUER WILL POWER
