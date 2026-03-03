@@ -556,39 +556,6 @@ const Reel = () => {
     navigate('/reel', { replace: true });
   };
 
-  const handleDeleteActivity = async () => {
-    if (!currentActivity) return;
-    
-    setIsDeleting(true);
-    const success = await deleteActivity(currentActivity.dayNumber);
-    setIsDeleting(false);
-    setShowDeleteConfirm(false);
-    
-    if (success) {
-      // Refresh the data
-      const groups = await fetchAllActivitiesGroupedByUser();
-      setUserGroups(groups);
-      
-      // If no more activities, go back
-      if (groups.length === 0 || !groups.some(g => g.activities.length > 0)) {
-        navigate(-1);
-        return;
-      }
-      
-      // If current user has no more activities, move to next user
-      const updatedGroup = groups[currentUserIndex];
-      if (!updatedGroup || updatedGroup.activities.length === 0) {
-        if (currentUserIndex > 0) {
-          setCurrentUserIndex(prev => prev - 1);
-        } else if (groups.length > 0) {
-          setCurrentUserIndex(0);
-        }
-        setCurrentActivityIndex(0);
-      } else if (currentActivityIndex >= updatedGroup.activities.length) {
-        setCurrentActivityIndex(Math.max(0, updatedGroup.activities.length - 1));
-      }
-    }
-  };
 
   // Auto-advance timer - pause when modals are open OR content is locked
   // Determine if story should be locked (user's profile is private OR they haven't shared any public activity)
