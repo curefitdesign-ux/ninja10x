@@ -120,13 +120,16 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   useEffect(() => {
     if (!isOpen) return;
     setAutoAdvanceProgress(0);
+    let raf2: number | null = null;
     const raf1 = requestAnimationFrame(() => {
-      const raf2 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
         setAutoAdvanceProgress(1);
       });
-      return () => cancelAnimationFrame(raf2);
     });
-    return () => cancelAnimationFrame(raf1);
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2 !== null) cancelAnimationFrame(raf2);
+    };
   }, [currentIndex, isOpen]);
 
   // Auto-advance timer
