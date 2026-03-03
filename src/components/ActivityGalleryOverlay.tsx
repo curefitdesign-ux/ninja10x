@@ -167,11 +167,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const week = Math.ceil(current.dayNumber / 3);
   const dayInWeek = ((current.dayNumber - 1) % 3) + 1;
 
-  // Share is available on all activities; delete only on the latest
-  const maxDayNumber = Math.max(...activities.filter(a => !a.isPlaceholder).map(a => a.dayNumber));
-  const isLatest = current.dayNumber === maxDayNumber;
+  // Edit is available on all non-placeholder activities
   const canShare = !current.isPlaceholder;
-  const canDelete = isLatest && !current.isPlaceholder;
+  const canEdit = !current.isPlaceholder;
 
   const goNext = () => setCurrentIndex(i => Math.min(i + 1, activities.length - 1));
   const goPrev = () => setCurrentIndex(i => Math.max(i - 1, 0));
