@@ -208,19 +208,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     }
   };
 
-  const handleDeleteActivity = async () => {
-    setIsDeleting(true);
-    const success = await deleteActivity(current.dayNumber);
-    setIsDeleting(false);
-    setShowDeleteConfirm(false);
-    if (success) {
-      if (activities.length <= 1) {
-        onClose();
-      } else if (currentIndex >= activities.length - 1) {
-        setCurrentIndex(Math.max(0, activities.length - 2));
-      }
-    }
-  };
 
   const overlay = (
     <AnimatePresence>
