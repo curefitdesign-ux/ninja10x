@@ -18,22 +18,12 @@ const PATH_H = 543;
 const TILE_W = 50;
 const TILE_H = 50;
 
-/**
- * 12-tile gamified journey path – pixel-perfect zigzag staircase.
- *
- * Layout (bottom → top):
- *   Week 1 (tiles 0-2): steps up-right
- *   Week 2 (tiles 3-5): steps up-left
- *   Week 3 (tiles 6-8): steps up-right
- *   Week 4 (tiles 9-11): steps up-left
- */
 export default function GamifiedJourneyPath({ completedActivities }: GamifiedJourneyPathProps) {
-  // Hard-coded tile positions for pixel-perfect placement within 380×543
   const tiles = useMemo(() => {
     const STEP_X = 50;
-    const STEP_Y = 34;
-    const startX = 128;
-    const startY = 468;
+    const STEP_Y = 28;
+    const startX = 28;
+    const startY = 440;
 
     const positions: { x: number; y: number; index: number; isWeekEnd: boolean; isFinal: boolean }[] = [];
 
@@ -105,7 +95,7 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
             left: 0,
             top: 0,
             objectFit: 'contain',
-            opacity: 0.12,
+            opacity: 0.35,
             zIndex: 0,
           }}
         />
@@ -152,32 +142,11 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
         {tiles.map((tile) => {
           const isActive = tile.index < completedActivities;
           const isCurrent = tile.index === completedActivities - 1;
-          const showCrystal = tile.isWeekEnd && !tile.isFinal;
+          const isWeekEnd = tile.isWeekEnd;
           const showFinalGoal = tile.isFinal;
 
           return (
             <div key={tile.index}>
-              {/* Week crystal milestone */}
-              {showCrystal && (
-                <motion.img
-                  src={weekCrystalImg}
-                  alt="Week milestone"
-                  className="absolute pointer-events-none"
-                  style={{
-                    width: 36,
-                    height: 'auto',
-                    left: tile.x + TILE_W / 2 - 18,
-                    top: tile.y - 38,
-                    zIndex: 6,
-                    opacity: isActive ? 1 : 0.4,
-                    filter: isActive ? 'drop-shadow(0 0 8px rgba(100,220,255,0.5))' : 'none',
-                  }}
-                  initial={{ opacity: 0, scale: 0.6 }}
-                  animate={{ opacity: isActive ? 1 : 0.4, scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 200, damping: 16, delay: tile.index * 0.03 }}
-                />
-              )}
-
               {/* Final goal – treasure chest */}
               {showFinalGoal && (
                 <motion.img
@@ -190,34 +159,59 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
                     left: tile.x + TILE_W / 2 - 65,
                     top: tile.y - 105,
                     zIndex: 6,
-                    opacity: isActive ? 1 : 0.55,
+                    opacity: isActive ? 1 : 0.85,
                     filter: isActive ? 'drop-shadow(0 0 14px rgba(255,200,50,0.4))' : 'none',
                   }}
                   initial={{ opacity: 0, scale: 0.7 }}
-                  animate={{ opacity: isActive ? 1 : 0.55, scale: 1 }}
+                  animate={{ opacity: isActive ? 1 : 0.85, scale: 1 }}
                   transition={{ type: 'spring', stiffness: 140, damping: 14, delay: 0.25 }}
                 />
               )}
 
-              {/* Tile */}
-              <motion.img
-                src={isActive ? tileActiveImg : tileInactiveImg}
-                alt={`Day ${tile.index + 1}`}
-                className="absolute pointer-events-none"
-                style={{
-                  width: TILE_W,
-                  height: TILE_H,
-                  left: tile.x,
-                  top: tile.y,
-                  zIndex: 3,
-                  filter: isCurrent
-                    ? 'drop-shadow(0 0 12px rgba(130,100,255,0.6))'
-                    : 'none',
-                }}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.18, delay: tile.index * 0.03 }}
-              />
+              {/* Tile: use crystal for every 3rd activity (week-end), normal tile otherwise */}
+              {isWeekEnd && !showFinalGoal ? (
+                <motion.img
+                  src={weekCrystalImg}
+                  alt={`Week milestone - Day ${tile.index + 1}`}
+                  className="absolute pointer-events-none"
+                  style={{
+                    width: TILE_W + 6,
+                    height: TILE_H + 6,
+                    left: tile.x - 3,
+                    top: tile.y - 3,
+                    zIndex: 4,
+                    opacity: 1,
+                    filter: isActive
+                      ? 'drop-shadow(0 0 10px rgba(100,220,255,0.6))'
+                      : isCurrent
+                        ? 'drop-shadow(0 0 12px rgba(130,100,255,0.6))'
+                        : 'none',
+                  }}
+                  initial={{ opacity: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 16, delay: tile.index * 0.03 }}
+                />
+              ) : (
+                <motion.img
+                  src={isActive ? tileActiveImg : tileInactiveImg}
+                  alt={`Day ${tile.index + 1}`}
+                  className="absolute pointer-events-none"
+                  style={{
+                    width: TILE_W,
+                    height: TILE_H,
+                    left: tile.x,
+                    top: tile.y,
+                    zIndex: 3,
+                    opacity: 1,
+                    filter: isCurrent
+                      ? 'drop-shadow(0 0 12px rgba(130,100,255,0.6))'
+                      : 'none',
+                  }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.18, delay: tile.index * 0.03 }}
+                />
+              )}
             </div>
           );
         })}
