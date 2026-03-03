@@ -115,8 +115,8 @@ export default function ReelToProgressTransition({
   if (isInline) {
     // Inline mode: render content directly without fixed overlay
     return (
-      <div className="flex flex-col h-full overflow-hidden overflow-x-clip justify-end">
-        <div className="flex-1 flex flex-col justify-end">
+      <div className="flex flex-col h-full overflow-hidden overflow-x-clip">
+        <div className="flex flex-col h-full">
             {/* Week Progress Stacks */}
             {showStories && (
               <div
@@ -308,16 +308,16 @@ export default function ReelToProgressTransition({
               </div>
             )}
 
-            {/* Progress tiles - single image */}
-            <div className="flex-1 relative w-full overflow-visible flex items-end justify-center mx-auto" style={{ maxWidth: "370px", transform: "translate(-6px, -30px)" }}>
+            {/* Progress tiles - journey path image */}
+            <div className="w-full mx-auto" style={{ maxWidth: "370px", transform: "translateX(-6px)" }}>
               {showTiles && (
                 <motion.img
                   src={journeyPathImg}
                   alt="Journey Path"
-                  className="w-full h-full object-contain object-bottom"
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.1 }}
+                  className="w-full"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
                 />
               )}
             </div>
@@ -548,18 +548,18 @@ export default function ReelToProgressTransition({
 
               {/* Progress tiles area */}
               <motion.div 
-                className="flex-1 relative w-full overflow-hidden flex items-end justify-center mx-auto" 
-style={{ maxWidth: "370px", transform: "translate(-6px, -30px)" }}
+                className="w-full mx-auto" 
+                style={{ maxWidth: "370px", transform: "translateX(-6px)" }}
                 animate={{ opacity: expandingCardId ? 0.3 : 1 }}
               >
                 {showTiles && (
                   <motion.img
                     src={journeyPathImg}
                     alt="Journey Path"
-                    className="w-full h-full object-contain object-bottom"
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.15 }}
+                    className="w-full"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3, delay: 0.15 }}
                   />
                 )}
               </motion.div>
