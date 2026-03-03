@@ -122,6 +122,23 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
           ))}
         </svg>
 
+        {/* Start platform (stays at original left position) */}
+        <motion.img
+          src={startPlatformImg}
+          alt=""
+          className="absolute pointer-events-none"
+          style={{
+            width: 200,
+            height: 'auto',
+            left: -30,
+            top: rampY - 20,
+            zIndex: 0,
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        />
+
         {/* Start ramp */}
         <motion.img
           src={startRampImg}
