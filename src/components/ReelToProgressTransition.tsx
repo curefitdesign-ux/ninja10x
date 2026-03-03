@@ -5,7 +5,7 @@ import ProfileAvatar from '@/components/ProfileAvatar';
 import ActivityGalleryOverlay from '@/components/ActivityGalleryOverlay';
 import { isVideoUrl } from '@/lib/media';
 import { ReactionType, ActivityReaction } from '@/services/journey-service';
-import journeyPathImg from '@/assets/progress/journey-path.png';
+import GamifiedJourneyPath from '@/components/GamifiedJourneyPath';
 
 
 interface Activity {
