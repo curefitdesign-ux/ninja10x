@@ -91,6 +91,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const AUTO_ADVANCE_MS = 10000;
   const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
   const autoAdvanceTimer = useRef<NodeJS.Timeout | null>(null);
+  const progressStartTimer = useRef<number | null>(null);
+  const [progressRunKey, setProgressRunKey] = useState(0);
   const isPaused = showReactsSheet || showEditSheet;
 
   // Media loading
@@ -119,16 +121,25 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   // Reset progress on index change/open, then trigger fill after paint
   useEffect(() => {
     if (!isOpen) return;
+
+    if (progressStartTimer.current !== null) {
+      window.clearTimeout(progressStartTimer.current);
+      progressStartTimer.current = null;
+    }
+
     setAutoAdvanceProgress(0);
-    let raf2: number | null = null;
-    const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => {
-        setAutoAdvanceProgress(1);
-      });
-    });
+    setProgressRunKey((k) => k + 1);
+
+    progressStartTimer.current = window.setTimeout(() => {
+      setAutoAdvanceProgress(1);
+      progressStartTimer.current = null;
+    }, 50);
+
     return () => {
-      cancelAnimationFrame(raf1);
-      if (raf2 !== null) cancelAnimationFrame(raf2);
+      if (progressStartTimer.current !== null) {
+        window.clearTimeout(progressStartTimer.current);
+        progressStartTimer.current = null;
+      }
     };
   }, [currentIndex, isOpen]);
 
@@ -253,7 +264,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   if (isPlaceholder) {
                     return (
                       <div
-                        key={i}
+                        key={a.id}
                         className="flex items-center justify-center"
                         style={{ width: 8 }}
                       >
@@ -272,19 +283,20 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                   return (
                     <div
-                      key={i}
+                      key={a.id}
                       className="flex-1 h-[3px] rounded-full overflow-hidden"
                       style={{ background: 'rgba(255,255,255,0.15)' }}
                     >
                       <div
+                        key={isCurrent ? `${a.id}-${progressRunKey}` : `${a.id}-static`}
                         className="h-full rounded-full"
                         style={{
                           background: (isPast || isCurrent) ? 'rgba(255,255,255,0.9)' : 'transparent',
                           width: isPast ? '100%'
                             : isCurrent ? `${autoAdvanceProgress * 100}%` : '0%',
-                          transition: isCurrent && autoAdvanceProgress > 0
-                            ? `width ${AUTO_ADVANCE_MS}ms linear`
-                            : 'width 0.3s ease',
+                          transition: isCurrent
+                            ? (autoAdvanceProgress > 0 ? `width ${AUTO_ADVANCE_MS}ms linear` : 'none')
+                            : 'none',
                         }}
                       />
                     </div>
