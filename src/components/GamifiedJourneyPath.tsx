@@ -207,7 +207,7 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
                 height: 'auto',
                 left: (PATH_W - 350) / 2,
                 top: tile.y + TILE_H / 2 - 22 + yOffset,
-                zIndex: 8,
+                zIndex: 1,
                 imageRendering: 'auto',
               }}
               initial={{ opacity: 0, x: onRight ? 10 : -10 }}
