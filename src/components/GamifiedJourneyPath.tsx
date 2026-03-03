@@ -4,7 +4,7 @@ import startRampImg from '@/assets/progress/start-ramp-new.png';
 
 import tileActiveImg from '@/assets/progress/tile-active-glow.png';
 import tileInactiveImg from '@/assets/progress/tile-inactive-step.png';
-import weekCrystalImg from '@/assets/progress/week-crystal-new.png';
+import crystal5Img from '@/assets/progress/crystal-5.png';
 import finalGoalImg from '@/assets/progress/final-goal.png';
 import vmanImg from '@/assets/progress/vman.png';
 import journeyBgPattern from '@/assets/progress/journey-bg-pattern.png';
@@ -136,16 +136,16 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.18, delay: tile.index * 0.03 }}
                   />
-                  {/* Crystal floating above the tile */}
+                  {/* Diamond floating above the tile */}
                   <motion.img
-                    src={weekCrystalImg}
+                    src={crystal5Img}
                     alt={`Week milestone`}
                     className="absolute pointer-events-none"
                     style={{
-                      width: 32,
-                      height: 32,
-                      left: tile.x + TILE_W / 2 - 16,
-                      top: tile.y - 20,
+                      width: 28,
+                      height: 'auto',
+                      left: tile.x + TILE_W / 2 - 14,
+                      top: tile.y - 28,
                       zIndex: 5,
                       filter: isActive
                         ? 'drop-shadow(0 0 10px rgba(100,220,255,0.6))'
