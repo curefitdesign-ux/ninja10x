@@ -123,8 +123,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     }
   }, [isOpen, initialIndex, activities]);
 
-  // Reset progress on index change, then trigger fill after a frame
+  // Reset progress on index change or open, then trigger fill after a frame
   useEffect(() => {
+    if (!isOpen) return;
     setAutoAdvanceProgress(0);
     const raf = requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -132,7 +133,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
       });
     });
     return () => cancelAnimationFrame(raf);
-  }, [currentIndex]);
+  }, [currentIndex, isOpen]);
 
   // Auto-advance timer
   useEffect(() => {
