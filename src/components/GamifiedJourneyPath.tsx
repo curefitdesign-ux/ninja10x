@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 import startRampImg from '@/assets/progress/start-ramp.png';
-import startPlatformImg from '@/assets/progress/start-platform.png';
 import tileActiveImg from '@/assets/progress/tile-active-glow.png';
 import tileInactiveImg from '@/assets/progress/tile-inactive-step.png';
 import weekCrystalImg from '@/assets/progress/week-crystal.png';
@@ -23,8 +22,8 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
   const tiles = useMemo(() => {
     const STEP_X = 50;
     const STEP_Y = 28;
-    const startX = 98;
-    const startY = 440;
+    const startX = 108;
+    const startY = 420;
 
     const positions: { x: number; y: number; index: number; isWeekEnd: boolean; isFinal: boolean }[] = [];
 
@@ -121,23 +120,6 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
             />
           ))}
         </svg>
-
-        {/* Start platform (stays at original left position) */}
-        <motion.img
-          src={startPlatformImg}
-          alt=""
-          className="absolute pointer-events-none"
-          style={{
-            width: 200,
-            height: 'auto',
-            left: -30,
-            top: rampY - 20,
-            zIndex: 0,
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        />
 
         {/* Start ramp */}
         <motion.img
