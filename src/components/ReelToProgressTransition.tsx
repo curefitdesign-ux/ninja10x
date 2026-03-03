@@ -549,7 +549,7 @@ export default function ReelToProgressTransition({
               {/* Progress tiles area */}
               <motion.div 
                 className="flex-1 relative w-full overflow-hidden flex items-end justify-center mx-auto" 
-                style={{ maxWidth: "370px", transform: "translate(-6px, -180px)" }}
+                style={{ maxWidth: "370px", transform: "translate(-6px, -130px)" }}
                 animate={{ opacity: expandingCardId ? 0.3 : 1 }}
               >
                 {showTiles && (
