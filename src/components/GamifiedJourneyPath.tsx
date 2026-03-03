@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-
+import startRampImg from '@/assets/progress/start-ramp-new.png';
 
 import tileActiveImg from '@/assets/progress/tile-active-glow.png';
 import tileInactiveImg from '@/assets/progress/tile-inactive-step.png';
