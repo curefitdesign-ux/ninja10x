@@ -93,7 +93,7 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
             width: 205,
             height: 'auto',
             left: -60,
-            bottom: -200,
+            bottom: -190,
             zIndex: 0,
             opacity: 0.9,
           }}
