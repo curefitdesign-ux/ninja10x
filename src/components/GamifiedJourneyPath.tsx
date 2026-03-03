@@ -90,9 +90,9 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
           alt=""
           className="absolute pointer-events-none"
           style={{
-            width: 220,
+            width: 205,
             height: 'auto',
-            left: -20,
+            left: -40,
             bottom: 0,
             zIndex: 0,
             opacity: 0.9,
