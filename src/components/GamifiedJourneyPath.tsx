@@ -22,7 +22,7 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
   const tiles = useMemo(() => {
     const STEP_X = 50;
     const STEP_Y = 28;
-    const startX = 108;
+    const startX = 148;
     const startY = 420;
 
     const positions: { x: number; y: number; index: number; isWeekEnd: boolean; isFinal: boolean }[] = [];
@@ -101,10 +101,10 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
                   alt="Final Goal"
                   className="absolute pointer-events-none"
                   style={{
-                    width: 130,
+                    width: 115,
                     height: 'auto',
-                    left: tile.x + TILE_W / 2 - 65,
-                    top: tile.y - 105,
+                    left: tile.x + TILE_W / 2 - 57.5,
+                    top: tile.y - 95,
                     zIndex: 6,
                     opacity: isActive ? 1 : 0.85,
                     filter: isActive ? 'drop-shadow(0 0 14px rgba(255,200,50,0.4))' : 'none',
