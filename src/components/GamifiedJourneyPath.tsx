@@ -59,7 +59,7 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
   const vmanTileIdx = completedActivities > 0 ? Math.min(completedActivities - 1, 11) : -1;
   const vmanTile = vmanTileIdx >= 0 ? tiles[vmanTileIdx] : null;
   const vmanX = vmanTile ? vmanTile.x + TILE_W / 2 - 18 : tiles[0].x + TILE_W / 2 - 18;
-  const vmanY = vmanTile ? vmanTile.y - 38 : rampY - 28;
+  const vmanY = vmanTile ? vmanTile.y - 22 : rampY - 14;
 
   // Lines removed per user request
   return (
