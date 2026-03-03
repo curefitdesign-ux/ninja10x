@@ -69,20 +69,6 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
         style={{ width: PATH_W, height: PATH_H }}
       >
         {/* Background pattern overlay */}
-        <img
-          src={journeyBgPattern}
-          alt=""
-          className="absolute pointer-events-none"
-          style={{
-            width: PATH_W,
-            height: PATH_H,
-            left: 0,
-            top: -35,
-            objectFit: 'contain',
-            opacity: 0.35,
-            zIndex: 0,
-          }}
-        />
 
         {/* Start ramp – bottom left */}
         <img
