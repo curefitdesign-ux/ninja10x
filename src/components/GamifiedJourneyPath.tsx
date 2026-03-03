@@ -189,10 +189,12 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
           style={{
             width: 36,
             height: 'auto',
+            left: vmanX,
+            top: vmanY,
             zIndex: 10,
           }}
-          initial={{ opacity: 0, scale: 0.5, left: vmanX, top: vmanY }}
-          animate={{ opacity: 1, scale: 1, left: vmanX, top: vmanY }}
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ type: 'spring', stiffness: 120, damping: 18 }}
         />
       </div>
