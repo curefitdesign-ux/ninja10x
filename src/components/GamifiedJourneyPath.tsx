@@ -27,7 +27,7 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
     const STEP_X = 50;
     const STEP_Y = 28;
     const startX = 148;
-    const startY = 410;
+    const startY = 390;
 
     const positions: { x: number; y: number; index: number; isWeekEnd: boolean; isFinal: boolean }[] = [];
 
