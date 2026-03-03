@@ -121,16 +121,25 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   // Reset progress on index change/open, then trigger fill after paint
   useEffect(() => {
     if (!isOpen) return;
+
+    if (progressStartTimer.current !== null) {
+      window.clearTimeout(progressStartTimer.current);
+      progressStartTimer.current = null;
+    }
+
     setAutoAdvanceProgress(0);
-    let raf2: number | null = null;
-    const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => {
-        setAutoAdvanceProgress(1);
-      });
-    });
+    setProgressRunKey((k) => k + 1);
+
+    progressStartTimer.current = window.setTimeout(() => {
+      setAutoAdvanceProgress(1);
+      progressStartTimer.current = null;
+    }, 50);
+
     return () => {
-      cancelAnimationFrame(raf1);
-      if (raf2 !== null) cancelAnimationFrame(raf2);
+      if (progressStartTimer.current !== null) {
+        window.clearTimeout(progressStartTimer.current);
+        progressStartTimer.current = null;
+      }
     };
   }, [currentIndex, isOpen]);
 
