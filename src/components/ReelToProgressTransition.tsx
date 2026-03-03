@@ -5,33 +5,8 @@ import ProfileAvatar from '@/components/ProfileAvatar';
 import ActivityGalleryOverlay from '@/components/ActivityGalleryOverlay';
 import { isVideoUrl } from '@/lib/media';
 import { ReactionType, ActivityReaction } from '@/services/journey-service';
-import tileActiveImg from '@/assets/progress/tile-active-new.png';
-import tileInactiveImg from '@/assets/progress/tile-inactive.png';
-import engineBadgeImg from '@/assets/progress/engine-badge.png';
-import basePlatformImg from '@/assets/progress/base-platform.png';
+import journeyPathImg from '@/assets/progress/journey-path.png';
 
-// Tile positions for progress view
-const TILE_POSITIONS = [
-  { left: 34, top: 18 },
-  { left: 42, top: 23 },
-  { left: 50, top: 28 },
-  { left: 58, top: 33 },
-  { left: 50, top: 38 },
-  { left: 42, top: 43 },
-  { left: 34, top: 48 },
-  { left: 42, top: 53 },
-  { left: 50, top: 58 },
-  { left: 58, top: 63 },
-  { left: 50, top: 68 },
-  { left: 42, top: 73 },
-];
-
-const LABELS = [
-  { tileIndex: 0, text: ["BUILD", "STRENGTH"], side: "right" as const, top: 18, left: 70 },
-  { tileIndex: 3, text: ["INCREASE", "STAMINA"], side: "left" as const, top: 33, left: 6 },
-  { tileIndex: 6, text: ["BUILD", "ENERGY"], side: "right" as const, top: 48, left: 70 },
-  { tileIndex: 11, text: ["CONQUER", "WILL POWER"], side: "left" as const, top: 68, left: 6 },
-];
 
 interface Activity {
   id: string;
@@ -121,8 +96,6 @@ export default function ReelToProgressTransition({
     }, 250);
   }, [onStoryTap]);
 
-  const getDayFromIndex = (index: number) => 12 - index;
-  const isTileActive = (dayNumber: number) => myActivities.some(a => a.dayNumber === dayNumber);
 
   // Build week stacks data
   const WEEK_LOCK_COLORS = ['rgba(180,160,220,0.8)', '#F59E0B', '#D946EF', '#22C55E'];
@@ -335,64 +308,18 @@ export default function ReelToProgressTransition({
               </div>
             )}
 
-            {/* Progress tiles */}
-            <div className="flex-1 relative w-full overflow-visible" style={{ maxWidth: "430px", marginInline: "auto" }}>
-              <div className="absolute bottom-0 left-0 right-0" style={{ height: "100%" }}>
+            {/* Progress tiles - single image */}
+            <div className="flex-1 relative w-full overflow-visible flex items-end justify-center" style={{ maxWidth: "430px", marginInline: "auto" }}>
               {showTiles && (
-                <motion.div
-                  className="absolute"
-                  style={{ left: "10%", top: "-1%", width: "32%", aspectRatio: "1" }}
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.1 }}
-                >
-                  <img src={engineBadgeImg} alt="Engine Badge" className="w-full h-full object-contain" style={{ opacity: 0.7 }} />
-                </motion.div>
-              )}
-
-              {TILE_POSITIONS.map((pos, index) => {
-                const day = getDayFromIndex(index);
-                const isActive = isTileActive(day);
-                return (
-                  <motion.div
-                    key={day}
-                    className="absolute"
-                    style={{ left: `${pos.left}%`, top: `${pos.top}%`, width: "11%", aspectRatio: "1", transform: 'translateX(-50%)' }}
-                    initial={{ opacity: 0, y: -40, scale: 0.5 }}
-                    animate={showTiles ? { opacity: 1, y: 0, scale: 1 } : {}}
-                    transition={{ type: "spring", stiffness: 300, damping: 24, delay: index * 0.02 }}
-                  >
-                    <img src={isActive ? tileActiveImg : tileInactiveImg} alt={`Day ${day}`} className="w-full h-full object-contain" />
-                  </motion.div>
-                );
-              })}
-
-              {LABELS.map((label, idx) => (
-                <motion.div
-                  key={idx}
-                  className="absolute flex flex-col"
-                  style={{ left: `${label.left}%`, top: `${label.top}%`, textAlign: label.side === "left" ? "right" : "left", alignItems: label.side === "left" ? "flex-end" : "flex-start" }}
-                  initial={{ opacity: 0, x: label.side === "left" ? -20 : 20 }}
-                  animate={showTiles ? { opacity: 1, x: 0 } : {}}
-                  transition={{ type: "spring", stiffness: 200, damping: 22, delay: 0.2 + idx * 0.05 }}
-                >
-                  <span className="text-white/50 text-[10px] font-bold tracking-widest">{label.text[0]}</span>
-                  <span className="text-white/80 text-xs font-bold">{label.text[1]}</span>
-                </motion.div>
-              ))}
-
-              {showTiles && (
-                <motion.div
-                  className="absolute"
-                  style={{ left: "-50%", bottom: "2%", width: "100%", maxWidth: "400px" }}
+                <motion.img
+                  src={journeyPathImg}
+                  alt="Journey Path"
+                  className="w-full h-full object-contain object-bottom"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.25 }}
-                >
-                  <img src={basePlatformImg} alt="Base" className="w-full object-contain" style={{ opacity: 0.85 }} />
-                </motion.div>
+                  transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.1 }}
+                />
               )}
-              </div>
             </div>
           </div>
 
@@ -621,99 +548,20 @@ export default function ReelToProgressTransition({
 
               {/* Progress tiles area */}
               <motion.div 
-                className="flex-1 relative w-full overflow-hidden" 
+                className="flex-1 relative w-full overflow-hidden flex items-end justify-center" 
                 style={{ maxWidth: "430px", marginInline: "auto" }}
                 animate={{ opacity: expandingCardId ? 0.3 : 1 }}
               >
-                {/* Engine Badge */}
-                <AnimatePresence>
-                  {showTiles && (
-                    <motion.div
-                      className="absolute"
-                      style={{ left: "10%", top: "-1%", width: "32%", aspectRatio: "1" }}
-                      initial={{ opacity: 0, scale: 0.5, y: 50 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.5, y: 50 }}
-                      transition={{ type: "spring", stiffness: 140, damping: 18, delay: 0.15 }}
-                    >
-                      <img src={engineBadgeImg} alt="Engine Badge" className="w-full h-full object-contain" style={{ opacity: 0.7 }} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Diagonal Progress Tiles with cascade animation */}
-                {TILE_POSITIONS.map((pos, index) => {
-                  const day = getDayFromIndex(index);
-                  const isActive = isTileActive(day);
-
-                  return (
-                    <motion.div
-                      key={day}
-                      className="absolute"
-                      style={{ 
-                        left: `${pos.left}%`, 
-                        top: `${pos.top}%`, 
-                        width: "11%", 
-                        aspectRatio: "1",
-                        transform: 'translateX(-50%)',
-                      }}
-                      initial={{ opacity: 0, y: -80, scale: 0.5, rotate: -20 }}
-                      animate={showTiles ? { opacity: 1, y: 0, scale: 1, rotate: 0 } : {}}
-                      exit={{ opacity: 0, y: -50, scale: 0.7, rotate: -10, transition: { duration: 0.15, delay: index * 0.01 } }}
-                      transition={{ 
-                        type: "spring", 
-                        stiffness: 300, 
-                        damping: 24, 
-                        delay: index * 0.025 
-                      }}
-                    >
-                      <motion.img 
-                        src={isActive ? tileActiveImg : tileInactiveImg} 
-                        alt={`Day ${day}`} 
-                        className="w-full h-full object-contain relative z-10"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                      />
-                    </motion.div>
-                  );
-                })}
-
-                {/* Milestone Labels */}
-                {LABELS.map((label, idx) => (
-                  <motion.div
-                    key={idx}
-                    className="absolute flex flex-col"
-                    style={{
-                      left: `${label.left}%`,
-                      top: `${label.top}%`,
-                      textAlign: label.side === "left" ? "right" : "left",
-                      alignItems: label.side === "left" ? "flex-end" : "flex-start",
-                    }}
-                    initial={{ opacity: 0, x: label.side === "left" ? -30 : 30 }}
-                    animate={showTiles ? { opacity: 1, x: 0 } : {}}
-                    exit={{ opacity: 0, x: label.side === "left" ? -20 : 20 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 22, delay: 0.3 + idx * 0.08 }}
-                  >
-                    <span className="text-white/50 text-[10px] font-bold tracking-widest">{label.text[0]}</span>
-                    <span className="text-white/80 text-xs font-bold">{label.text[1]}</span>
-                  </motion.div>
-                ))}
-
-                {/* Base platform */}
-                <AnimatePresence>
-                  {showTiles && (
-                    <motion.div
-                      className="absolute"
-                      style={{ left: "10%", bottom: "2%", width: "80%", maxWidth: "320px" }}
-                      initial={{ opacity: 0, y: 60, scale: 0.9 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 40, scale: 0.9 }}
-                      transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.35 }}
-                    >
-                      <img src={basePlatformImg} alt="Base" className="w-full object-contain" style={{ opacity: 0.85 }} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {showTiles && (
+                  <motion.img
+                    src={journeyPathImg}
+                    alt="Journey Path"
+                    className="w-full h-full object-contain object-bottom"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.15 }}
+                  />
+                )}
               </motion.div>
             </motion.div>
           </LayoutGroup>
