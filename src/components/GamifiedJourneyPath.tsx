@@ -203,9 +203,9 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
               alt={`Level ${Math.floor(tileIdx / 3) + 1}`}
               className="absolute pointer-events-none"
               style={{
-                width: 390,
+                width: 280,
                 height: 'auto',
-                left: (PATH_W - 390) / 2,
+                left: (PATH_W - 280) / 2,
                 top: tile.y + TILE_H / 2 - 22,
                 zIndex: 8,
                 imageRendering: 'auto',
