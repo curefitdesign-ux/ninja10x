@@ -185,6 +185,37 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
           );
         })}
 
+        {/* Level labels */}
+        {[
+          { img: level1Img, tileIdx: 2 },
+          { img: level2Img, tileIdx: 5 },
+          { img: level3Img, tileIdx: 8 },
+          { img: level4Img, tileIdx: 11 },
+        ].map(({ img, tileIdx }) => {
+          const tile = tiles[tileIdx];
+          const weekNum = Math.floor(tileIdx / 3);
+          // W0,W2 go right, so label on left; W1,W3 go left, so label on right
+          const onRight = weekNum % 2 === 1;
+          return (
+            <motion.img
+              key={`level-${tileIdx}`}
+              src={img}
+              alt={`Level ${Math.floor(tileIdx / 3) + 1}`}
+              className="absolute pointer-events-none"
+              style={{
+                width: 80,
+                height: 'auto',
+                left: onRight ? tile.x + TILE_W + 12 : tile.x - 92,
+                top: tile.y + TILE_H / 2 - 12,
+                zIndex: 8,
+              }}
+              initial={{ opacity: 0, x: onRight ? 10 : -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.2 + tileIdx * 0.05 }}
+            />
+          );
+        })}
+
         {/* V-man avatar */}
         <motion.img
           src={vmanImg}
