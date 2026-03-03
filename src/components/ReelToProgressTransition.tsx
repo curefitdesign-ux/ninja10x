@@ -293,6 +293,19 @@ export default function ReelToProgressTransition({
                                   </div>
                                 )}
                               </div>
+
+                              {/* Plus icon for current week with incomplete photos */}
+                              {isGlowing && ws.completedCount > 0 && ws.completedCount < 3 && (
+                                <div
+                                  className="absolute z-10"
+                                  style={{
+                                    bottom: '-6px',
+                                    right: hasPhotos ? '-4px' : '0px',
+                                  }}
+                                >
+                                  <img src={plusIconImg} alt="Add" className="w-6 h-6 drop-shadow-lg" />
+                                </div>
+                              )}
                             </motion.button>
                           );
                         })()}
