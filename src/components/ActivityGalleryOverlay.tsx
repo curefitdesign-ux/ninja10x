@@ -90,45 +90,47 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   // Auto-advance timer
   const AUTO_ADVANCE_MS = 10000;
   const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
-  const [progressKey, setProgressKey] = useState(0);
   const autoAdvanceTimer = useRef<NodeJS.Timeout | null>(null);
   const isPaused = showReactsSheet || showEditSheet;
 
   // Media loading
   const [loadedMediaUrl, setLoadedMediaUrl] = useState('');
 
+  // Initialize index only when overlay opens (avoid resets on activity array refreshes)
   useEffect(() => {
-    if (isOpen) {
-      setCurrentIndex(initialIndex);
-      // Initialize local reactions
-      const map: Record<string, { total: number; reactions: Record<ReactionType, ActivityReaction>; reactorProfiles: ReactorProfile[] }> = {};
-      for (const a of activities) {
-        map[a.id] = {
-          total: a.reactionCount || 0,
-          reactions: a.reactions || { ...DEFAULT_REACTIONS },
-          reactorProfiles: a.reactorProfiles || [],
-        };
-      }
-      setLocalReactions(map);
-      // Force progress reset on open
-      setProgressKey(k => k + 1);
+    if (!isOpen) return;
+    setCurrentIndex(initialIndex);
+  }, [isOpen, initialIndex]);
+
+  // Keep local reactions in sync with incoming activities
+  useEffect(() => {
+    if (!isOpen) return;
+    const map: Record<string, { total: number; reactions: Record<ReactionType, ActivityReaction>; reactorProfiles: ReactorProfile[] }> = {};
+    for (const a of activities) {
+      map[a.id] = {
+        total: a.reactionCount || 0,
+        reactions: a.reactions || { ...DEFAULT_REACTIONS },
+        reactorProfiles: a.reactorProfiles || [],
+      };
     }
-  }, [isOpen, initialIndex, activities]);
+    setLocalReactions(map);
+  }, [activities, isOpen]);
 
-  // Reset progress on index change
-  useEffect(() => {
-    setProgressKey(k => k + 1);
-  }, [currentIndex]);
-
-  // Animate progress bar after reset
+  // Reset progress on index change/open, then trigger fill after paint
   useEffect(() => {
     if (!isOpen) return;
     setAutoAdvanceProgress(0);
-    const timeout = setTimeout(() => {
-      setAutoAdvanceProgress(1);
-    }, 50);
-    return () => clearTimeout(timeout);
-  }, [progressKey, isOpen]);
+    let raf2: number | null = null;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        setAutoAdvanceProgress(1);
+      });
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2 !== null) cancelAnimationFrame(raf2);
+    };
+  }, [currentIndex, isOpen]);
 
   // Auto-advance timer
   useEffect(() => {
