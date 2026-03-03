@@ -227,6 +227,6 @@ const MediaSourceSheet = forwardRef<HTMLDivElement, MediaSourceSheetProps>(funct
     </AnimatePresence>,
     portalContainer
   );
-};
+});
 
 export default MediaSourceSheet;
