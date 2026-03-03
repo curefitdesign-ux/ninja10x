@@ -9,91 +9,97 @@ import finalGoalImg from '@/assets/progress/final-goal.png';
 import vmanImg from '@/assets/progress/vman.png';
 
 interface GamifiedJourneyPathProps {
-  /** Number of activities completed (0-12) */
   completedActivities: number;
 }
 
 /**
- * 12-tile gamified journey path.
- * - Tiles zigzag: odd rows go right, even rows go left (3 tiles per row = 1 week).
- * - V-man sits on the tile matching completedActivities (0 = start ramp).
- * - Every 3rd tile (end of week) shows a crystal milestone above the tile.
- * - Tile 12 shows the final goal instead of a crystal.
- * - Tiles behind V-man are active; ahead are inactive.
+ * 12-tile gamified journey path matching the reference design.
+ * Bottom-to-top diagonal zigzag staircase:
+ *   Week 1 (tiles 1-3): steps up-right
+ *   Week 2 (tiles 4-6): steps up-left
+ *   Week 3 (tiles 7-9): steps up-right
+ *   Week 4 (tiles 10-12): steps up-left
+ * Crystals at every 3rd tile, final goal at tile 12.
  */
 export default function GamifiedJourneyPath({ completedActivities }: GamifiedJourneyPathProps) {
-  const tileSize = 52;
-  const gapX = 18;
-  const rowGap = 28;
-  const pathWidth = 3 * tileSize + 2 * gapX; // ~192px
+  const tileW = 56;
+  const tileH = 56;
+  const stepX = 48; // horizontal offset per step
+  const stepY = 64; // vertical offset per step (going up)
 
-  // Build tile positions in a zigzag pattern (4 rows of 3)
+  // Build tile positions bottom-to-top zigzag
   const tiles = useMemo(() => {
-    const result: { x: number; y: number; index: number; isWeekEnd: boolean; isFinal: boolean }[] = [];
-    for (let row = 0; row < 4; row++) {
-      const leftToRight = row % 2 === 0;
-      for (let col = 0; col < 3; col++) {
-        const actualCol = leftToRight ? col : 2 - col;
-        const index = row * 3 + col; // 0-11
-        result.push({
-          x: actualCol * (tileSize + gapX),
-          y: row * (tileSize + rowGap),
-          index,
-          isWeekEnd: (index + 1) % 3 === 0, // tiles 2,5,8,11
-          isFinal: index === 11,
-        });
+    const positions: { x: number; y: number; index: number; isWeekEnd: boolean; isFinal: boolean }[] = [];
+
+    // We place tiles from bottom (y high) to top (y low)
+    // Total height: 12 steps * stepY = 768, plus padding
+    const baseY = 11 * stepY; // bottom-most tile y
+    const centerX = 150; // center reference
+
+    for (let i = 0; i < 12; i++) {
+      const week = Math.floor(i / 3); // 0-3
+      const posInWeek = i % 3; // 0-2
+      const goingRight = week % 2 === 0;
+
+      // Each week starts from where the previous ended
+      // Week 0: starts center-left, goes right
+      // Week 1: continues from right, goes left
+      // Week 2: continues from left, goes right
+      // Week 3: continues from right, goes left
+
+      let x: number;
+      if (goingRight) {
+        // Start from left side of the zigzag
+        x = centerX - stepX + posInWeek * stepX;
+      } else {
+        // Start from right side, go left
+        x = centerX + stepX - posInWeek * stepX;
       }
+
+      const y = baseY - i * stepY;
+
+      positions.push({
+        x,
+        y,
+        index: i,
+        isWeekEnd: (i + 1) % 3 === 0,
+        isFinal: i === 11,
+      });
     }
-    return result;
+
+    return positions;
   }, []);
 
-  // Start ramp position: above the first tile, offset to the left
-  const startRampX = -30;
-  const startRampY = -65;
+  const totalHeight = 12 * stepY + 120;
+  const totalWidth = 320;
+
+  // Start ramp position: below first tile
+  const rampX = tiles[0].x - 32;
+  const rampY = tiles[0].y + 20;
 
   // V-man position
   const vmanTile = completedActivities > 0 ? tiles[completedActivities - 1] : null;
-  const vmanX = vmanTile ? vmanTile.x + tileSize / 2 - 16 : tiles[0].x + tileSize / 2 - 16; // center 32px vman
-  const vmanY = vmanTile ? vmanTile.y - 38 : startRampY - 10;
-  const showVmanOnStart = completedActivities === 0;
-
-  const totalHeight = 3 * (tileSize + rowGap) + tileSize + 60; // extra space for crystal/goal above last row
+  const vmanX = vmanTile ? vmanTile.x + tileW / 2 - 18 : tiles[0].x + tileW / 2 - 18;
+  const vmanY = vmanTile ? vmanTile.y - 36 : rampY - 30;
 
   return (
     <div className="w-full flex justify-center">
       <div
         className="relative"
-        style={{ width: pathWidth, height: totalHeight + 80 }}
+        style={{ width: totalWidth, height: totalHeight }}
       >
-        {/* Start ramp - always visible */}
-        <motion.img
-          src={startRampImg}
-          alt="Start"
-          className="absolute"
-          style={{
-            width: 120,
-            height: 'auto',
-            left: startRampX,
-            top: startRampY,
-            zIndex: 1,
-          }}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4 }}
-        />
-
-        {/* Connecting path lines between tiles */}
+        {/* Connecting path lines */}
         <svg
           className="absolute inset-0 pointer-events-none"
-          style={{ width: pathWidth, height: totalHeight + 80, zIndex: 0 }}
+          style={{ width: totalWidth, height: totalHeight, zIndex: 0 }}
         >
           {tiles.map((tile, i) => {
             if (i === 0) return null;
             const prev = tiles[i - 1];
-            const fromX = prev.x + tileSize / 2;
-            const fromY = prev.y + tileSize / 2;
-            const toX = tile.x + tileSize / 2;
-            const toY = tile.y + tileSize / 2;
+            const fromX = prev.x + tileW / 2;
+            const fromY = prev.y + tileH / 2;
+            const toX = tile.x + tileW / 2;
+            const toY = tile.y + tileH / 2;
             const isActive = i < completedActivities;
             return (
               <line
@@ -102,13 +108,30 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
                 y1={fromY}
                 x2={toX}
                 y2={toY}
-                stroke={isActive ? 'rgba(160,120,255,0.5)' : 'rgba(255,255,255,0.08)'}
-                strokeWidth={isActive ? 2.5 : 1.5}
-                strokeDasharray={isActive ? 'none' : '4 4'}
+                stroke={isActive ? 'rgba(160,120,255,0.45)' : 'rgba(255,255,255,0.06)'}
+                strokeWidth={isActive ? 2 : 1.5}
+                strokeDasharray={isActive ? 'none' : '5 5'}
               />
             );
           })}
         </svg>
+
+        {/* Start ramp */}
+        <motion.img
+          src={startRampImg}
+          alt="Start"
+          className="absolute"
+          style={{
+            width: 120,
+            height: 'auto',
+            left: rampX,
+            top: rampY,
+            zIndex: 1,
+          }}
+          initial={{ opacity: 0, scale: 0.85 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+        />
 
         {/* Tiles */}
         {tiles.map((tile) => {
@@ -119,7 +142,7 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
 
           return (
             <div key={tile.index}>
-              {/* Crystal milestone above week-end tiles */}
+              {/* Crystal milestone */}
               <AnimatePresence>
                 {showCrystal && (
                   <motion.img
@@ -127,20 +150,20 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
                     alt="Week Complete"
                     className="absolute"
                     style={{
-                      width: 48,
+                      width: 44,
                       height: 'auto',
-                      left: tile.x + tileSize / 2 - 24,
-                      top: tile.y - 52,
+                      left: tile.x + tileW / 2 - 22,
+                      top: tile.y - 48,
                       zIndex: 5,
                     }}
-                    initial={{ opacity: 0, y: 10, scale: 0.5 }}
+                    initial={{ opacity: 0, y: 8, scale: 0.5 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                   />
                 )}
               </AnimatePresence>
 
-              {/* Final goal on tile 12 */}
+              {/* Final goal */}
               <AnimatePresence>
                 {showFinalGoal && (
                   <motion.img
@@ -148,10 +171,10 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
                     alt="Final Goal"
                     className="absolute"
                     style={{
-                      width: 72,
+                      width: 80,
                       height: 'auto',
-                      left: tile.x + tileSize / 2 - 36,
-                      top: tile.y - 60,
+                      left: tile.x + tileW / 2 - 40,
+                      top: tile.y - 70,
                       zIndex: 5,
                     }}
                     initial={{ opacity: 0, scale: 0.5 }}
@@ -161,58 +184,59 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
                 )}
               </AnimatePresence>
 
-              {/* Tile image */}
+              {/* Tile */}
               <motion.img
                 src={isActive ? tileActiveImg : tileInactiveImg}
-                alt={`Tile ${tile.index + 1}`}
+                alt={`Day ${tile.index + 1}`}
                 className="absolute"
                 style={{
-                  width: tileSize,
-                  height: tileSize,
+                  width: tileW,
+                  height: tileH,
                   left: tile.x,
                   top: tile.y,
                   zIndex: 2,
-                  filter: isCurrent ? 'drop-shadow(0 0 12px rgba(140,100,255,0.7))' : 'none',
+                  filter: isCurrent
+                    ? 'drop-shadow(0 0 14px rgba(140,100,255,0.6))'
+                    : 'none',
                 }}
                 initial={{ opacity: 0, scale: 0.7 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: tile.index * 0.04 }}
+                transition={{ duration: 0.25, delay: tile.index * 0.035 }}
               />
 
-              {/* Day number label */}
+              {/* Day label */}
               <motion.span
-                className="absolute text-[9px] font-bold tracking-wider text-center"
+                className="absolute text-[8px] font-semibold tracking-widest text-center uppercase"
                 style={{
                   left: tile.x,
-                  top: tile.y + tileSize + 4,
-                  width: tileSize,
-                  color: isActive ? 'rgba(200,180,255,0.9)' : 'rgba(255,255,255,0.25)',
+                  top: tile.y + tileH + 3,
+                  width: tileW,
+                  color: isActive
+                    ? 'rgba(200,180,255,0.85)'
+                    : 'rgba(255,255,255,0.2)',
                   zIndex: 3,
                 }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: tile.index * 0.04 + 0.2 }}
+                transition={{ delay: tile.index * 0.035 + 0.15 }}
               >
-                DAY {tile.index + 1}
+                Day {tile.index + 1}
               </motion.span>
             </div>
           );
         })}
 
-        {/* V-man */}
+        {/* V-man avatar */}
         <motion.img
           src={vmanImg}
           alt="You"
           className="absolute"
           style={{
-            width: 32,
+            width: 36,
             height: 'auto',
             zIndex: 10,
           }}
-          animate={{
-            left: vmanX,
-            top: vmanY,
-          }}
+          animate={{ left: vmanX, top: vmanY }}
           transition={{ type: 'spring', stiffness: 120, damping: 18 }}
           initial={{ opacity: 0, scale: 0.5 }}
           whileInView={{ opacity: 1, scale: 1 }}
