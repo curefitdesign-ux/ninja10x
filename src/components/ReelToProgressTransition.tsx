@@ -309,13 +309,12 @@ export default function ReelToProgressTransition({
             )}
 
             {/* Progress tiles - journey path image */}
-            <div className="flex-1 overflow-hidden w-full mx-auto flex items-end justify-center" style={{ maxWidth: "370px" }}>
+            <div className="w-full mx-auto" style={{ maxWidth: "370px", transform: "translateX(-6px)" }}>
               {showTiles && (
                 <motion.img
                   src={journeyPathImg}
                   alt="Journey Path"
                   className="w-full"
-                  style={{ transform: "translateX(-6px)" }}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.1 }}
