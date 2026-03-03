@@ -11,7 +11,7 @@ import { useProfile } from '@/hooks/use-profile';
 import { z } from 'zod';
 
 
-// Curo mascot preset avatars
+// Curo mascot preset avatars (thumbnails)
 import curoBoxing from '@/assets/avatars/curo-boxing.png';
 import curoCool from '@/assets/avatars/curo-cool.png';
 import curoHappy from '@/assets/avatars/curo-happy.png';
@@ -22,16 +22,27 @@ import curoZen from '@/assets/avatars/curo-zen.png';
 import curoShocked from '@/assets/avatars/curo-shocked.png';
 import curoMusic from '@/assets/avatars/curo-music.png';
 
+// HD versions for hero display
+import curoBoxingHd from '@/assets/avatars/curo-boxing-hd.png';
+import curoCoolHd from '@/assets/avatars/curo-cool-hd.png';
+import curoHappyHd from '@/assets/avatars/curo-happy-hd.png';
+import curoFireHd from '@/assets/avatars/curo-fire-hd.png';
+import curoFierceHd from '@/assets/avatars/curo-fierce-hd.png';
+import curoShyHd from '@/assets/avatars/curo-shy-hd.png';
+import curoZenHd from '@/assets/avatars/curo-zen-hd.png';
+import curoShockedHd from '@/assets/avatars/curo-shocked-hd.png';
+import curoMusicHd from '@/assets/avatars/curo-music-hd.png';
+
 const PRESET_AVATARS = [
-  { id: 'curo-boxing', src: curoBoxing },
-  { id: 'curo-cool', src: curoCool },
-  { id: 'curo-happy', src: curoHappy },
-  { id: 'curo-fire', src: curoFire },
-  { id: 'curo-fierce', src: curoFierce },
-  { id: 'curo-shy', src: curoShy },
-  { id: 'curo-zen', src: curoZen },
-  { id: 'curo-shocked', src: curoShocked },
-  { id: 'curo-music', src: curoMusic },
+  { id: 'curo-boxing', src: curoBoxing, hd: curoBoxingHd },
+  { id: 'curo-cool', src: curoCool, hd: curoCoolHd },
+  { id: 'curo-happy', src: curoHappy, hd: curoHappyHd },
+  { id: 'curo-fire', src: curoFire, hd: curoFireHd },
+  { id: 'curo-fierce', src: curoFierce, hd: curoFierceHd },
+  { id: 'curo-shy', src: curoShy, hd: curoShyHd },
+  { id: 'curo-zen', src: curoZen, hd: curoZenHd },
+  { id: 'curo-shocked', src: curoShocked, hd: curoShockedHd },
+  { id: 'curo-music', src: curoMusic, hd: curoMusicHd },
 ];
 
 const nameSchema = z.string().trim().min(2, 'Name must be at least 2 characters').max(50, 'Name too long');
@@ -114,7 +125,7 @@ const ProfileSetupPage = () => {
   // What to show in the hero and blurred bg
   const getCurrentAvatarSrc = () => {
     if (customAvatarPreview) return customAvatarPreview;
-    if (selectedAvatar) return PRESET_AVATARS.find(a => a.id === selectedAvatar)?.src ?? null;
+    if (selectedAvatar) return PRESET_AVATARS.find(a => a.id === selectedAvatar)?.hd ?? null;
     return null;
   };
   const heroImage = getCurrentAvatarSrc();
