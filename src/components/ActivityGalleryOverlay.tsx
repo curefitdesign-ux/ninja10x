@@ -75,12 +75,10 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const portalContainer = usePortalContainer();
   const { user } = useAuth();
-  const { deleteActivity } = useJourneyActivities();
 
   // Sheets
   const [showReactsSheet, setShowReactsSheet] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [showEditSheet, setShowEditSheet] = useState(false);
 
   // Local reactions state
   const [localReactions, setLocalReactions] = useState<Record<string, {
