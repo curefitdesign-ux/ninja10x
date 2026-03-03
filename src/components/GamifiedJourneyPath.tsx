@@ -187,9 +187,9 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
 
         {/* Level labels */}
         {[
-          { img: level1Img, tileIdx: 2, yOffset: -25 },
-          { img: level2Img, tileIdx: 5, yOffset: -25 },
-          { img: level3Img, tileIdx: 8, yOffset: -25 },
+          { img: level1Img, tileIdx: 2, yOffset: -25, z: 1 },
+          { img: level2Img, tileIdx: 5, yOffset: -25, z: 1 },
+          { img: level3Img, tileIdx: 8, yOffset: -25, z: 1 },
           { img: level4Img, tileIdx: 11, yOffset: -60, z: 0 },
         ].map(({ img, tileIdx, yOffset }) => {
           const tile = tiles[tileIdx];
