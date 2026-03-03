@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import startRampImg from '@/assets/progress/start-ramp-new.png';
 
