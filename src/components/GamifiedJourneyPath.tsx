@@ -84,6 +84,21 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
           }}
         />
 
+        {/* Start ramp – bottom left */}
+        <img
+          src={startRampImg}
+          alt=""
+          className="absolute pointer-events-none"
+          style={{
+            width: 220,
+            height: 'auto',
+            left: -20,
+            bottom: 0,
+            zIndex: 0,
+            opacity: 0.9,
+          }}
+        />
+
 
         {/* Tiles + milestones */}
         {tiles.map((tile) => {
