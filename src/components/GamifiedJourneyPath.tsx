@@ -53,7 +53,7 @@ export default function GamifiedJourneyPath({ completedActivities }: GamifiedJou
   }, []);
 
   // Ramp: positioned behind and below tile 0
-  const rampX = tiles[0].x - 55;
+  const rampX = tiles[0].x - 45;
   const rampY = tiles[0].y - 8;
 
   // V-man: sits on top of the current tile (or on ramp if 0 completed)
