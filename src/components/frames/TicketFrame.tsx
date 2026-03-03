@@ -30,7 +30,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
   }, [isVideo, imageUrl]);
   
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] overflow-hidden relative rounded-3xl bg-black">
+    <div className="w-[90%] mx-auto aspect-[9/16] overflow-hidden relative rounded-3xl bg-black" style={{ containerType: 'inline-size' }}>
       {/* Layer 1: Background Image or Video (full-bleed) */}
       <div className="absolute inset-0 overflow-hidden z-0">
         {isVideo ? (
@@ -84,7 +84,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
           className="text-[#2A2A2A] uppercase tracking-wide leading-none text-center"
           style={{ 
             fontFamily: 'Impact, "Arial Black", sans-serif',
-            fontSize: 'clamp(24px, 8vw, 36px)',
+            fontSize: 'clamp(24px, 10.5cqw, 36px)',
             letterSpacing: '2px'
           }}
         >
@@ -116,7 +116,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
           className="relative z-10 text-[#5A5A5A] font-bold tracking-wider whitespace-nowrap"
           style={{ 
             fontFamily: 'Impact, "Arial Black", sans-serif',
-            fontSize: 'clamp(10px, 3vw, 13px)',
+            fontSize: 'clamp(10px, 3.8cqw, 13px)',
             letterSpacing: '1.5px',
             transform: 'rotate(-4deg)'
           }}
@@ -155,7 +155,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
                   className="text-[#888888] font-normal mb-1"
                   style={{ 
                     fontFamily: 'system-ui, -apple-system, sans-serif',
-                    fontSize: 'clamp(9px, 2.5vw, 12px)',
+                    fontSize: 'clamp(9px, 3.3cqw, 12px)',
                     letterSpacing: '0.5px'
                   }}
                 >
@@ -165,7 +165,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
                   className="text-[#2A2A2A] leading-none"
                   style={{ 
                     fontFamily: 'Impact, "Arial Black", sans-serif',
-                    fontSize: 'clamp(32px, 10vw, 48px)',
+                    fontSize: 'clamp(32px, 13cqw, 48px)',
                     fontWeight: 900
                   }}
                 >
@@ -180,7 +180,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
                 className="mx-3 rounded-full"
                 style={{ 
                   width: '2px',
-                  height: 'clamp(40px, 12vw, 60px)',
+                  height: 'clamp(40px, 15cqw, 60px)',
                   background: '#2A2A2A'
                 }}
               />
@@ -193,7 +193,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
                   className="text-[#888888] font-normal mb-1"
                   style={{ 
                     fontFamily: 'system-ui, -apple-system, sans-serif',
-                    fontSize: 'clamp(9px, 2.5vw, 12px)',
+                    fontSize: 'clamp(9px, 3.3cqw, 12px)',
                     letterSpacing: '0.5px'
                   }}
                 >
@@ -203,7 +203,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
                   className="text-[#2A2A2A] leading-none uppercase"
                   style={{ 
                     fontFamily: 'Impact, "Arial Black", sans-serif',
-                    fontSize: 'clamp(32px, 10vw, 48px)',
+                    fontSize: 'clamp(32px, 13cqw, 48px)',
                     fontWeight: 900
                   }}
                 >

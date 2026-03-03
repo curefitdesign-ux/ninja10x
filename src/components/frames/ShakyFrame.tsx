@@ -28,7 +28,7 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
   }, [isVideo, imageUrl]);
 
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative bg-black">
+    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative bg-black" style={{ containerType: 'inline-size' }}>
       {/* Background image or video filling the frame */}
       <div className="absolute inset-0 overflow-hidden">
         {isVideo ? (
@@ -74,7 +74,7 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
         <h2 
           className="text-white font-black italic mt-2 leading-[0.95]"
           style={{
-            fontSize: 'clamp(28px, 10vw, 40px)',
+            fontSize: 'clamp(28px, 13cqw, 40px)',
             textShadow: '2px 4px 12px rgba(0,0,0,0.15)',
           }}
         >
