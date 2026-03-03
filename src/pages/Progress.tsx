@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MoreVertical, Plus, UserPen, LogOut } from "lucide-react";
@@ -32,6 +32,7 @@ const Progress = () => {
 
   // Transition state
   const [showTransitionIn, setShowTransitionIn] = useState(false);
+  const transitionHandledRef = useRef(false);
 
   // Navigation state
   const transitionImage = location.state?.transitionImage;
@@ -48,26 +49,28 @@ const Progress = () => {
     loadFeed();
   }, []);
 
-  // Handle transition from share
+  // Handle transition from share — run only once per navigation
   useEffect(() => {
-    if (transitionToProgress && transitionImage) {
-      setShowTransitionIn(true);
-      setTimeout(() => setShowTransitionIn(false), 300);
+    if (!transitionToProgress || !transitionImage || transitionHandledRef.current) return;
+    if (myActivities.length === 0 && loading) return; // wait for activities to load
 
-      const currentActivity = myActivities.find(a => a.dayNumber === transitionDayNumber);
-      if (currentActivity && !currentActivity.isPublic) {
-        const isProfilePublic = profile?.stories_public === true;
-        if (isProfilePublic || hasUserChosenPublic()) {
-          makeActivityPublic(transitionDayNumber);
-        } else {
-          setTimeout(() => {
-            setPendingDayNumber(transitionDayNumber);
-            setShowMakePublicSheet(true);
-          }, 400);
-        }
+    transitionHandledRef.current = true;
+    setShowTransitionIn(true);
+    setTimeout(() => setShowTransitionIn(false), 300);
+
+    const currentActivity = myActivities.find(a => a.dayNumber === transitionDayNumber);
+    if (currentActivity && !currentActivity.isPublic) {
+      const isProfilePublic = profile?.stories_public === true;
+      if (isProfilePublic || hasUserChosenPublic()) {
+        makeActivityPublic(transitionDayNumber);
+      } else {
+        setTimeout(() => {
+          setPendingDayNumber(transitionDayNumber);
+          setShowMakePublicSheet(true);
+        }, 400);
       }
     }
-  }, [transitionToProgress, transitionImage, transitionDayNumber, myActivities, makeActivityPublic, profile?.stories_public]);
+  }, [transitionToProgress, transitionImage, transitionDayNumber, myActivities, loading, makeActivityPublic, profile?.stories_public]);
 
   const handleMakePublic = async () => {
     try {
