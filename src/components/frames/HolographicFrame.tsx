@@ -13,28 +13,12 @@ interface HolographicFrameProps {
   pr: string;
   imagePosition: { x: number; y: number };
   imageScale: number;
-  label1?: string;        // secondary metric unit (e.g. "km") — used for box 2 subtext
-  label2?: string;        // primary metric unit (e.g. "min") — combined with label2Name for box 1
-  label1Name?: string;    // secondary metric name (e.g. "Distance") — for box 2 label
-  label2Name?: string;    // primary metric name  (e.g. "Duration") — for box 1 "UNIT | NAME"
+  label1?: string;
+  label2?: string;
+  label1Name?: string;
+  label2Name?: string;
 }
 
-/**
- * Holographic Frame — pixel-perfect match to reference design (Frame_2147223513).
- *
- * Metric box layout (bottom-right corner):
- *  BOX 1 (white/salmon chamfered): large bold NUMBER + "UNIT | LABEL" subtext
- *  BOX 2 (dark):                   large bold NUMBER + white label subtext below
- *
- * Layer stack (bottom → top):
- *  0. Holographic gradient base
- *  1. User media
- *  2. Holographic overlay PNG
- *  3. Activity header
- *  4. Sidebar week/day text
- *  5. Metric PNG (conditional)
- *  6. Metric text overlays (pixel-perfect inside boxes)
- */
 const HolographicFrame = ({
   imageUrl,
   isVideo,
@@ -52,27 +36,17 @@ const HolographicFrame = ({
 }: HolographicFrameProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Box 1 (top, light box): shows duration value + "UNIT | METRIC NAME"
-  // label2 = primary unit (e.g. "min"), label2Name = primary metric name (e.g. "Duration")
   const durationMetricName = label2Name || 'Duration';
   const durationUnit = label2?.toUpperCase() || '';
-  
-  // Box 2 (bottom, dark box): shows pr value + metric name label
-  // label1 = secondary unit (e.g. "km"), label1Name = secondary metric name (e.g. "Distance")
   const metricLabel = label1Name || label1 || 'Distance';
 
   const hasMetric1 = !!duration;
   const hasMetric2 = !!pr;
 
-  // Strip letters/units from duration value for display (e.g. "30 min" → "30")
   const durationRaw = duration.replace(/[a-zA-Z\s]/g, '').trim() || duration;
-
-  // Subtext for metric 1 box: "MIN | DURATION" style matching reference
   const metric1Subtext = durationUnit
     ? `${durationUnit} | ${durationMetricName.toUpperCase()}`
     : durationMetricName.toUpperCase();
-
-  // Strip units from pr/secondary metric value for display
   const prValue = pr.replace(/[a-zA-Z\s]/g, '').trim() || pr;
 
   useEffect(() => {
@@ -85,9 +59,9 @@ const HolographicFrame = ({
   return (
     <div
       className="w-[90%] mx-auto aspect-[9/16] relative overflow-hidden"
-      style={{ borderRadius: '0px', containerType: 'size' }}
+      style={{ borderRadius: '0px', containerType: 'inline-size' }}
     >
-      {/* ── LAYER 0: Holographic gradient base ── */}
+      {/* LAYER 0: Holographic gradient base */}
       <div
         className="absolute inset-0"
         style={{
@@ -103,16 +77,13 @@ const HolographicFrame = ({
         }}
       />
 
-      {/* ── LAYER 1: User media ── */}
+      {/* LAYER 1: User media */}
       <div className="absolute inset-0" style={{ zIndex: 1 }}>
         {isVideo ? (
           <video
             ref={videoRef}
             src={imageUrl}
-            autoPlay
-            loop
-            muted
-            playsInline
+            autoPlay loop muted playsInline
             className="absolute inset-0 w-full h-full object-cover"
             style={{ transform: (imagePosition.x || imagePosition.y || imageScale !== 1) ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` : `scale(${imageScale})` }}
           />
@@ -126,7 +97,7 @@ const HolographicFrame = ({
         )}
       </div>
 
-      {/* ── LAYER 2: Holographic overlay PNG ── */}
+      {/* LAYER 2: Holographic overlay PNG */}
       <img
         src={holographicOverlay}
         alt=""
@@ -134,29 +105,21 @@ const HolographicFrame = ({
         style={{ zIndex: 2, objectFit: 'fill' }}
       />
 
-      {/* ── LAYER 3: Activity name — large bold header at top ── */}
+      {/* LAYER 3: Activity name header */}
       <div
         className="absolute left-0 right-0 top-0 flex items-center justify-center"
-        style={{
-          zIndex: 10,
-          height: '13%',
-          paddingLeft: '10%',
-          paddingRight: '3%',
-          overflow: 'hidden',
-        }}
+        style={{ zIndex: 10, height: '13%', paddingLeft: '10%', paddingRight: '3%', overflow: 'hidden' }}
       >
         <span
           style={{
             fontFamily: "'Arial Black', 'Impact', 'Helvetica Neue', sans-serif",
             fontWeight: 900,
-            fontSize: 'clamp(14px, 6.5cqw, 32px)',
+            fontSize: '6.5cqw',
             color: '#000000',
             textTransform: 'uppercase',
             letterSpacing: '-0.02em',
             lineHeight: 1,
             whiteSpace: 'nowrap',
-            overflow: 'visible',
-            textOverflow: 'clip',
             textAlign: 'center',
           }}
         >
@@ -164,22 +127,16 @@ const HolographicFrame = ({
         </span>
       </div>
 
-      {/* ── LAYER 4: Left sidebar "*** WEEK N / DAY N ***" rotated ── */}
+      {/* LAYER 4: Left sidebar rotated text */}
       <div
         className="absolute flex items-center justify-center"
-        style={{
-          zIndex: 10,
-          top: '13%',
-          left: 0,
-          width: '9%',
-          bottom: 0,
-        }}
+        style={{ zIndex: 10, top: '13%', left: 0, width: '9%', bottom: 0 }}
       >
         <span
           style={{
             fontFamily: "'Arial', 'Helvetica', sans-serif",
             fontWeight: 900,
-            fontSize: 'clamp(5.5px, 2cqw, 9px)',
+            fontSize: '2cqw',
             color: '#000000',
             textTransform: 'uppercase',
             letterSpacing: '0.20em',
@@ -193,32 +150,22 @@ const HolographicFrame = ({
         </span>
       </div>
 
-      {/* ── LAYER 5: Metric PNG ── */}
+      {/* LAYER 5: Metric PNGs */}
       {hasMetric1 && (
-        <img
-          src={metric1Png}
-          alt=""
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          style={{ zIndex: 11, objectFit: 'fill' }}
-        />
+        <img src={metric1Png} alt="" className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 11, objectFit: 'fill' }} />
       )}
       {hasMetric2 && (
-        <img
-          src={metric2Png}
-          alt=""
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          style={{ zIndex: 12, objectFit: 'fill' }}
-        />
+        <img src={metric2Png} alt="" className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 12, objectFit: 'fill' }} />
       )}
 
-      {/* BOX 1 text: Large number + unit | label subtext — shifted slightly down */}
+      {/* BOX 1 text */}
       {hasMetric1 && (
         <div
           className="absolute"
           style={{
             zIndex: 13,
             bottom: '18%',
-            right: '10px',
+            right: '2.5cqw',
             width: '30%',
             height: '13%',
             display: 'flex',
@@ -230,12 +177,11 @@ const HolographicFrame = ({
             paddingTop: '2%',
           }}
         >
-          {/* Large bold number */}
           <div
             style={{
               fontFamily: "'Arial Black', 'Impact', sans-serif",
               fontWeight: 900,
-              fontSize: 'clamp(22px, 10cqw, 52px)',
+              fontSize: '10cqw',
               color: '#000000',
               lineHeight: 1,
               letterSpacing: '-0.02em',
@@ -244,17 +190,16 @@ const HolographicFrame = ({
           >
             {durationRaw}
           </div>
-          {/* Unit | Label subtext — shifted left by 10px */}
           <div
             style={{
               fontFamily: "'Arial', 'Helvetica', sans-serif",
               fontWeight: 700,
-              fontSize: 'clamp(6px, 2.2cqw, 11px)',
+              fontSize: '2.2cqw',
               color: '#000000',
               letterSpacing: '0.04em',
               textTransform: 'uppercase',
-              marginTop: '3px',
-              marginLeft: '-10px',
+              marginTop: '0.8cqw',
+              marginLeft: '-2.5cqw',
               whiteSpace: 'nowrap',
               lineHeight: 1.1,
             }}
@@ -264,7 +209,7 @@ const HolographicFrame = ({
         </div>
       )}
 
-      {/* BOX 2 text: Large number + white label subtext */}
+      {/* BOX 2 text */}
       {hasMetric2 && (
         <div
           className="absolute"
@@ -282,32 +227,30 @@ const HolographicFrame = ({
             paddingRight: '4%',
           }}
         >
-          {/* Large bold number — shifted down by 5px */}
           <div
             style={{
               fontFamily: "'Arial Black', 'Impact', sans-serif",
               fontWeight: 900,
-              fontSize: 'clamp(20px, 9cqw, 46px)',
+              fontSize: '9cqw',
               color: '#000000',
               lineHeight: 1,
               letterSpacing: '-0.02em',
               whiteSpace: 'nowrap',
-              marginTop: '5px',
+              marginTop: '1.2cqw',
             }}
           >
             {prValue}
           </div>
-          {/* White label subtext — 10px down, 5px left */}
           <div
             style={{
               fontFamily: "'Arial Black', 'Arial', sans-serif",
               fontWeight: 900,
-              fontSize: 'clamp(6px, 2.2cqw, 11px)',
+              fontSize: '2.2cqw',
               color: '#ffffff',
               letterSpacing: '0.02em',
               textTransform: 'capitalize',
-              marginTop: '15px',
-              marginLeft: '-5px',
+              marginTop: '3.5cqw',
+              marginLeft: '-1.2cqw',
               whiteSpace: 'nowrap',
               lineHeight: 1.2,
             }}
