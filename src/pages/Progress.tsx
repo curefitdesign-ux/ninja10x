@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MoreVertical, Plus, UserPen, LogOut, ChevronLeft } from "lucide-react";
+import { MoreVertical, Plus, UserPen, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
 import { useJourneyActivities, fetchPublicFeed, LocalActivity } from "@/hooks/use-journey-activities";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
