@@ -151,39 +151,17 @@ const JournalFrame = ({
         )}
       </div>
 
-      {/* Activity badge — scalloped seal (icon only) */}
-      <div className="absolute z-30" style={{ bottom: '175px', right: '165px', width: '60px', height: '60px' }}>
-        <svg viewBox="0 0 100 100" width="100%" height="100%">
-          {/* Scalloped circle */}
-          <path
-            d={(() => {
-              const cx = 50, cy = 50, points = 18, outerR = 48, innerR = 42;
-              let d = '';
-              for (let i = 0; i < points; i++) {
-                const outerAngle = (i / points) * Math.PI * 2 - Math.PI / 2;
-                const innerAngle = ((i + 0.5) / points) * Math.PI * 2 - Math.PI / 2;
-                const ox = cx + outerR * Math.cos(outerAngle);
-                const oy = cy + outerR * Math.sin(outerAngle);
-                const ix = cx + innerR * Math.cos(innerAngle);
-                const iy = cy + innerR * Math.sin(innerAngle);
-                d += (i === 0 ? `M${ox},${oy}` : `L${ox},${oy}`) + `L${ix},${iy}`;
-              }
-              return d + 'Z';
-            })()}
-            fill="#1a1f3d"
-            stroke="#2a3060"
-            strokeWidth="1"
-          />
-          {/* Inner circle */}
-          <circle cx="50" cy="50" r="34" fill="none" stroke="#6366f1" strokeWidth="1.5" opacity="0.5" />
-          {/* Activity-specific icon — centered and larger */}
-          <g transform="translate(35, 35) scale(1.25)">
-            <path d={getActivityIconPath(activity)} fill="none" stroke="#c084fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </g>
-          {/* Decorative stars */}
-          <text x="28" y="25" fontSize="6" fill="#a78bfa" opacity="0.7">✦</text>
-          <text x="72" y="25" fontSize="6" fill="#a78bfa" opacity="0.7">✦</text>
-        </svg>
+      {/* CULT NINJA JOURNEY tag — bottom left */}
+      <div className="absolute z-30" style={{ bottom: '160px', left: '20px' }}>
+        <div 
+          className="inline-flex rounded-full px-4 py-1.5"
+          style={{ 
+            background: '#2DD4A8',
+            boxShadow: '2px 3px 0px rgba(0,0,0,0.15)',
+          }}
+        >
+          <span className="text-black font-bold text-[13px] tracking-wide whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>CULT NINJA JOURNEY</span>
+        </div>
       </div>
 
       {/* WEEK | DAY badge — top right corner */}
