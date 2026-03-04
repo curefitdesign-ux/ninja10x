@@ -30,6 +30,8 @@ const BoldFrame = ({
   imageScale,
   label1,
   label2,
+  label1Name,
+  label2Name,
 }: BoldFrameProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
