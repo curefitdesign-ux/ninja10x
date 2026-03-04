@@ -53,9 +53,9 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       </div>
       
       {/* CONQUER WILL POWER tag */}
-      <div className="absolute z-20" style={{ top: '8cqw', right: '3cqw' }}>
-        <div style={{ background: '#F45B4A', borderRadius: '1cqw', padding: '1cqw 1.5cqw' }}>
-          <span className="text-white font-normal uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '3.5cqw', letterSpacing: '0.03em' }}>
+      <div className="absolute z-20" style={{ top: 'calc(8cqw + 20px)', right: '3cqw' }}>
+        <div style={{ background: '#F45B4A', borderRadius: '2px', padding: '4px 6px' }}>
+          <span className="text-white font-normal uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '3.5cqw', letterSpacing: '0.5px' }}>
             CONQUER WILL POWER
           </span>
         </div>
@@ -65,13 +65,13 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       <div className="absolute z-20" style={{ top: '13cqw', left: '4cqw' }}>
         <h1 
           className="font-black leading-[0.9] uppercase"
-          style={{ color: '#F4E14D', fontFamily: "'Bebas Neue', sans-serif", fontSize: '12.8cqw', letterSpacing: '0px', textShadow: '2px 3px 4px rgba(0,0,0,0.35)' }}
+          style={{ color: '#F4E14D', fontFamily: "'Bebas Neue', sans-serif", fontSize: '51px', letterSpacing: '0px', textShadow: '2px 3px 4px rgba(0,0,0,0.35)' }}
         >
           CULT
         </h1>
         <h2 
           className="font-black leading-[0.95] uppercase"
-          style={{ color: '#FFFFFF', fontFamily: "'Bebas Neue', sans-serif", fontSize: '14.8cqw', letterSpacing: '0px', textShadow: '3px 4px 8px rgba(0,0,0,0.5)', marginTop: '0.5cqw' }}
+          style={{ color: '#FFFFFF', fontFamily: "'Bebas Neue', sans-serif", fontSize: '59px', letterSpacing: '0px', textShadow: '3px 4px 8px rgba(0,0,0,0.5)', marginTop: '2px' }}
         >
           NINJA
         </h2>
@@ -93,7 +93,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       {/* Photo container */}
       <div 
         className="absolute z-10"
-        style={{ top: '22%', left: '50%', width: '65%', height: '42%', transform: 'translateX(-50%) rotate(-8deg)' }}
+        style={{ top: '22%', left: '50%', width: 'calc(58% + 40px)', height: 'calc(44% + 75px)', transform: 'translateX(-50%) rotate(-8deg)' }}
       >
         <div 
           className="absolute inset-0"
