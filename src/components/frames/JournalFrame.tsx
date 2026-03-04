@@ -129,22 +129,22 @@ const JournalFrame = ({
 
       {/* Bottom content */}
       <div className="absolute left-0 right-0 pt-0" style={{ bottom: '35px', padding: '0 12px', paddingLeft: '37px' }}>
-        {/* Activity name — moved up 5px, Inter Black, +5px font size */}
-        <h2 className="text-black leading-none mb-2" style={{ fontSize: '34px', fontFamily: 'Inter, sans-serif', fontWeight: 900, marginTop: '-10px' }}>{activity}</h2>
+        {/* Activity name */}
+        <h2 className="text-black leading-none mb-2" style={{ fontSize: '34px', fontFamily: "'Caveat', cursive", fontWeight: 700, marginTop: '-10px' }}>{activity}</h2>
         
         {/* Stats row */}
         {(duration || pr) && (
           <div className="flex" style={{ gap: '86px' }}>
             {pr && (
               <div>
-                <p className="text-gray-500 font-medium mb-0.5" style={{ fontSize: '14px' }}>{metricLabel}</p>
-                <p className="text-black font-black leading-none" style={{ fontSize: '20px' }}>{pr}</p>
+                <p className="text-gray-500 mb-0.5" style={{ fontSize: '14px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{metricLabel}</p>
+                <p className="text-black leading-none" style={{ fontSize: '20px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{pr}</p>
               </div>
             )}
             {duration && (
               <div>
-                <p className="text-gray-500 font-medium mb-0.5" style={{ fontSize: '14px' }}>{durationLabel}</p>
-                <p className="text-black font-black leading-none" style={{ fontSize: '20px' }}>{duration}</p>
+                <p className="text-gray-500 mb-0.5" style={{ fontSize: '14px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{durationLabel}</p>
+                <p className="text-black leading-none" style={{ fontSize: '20px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{duration}</p>
               </div>
             )}
           </div>
