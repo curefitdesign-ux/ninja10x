@@ -48,7 +48,7 @@ const JournalFrame = ({
       <img src={journalBgWhite} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
       
       {/* Lines overlay — centered on top of background */}
-      <img src={journalLinesOverlay} alt="" className="absolute pointer-events-none" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'calc(100% - 80px)', height: 'calc(100% - 80px)', objectFit: 'contain' }} />
+      <img src={journalLinesOverlay} alt="" className="absolute pointer-events-none" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'calc(100% - 50px)', height: 'calc(100% - 50px)', objectFit: 'contain' }} />
       
       {/* Paper holes — horizontal row across the top */}
       {[12, 25, 38, 51, 64, 76, 89].map((leftPct) => (
@@ -105,7 +105,7 @@ const JournalFrame = ({
       </div>
 
       {/* Paperclip on top of image */}
-      <div className="absolute z-20" style={{ top: '5px', right: '235px', width: '45px' }}>
+      <div className="absolute z-20" style={{ top: '5px', right: '185px', width: '45px' }}>
         <img src={paperclipImg} alt="" className="w-full h-full object-contain pointer-events-none" />
       </div>
 
@@ -116,7 +116,7 @@ const JournalFrame = ({
         
         {/* Stats row */}
         {(duration || pr) && (
-          <div className="flex" style={{ gap: '56px' }}>
+          <div className="flex" style={{ gap: '86px' }}>
             {pr && (
               <div>
                 <p className="text-gray-500 font-medium mb-0.5" style={{ fontSize: '14px' }}>{metricLabel}</p>
