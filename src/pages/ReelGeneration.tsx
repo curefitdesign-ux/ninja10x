@@ -314,7 +314,7 @@ const ReelGeneration = () => {
           <AnimatePresence mode="wait">
             <motion.p
               key={error || motivationalPhrase}
-              className="text-sm text-white/70 text-center font-semibold mb-3 px-6"
+              className={`text-sm text-white/70 text-center font-semibold mb-3 px-6 ${error ? 'mt-5' : ''}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
