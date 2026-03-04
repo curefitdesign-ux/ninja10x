@@ -105,7 +105,7 @@ const JournalFrame = ({
       </div>
 
       {/* Paperclip on top of image */}
-      <div className="absolute z-20" style={{ top: '15px', right: '85px', width: '45px' }}>
+      <div className="absolute z-20" style={{ top: '5px', right: '385px', width: '45px' }}>
         <img src={paperclipImg} alt="" className="w-full h-full object-contain pointer-events-none" />
       </div>
 
