@@ -75,8 +75,10 @@ const JournalFrame = ({
       
       {/* Photo area filling the frame - tilted 10deg, 90% size */}
       <div 
-        className="absolute top-10 left-4 right-4 bottom-[140px] rounded-xl overflow-hidden bg-black"
+        className="absolute left-4 right-4 rounded-xl overflow-hidden bg-black"
         style={{
+          top: 'calc(2.5rem - 5px)',
+          bottom: '130px',
           transform: 'rotate(10deg) scale(0.8)',
         }}
       >
@@ -123,7 +125,7 @@ const JournalFrame = ({
       </div>
       
       {/* Bottom content */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 pt-0">
+      <div className="absolute left-0 right-0 pt-0" style={{ bottom: '10px', padding: '0 12px', paddingLeft: '17px' }}>
         {/* Badge */}
         <div className="mb-1.5">
           <div 
