@@ -40,7 +40,7 @@ const ArcadeFrame = ({
 
   return (
     <div
-      className="w-[90%] mx-auto aspect-[9/16] rounded-[4px] overflow-hidden relative flex flex-col"
+      className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden relative flex flex-col"
       style={{
         containerType: 'inline-size',
         background: '#000000',
@@ -149,7 +149,7 @@ const ArcadeFrame = ({
       {/* ── Bottom Metrics — stacked, left-aligned ── */}
       <div style={{ padding: '2.5% 5% 4% 5%', flexShrink: 0 }}>
         {(duration || pr) ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+          <div style={{ display: 'flex', flexDirection: 'row', gap: '100px' }}>
             {/* Duration metric */}
             {duration && (
               <div>
@@ -180,17 +180,6 @@ const ArcadeFrame = ({
                   {duration}
                 </div>
               </div>
-            )}
-
-            {/* Separator line */}
-            {duration && pr && (
-              <div
-                style={{
-                  borderTop: '1px solid rgba(255, 255, 255, 0.35)',
-                  width: '50%',
-                  margin: '2.5% 0 1.5% 0',
-                }}
-              />
             )}
 
             {/* Secondary metric */}
