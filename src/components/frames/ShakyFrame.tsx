@@ -72,7 +72,7 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
             marginLeft: '10px',
           }}
         >
-          <span className="text-white font-semibold tracking-wider" style={{ fontSize: 'calc(2.5cqw + 5px)', fontFamily }}>WEEK {week} | DAY {day}</span>
+          <span className="text-white font-semibold tracking-wider" style={{ fontSize: 'calc(2.5cqw + 2px)', fontFamily }}>CULT NINJA JOURNEY · WEEK {week} | DAY {day}</span>
         </div>
         
         {/* Activity name */}
