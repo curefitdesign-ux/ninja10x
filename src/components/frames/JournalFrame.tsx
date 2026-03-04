@@ -48,7 +48,7 @@ const JournalFrame = ({
       <img src={journalBgWhite} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
       
       {/* Lines overlay — centered on top of background */}
-      <img src={journalLinesOverlay} alt="" className="absolute inset-0 w-full h-full object-contain pointer-events-none" style={{ margin: 'auto' }} />
+      <img src={journalLinesOverlay} alt="" className="absolute pointer-events-none" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'calc(100% - 80px)', height: 'calc(100% - 80px)', objectFit: 'contain' }} />
       
       {/* Paper holes — horizontal row across the top */}
       {[12, 25, 38, 51, 64, 76, 89].map((leftPct) => (
