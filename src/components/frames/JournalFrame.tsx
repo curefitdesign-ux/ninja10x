@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
-import journalBgClean from '@/assets/frames/journal-bg-clean.png';
+import journalBgWhite from '@/assets/frames/journal-bg-white.png';
+import journalLinesOverlay from '@/assets/frames/journal-lines-overlay.png';
 import paperclipImg from '@/assets/frames/paperclip-silver.png';
 
 interface JournalFrameProps {
@@ -44,16 +45,10 @@ const JournalFrame = ({
   return (
     <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative" style={{ background: '#fff' }}>
       {/* Background image */}
-      <img src={journalBgClean} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
+      <img src={journalBgWhite} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
       
-      {/* CSS lined paper overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 38px, #2a9d6a 38px, #2a9d6a 39.5px)',
-          backgroundPosition: '0 60px',
-        }}
-      />
+      {/* Lines overlay — centered on top of background */}
+      <img src={journalLinesOverlay} alt="" className="absolute inset-0 w-full h-full object-contain pointer-events-none" style={{ margin: 'auto' }} />
       
       {/* Paper holes — horizontal row across the top */}
       {[12, 25, 38, 51, 64, 76, 89].map((leftPct) => (
