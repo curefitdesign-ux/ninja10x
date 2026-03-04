@@ -29,6 +29,7 @@ const ArcadeFrame = ({
 }: ArcadeFrameProps) => {
   const metricLabel = label1 || 'Personal Best';
   const durationLabel = label2 || 'Duration';
+  const isNumericPr = pr ? /\d/.test(pr) : false;
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
