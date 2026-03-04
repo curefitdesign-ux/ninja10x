@@ -151,21 +151,14 @@ const JournalFrame = ({
         )}
       </div>
 
-      {/* CULT NINJA JOURNEY tag — bottom left */}
-      <div className="absolute z-30" style={{ bottom: '160px', left: '20px' }}>
+      {/* Top badges row */}
+      <div className="absolute z-30 flex items-center justify-between" style={{ top: '50px', left: '20px', right: '20px' }}>
         <div 
-          className="inline-flex rounded-full px-4 py-1.5"
-          style={{ 
-            background: '#2DD4A8',
-            boxShadow: '2px 3px 0px rgba(0,0,0,0.15)',
-          }}
+          className="inline-flex rounded-full px-2.5 py-0.5"
+          style={{ background: '#2DD4A8' }}
         >
-          <span className="text-black font-bold text-[13px] tracking-wide whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>CULT NINJA JOURNEY</span>
+          <span className="text-black font-bold text-[11px] tracking-wide whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>CULT NINJA JOURNEY</span>
         </div>
-      </div>
-
-      {/* WEEK | DAY badge — top right corner */}
-      <div className="absolute z-30" style={{ top: '50px', right: '20px' }}>
         <div 
           className="inline-flex rounded-full px-2.5 py-0.5"
           style={{ background: '#2DD4A8' }}
@@ -173,7 +166,6 @@ const JournalFrame = ({
           <span className="text-black font-bold text-[11px] tracking-wide whitespace-nowrap">WEEK {week} | DAY {day}</span>
         </div>
       </div>
-    </div>
   );
 };
 
