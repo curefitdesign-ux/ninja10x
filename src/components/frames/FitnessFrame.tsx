@@ -145,18 +145,18 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       
       {/* Bottom right - journey progress */}
       <div className="absolute z-20 text-right" style={{ right: '4cqw', bottom: '6%' }}>
-        <p className="font-medium" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '3.2cqw' }}>
-          {week > 1 ? 'Week' : 'Day'}
-        </p>
-        <p 
-          className="font-black leading-none"
-          style={{ color: '#F4E14D', fontFamily: 'system-ui, sans-serif', fontSize: '13cqw', letterSpacing: '-0.02em' }}
+        <h3 
+          className="font-black leading-[0.9] uppercase"
+          style={{ color: '#F4E14D', fontFamily: "'Bebas Neue', sans-serif", fontSize: '51px', letterSpacing: '0px', textShadow: '2px 3px 4px rgba(0,0,0,0.35)' }}
         >
-          {week > 1 ? week : day}
-        </p>
-        <p className="font-medium" style={{ color: '#F4E14D', fontSize: '3.8cqw', marginTop: '-0.5cqw' }}>
-          {week > 1 ? `Day ${((day - 1) % 3) + 1} of 3` : 'Journey'}
-        </p>
+          Day {week > 1 ? ((day - 1) % 3) + 1 : day}
+        </h3>
+        <h4 
+          className="font-black leading-[0.95] uppercase"
+          style={{ color: '#FFFFFF', fontFamily: "'Bebas Neue', sans-serif", fontSize: '59px', letterSpacing: '0px', textShadow: '3px 4px 8px rgba(0,0,0,0.5)', marginTop: '2px' }}
+        >
+          Journey
+        </h4>
       </div>
     </div>
   );
