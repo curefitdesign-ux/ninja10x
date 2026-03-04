@@ -1,5 +1,6 @@
-import paperclipImg from '@/assets/frames/paperclip.png';
+import paperclipImg from '@/assets/frames/paperclip-silver.png';
 import shuttlecockImg from '@/assets/frames/shuttlecock.png';
+import linedBg from '@/assets/frames/journal2-lined-bg.png';
 
 interface Journal2FrameProps {
   imageUrl: string;
@@ -17,82 +18,144 @@ interface Journal2FrameProps {
 const Journal2Frame = ({ imageUrl, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: Journal2FrameProps) => {
   const metricLabel = label1 || 'Metric';
   const durationLabel = label2 || 'Duration';
+
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden bg-white shadow-2xl relative">
-      {/* Paperclip - positioned at top center, overlapping the image */}
-      <div className="absolute top-[-20px] left-1/2 -translate-x-1/2 z-20 w-16 h-24">
-        <img 
-          src={paperclipImg} 
+    <div
+      className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden relative"
+      style={{ containerType: 'inline-size', background: '#f5f5f0' }}
+    >
+      {/* Lined notebook background */}
+      <img
+        src={linedBg}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        style={{ opacity: 0.9 }}
+      />
+
+      {/* Paperclip — top center-right */}
+      <div
+        className="absolute z-30"
+        style={{
+          top: '-3cqw',
+          right: '28cqw',
+          width: '14cqw',
+          height: '28cqw',
+        }}
+      >
+        <img
+          src={paperclipImg}
           alt="Paperclip"
           className="w-full h-full object-contain"
-          style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+          style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.25))' }}
         />
       </div>
-      
-      {/* Photo area - slightly rotated for journal feel */}
-      <div 
-        className="absolute top-12 left-4 right-4 bottom-[140px] rounded-2xl overflow-hidden bg-gray-100 shadow-lg"
-        style={{ transform: 'rotate(2deg)' }}
+
+      {/* Photo area — large, slightly rotated */}
+      <div
+        className="absolute overflow-hidden z-10"
+        style={{
+          top: '4cqw',
+          left: '5cqw',
+          right: '5cqw',
+          height: '62cqw',
+          borderRadius: '5cqw',
+          transform: 'rotate(2.5deg)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
+          background: '#e8e8e8',
+        }}
       >
-        <img 
+        {/* Aspect-filling photo */}
+        <img
           src={imageUrl}
           alt="Activity"
           className="w-full h-full object-cover"
           style={{
-            transform: (imagePosition.x || imagePosition.y || imageScale !== 1) ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` : `scale(${imageScale})`,
+            transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
           }}
         />
-        
-        {/* Shuttlecock sticker - positioned at bottom-left of image */}
-        <div 
-          className="absolute bottom-4 left-4 w-20 h-20 z-10"
-          style={{ 
+
+        {/* Shuttlecock sticker — bottom-left of photo */}
+        <div
+          className="absolute z-20"
+          style={{
+            bottom: '3cqw',
+            left: '3cqw',
+            width: '16cqw',
+            height: '16cqw',
             transform: 'rotate(-15deg)',
-            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))'
+            filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.2))',
           }}
         >
-          <img 
+          <img
             src={shuttlecockImg}
             alt="Shuttlecock"
             className="w-full h-full object-contain"
           />
         </div>
       </div>
-      
-      {/* Bottom content */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 pt-0">
+
+      {/* Bottom content area */}
+      <div
+        className="absolute left-0 right-0 z-20"
+        style={{ bottom: '3cqw', padding: '0 5cqw' }}
+      >
         {/* Badges row */}
-        <div className="flex justify-between mb-2">
-          <div 
-            className="rounded-full px-3 py-1.5"
-            style={{ background: '#2DD4A8' }}
+        <div className="flex justify-between items-center" style={{ marginBottom: '2.5cqw' }}>
+          <div
+            className="rounded-full flex items-center justify-center"
+            style={{
+              background: '#2DD4A8',
+              padding: '1.8cqw 4cqw',
+            }}
           >
-            <span className="text-black font-bold text-[10px] tracking-wide">WEEK {week} | DAY {day}</span>
+            <span
+              className="font-bold tracking-wide"
+              style={{ fontSize: '3cqw', color: '#000', letterSpacing: '0.04em' }}
+            >
+              WEEK {week} | DAY {day}
+            </span>
           </div>
-          <div 
-            className="rounded-full px-3 py-1.5"
-            style={{ background: '#2DD4A8' }}
+          <div
+            className="rounded-full flex items-center justify-center"
+            style={{
+              background: '#2DD4A8',
+              padding: '1.8cqw 4cqw',
+            }}
           >
-            <span className="text-black font-bold text-[10px] tracking-wide">Bellandur, Bangalore</span>
+            <span
+              className="font-bold tracking-wide"
+              style={{ fontSize: '3cqw', color: '#000', letterSpacing: '0.04em' }}
+            >
+              Bellandur, Bangalore
+            </span>
           </div>
         </div>
-        
+
         {/* Activity name */}
-        <h2 className="text-black text-[28px] font-black italic leading-none mb-2">{activity}</h2>
-        
-        {/* Stats row - only show if user entered values */}
+        <h2
+          className="font-black italic leading-none"
+          style={{
+            fontSize: '10cqw',
+            color: '#000',
+            marginBottom: '2cqw',
+          }}
+        >
+          {activity}
+        </h2>
+
+        {/* Stats row — 3 columns like reference */}
         {(duration || pr) && (
-          <div className="flex gap-6">
+          <div className="flex" style={{ gap: '8cqw' }}>
             {duration && (
               <div>
-                <p className="text-gray-500 text-[10px] font-medium">{durationLabel}</p>
-                <p className="text-black text-xl font-bold">{duration}</p>
+                <p style={{ fontSize: '3.2cqw', color: '#555', fontWeight: 500 }}>{durationLabel}</p>
+                <p className="font-bold" style={{ fontSize: '7cqw', color: '#000' }}>{duration}</p>
               </div>
             )}
             {pr && (
               <div>
-                <p className="text-gray-500 text-[10px] font-medium">{metricLabel}</p>
-                <p className="text-black text-xl font-bold">{pr}</p>
+                <p style={{ fontSize: '3.2cqw', color: '#555', fontWeight: 500 }}>{metricLabel}</p>
+                <p className="font-bold" style={{ fontSize: '7cqw', color: '#000' }}>{pr}</p>
               </div>
             )}
           </div>
