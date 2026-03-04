@@ -109,6 +109,21 @@ const JournalFrame = ({
         </div>
       </div>
 
+      {/* Paperclip overlaying the photo top-right */}
+      <div
+        className="absolute z-20"
+        style={{
+          top: '20px',
+          right: '30px',
+          width: '70px',
+          height: '90px',
+          transform: 'rotate(15deg)',
+          filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.2))',
+        }}
+      >
+        <img src={paperclipImg} alt="" className="w-full h-full object-contain" />
+      </div>
+
       {/* Shuttlecock sticker — bottom-left of photo */}
       <div
         className="absolute z-20"
