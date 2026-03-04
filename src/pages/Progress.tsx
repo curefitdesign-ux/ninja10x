@@ -11,6 +11,7 @@ import ReelToProgressTransition from "@/components/ReelToProgressTransition";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
 import SharedImageTransition from "@/components/SharedImageTransition";
 import ProfileAvatar from "@/components/ProfileAvatar";
+import weekCrystal from "@/assets/progress/week-complete-snackbar.png";
 
 const Progress = () => {
   const navigate = useNavigate();
