@@ -130,7 +130,7 @@ const JournalFrame = ({
       {/* Bottom content */}
       <div className="absolute left-0 right-0 pt-0" style={{ bottom: '35px', padding: '0 12px', paddingLeft: '37px' }}>
         {/* Activity name */}
-        <h2 className="leading-none mb-2" style={{ fontSize: '54px', fontFamily: "'Caveat', cursive", fontWeight: 700, marginTop: '0px', color: '#3C46AF' }}>{activity}</h2>
+        <h2 className="leading-none mb-2" style={{ fontSize: '54px', fontFamily: "'Caveat', cursive", fontWeight: 700, marginTop: '20px', color: '#3C46AF' }}>{activity}</h2>
         
         {/* Stats row */}
         {(duration || pr) && (
