@@ -1,5 +1,4 @@
 import { useRef, useEffect } from 'react';
-import shuttlecockIcon from '@/assets/frames/shuttlecock.png';
 import journalBg from '@/assets/frames/journal2-lined-bg.png';
 
 interface JournalFrameProps {
@@ -49,25 +48,6 @@ const JournalFrame = ({
         alt=""
         className="absolute inset-0 w-full h-full object-cover"
       />
-      {/* Paperclip - with subtle animation */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10 animate-subtle-float">
-        <svg width="40" height="80" viewBox="0 0 48 100" fill="none">
-          <path 
-            d="M24 90 L24 20 C24 10 30 6 36 6 C42 6 46 12 46 20 L46 65 C46 72 42 76 36 76 L28 76" 
-            stroke="url(#paperclipGradient)" 
-            strokeWidth="4" 
-            fill="none"
-            strokeLinecap="round"
-          />
-          <defs>
-            <linearGradient id="paperclipGradient" x1="24" y1="6" x2="24" y2="90" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#D0D0D0" />
-              <stop offset="0.5" stopColor="#A0A0A0" />
-              <stop offset="1" stopColor="#C0C0C0" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
       
       {/* Photo area filling the frame - tilted 10deg, 90% size */}
       <div 
@@ -103,14 +83,6 @@ const JournalFrame = ({
         </div>
       </div>
       
-      {/* Activity icon - Shuttlecock - positioned above the tilted image with animation */}
-      <div className="absolute left-[34px] top-[35px] z-20 animate-subtle-wave">
-        <img 
-          src={shuttlecockIcon}
-          alt="Shuttlecock"
-          className="w-20 h-20 object-contain"
-        />
-      </div>
       
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 p-3 pt-0">
