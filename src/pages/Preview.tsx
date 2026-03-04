@@ -840,7 +840,7 @@ const Preview = () => {
       case 'arcade':
         return <ArcadeFrame {...frameProps} />;
       case 'bold':
-        return <BoldFrame {...frameProps} />;
+        return <BoldFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />;
     }
   };
 
