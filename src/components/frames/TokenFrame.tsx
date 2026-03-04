@@ -36,6 +36,8 @@ const TokenFrame = ({
   imageScale,
   label1,
   label2,
+  label1Name,
+  label2Name,
 }: TokenFrameProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
