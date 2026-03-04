@@ -69,7 +69,7 @@ const Progress = () => {
       const weekNum = Math.ceil(transitionDayNumber / 3);
       setCompletedWeekNum(weekNum);
       setTimeout(() => setShowWeekSnackbar(true), 500);
-      setTimeout(() => setShowWeekSnackbar(false), 5500);
+      setTimeout(() => setShowWeekSnackbar(false), 10500);
     }
 
     const currentActivity = myActivities.find(a => a.dayNumber === transitionDayNumber);
@@ -145,10 +145,10 @@ const Progress = () => {
           <motion.div
             key="week-snackbar"
             className="absolute left-0 right-0 z-[60] flex justify-center"
-            style={{ top: 'calc(env(safe-area-inset-top, 12px) + 60px)' }}
-            initial={{ opacity: 0, y: -20 }}
+            style={{ bottom: 'calc(env(safe-area-inset-bottom, 12px) + 24px)' }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: 20 }}
             transition={{ type: 'spring', stiffness: 180, damping: 20 }}
           >
             <button
@@ -171,19 +171,19 @@ const Progress = () => {
                 src={snackbarCrystal}
                 alt=""
                 className="relative z-10 flex-shrink-0"
-                style={{ width: 44, height: 44, marginLeft: -6, marginRight: 4, objectFit: 'contain' }}
+                style={{ width: 54, height: 54, marginLeft: -6, marginRight: 4, objectFit: 'contain' }}
               />
               {/* Text */}
               <span
                 className="relative z-10 font-semibold tracking-tight whitespace-nowrap"
-                style={{ fontSize: 13, color: '#1a1a1a', marginRight: 6 }}
+                style={{ fontSize: 13, color: '#ffffff', marginRight: 6 }}
               >
                 Week {completedWeekNum} reel is ready, Click here to view
               </span>
               {/* Chevron */}
               <ChevronRight
                 className="relative z-10 flex-shrink-0"
-                style={{ width: 16, height: 16, color: '#999', marginRight: 12 }}
+                style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.6)', marginRight: 12 }}
                 strokeWidth={2}
               />
             </button>
@@ -331,7 +331,7 @@ const Progress = () => {
           onCrystalTap={(weekNum) => {
             setCompletedWeekNum(weekNum);
             setShowWeekSnackbar(true);
-            setTimeout(() => setShowWeekSnackbar(false), 5000);
+            setTimeout(() => setShowWeekSnackbar(false), 10000);
           }}
           isInline={true}
         />
