@@ -331,7 +331,7 @@ const Progress = () => {
           onCrystalTap={(weekNum) => {
             setCompletedWeekNum(weekNum);
             setShowWeekSnackbar(true);
-            setTimeout(() => setShowWeekSnackbar(false), 5000);
+            setTimeout(() => setShowWeekSnackbar(false), 10000);
           }}
           isInline={true}
         />
