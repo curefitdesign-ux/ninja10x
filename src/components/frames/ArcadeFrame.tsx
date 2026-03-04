@@ -29,6 +29,7 @@ const ArcadeFrame = ({
 }: ArcadeFrameProps) => {
   const metricLabel = label1 || 'Personal Best';
   const durationLabel = label2 || 'Duration';
+  const isNumericPr = pr ? /\d/.test(pr) : false;
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -201,12 +202,15 @@ const ArcadeFrame = ({
                 <div
                   style={{
                     fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
-                    fontSize: '8.5cqw',
+                    fontSize: isNumericPr ? '8.5cqw' : '5.5cqw',
                     fontWeight: 700,
                     color: '#FFFFFF',
                     lineHeight: 1.1,
                     letterSpacing: '-0.01em',
                     marginTop: '0.5%',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {pr}

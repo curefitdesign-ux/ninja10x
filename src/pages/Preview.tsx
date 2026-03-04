@@ -824,6 +824,8 @@ const Preview = () => {
           imageScale={imageScale}
           label1={activityLabels.secondaryUnit}
           label2={activityLabels.primaryUnit}
+          label1Name={activityLabels.secondaryMetric}
+          label2Name={activityLabels.primaryMetric}
         />;
       case 'holographic':
         return <HolographicFrame 
@@ -838,7 +840,7 @@ const Preview = () => {
       case 'arcade':
         return <ArcadeFrame {...frameProps} />;
       case 'bold':
-        return <BoldFrame {...frameProps} />;
+        return <BoldFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />;
     }
   };
 
@@ -1203,7 +1205,7 @@ const Preview = () => {
                 {currentFrame === 'vogue' && <VogueFrame {...frameProps} />}
                 {currentFrame === 'fitness' && <FitnessFrame {...frameProps} />}
                 {currentFrame === 'ticket' && <TicketFrame {...frameProps} />}
-                {currentFrame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} />}
+                {currentFrame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
                 {currentFrame === 'holographic' && <HolographicFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
               </div>
             </div>
@@ -1275,7 +1277,7 @@ const Preview = () => {
                         {frame === 'vogue' && <VogueFrame {...frameProps} />}
                         {frame === 'fitness' && <FitnessFrame {...frameProps} />}
                         {frame === 'ticket' && <TicketFrame {...frameProps} />}
-                        {frame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} />}
+                        {frame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
                         {frame === 'holographic' && <HolographicFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
                         {frame === 'scrapbook' && <ScrapbookFrame {...frameProps} />}
                         {frame === 'arcade' && <ArcadeFrame {...frameProps} />}

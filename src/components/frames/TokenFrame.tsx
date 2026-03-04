@@ -20,6 +20,8 @@ interface TokenFrameProps {
   imageScale: number;
   label1?: string;
   label2?: string;
+  label1Name?: string;
+  label2Name?: string;
 }
 
 const TokenFrame = ({
@@ -34,6 +36,8 @@ const TokenFrame = ({
   imageScale,
   label1,
   label2,
+  label1Name,
+  label2Name,
 }: TokenFrameProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -179,7 +183,7 @@ const TokenFrame = ({
         {prValue ? (
           <div style={{ textAlign: 'right', lineHeight: 1.1 }}>
             <div style={{ fontFamily: "'Rowdies', 'Arial', sans-serif", fontWeight: 300, fontSize: 'clamp(8px, 3.4cqw, 12px)', color: '#696760', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '2px' }}>
-              DISTANCE
+              {(label1Name || 'DISTANCE').toUpperCase()}
             </div>
             <span style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: isNumericPr ? 'clamp(14px, 6.5cqw, 24px)' : 'clamp(10px, 4.5cqw, 18px)', color: '#0a4a72' }}>
               {prValue}

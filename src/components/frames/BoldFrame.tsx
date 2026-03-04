@@ -14,6 +14,8 @@ interface BoldFrameProps {
   imageScale: number;
   label1?: string;
   label2?: string;
+  label1Name?: string;
+  label2Name?: string;
 }
 
 const BoldFrame = ({
@@ -28,6 +30,8 @@ const BoldFrame = ({
   imageScale,
   label1,
   label2,
+  label1Name,
+  label2Name,
 }: BoldFrameProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -261,7 +265,7 @@ const BoldFrame = ({
                 textTransform: 'uppercase',
               }}
             >
-              DISTANCE :
+              {(label1Name || 'DISTANCE').toUpperCase()} :
             </span>
             <span
               style={{
