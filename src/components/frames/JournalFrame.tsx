@@ -125,7 +125,7 @@ const JournalFrame = ({
       </div>
       
       {/* Bottom content */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 pt-0">
+      <div className="absolute left-0 right-0 pt-0" style={{ bottom: '10px', padding: '0 12px', paddingLeft: '17px' }}>
         {/* Badge */}
         <div className="mb-1.5">
           <div 
