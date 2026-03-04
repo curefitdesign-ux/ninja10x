@@ -76,7 +76,7 @@ const ArcadeFrame = ({
       {/* ── Photo Area — white-bordered, fills middle ── */}
       <div
         style={{
-          margin: '0 3.5%',
+          margin: '0 3.5% 0 3.5%',
           flex: 1,
           position: 'relative',
           minHeight: 0,
