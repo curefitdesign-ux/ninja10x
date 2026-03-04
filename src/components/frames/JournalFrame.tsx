@@ -1,5 +1,4 @@
 import { useRef, useEffect } from 'react';
-import journalBg from '@/assets/frames/journal2-lined-bg.png';
 
 interface JournalFrameProps {
   imageUrl: string;
@@ -41,12 +40,14 @@ const JournalFrame = ({
   }, [isVideo, imageUrl]);
 
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative">
-      {/* Background image */}
-      <img 
-        src={journalBg}
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover"
+    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative" style={{ background: '#fff' }}>
+      {/* CSS-generated lined notebook background */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 38px, #2a9d6a 38px, #2a9d6a 39.5px)',
+          backgroundPosition: '0 60px',
+        }}
       />
       
       {/* Photo area filling the frame - tilted 10deg, 90% size */}

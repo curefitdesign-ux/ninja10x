@@ -1,5 +1,3 @@
-import linedBg from '@/assets/frames/journal2-lined-bg.png';
-
 interface Journal2FrameProps {
   imageUrl: string;
   activity: string;
@@ -20,14 +18,15 @@ const Journal2Frame = ({ imageUrl, activity, week, day, duration, pr, imagePosit
   return (
     <div
       className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden relative"
-      style={{ containerType: 'inline-size', background: '#f5f5f0' }}
+      style={{ containerType: 'inline-size', background: '#fff' }}
     >
-      {/* Lined notebook background */}
-      <img
-        src={linedBg}
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-        style={{ opacity: 0.9 }}
+      {/* CSS-generated lined notebook background */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 38px, #2a9d6a 38px, #2a9d6a 39.5px)',
+          backgroundPosition: '0 60px',
+        }}
       />
 
       {/* Photo area — large, slightly rotated, moved up 10px + taller by 10px */}
