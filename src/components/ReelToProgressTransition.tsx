@@ -41,6 +41,7 @@ export default function ReelToProgressTransition({
   myActivities,
   onStoryTap,
   onLogActivity,
+  onCrystalTap,
   isInline = false,
 }: ReelToProgressTransitionProps) {
   const [showTiles, setShowTiles] = useState(false);
