@@ -166,6 +166,7 @@ const JournalFrame = ({
           <span className="text-black font-bold text-[11px] tracking-wide whitespace-nowrap">WEEK {week} | DAY {day}</span>
         </div>
       </div>
+    </div>
   );
 };
 
