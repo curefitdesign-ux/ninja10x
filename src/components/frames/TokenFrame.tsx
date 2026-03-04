@@ -20,6 +20,8 @@ interface TokenFrameProps {
   imageScale: number;
   label1?: string;
   label2?: string;
+  label1Name?: string;
+  label2Name?: string;
 }
 
 const TokenFrame = ({
