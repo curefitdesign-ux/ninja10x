@@ -1,6 +1,5 @@
 import { useRef, useEffect } from 'react';
 import journalBgClean from '@/assets/frames/journal-bg-clean.png';
-import paperclipImg from '@/assets/frames/paperclip.png';
 
 interface JournalFrameProps {
   imageUrl: string;
@@ -109,39 +108,25 @@ const JournalFrame = ({
         </div>
       </div>
 
-      {/* Paperclip overlaying the photo top-right */}
-      <div
-        className="absolute z-20"
-        style={{
-          top: '20px',
-          right: '30px',
-          width: '70px',
-          height: '90px',
-          transform: 'rotate(15deg)',
-          filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.2))',
-        }}
-      >
-        <img src={paperclipImg} alt="" className="w-full h-full object-contain" />
-      </div>
 
       {/* Bottom content */}
       <div className="absolute left-0 right-0 pt-0" style={{ bottom: '40px', padding: '0 12px', paddingLeft: '37px' }}>
         {/* Activity name */}
-        <h2 className="text-black font-black leading-none mb-2" style={{ fontSize: '42px' }}>{activity}</h2>
+        <h2 className="text-black font-black leading-none mb-2" style={{ fontSize: '27px' }}>{activity}</h2>
         
         {/* Stats row */}
         {(duration || pr) && (
           <div className="flex gap-6">
             {pr && (
               <div>
-                <p className="text-gray-500 font-medium mb-0.5" style={{ fontSize: '29px' }}>{metricLabel}</p>
-                <p className="text-black font-black leading-none" style={{ fontSize: '35px' }}>{pr}</p>
+                <p className="text-gray-500 font-medium mb-0.5" style={{ fontSize: '14px' }}>{metricLabel}</p>
+                <p className="text-black font-black leading-none" style={{ fontSize: '20px' }}>{pr}</p>
               </div>
             )}
             {duration && (
               <div>
-                <p className="text-gray-500 font-medium mb-0.5" style={{ fontSize: '29px' }}>{durationLabel}</p>
-                <p className="text-black font-black leading-none" style={{ fontSize: '35px' }}>{duration}</p>
+                <p className="text-gray-500 font-medium mb-0.5" style={{ fontSize: '14px' }}>{durationLabel}</p>
+                <p className="text-black font-black leading-none" style={{ fontSize: '20px' }}>{duration}</p>
               </div>
             )}
           </div>
@@ -154,7 +139,7 @@ const JournalFrame = ({
           className="inline-flex rounded-full px-2.5 py-0.5"
           style={{ background: '#2DD4A8' }}
         >
-          <span className="text-black font-bold text-[9px] tracking-wide whitespace-nowrap">WEEK {week} | DAY {day}</span>
+          <span className="text-black font-bold text-[11px] tracking-wide whitespace-nowrap">WEEK {week} | DAY {day}</span>
         </div>
       </div>
     </div>
