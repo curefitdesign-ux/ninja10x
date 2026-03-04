@@ -562,6 +562,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
       dayNumber={current.dayNumber}
       activity={current.activity}
       preserveActivity={true}
+      zIndex={80}
     />
   );
 
