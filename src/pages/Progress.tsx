@@ -171,7 +171,7 @@ const Progress = () => {
                 src={snackbarCrystal}
                 alt=""
                 className="relative z-10 flex-shrink-0"
-                style={{ width: 54, height: 54, marginLeft: -6, marginRight: 4, objectFit: 'contain' }}
+                style={{ width: 64, height: 64, marginLeft: -6, marginRight: 4, marginTop: -8, objectFit: 'contain' }}
               />
               {/* Text */}
               <span
