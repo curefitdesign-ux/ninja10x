@@ -1,5 +1,3 @@
-import paperclipImg from '@/assets/frames/paperclip-silver.png';
-import shuttlecockImg from '@/assets/frames/shuttlecock.png';
 import linedBg from '@/assets/frames/journal2-lined-bg.png';
 
 interface Journal2FrameProps {
@@ -32,39 +30,20 @@ const Journal2Frame = ({ imageUrl, activity, week, day, duration, pr, imagePosit
         style={{ opacity: 0.9 }}
       />
 
-      {/* Paperclip — top center-right */}
-      <div
-        className="absolute z-30"
-        style={{
-          top: '-3cqw',
-          right: '28cqw',
-          width: '14cqw',
-          height: '28cqw',
-        }}
-      >
-        <img
-          src={paperclipImg}
-          alt="Paperclip"
-          className="w-full h-full object-contain"
-          style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.25))' }}
-        />
-      </div>
-
-      {/* Photo area — large, slightly rotated */}
+      {/* Photo area — large, slightly rotated, moved up 10px + taller by 10px */}
       <div
         className="absolute overflow-hidden z-10"
         style={{
-          top: '4cqw',
+          top: 'calc(4cqw - 10px)',
           left: '5cqw',
           right: '5cqw',
-          height: '62cqw',
+          height: 'calc(62cqw + 10px)',
           borderRadius: '5cqw',
           transform: 'rotate(2.5deg)',
           boxShadow: '0 8px 24px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
           background: '#e8e8e8',
         }}
       >
-        {/* Aspect-filling photo */}
         <img
           src={imageUrl}
           alt="Activity"
@@ -73,40 +52,18 @@ const Journal2Frame = ({ imageUrl, activity, week, day, duration, pr, imagePosit
             transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
           }}
         />
-
-        {/* Shuttlecock sticker — bottom-left of photo */}
-        <div
-          className="absolute z-20"
-          style={{
-            bottom: '3cqw',
-            left: '3cqw',
-            width: '16cqw',
-            height: '16cqw',
-            transform: 'rotate(-15deg)',
-            filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.2))',
-          }}
-        >
-          <img
-            src={shuttlecockImg}
-            alt="Shuttlecock"
-            className="w-full h-full object-contain"
-          />
-        </div>
       </div>
 
-      {/* Bottom content area */}
+      {/* Bottom content area — moved up 10px and right 10px */}
       <div
         className="absolute left-0 right-0 z-20"
-        style={{ bottom: '3cqw', padding: '0 5cqw' }}
+        style={{ bottom: 'calc(3cqw + 10px)', padding: '0 5cqw', paddingLeft: 'calc(5cqw + 10px)' }}
       >
         {/* Badges row */}
         <div className="flex justify-between items-center" style={{ marginBottom: '2.5cqw' }}>
           <div
             className="rounded-full flex items-center justify-center"
-            style={{
-              background: '#2DD4A8',
-              padding: '1.8cqw 4cqw',
-            }}
+            style={{ background: '#2DD4A8', padding: '1.8cqw 4cqw' }}
           >
             <span
               className="font-bold tracking-wide"
@@ -117,10 +74,7 @@ const Journal2Frame = ({ imageUrl, activity, week, day, duration, pr, imagePosit
           </div>
           <div
             className="rounded-full flex items-center justify-center"
-            style={{
-              background: '#2DD4A8',
-              padding: '1.8cqw 4cqw',
-            }}
+            style={{ background: '#2DD4A8', padding: '1.8cqw 4cqw' }}
           >
             <span
               className="font-bold tracking-wide"
@@ -134,16 +88,12 @@ const Journal2Frame = ({ imageUrl, activity, week, day, duration, pr, imagePosit
         {/* Activity name */}
         <h2
           className="font-black italic leading-none"
-          style={{
-            fontSize: '10cqw',
-            color: '#000',
-            marginBottom: '2cqw',
-          }}
+          style={{ fontSize: '10cqw', color: '#000', marginBottom: '2cqw' }}
         >
           {activity}
         </h2>
 
-        {/* Stats row — 3 columns like reference */}
+        {/* Stats row */}
         {(duration || pr) && (
           <div className="flex" style={{ gap: '8cqw' }}>
             {duration && (
