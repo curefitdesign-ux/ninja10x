@@ -1,5 +1,4 @@
 import { useRef, useEffect } from 'react';
-import journalBg from '@/assets/frames/journal2-lined-bg.png';
 
 interface JournalFrameProps {
   imageUrl: string;
