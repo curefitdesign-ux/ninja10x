@@ -254,7 +254,7 @@ const ReelGeneration = () => {
         <motion.div
           className="flex flex-col items-center justify-center rounded-3xl relative overflow-hidden max-w-[340px] w-full"
           style={{
-            height: deviceHeight > 0 ? `${deviceHeight - 200}px` : 'calc(100dvh - 200px)',
+            height: deviceHeight > 0 ? `${deviceHeight - 100}px` : 'calc(100dvh - 100px)',
             background: 'linear-gradient(180deg, rgba(20, 10, 40, 0.6) 0%, rgba(0, 0, 0, 0.8) 100%)',
             border: '1px solid rgba(255, 255, 255, 0.08)',
             boxShadow: '0 0 60px rgba(139, 92, 246, 0.1), inset 0 1px 0 rgba(255,255,255,0.05)',
