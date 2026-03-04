@@ -66,7 +66,7 @@ const JournalFrame = ({
       <img src={journalBgWhite} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
       
       {/* Lines overlay — centered on top of background */}
-      <img src={journalLinesOverlay} alt="" className="absolute pointer-events-none" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'calc(100% - 50px)', height: 'calc(100% - 50px)', objectFit: 'contain' }} />
+      <img src={journalLinesOverlay} alt="" className="absolute pointer-events-none" style={{ top: 'calc(50% + 20px)', left: '50%', transform: 'translate(-50%, -50%)', width: 'calc(100% - 40px)', height: 'calc(100% - 40px)', objectFit: 'contain' }} />
       
       {/* Paper holes — horizontal row across the top */}
       {[12, 25, 38, 51, 64, 76, 89].map((leftPct) => (
@@ -130,7 +130,7 @@ const JournalFrame = ({
       {/* Bottom content */}
       <div className="absolute left-0 right-0 pt-0" style={{ bottom: '35px', padding: '0 12px', paddingLeft: '37px' }}>
         {/* Activity name */}
-        <h2 className="leading-none mb-2" style={{ fontSize: '54px', fontFamily: "'Caveat', cursive", fontWeight: 700, marginTop: '0px', color: '#3C46AF' }}>{activity}</h2>
+        <h2 className="leading-none mb-2" style={{ fontSize: '54px', fontFamily: "'Caveat', cursive", fontWeight: 700, marginTop: '20px', color: '#3C46AF' }}>{activity}</h2>
         
         {/* Stats row */}
         {(duration || pr) && (
