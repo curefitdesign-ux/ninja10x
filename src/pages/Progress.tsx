@@ -63,6 +63,14 @@ const Progress = () => {
     setShowTransitionIn(true);
     setTimeout(() => setShowTransitionIn(false), 300);
 
+    // Show week-complete snackbar for days 3, 6, 9, 12
+    if ([3, 6, 9, 12].includes(transitionDayNumber)) {
+      const weekNum = Math.ceil(transitionDayNumber / 3);
+      setCompletedWeekNum(weekNum);
+      setTimeout(() => setShowWeekSnackbar(true), 500);
+      setTimeout(() => setShowWeekSnackbar(false), 5500);
+    }
+
     const currentActivity = myActivities.find(a => a.dayNumber === transitionDayNumber);
     if (currentActivity && !currentActivity.isPublic) {
       const isProfilePublic = profile?.stories_public === true;
