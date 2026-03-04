@@ -1,7 +1,24 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import journalBgWhite from '@/assets/frames/journal-bg-white.png';
 import journalLinesOverlay from '@/assets/frames/journal-lines-overlay.png';
 import paperclipImg from '@/assets/frames/paperclip-silver.png';
+
+/** Returns an SVG path for common activities */
+const getActivityIconPath = (activity: string): string => {
+  const key = activity.toLowerCase();
+  if (key.includes('run')) return 'M13.5 5.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM9.8 8.9 7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3A6.3 6.3 0 0 0 18 13h2a8 8 0 0 1-5.3-3.4l-1-1.6a2 2 0 0 0-1.7-1 2 2 0 0 0-.7.1L6 9.8V14h2V11l1.8-.9';
+  if (key.includes('cycl') || key.includes('bike')) return 'M5 17a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm14 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12 6l-3 5h5l-1 4';
+  if (key.includes('yoga') || key.includes('zen')) return 'M12 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm0 2v6m-4 4h8m-6-4-2 4m6-4 2 4';
+  if (key.includes('swim')) return 'M2 6c.6.5 1.2 1 2.5 1C6 7 7 6 8.5 6c1 0 1.8.5 2.5 1s1.5 1 2.5 1 2-.5 2.5-1m-14 6c.6.5 1.2 1 2.5 1 1.5 0 2.5-1 4-1s2 .5 2.5 1 1.5 1 2.5 1 2-.5 2.5-1';
+  if (key.includes('trek') || key.includes('hik')) return 'M3 19h4l1-6 2 3 2-3 1 6h4M12 5l-2 3h4l-2-3Z';
+  if (key.includes('gym') || key.includes('weight') || key.includes('lift')) return 'M6.5 6.5h11M6.5 17.5h11M3 10h1.5v4H3zm17 0h1.5v4H20zM6.5 8h1v8h-1zm10 0h1v8h-1z';
+  if (key.includes('box')) return 'M18 4a2 2 0 0 0-2 2v1H8V6a2 2 0 0 0-4 0v4a2 2 0 0 0 2 2h1v3a5 5 0 0 0 10 0v-3h1a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z';
+  if (key.includes('basket')) return 'M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10A10 10 0 0 1 2 12 10 10 0 0 1 12 2Zm0 4 2.5 2-1 3h-3l-1-3Zm-4.5 5 1-3L12 6l3.5 2 1 3-2 2.5h-3Z';
+  if (key.includes('foot') || key.includes('soccer')) return 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 4 2.5 2-1 3h-3l-1-3Zm-4.5 5 1-3L12 6l3.5 2 1 3-2 2.5h-3Z';
+  if (key.includes('cricket') || key.includes('bat')) return 'M15 4l5 5-9 9-5-5zm-7 11-4 4m1-1 3 3';
+  if (key.includes('racquet') || key.includes('tennis') || key.includes('badminton')) return 'M12 2a6 6 0 0 1 6 6c0 3-2 5.5-6 8-4-2.5-6-5-6-8a6 6 0 0 1 6-6Zm0 14v6';
+  return 'M13 2 3 14h9l-1 8 10-12h-9l1-8z'; // lightning bolt default
+};
 
 interface JournalFrameProps {
   imageUrl: string;
@@ -112,7 +129,7 @@ const JournalFrame = ({
       {/* Bottom content */}
       <div className="absolute left-0 right-0 pt-0" style={{ bottom: '35px', padding: '0 12px', paddingLeft: '37px' }}>
         {/* Activity name — moved up 5px, Inter Black, +5px font size */}
-        <h2 className="text-black leading-none mb-2" style={{ fontSize: '32px', fontFamily: 'Inter, sans-serif', fontWeight: 900, marginTop: '-5px' }}>{activity}</h2>
+        <h2 className="text-black leading-none mb-2" style={{ fontSize: '34px', fontFamily: 'Inter, sans-serif', fontWeight: 900, marginTop: '-10px' }}>{activity}</h2>
         
         {/* Stats row */}
         {(duration || pr) && (
@@ -134,7 +151,7 @@ const JournalFrame = ({
       </div>
 
       {/* Activity badge — scalloped seal */}
-      <div className="absolute z-30" style={{ bottom: '25px', right: '15px', width: '80px', height: '80px' }}>
+      <div className="absolute z-30" style={{ bottom: '75px', right: '65px', width: '80px', height: '80px' }}>
         <svg viewBox="0 0 100 100" width="100%" height="100%">
           {/* Scalloped circle */}
           <path
@@ -158,9 +175,11 @@ const JournalFrame = ({
           />
           {/* Inner circle */}
           <circle cx="50" cy="50" r="34" fill="none" stroke="#6366f1" strokeWidth="1.5" opacity="0.5" />
-          {/* Ribbon icon */}
-          <text x="50" y="38" textAnchor="middle" fontSize="16" fill="#c084fc">🎖️</text>
-          {/* Activity text — wraps around center */}
+          {/* Activity-specific icon */}
+          <g transform="translate(38, 24) scale(1)">
+            <path d={getActivityIconPath(activity)} fill="none" stroke="#c084fc" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+          {/* Activity text */}
           <text x="50" y="52" textAnchor="middle" fontSize="7" fill="white" fontWeight="800" fontFamily="Inter, sans-serif" letterSpacing="0.5">
             {activity.toUpperCase()}
           </text>
