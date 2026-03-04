@@ -111,8 +111,8 @@ const JournalFrame = ({
 
       {/* Bottom content */}
       <div className="absolute left-0 right-0 pt-0" style={{ bottom: '35px', padding: '0 12px', paddingLeft: '37px' }}>
-        {/* Activity name */}
-        <h2 className="text-black font-black leading-none mb-2" style={{ fontSize: '27px' }}>{activity}</h2>
+        {/* Activity name — moved up 5px, Inter Black, +5px font size */}
+        <h2 className="text-black leading-none mb-2" style={{ fontSize: '32px', fontFamily: 'Inter, sans-serif', fontWeight: 900, marginTop: '-5px' }}>{activity}</h2>
         
         {/* Stats row */}
         {(duration || pr) && (
@@ -131,6 +131,46 @@ const JournalFrame = ({
             )}
           </div>
         )}
+      </div>
+
+      {/* Activity badge — scalloped seal */}
+      <div className="absolute z-30" style={{ bottom: '25px', right: '15px', width: '80px', height: '80px' }}>
+        <svg viewBox="0 0 100 100" width="100%" height="100%">
+          {/* Scalloped circle */}
+          <path
+            d={(() => {
+              const cx = 50, cy = 50, points = 18, outerR = 48, innerR = 42;
+              let d = '';
+              for (let i = 0; i < points; i++) {
+                const outerAngle = (i / points) * Math.PI * 2 - Math.PI / 2;
+                const innerAngle = ((i + 0.5) / points) * Math.PI * 2 - Math.PI / 2;
+                const ox = cx + outerR * Math.cos(outerAngle);
+                const oy = cy + outerR * Math.sin(outerAngle);
+                const ix = cx + innerR * Math.cos(innerAngle);
+                const iy = cy + innerR * Math.sin(innerAngle);
+                d += (i === 0 ? `M${ox},${oy}` : `L${ox},${oy}`) + `L${ix},${iy}`;
+              }
+              return d + 'Z';
+            })()}
+            fill="#1a1f3d"
+            stroke="#2a3060"
+            strokeWidth="1"
+          />
+          {/* Inner circle */}
+          <circle cx="50" cy="50" r="34" fill="none" stroke="#6366f1" strokeWidth="1.5" opacity="0.5" />
+          {/* Ribbon icon */}
+          <text x="50" y="38" textAnchor="middle" fontSize="16" fill="#c084fc">🎖️</text>
+          {/* Activity text — wraps around center */}
+          <text x="50" y="52" textAnchor="middle" fontSize="7" fill="white" fontWeight="800" fontFamily="Inter, sans-serif" letterSpacing="0.5">
+            {activity.toUpperCase()}
+          </text>
+          <text x="50" y="62" textAnchor="middle" fontSize="5.5" fill="#a78bfa" fontWeight="700" fontFamily="Inter, sans-serif" letterSpacing="0.8">
+            COMPLETED
+          </text>
+          {/* Decorative stars */}
+          <text x="28" y="30" fontSize="5" fill="#a78bfa" opacity="0.7">✦</text>
+          <text x="72" y="30" fontSize="5" fill="#a78bfa" opacity="0.7">✦</text>
+        </svg>
       </div>
 
       {/* WEEK | DAY badge — top right corner */}
