@@ -145,7 +145,7 @@ const Progress = () => {
           <motion.div
             key="week-snackbar"
             className="absolute left-0 right-0 z-[60] flex justify-center"
-            style={{ bottom: 'calc(env(safe-area-inset-bottom, 12px) + 24px)' }}
+            style={{ bottom: 'calc(env(safe-area-inset-bottom, 12px) + 74px)' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
@@ -171,7 +171,7 @@ const Progress = () => {
                 src={snackbarCrystal}
                 alt=""
                 className="relative z-10 flex-shrink-0"
-                style={{ width: 54, height: 54, marginLeft: -6, marginRight: 4, objectFit: 'contain' }}
+                style={{ width: 64, height: 64, marginLeft: -6, marginRight: 4, marginTop: -8, objectFit: 'contain' }}
               />
               {/* Text */}
               <span
