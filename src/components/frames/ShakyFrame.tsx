@@ -68,6 +68,8 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
             backdropFilter: 'blur(10px)',
             border: '1px solid rgba(255,255,255,0.25)',
             padding: '1cqw 2.5cqw',
+            marginTop: '20px',
+            marginLeft: '10px',
           }}
         >
           <span className="text-white font-semibold tracking-wider" style={{ fontSize: 'calc(2.5cqw + 5px)', fontFamily }}>WEEK {week} | DAY {day}</span>
