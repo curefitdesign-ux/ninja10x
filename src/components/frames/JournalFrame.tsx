@@ -78,7 +78,7 @@ const JournalFrame = ({
         className="absolute left-4 right-4 rounded-xl overflow-hidden bg-black"
         style={{
           top: 'calc(2.5rem - 5px)',
-          bottom: '130px',
+          bottom: '100px',
           transform: 'rotate(10deg) scale(0.8)',
         }}
       >
@@ -125,7 +125,7 @@ const JournalFrame = ({
       </div>
       
       {/* Bottom content */}
-      <div className="absolute left-0 right-0 pt-0" style={{ bottom: '10px', padding: '0 12px', paddingLeft: '17px' }}>
+      <div className="absolute left-0 right-0 pt-0" style={{ bottom: '40px', padding: '0 12px', paddingLeft: '37px' }}>
         {/* Badge */}
         <div className="mb-1.5">
           <div 
