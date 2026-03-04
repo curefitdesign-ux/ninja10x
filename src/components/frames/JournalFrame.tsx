@@ -151,7 +151,7 @@ const JournalFrame = ({
       </div>
 
       {/* Activity badge — scalloped seal */}
-      <div className="absolute z-30" style={{ bottom: '25px', right: '15px', width: '80px', height: '80px' }}>
+      <div className="absolute z-30" style={{ bottom: '75px', right: '65px', width: '80px', height: '80px' }}>
         <svg viewBox="0 0 100 100" width="100%" height="100%">
           {/* Scalloped circle */}
           <path
@@ -175,9 +175,11 @@ const JournalFrame = ({
           />
           {/* Inner circle */}
           <circle cx="50" cy="50" r="34" fill="none" stroke="#6366f1" strokeWidth="1.5" opacity="0.5" />
-          {/* Ribbon icon */}
-          <text x="50" y="38" textAnchor="middle" fontSize="16" fill="#c084fc">🎖️</text>
-          {/* Activity text — wraps around center */}
+          {/* Activity-specific icon */}
+          <g transform="translate(38, 24) scale(1)">
+            <path d={getActivityIconPath(activity)} fill="none" stroke="#c084fc" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+          {/* Activity text */}
           <text x="50" y="52" textAnchor="middle" fontSize="7" fill="white" fontWeight="800" fontFamily="Inter, sans-serif" letterSpacing="0.5">
             {activity.toUpperCase()}
           </text>
