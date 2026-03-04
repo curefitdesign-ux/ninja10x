@@ -134,7 +134,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
             )}
             {duration && (
               <div style={{ background: '#F45B4A', borderRadius: '2px', padding: '4px 6px' }}>
-                <span className="text-white font-normal uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '4cqw', letterSpacing: '0.5px' }}>
+                <span className="text-white font-normal uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'calc(4cqw + 3px)', letterSpacing: '0.5px' }}>
                   {durationLabel} : {duration}
                 </span>
               </div>
