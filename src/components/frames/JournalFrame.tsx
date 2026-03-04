@@ -72,7 +72,7 @@ const JournalFrame = ({
       <div 
         className="absolute left-4 right-4 rounded-xl overflow-hidden bg-black"
         style={{
-          top: 'calc(2.5rem - 5px)',
+          top: 'calc(2.5rem - 25px)',
           bottom: '100px',
           transform: 'rotate(10deg) scale(0.8)',
         }}
@@ -105,7 +105,7 @@ const JournalFrame = ({
       </div>
 
       {/* Paperclip on top of image */}
-      <div className="absolute z-20" style={{ top: '25px', right: '35px', width: '65px' }}>
+      <div className="absolute z-20" style={{ top: '15px', right: '85px', width: '45px' }}>
         <img src={paperclipImg} alt="" className="w-full h-full object-contain pointer-events-none" />
       </div>
 
