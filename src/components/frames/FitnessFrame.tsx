@@ -55,7 +55,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       {/* CONQUER WILL POWER tag */}
       <div className="absolute z-20" style={{ top: 'calc(8cqw + 20px)', right: '3cqw' }}>
         <div style={{ background: '#F45B4A', borderRadius: '2px', padding: '4px 6px' }}>
-          <span className="text-white font-normal uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '3.5cqw', letterSpacing: '0.5px' }}>
+          <span className="text-white font-normal uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'calc(3.5cqw + 3px)', letterSpacing: '0.5px' }}>
             CONQUER WILL POWER
           </span>
         </div>
