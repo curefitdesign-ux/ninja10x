@@ -126,7 +126,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
         <div className="absolute z-20" style={{ left: '3cqw', bottom: 'calc(18% - 30px)' }}>
           <div className="flex flex-col" style={{ gap: '1.5cqw' }}>
             {pr && (
-              <div style={{ background: '#F45B4A', borderRadius: '2px', padding: '4px 6px' }}>
+              <div style={{ background: '#F45B4A', borderRadius: '2px', padding: '2px 6px' }}>
                 <span className="text-white font-normal uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'calc(4cqw + 3px)', letterSpacing: '0.5px' }}>
                   {metricLabel} : {pr}
                 </span>
