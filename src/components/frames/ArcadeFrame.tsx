@@ -76,12 +76,12 @@ const ArcadeFrame = ({
       {/* ── Photo Area — white-bordered, fills middle ── */}
       <div
         style={{
-          margin: '0 3.5% 0 3.5%',
+          margin: '0 3.5%',
           flex: '1 1 0',
           position: 'relative',
           minHeight: 0,
           border: '1.5px solid rgba(255, 255, 255, 0.6)',
-          marginBottom: '0px',
+          marginBottom: '20px',
         }}
       >
         {/* Journey info overlay — top-left inside photo */}
