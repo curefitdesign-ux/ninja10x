@@ -116,7 +116,7 @@ const JournalFrame = ({
         
         {/* Stats row */}
         {(duration || pr) && (
-          <div className="flex" style={{ gap: '56px' }}>
+          <div className="flex" style={{ gap: '86px' }}>
             {pr && (
               <div>
                 <p className="text-gray-500 font-medium mb-0.5" style={{ fontSize: '14px' }}>{metricLabel}</p>
