@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import shuttlecockIcon from '@/assets/frames/shuttlecock.png';
-import journalBg from '@/assets/frames/journal-bg.png';
+import journalBg from '@/assets/frames/journal2-lined-bg.png';
 
 interface JournalFrameProps {
   imageUrl: string;
