@@ -72,7 +72,7 @@ const JournalFrame = ({
       <div 
         className="absolute left-4 right-4 rounded-xl overflow-hidden bg-black"
         style={{
-          top: 'calc(2.5rem - 5px)',
+          top: 'calc(2.5rem - 25px)',
           bottom: '100px',
           transform: 'rotate(10deg) scale(0.8)',
         }}
