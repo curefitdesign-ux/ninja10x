@@ -1356,8 +1356,35 @@ const Preview = () => {
                   </span>
                 </button>
                 
-                {/* Secondary metric row */}
-                {config.secondaryInputType !== 'none' && (
+                {/* Secondary metric - chips or numeric */}
+                {config.secondaryInputType === 'chips' ? (
+                  <div className="py-3.5">
+                    <div className="flex items-baseline gap-2 mb-3">
+                      <span className="text-white/85 text-[15px] font-semibold">{config.secondaryMetric}</span>
+                      <span className="text-[11px] text-white/40">tap to select</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {(getCurrentChipOptions() || []).map((chip) => {
+                        const isSelected = pr === chip;
+                        return (
+                          <button
+                            key={chip}
+                            onClick={() => handleChipSelect(chip)}
+                            className="px-3.5 py-1.5 rounded-xl text-[13px] font-semibold transition-all active:scale-95"
+                            style={{
+                              background: isSelected ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.08)',
+                              color: isSelected ? '#fff' : 'rgba(255,255,255,0.55)',
+                              border: isSelected ? '1px solid rgba(255,255,255,0.45)' : '1px solid rgba(255,255,255,0.12)',
+                              boxShadow: isSelected ? '0 2px 12px rgba(255,255,255,0.15)' : 'none',
+                            }}
+                          >
+                            {chip}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : config.secondaryInputType !== 'none' ? (
                   <button 
                     onClick={() => { handleTap('pr'); openEditSheet('pr'); }}
                     className={`w-full flex justify-between items-center py-3.5 tap-bounce min-h-[52px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
@@ -1374,7 +1401,7 @@ const Preview = () => {
                       {pr || '—'}
                     </span>
                   </button>
-                )}
+                ) : null}
               </div>
             );
           })()}
