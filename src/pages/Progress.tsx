@@ -183,7 +183,7 @@ const Progress = () => {
               {/* Chevron */}
               <ChevronRight
                 className="relative z-10 flex-shrink-0"
-                style={{ width: 16, height: 16, color: '#999', marginRight: 12 }}
+                style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.6)', marginRight: 12 }}
                 strokeWidth={2}
               />
             </button>
