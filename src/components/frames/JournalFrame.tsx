@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import journalBgClean from '@/assets/frames/journal-bg-clean.png';
+import paperclipImg from '@/assets/frames/paperclip-silver.png';
 
 interface JournalFrameProps {
   imageUrl: string;
