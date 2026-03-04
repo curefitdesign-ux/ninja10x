@@ -104,18 +104,51 @@ const ReelGeneration = () => {
   useEffect(() => {
     if (hasTriggered.current) return;
 
-    const photos = locationState?.weekPhotos;
-    const weekNumber = locationState?.weekNumber || 1;
-    const forceRegenerate = locationState?.forceRegenerate || false;
+    const startGeneration = async () => {
+      let photos = locationState?.weekPhotos;
+      let weekNumber = locationState?.weekNumber || 1;
+      const forceRegenerate = locationState?.forceRegenerate || false;
 
-    if (!photos || photos.length < 3) {
-      setError('Need at least 3 photos to generate a reel');
-      return;
-    }
+      // Fallback: if no state passed (e.g. page refresh), fetch from DB
+      if (!photos || photos.length < 3) {
+        console.log('[ReelGeneration] No photos in state, fetching from DB...');
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (authUser) {
+          const { data: dbActivities } = await supabase
+            .from('journey_activities')
+            .select('*')
+            .eq('user_id', authUser.id)
+            .order('day_number', { ascending: true });
 
-    hasTriggered.current = true;
+          if (dbActivities && dbActivities.length >= 3) {
+            // Find the latest completed week (groups of 3)
+            const completedWeeks = Math.floor(dbActivities.length / 3);
+            weekNumber = completedWeeks;
+            const weekStart = (weekNumber - 1) * 3;
+            const weekActivities = dbActivities.slice(weekStart, weekStart + 3);
 
-    const run = async () => {
+            photos = weekActivities.map(a => ({
+              id: a.id,
+              imageUrl: a.original_url || a.storage_url,
+              activity: a.activity || 'Workout',
+              duration: a.duration || undefined,
+              pr: a.pr || undefined,
+              uploadDate: new Date(a.created_at).toISOString().split('T')[0],
+              dayNumber: a.day_number,
+              isVideo: a.is_video || false,
+            }));
+            console.log('[ReelGeneration] Fetched', photos.length, 'photos from DB for week', weekNumber);
+          }
+        }
+      }
+
+      if (!photos || photos.length < 3) {
+        setError('Need at least 3 photos to generate a reel');
+        return;
+      }
+
+      hasTriggered.current = true;
+
       if (forceRegenerate) {
         // NUCLEAR: Clear ALL caches — local IndexedDB + cloud storage
         console.log('[ReelGeneration] 🔥 FORCE REGENERATE — nuking all caches');
@@ -205,8 +238,8 @@ const ReelGeneration = () => {
       }
     };
 
-    run();
-  }, [locationState, navigateToReel]);
+    startGeneration();
+  }, [locationState, navigateToReel, user, profile]);
 
   const handleClose = useCallback(() => {
     navigate(-1);
