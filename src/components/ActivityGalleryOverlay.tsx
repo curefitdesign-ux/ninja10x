@@ -571,13 +571,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
       {showEditSheet && editSheet}
     </>
   );
-        </DynamicBlurBackground>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-
-  return createPortal(overlay, portalContainer);
 });
 
 export default ActivityGalleryOverlay;
