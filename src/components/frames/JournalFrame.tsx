@@ -1,4 +1,5 @@
 import { useRef, useEffect, useMemo } from 'react';
+import '@fontsource/caveat/700.css';
 import journalBgWhite from '@/assets/frames/journal-bg-white.png';
 import journalLinesOverlay from '@/assets/frames/journal-lines-overlay.png';
 import paperclipImg from '@/assets/frames/paperclip-silver.png';
