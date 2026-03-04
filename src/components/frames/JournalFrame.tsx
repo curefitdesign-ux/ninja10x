@@ -152,7 +152,7 @@ const JournalFrame = ({
       </div>
 
       {/* Top badges row */}
-      <div className="absolute z-30 flex items-center justify-between" style={{ top: '50px', left: '20px', right: '20px' }}>
+      <div className="absolute z-30 flex items-center justify-between" style={{ top: '65px', left: '20px', right: '20px' }}>
         <div 
           className="inline-flex rounded-full px-2.5 py-0.5"
           style={{ background: '#2DD4A8' }}
