@@ -307,6 +307,11 @@ const Progress = () => {
           myActivities={myActivities.map(a => ({ id: a.id, dayNumber: a.dayNumber, storageUrl: a.storageUrl, originalUrl: a.originalUrl, isVideo: a.isVideo, activity: a.activity, frame: a.frame, duration: a.duration, pr: a.pr, createdAt: a.createdAt, reactionCount: a.reactionCount, reactions: a.reactions, reactorProfiles: a.reactorProfiles }))}
           onStoryTap={handleStoryTap}
           onLogActivity={() => setShowMediaSourceSheet(true)}
+          onCrystalTap={(weekNum) => {
+            setCompletedWeekNum(weekNum);
+            setShowWeekSnackbar(true);
+            setTimeout(() => setShowWeekSnackbar(false), 5000);
+          }}
           isInline={true}
         />
       </div>
