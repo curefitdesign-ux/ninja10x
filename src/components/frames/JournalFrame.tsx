@@ -1,4 +1,5 @@
 import { useRef, useEffect, useMemo } from 'react';
+import '@fontsource/caveat/700.css';
 import journalBgWhite from '@/assets/frames/journal-bg-white.png';
 import journalLinesOverlay from '@/assets/frames/journal-lines-overlay.png';
 import paperclipImg from '@/assets/frames/paperclip-silver.png';
@@ -128,30 +129,30 @@ const JournalFrame = ({
 
       {/* Bottom content */}
       <div className="absolute left-0 right-0 pt-0" style={{ bottom: '35px', padding: '0 12px', paddingLeft: '37px' }}>
-        {/* Activity name — moved up 5px, Inter Black, +5px font size */}
-        <h2 className="text-black leading-none mb-2" style={{ fontSize: '34px', fontFamily: 'Inter, sans-serif', fontWeight: 900, marginTop: '-10px' }}>{activity}</h2>
+        {/* Activity name */}
+        <h2 className="text-black leading-none mb-2" style={{ fontSize: '34px', fontFamily: "'Caveat', cursive", fontWeight: 700, marginTop: '-10px' }}>{activity}</h2>
         
         {/* Stats row */}
         {(duration || pr) && (
           <div className="flex" style={{ gap: '86px' }}>
             {pr && (
               <div>
-                <p className="text-gray-500 font-medium mb-0.5" style={{ fontSize: '14px' }}>{metricLabel}</p>
-                <p className="text-black font-black leading-none" style={{ fontSize: '20px' }}>{pr}</p>
+                <p className="text-gray-500 mb-0.5" style={{ fontSize: '14px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{metricLabel}</p>
+                <p className="text-black leading-none" style={{ fontSize: '20px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{pr}</p>
               </div>
             )}
             {duration && (
               <div>
-                <p className="text-gray-500 font-medium mb-0.5" style={{ fontSize: '14px' }}>{durationLabel}</p>
-                <p className="text-black font-black leading-none" style={{ fontSize: '20px' }}>{duration}</p>
+                <p className="text-gray-500 mb-0.5" style={{ fontSize: '14px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{durationLabel}</p>
+                <p className="text-black leading-none" style={{ fontSize: '20px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{duration}</p>
               </div>
             )}
           </div>
         )}
       </div>
 
-      {/* Activity badge — scalloped seal */}
-      <div className="absolute z-30" style={{ bottom: '75px', right: '65px', width: '80px', height: '80px' }}>
+      {/* Activity badge — scalloped seal (icon only) */}
+      <div className="absolute z-30" style={{ bottom: '175px', right: '165px', width: '60px', height: '60px' }}>
         <svg viewBox="0 0 100 100" width="100%" height="100%">
           {/* Scalloped circle */}
           <path
@@ -175,20 +176,13 @@ const JournalFrame = ({
           />
           {/* Inner circle */}
           <circle cx="50" cy="50" r="34" fill="none" stroke="#6366f1" strokeWidth="1.5" opacity="0.5" />
-          {/* Activity-specific icon */}
-          <g transform="translate(38, 24) scale(1)">
-            <path d={getActivityIconPath(activity)} fill="none" stroke="#c084fc" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          {/* Activity-specific icon — centered and larger */}
+          <g transform="translate(35, 35) scale(1.25)">
+            <path d={getActivityIconPath(activity)} fill="none" stroke="#c084fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </g>
-          {/* Activity text */}
-          <text x="50" y="52" textAnchor="middle" fontSize="7" fill="white" fontWeight="800" fontFamily="Inter, sans-serif" letterSpacing="0.5">
-            {activity.toUpperCase()}
-          </text>
-          <text x="50" y="62" textAnchor="middle" fontSize="5.5" fill="#a78bfa" fontWeight="700" fontFamily="Inter, sans-serif" letterSpacing="0.8">
-            COMPLETED
-          </text>
           {/* Decorative stars */}
-          <text x="28" y="30" fontSize="5" fill="#a78bfa" opacity="0.7">✦</text>
-          <text x="72" y="30" fontSize="5" fill="#a78bfa" opacity="0.7">✦</text>
+          <text x="28" y="25" fontSize="6" fill="#a78bfa" opacity="0.7">✦</text>
+          <text x="72" y="25" fontSize="6" fill="#a78bfa" opacity="0.7">✦</text>
         </svg>
       </div>
 
