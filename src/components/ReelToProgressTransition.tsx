@@ -330,7 +330,7 @@ export default function ReelToProgressTransition({
 
             {/* Gamified Journey Path */}
             {showTiles && (
-              <div className="w-full mx-auto" style={{ maxWidth: "400px" }}>
+              <div className="w-full mx-auto" style={{ maxWidth: "400px", marginTop: -20 }}>
                 <GamifiedJourneyPath completedActivities={myActivities.length} onCrystalTap={onCrystalTap} />
               </div>
             )}
