@@ -1,4 +1,6 @@
 import { useRef, useEffect } from 'react';
+import paperclipImg from '@/assets/frames/paperclip-silver.png';
+import shuttlecockImg from '@/assets/frames/shuttlecock.png';
 
 interface JournalFrameProps {
   imageUrl: string;
