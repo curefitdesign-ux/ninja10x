@@ -130,7 +130,7 @@ const JournalFrame = ({
       {/* Bottom content */}
       <div className="absolute left-0 right-0 pt-0" style={{ bottom: '35px', padding: '0 12px', paddingLeft: '37px' }}>
         {/* Activity name */}
-        <h2 className="leading-none mb-2" style={{ fontSize: '54px', fontFamily: "'Caveat', cursive", fontWeight: 700, marginTop: '-10px', color: '#3C46AF' }}>{activity}</h2>
+        <h2 className="leading-none mb-2" style={{ fontSize: '54px', fontFamily: "'Caveat', cursive", fontWeight: 700, marginTop: '0px', color: '#3C46AF' }}>{activity}</h2>
         
         {/* Stats row */}
         {(duration || pr) && (
@@ -138,13 +138,13 @@ const JournalFrame = ({
             {pr && (
               <div>
                 <p className="text-gray-500 mb-0.5" style={{ fontSize: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>{metricLabel}</p>
-                <p className="text-black leading-none" style={{ fontSize: '30px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{pr}</p>
+                <p className="leading-none" style={{ fontSize: '30px', fontFamily: "'Caveat', cursive", fontWeight: 700, color: '#3C46AF' }}>{pr}</p>
               </div>
             )}
             {duration && (
               <div>
                 <p className="text-gray-500 mb-0.5" style={{ fontSize: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>{durationLabel}</p>
-                <p className="text-black leading-none" style={{ fontSize: '30px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{duration}</p>
+                <p className="leading-none" style={{ fontSize: '30px', fontFamily: "'Caveat', cursive", fontWeight: 700, color: '#3C46AF' }}>{duration}</p>
               </div>
             )}
           </div>
