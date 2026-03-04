@@ -139,7 +139,7 @@ const JournalFrame = ({
           className="inline-flex rounded-full px-2.5 py-0.5"
           style={{ background: '#2DD4A8' }}
         >
-          <span className="text-black font-bold text-[9px] tracking-wide whitespace-nowrap">WEEK {week} | DAY {day}</span>
+          <span className="text-black font-bold text-[11px] tracking-wide whitespace-nowrap">WEEK {week} | DAY {day}</span>
         </div>
       </div>
     </div>
