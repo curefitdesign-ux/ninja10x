@@ -548,14 +548,29 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               document.body,
             )}
 
-          {/* Edit/Replace Sheet */}
-          <MediaSourceSheet
-            isOpen={showEditSheet}
-            onClose={() => setShowEditSheet(false)}
-            dayNumber={current.dayNumber}
-            activity={current.activity}
-            preserveActivity={true}
-          />
+          {/* Edit/Replace Sheet — rendered outside the overlay via portal to document.body */}
+        </DynamicBlurBackground>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  const editSheet = (
+    <MediaSourceSheet
+      isOpen={showEditSheet}
+      onClose={() => setShowEditSheet(false)}
+      dayNumber={current.dayNumber}
+      activity={current.activity}
+      preserveActivity={true}
+    />
+  );
+
+  return (
+    <>
+      {createPortal(overlay, portalContainer)}
+      {showEditSheet && editSheet}
+    </>
+  );
         </DynamicBlurBackground>
         </motion.div>
       )}
