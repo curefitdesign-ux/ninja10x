@@ -151,7 +151,7 @@ const TokenFrame = ({
       <div
         className="absolute left-0 right-0 flex items-end justify-between"
         style={{
-          bottom: '20px',
+          bottom: '5cqw',
           height: '14%',
           paddingLeft: '8%',
           paddingRight: '8%',

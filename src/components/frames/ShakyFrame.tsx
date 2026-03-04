@@ -19,7 +19,6 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
   const durationLabel = label2 || 'Duration';
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Ensure video plays on mount and when URL changes
   useEffect(() => {
     if (isVideo && videoRef.current) {
       videoRef.current.load();
@@ -35,10 +34,7 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
           <video 
             ref={videoRef}
             src={imageUrl}
-            autoPlay
-            loop
-            muted
-            playsInline
+            autoPlay loop muted playsInline
             className="absolute inset-0 w-full h-full object-cover"
             style={{
               transform: (imagePosition.x || imagePosition.y || imageScale !== 1) ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` : `scale(${imageScale})`,
@@ -57,24 +53,26 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
       </div>
       
       {/* Content */}
-      <div className="absolute inset-0 p-4 flex flex-col">
+      <div className="absolute inset-0 flex flex-col" style={{ padding: '4cqw' }}>
         {/* Week/Day badge - top left */}
         <div 
-          className="inline-flex self-start rounded-full px-2.5 py-1"
+          className="inline-flex self-start rounded-full"
           style={{
             background: 'rgba(255,255,255,0.2)',
             backdropFilter: 'blur(10px)',
             border: '1px solid rgba(255,255,255,0.25)',
+            padding: '1cqw 2.5cqw',
           }}
         >
-          <span className="text-white font-semibold text-[10px] tracking-wider">WEEK {week} | DAY {day}</span>
+          <span className="text-white font-semibold tracking-wider" style={{ fontSize: '2.5cqw' }}>WEEK {week} | DAY {day}</span>
         </div>
         
         {/* Activity name */}
         <h2 
-          className="text-white font-black italic mt-2 leading-[0.95]"
+          className="text-white font-black italic leading-[0.95]"
           style={{
-            fontSize: 'clamp(28px, 13cqw, 40px)',
+            fontSize: '13cqw',
+            marginTop: '2cqw',
             textShadow: '2px 4px 12px rgba(0,0,0,0.15)',
           }}
         >
@@ -84,37 +82,37 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
         {/* Spacer */}
         <div className="flex-1" />
         
-        {/* Stats at bottom - only show if user entered values */}
+        {/* Stats at bottom */}
         {(duration || pr) && (
-          <div className="flex gap-6">
+          <div className="flex" style={{ gap: '6cqw' }}>
             {duration && (
               <div className="flex-1">
-                <p className="text-white/60 text-[10px] font-medium mb-0.5 tracking-wide">{durationLabel}</p>
+                <p className="text-white/60 font-medium tracking-wide" style={{ fontSize: '2.5cqw', marginBottom: '0.5cqw' }}>{durationLabel}</p>
                 <p 
-                  className="text-white font-bold leading-none text-xl animate-subtle-pulse"
-                  style={{ fontVariantNumeric: 'tabular-nums' }}
+                  className="text-white font-bold leading-none animate-subtle-pulse"
+                  style={{ fontSize: '5.5cqw', fontVariantNumeric: 'tabular-nums' }}
                 >
                   {duration}
                 </p>
-                <div className="flex items-end gap-0.5 mt-2 h-6">
-                  <div className="w-2.5 h-2.5 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0s' }} />
-                  <div className="w-2.5 h-5 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0.2s' }} />
-                  <div className="w-2.5 h-6 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0.4s' }} />
-                  <div className="w-2.5 h-4 bg-white/20 rounded-sm animate-subtle-float" style={{ animationDelay: '0.6s' }} />
+                <div className="flex items-end" style={{ gap: '0.5cqw', marginTop: '2cqw', height: '6cqw' }}>
+                  <div className="bg-white/20 rounded-sm animate-subtle-float" style={{ width: '2.5cqw', height: '2.5cqw', animationDelay: '0s' }} />
+                  <div className="bg-white/20 rounded-sm animate-subtle-float" style={{ width: '2.5cqw', height: '5cqw', animationDelay: '0.2s' }} />
+                  <div className="bg-white/20 rounded-sm animate-subtle-float" style={{ width: '2.5cqw', height: '6cqw', animationDelay: '0.4s' }} />
+                  <div className="bg-white/20 rounded-sm animate-subtle-float" style={{ width: '2.5cqw', height: '4cqw', animationDelay: '0.6s' }} />
                 </div>
               </div>
             )}
             
             {pr && (
               <div className="flex-1">
-                <p className="text-white/60 text-[10px] font-medium mb-0.5 tracking-wide">{metricLabel}</p>
+                <p className="text-white/60 font-medium tracking-wide" style={{ fontSize: '2.5cqw', marginBottom: '0.5cqw' }}>{metricLabel}</p>
                 <p 
-                  className="text-white font-bold leading-none text-xl animate-subtle-pulse"
-                  style={{ fontVariantNumeric: 'tabular-nums', animationDelay: '0.5s' }}
+                  className="text-white font-bold leading-none animate-subtle-pulse"
+                  style={{ fontSize: '5.5cqw', fontVariantNumeric: 'tabular-nums', animationDelay: '0.5s' }}
                 >
                   {pr}
                 </p>
-                <svg className="w-16 h-6 mt-2 animate-subtle-wave" viewBox="0 0 96 40" fill="none">
+                <svg style={{ width: '16cqw', height: '6cqw', marginTop: '2cqw' }} viewBox="0 0 96 40" fill="none">
                   <path 
                     d="M0 30 L14 22 L28 26 L42 14 L56 20 L70 10 L84 14 L96 6" 
                     fill="none" 
