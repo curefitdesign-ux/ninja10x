@@ -362,6 +362,7 @@ const ReelGeneration = () => {
 
           {/* Error state */}
           {error && (
+            <></>
           )}
         </motion.div>
       </div>
