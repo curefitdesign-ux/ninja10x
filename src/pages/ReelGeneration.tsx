@@ -308,21 +308,35 @@ const ReelGeneration = () => {
                 <>Generating<br />your week journey</>
               )}
             </motion.h2>
+
+            {/* Sub copy — inside centered group when error */}
+            {error && (
+              <motion.p
+                className="text-sm text-white/70 text-center font-semibold px-6 mt-5"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                {error}
+              </motion.p>
+            )}
           </div>
 
-          {/* Motivational phrase */}
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={error || motivationalPhrase}
-              className={`text-sm text-white/70 text-center font-semibold mb-3 px-6 ${error ? 'mt-5' : ''}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              {error || motivationalPhrase}
-            </motion.p>
-          </AnimatePresence>
+          {/* Motivational phrase — below centered group when generating */}
+          {!error && (
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={motivationalPhrase}
+                className="text-sm text-white/70 text-center font-semibold mb-3 px-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {motivationalPhrase}
+              </motion.p>
+            </AnimatePresence>
+          )}
 
           {/* Phase label with crossfade */}
           {/* Phase label */}
