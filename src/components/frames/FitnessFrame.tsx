@@ -149,7 +149,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
           className="font-black leading-[0.9] uppercase"
           style={{ color: '#F4E14D', fontFamily: "'Bebas Neue', sans-serif", fontSize: '43px', letterSpacing: '0px', textShadow: '2px 3px 4px rgba(0,0,0,0.35)' }}
         >
-          Week {week} / Day {((day - 1) % 3) + 1}
+          W{week}/D{((day - 1) % 3) + 1}
         </h3>
         <h4 
           className="font-black leading-[0.95] uppercase"
