@@ -43,29 +43,8 @@ const JournalFrame = ({
 
   return (
     <div className="w-[90%] mx-auto aspect-[9/16] rounded-[24px] overflow-hidden shadow-2xl relative" style={{ background: '#fff' }}>
-      {/* CSS-generated lined notebook background */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 38px, #2a9d6a 38px, #2a9d6a 39.5px)',
-          backgroundPosition: '0 60px',
-        }}
-      />
-
-      {/* Paperclip — top center-right, overlapping the photo */}
-      <div
-        className="absolute z-30"
-        style={{
-          top: '-8px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '40px',
-          height: '80px',
-          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
-        }}
-      >
-        <img src={paperclipImg} alt="" className="w-full h-full object-contain" />
-      </div>
+      {/* Background image */}
+      <img src={journalBgClean} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
       
       {/* Photo area filling the frame - tilted 10deg, 90% size */}
       <div 
