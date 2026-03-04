@@ -265,7 +265,7 @@ const BoldFrame = ({
                 textTransform: 'uppercase',
               }}
             >
-              DISTANCE :
+              {(label1Name || 'DISTANCE').toUpperCase()} :
             </span>
             <span
               style={{
