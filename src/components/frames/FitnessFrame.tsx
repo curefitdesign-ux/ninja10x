@@ -153,7 +153,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
         </h3>
         <h4 
           className="font-black leading-[0.95] uppercase"
-          style={{ color: '#FFFFFF', fontFamily: "'Bebas Neue', sans-serif", fontSize: '43px', letterSpacing: '0px', textShadow: '3px 4px 8px rgba(0,0,0,0.5)', marginTop: '2px' }}
+          style={{ color: '#FFFFFF', fontFamily: "'Bebas Neue', sans-serif", fontSize: '59px', letterSpacing: '0px', textShadow: '3px 4px 8px rgba(0,0,0,0.5)', marginTop: '2px' }}
         >
           Journey
         </h4>
