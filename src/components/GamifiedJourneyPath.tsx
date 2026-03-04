@@ -15,6 +15,7 @@ import level4Img from '@/assets/progress/level-4.png';
 
 interface GamifiedJourneyPathProps {
   completedActivities: number;
+  onCrystalTap?: (weekNum: number) => void;
 }
 
 const PATH_W = 380;
@@ -22,7 +23,7 @@ const PATH_H = 543;
 const TILE_W = 50;
 const TILE_H = 50;
 
-const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>(function GamifiedJourneyPath({ completedActivities }, ref) {
+const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>(function GamifiedJourneyPath({ completedActivities, onCrystalTap }, ref) {
   const tiles = useMemo(() => {
     const STEP_X = 50;
     const STEP_Y = 28;
@@ -140,11 +141,11 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.18, delay: tile.index * 0.03 }}
                   />
-                  {/* Diamond floating above the tile */}
+                  {/* Diamond floating above the tile — tappable */}
                   <motion.img
                     src={crystal5Img}
                     alt={`Week milestone`}
-                    className="absolute pointer-events-none"
+                    className="absolute cursor-pointer"
                     style={{
                       width: 36,
                       height: 'auto',
@@ -158,6 +159,11 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
                     initial={{ opacity: 0, scale: 0.6 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ type: 'spring', stiffness: 200, damping: 16, delay: tile.index * 0.03 }}
+                    whileTap={{ scale: 0.85 }}
+                    onClick={() => {
+                      const weekNum = Math.floor(tile.index / 3) + 1;
+                      onCrystalTap?.(weekNum);
+                    }}
                   />
                 </>
               ) : (
