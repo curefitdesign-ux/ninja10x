@@ -124,53 +124,38 @@ const JournalFrame = ({
         <img src={paperclipImg} alt="" className="w-full h-full object-contain" />
       </div>
 
-      {/* Shuttlecock sticker — bottom-left of photo */}
-      <div
-        className="absolute z-20"
-        style={{
-          bottom: '170px',
-          left: '20px',
-          width: '60px',
-          height: '60px',
-          transform: 'rotate(-15deg)',
-          filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.2))',
-        }}
-      >
-        <img src={shuttlecockImg} alt="" className="w-full h-full object-contain" />
-      </div>
-      
       {/* Bottom content */}
       <div className="absolute left-0 right-0 pt-0" style={{ bottom: '40px', padding: '0 12px', paddingLeft: '37px' }}>
-        {/* Badge */}
-        <div className="mb-1.5">
-          <div 
-            className="inline-flex rounded-full px-2.5 py-0.5"
-            style={{ background: '#2DD4A8' }}
-          >
-            <span className="text-black font-bold text-[9px] tracking-wide whitespace-nowrap">WEEK {week} | DAY {day}</span>
-          </div>
-        </div>
-        
         {/* Activity name */}
-        <h2 className="text-black text-[22px] font-black leading-none mb-2">{activity}</h2>
+        <h2 className="text-black font-black leading-none mb-2" style={{ fontSize: '42px' }}>{activity}</h2>
         
-        {/* Stats row - only show if user entered values */}
+        {/* Stats row */}
         {(duration || pr) && (
           <div className="flex gap-6">
             {pr && (
               <div>
-                <p className="text-gray-500 text-[9px] font-medium mb-0.5">{metricLabel}</p>
-                <p className="text-black text-[15px] font-black leading-none">{pr}</p>
+                <p className="text-gray-500 font-medium mb-0.5" style={{ fontSize: '29px' }}>{metricLabel}</p>
+                <p className="text-black font-black leading-none" style={{ fontSize: '35px' }}>{pr}</p>
               </div>
             )}
             {duration && (
               <div>
-                <p className="text-gray-500 text-[9px] font-medium mb-0.5">{durationLabel}</p>
-                <p className="text-black text-[15px] font-black leading-none">{duration}</p>
+                <p className="text-gray-500 font-medium mb-0.5" style={{ fontSize: '29px' }}>{durationLabel}</p>
+                <p className="text-black font-black leading-none" style={{ fontSize: '35px' }}>{duration}</p>
               </div>
             )}
           </div>
         )}
+      </div>
+
+      {/* WEEK | DAY badge — top right corner */}
+      <div className="absolute z-30" style={{ top: '50px', right: '20px' }}>
+        <div 
+          className="inline-flex rounded-full px-2.5 py-0.5"
+          style={{ background: '#2DD4A8' }}
+        >
+          <span className="text-black font-bold text-[9px] tracking-wide whitespace-nowrap">WEEK {week} | DAY {day}</span>
+        </div>
       </div>
     </div>
   );
