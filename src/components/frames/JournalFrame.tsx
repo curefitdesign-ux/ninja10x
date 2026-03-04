@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import journalBgClean from '@/assets/frames/journal-bg-clean.png';
+import paperclipImg from '@/assets/frames/paperclip-silver.png';
 
 interface JournalFrameProps {
   imageUrl: string;
@@ -108,15 +109,19 @@ const JournalFrame = ({
         </div>
       </div>
 
+      {/* Paperclip on top of image */}
+      <div className="absolute z-20" style={{ top: '25px', right: '35px', width: '65px' }}>
+        <img src={paperclipImg} alt="" className="w-full h-full object-contain pointer-events-none" />
+      </div>
 
       {/* Bottom content */}
-      <div className="absolute left-0 right-0 pt-0" style={{ bottom: '40px', padding: '0 12px', paddingLeft: '37px' }}>
+      <div className="absolute left-0 right-0 pt-0" style={{ bottom: '35px', padding: '0 12px', paddingLeft: '37px' }}>
         {/* Activity name */}
         <h2 className="text-black font-black leading-none mb-2" style={{ fontSize: '27px' }}>{activity}</h2>
         
         {/* Stats row */}
         {(duration || pr) && (
-          <div className="flex gap-6">
+          <div className="flex" style={{ gap: '56px' }}>
             {pr && (
               <div>
                 <p className="text-gray-500 font-medium mb-0.5" style={{ fontSize: '14px' }}>{metricLabel}</p>
