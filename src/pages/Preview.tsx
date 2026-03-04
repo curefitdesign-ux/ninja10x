@@ -71,24 +71,39 @@ const activityOptions: ActivityOption[] = [
 
 // Get activity-specific input config from centralized utility
 const getActivityInputConfig = (activityName: string, customMetricsOverride?: { primaryMetric: string; primaryUnit: string; secondaryMetric: string; secondaryUnit: string } | null) => {
+  // First check if the activity is in our local options (which has chip configs)
+  const localMatch = activityOptions.find(a => a.name === activityName);
+  
   if (customMetricsOverride) {
     return {
       primaryMetric: customMetricsOverride.primaryMetric,
       primaryUnit: customMetricsOverride.primaryUnit,
-      primaryInputType: 'wheel' as const,
+      primaryInputType: 'wheel' as MetricInputType,
       secondaryMetric: customMetricsOverride.secondaryMetric,
       secondaryUnit: customMetricsOverride.secondaryUnit,
-      secondaryInputType: customMetricsOverride.secondaryUnit ? 'number' as const : 'none' as const,
+      secondaryInputType: (customMetricsOverride.secondaryUnit ? 'number' : 'none') as MetricInputType,
     };
   }
+  
+  if (localMatch) {
+    return {
+      primaryMetric: localMatch.primaryMetric,
+      primaryUnit: localMatch.primaryUnit,
+      primaryInputType: localMatch.primaryInputType,
+      secondaryMetric: localMatch.secondaryMetric,
+      secondaryUnit: localMatch.secondaryUnit,
+      secondaryInputType: localMatch.secondaryInputType,
+    };
+  }
+  
   const config = getActivityConfig(activityName);
   return {
     primaryMetric: config.primaryMetric,
     primaryUnit: config.primaryUnit,
-    primaryInputType: config.primaryInputType,
+    primaryInputType: config.primaryInputType as MetricInputType,
     secondaryMetric: config.secondaryMetric,
     secondaryUnit: config.secondaryUnit,
-    secondaryInputType: config.secondaryInputType,
+    secondaryInputType: config.secondaryInputType as MetricInputType,
   };
 };
 
