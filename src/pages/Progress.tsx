@@ -145,10 +145,10 @@ const Progress = () => {
           <motion.div
             key="week-snackbar"
             className="absolute left-0 right-0 z-[60] flex justify-center"
-            style={{ top: 'calc(env(safe-area-inset-top, 12px) + 60px)' }}
-            initial={{ opacity: 0, y: -20 }}
+            style={{ bottom: 'calc(env(safe-area-inset-bottom, 12px) + 24px)' }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: 20 }}
             transition={{ type: 'spring', stiffness: 180, damping: 20 }}
           >
             <button
