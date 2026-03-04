@@ -362,23 +362,7 @@ const ReelGeneration = () => {
 
           {/* Error state */}
           {error && (
-            <motion.div
-              className="pb-6"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, type: 'spring', stiffness: 200, damping: 20 }}
-            >
-              <button
-                onClick={handleClose}
-                className="px-8 py-3 rounded-full text-white/90 text-base font-semibold"
-                style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                }}
-              >
-                Go Back
-              </button>
-            </motion.div>
+            <></>
           )}
         </motion.div>
       </div>
