@@ -1,4 +1,6 @@
 import { useRef, useEffect } from 'react';
+import paperclipImg from '@/assets/frames/paperclip-silver.png';
+import shuttlecockImg from '@/assets/frames/shuttlecock.png';
 
 interface JournalFrameProps {
   imageUrl: string;
@@ -49,6 +51,21 @@ const JournalFrame = ({
           backgroundPosition: '0 60px',
         }}
       />
+
+      {/* Paperclip — top center-right, overlapping the photo */}
+      <div
+        className="absolute z-30"
+        style={{
+          top: '-8px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '40px',
+          height: '80px',
+          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
+        }}
+      >
+        <img src={paperclipImg} alt="" className="w-full h-full object-contain" />
+      </div>
       
       {/* Photo area filling the frame - tilted 10deg, 90% size */}
       <div 
@@ -83,7 +100,21 @@ const JournalFrame = ({
           )}
         </div>
       </div>
-      
+
+      {/* Shuttlecock sticker — bottom-left of photo */}
+      <div
+        className="absolute z-20"
+        style={{
+          bottom: '170px',
+          left: '20px',
+          width: '60px',
+          height: '60px',
+          transform: 'rotate(-15deg)',
+          filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.2))',
+        }}
+      >
+        <img src={shuttlecockImg} alt="" className="w-full h-full object-contain" />
+      </div>
       
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 p-3 pt-0">
