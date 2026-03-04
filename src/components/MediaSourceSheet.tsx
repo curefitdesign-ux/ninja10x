@@ -74,7 +74,7 @@ const MediaSourceSheet = forwardRef<HTMLDivElement, MediaSourceSheetProps>(funct
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-50"
-            style={{ background: 'rgba(0,0,0,0.6)' }}
+            style={{ background: 'rgba(0,0,0,0.6)', zIndex }}
             onClick={onClose}
           />
 
@@ -87,7 +87,7 @@ const MediaSourceSheet = forwardRef<HTMLDivElement, MediaSourceSheetProps>(funct
             className="fixed left-0 right-0 rounded-t-3xl overflow-hidden"
             style={{
               bottom: 0,
-              zIndex: 50,
+              zIndex: zIndex + 1,
               background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%)',
               backdropFilter: 'blur(60px) saturate(200%)',
               WebkitBackdropFilter: 'blur(60px) saturate(200%)',
