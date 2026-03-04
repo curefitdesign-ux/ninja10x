@@ -15,9 +15,10 @@ interface MediaSourceSheetProps {
   dayNumber: number;
   activity?: string;
   preserveActivity?: boolean;
+  zIndex?: number;
 }
 
-const MediaSourceSheet = forwardRef<HTMLDivElement, MediaSourceSheetProps>(function MediaSourceSheet({ isOpen, onClose, dayNumber, activity, preserveActivity }, _ref) {
+const MediaSourceSheet = forwardRef<HTMLDivElement, MediaSourceSheetProps>(function MediaSourceSheet({ isOpen, onClose, dayNumber, activity, preserveActivity, zIndex = 50 }, _ref) {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const portalContainer = usePortalContainer();
