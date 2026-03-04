@@ -33,35 +33,40 @@ const FRAMES = ['token', 'holographic', 'shaky', 'journal', 'scrapbook', 'arcade
 type FrameType = typeof FRAMES[number];
 
 // Activity options with minimal line icons
-const activityOptions: Array<{
+type MetricInputType = 'wheel' | 'number' | 'decimal' | 'none' | 'chips';
+
+interface ActivityOption {
   name: string;
   icon: React.ComponentType<any>;
   isCustom?: boolean;
   primaryMetric: string;
   primaryUnit: string;
-  primaryInputType: 'wheel' | 'number' | 'decimal' | 'none';
+  primaryInputType: MetricInputType;
   secondaryMetric: string;
   secondaryUnit: string;
-  secondaryInputType: 'wheel' | 'number' | 'decimal' | 'none';
-}> = [
+  secondaryInputType: MetricInputType;
+  chipOptions?: string[];
+}
+
+const activityOptions: ActivityOption[] = [
   { name: 'Running', icon: Footprints, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' },
   { name: 'Cycling', icon: Bike, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' },
-  { name: 'Trekking', icon: MountainSnow, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Elevation', secondaryUnit: 'm', secondaryInputType: 'number' },
-  { name: 'Yoga', icon: PersonStanding, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
-  { name: 'GYM', icon: Dumbbell, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' },
+  { name: 'Trekking', icon: MountainSnow, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' },
+  { name: 'Yoga', icon: PersonStanding, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Type of Yoga', secondaryUnit: '', secondaryInputType: 'chips', chipOptions: ['Meditation', 'Flexibility', 'Balance', 'Power Yoga', 'Breathing', 'Recovery'] },
+  { name: 'GYM', icon: Dumbbell, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Workout Focus', secondaryUnit: '', secondaryInputType: 'chips', chipOptions: ['Chest', 'Back', 'Legs', 'Arms', 'Core', 'Full Body', 'Cardio'] },
   { name: 'Cricket', icon: CricketBatBall, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Runs', secondaryUnit: 'runs', secondaryInputType: 'number' },
-  { name: 'Badminton', icon: Shuttlecock, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Games', secondaryUnit: 'games', secondaryInputType: 'number' },
-  { name: 'Tennis', icon: TennisBall, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' },
+  { name: 'Badminton', icon: Shuttlecock, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Matches Won', secondaryUnit: 'won', secondaryInputType: 'number' },
+  { name: 'Tennis', icon: TennisBall, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Matches Won', secondaryUnit: 'won', secondaryInputType: 'number' },
   { name: 'Boxing', icon: BoxingGlove, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Rounds', secondaryUnit: 'rounds', secondaryInputType: 'number' },
-  { name: 'Football', icon: FootballIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
-  { name: 'Basketball', icon: BasketballIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
-  { name: 'Swimming', icon: Waves, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' },
-  { name: 'Stair Climbing', icon: ArrowUpFromLine, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Floors', secondaryUnit: 'floors', secondaryInputType: 'number' },
-  { name: 'Skipping Rope', icon: SkipForward, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Count', secondaryUnit: 'reps', secondaryInputType: 'number' },
-  { name: 'HRX Session', icon: Zap, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Type', secondaryUnit: '', secondaryInputType: 'none' },
-  { name: 'Strength', icon: Weight, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'PR', secondaryUnit: 'kg', secondaryInputType: 'decimal' },
-  { name: 'Burn', icon: Flame, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
-  { name: 'Other', icon: MoreHorizontal, isCustom: true, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
+  { name: 'Football', icon: FootballIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Goals Scored', secondaryUnit: 'goals', secondaryInputType: 'number' },
+  { name: 'Basketball', icon: BasketballIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Points Scored', secondaryUnit: 'pts', secondaryInputType: 'number' },
+  { name: 'Swimming', icon: Waves, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Laps', secondaryUnit: 'laps', secondaryInputType: 'number' },
+  { name: 'Stair Climbing', icon: ArrowUpFromLine, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Floors Climbed', secondaryUnit: 'floors', secondaryInputType: 'number' },
+  { name: 'Skipping Rope', icon: SkipForward, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Skips', secondaryUnit: 'skips', secondaryInputType: 'number' },
+  { name: 'HRX Session', icon: Zap, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session Type', secondaryUnit: '', secondaryInputType: 'chips', chipOptions: ['Strength', 'HIIT', 'Cardio', 'Mobility'] },
+  { name: 'Strength', icon: Weight, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Workout Type', secondaryUnit: '', secondaryInputType: 'chips', chipOptions: ['Upper Body', 'Lower Body', 'Core', 'Push', 'Pull'] },
+  { name: 'Burn', icon: Flame, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Calories', secondaryUnit: 'kcal', secondaryInputType: 'number' },
+  { name: 'Other', icon: MoreHorizontal, isCustom: true, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Notes', secondaryUnit: '', secondaryInputType: 'none' },
 ];
 
 // Get activity-specific input config from centralized utility
