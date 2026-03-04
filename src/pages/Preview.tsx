@@ -690,25 +690,55 @@ const Preview = () => {
   // Get contextual presets based on activity and field
   const getPresets = (field: EditingField): number[] => {
     if (field === 'duration') {
-      // Duration presets in minutes
       return [15, 30, 45, 60, 90];
     }
     
-    // Secondary metric presets based on activity
     const activityLower = activity?.toLowerCase() || '';
-    if (activityLower.includes('running') || activityLower.includes('cycling')) {
-      return [3, 5, 10, 15, 20]; // Distance in km
+    if (activityLower.includes('running') || activityLower.includes('cycling') || activityLower.includes('trekking')) {
+      return [3, 5, 10, 15, 20];
     }
     if (activityLower.includes('swimming')) {
-      return [10, 20, 30, 50]; // Laps
+      return [10, 20, 30, 50];
     }
-    if (activityLower.includes('gym') || activityLower.includes('boxing')) {
-      return [3, 5, 8, 10, 12]; // Sets/Rounds
+    if (activityLower.includes('boxing')) {
+      return [3, 5, 8, 10, 12];
     }
-    if (activityLower.includes('trekking')) {
-      return [200, 500, 800, 1000]; // Elevation in m
+    if (activityLower.includes('badminton') || activityLower.includes('tennis')) {
+      return [1, 2, 3, 5];
     }
-    return [5, 10, 15, 20]; // Generic
+    if (activityLower.includes('football')) {
+      return [1, 2, 3, 5];
+    }
+    if (activityLower.includes('basketball')) {
+      return [5, 10, 15, 20, 30];
+    }
+    if (activityLower.includes('stair')) {
+      return [5, 10, 20, 30, 50];
+    }
+    if (activityLower.includes('skipping')) {
+      return [100, 200, 500, 1000];
+    }
+    if (activityLower.includes('burn')) {
+      return [100, 200, 300, 500];
+    }
+    if (activityLower.includes('cricket')) {
+      const isBowling = customMetrics?.secondaryMetric === 'Wickets';
+      return isBowling ? [1, 2, 3, 5] : [10, 25, 50, 100];
+    }
+    return [5, 10, 15, 20];
+  };
+
+  // Get chip options for current activity
+  const getCurrentChipOptions = (): string[] | null => {
+    const match = activityOptions.find(a => a.name === activity);
+    if (match?.chipOptions) return match.chipOptions;
+    return null;
+  };
+
+  // Handle chip selection for categorical metrics
+  const handleChipSelect = (chip: string) => {
+    triggerHaptic('light');
+    setPr(chip);
   };
 
   // Calculate week from dayNumber
