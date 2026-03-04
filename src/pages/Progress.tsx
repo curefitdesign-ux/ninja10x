@@ -145,7 +145,7 @@ const Progress = () => {
           <motion.div
             key="week-snackbar"
             className="absolute left-0 right-0 z-[60] flex justify-center"
-            style={{ bottom: 'calc(env(safe-area-inset-bottom, 12px) + 74px)' }}
+            style={{ bottom: 'calc(env(safe-area-inset-bottom, 12px) + 104px)' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
@@ -176,7 +176,7 @@ const Progress = () => {
               {/* Text */}
               <span
                 className="relative z-10 font-semibold tracking-tight whitespace-nowrap"
-                style={{ fontSize: 13, color: '#ffffff', marginRight: 6 }}
+                style={{ fontSize: 13, color: '#ffffff', marginRight: 6, marginLeft: -10 }}
               >
                 Week {completedWeekNum} reel is ready, Click here to view
               </span>
