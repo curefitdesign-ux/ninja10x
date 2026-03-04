@@ -137,14 +137,14 @@ const JournalFrame = ({
           <div className="flex" style={{ gap: '86px' }}>
             {pr && (
               <div>
-                <p className="text-gray-500 mb-0.5" style={{ fontSize: '14px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{metricLabel}</p>
-                <p className="text-black leading-none" style={{ fontSize: '20px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{pr}</p>
+                <p className="text-gray-500 mb-0.5" style={{ fontSize: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>{metricLabel}</p>
+                <p className="text-black leading-none" style={{ fontSize: '30px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{pr}</p>
               </div>
             )}
             {duration && (
               <div>
-                <p className="text-gray-500 mb-0.5" style={{ fontSize: '14px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{durationLabel}</p>
-                <p className="text-black leading-none" style={{ fontSize: '20px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{duration}</p>
+                <p className="text-gray-500 mb-0.5" style={{ fontSize: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>{durationLabel}</p>
+                <p className="text-black leading-none" style={{ fontSize: '30px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{duration}</p>
               </div>
             )}
           </div>
