@@ -108,20 +108,6 @@ const JournalFrame = ({
         </div>
       </div>
 
-      {/* Paperclip overlaying the photo top-right */}
-      <div
-        className="absolute z-20"
-        style={{
-          top: '20px',
-          right: '30px',
-          width: '70px',
-          height: '90px',
-          transform: 'rotate(15deg)',
-          filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.2))',
-        }}
-      >
-        <img src={paperclipImg} alt="" className="w-full h-full object-contain" />
-      </div>
 
       {/* Bottom content */}
       <div className="absolute left-0 right-0 pt-0" style={{ bottom: '40px', padding: '0 12px', paddingLeft: '37px' }}>
