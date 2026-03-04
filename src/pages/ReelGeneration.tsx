@@ -147,9 +147,8 @@ const ReelGeneration = () => {
         return;
       }
 
-    hasTriggered.current = true;
+      hasTriggered.current = true;
 
-    const run = async () => {
       if (forceRegenerate) {
         // NUCLEAR: Clear ALL caches — local IndexedDB + cloud storage
         console.log('[ReelGeneration] 🔥 FORCE REGENERATE — nuking all caches');
@@ -239,8 +238,8 @@ const ReelGeneration = () => {
       }
     };
 
-    run();
-  }, [locationState, navigateToReel]);
+    startGeneration();
+  }, [locationState, navigateToReel, user, profile]);
 
   const handleClose = useCallback(() => {
     navigate(-1);
