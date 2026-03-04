@@ -144,7 +144,7 @@ const JournalFrame = ({
             {duration && (
               <div>
                 <p className="text-gray-500 mb-0.5" style={{ fontSize: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>{durationLabel}</p>
-                <p className="text-black leading-none" style={{ fontSize: '30px', fontFamily: "'Caveat', cursive", fontWeight: 700 }}>{duration}</p>
+                <p className="leading-none" style={{ fontSize: '30px', fontFamily: "'Caveat', cursive", fontWeight: 700, color: '#3C46AF' }}>{duration}</p>
               </div>
             )}
           </div>
