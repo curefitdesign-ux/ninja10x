@@ -77,7 +77,7 @@ const ArcadeFrame = ({
       <div
         style={{
           margin: '0 3.5% 0 3.5%',
-          flex: 1,
+          flex: '1 1 0',
           position: 'relative',
           minHeight: 0,
           border: '1.5px solid rgba(255, 255, 255, 0.6)',
