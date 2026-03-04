@@ -123,7 +123,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       
       {/* Stats pills */}
       {(duration || pr) && (
-        <div className="absolute z-20" style={{ left: '3cqw', bottom: 'calc(18% - 30px)' }}>
+        <div className="absolute z-20" style={{ left: '3cqw', bottom: 'calc(18% - 15px)' }}>
           <div className="flex flex-col" style={{ gap: '1.5cqw' }}>
             {pr && (
               <div style={{ background: '#F45B4A', borderRadius: '2px', padding: '2px 6px' }}>
