@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MoreVertical, Plus, UserPen, LogOut, ChevronLeft } from "lucide-react";
+import { MoreVertical, Plus, UserPen, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
 import { useJourneyActivities, fetchPublicFeed, LocalActivity } from "@/hooks/use-journey-activities";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -11,7 +11,8 @@ import ReelToProgressTransition from "@/components/ReelToProgressTransition";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
 import SharedImageTransition from "@/components/SharedImageTransition";
 import ProfileAvatar from "@/components/ProfileAvatar";
-import weekCrystal from "@/assets/progress/week-complete-snackbar.png";
+import snackbarCrystal from "@/assets/progress/snackbar-crystal.png";
+import snackbarBg from "@/assets/progress/snackbar-bg.png";
 
 const Progress = () => {
   const navigate = useNavigate();
@@ -143,29 +144,49 @@ const Progress = () => {
         {showWeekSnackbar && (
           <motion.div
             key="week-snackbar"
-            className="absolute left-0 right-0 z-[60] flex justify-center pointer-events-none"
+            className="absolute left-0 right-0 z-[60] flex justify-center"
             style={{ top: 'calc(env(safe-area-inset-top, 12px) + 60px)' }}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ type: 'spring', stiffness: 180, damping: 20 }}
           >
-            <div
-              className="flex items-center gap-2 px-1 py-1 pr-5 rounded-full"
-              style={{
-                background: 'rgba(255, 255, 255, 0.95)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08)',
-                border: '1px solid rgba(0, 0, 0, 0.06)',
+            <button
+              onClick={() => {
+                setShowWeekSnackbar(false);
+                navigate('/reel-generation', { state: { week: completedWeekNum } });
               }}
+              className="relative flex items-center active:scale-[0.97] transition-transform"
+              style={{ height: 52 }}
             >
-              <img src={weekCrystal} alt="" className="w-9 h-9 object-contain" />
+              {/* Background pill */}
+              <img
+                src={snackbarBg}
+                alt=""
+                className="absolute inset-0 w-full h-full"
+                style={{ objectFit: 'fill' }}
+              />
+              {/* Crystal — overlapping left edge */}
+              <img
+                src={snackbarCrystal}
+                alt=""
+                className="relative z-10 flex-shrink-0"
+                style={{ width: 44, height: 44, marginLeft: -6, marginRight: 4, objectFit: 'contain' }}
+              />
+              {/* Text */}
               <span
-                className="font-semibold tracking-tight whitespace-nowrap"
-                style={{ fontSize: '14px', color: '#1a1a1a' }}
+                className="relative z-10 font-semibold tracking-tight whitespace-nowrap"
+                style={{ fontSize: 13, color: '#1a1a1a', marginRight: 6 }}
               >
-                Week {completedWeekNum} Complete! 🎉
+                Week {completedWeekNum} reel is ready, Click here to view
               </span>
-            </div>
+              {/* Chevron */}
+              <ChevronRight
+                className="relative z-10 flex-shrink-0"
+                style={{ width: 16, height: 16, color: '#999', marginRight: 12 }}
+                strokeWidth={2}
+              />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
