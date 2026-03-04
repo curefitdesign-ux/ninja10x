@@ -41,7 +41,8 @@ const BoldFrame = ({
   const durationUnit = label2 || 'min';
   const prUnit = label1 || '';
   const durationValue = duration ? duration.replace(/[^0-9:]/g, '') : '';
-  const prValue = pr ? pr.replace(/[^0-9.]/g, '') : '';
+  const isNumericPr = pr ? /\d/.test(pr) : false;
+  const prValue = pr ? (isNumericPr ? pr.replace(/[^0-9.]/g, '') : pr) : '';
 
   return (
     <div
