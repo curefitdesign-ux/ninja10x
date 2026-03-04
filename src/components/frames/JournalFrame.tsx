@@ -109,9 +109,13 @@ const JournalFrame = ({
         </div>
       </div>
 
+      {/* Paperclip on top of image */}
+      <div className="absolute z-20" style={{ top: '25px', right: '35px', width: '65px' }}>
+        <img src={paperclipImg} alt="" className="w-full h-full object-contain pointer-events-none" />
+      </div>
 
       {/* Bottom content */}
-      <div className="absolute left-0 right-0 pt-0" style={{ bottom: '40px', padding: '0 12px', paddingLeft: '37px' }}>
+      <div className="absolute left-0 right-0 pt-0" style={{ bottom: '35px', padding: '0 12px', paddingLeft: '37px' }}>
         {/* Activity name */}
         <h2 className="text-black font-black leading-none mb-2" style={{ fontSize: '27px' }}>{activity}</h2>
         
