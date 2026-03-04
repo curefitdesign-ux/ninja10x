@@ -129,7 +129,7 @@ const JournalFrame = ({
       {/* Bottom content */}
       <div className="absolute left-0 right-0 pt-0" style={{ bottom: '35px', padding: '0 12px', paddingLeft: '37px' }}>
         {/* Activity name — moved up 5px, Inter Black, +5px font size */}
-        <h2 className="text-black leading-none mb-2" style={{ fontSize: '32px', fontFamily: 'Inter, sans-serif', fontWeight: 900, marginTop: '-5px' }}>{activity}</h2>
+        <h2 className="text-black leading-none mb-2" style={{ fontSize: '34px', fontFamily: 'Inter, sans-serif', fontWeight: 900, marginTop: '-10px' }}>{activity}</h2>
         
         {/* Stats row */}
         {(duration || pr) && (
