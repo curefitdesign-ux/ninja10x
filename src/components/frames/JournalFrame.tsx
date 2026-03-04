@@ -83,14 +83,6 @@ const JournalFrame = ({
         </div>
       </div>
       
-      {/* Activity icon - Shuttlecock - positioned above the tilted image with animation */}
-      <div className="absolute left-[34px] top-[35px] z-20 animate-subtle-wave">
-        <img 
-          src={shuttlecockIcon}
-          alt="Shuttlecock"
-          className="w-20 h-20 object-contain"
-        />
-      </div>
       
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 p-3 pt-0">
