@@ -35,6 +35,10 @@ const Progress = () => {
   const [showTransitionIn, setShowTransitionIn] = useState(false);
   const transitionHandledRef = useRef(false);
 
+  // Week-complete snackbar
+  const [showWeekSnackbar, setShowWeekSnackbar] = useState(false);
+  const [completedWeekNum, setCompletedWeekNum] = useState(0);
+
   // Navigation state
   const transitionImage = location.state?.transitionImage;
   const transitionDayNumber = location.state?.dayNumber || 1;
