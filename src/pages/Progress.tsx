@@ -11,6 +11,7 @@ import ReelToProgressTransition from "@/components/ReelToProgressTransition";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
 import SharedImageTransition from "@/components/SharedImageTransition";
 import ProfileAvatar from "@/components/ProfileAvatar";
+import weekCrystal from "@/assets/progress/week-complete-snackbar.png";
 
 const Progress = () => {
   const navigate = useNavigate();
@@ -33,6 +34,10 @@ const Progress = () => {
   // Transition state
   const [showTransitionIn, setShowTransitionIn] = useState(false);
   const transitionHandledRef = useRef(false);
+
+  // Week-complete snackbar
+  const [showWeekSnackbar, setShowWeekSnackbar] = useState(false);
+  const [completedWeekNum, setCompletedWeekNum] = useState(0);
 
   // Navigation state
   const transitionImage = location.state?.transitionImage;
@@ -57,6 +62,14 @@ const Progress = () => {
     transitionHandledRef.current = true;
     setShowTransitionIn(true);
     setTimeout(() => setShowTransitionIn(false), 300);
+
+    // Show week-complete snackbar for days 3, 6, 9, 12
+    if ([3, 6, 9, 12].includes(transitionDayNumber)) {
+      const weekNum = Math.ceil(transitionDayNumber / 3);
+      setCompletedWeekNum(weekNum);
+      setTimeout(() => setShowWeekSnackbar(true), 500);
+      setTimeout(() => setShowWeekSnackbar(false), 5500);
+    }
 
     const currentActivity = myActivities.find(a => a.dayNumber === transitionDayNumber);
     if (currentActivity && !currentActivity.isPublic) {
@@ -125,7 +138,38 @@ const Progress = () => {
         />
       </div>
 
-      {/* Transition-in animation */}
+      {/* Week-complete snackbar */}
+      <AnimatePresence>
+        {showWeekSnackbar && (
+          <motion.div
+            key="week-snackbar"
+            className="absolute left-0 right-0 z-[60] flex justify-center pointer-events-none"
+            style={{ top: 'calc(env(safe-area-inset-top, 12px) + 60px)' }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ type: 'spring', stiffness: 180, damping: 20 }}
+          >
+            <div
+              className="flex items-center gap-2 px-1 py-1 pr-5 rounded-full"
+              style={{
+                background: 'rgba(255, 255, 255, 0.95)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08)',
+                border: '1px solid rgba(0, 0, 0, 0.06)',
+              }}
+            >
+              <img src={weekCrystal} alt="" className="w-9 h-9 object-contain" />
+              <span
+                className="font-semibold tracking-tight whitespace-nowrap"
+                style={{ fontSize: '14px', color: '#1a1a1a' }}
+              >
+                Week {completedWeekNum} Complete! 🎉
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {showTransitionIn && transitionImage && (
           <motion.div key="shared-image-transition">
