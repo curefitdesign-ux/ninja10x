@@ -68,6 +68,8 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
             backdropFilter: 'blur(10px)',
             border: '1px solid rgba(255,255,255,0.25)',
             padding: '1cqw 2.5cqw',
+            marginTop: '20px',
+            marginLeft: '10px',
           }}
         >
           <span className="text-white font-semibold tracking-wider" style={{ fontSize: 'calc(2.5cqw + 5px)', fontFamily }}>WEEK {week} | DAY {day}</span>
@@ -75,12 +77,13 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
         
         {/* Activity name */}
         <h2 
-          className="text-white font-black italic leading-[0.95]"
+          className="text-white font-bold leading-[0.95]"
           style={{
-            fontSize: '13cqw',
+            fontSize: 'calc(13cqw + 5px)',
             marginTop: 'calc(2cqw + 15px)',
             marginLeft: '10px',
             fontFamily,
+            fontStyle: 'normal',
           }}
         >
           {activity}
@@ -91,13 +94,13 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
         
         {/* Stats at bottom */}
         {(duration || pr) && (
-          <div className="flex" style={{ gap: '6cqw', marginLeft: '10px' }}>
+          <div className="flex" style={{ gap: '6cqw', marginLeft: '10px', marginBottom: '20px' }}>
             {duration && (
               <div className="flex-1">
-                <p className="text-white/60 font-medium tracking-wide" style={{ fontSize: 'calc(2.5cqw + 10px)', marginBottom: '0.5cqw', fontFamily }}>{durationLabel}</p>
+                <p className="text-white/60 font-medium tracking-wide" style={{ fontSize: 'calc(2.5cqw + 5px)', marginBottom: '0.5cqw', fontFamily }}>{durationLabel}</p>
                 <p 
                   className="text-white font-bold leading-none animate-subtle-pulse"
-                  style={{ fontSize: 'calc(5.5cqw + 10px)', fontVariantNumeric: 'tabular-nums', fontFamily }}
+                  style={{ fontSize: 'calc(5.5cqw + 5px)', fontVariantNumeric: 'tabular-nums', fontFamily }}
                 >
                   {duration}
                 </p>
@@ -135,10 +138,10 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
             
             {pr && (
               <div className="flex-1">
-                <p className="text-white/60 font-medium tracking-wide" style={{ fontSize: 'calc(2.5cqw + 10px)', marginBottom: '0.5cqw', fontFamily }}>{metricLabel}</p>
+                <p className="text-white/60 font-medium tracking-wide" style={{ fontSize: 'calc(2.5cqw + 5px)', marginBottom: '0.5cqw', fontFamily }}>{metricLabel}</p>
                 <p 
                   className="text-white font-bold leading-none animate-subtle-pulse"
-                  style={{ fontSize: 'calc(5.5cqw + 10px)', fontVariantNumeric: 'tabular-nums', animationDelay: '0.5s', fontFamily }}
+                  style={{ fontSize: 'calc(5.5cqw + 5px)', fontVariantNumeric: 'tabular-nums', animationDelay: '0.5s', fontFamily }}
                 >
                   {pr}
                 </p>
