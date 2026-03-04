@@ -69,7 +69,7 @@ const Progress = () => {
       const weekNum = Math.ceil(transitionDayNumber / 3);
       setCompletedWeekNum(weekNum);
       setTimeout(() => setShowWeekSnackbar(true), 500);
-      setTimeout(() => setShowWeekSnackbar(false), 5500);
+      setTimeout(() => setShowWeekSnackbar(false), 10500);
     }
 
     const currentActivity = myActivities.find(a => a.dayNumber === transitionDayNumber);
