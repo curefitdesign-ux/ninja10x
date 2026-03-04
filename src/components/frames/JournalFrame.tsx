@@ -55,20 +55,20 @@ const JournalFrame = ({
         }}
       />
       
-      {/* Paper holes */}
-      {[80, 200, 320, 440, 560].map((top) => (
+      {/* Paper holes — horizontal row across the top */}
+      {[12, 25, 38, 51, 64, 76, 89].map((leftPct) => (
         <div
-          key={top}
+          key={leftPct}
           className="absolute pointer-events-none"
           style={{
-            left: '12px',
-            top: `${top}px`,
-            width: '14px',
-            height: '14px',
+            left: `${leftPct}%`,
+            top: '14px',
+            width: '18px',
+            height: '18px',
             borderRadius: '50%',
-            background: '#e8e0d0',
-            border: '1.5px solid #c4b8a4',
-            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.15)',
+            background: '#1a1030',
+            transform: 'translateX(-50%)',
+            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.3)',
           }}
         />
       ))}
