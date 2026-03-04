@@ -176,7 +176,7 @@ const Progress = () => {
               {/* Text */}
               <span
                 className="relative z-10 font-semibold tracking-tight whitespace-nowrap"
-                style={{ fontSize: 13, color: '#1a1a1a', marginRight: 6 }}
+                style={{ fontSize: 13, color: '#ffffff', marginRight: 6 }}
               >
                 Week {completedWeekNum} reel is ready, Click here to view
               </span>
