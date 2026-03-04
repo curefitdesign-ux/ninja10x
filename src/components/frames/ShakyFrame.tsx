@@ -138,10 +138,10 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
             
             {pr && (
               <div className="flex-1">
-                <p className="text-white/60 font-medium tracking-wide" style={{ fontSize: 'calc(2.5cqw + 10px)', marginBottom: '0.5cqw', fontFamily }}>{metricLabel}</p>
+                <p className="text-white/60 font-medium tracking-wide" style={{ fontSize: 'calc(2.5cqw + 5px)', marginBottom: '0.5cqw', fontFamily }}>{metricLabel}</p>
                 <p 
                   className="text-white font-bold leading-none animate-subtle-pulse"
-                  style={{ fontSize: 'calc(5.5cqw + 10px)', fontVariantNumeric: 'tabular-nums', animationDelay: '0.5s', fontFamily }}
+                  style={{ fontSize: 'calc(5.5cqw + 5px)', fontVariantNumeric: 'tabular-nums', animationDelay: '0.5s', fontFamily }}
                 >
                   {pr}
                 </p>
