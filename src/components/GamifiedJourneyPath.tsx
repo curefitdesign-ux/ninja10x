@@ -141,11 +141,11 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.18, delay: tile.index * 0.03 }}
                   />
-                  {/* Diamond floating above the tile */}
+                  {/* Diamond floating above the tile — tappable */}
                   <motion.img
                     src={crystal5Img}
                     alt={`Week milestone`}
-                    className="absolute pointer-events-none"
+                    className="absolute cursor-pointer"
                     style={{
                       width: 36,
                       height: 'auto',
@@ -159,6 +159,11 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
                     initial={{ opacity: 0, scale: 0.6 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ type: 'spring', stiffness: 200, damping: 16, delay: tile.index * 0.03 }}
+                    whileTap={{ scale: 0.85 }}
+                    onClick={() => {
+                      const weekNum = Math.floor(tile.index / 3) + 1;
+                      onCrystalTap?.(weekNum);
+                    }}
                   />
                 </>
               ) : (
