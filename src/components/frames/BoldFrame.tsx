@@ -41,7 +41,8 @@ const BoldFrame = ({
   const durationUnit = label2 || 'min';
   const prUnit = label1 || '';
   const durationValue = duration ? duration.replace(/[^0-9:]/g, '') : '';
-  const prValue = pr ? pr.replace(/[^0-9.]/g, '') : '';
+  const isNumericPr = pr ? /\d/.test(pr) : false;
+  const prValue = pr ? (isNumericPr ? pr.replace(/[^0-9.]/g, '') : pr) : '';
 
   return (
     <div
@@ -248,7 +249,7 @@ const BoldFrame = ({
           </div>
         ) : null}
 
-        {prValue && prUnit ? (
+        {prValue ? (
           <div className="flex items-baseline gap-1.5">
             <span
               style={{
@@ -266,24 +267,26 @@ const BoldFrame = ({
               style={{
                 fontFamily: "'Caveat', cursive",
                 fontWeight: 700,
-                fontSize: 'clamp(18px, 7.8cqw, 30px)',
+                fontSize: isNumericPr ? 'clamp(18px, 7.8cqw, 30px)' : 'clamp(14px, 5.8cqw, 24px)',
                 color: '#6B4EE6',
                 fontStyle: 'italic',
               }}
             >
               {prValue}
             </span>
-            <span
-              style={{
-                fontFamily: "'Caveat', cursive",
-                fontWeight: 700,
-                fontSize: 'clamp(14px, 5.8cqw, 24px)',
-                color: '#6B4EE6',
-                fontStyle: 'italic',
-              }}
-            >
-              {prUnit}
-            </span>
+            {prUnit && (
+              <span
+                style={{
+                  fontFamily: "'Caveat', cursive",
+                  fontWeight: 700,
+                  fontSize: 'clamp(14px, 5.8cqw, 24px)',
+                  color: '#6B4EE6',
+                  fontStyle: 'italic',
+                }}
+              >
+                {prUnit}
+              </span>
+            )}
           </div>
         ) : null}
       </div>

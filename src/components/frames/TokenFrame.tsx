@@ -47,7 +47,8 @@ const TokenFrame = ({
   const durationUnit = label2 || 'min';
   const prUnit = label1 || '';
   const durationValue = duration ? duration.replace(/[^0-9:]/g, '') : '';
-  const prValue = pr ? pr.replace(/[^0-9.]/g, '') : '';
+  const isNumericPr = pr ? /\d/.test(pr) : false;
+  const prValue = pr ? (isNumericPr ? pr.replace(/[^0-9.]/g, '') : pr) : '';
 
   return (
     <div
@@ -175,17 +176,19 @@ const TokenFrame = ({
           </div>
         ) : null}
 
-        {prValue && prUnit ? (
+        {prValue ? (
           <div style={{ textAlign: 'right', lineHeight: 1.1 }}>
             <div style={{ fontFamily: "'Rowdies', 'Arial', sans-serif", fontWeight: 300, fontSize: 'clamp(8px, 3.4cqw, 12px)', color: '#696760', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '2px' }}>
               DISTANCE
             </div>
-            <span style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: 'clamp(14px, 6.5cqw, 24px)', color: '#0a4a72' }}>
+            <span style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: isNumericPr ? 'clamp(14px, 6.5cqw, 24px)' : 'clamp(10px, 4.5cqw, 18px)', color: '#0a4a72' }}>
               {prValue}
             </span>
-            <span style={{ fontFamily: "'Rowdies', 'Arial Black', sans-serif", fontWeight: 700, fontSize: 'clamp(10px, 4.5cqw, 18px)', color: '#0a4a72', marginLeft: '4px' }}>
-              {prUnit}
-            </span>
+            {prUnit && (
+              <span style={{ fontFamily: "'Rowdies', 'Arial Black', sans-serif", fontWeight: 700, fontSize: 'clamp(10px, 4.5cqw, 18px)', color: '#0a4a72', marginLeft: '4px' }}>
+                {prUnit}
+              </span>
+            )}
           </div>
         ) : null}
       </div>
