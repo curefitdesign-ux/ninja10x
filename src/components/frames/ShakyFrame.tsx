@@ -72,8 +72,8 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
           className="text-white font-black italic leading-[0.95]"
           style={{
             fontSize: '13cqw',
-            marginTop: '2cqw',
-            textShadow: '2px 4px 12px rgba(0,0,0,0.15)',
+            marginTop: 'calc(2cqw + 5px)',
+            marginLeft: '10px',
           }}
         >
           {activity}
