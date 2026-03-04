@@ -33,57 +33,77 @@ const FRAMES = ['token', 'holographic', 'shaky', 'journal', 'scrapbook', 'arcade
 type FrameType = typeof FRAMES[number];
 
 // Activity options with minimal line icons
-const activityOptions: Array<{
+type MetricInputType = 'wheel' | 'number' | 'decimal' | 'none' | 'chips';
+
+interface ActivityOption {
   name: string;
   icon: React.ComponentType<any>;
   isCustom?: boolean;
   primaryMetric: string;
   primaryUnit: string;
-  primaryInputType: 'wheel' | 'number' | 'decimal' | 'none';
+  primaryInputType: MetricInputType;
   secondaryMetric: string;
   secondaryUnit: string;
-  secondaryInputType: 'wheel' | 'number' | 'decimal' | 'none';
-}> = [
+  secondaryInputType: MetricInputType;
+  chipOptions?: string[];
+}
+
+const activityOptions: ActivityOption[] = [
   { name: 'Running', icon: Footprints, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' },
   { name: 'Cycling', icon: Bike, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' },
-  { name: 'Trekking', icon: MountainSnow, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Elevation', secondaryUnit: 'm', secondaryInputType: 'number' },
-  { name: 'Yoga', icon: PersonStanding, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
-  { name: 'GYM', icon: Dumbbell, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' },
+  { name: 'Trekking', icon: MountainSnow, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' },
+  { name: 'Yoga', icon: PersonStanding, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Type of Yoga', secondaryUnit: '', secondaryInputType: 'chips', chipOptions: ['Meditation', 'Flexibility', 'Balance', 'Power Yoga', 'Breathing', 'Recovery'] },
+  { name: 'GYM', icon: Dumbbell, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Workout Focus', secondaryUnit: '', secondaryInputType: 'chips', chipOptions: ['Chest', 'Back', 'Legs', 'Arms', 'Core', 'Full Body', 'Cardio'] },
   { name: 'Cricket', icon: CricketBatBall, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Runs', secondaryUnit: 'runs', secondaryInputType: 'number' },
-  { name: 'Badminton', icon: Shuttlecock, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Games', secondaryUnit: 'games', secondaryInputType: 'number' },
-  { name: 'Tennis', icon: TennisBall, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Sets', secondaryUnit: 'sets', secondaryInputType: 'number' },
+  { name: 'Badminton', icon: Shuttlecock, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Matches Won', secondaryUnit: 'won', secondaryInputType: 'number' },
+  { name: 'Tennis', icon: TennisBall, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Matches Won', secondaryUnit: 'won', secondaryInputType: 'number' },
   { name: 'Boxing', icon: BoxingGlove, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Rounds', secondaryUnit: 'rounds', secondaryInputType: 'number' },
-  { name: 'Football', icon: FootballIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
-  { name: 'Basketball', icon: BasketballIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
-  { name: 'Swimming', icon: Waves, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Distance', secondaryUnit: 'km', secondaryInputType: 'decimal' },
-  { name: 'Stair Climbing', icon: ArrowUpFromLine, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Floors', secondaryUnit: 'floors', secondaryInputType: 'number' },
-  { name: 'Skipping Rope', icon: SkipForward, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Count', secondaryUnit: 'reps', secondaryInputType: 'number' },
-  { name: 'HRX Session', icon: Zap, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Type', secondaryUnit: '', secondaryInputType: 'none' },
-  { name: 'Strength', icon: Weight, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'PR', secondaryUnit: 'kg', secondaryInputType: 'decimal' },
-  { name: 'Burn', icon: Flame, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
-  { name: 'Other', icon: MoreHorizontal, isCustom: true, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session', secondaryUnit: '', secondaryInputType: 'none' },
+  { name: 'Football', icon: FootballIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Goals Scored', secondaryUnit: 'goals', secondaryInputType: 'number' },
+  { name: 'Basketball', icon: BasketballIcon, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Points Scored', secondaryUnit: 'pts', secondaryInputType: 'number' },
+  { name: 'Swimming', icon: Waves, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Laps', secondaryUnit: 'laps', secondaryInputType: 'number' },
+  { name: 'Stair Climbing', icon: ArrowUpFromLine, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Floors Climbed', secondaryUnit: 'floors', secondaryInputType: 'number' },
+  { name: 'Skipping Rope', icon: SkipForward, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Skips', secondaryUnit: 'skips', secondaryInputType: 'number' },
+  { name: 'HRX Session', icon: Zap, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Session Type', secondaryUnit: '', secondaryInputType: 'chips', chipOptions: ['Strength', 'HIIT', 'Cardio', 'Mobility'] },
+  { name: 'Strength', icon: Weight, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Workout Type', secondaryUnit: '', secondaryInputType: 'chips', chipOptions: ['Upper Body', 'Lower Body', 'Core', 'Push', 'Pull'] },
+  { name: 'Burn', icon: Flame, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Calories', secondaryUnit: 'kcal', secondaryInputType: 'number' },
+  { name: 'Other', icon: MoreHorizontal, isCustom: true, primaryMetric: 'Duration', primaryUnit: 'min', primaryInputType: 'wheel', secondaryMetric: 'Notes', secondaryUnit: '', secondaryInputType: 'none' },
 ];
 
 // Get activity-specific input config from centralized utility
 const getActivityInputConfig = (activityName: string, customMetricsOverride?: { primaryMetric: string; primaryUnit: string; secondaryMetric: string; secondaryUnit: string } | null) => {
+  // First check if the activity is in our local options (which has chip configs)
+  const localMatch = activityOptions.find(a => a.name === activityName);
+  
   if (customMetricsOverride) {
     return {
       primaryMetric: customMetricsOverride.primaryMetric,
       primaryUnit: customMetricsOverride.primaryUnit,
-      primaryInputType: 'wheel' as const,
+      primaryInputType: 'wheel' as MetricInputType,
       secondaryMetric: customMetricsOverride.secondaryMetric,
       secondaryUnit: customMetricsOverride.secondaryUnit,
-      secondaryInputType: customMetricsOverride.secondaryUnit ? 'number' as const : 'none' as const,
+      secondaryInputType: (customMetricsOverride.secondaryUnit ? 'number' : 'none') as MetricInputType,
     };
   }
+  
+  if (localMatch) {
+    return {
+      primaryMetric: localMatch.primaryMetric,
+      primaryUnit: localMatch.primaryUnit,
+      primaryInputType: localMatch.primaryInputType,
+      secondaryMetric: localMatch.secondaryMetric,
+      secondaryUnit: localMatch.secondaryUnit,
+      secondaryInputType: localMatch.secondaryInputType,
+    };
+  }
+  
   const config = getActivityConfig(activityName);
   return {
     primaryMetric: config.primaryMetric,
     primaryUnit: config.primaryUnit,
-    primaryInputType: config.primaryInputType,
+    primaryInputType: config.primaryInputType as MetricInputType,
     secondaryMetric: config.secondaryMetric,
     secondaryUnit: config.secondaryUnit,
-    secondaryInputType: config.secondaryInputType,
+    secondaryInputType: config.secondaryInputType as MetricInputType,
   };
 };
 
@@ -685,25 +705,55 @@ const Preview = () => {
   // Get contextual presets based on activity and field
   const getPresets = (field: EditingField): number[] => {
     if (field === 'duration') {
-      // Duration presets in minutes
       return [15, 30, 45, 60, 90];
     }
     
-    // Secondary metric presets based on activity
     const activityLower = activity?.toLowerCase() || '';
-    if (activityLower.includes('running') || activityLower.includes('cycling')) {
-      return [3, 5, 10, 15, 20]; // Distance in km
+    if (activityLower.includes('running') || activityLower.includes('cycling') || activityLower.includes('trekking')) {
+      return [3, 5, 10, 15, 20];
     }
     if (activityLower.includes('swimming')) {
-      return [10, 20, 30, 50]; // Laps
+      return [10, 20, 30, 50];
     }
-    if (activityLower.includes('gym') || activityLower.includes('boxing')) {
-      return [3, 5, 8, 10, 12]; // Sets/Rounds
+    if (activityLower.includes('boxing')) {
+      return [3, 5, 8, 10, 12];
     }
-    if (activityLower.includes('trekking')) {
-      return [200, 500, 800, 1000]; // Elevation in m
+    if (activityLower.includes('badminton') || activityLower.includes('tennis')) {
+      return [1, 2, 3, 5];
     }
-    return [5, 10, 15, 20]; // Generic
+    if (activityLower.includes('football')) {
+      return [1, 2, 3, 5];
+    }
+    if (activityLower.includes('basketball')) {
+      return [5, 10, 15, 20, 30];
+    }
+    if (activityLower.includes('stair')) {
+      return [5, 10, 20, 30, 50];
+    }
+    if (activityLower.includes('skipping')) {
+      return [100, 200, 500, 1000];
+    }
+    if (activityLower.includes('burn')) {
+      return [100, 200, 300, 500];
+    }
+    if (activityLower.includes('cricket')) {
+      const isBowling = customMetrics?.secondaryMetric === 'Wickets';
+      return isBowling ? [1, 2, 3, 5] : [10, 25, 50, 100];
+    }
+    return [5, 10, 15, 20];
+  };
+
+  // Get chip options for current activity
+  const getCurrentChipOptions = (): string[] | null => {
+    const match = activityOptions.find(a => a.name === activity);
+    if (match?.chipOptions) return match.chipOptions;
+    return null;
+  };
+
+  // Handle chip selection for categorical metrics
+  const handleChipSelect = (chip: string) => {
+    triggerHaptic('light');
+    setPr(chip);
   };
 
   // Calculate week from dayNumber
@@ -1321,8 +1371,35 @@ const Preview = () => {
                   </span>
                 </button>
                 
-                {/* Secondary metric row */}
-                {config.secondaryInputType !== 'none' && (
+                {/* Secondary metric - chips or numeric */}
+                {config.secondaryInputType === 'chips' ? (
+                  <div className="py-3.5">
+                    <div className="flex items-baseline gap-2 mb-3">
+                      <span className="text-white/85 text-[15px] font-semibold">{config.secondaryMetric}</span>
+                      <span className="text-[11px] text-white/40">tap to select</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {(getCurrentChipOptions() || []).map((chip) => {
+                        const isSelected = pr === chip;
+                        return (
+                          <button
+                            key={chip}
+                            onClick={() => handleChipSelect(chip)}
+                            className="px-3.5 py-1.5 rounded-xl text-[13px] font-semibold transition-all active:scale-95"
+                            style={{
+                              background: isSelected ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.08)',
+                              color: isSelected ? '#fff' : 'rgba(255,255,255,0.55)',
+                              border: isSelected ? '1px solid rgba(255,255,255,0.45)' : '1px solid rgba(255,255,255,0.12)',
+                              boxShadow: isSelected ? '0 2px 12px rgba(255,255,255,0.15)' : 'none',
+                            }}
+                          >
+                            {chip}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : config.secondaryInputType !== 'none' ? (
                   <button 
                     onClick={() => { handleTap('pr'); openEditSheet('pr'); }}
                     className={`w-full flex justify-between items-center py-3.5 tap-bounce min-h-[52px] ${tappedElement === 'pr' ? 'animate-liquid-tap' : ''}`}
@@ -1339,7 +1416,7 @@ const Preview = () => {
                       {pr || '—'}
                     </span>
                   </button>
-                )}
+                ) : null}
               </div>
             );
           })()}
