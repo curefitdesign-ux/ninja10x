@@ -64,7 +64,7 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
             padding: '1cqw 2.5cqw',
           }}
         >
-          <span className="text-white font-semibold tracking-wider" style={{ fontSize: '2.5cqw' }}>WEEK {week} | DAY {day}</span>
+          <span className="text-white font-semibold tracking-wider" style={{ fontSize: 'calc(2.5cqw + 5px)' }}>WEEK {week} | DAY {day}</span>
         </div>
         
         {/* Activity name */}
@@ -72,8 +72,8 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
           className="text-white font-black italic leading-[0.95]"
           style={{
             fontSize: '13cqw',
-            marginTop: '2cqw',
-            textShadow: '2px 4px 12px rgba(0,0,0,0.15)',
+            marginTop: 'calc(2cqw + 5px)',
+            marginLeft: '10px',
           }}
         >
           {activity}
@@ -87,10 +87,10 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
           <div className="flex" style={{ gap: '6cqw' }}>
             {duration && (
               <div className="flex-1">
-                <p className="text-white/60 font-medium tracking-wide" style={{ fontSize: '2.5cqw', marginBottom: '0.5cqw' }}>{durationLabel}</p>
+                <p className="text-white/60 font-medium tracking-wide" style={{ fontSize: 'calc(2.5cqw + 20px)', marginBottom: '0.5cqw' }}>{durationLabel}</p>
                 <p 
                   className="text-white font-bold leading-none animate-subtle-pulse"
-                  style={{ fontSize: '5.5cqw', fontVariantNumeric: 'tabular-nums' }}
+                  style={{ fontSize: 'calc(5.5cqw + 20px)', fontVariantNumeric: 'tabular-nums' }}
                 >
                   {duration}
                 </p>
@@ -105,10 +105,10 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
             
             {pr && (
               <div className="flex-1">
-                <p className="text-white/60 font-medium tracking-wide" style={{ fontSize: '2.5cqw', marginBottom: '0.5cqw' }}>{metricLabel}</p>
+                <p className="text-white/60 font-medium tracking-wide" style={{ fontSize: 'calc(2.5cqw + 20px)', marginBottom: '0.5cqw' }}>{metricLabel}</p>
                 <p 
                   className="text-white font-bold leading-none animate-subtle-pulse"
-                  style={{ fontSize: '5.5cqw', fontVariantNumeric: 'tabular-nums', animationDelay: '0.5s' }}
+                  style={{ fontSize: 'calc(5.5cqw + 20px)', fontVariantNumeric: 'tabular-nums', animationDelay: '0.5s' }}
                 >
                   {pr}
                 </p>
