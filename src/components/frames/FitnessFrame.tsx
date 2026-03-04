@@ -123,18 +123,18 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       
       {/* Stats pills */}
       {(duration || pr) && (
-        <div className="absolute z-20" style={{ left: '3cqw', bottom: '18%' }}>
+        <div className="absolute z-20" style={{ left: '3cqw', bottom: 'calc(18% - 30px)' }}>
           <div className="flex flex-col" style={{ gap: '1.5cqw' }}>
             {pr && (
-              <div style={{ background: '#F45B4A', borderRadius: '1cqw', padding: '1cqw 1.5cqw' }}>
-                <span className="text-white font-normal uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '4cqw', letterSpacing: '0.03em' }}>
+              <div style={{ background: '#F45B4A', borderRadius: '2px', padding: '4px 6px' }}>
+                <span className="text-white font-normal uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '4cqw', letterSpacing: '0.5px' }}>
                   {metricLabel} : {pr}
                 </span>
               </div>
             )}
             {duration && (
-              <div style={{ background: '#F45B4A', borderRadius: '1cqw', padding: '1cqw 1.5cqw' }}>
-                <span className="text-white font-normal uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '4cqw', letterSpacing: '0.03em' }}>
+              <div style={{ background: '#F45B4A', borderRadius: '2px', padding: '4px 6px' }}>
+                <span className="text-white font-normal uppercase" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '4cqw', letterSpacing: '0.5px' }}>
                   {durationLabel} : {duration}
                 </span>
               </div>
