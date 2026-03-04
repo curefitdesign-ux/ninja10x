@@ -46,6 +46,33 @@ const JournalFrame = ({
       {/* Background image */}
       <img src={journalBgClean} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
       
+      {/* CSS lined paper overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 38px, #2a9d6a 38px, #2a9d6a 39.5px)',
+          backgroundPosition: '0 60px',
+        }}
+      />
+      
+      {/* Paper holes */}
+      {[80, 200, 320, 440, 560].map((top) => (
+        <div
+          key={top}
+          className="absolute pointer-events-none"
+          style={{
+            left: '12px',
+            top: `${top}px`,
+            width: '14px',
+            height: '14px',
+            borderRadius: '50%',
+            background: '#e8e0d0',
+            border: '1.5px solid #c4b8a4',
+            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.15)',
+          }}
+        />
+      ))}
+      
       {/* Photo area filling the frame - tilted 10deg, 90% size */}
       <div 
         className="absolute top-10 left-4 right-4 bottom-[140px] rounded-xl overflow-hidden bg-black"
