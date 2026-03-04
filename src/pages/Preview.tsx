@@ -824,6 +824,8 @@ const Preview = () => {
           imageScale={imageScale}
           label1={activityLabels.secondaryUnit}
           label2={activityLabels.primaryUnit}
+          label1Name={activityLabels.secondaryMetric}
+          label2Name={activityLabels.primaryMetric}
         />;
       case 'holographic':
         return <HolographicFrame 
