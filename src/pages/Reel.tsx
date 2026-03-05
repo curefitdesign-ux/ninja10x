@@ -1556,8 +1556,6 @@ const Reel = () => {
                       </button>
                     );
                   })}
-                </div>
-              </div>
             </div>
           </div>
 
