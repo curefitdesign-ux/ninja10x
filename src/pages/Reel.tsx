@@ -1304,8 +1304,8 @@ const Reel = () => {
 
           {/* Row 1: Own profile + All avatars in one scrollable strip */}
           <div
-            className="flex items-center px-3 shrink-0"
-            style={{ height: 56 }}
+            className="flex items-start px-3 shrink-0"
+            style={{ height: 72 }}
           >
             {/* Left side - Profile with story ring + Delete */}
             <div className="flex items-center gap-1 shrink-0">
@@ -1325,77 +1325,80 @@ const Reel = () => {
                         setCurrentActivityIndex(0);
                       }
                     }}
-                    className="relative active:scale-95 flex-shrink-0"
-                    style={{ width: avatarSize, height: avatarSize }}
+                    className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
+                    style={{ width: avatarSize }}
                   >
-                    {/* Story ring around profile avatar */}
-                    {ownGroup && ownActivityCount > 0 && (
-                      <svg
-                        className="absolute inset-0"
-                        style={{ width: avatarSize, height: avatarSize, transform: 'rotate(-90deg)' }}
-                        viewBox="0 0 100 100"
-                      >
-                        {Array.from({ length: ownActivityCount }).map((_, segIdx) => {
-                          const gapAngle = ownActivityCount > 1 ? 10 : 0;
-                          const totalGap = gapAngle * ownActivityCount;
-                          const segmentAngle = (360 - totalGap) / ownActivityCount;
-                          const startAngle = segIdx * (segmentAngle + gapAngle);
-                          const isCurrentSegment = isOwnActive && segIdx === ownCurrentIdx;
-                          const isSegmentViewed = isOwnActive && segIdx < ownCurrentIdx;
-                          const isSegmentUnviewed = !isOwnActive || segIdx > ownCurrentIdx;
+                    <div className="relative" style={{ width: avatarSize, height: avatarSize }}>
+                      {/* Story ring around profile avatar */}
+                      {ownGroup && ownActivityCount > 0 && (
+                        <svg
+                          className="absolute inset-0"
+                          style={{ width: avatarSize, height: avatarSize, transform: 'rotate(-90deg)' }}
+                          viewBox="0 0 100 100"
+                        >
+                          {Array.from({ length: ownActivityCount }).map((_, segIdx) => {
+                            const gapAngle = ownActivityCount > 1 ? 10 : 0;
+                            const totalGap = gapAngle * ownActivityCount;
+                            const segmentAngle = (360 - totalGap) / ownActivityCount;
+                            const startAngle = segIdx * (segmentAngle + gapAngle);
+                            const isCurrentSegment = isOwnActive && segIdx === ownCurrentIdx;
+                            const isSegmentViewed = isOwnActive && segIdx < ownCurrentIdx;
+                            const isSegmentUnviewed = !isOwnActive || segIdx > ownCurrentIdx;
 
-                          const radius = 44;
-                          const circumference = 2 * Math.PI * radius;
-                          const segmentLength = (segmentAngle / 360) * circumference;
-                          const offset = (startAngle / 360) * circumference;
+                            const radius = 44;
+                            const circumference = 2 * Math.PI * radius;
+                            const segmentLength = (segmentAngle / 360) * circumference;
+                            const offset = (startAngle / 360) * circumference;
 
-                          const progressLength = isCurrentSegment && ownRingProgress > 0
-                            ? segmentLength
-                            : isCurrentSegment ? 0 : segmentLength;
+                            const progressLength = isCurrentSegment && ownRingProgress > 0
+                              ? segmentLength : isCurrentSegment ? 0 : segmentLength;
 
-                          return (
-                            <g key={segIdx}>
-                              {isCurrentSegment && (
+                            return (
+                              <g key={segIdx}>
+                                {isCurrentSegment && (
+                                  <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
+                                    stroke="rgba(255,255,255,0.15)"
+                                    strokeDasharray={`${segmentLength} ${circumference}`}
+                                    strokeDashoffset={-offset} strokeLinecap="round" />
+                                )}
                                 <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
-                                  stroke="rgba(255,255,255,0.15)"
-                                  strokeDasharray={`${segmentLength} ${circumference}`}
+                                  stroke={isSegmentUnviewed ? 'rgba(255,255,255,0.25)' : 'url(#storyGradientOwn)'}
+                                  strokeDasharray={`${isCurrentSegment ? progressLength : segmentLength} ${circumference}`}
                                   strokeDashoffset={-offset} strokeLinecap="round"
+                                  style={{
+                                    filter: (isSegmentViewed || isCurrentSegment) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
+                                    transition: isCurrentSegment && ownRingProgress > 0
+                                      ? `stroke-dasharray ${autoAdvanceDuration}ms linear`
+                                      : isCurrentSegment ? 'none' : 'stroke-dasharray 0.3s ease',
+                                  }}
                                 />
-                              )}
-                              <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
-                                stroke={isSegmentUnviewed && !isCurrentSegment ? 'rgba(255,255,255,0.25)' : 'url(#storyGradientOwn)'}
-                                strokeDasharray={`${isCurrentSegment ? progressLength : segmentLength} ${circumference}`}
-                                strokeDashoffset={-offset} strokeLinecap="round"
-                                style={{
-                                  filter: (isSegmentViewed || isCurrentSegment) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
-                                  transition: isCurrentSegment && ownRingProgress > 0
-                                    ? `stroke-dasharray ${autoAdvanceDuration}ms linear`
-                                    : isCurrentSegment ? 'none' : 'stroke-dasharray 0.3s ease',
-                                }}
-                              />
-                            </g>
-                          );
-                        })}
-                        <defs>
-                          <linearGradient id="storyGradientOwn" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#FEDA75" />
-                            <stop offset="25%" stopColor="#FA7E1E" />
-                            <stop offset="50%" stopColor="#D62976" />
-                            <stop offset="75%" stopColor="#962FBF" />
-                            <stop offset="100%" stopColor="#4F5BD5" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
-                    )}
-                    <div className="relative" style={{ width: avatarSize, height: avatarSize, padding: 4 }}>
-                      <div className="w-full h-full rounded-full overflow-hidden">
-                        <ProfileAvatar
-                          src={profile?.avatar_url}
-                          name={profile?.display_name}
-                          size={avatarSize - 8}
-                        />
+                              </g>
+                            );
+                          })}
+                          <defs>
+                            <linearGradient id="storyGradientOwn" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#FEDA75" />
+                              <stop offset="25%" stopColor="#FA7E1E" />
+                              <stop offset="50%" stopColor="#D62976" />
+                              <stop offset="75%" stopColor="#962FBF" />
+                              <stop offset="100%" stopColor="#4F5BD5" />
+                            </linearGradient>
+                          </defs>
+                        </svg>
+                      )}
+                      <div className="relative" style={{ width: avatarSize, height: avatarSize, padding: 4 }}>
+                        <div className="w-full h-full rounded-full overflow-hidden">
+                          <ProfileAvatar
+                            src={profile?.avatar_url}
+                            name={profile?.display_name}
+                            size={avatarSize - 8}
+                          />
+                        </div>
                       </div>
                     </div>
+                    <span className="text-[9px] text-white/50 font-medium mt-1 max-w-[52px] truncate">
+                      {isOwnActive ? 'You' : 'You'}
+                    </span>
                   </button>
                 );
               })()}
@@ -1405,14 +1408,14 @@ const Reel = () => {
             <div className="flex-1 overflow-hidden">
               <div 
                 ref={avatarStripRef}
-                className="flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center"
+                className="flex items-start gap-3 overflow-x-auto scrollbar-hide justify-center"
                 style={{ 
                   WebkitOverflowScrolling: 'touch',
                   scrollbarWidth: 'none',
                   msOverflowStyle: 'none',
                 }}
               >
-                <div className="flex items-center gap-2 px-1">
+                <div className="flex items-start gap-3 px-1">
                   {effectiveUserGroups.map((group, idx) => {
                     // Skip own user — shown as fixed profile button on the left
                     if (user && group.userId === user.id) return null;
@@ -1432,14 +1435,14 @@ const Reel = () => {
                           setCurrentUserIndex(idx);
                           setCurrentActivityIndex(0);
                         }}
-                        className="relative active:scale-95 flex-shrink-0"
+                        className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
                         style={{ 
-                          transform: isActive ? 'scale(1)' : 'scale(0.85)',
                           opacity: isActive ? 1 : 0.5,
                           transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
                           filter: isActive && userTransitionFlash ? 'drop-shadow(0 0 8px rgba(236, 72, 153, 0.6))' : 'none',
                         }}
                       >
+                        <div className="relative" style={{ width: avatarSize, height: avatarSize }}>
                         {/* Instagram-style story ring with auto-advance progress */}
                         <svg
                           className="absolute inset-0"
@@ -1547,6 +1550,10 @@ const Reel = () => {
                             />
                           </div>
                         </div>
+                        </div>
+                        <span className="text-[9px] text-white/50 font-medium mt-1 max-w-[48px] truncate">
+                          {group.displayName?.split(' ')[0] || 'User'}
+                        </span>
                       </button>
                     );
                   })}
@@ -1555,18 +1562,6 @@ const Reel = () => {
             </div>
           </div>
 
-          {/* Row 2: Current user name/info — centered */}
-          <div className="shrink-0 pb-1">
-            <div className="flex items-center justify-center gap-2" style={{ height: 20 }}>
-              <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
-              <span className="text-white/40">•</span>
-              {isWeekRecapStory || isRecapActivity ? (
-                <span className="text-white/60 text-xs">Week {weekRecapNumber || 1} Recap</span>
-              ) : currentActivity.dayNumber < 1000 ? (
-                <span className="text-white/60 text-xs">Week {week} • Day {dayInWeek}</span>
-              ) : null}
-            </div>
-          </div>
         </div>
 
         {/* MIDDLE CONTAINER — flexes between profile strip and bottom nav */}
