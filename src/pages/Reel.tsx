@@ -1585,16 +1585,16 @@ const Reel = () => {
               <motion.div
                 key={`peek-left-${prevIdx}`}
                 className="absolute left-0 top-0 bottom-0 flex items-center cursor-pointer"
-                style={{ width: '16%', zIndex: 20 }}
+                style={{ width: '13%', zIndex: 20 }}
                 onClick={goPrevUser}
                 initial={{ opacity: 0, x: -10, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
               >
                 <div
-                  className="w-full h-[55%] overflow-hidden"
+                  className="w-full h-[59%] overflow-hidden"
                   style={{
-                    borderRadius: '0 16px 16px 0',
+                    borderRadius: '0 10px 10px 0',
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.12)',
                     borderLeft: 'none',
@@ -1628,16 +1628,16 @@ const Reel = () => {
               <motion.div
                 key={`peek-right-${nextIdx}`}
                 className="absolute right-0 top-0 bottom-0 flex items-center cursor-pointer"
-                style={{ width: '16%', zIndex: 20 }}
+                style={{ width: '13%', zIndex: 20 }}
                 onClick={goNextUser}
                 initial={{ opacity: 0, x: 10, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
               >
                 <div
-                  className="w-full h-[55%] overflow-hidden"
+                  className="w-full h-[59%] overflow-hidden"
                   style={{
-                    borderRadius: '16px 0 0 16px',
+                    borderRadius: '10px 0 0 10px',
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.12)',
                     borderRight: 'none',
@@ -1703,7 +1703,7 @@ const Reel = () => {
                         aspectRatio: '9/16',
                         height: 'calc(90% - 50px)',
                         maxWidth: '100%',
-                        borderRadius: '20px',
+                        borderRadius: '10px',
                         overflow: 'hidden',
                         background: 'transparent',
                       }}
@@ -1927,7 +1927,7 @@ const Reel = () => {
 
                     {/* Floating 3D emoji reactions - OUTSIDE overflow-hidden card so they aren't clipped */}
                     {!shouldShowLocked && (
-                      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 25, overflow: 'hidden', borderRadius: '20px' }}>
+                      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 25, overflow: 'hidden', borderRadius: '10px' }}>
                         <Floating3DEmojis 
                           reactions={activeReactionTypes}
                           newReaction={null}
