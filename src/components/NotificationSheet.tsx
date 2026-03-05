@@ -329,45 +329,64 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20, height: 0 }}
                         transition={{ delay: index * 0.03 }}
-                        className="relative flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform"
+                        className="relative flex items-center gap-3 p-3 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform"
                         style={{
                           background: 'rgba(255, 255, 255, 0.06)',
                           border: '1px solid rgba(255, 255, 255, 0.1)',
                         }}
                         onClick={() => handleNotificationTap(notif)}
                       >
-                        {/* Reaction icon */}
-                        <div 
-                          className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
-                          style={{
-                            background: 'rgba(255, 255, 255, 0.08)',
-                          }}
-                        >
-                          {iconSrc ? (
-                            <img
-                              src={iconSrc}
-                              alt={notif.reactionType}
-                              className="w-7 h-7 object-contain"
+                        {/* Reactor avatar with reaction badge */}
+                        <div className="relative flex-shrink-0">
+                          <div className="w-11 h-11 rounded-full overflow-hidden">
+                            <ProfileAvatar
+                              src={notif.reactorAvatarUrl}
+                              name={notif.reactorName}
+                              size={44}
                             />
-                          ) : (
-                            <div className="w-2 h-2 rounded-full bg-white/30" />
+                          </div>
+                          {/* Reaction badge on avatar */}
+                          {iconSrc && (
+                            <div 
+                              className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
+                              style={{
+                                background: 'rgba(30, 18, 69, 0.9)',
+                                border: '1.5px solid rgba(255,255,255,0.15)',
+                              }}
+                            >
+                              <img src={iconSrc} alt={notif.reactionType} className="w-4 h-4 object-contain" />
+                            </div>
                           )}
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-white text-sm">
-                            <span className="font-medium">{notif.reactorName}</span>
-                            <span className="text-white/70"> {REACTION_VERBS[notif.reactionType] || 'reacted to'} your activity</span>
+                          <p className="text-white text-sm leading-snug">
+                            <span className="font-semibold">{notif.reactorName}</span>
+                            <span className="text-white/60"> {REACTION_VERBS[notif.reactionType] || 'reacted to'} your {notif.activityType || 'activity'}</span>
                           </p>
-                          {notif.dayNumber && (
-                            <p className="text-white/40 text-xs mt-0.5">Day {notif.dayNumber}</p>
-                          )}
+                          <p className="text-white/35 text-xs mt-0.5">
+                            {notif.dayNumber ? `Day ${notif.dayNumber} · ` : ''}{formatRelativeTime(notif.timestamp)}
+                          </p>
                         </div>
 
-                        {/* Timestamp on right */}
-                        <span className="text-white/30 text-xs flex-shrink-0">
-                          {formatRelativeTime(notif.timestamp)}
+                        {/* Activity thumbnail on right */}
+                        {notif.activityImageUrl ? (
+                          <div 
+                            className="w-11 h-14 rounded-lg overflow-hidden flex-shrink-0"
+                            style={{ border: '1px solid rgba(255,255,255,0.1)' }}
+                          >
+                            <img 
+                              src={notif.activityImageUrl} 
+                              alt="Activity" 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <span className="text-white/30 text-xs flex-shrink-0">
+                            {formatRelativeTime(notif.timestamp)}
+                          </span>
+                        )}
                         </span>
                       </motion.div>
                     );
