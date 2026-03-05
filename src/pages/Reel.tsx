@@ -1562,18 +1562,6 @@ const Reel = () => {
             </div>
           </div>
 
-          {/* Row 2: Current user name/info — centered */}
-          <div className="shrink-0 pb-1">
-            <div className="flex items-center justify-center gap-2" style={{ height: 20 }}>
-              <span className="text-white font-semibold text-sm">{currentGroup.displayName}</span>
-              <span className="text-white/40">•</span>
-              {isWeekRecapStory || isRecapActivity ? (
-                <span className="text-white/60 text-xs">Week {weekRecapNumber || 1} Recap</span>
-              ) : currentActivity.dayNumber < 1000 ? (
-                <span className="text-white/60 text-xs">Week {week} • Day {dayInWeek}</span>
-              ) : null}
-            </div>
-          </div>
         </div>
 
         {/* MIDDLE CONTAINER — flexes between profile strip and bottom nav */}
