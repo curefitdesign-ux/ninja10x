@@ -1428,8 +1428,35 @@ const Reel = () => {
               </div>
             </div>
             
-            {/* Right side - Ellipsis menu */}
-            <div className="flex items-center shrink-0 relative">
+            {/* Right side - Notification + Ellipsis menu */}
+            <div className="flex items-center gap-2 shrink-0 relative">
+              {/* Notification bell */}
+              <button
+                onClick={() => setShowNotificationSheet(true)}
+                className="relative active:scale-[0.95] transition-transform flex items-center justify-center"
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(40px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+                }}
+              >
+                <Bell className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
+                {unreadNotificationCount > 0 && (
+                  <div
+                    className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full"
+                    style={{
+                      background: '#EF4444',
+                      border: '1.5px solid rgba(0,0,0,0.5)',
+                      boxShadow: '0 0 6px rgba(239, 68, 68, 0.6)',
+                    }}
+                  />
+                )}
+              </button>
               <button
                 onClick={() => setShowEllipsisMenu(prev => !prev)}
                 className="active:scale-[0.95] transition-transform flex items-center justify-center"
