@@ -145,6 +145,8 @@ const Reel = () => {
   const [showMakePublicSheet, setShowMakePublicSheet] = useState(false);
   const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
   const [showEllipsisMenu, setShowEllipsisMenu] = useState(false);
+  const [showNotificationSheet, setShowNotificationSheet] = useState(false);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 
   // Recap viewer state
   const [isAddingToStories, setIsAddingToStories] = useState(false);
