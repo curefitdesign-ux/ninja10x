@@ -36,9 +36,11 @@ const MediaSourceSheet = forwardRef<HTMLDivElement, MediaSourceSheetProps>(funct
   };
 
   const handleGallerySelect = () => {
-    triggerHaptic('medium');
-    // Directly trigger file picker
+    // On Android, programmatic click must happen synchronously in user gesture handler
+    // triggerHaptic is async and breaks the gesture chain on some Android WebViews
+    // So we click first, then haptic
     fileInputRef.current?.click();
+    triggerHaptic('medium');
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -165,13 +167,15 @@ const MediaSourceSheet = forwardRef<HTMLDivElement, MediaSourceSheetProps>(funct
               </div>
             </motion.div>
 
-            {/* Hidden file input for direct gallery access */}
+            {/* Hidden file input for direct gallery access - capture removed for gallery mode */}
             <input
               ref={fileInputRef}
               type="file"
               accept="image/*,video/*"
+              capture={undefined}
               className="hidden"
               onChange={handleFileChange}
+              style={{ position: 'absolute', left: '-9999px', opacity: 0 }}
             />
 
             {/* Options */}

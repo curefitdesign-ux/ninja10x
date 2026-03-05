@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react';
 import { User, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -70,6 +71,21 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
   const navigate = useNavigate();
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
   
+  // Preload the latest 3 images immediately for instant rendering
+  const displayPhotos = photos.slice(-3).reverse();
+  const preloadedUrls = useRef(new Set<string>());
+  
+  useEffect(() => {
+    displayPhotos.forEach(photo => {
+      const url = photo.originalUrl || photo.storageUrl;
+      if (url && !preloadedUrls.current.has(url)) {
+        preloadedUrls.current.add(url);
+        const img = new window.Image();
+        img.src = url;
+      }
+    });
+  }, [photos.length]);
+  
   const existingDays = new Set(photos.map(p => p.dayNumber));
   const nextDayNumber = (() => {
     for (let day = 1; day <= 12; day++) {
@@ -94,7 +110,7 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
     });
   };
 
-  const displayPhotos = photos.slice(-3).reverse();
+  const visiblePhotos = displayPhotos;
   
   // Get active reaction types for a photo
   const getActiveReactions = (photo: Photo): ReactionType[] => {
@@ -197,7 +213,7 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
           </div>
         )}
         <div className="rounded-2xl overflow-hidden" style={{ width: `${cardWidth}px`, height: `${cardHeight}px`, border: '3px solid rgba(0,0,0,0.9)', boxShadow: isCenter ? '0 15px 40px rgba(0,0,0,0.5)' : '0 8px 25px rgba(0,0,0,0.3)' }}>
-          {isVideo ? <video src={displayUrl} className="w-full h-full object-cover" muted playsInline autoPlay loop /> : <img src={displayUrl} alt="" className="w-full h-full object-cover" />}
+          {isVideo ? <video src={displayUrl} className="w-full h-full object-cover" muted playsInline autoPlay loop preload="auto" /> : <img src={displayUrl} alt="" className="w-full h-full object-cover" loading="eager" decoding="async" fetchPriority="high" />}
         </div>
       </div>
     );
@@ -214,10 +230,10 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
       data-shared-element="cult-ninja-widget"
     >
       <div className="relative w-full" style={{ height: '280px' }}>
-        {displayPhotos.length === 0 ? (
+        {visiblePhotos.length === 0 ? (
           <CardComponent photo={null} position={0} />
         ) : (
-          displayPhotos.map((photo, idx) => <CardComponent key={photo.id} photo={photo} position={idx} />)
+          visiblePhotos.map((photo, idx) => <CardComponent key={photo.id} photo={photo} position={idx} />)
         )}
 
         {/* Plus icon to log next activity */}
