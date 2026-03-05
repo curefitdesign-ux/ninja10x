@@ -1302,13 +1302,20 @@ const Reel = () => {
             </div>
           </div>
 
-          {/* Row 1: Own profile + All avatars in one scrollable strip */}
+          {/* Row 1: All avatars in one centered scrollable strip */}
           <div
-            className="flex items-start px-3 shrink-0"
-            style={{ height: 72 }}
+            className="shrink-0 overflow-hidden"
+            style={{ height: 78 }}
           >
-            {/* Left side - Profile with story ring + Delete */}
-            <div className="flex items-center gap-1 shrink-0">
+            <div 
+              ref={avatarStripRef}
+              className="flex items-start gap-3 overflow-x-auto scrollbar-hide justify-center px-3"
+              style={{ 
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+            >
               {(() => {
                 const ownIdx = effectiveUserGroups.findIndex(g => user && g.userId === user.id);
                 const isOwnActive = ownIdx >= 0 && ownIdx === currentUserIndex;
@@ -1325,8 +1332,13 @@ const Reel = () => {
                         setCurrentActivityIndex(0);
                       }
                     }}
+                    ref={isOwnActive ? activeAvatarRef : undefined}
                     className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
-                    style={{ width: avatarSize }}
+                    style={{ 
+                      width: avatarSize,
+                      opacity: isOwnActive ? 1 : 0.5,
+                      transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
+                    }}
                   >
                     <div className="relative" style={{ width: avatarSize, height: avatarSize }}>
                       {/* Story ring around profile avatar */}
@@ -1397,27 +1409,13 @@ const Reel = () => {
                       </div>
                     </div>
                     <span className="text-[9px] text-white/50 font-medium mt-1 max-w-[52px] truncate">
-                      {isOwnActive ? 'You' : 'You'}
+                      You
                     </span>
                   </button>
                 );
               })()}
-             </div>
-
-            {/* Other user avatars - SCROLLABLE horizontally */}
-            <div className="flex-1 overflow-hidden">
-              <div 
-                ref={avatarStripRef}
-                className="flex items-start gap-3 overflow-x-auto scrollbar-hide justify-center"
-                style={{ 
-                  WebkitOverflowScrolling: 'touch',
-                  scrollbarWidth: 'none',
-                  msOverflowStyle: 'none',
-                }}
-              >
-                <div className="flex items-start gap-3 px-1">
-                  {effectiveUserGroups.map((group, idx) => {
-                    // Skip own user — shown as fixed profile button on the left
+              {effectiveUserGroups.map((group, idx) => {
+                    // Skip own user — already shown above
                     if (user && group.userId === user.id) return null;
                     const isActive = idx === currentUserIndex;
                     const activityCount = group.activities.length;
@@ -1425,7 +1423,7 @@ const Reel = () => {
                     const isOwnProfile = user && group.userId === user.id;
                     // Stories are locked, but profile photos are ALWAYS visible
                     const isStoryLocked = !isOwnProfile && !profile?.stories_public;
-                    const avatarSize = isActive ? 48 : 40;
+                    const avatarSize = 52;
                     
                       return (
                       <button
@@ -1435,8 +1433,9 @@ const Reel = () => {
                           setCurrentUserIndex(idx);
                           setCurrentActivityIndex(0);
                         }}
-                        className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
+                    className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
                         style={{ 
+                          width: avatarSize,
                           opacity: isActive ? 1 : 0.5,
                           transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
                           filter: isActive && userTransitionFlash ? 'drop-shadow(0 0 8px rgba(236, 72, 153, 0.6))' : 'none',
@@ -1557,8 +1556,6 @@ const Reel = () => {
                       </button>
                     );
                   })}
-                </div>
-              </div>
             </div>
           </div>
 
