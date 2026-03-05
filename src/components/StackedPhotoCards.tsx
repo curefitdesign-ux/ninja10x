@@ -110,7 +110,7 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
     });
   };
 
-  const displayPhotos = photos.slice(-3).reverse();
+  const visiblePhotos = displayPhotos;
   
   // Get active reaction types for a photo
   const getActiveReactions = (photo: Photo): ReactionType[] => {
