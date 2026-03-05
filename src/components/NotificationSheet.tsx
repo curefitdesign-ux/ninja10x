@@ -68,9 +68,12 @@ export interface Notification {
   id: string;
   activityId: string;
   reactorName: string;
+  reactorAvatarUrl?: string;
   reactionType: string;
   timestamp: Date;
   dayNumber?: number;
+  activityImageUrl?: string;
+  activityType?: string;
 }
 
 interface NotificationSheetProps {
