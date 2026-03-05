@@ -1435,12 +1435,12 @@ const Reel = () => {
                           setCurrentUserIndex(idx);
                           setCurrentActivityIndex(0);
                         }}
-                        className="relative active:scale-95 flex-shrink-0"
+                        className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
                         style={{ 
-                          transform: isActive ? 'scale(1)' : 'scale(0.85)',
                           opacity: isActive ? 1 : 0.5,
                           transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
                           filter: isActive && userTransitionFlash ? 'drop-shadow(0 0 8px rgba(236, 72, 153, 0.6))' : 'none',
+                        }}
                         }}
                       >
                         {/* Instagram-style story ring with auto-advance progress */}
