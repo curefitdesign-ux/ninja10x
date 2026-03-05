@@ -1927,7 +1927,7 @@ const Reel = () => {
 
                     {/* Floating 3D emoji reactions - OUTSIDE overflow-hidden card so they aren't clipped */}
                     {!shouldShowLocked && (
-                      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 25, overflow: 'hidden', borderRadius: '20px' }}>
+                      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 25, overflow: 'hidden', borderRadius: '10px' }}>
                         <Floating3DEmojis 
                           reactions={activeReactionTypes}
                           newReaction={null}
