@@ -1550,6 +1550,10 @@ const Reel = () => {
                             />
                           </div>
                         </div>
+                        </div>
+                        <span className="text-[9px] text-white/50 font-medium mt-1 max-w-[48px] truncate">
+                          {group.displayName?.split(' ')[0] || 'User'}
+                        </span>
                       </button>
                     );
                   })}
