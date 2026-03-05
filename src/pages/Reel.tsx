@@ -1332,8 +1332,13 @@ const Reel = () => {
                         setCurrentActivityIndex(0);
                       }
                     }}
+                    ref={isOwnActive ? activeAvatarRef : undefined}
                     className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
-                    style={{ width: avatarSize }}
+                    style={{ 
+                      width: avatarSize,
+                      opacity: isOwnActive ? 1 : 0.5,
+                      transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
+                    }}
                   >
                     <div className="relative" style={{ width: avatarSize, height: avatarSize }}>
                       {/* Story ring around profile avatar */}
