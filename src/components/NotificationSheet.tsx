@@ -178,11 +178,18 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             userActivitiesRef.current.has(newReaction.activity_id) &&
             newReaction.user_id !== user.id
           ) {
-            // Fetch reactor's profile for display name
+            // Fetch reactor's profile
             const { data: profile } = await supabase
               .from('profiles')
-              .select('display_name')
+              .select('display_name, avatar_url')
               .eq('user_id', newReaction.user_id)
+              .maybeSingle();
+
+            // Fetch activity info
+            const { data: activityInfo } = await supabase
+              .from('journey_activities')
+              .select('day_number, storage_url, activity')
+              .eq('id', newReaction.activity_id)
               .maybeSingle();
 
             const reactorName = profile?.display_name || 'Someone';
@@ -191,8 +198,12 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
               id: newReaction.id,
               activityId: newReaction.activity_id,
               reactorName,
+              reactorAvatarUrl: profile?.avatar_url || undefined,
               reactionType: newReaction.reaction_type,
               timestamp: new Date(),
+              dayNumber: activityInfo?.day_number,
+              activityImageUrl: activityInfo?.storage_url,
+              activityType: activityInfo?.activity || undefined,
             };
 
             setNotifications(prev => {
