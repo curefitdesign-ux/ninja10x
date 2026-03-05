@@ -1172,7 +1172,7 @@ const Reel = () => {
         <div 
           className="z-50 flex flex-col justify-end shrink-0"
           style={{ 
-            paddingTop: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 12px)',
+            paddingTop: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 27px)',
           }}
         >
           {/* Row 0: Brand bar — Bell | Ninja 10X | 3-dot */}
