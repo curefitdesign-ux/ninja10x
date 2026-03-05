@@ -2205,6 +2205,11 @@ const Reel = () => {
         onClose={() => setShowMediaSourceSheet(false)}
         dayNumber={myActivities.length + 1}
       />
+      <NotificationSheet
+        isOpen={showNotificationSheet}
+        onClose={() => setShowNotificationSheet(false)}
+        onNotificationCountChange={setUnreadNotificationCount}
+      />
     </DynamicBlurBackground>
   );
 };
