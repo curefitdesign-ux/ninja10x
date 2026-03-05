@@ -1304,8 +1304,8 @@ const Reel = () => {
 
           {/* Row 1: Own profile + All avatars in one scrollable strip */}
           <div
-            className="flex items-center px-3 shrink-0"
-            style={{ height: 56 }}
+            className="flex items-start px-3 shrink-0"
+            style={{ height: 72 }}
           >
             {/* Left side - Profile with story ring + Delete */}
             <div className="flex items-center gap-1 shrink-0">
