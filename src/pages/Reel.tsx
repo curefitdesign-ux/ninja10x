@@ -1594,7 +1594,7 @@ const Reel = () => {
                 <div
                   className="w-full h-[59%] overflow-hidden"
                   style={{
-                    borderRadius: '0 16px 16px 0',
+                    borderRadius: '0 10px 10px 0',
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.12)',
                     borderLeft: 'none',
