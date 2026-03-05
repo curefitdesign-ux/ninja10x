@@ -212,7 +212,7 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
             <img src={activityIcon} alt="" className="w-5 h-5 object-contain" />
           </div>
         )}
-        <div className="rounded-2xl overflow-hidden" style={{ width: `${cardWidth}px`, height: `${cardHeight}px`, border: '3px solid rgba(0,0,0,0.9)', boxShadow: isCenter ? '0 15px 40px rgba(0,0,0,0.5)' : '0 8px 25px rgba(0,0,0,0.3)' }}>
+        <div className="overflow-hidden" style={{ width: `${cardWidth}px`, height: `${cardHeight}px`, borderRadius: isCenter ? '26px' : '16px', border: '3px solid rgba(0,0,0,0.9)', boxShadow: isCenter ? '0 15px 40px rgba(0,0,0,0.5)' : '0 8px 25px rgba(0,0,0,0.3)' }}>
           {isVideo ? <video src={displayUrl} className="w-full h-full object-cover" muted playsInline autoPlay loop preload="auto" /> : <img src={displayUrl} alt="" className="w-full h-full object-cover" loading="eager" decoding="async" fetchPriority="high" />}
         </div>
       </div>
