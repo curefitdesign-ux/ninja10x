@@ -1325,77 +1325,80 @@ const Reel = () => {
                         setCurrentActivityIndex(0);
                       }
                     }}
-                    className="relative active:scale-95 flex-shrink-0"
-                    style={{ width: avatarSize, height: avatarSize }}
+                    className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
+                    style={{ width: avatarSize }}
                   >
-                    {/* Story ring around profile avatar */}
-                    {ownGroup && ownActivityCount > 0 && (
-                      <svg
-                        className="absolute inset-0"
-                        style={{ width: avatarSize, height: avatarSize, transform: 'rotate(-90deg)' }}
-                        viewBox="0 0 100 100"
-                      >
-                        {Array.from({ length: ownActivityCount }).map((_, segIdx) => {
-                          const gapAngle = ownActivityCount > 1 ? 10 : 0;
-                          const totalGap = gapAngle * ownActivityCount;
-                          const segmentAngle = (360 - totalGap) / ownActivityCount;
-                          const startAngle = segIdx * (segmentAngle + gapAngle);
-                          const isCurrentSegment = isOwnActive && segIdx === ownCurrentIdx;
-                          const isSegmentViewed = isOwnActive && segIdx < ownCurrentIdx;
-                          const isSegmentUnviewed = !isOwnActive || segIdx > ownCurrentIdx;
+                    <div className="relative" style={{ width: avatarSize, height: avatarSize }}>
+                      {/* Story ring around profile avatar */}
+                      {ownGroup && ownActivityCount > 0 && (
+                        <svg
+                          className="absolute inset-0"
+                          style={{ width: avatarSize, height: avatarSize, transform: 'rotate(-90deg)' }}
+                          viewBox="0 0 100 100"
+                        >
+                          {Array.from({ length: ownActivityCount }).map((_, segIdx) => {
+                            const gapAngle = ownActivityCount > 1 ? 10 : 0;
+                            const totalGap = gapAngle * ownActivityCount;
+                            const segmentAngle = (360 - totalGap) / ownActivityCount;
+                            const startAngle = segIdx * (segmentAngle + gapAngle);
+                            const isCurrentSegment = isOwnActive && segIdx === ownCurrentIdx;
+                            const isSegmentViewed = isOwnActive && segIdx < ownCurrentIdx;
+                            const isSegmentUnviewed = !isOwnActive || segIdx > ownCurrentIdx;
 
-                          const radius = 44;
-                          const circumference = 2 * Math.PI * radius;
-                          const segmentLength = (segmentAngle / 360) * circumference;
-                          const offset = (startAngle / 360) * circumference;
+                            const radius = 44;
+                            const circumference = 2 * Math.PI * radius;
+                            const segmentLength = (segmentAngle / 360) * circumference;
+                            const offset = (startAngle / 360) * circumference;
 
-                          const progressLength = isCurrentSegment && ownRingProgress > 0
-                            ? segmentLength
-                            : isCurrentSegment ? 0 : segmentLength;
+                            const progressLength = isCurrentSegment && ownRingProgress > 0
+                              ? segmentLength : isCurrentSegment ? 0 : segmentLength;
 
-                          return (
-                            <g key={segIdx}>
-                              {isCurrentSegment && (
+                            return (
+                              <g key={segIdx}>
+                                {isCurrentSegment && (
+                                  <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
+                                    stroke="rgba(255,255,255,0.15)"
+                                    strokeDasharray={`${segmentLength} ${circumference}`}
+                                    strokeDashoffset={-offset} strokeLinecap="round" />
+                                )}
                                 <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
-                                  stroke="rgba(255,255,255,0.15)"
-                                  strokeDasharray={`${segmentLength} ${circumference}`}
+                                  stroke={isSegmentUnviewed ? 'rgba(255,255,255,0.25)' : 'url(#storyGradientOwn)'}
+                                  strokeDasharray={`${isCurrentSegment ? progressLength : segmentLength} ${circumference}`}
                                   strokeDashoffset={-offset} strokeLinecap="round"
+                                  style={{
+                                    filter: (isSegmentViewed || isCurrentSegment) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
+                                    transition: isCurrentSegment && ownRingProgress > 0
+                                      ? `stroke-dasharray ${autoAdvanceDuration}ms linear`
+                                      : isCurrentSegment ? 'none' : 'stroke-dasharray 0.3s ease',
+                                  }}
                                 />
-                              )}
-                              <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
-                                stroke={isSegmentUnviewed && !isCurrentSegment ? 'rgba(255,255,255,0.25)' : 'url(#storyGradientOwn)'}
-                                strokeDasharray={`${isCurrentSegment ? progressLength : segmentLength} ${circumference}`}
-                                strokeDashoffset={-offset} strokeLinecap="round"
-                                style={{
-                                  filter: (isSegmentViewed || isCurrentSegment) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
-                                  transition: isCurrentSegment && ownRingProgress > 0
-                                    ? `stroke-dasharray ${autoAdvanceDuration}ms linear`
-                                    : isCurrentSegment ? 'none' : 'stroke-dasharray 0.3s ease',
-                                }}
-                              />
-                            </g>
-                          );
-                        })}
-                        <defs>
-                          <linearGradient id="storyGradientOwn" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#FEDA75" />
-                            <stop offset="25%" stopColor="#FA7E1E" />
-                            <stop offset="50%" stopColor="#D62976" />
-                            <stop offset="75%" stopColor="#962FBF" />
-                            <stop offset="100%" stopColor="#4F5BD5" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
-                    )}
-                    <div className="relative" style={{ width: avatarSize, height: avatarSize, padding: 4 }}>
-                      <div className="w-full h-full rounded-full overflow-hidden">
-                        <ProfileAvatar
-                          src={profile?.avatar_url}
-                          name={profile?.display_name}
-                          size={avatarSize - 8}
-                        />
+                              </g>
+                            );
+                          })}
+                          <defs>
+                            <linearGradient id="storyGradientOwn" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#FEDA75" />
+                              <stop offset="25%" stopColor="#FA7E1E" />
+                              <stop offset="50%" stopColor="#D62976" />
+                              <stop offset="75%" stopColor="#962FBF" />
+                              <stop offset="100%" stopColor="#4F5BD5" />
+                            </linearGradient>
+                          </defs>
+                        </svg>
+                      )}
+                      <div className="relative" style={{ width: avatarSize, height: avatarSize, padding: 4 }}>
+                        <div className="w-full h-full rounded-full overflow-hidden">
+                          <ProfileAvatar
+                            src={profile?.avatar_url}
+                            name={profile?.display_name}
+                            size={avatarSize - 8}
+                          />
+                        </div>
                       </div>
                     </div>
+                    <span className="text-[9px] text-white/50 font-medium mt-1 max-w-[52px] truncate">
+                      {isOwnActive ? 'You' : 'You'}
+                    </span>
                   </button>
                 );
               })()}
