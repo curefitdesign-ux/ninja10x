@@ -1168,16 +1168,143 @@ const Reel = () => {
           onNudge={triggerShake}
         />
 
-        {/* TOP ZONE — fixed height — profile strip + user name */}
+        {/* TOP ZONE — fixed height — brand bar + avatar strip + user name */}
         <div 
           className="z-50 flex flex-col justify-end shrink-0"
           style={{ 
-            paddingTop: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 20px)',
+            paddingTop: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 12px)',
           }}
         >
-          {/* Row 1: Delete + Avatars + Close - all in one row */}
+          {/* Row 0: Brand bar — Bell | Ninja 10X | 3-dot */}
           <div
-            className="flex items-center justify-between px-3 shrink-0"
+            className="flex items-center justify-between px-4 shrink-0 mb-3"
+            style={{ height: 40 }}
+          >
+            {/* Left - Notification bell */}
+            <button
+              onClick={() => setShowNotificationSheet(true)}
+              className="relative active:scale-[0.95] transition-transform flex items-center justify-center"
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 19,
+                background: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(40px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+              }}
+            >
+              <Bell className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
+              {unreadNotificationCount > 0 && (
+                <div
+                  className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full"
+                  style={{
+                    background: '#EF4444',
+                    border: '1.5px solid rgba(0,0,0,0.5)',
+                    boxShadow: '0 0 6px rgba(239, 68, 68, 0.6)',
+                  }}
+                />
+              )}
+            </button>
+
+            {/* Center - Brand name */}
+            <h1 
+              className="text-white font-bold tracking-tight"
+              style={{ 
+                fontSize: 20,
+                fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
+                letterSpacing: '-0.02em',
+              }}
+            >
+              Ninja 10X
+            </h1>
+
+            {/* Right - 3-dot menu */}
+            <div className="relative">
+              <button
+                onClick={() => setShowEllipsisMenu(prev => !prev)}
+                className="active:scale-[0.95] transition-transform flex items-center justify-center"
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 19,
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(40px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+                }}
+              >
+                <MoreVertical className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
+              </button>
+
+              <AnimatePresence>
+                {showEllipsisMenu && (
+                  <>
+                    <motion.div
+                      className="fixed inset-0 z-40"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={() => setShowEllipsisMenu(false)}
+                    />
+                    <motion.div
+                      className="absolute right-0 top-full mt-2 w-52 z-50 rounded-2xl overflow-hidden"
+                      style={{
+                        background: 'rgba(20, 20, 30, 0.95)',
+                        backdropFilter: 'blur(40px) saturate(180%)',
+                        border: '1px solid rgba(255, 255, 255, 0.12)',
+                        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
+                      }}
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div className="py-1">
+                        <motion.button
+                          onClick={() => { setShowEllipsisMenu(false); setShowMediaSourceSheet(true); }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+                          whileHover={{ x: 2 }}
+                        >
+                          <Plus className="w-4 h-4 text-emerald-400" />
+                          <span className="text-sm">Log Activity</span>
+                        </motion.button>
+                        <motion.button
+                          onClick={() => { setShowEllipsisMenu(false); navigate('/profile-setup?edit=true'); }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+                          whileHover={{ x: 2 }}
+                        >
+                          <UserPen className="w-4 h-4 text-emerald-400" />
+                          <span className="text-sm">Edit Profile</span>
+                        </motion.button>
+                        <motion.button
+                          onClick={async () => {
+                            setShowEllipsisMenu(false);
+                            try {
+                              await supabase.auth.signOut();
+                              toast.success('Logged out successfully');
+                              navigate('/auth');
+                            } catch { toast.error('Failed to log out'); }
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-red-400 hover:bg-red-500/5 transition-colors"
+                          whileHover={{ x: 2 }}
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span className="text-sm">Log Out</span>
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Row 1: Own profile + All avatars in one scrollable strip */}
+          <div
+            className="flex items-center px-3 shrink-0"
             style={{ height: 56 }}
           >
             {/* Left side - Profile with story ring + Delete */}
