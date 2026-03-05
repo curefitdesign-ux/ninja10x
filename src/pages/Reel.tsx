@@ -1553,7 +1553,6 @@ const Reel = () => {
                 </div>
               </div>
             </div>
-            </div>
           </div>
 
           {/* Row 2: Current user name/info — centered */}
