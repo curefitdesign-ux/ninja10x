@@ -1408,7 +1408,7 @@ const Reel = () => {
             <div className="flex-1 overflow-hidden">
               <div 
                 ref={avatarStripRef}
-                className="flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center"
+                className="flex items-start gap-3 overflow-x-auto scrollbar-hide justify-center"
                 style={{ 
                   WebkitOverflowScrolling: 'touch',
                   scrollbarWidth: 'none',
