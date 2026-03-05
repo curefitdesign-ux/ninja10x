@@ -1703,7 +1703,7 @@ const Reel = () => {
                         aspectRatio: '9/16',
                         height: 'calc(90% - 50px)',
                         maxWidth: '100%',
-                        borderRadius: '10px',
+                        borderRadius: '0px',
                         overflow: 'hidden',
                         background: 'transparent',
                       }}
@@ -1927,7 +1927,7 @@ const Reel = () => {
 
                     {/* Floating 3D emoji reactions - OUTSIDE overflow-hidden card so they aren't clipped */}
                     {!shouldShowLocked && (
-                      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 25, overflow: 'hidden', borderRadius: '10px' }}>
+                      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 25, overflow: 'hidden', borderRadius: '0px' }}>
                         <Floating3DEmojis 
                           reactions={activeReactionTypes}
                           newReaction={null}
