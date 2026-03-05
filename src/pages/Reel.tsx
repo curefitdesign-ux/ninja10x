@@ -1550,7 +1550,7 @@ const Reel = () => {
                           </div>
                         </div>
                         </div>
-                        <span className="text-[9px] text-white/50 font-medium mt-1 max-w-[48px] truncate">
+                        <span className={`text-[11px] font-medium mt-1 max-w-[52px] truncate ${isActive ? 'text-white font-semibold' : 'text-white/50'}`}>
                           {group.displayName?.split(' ')[0] || 'User'}
                         </span>
                       </button>
