@@ -1441,8 +1441,8 @@ const Reel = () => {
                           transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
                           filter: isActive && userTransitionFlash ? 'drop-shadow(0 0 8px rgba(236, 72, 153, 0.6))' : 'none',
                         }}
-                        }}
                       >
+                        <div className="relative" style={{ width: avatarSize, height: avatarSize }}>
                         {/* Instagram-style story ring with auto-advance progress */}
                         <svg
                           className="absolute inset-0"
