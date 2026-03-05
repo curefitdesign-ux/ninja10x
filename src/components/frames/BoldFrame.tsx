@@ -53,7 +53,7 @@ const BoldFrame = ({
       className="w-full h-full relative overflow-hidden"
       style={{
         background: '#f0ede6',
-        borderRadius: '16px',
+        borderRadius: '6px',
         containerType: 'inline-size',
       }}
     >
