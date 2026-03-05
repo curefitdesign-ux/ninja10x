@@ -1415,7 +1415,7 @@ const Reel = () => {
                   msOverflowStyle: 'none',
                 }}
               >
-                <div className="flex items-center gap-2 px-1">
+                <div className="flex items-start gap-3 px-1">
                   {effectiveUserGroups.map((group, idx) => {
                     // Skip own user — shown as fixed profile button on the left
                     if (user && group.userId === user.id) return null;
