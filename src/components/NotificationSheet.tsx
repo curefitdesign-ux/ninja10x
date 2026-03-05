@@ -387,7 +387,6 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                             {formatRelativeTime(notif.timestamp)}
                           </span>
                         )}
-                        </span>
                       </motion.div>
                     );
                   })}
