@@ -1409,27 +1409,13 @@ const Reel = () => {
                       </div>
                     </div>
                     <span className="text-[9px] text-white/50 font-medium mt-1 max-w-[52px] truncate">
-                      {isOwnActive ? 'You' : 'You'}
+                      You
                     </span>
                   </button>
                 );
               })()}
-             </div>
-
-            {/* Other user avatars - SCROLLABLE horizontally */}
-            <div className="flex-1 overflow-hidden">
-              <div 
-                ref={avatarStripRef}
-                className="flex items-start gap-3 overflow-x-auto scrollbar-hide justify-center"
-                style={{ 
-                  WebkitOverflowScrolling: 'touch',
-                  scrollbarWidth: 'none',
-                  msOverflowStyle: 'none',
-                }}
-              >
-                <div className="flex items-start gap-3 px-1">
-                  {effectiveUserGroups.map((group, idx) => {
-                    // Skip own user — shown as fixed profile button on the left
+              {effectiveUserGroups.map((group, idx) => {
+                    // Skip own user — already shown above
                     if (user && group.userId === user.id) return null;
                     const isActive = idx === currentUserIndex;
                     const activityCount = group.activities.length;
@@ -1437,7 +1423,7 @@ const Reel = () => {
                     const isOwnProfile = user && group.userId === user.id;
                     // Stories are locked, but profile photos are ALWAYS visible
                     const isStoryLocked = !isOwnProfile && !profile?.stories_public;
-                    const avatarSize = isActive ? 48 : 40;
+                    const avatarSize = 52;
                     
                       return (
                       <button
