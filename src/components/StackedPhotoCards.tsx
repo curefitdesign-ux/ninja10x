@@ -230,10 +230,10 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
       data-shared-element="cult-ninja-widget"
     >
       <div className="relative w-full" style={{ height: '280px' }}>
-        {displayPhotos.length === 0 ? (
+        {visiblePhotos.length === 0 ? (
           <CardComponent photo={null} position={0} />
         ) : (
-          displayPhotos.map((photo, idx) => <CardComponent key={photo.id} photo={photo} position={idx} />)
+          visiblePhotos.map((photo, idx) => <CardComponent key={photo.id} photo={photo} position={idx} />)
         )}
 
         {/* Plus icon to log next activity */}
