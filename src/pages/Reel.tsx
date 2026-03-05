@@ -1399,11 +1399,10 @@ const Reel = () => {
                   </button>
                 );
               })()}
-              {/* Delete button moved to bottom next to share */}
-            </div>
+             </div>
 
-            {/* Center - User avatars strip - SCROLLABLE horizontally */}
-            <div className="flex-1 overflow-hidden mx-2">
+            {/* Other user avatars - SCROLLABLE horizontally */}
+            <div className="flex-1 overflow-hidden">
               <div 
                 ref={avatarStripRef}
                 className="flex items-center gap-2 overflow-x-auto scrollbar-hide justify-center"
