@@ -98,12 +98,13 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
       // First get user's activity IDs
       const { data: activities } = await supabase
         .from('journey_activities')
-        .select('id')
+        .select('id, day_number, storage_url, activity')
         .eq('user_id', user.id);
       
       if (activities) {
         const activityIds = activities.map(a => a.id);
         userActivitiesRef.current = new Set(activityIds);
+        const activityMap = new Map(activities.map(a => [a.id, a]));
         
         if (activityIds.length > 0) {
           // Fetch past reactions on user's activities (excluding self-reactions)
@@ -120,26 +121,26 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             const reactorIds = [...new Set(reactions.map(r => r.user_id))];
             const { data: profiles } = await supabase
               .from('profiles')
-              .select('user_id, display_name')
+              .select('user_id, display_name, avatar_url')
               .in('user_id', reactorIds);
             
-            // Fetch activity day numbers
-            const { data: activityDetails } = await supabase
-              .from('journey_activities')
-              .select('id, day_number')
-              .in('id', activityIds);
-            const activityDayMap = new Map(activityDetails?.map(a => [a.id, a.day_number]) || []);
+            const profileMap = new Map(profiles?.map(p => [p.user_id, { name: p.display_name, avatar: p.avatar_url }]) || []);
             
-            const profileMap = new Map(profiles?.map(p => [p.user_id, p.display_name]) || []);
-            
-            const pastNotifications: Notification[] = reactions.map(r => ({
-              id: r.id,
-              activityId: r.activity_id,
-              reactorName: profileMap.get(r.user_id) || 'Someone',
-              reactionType: r.reaction_type,
-              timestamp: new Date(r.created_at),
-              dayNumber: activityDayMap.get(r.activity_id),
-            }));
+            const pastNotifications: Notification[] = reactions.map(r => {
+              const reactorProfile = profileMap.get(r.user_id);
+              const activityInfo = activityMap.get(r.activity_id);
+              return {
+                id: r.id,
+                activityId: r.activity_id,
+                reactorName: reactorProfile?.name || 'Someone',
+                reactorAvatarUrl: reactorProfile?.avatar || undefined,
+                reactionType: r.reaction_type,
+                timestamp: new Date(r.created_at),
+                dayNumber: activityInfo?.day_number,
+                activityImageUrl: activityInfo?.storage_url,
+                activityType: activityInfo?.activity || undefined,
+              };
+            });
             
             setNotifications(pastNotifications);
           }
