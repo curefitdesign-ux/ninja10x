@@ -167,13 +167,15 @@ const MediaSourceSheet = forwardRef<HTMLDivElement, MediaSourceSheetProps>(funct
               </div>
             </motion.div>
 
-            {/* Hidden file input for direct gallery access */}
+            {/* Hidden file input for direct gallery access - capture removed for gallery mode */}
             <input
               ref={fileInputRef}
               type="file"
               accept="image/*,video/*"
+              capture={undefined}
               className="hidden"
               onChange={handleFileChange}
+              style={{ position: 'absolute', left: '-9999px', opacity: 0 }}
             />
 
             {/* Options */}
