@@ -6,18 +6,31 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
+import ProfileAvatar from '@/components/ProfileAvatar';
 
-// 3D reaction assets (clean transparency)
+// 3D reaction assets
 import fireImg from '@/assets/reactions/fire-new.png';
 import clapImg from '@/assets/reactions/clap-hands.png';
+import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
+import wowImg from '@/assets/reactions/wow.png';
 import flexImg from '@/assets/reactions/flex.png';
+import trophyImg from '@/assets/reactions/dumbbells.png';
+import runnerImg from '@/assets/reactions/runner.png';
+import energyImg from '@/assets/reactions/energy.png';
+import timerImg from '@/assets/reactions/stopwatch.png';
+import heartImg from '@/assets/reactions/heart-workout.png';
 
-// Only use icons we know are clean (no white background).
-// For other reaction types we still show text, but avoid rendering a potentially white-backed asset.
 const REACTION_IMAGES: Record<string, string> = {
+  heart: heartImg,
   fire: fireImg,
   clap: clapImg,
+  fistbump: fistbumpImg,
+  wow: wowImg,
   flex: flexImg,
+  trophy: trophyImg,
+  runner: runnerImg,
+  energy: energyImg,
+  timer: timerImg,
 };
 
 const REACTION_VERBS: Record<string, string> = {
@@ -55,9 +68,12 @@ export interface Notification {
   id: string;
   activityId: string;
   reactorName: string;
+  reactorAvatarUrl?: string;
   reactionType: string;
   timestamp: Date;
   dayNumber?: number;
+  activityImageUrl?: string;
+  activityType?: string;
 }
 
 interface NotificationSheetProps {
@@ -82,12 +98,13 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
       // First get user's activity IDs
       const { data: activities } = await supabase
         .from('journey_activities')
-        .select('id')
+        .select('id, day_number, storage_url, activity')
         .eq('user_id', user.id);
       
       if (activities) {
         const activityIds = activities.map(a => a.id);
         userActivitiesRef.current = new Set(activityIds);
+        const activityMap = new Map(activities.map(a => [a.id, a]));
         
         if (activityIds.length > 0) {
           // Fetch past reactions on user's activities (excluding self-reactions)
@@ -104,26 +121,26 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             const reactorIds = [...new Set(reactions.map(r => r.user_id))];
             const { data: profiles } = await supabase
               .from('profiles')
-              .select('user_id, display_name')
+              .select('user_id, display_name, avatar_url')
               .in('user_id', reactorIds);
             
-            // Fetch activity day numbers
-            const { data: activityDetails } = await supabase
-              .from('journey_activities')
-              .select('id, day_number')
-              .in('id', activityIds);
-            const activityDayMap = new Map(activityDetails?.map(a => [a.id, a.day_number]) || []);
+            const profileMap = new Map(profiles?.map(p => [p.user_id, { name: p.display_name, avatar: p.avatar_url }]) || []);
             
-            const profileMap = new Map(profiles?.map(p => [p.user_id, p.display_name]) || []);
-            
-            const pastNotifications: Notification[] = reactions.map(r => ({
-              id: r.id,
-              activityId: r.activity_id,
-              reactorName: profileMap.get(r.user_id) || 'Someone',
-              reactionType: r.reaction_type,
-              timestamp: new Date(r.created_at),
-              dayNumber: activityDayMap.get(r.activity_id),
-            }));
+            const pastNotifications: Notification[] = reactions.map(r => {
+              const reactorProfile = profileMap.get(r.user_id);
+              const activityInfo = activityMap.get(r.activity_id);
+              return {
+                id: r.id,
+                activityId: r.activity_id,
+                reactorName: reactorProfile?.name || 'Someone',
+                reactorAvatarUrl: reactorProfile?.avatar || undefined,
+                reactionType: r.reaction_type,
+                timestamp: new Date(r.created_at),
+                dayNumber: activityInfo?.day_number,
+                activityImageUrl: activityInfo?.storage_url,
+                activityType: activityInfo?.activity || undefined,
+              };
+            });
             
             setNotifications(pastNotifications);
           }
@@ -161,11 +178,18 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             userActivitiesRef.current.has(newReaction.activity_id) &&
             newReaction.user_id !== user.id
           ) {
-            // Fetch reactor's profile for display name
+            // Fetch reactor's profile
             const { data: profile } = await supabase
               .from('profiles')
-              .select('display_name')
+              .select('display_name, avatar_url')
               .eq('user_id', newReaction.user_id)
+              .maybeSingle();
+
+            // Fetch activity info
+            const { data: activityInfo } = await supabase
+              .from('journey_activities')
+              .select('day_number, storage_url, activity')
+              .eq('id', newReaction.activity_id)
               .maybeSingle();
 
             const reactorName = profile?.display_name || 'Someone';
@@ -174,8 +198,12 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
               id: newReaction.id,
               activityId: newReaction.activity_id,
               reactorName,
+              reactorAvatarUrl: profile?.avatar_url || undefined,
               reactionType: newReaction.reaction_type,
               timestamp: new Date(),
+              dayNumber: activityInfo?.day_number,
+              activityImageUrl: activityInfo?.storage_url,
+              activityType: activityInfo?.activity || undefined,
             };
 
             setNotifications(prev => {
@@ -301,46 +329,64 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20, height: 0 }}
                         transition={{ delay: index * 0.03 }}
-                        className="relative flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform"
+                        className="relative flex items-center gap-3 p-3 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform"
                         style={{
                           background: 'rgba(255, 255, 255, 0.06)',
                           border: '1px solid rgba(255, 255, 255, 0.1)',
                         }}
                         onClick={() => handleNotificationTap(notif)}
                       >
-                        {/* Reaction icon */}
-                        <div 
-                          className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
-                          style={{
-                            background: 'rgba(255, 255, 255, 0.08)',
-                          }}
-                        >
-                          {iconSrc ? (
-                            <img
-                              src={iconSrc}
-                              alt={notif.reactionType}
-                              className="w-7 h-7 object-contain"
+                        {/* Reactor avatar with reaction badge */}
+                        <div className="relative flex-shrink-0">
+                          <div className="w-11 h-11 rounded-full overflow-hidden">
+                            <ProfileAvatar
+                              src={notif.reactorAvatarUrl}
+                              name={notif.reactorName}
+                              size={44}
                             />
-                          ) : (
-                            <div className="w-2 h-2 rounded-full bg-white/30" />
+                          </div>
+                          {/* Reaction badge on avatar */}
+                          {iconSrc && (
+                            <div 
+                              className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
+                              style={{
+                                background: 'rgba(30, 18, 69, 0.9)',
+                                border: '1.5px solid rgba(255,255,255,0.15)',
+                              }}
+                            >
+                              <img src={iconSrc} alt={notif.reactionType} className="w-4 h-4 object-contain" />
+                            </div>
                           )}
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-white text-sm">
-                            <span className="font-medium">{notif.reactorName}</span>
-                            <span className="text-white/70"> {REACTION_VERBS[notif.reactionType] || 'reacted to'} your activity</span>
+                          <p className="text-white text-sm leading-snug">
+                            <span className="font-semibold">{notif.reactorName}</span>
+                            <span className="text-white/60"> {REACTION_VERBS[notif.reactionType] || 'reacted to'} your {notif.activityType || 'activity'}</span>
                           </p>
-                          {notif.dayNumber && (
-                            <p className="text-white/40 text-xs mt-0.5">Day {notif.dayNumber}</p>
-                          )}
+                          <p className="text-white/35 text-xs mt-0.5">
+                            {notif.dayNumber ? `Day ${notif.dayNumber} · ` : ''}{formatRelativeTime(notif.timestamp)}
+                          </p>
                         </div>
 
-                        {/* Timestamp on right */}
-                        <span className="text-white/30 text-xs flex-shrink-0">
-                          {formatRelativeTime(notif.timestamp)}
-                        </span>
+                        {/* Activity thumbnail on right */}
+                        {notif.activityImageUrl ? (
+                          <div 
+                            className="w-11 h-14 rounded-lg overflow-hidden flex-shrink-0"
+                            style={{ border: '1px solid rgba(255,255,255,0.1)' }}
+                          >
+                            <img 
+                              src={notif.activityImageUrl} 
+                              alt="Activity" 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <span className="text-white/30 text-xs flex-shrink-0">
+                            {formatRelativeTime(notif.timestamp)}
+                          </span>
+                        )}
                       </motion.div>
                     );
                   })}

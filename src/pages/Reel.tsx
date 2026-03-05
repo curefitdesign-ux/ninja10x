@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronLeft, ChevronUp, Pencil, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, MoreVertical, UserPen, LogOut, Plus } from 'lucide-react';
+import { X, ChevronLeft, ChevronUp, Pencil, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, MoreVertical, UserPen, LogOut, Plus, Bell } from 'lucide-react';
 import PullToRefresh from '@/components/PullToRefresh';
 import ProfileMenu from '@/components/ProfileMenu';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
@@ -21,6 +21,7 @@ import SendReactionSheet from '@/components/SendReactionSheet';
 import ProfileAvatar from '@/components/ProfileAvatar';
 
 import MakePublicSheet from '@/components/MakePublicSheet';
+import NotificationSheet from '@/components/NotificationSheet';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
 import StoryHint, { useStoryNudgeAnimation } from '@/components/StoryHint';
 import { ReelViewerSkeleton } from '@/components/SkeletonLoaders';
@@ -144,6 +145,8 @@ const Reel = () => {
   const [showMakePublicSheet, setShowMakePublicSheet] = useState(false);
   const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
   const [showEllipsisMenu, setShowEllipsisMenu] = useState(false);
+  const [showNotificationSheet, setShowNotificationSheet] = useState(false);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 
   // Recap viewer state
   const [isAddingToStories, setIsAddingToStories] = useState(false);
@@ -1425,8 +1428,35 @@ const Reel = () => {
               </div>
             </div>
             
-            {/* Right side - Ellipsis menu */}
-            <div className="flex items-center shrink-0 relative">
+            {/* Right side - Notification + Ellipsis menu */}
+            <div className="flex items-center gap-2 shrink-0 relative">
+              {/* Notification bell */}
+              <button
+                onClick={() => setShowNotificationSheet(true)}
+                className="relative active:scale-[0.95] transition-transform flex items-center justify-center"
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(40px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+                }}
+              >
+                <Bell className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
+                {unreadNotificationCount > 0 && (
+                  <div
+                    className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full"
+                    style={{
+                      background: '#EF4444',
+                      border: '1.5px solid rgba(0,0,0,0.5)',
+                      boxShadow: '0 0 6px rgba(239, 68, 68, 0.6)',
+                    }}
+                  />
+                )}
+              </button>
               <button
                 onClick={() => setShowEllipsisMenu(prev => !prev)}
                 className="active:scale-[0.95] transition-transform flex items-center justify-center"
@@ -2174,6 +2204,11 @@ const Reel = () => {
         isOpen={showMediaSourceSheet}
         onClose={() => setShowMediaSourceSheet(false)}
         dayNumber={myActivities.length + 1}
+      />
+      <NotificationSheet
+        isOpen={showNotificationSheet}
+        onClose={() => setShowNotificationSheet(false)}
+        onNotificationCountChange={setUnreadNotificationCount}
       />
     </DynamicBlurBackground>
   );
