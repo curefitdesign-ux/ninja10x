@@ -1302,13 +1302,20 @@ const Reel = () => {
             </div>
           </div>
 
-          {/* Row 1: Own profile + All avatars in one scrollable strip */}
+          {/* Row 1: All avatars in one centered scrollable strip */}
           <div
-            className="flex items-start px-3 shrink-0"
-            style={{ height: 72 }}
+            className="shrink-0 overflow-hidden"
+            style={{ height: 78 }}
           >
-            {/* Left side - Profile with story ring + Delete */}
-            <div className="flex items-center gap-1 shrink-0">
+            <div 
+              ref={avatarStripRef}
+              className="flex items-start gap-3 overflow-x-auto scrollbar-hide justify-center px-3"
+              style={{ 
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+            >
               {(() => {
                 const ownIdx = effectiveUserGroups.findIndex(g => user && g.userId === user.id);
                 const isOwnActive = ownIdx >= 0 && ownIdx === currentUserIndex;
