@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react';
 import { User, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
