@@ -70,6 +70,21 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
   const navigate = useNavigate();
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
   
+  // Preload the latest 3 images immediately for instant rendering
+  const displayPhotos = photos.slice(-3).reverse();
+  const preloadedUrls = useRef(new Set<string>());
+  
+  useEffect(() => {
+    displayPhotos.forEach(photo => {
+      const url = photo.originalUrl || photo.storageUrl;
+      if (url && !preloadedUrls.current.has(url)) {
+        preloadedUrls.current.add(url);
+        const img = new window.Image();
+        img.src = url;
+      }
+    });
+  }, [photos.length]);
+  
   const existingDays = new Set(photos.map(p => p.dayNumber));
   const nextDayNumber = (() => {
     for (let day = 1; day <= 12; day++) {
