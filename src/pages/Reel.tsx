@@ -1703,7 +1703,7 @@ const Reel = () => {
                         aspectRatio: '9/16',
                         height: 'calc(90% - 50px)',
                         maxWidth: '100%',
-                        borderRadius: '20px',
+                        borderRadius: '10px',
                         overflow: 'hidden',
                         background: 'transparent',
                       }}
