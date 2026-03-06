@@ -1547,7 +1547,7 @@ const Reel = () => {
               <motion.div
                 key={`peek-right-${nextIdx}`}
                 className="absolute right-0 top-0 bottom-0 flex items-center cursor-pointer"
-                style={{ width: '13%', zIndex: 20 }}
+                style={{ width: '9%', zIndex: 20 }}
                 onClick={goNextUser}
                 initial={{ opacity: 0, x: 10, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
