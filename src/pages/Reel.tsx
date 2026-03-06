@@ -1624,7 +1624,7 @@ const Reel = () => {
                         borderRadius: '0px',
                         overflow: 'hidden',
                         background: 'transparent',
-                        marginTop: '-30px',
+                        marginTop: '-10px',
                       }}
                       transition={{ type: 'spring', stiffness: 280, damping: 30, duration: 0.5 }}
                     >
