@@ -16,6 +16,7 @@ import level4Img from '@/assets/progress/level-4.png';
 interface GamifiedJourneyPathProps {
   completedActivities: number;
   onCrystalTap?: (weekNum: number) => void;
+  onFinalGoalTap?: () => void;
 }
 
 const PATH_W = 380;
