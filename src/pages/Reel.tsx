@@ -844,33 +844,51 @@ const Reel = () => {
     }
   }, [buildSharePayload]);
 
-  const shareToChannel = useCallback(async (channel: 'whatsapp' | 'instagram' | 'messages') => {
+  const shareToChannel = useCallback((channel: 'whatsapp' | 'instagram' | 'messages') => {
     const payload = buildSharePayload();
     const shareText = `${payload.text}\n\n${payload.url}`;
 
-    if (channel === 'whatsapp') {
-      window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
-      return;
-    }
+    // Use setTimeout to ensure the dialog has closed and the user gesture context is preserved
+    setTimeout(() => {
+      if (channel === 'whatsapp') {
+        // Use whatsapp:// deep link for mobile, fallback to web
+        const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(shareText)}`;
+        const webFallback = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+        
+        const link = document.createElement('a');
+        link.href = whatsappUrl;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Fallback: if deep link doesn't work, open web version after a short delay
+        setTimeout(() => {
+          window.location.href = webFallback;
+        }, 1500);
+        return;
+      }
 
-    if (channel === 'messages') {
-      window.location.href = `sms:?body=${encodeURIComponent(shareText)}`;
-      return;
-    }
+      if (channel === 'messages') {
+        window.location.href = `sms:&body=${encodeURIComponent(shareText)}`;
+        return;
+      }
 
-    // Instagram does not support direct web URL sharing like WhatsApp; use native share if possible.
-    if (navigator.share) {
-      await handleSystemShare();
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(shareText);
-      toast.success('Link copied. Paste it in Instagram.');
-    } catch {
-      toast.error('Unable to prepare Instagram share');
-    }
-  }, [buildSharePayload, handleSystemShare]);
+      if (channel === 'instagram') {
+        // Instagram doesn't have a direct share URL; use native share or copy
+        if (navigator.share) {
+          navigator.share(payload).catch(() => {});
+        } else {
+          navigator.clipboard.writeText(shareText).then(() => {
+            toast.success('Link copied! Paste it in Instagram.');
+          }).catch(() => {
+            toast.error('Unable to copy link');
+          });
+        }
+        return;
+      }
+    }, 100);
+  }, [buildSharePayload]);
 
   // Handler: open share options picker
   const handleShareStory = useCallback(() => {
