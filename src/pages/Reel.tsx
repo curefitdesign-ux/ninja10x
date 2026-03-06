@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronLeft, ChevronUp, Pencil, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, MoreVertical, UserPen, LogOut, Plus, Bell } from 'lucide-react';
+import { X, ChevronLeft, ChevronUp, Pencil, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause } from 'lucide-react';
 import PullToRefresh from '@/components/PullToRefresh';
 import ProfileMenu from '@/components/ProfileMenu';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
@@ -21,7 +21,6 @@ import SendReactionSheet from '@/components/SendReactionSheet';
 import ProfileAvatar from '@/components/ProfileAvatar';
 
 import MakePublicSheet from '@/components/MakePublicSheet';
-import NotificationSheet from '@/components/NotificationSheet';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
 import StoryHint, { useStoryNudgeAnimation } from '@/components/StoryHint';
 import { ReelViewerSkeleton } from '@/components/SkeletonLoaders';
@@ -143,11 +142,7 @@ const Reel = () => {
   
   // Privacy/share sheet state
   const [showMakePublicSheet, setShowMakePublicSheet] = useState(false);
-  const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
-  const [showEllipsisMenu, setShowEllipsisMenu] = useState(false);
-  const [showNotificationSheet, setShowNotificationSheet] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
-  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 
   // Recap viewer state
   const [isAddingToStories, setIsAddingToStories] = useState(false);
@@ -1503,15 +1498,16 @@ const Reel = () => {
               <motion.div
                 key={`peek-left-${prevIdx}`}
                 className="absolute left-0 top-0 bottom-0 flex items-center cursor-pointer"
-                style={{ width: '13%', zIndex: 20 }}
+                style={{ width: '9%', zIndex: 20 }}
                 onClick={goPrevUser}
                 initial={{ opacity: 0, x: -10, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
               >
                 <div
-                  className="w-full h-[59%] overflow-hidden"
+                  className="w-full overflow-hidden"
                   style={{
+                    height: 'calc(59% + 20px)',
                     borderRadius: '0 10px 10px 0',
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.12)',
@@ -1546,15 +1542,16 @@ const Reel = () => {
               <motion.div
                 key={`peek-right-${nextIdx}`}
                 className="absolute right-0 top-0 bottom-0 flex items-center cursor-pointer"
-                style={{ width: '13%', zIndex: 20 }}
+                style={{ width: '9%', zIndex: 20 }}
                 onClick={goNextUser}
                 initial={{ opacity: 0, x: 10, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
               >
                 <div
-                  className="w-full h-[59%] overflow-hidden"
+                  className="w-full overflow-hidden"
                   style={{
+                    height: 'calc(59% + 20px)',
                     borderRadius: '10px 0 0 10px',
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.12)',
@@ -1660,7 +1657,7 @@ const Reel = () => {
                             className="w-[90%] aspect-[9/15.7] flex flex-col items-center justify-center cursor-pointer relative overflow-hidden self-center"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setShowMediaSourceSheet(true);
+                              navigate('/camera', { state: { dayNumber: currentActivity.dayNumber } });
                             }}
                             style={{
                               background: 'linear-gradient(180deg, rgba(28,28,32,1) 0%, rgba(18,18,22,1) 100%)',
@@ -2036,127 +2033,6 @@ const Reel = () => {
         </div>
       </div>{/* end overflow:hidden flex container */}
 
-      {/* Bottom action buttons — bell + 3-dot flanking the nav bar */}
-      <div
-        className="fixed left-1/2 -translate-x-1/2 flex items-center gap-3"
-        style={{
-          bottom: 'calc(max(env(safe-area-inset-bottom, 10px), 10px) + 24px)',
-          zIndex: 50,
-        }}
-      >
-        {/* Bell button */}
-        <button
-          onClick={() => setShowNotificationSheet(true)}
-          className="relative active:scale-[0.95] transition-transform flex items-center justify-center"
-          style={{
-            width: 42,
-            height: 42,
-            borderRadius: 21,
-            background: 'rgba(255, 255, 255, 0.08)',
-            backdropFilter: 'blur(60px) saturate(200%)',
-            WebkitBackdropFilter: 'blur(60px) saturate(200%)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-          }}
-        >
-          <Bell className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
-          {unreadNotificationCount > 0 && (
-            <div
-              className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full"
-              style={{
-                background: '#EF4444',
-                border: '1.5px solid rgba(0,0,0,0.5)',
-                boxShadow: '0 0 6px rgba(239, 68, 68, 0.6)',
-              }}
-            />
-          )}
-        </button>
-
-        {/* Spacer for nav bar width */}
-        <div style={{ width: 210 }} />
-
-        {/* 3-dot menu button */}
-        <div className="relative">
-          <button
-            onClick={() => setShowEllipsisMenu(prev => !prev)}
-            className="active:scale-[0.95] transition-transform flex items-center justify-center"
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: 21,
-              background: 'rgba(255, 255, 255, 0.08)',
-              backdropFilter: 'blur(60px) saturate(200%)',
-              WebkitBackdropFilter: 'blur(60px) saturate(200%)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-            }}
-          >
-            <MoreVertical className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
-          </button>
-
-          <AnimatePresence>
-            {showEllipsisMenu && (
-              <>
-                <motion.div
-                  className="fixed inset-0 z-40"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  onClick={() => setShowEllipsisMenu(false)}
-                />
-                <motion.div
-                  className="absolute right-0 bottom-full mb-2 w-52 z-50 rounded-2xl overflow-hidden"
-                  style={{
-                    background: 'rgba(20, 20, 30, 0.95)',
-                    backdropFilter: 'blur(40px) saturate(180%)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
-                  }}
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="py-1">
-                    <motion.button
-                      onClick={() => { setShowEllipsisMenu(false); setShowMediaSourceSheet(true); }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
-                      whileHover={{ x: 2 }}
-                    >
-                      <Plus className="w-4 h-4 text-emerald-400" />
-                      <span className="text-sm">Log Activity</span>
-                    </motion.button>
-                    <motion.button
-                      onClick={() => { setShowEllipsisMenu(false); navigate('/profile-setup?edit=true'); }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
-                      whileHover={{ x: 2 }}
-                    >
-                      <UserPen className="w-4 h-4 text-emerald-400" />
-                      <span className="text-sm">Edit Profile</span>
-                    </motion.button>
-                    <motion.button
-                      onClick={async () => {
-                        setShowEllipsisMenu(false);
-                        try {
-                          await supabase.auth.signOut();
-                          toast.success('Logged out successfully');
-                          navigate('/auth');
-                        } catch { toast.error('Failed to log out'); }
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-red-400 hover:bg-red-500/5 transition-colors"
-                      whileHover={{ x: 2 }}
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span className="text-sm">Log Out</span>
-                    </motion.button>
-                  </div>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-
       {/* Progress drawer removed — now a standalone page via nav */}
 
       {/* Reacts bottom sheet for own stories */}
@@ -2248,16 +2124,6 @@ const Reel = () => {
           loadActivities();
         }}
         onKeepPrivate={() => setShowMakePublicSheet(false)}
-      />
-      <MediaSourceSheet
-        isOpen={showMediaSourceSheet}
-        onClose={() => setShowMediaSourceSheet(false)}
-        dayNumber={myActivities.length + 1}
-      />
-      <NotificationSheet
-        isOpen={showNotificationSheet}
-        onClose={() => setShowNotificationSheet(false)}
-        onNotificationCountChange={setUnreadNotificationCount}
       />
 
       <AlertDialog open={showShareOptions} onOpenChange={setShowShareOptions}>
