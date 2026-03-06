@@ -1658,7 +1658,7 @@ const Reel = () => {
                             className="w-[90%] aspect-[9/15.7] flex flex-col items-center justify-center cursor-pointer relative overflow-hidden self-center"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setShowMediaSourceSheet(true);
+                              navigate('/camera', { state: { dayNumber: currentActivity.dayNumber } });
                             }}
                             style={{
                               background: 'linear-gradient(180deg, rgba(28,28,32,1) 0%, rgba(18,18,22,1) 100%)',
