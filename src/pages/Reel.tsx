@@ -1473,10 +1473,11 @@ const Reel = () => {
                       </button>
                     );
                   })}
-            </div>
-          </div>
+            </div>{/* end scrollable others */}
+            </div>{/* end flex container */}
+          </div>{/* end height:78 wrapper */}
 
-        </div>
+        </div>{/* end top zone */}
 
         {/* MIDDLE CONTAINER — flexes between profile strip and bottom nav */}
         <div
