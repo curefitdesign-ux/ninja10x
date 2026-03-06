@@ -3,13 +3,14 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Map, Bell, MoreVertical, Plus, UserPen, LogOut } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import progressIcon from "@/assets/nav/progress-icon.png";
 import NotificationSheet from "@/components/NotificationSheet";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
       return;
     }
     if (tabId === "menu") {
-      setShowEllipsisMenu(prev => !prev);
+      setShowEllipsisMenu(true);
       return;
     }
     if (tabId === "discover") {
@@ -153,50 +154,12 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
               </button>
 
               {/* Menu */}
-              <div className="relative">
-                <button onClick={() => handleTabClick("menu")} className={btnClass}>
-                  <div style={{ color: "rgba(200, 210, 230, 0.6)", opacity: 0.5 }}>
-                    <MoreVertical className="w-5 h-5" strokeWidth={1.5} />
-                  </div>
-                  <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap" style={{ color: "rgba(200, 210, 230, 0.5)", fontWeight: 400 }}>Menu</span>
-                </button>
-
-                <AnimatePresence>
-                  {showEllipsisMenu && (
-                    <>
-                      <motion.div className="fixed inset-0 z-40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowEllipsisMenu(false)} />
-                      <motion.div
-                        className="absolute right-0 bottom-full mb-2 w-52 z-50 rounded-2xl overflow-hidden"
-                        style={{
-                          background: "rgba(20, 20, 30, 0.95)",
-                          backdropFilter: "blur(40px) saturate(180%)",
-                          border: "1px solid rgba(255, 255, 255, 0.12)",
-                          boxShadow: "0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
-                        }}
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <div className="py-1">
-                          <motion.button onClick={() => { setShowEllipsisMenu(false); setShowMediaSourceSheet(true); }} className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors" whileHover={{ x: 2 }}>
-                            <Plus className="w-4 h-4 text-emerald-400" />
-                            <span className="text-sm">Log Activity</span>
-                          </motion.button>
-                          <motion.button onClick={() => { setShowEllipsisMenu(false); navigate("/profile-setup?edit=true"); }} className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors" whileHover={{ x: 2 }}>
-                            <UserPen className="w-4 h-4 text-emerald-400" />
-                            <span className="text-sm">Edit Profile</span>
-                          </motion.button>
-                          <motion.button onClick={async () => { setShowEllipsisMenu(false); try { await supabase.auth.signOut(); toast.success("Logged out successfully"); navigate("/auth"); } catch { toast.error("Failed to log out"); } }} className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-red-400 hover:bg-red-500/5 transition-colors" whileHover={{ x: 2 }}>
-                            <LogOut className="w-4 h-4" />
-                            <span className="text-sm">Log Out</span>
-                          </motion.button>
-                        </div>
-                      </motion.div>
-                    </>
-                  )}
-                </AnimatePresence>
-              </div>
+              <button onClick={() => handleTabClick("menu")} className={btnClass}>
+                <div style={{ color: "rgba(200, 210, 230, 0.6)", opacity: 0.5 }}>
+                  <MoreVertical className="w-5 h-5" strokeWidth={1.5} />
+                </div>
+                <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap" style={{ color: "rgba(200, 210, 230, 0.5)", fontWeight: 400 }}>Menu</span>
+              </button>
             </div>
           </div>
         </div>
@@ -204,6 +167,49 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
 
       <NotificationSheet isOpen={showNotificationSheet} onClose={() => setShowNotificationSheet(false)} onNotificationCountChange={setUnreadNotificationCount} />
       <MediaSourceSheet isOpen={showMediaSourceSheet} onClose={() => setShowMediaSourceSheet(false)} dayNumber={activityCount + 1} />
+
+      <Sheet open={showEllipsisMenu} onOpenChange={setShowEllipsisMenu}>
+        <SheetContent side="bottom" className="px-0 pt-2 pb-8 rounded-t-3xl">
+          <SheetTitle className="sr-only">Menu</SheetTitle>
+          <div className="flex flex-col">
+            <button
+              onClick={() => { setShowEllipsisMenu(false); setShowMediaSourceSheet(true); }}
+              className="flex items-center gap-4 px-6 py-4 text-left transition-colors active:scale-[0.97]"
+              style={{ color: "rgba(255,255,255,0.85)" }}
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(16, 185, 129, 0.15)" }}>
+                <Plus className="w-5 h-5 text-emerald-400" />
+              </div>
+              <span className="text-[15px] font-medium">Log Activity</span>
+            </button>
+            <button
+              onClick={() => { setShowEllipsisMenu(false); navigate("/profile-setup?edit=true"); }}
+              className="flex items-center gap-4 px-6 py-4 text-left transition-colors active:scale-[0.97]"
+              style={{ color: "rgba(255,255,255,0.85)" }}
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(99, 102, 241, 0.15)" }}>
+                <UserPen className="w-5 h-5 text-indigo-400" />
+              </div>
+              <span className="text-[15px] font-medium">Edit Profile</span>
+            </button>
+            <div className="mx-6 my-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+            <button
+              onClick={async () => {
+                setShowEllipsisMenu(false);
+                try { await supabase.auth.signOut(); toast.success("Logged out successfully"); navigate("/auth"); }
+                catch { toast.error("Failed to log out"); }
+              }}
+              className="flex items-center gap-4 px-6 py-4 text-left transition-colors active:scale-[0.97]"
+              style={{ color: "rgba(239, 68, 68, 0.85)" }}
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(239, 68, 68, 0.12)" }}>
+                <LogOut className="w-5 h-5 text-red-400" />
+              </div>
+              <span className="text-[15px] font-medium">Log Out</span>
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 };
