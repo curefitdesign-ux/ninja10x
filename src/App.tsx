@@ -34,7 +34,21 @@ const BottomNavBar = lazy(() => import("@/components/BottomNavBar"));
 
 import PageTransition from "./components/PageTransition";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2, // 2 min cache for GET queries
+      gcTime: 1000 * 60 * 5,    // 5 min garbage collection
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+// Minimal loading fallback (same dimensions, no layout shift)
+const RouteFallback = () => (
+  <div className="min-h-screen bg-black" />
+);
 
 // Protected route wrapper that also checks for profile
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
