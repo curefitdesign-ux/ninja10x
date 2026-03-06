@@ -2059,9 +2059,9 @@ const Reel = () => {
                   )}
                   </button>
 
-                  {/* Share & Delete buttons — aligned with reaction pill */}
+                  {/* Share & Edit buttons — aligned with reaction pill */}
                   <div className="flex items-center gap-2 shrink-0">
-                    {canEdit && (
+                    {isOwnStory && !isWeekRecapStory && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
