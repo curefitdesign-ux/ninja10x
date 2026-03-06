@@ -361,7 +361,7 @@ export default function ReelToProgressTransition({
                         backdropFilter: 'blur(60px) saturate(200%)',
                         WebkitBackdropFilter: 'blur(60px) saturate(200%)',
                         border: '1px solid rgba(255, 255, 255, 0.12)',
-                        boxShadow: '0 0 40px rgba(16, 185, 129, 0.2), 0 24px 80px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1)',
+                        boxShadow: '0 0 40px rgba(130, 100, 255, 0.2), 0 24px 80px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1)',
                         padding: '28px 24px 24px',
                       }}
                       initial={{ opacity: 0, scale: 0.9, y: '-45%', x: '-50%' }}
