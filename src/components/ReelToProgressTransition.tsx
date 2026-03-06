@@ -336,82 +336,9 @@ export default function ReelToProgressTransition({
             {/* Gamified Journey Path */}
             {showTiles && (
               <div className="w-full mx-auto" style={{ maxWidth: "400px", marginTop: -20 }}>
-                <GamifiedJourneyPath completedActivities={myActivities.length} onCrystalTap={onCrystalTap} />
+                <GamifiedJourneyPath completedActivities={myActivities.length} onCrystalTap={onCrystalTap} onFinalGoalTap={() => setShowCertPopup(true)} />
               </div>
             )}
-
-            {/* Ninja Certificate Section */}
-            <motion.div
-              className="w-full mx-auto flex justify-center cursor-pointer"
-              style={{ maxWidth: '340px', marginTop: 12, marginBottom: 40, paddingInline: 16 }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.4 }}
-              onClick={() => setShowCertPopup(true)}
-              whileTap={{ scale: 0.97 }}
-            >
-              <div
-                className="relative w-full overflow-hidden"
-                style={{
-                  borderRadius: 20,
-                  background: 'rgba(10, 10, 10, 0.5)',
-                  backdropFilter: 'blur(40px)',
-                  WebkitBackdropFilter: 'blur(40px)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  boxShadow: '0 0 30px rgba(16, 185, 129, 0.25), 0 0 60px rgba(16, 185, 129, 0.1), inset 0 1px 0 rgba(255,255,255,0.08)',
-                  padding: '24px 20px',
-                }}
-              >
-                {/* Pulsing glow border effect */}
-                <motion.div
-                  className="absolute inset-0 rounded-[20px] pointer-events-none"
-                  style={{
-                    border: '1px solid rgba(16, 185, 129, 0.3)',
-                    boxShadow: '0 0 20px rgba(16, 185, 129, 0.2), inset 0 0 20px rgba(16, 185, 129, 0.05)',
-                  }}
-                  animate={{
-                    boxShadow: [
-                      '0 0 20px rgba(16, 185, 129, 0.2), inset 0 0 20px rgba(16, 185, 129, 0.05)',
-                      '0 0 40px rgba(16, 185, 129, 0.35), inset 0 0 30px rgba(16, 185, 129, 0.1)',
-                      '0 0 20px rgba(16, 185, 129, 0.2), inset 0 0 20px rgba(16, 185, 129, 0.05)',
-                    ],
-                  }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                />
-
-                {/* Certificate image tilted */}
-                <div className="flex justify-center" style={{ marginBottom: 16 }}>
-                  <motion.img
-                    src={finalGoalImg}
-                    alt="Ninja Certificate"
-                    style={{
-                      width: 120,
-                      height: 'auto',
-                      transform: 'rotate(12deg)',
-                      filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))',
-                    }}
-                    animate={{ y: [0, -4, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                </div>
-
-                {/* Text */}
-                <p className="text-center text-white/80 text-[15px] leading-snug font-medium" style={{ marginBottom: 8 }}>
-                  You are <span className="text-white font-bold">{Math.max(0, 12 - myActivities.length)} logs</span> away
-                  from becoming
-                </p>
-
-                {/* CULT NINJA text */}
-                <div className="flex justify-center" style={{ marginBottom: 12 }}>
-                  <img src={cultNinjaText} alt="CULT NINJA" style={{ width: 160, height: 'auto' }} />
-                </div>
-
-                {/* Subtext */}
-                <p className="text-center text-white/40 text-[11px] leading-relaxed">
-                  Inspire & Help Build India's<br />Ultimate Habit Building Product
-                </p>
-              </div>
-            </motion.div>
 
             {/* Certificate Popup */}
             {createPortal(
