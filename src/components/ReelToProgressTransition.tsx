@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { X, Plus, Lock } from 'lucide-react';
 import ProfileAvatar from '@/components/ProfileAvatar';
@@ -7,6 +8,9 @@ import { isVideoUrl } from '@/lib/media';
 import { ReactionType, ActivityReaction } from '@/services/journey-service';
 import GamifiedJourneyPath from '@/components/GamifiedJourneyPath';
 import plusIconImg from '@/assets/icons/plus-icon.png';
+import cultNinjaText from '@/assets/progress/cult-ninja-text.svg';
+import certificateCardBg from '@/assets/progress/certificate-card-bg.svg';
+import finalGoalImg from '@/assets/progress/final-goal.png';
 
 
 interface Activity {
