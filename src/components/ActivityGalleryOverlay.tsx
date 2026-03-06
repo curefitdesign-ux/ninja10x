@@ -80,6 +80,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   // Sheets
   const [showReactsSheet, setShowReactsSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
+  const [showShareOptions, setShowShareOptions] = useState(false);
 
   // Local reactions state
   const [localReactions, setLocalReactions] = useState<Record<string, {
