@@ -167,6 +167,49 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
 
       <NotificationSheet isOpen={showNotificationSheet} onClose={() => setShowNotificationSheet(false)} onNotificationCountChange={setUnreadNotificationCount} />
       <MediaSourceSheet isOpen={showMediaSourceSheet} onClose={() => setShowMediaSourceSheet(false)} dayNumber={activityCount + 1} />
+
+      <Sheet open={showEllipsisMenu} onOpenChange={setShowEllipsisMenu}>
+        <SheetContent side="bottom" className="px-0 pt-2 pb-8 rounded-t-3xl">
+          <SheetTitle className="sr-only">Menu</SheetTitle>
+          <div className="flex flex-col">
+            <button
+              onClick={() => { setShowEllipsisMenu(false); setShowMediaSourceSheet(true); }}
+              className="flex items-center gap-4 px-6 py-4 text-left transition-colors active:scale-[0.97]"
+              style={{ color: "rgba(255,255,255,0.85)" }}
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(16, 185, 129, 0.15)" }}>
+                <Plus className="w-5 h-5 text-emerald-400" />
+              </div>
+              <span className="text-[15px] font-medium">Log Activity</span>
+            </button>
+            <button
+              onClick={() => { setShowEllipsisMenu(false); navigate("/profile-setup?edit=true"); }}
+              className="flex items-center gap-4 px-6 py-4 text-left transition-colors active:scale-[0.97]"
+              style={{ color: "rgba(255,255,255,0.85)" }}
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(99, 102, 241, 0.15)" }}>
+                <UserPen className="w-5 h-5 text-indigo-400" />
+              </div>
+              <span className="text-[15px] font-medium">Edit Profile</span>
+            </button>
+            <div className="mx-6 my-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+            <button
+              onClick={async () => {
+                setShowEllipsisMenu(false);
+                try { await supabase.auth.signOut(); toast.success("Logged out successfully"); navigate("/auth"); }
+                catch { toast.error("Failed to log out"); }
+              }}
+              className="flex items-center gap-4 px-6 py-4 text-left transition-colors active:scale-[0.97]"
+              style={{ color: "rgba(239, 68, 68, 0.85)" }}
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(239, 68, 68, 0.12)" }}>
+                <LogOut className="w-5 h-5 text-red-400" />
+              </div>
+              <span className="text-[15px] font-medium">Log Out</span>
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 };
