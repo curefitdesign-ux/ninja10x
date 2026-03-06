@@ -16,6 +16,7 @@ import level4Img from '@/assets/progress/level-4.png';
 interface GamifiedJourneyPathProps {
   completedActivities: number;
   onCrystalTap?: (weekNum: number) => void;
+  onFinalGoalTap?: () => void;
 }
 
 const PATH_W = 380;
@@ -23,7 +24,7 @@ const PATH_H = 543;
 const TILE_W = 50;
 const TILE_H = 50;
 
-const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>(function GamifiedJourneyPath({ completedActivities, onCrystalTap }, ref) {
+const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>(function GamifiedJourneyPath({ completedActivities, onCrystalTap, onFinalGoalTap }, ref) {
   const tiles = useMemo(() => {
     const STEP_X = 50;
     const STEP_Y = 28;
@@ -106,7 +107,7 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
                 <motion.img
                   src={finalGoalImg}
                   alt="Final Goal"
-                  className="absolute pointer-events-none"
+                  className="absolute cursor-pointer"
                   style={{
                     width: 100,
                     height: 'auto',
@@ -114,11 +115,23 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
                     top: tile.y - 85,
                     zIndex: 6,
                     opacity: isActive ? 1 : 0.85,
-                    filter: isActive ? 'drop-shadow(0 0 14px rgba(255,200,50,0.4))' : 'none',
+                    filter: isActive
+                      ? 'drop-shadow(0 0 14px rgba(255,200,50,0.4))'
+                      : 'drop-shadow(0 0 10px rgba(16,185,129,0.3))',
                   }}
                   initial={{ opacity: 0, scale: 0.7 }}
-                  animate={{ opacity: isActive ? 1 : 0.85, scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 140, damping: 14, delay: 0.25 }}
+                  animate={{
+                    opacity: isActive ? 1 : 0.85,
+                    scale: 1,
+                    filter: [
+                      'drop-shadow(0 0 10px rgba(16,185,129,0.2))',
+                      'drop-shadow(0 0 20px rgba(16,185,129,0.45))',
+                      'drop-shadow(0 0 10px rgba(16,185,129,0.2))',
+                    ],
+                  }}
+                  transition={{ type: 'spring', stiffness: 140, damping: 14, delay: 0.25, filter: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' } }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => onFinalGoalTap?.()}
                 />
               )}
 
