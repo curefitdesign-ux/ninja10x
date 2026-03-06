@@ -361,7 +361,7 @@ export default function ReelToProgressTransition({
                         backdropFilter: 'blur(60px) saturate(200%)',
                         WebkitBackdropFilter: 'blur(60px) saturate(200%)',
                         border: '1px solid rgba(255, 255, 255, 0.12)',
-                        boxShadow: '0 0 40px rgba(16, 185, 129, 0.2), 0 24px 80px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1)',
+                        boxShadow: '0 0 40px rgba(130, 100, 255, 0.2), 0 24px 80px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1)',
                         padding: '28px 24px 24px',
                       }}
                       initial={{ opacity: 0, scale: 0.9, y: '-45%', x: '-50%' }}
@@ -402,9 +402,9 @@ export default function ReelToProgressTransition({
                       <motion.button
                         className="w-full py-3 rounded-2xl text-[15px] font-semibold active:scale-[0.97] transition-transform"
                         style={{
-                          background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.1) 100%)',
-                          border: '1px solid rgba(16, 185, 129, 0.3)',
-                          color: 'rgba(16, 185, 129, 1)',
+                          background: 'linear-gradient(135deg, rgba(130, 100, 255, 0.25) 0%, rgba(130, 100, 255, 0.1) 100%)',
+                          border: '1px solid rgba(130, 100, 255, 0.3)',
+                          color: 'rgba(180, 160, 220, 1)',
                         }}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => setShowCertPopup(false)}
