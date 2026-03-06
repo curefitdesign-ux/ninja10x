@@ -812,50 +812,70 @@ const Reel = () => {
     }
   }, [weekRecapVideoFromNav, weekRecapNumber]);
 
-  // Handler: Share current story via Web Share API
-  const handleShareStory = useCallback(async () => {
+  const buildSharePayload = useCallback(() => {
+    const mediaUrl = currentActivity?.storageUrl || currentActivity?.originalUrl;
+    const userName = currentGroup?.displayName || 'Someone';
+    const activityName = currentActivity?.activity || 'workout';
+    const text = isOwnStory
+      ? `Check out my ${activityName} on my fitness journey! 💪`
+      : `Check out ${userName}'s ${activityName}! 🔥`;
+
+    return {
+      title: `${isOwnStory ? 'My' : `${userName}'s`} Fitness Story`,
+      text,
+      url: mediaUrl && mediaUrl.startsWith('http') ? mediaUrl : window.location.href,
+    };
+  }, [currentActivity, currentGroup, isOwnStory]);
+
+  const handleSystemShare = useCallback(async () => {
+    const payload = buildSharePayload();
+
     try {
-      const mediaUrl = currentActivity?.storageUrl || currentActivity?.originalUrl;
-      const userName = currentGroup?.displayName || 'Someone';
-      const activityName = currentActivity?.activity || 'workout';
-      const shareText = isOwnStory 
-        ? `Check out my ${activityName} on my fitness journey! 💪`
-        : `Check out ${userName}'s ${activityName}! 🔥`;
-
       if (navigator.share) {
-        const shareData: ShareData = {
-          title: `${isOwnStory ? 'My' : `${userName}'s`} Fitness Story`,
-          text: shareText,
-        };
-
-        // Try to share the media file if possible
-        if (mediaUrl) {
-          try {
-            const response = await fetch(mediaUrl);
-            const blob = await response.blob();
-            const ext = currentActivity?.isVideo ? 'mp4' : 'jpg';
-            const file = new File([blob], `story.${ext}`, { type: blob.type });
-            if (navigator.canShare?.({ files: [file] })) {
-              shareData.files = [file];
-            }
-          } catch {
-            if (mediaUrl.startsWith('http')) {
-              shareData.url = mediaUrl;
-            }
-          }
-        }
-
-        await navigator.share(shareData);
+        await navigator.share(payload);
       } else {
-        await navigator.clipboard.writeText(shareText);
-        toast.success('Copied to clipboard!');
+        await navigator.clipboard.writeText(`${payload.text}\n\n${payload.url}`);
+        toast.success('Link copied to clipboard');
       }
     } catch (err: any) {
       if (err?.name !== 'AbortError') {
-        toast.error('Failed to share');
+        toast.error('Unable to open share sheet');
       }
     }
-  }, [currentActivity, currentGroup, isOwnStory]);
+  }, [buildSharePayload]);
+
+  const shareToChannel = useCallback(async (channel: 'whatsapp' | 'instagram' | 'messages') => {
+    const payload = buildSharePayload();
+    const shareText = `${payload.text}\n\n${payload.url}`;
+
+    if (channel === 'whatsapp') {
+      window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    if (channel === 'messages') {
+      window.location.href = `sms:?body=${encodeURIComponent(shareText)}`;
+      return;
+    }
+
+    // Instagram does not support direct web URL sharing like WhatsApp; use native share if possible.
+    if (navigator.share) {
+      await handleSystemShare();
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+      toast.success('Link copied. Paste it in Instagram.');
+    } catch {
+      toast.error('Unable to prepare Instagram share');
+    }
+  }, [buildSharePayload, handleSystemShare]);
+
+  // Handler: open share options picker
+  const handleShareStory = useCallback(() => {
+    setShowShareOptions(true);
+  }, []);
 
   if (loading) {
     return <ReelViewerSkeleton />;
