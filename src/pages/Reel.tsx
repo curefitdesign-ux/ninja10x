@@ -1484,8 +1484,8 @@ const Reel = () => {
           className="relative z-30 flex-1 min-h-0 flex flex-col"
           style={{
             paddingTop: '0px',
-            marginTop: '-32px',
-            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 6px), 6px) + 64px)',
+            marginTop: '-16px',
+            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 6px), 6px) + 80px)',
           }}
         >
           {/* Reel cards fill the available middle container space */}
