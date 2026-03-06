@@ -210,10 +210,14 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <MobileFrame>
-            <NotificationCenter />
-            <ReactionNotificationPill />
+            <Suspense fallback={null}>
+              <NotificationCenter />
+              <ReactionNotificationPill />
+            </Suspense>
             <AnimatedRoutes />
-            <BottomNavBar />
+            <Suspense fallback={null}>
+              <BottomNavBar />
+            </Suspense>
           </MobileFrame>
         </BrowserRouter>
       </TooltipProvider>
