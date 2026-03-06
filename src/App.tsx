@@ -122,25 +122,27 @@ const AnimatedRoutes = () => {
   const location = useLocation();
   
   return (
-    <PageTransition key={location.pathname}>
-      <Routes location={location}>
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/profile-setup" element={<ProfileSetupRouteWrapper><ProfileSetupPage /></ProfileSetupRouteWrapper>} />
-        <Route path="/avatar-crop" element={<ProtectedRoute><AvatarCrop /></ProtectedRoute>} />
-        <Route path="/" element={<Navigate to="/reel" replace />} />
-        <Route path="/create" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-        <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
-        <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
-        <Route path="/camera" element={<ProtectedRoute><Camera /></ProtectedRoute>} />
-        <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
-        
-        <Route path="/reel" element={<ProtectedRoute><Reel /></ProtectedRoute>} />
-        <Route path="/reel-generation" element={<ProtectedRoute><ReelGeneration /></ProtectedRoute>} />
-        
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </PageTransition>
+    <Suspense fallback={<RouteFallback />}>
+      <PageTransition key={location.pathname}>
+        <Routes location={location}>
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/profile-setup" element={<ProfileSetupRouteWrapper><ProfileSetupPage /></ProfileSetupRouteWrapper>} />
+          <Route path="/avatar-crop" element={<ProtectedRoute><AvatarCrop /></ProtectedRoute>} />
+          <Route path="/" element={<Navigate to="/reel" replace />} />
+          <Route path="/create" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
+          <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
+          <Route path="/camera" element={<ProtectedRoute><Camera /></ProtectedRoute>} />
+          <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
+          
+          <Route path="/reel" element={<ProtectedRoute><Reel /></ProtectedRoute>} />
+          <Route path="/reel-generation" element={<ProtectedRoute><ReelGeneration /></ProtectedRoute>} />
+          
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </PageTransition>
+    </Suspense>
   );
 };
 
