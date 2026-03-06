@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { MessageCircle } from 'lucide-react';
 import { X, Share2, Pencil, ChevronUp } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
@@ -79,6 +80,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   // Sheets
   const [showReactsSheet, setShowReactsSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
+  const [showShareOptions, setShowShareOptions] = useState(false);
 
   // Local reactions state
   const [localReactions, setLocalReactions] = useState<Record<string, {
@@ -194,31 +196,47 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     else goNext();
   };
 
-  const handleShareStory = async () => {
-    try {
-      const activityName = current.activity || 'workout';
-      const shareText = `Check out my ${activityName} on my fitness journey! 💪`;
-      if (navigator.share) {
-        const shareData: ShareData = { title: 'My Fitness Story', text: shareText };
-        if (mediaUrl) {
-          try {
-            const response = await fetch(mediaUrl);
-            const blob = await response.blob();
-            const ext = current.isVideo ? 'mp4' : 'jpg';
-            const file = new File([blob], `story.${ext}`, { type: blob.type });
-            if (navigator.canShare?.({ files: [file] })) shareData.files = [file];
-          } catch {
-            if (mediaUrl.startsWith('http')) shareData.url = mediaUrl;
-          }
-        }
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(shareText);
-        toast.success('Copied to clipboard!');
+  const buildSharePayload = () => {
+    const activityName = current?.activity || 'workout';
+    const shareText = `Check out my ${activityName} on my fitness journey! 💪`;
+    const url = mediaUrl && mediaUrl.startsWith('http') ? mediaUrl : window.location.href;
+    return { title: 'My Fitness Story', text: shareText, url };
+  };
+
+  const shareToChannel = (channel: 'whatsapp' | 'instagram' | 'messages') => {
+    const payload = buildSharePayload();
+    const shareText = `${payload.text}\n\n${payload.url}`;
+
+    setTimeout(() => {
+      if (channel === 'whatsapp') {
+        const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(shareText)}`;
+        const webFallback = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+        const link = document.createElement('a');
+        link.href = whatsappUrl;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => { window.location.href = webFallback; }, 1500);
+        return;
       }
-    } catch (err: any) {
-      if (err?.name !== 'AbortError') toast.error('Failed to share');
-    }
+      if (channel === 'messages') {
+        window.location.href = `sms:&body=${encodeURIComponent(shareText)}`;
+        return;
+      }
+      if (channel === 'instagram') {
+        if (navigator.share) {
+          navigator.share(payload).catch(() => {});
+        } else {
+          navigator.clipboard.writeText(shareText).then(() => {
+            toast.success('Link copied! Paste it in Instagram.');
+          }).catch(() => {
+            toast.error('Unable to copy link');
+          });
+        }
+        return;
+      }
+    }, 100);
   };
 
 
@@ -496,7 +514,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     <div className="flex items-center gap-2 shrink-0">
                       {canShare && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); handleShareStory(); }}
+                          onClick={(e) => { e.stopPropagation(); setShowShareOptions(true); }}
                           className="shrink-0 active:scale-95 transition-transform"
                           style={{
                             width: 44, height: 44, borderRadius: 22,
@@ -547,6 +565,69 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               />,
               document.body,
             )}
+
+          {/* Share Options Sheet */}
+          <AnimatePresence>
+            {showShareOptions && (
+              <>
+                <motion.div
+                  className="fixed inset-0"
+                  style={{ zIndex: 70, background: 'rgba(0,0,0,0.5)' }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setShowShareOptions(false)}
+                />
+                <motion.div
+                  className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] rounded-3xl p-5 flex flex-col gap-3"
+                  style={{
+                    zIndex: 71,
+                    background: 'linear-gradient(180deg, rgba(60, 55, 70, 0.92) 0%, rgba(40, 38, 50, 0.95) 100%)',
+                    backdropFilter: 'blur(60px) saturate(200%)',
+                    WebkitBackdropFilter: 'blur(60px) saturate(200%)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    boxShadow: '0 24px 80px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1)',
+                  }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                >
+                  <h3 className="text-white font-semibold text-base text-center mb-1">Share via</h3>
+                  <button
+                    onClick={() => { setShowShareOptions(false); shareToChannel('whatsapp'); }}
+                    className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 active:scale-[0.97] transition-transform flex items-center gap-3"
+                    style={{ background: 'rgba(255,255,255,0.08)' }}
+                  >
+                    <MessageCircle className="w-5 h-5 text-green-400" />
+                    WhatsApp
+                  </button>
+                  <button
+                    onClick={() => { setShowShareOptions(false); shareToChannel('instagram'); }}
+                    className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 active:scale-[0.97] transition-transform flex items-center gap-3"
+                    style={{ background: 'rgba(255,255,255,0.08)' }}
+                  >
+                    <Share2 className="w-5 h-5 text-pink-400" />
+                    Instagram
+                  </button>
+                  <button
+                    onClick={() => { setShowShareOptions(false); shareToChannel('messages'); }}
+                    className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 active:scale-[0.97] transition-transform flex items-center gap-3"
+                    style={{ background: 'rgba(255,255,255,0.08)' }}
+                  >
+                    <MessageCircle className="w-5 h-5 text-blue-400" />
+                    Messages
+                  </button>
+                  <button
+                    onClick={() => setShowShareOptions(false)}
+                    className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-white/50 active:scale-[0.97] transition-transform mt-1"
+                  >
+                    Cancel
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
 
           {/* Edit/Replace Sheet — rendered outside the overlay via portal to document.body */}
         </DynamicBlurBackground>
