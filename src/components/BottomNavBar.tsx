@@ -46,7 +46,7 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
       return;
     }
     if (tabId === "menu") {
-      setShowEllipsisMenu(prev => !prev);
+      setShowEllipsisMenu(true);
       return;
     }
     if (tabId === "discover") {
