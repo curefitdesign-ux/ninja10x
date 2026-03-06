@@ -566,6 +566,69 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               document.body,
             )}
 
+          {/* Share Options Sheet */}
+          <AnimatePresence>
+            {showShareOptions && (
+              <>
+                <motion.div
+                  className="fixed inset-0"
+                  style={{ zIndex: 70, background: 'rgba(0,0,0,0.5)' }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setShowShareOptions(false)}
+                />
+                <motion.div
+                  className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] rounded-3xl p-5 flex flex-col gap-3"
+                  style={{
+                    zIndex: 71,
+                    background: 'linear-gradient(180deg, rgba(60, 55, 70, 0.92) 0%, rgba(40, 38, 50, 0.95) 100%)',
+                    backdropFilter: 'blur(60px) saturate(200%)',
+                    WebkitBackdropFilter: 'blur(60px) saturate(200%)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    boxShadow: '0 24px 80px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1)',
+                  }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                >
+                  <h3 className="text-white font-semibold text-base text-center mb-1">Share via</h3>
+                  <button
+                    onClick={() => { setShowShareOptions(false); shareToChannel('whatsapp'); }}
+                    className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 active:scale-[0.97] transition-transform flex items-center gap-3"
+                    style={{ background: 'rgba(255,255,255,0.08)' }}
+                  >
+                    <MessageCircle className="w-5 h-5 text-green-400" />
+                    WhatsApp
+                  </button>
+                  <button
+                    onClick={() => { setShowShareOptions(false); shareToChannel('instagram'); }}
+                    className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 active:scale-[0.97] transition-transform flex items-center gap-3"
+                    style={{ background: 'rgba(255,255,255,0.08)' }}
+                  >
+                    <Share2 className="w-5 h-5 text-pink-400" />
+                    Instagram
+                  </button>
+                  <button
+                    onClick={() => { setShowShareOptions(false); shareToChannel('messages'); }}
+                    className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 active:scale-[0.97] transition-transform flex items-center gap-3"
+                    style={{ background: 'rgba(255,255,255,0.08)' }}
+                  >
+                    <MessageCircle className="w-5 h-5 text-blue-400" />
+                    Messages
+                  </button>
+                  <button
+                    onClick={() => setShowShareOptions(false)}
+                    className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-white/50 active:scale-[0.97] transition-transform mt-1"
+                  >
+                    Cancel
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+
           {/* Edit/Replace Sheet — rendered outside the overlay via portal to document.body */}
         </DynamicBlurBackground>
         </motion.div>
