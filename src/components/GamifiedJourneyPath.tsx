@@ -73,7 +73,7 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
     <div className="w-full flex justify-center" ref={ref}>
       <div
         className="relative overflow-visible"
-        style={{ width: PATH_W, height: PATH_H }}
+        style={{ width: PATH_W, height: PATH_H + 60, paddingTop: 60 }}
       >
         {/* Background pattern overlay */}
 
