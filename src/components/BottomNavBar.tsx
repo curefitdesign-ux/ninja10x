@@ -154,50 +154,12 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
               </button>
 
               {/* Menu */}
-              <div className="relative">
-                <button onClick={() => handleTabClick("menu")} className={btnClass}>
-                  <div style={{ color: "rgba(200, 210, 230, 0.6)", opacity: 0.5 }}>
-                    <MoreVertical className="w-5 h-5" strokeWidth={1.5} />
-                  </div>
-                  <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap" style={{ color: "rgba(200, 210, 230, 0.5)", fontWeight: 400 }}>Menu</span>
-                </button>
-
-                <AnimatePresence>
-                  {showEllipsisMenu && (
-                    <>
-                      <motion.div className="fixed inset-0 z-40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowEllipsisMenu(false)} />
-                      <motion.div
-                        className="absolute right-0 bottom-full mb-2 w-52 z-50 rounded-2xl overflow-hidden"
-                        style={{
-                          background: "rgba(20, 20, 30, 0.95)",
-                          backdropFilter: "blur(40px) saturate(180%)",
-                          border: "1px solid rgba(255, 255, 255, 0.12)",
-                          boxShadow: "0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
-                        }}
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <div className="py-1">
-                          <motion.button onClick={() => { setShowEllipsisMenu(false); setShowMediaSourceSheet(true); }} className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors" whileHover={{ x: 2 }}>
-                            <Plus className="w-4 h-4 text-emerald-400" />
-                            <span className="text-sm">Log Activity</span>
-                          </motion.button>
-                          <motion.button onClick={() => { setShowEllipsisMenu(false); navigate("/profile-setup?edit=true"); }} className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors" whileHover={{ x: 2 }}>
-                            <UserPen className="w-4 h-4 text-emerald-400" />
-                            <span className="text-sm">Edit Profile</span>
-                          </motion.button>
-                          <motion.button onClick={async () => { setShowEllipsisMenu(false); try { await supabase.auth.signOut(); toast.success("Logged out successfully"); navigate("/auth"); } catch { toast.error("Failed to log out"); } }} className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-red-400 hover:bg-red-500/5 transition-colors" whileHover={{ x: 2 }}>
-                            <LogOut className="w-4 h-4" />
-                            <span className="text-sm">Log Out</span>
-                          </motion.button>
-                        </div>
-                      </motion.div>
-                    </>
-                  )}
-                </AnimatePresence>
-              </div>
+              <button onClick={() => handleTabClick("menu")} className={btnClass}>
+                <div style={{ color: "rgba(200, 210, 230, 0.6)", opacity: 0.5 }}>
+                  <MoreVertical className="w-5 h-5" strokeWidth={1.5} />
+                </div>
+                <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap" style={{ color: "rgba(200, 210, 230, 0.5)", fontWeight: 400 }}>Menu</span>
+              </button>
             </div>
           </div>
         </div>
