@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback, useState } from "react";
+import React, { useEffect, useRef, useCallback, useState, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,27 +9,46 @@ import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PortalContainerProvider } from "@/hooks/use-portal-container";
-import NotificationCenter from "@/components/NotificationCenter";
-import ReactionNotificationPill from "@/components/ReactionNotificationPill";
-import BottomNavBar from "@/components/BottomNavBar";
-import Index from "./pages/Index";
-import Preview from "./pages/Preview";
-import Activity from "./pages/Activity";
-import Auth from "./pages/Auth";
-import NotFound from "./pages/NotFound";
-
-import Progress from "./pages/Progress";
-import Camera from "./pages/Camera";
-import Gallery from "./pages/Gallery";
-
-import Reel from "./pages/Reel";
-import ReelGenerationBase from "./pages/ReelGeneration";
-import ProfileSetupPage from "./pages/ProfileSetupPage";
-import AvatarCrop from "./pages/AvatarCrop";
-import PageTransition from "./components/PageTransition";
 import { enableAutoMotion } from "@/lib/motion";
 
-const queryClient = new QueryClient();
+// Eagerly load Auth (initial landing page)
+import Auth from "./pages/Auth";
+
+// Lazy-load all other routes
+const Index = lazy(() => import("./pages/Index"));
+const Preview = lazy(() => import("./pages/Preview"));
+const Activity = lazy(() => import("./pages/Activity"));
+const Progress = lazy(() => import("./pages/Progress"));
+const Camera = lazy(() => import("./pages/Camera"));
+const Gallery = lazy(() => import("./pages/Gallery"));
+const Reel = lazy(() => import("./pages/Reel"));
+const ReelGenerationBase = lazy(() => import("./pages/ReelGeneration"));
+const ProfileSetupPage = lazy(() => import("./pages/ProfileSetupPage"));
+const AvatarCrop = lazy(() => import("./pages/AvatarCrop"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Lazy-load non-critical global components
+const NotificationCenter = lazy(() => import("@/components/NotificationCenter"));
+const ReactionNotificationPill = lazy(() => import("@/components/ReactionNotificationPill"));
+const BottomNavBar = lazy(() => import("@/components/BottomNavBar"));
+
+import PageTransition from "./components/PageTransition";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2, // 2 min cache for GET queries
+      gcTime: 1000 * 60 * 5,    // 5 min garbage collection
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+// Minimal loading fallback (same dimensions, no layout shift)
+const RouteFallback = () => (
+  <div className="min-h-screen bg-black" />
+);
 
 // Protected route wrapper that also checks for profile
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -103,25 +122,27 @@ const AnimatedRoutes = () => {
   const location = useLocation();
   
   return (
-    <PageTransition key={location.pathname}>
-      <Routes location={location}>
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/profile-setup" element={<ProfileSetupRouteWrapper><ProfileSetupPage /></ProfileSetupRouteWrapper>} />
-        <Route path="/avatar-crop" element={<ProtectedRoute><AvatarCrop /></ProtectedRoute>} />
-        <Route path="/" element={<Navigate to="/reel" replace />} />
-        <Route path="/create" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-        <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
-        <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
-        <Route path="/camera" element={<ProtectedRoute><Camera /></ProtectedRoute>} />
-        <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
-        
-        <Route path="/reel" element={<ProtectedRoute><Reel /></ProtectedRoute>} />
-        <Route path="/reel-generation" element={<ProtectedRoute><ReelGeneration /></ProtectedRoute>} />
-        
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </PageTransition>
+    <Suspense fallback={<RouteFallback />}>
+      <PageTransition key={location.pathname}>
+        <Routes location={location}>
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/profile-setup" element={<ProfileSetupRouteWrapper><ProfileSetupPage /></ProfileSetupRouteWrapper>} />
+          <Route path="/avatar-crop" element={<ProtectedRoute><AvatarCrop /></ProtectedRoute>} />
+          <Route path="/" element={<Navigate to="/reel" replace />} />
+          <Route path="/create" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
+          <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
+          <Route path="/camera" element={<ProtectedRoute><Camera /></ProtectedRoute>} />
+          <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
+          
+          <Route path="/reel" element={<ProtectedRoute><Reel /></ProtectedRoute>} />
+          <Route path="/reel-generation" element={<ProtectedRoute><ReelGeneration /></ProtectedRoute>} />
+          
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </PageTransition>
+    </Suspense>
   );
 };
 
@@ -189,10 +210,14 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <MobileFrame>
-            <NotificationCenter />
-            <ReactionNotificationPill />
+            <Suspense fallback={null}>
+              <NotificationCenter />
+              <ReactionNotificationPill />
+            </Suspense>
             <AnimatedRoutes />
-            <BottomNavBar />
+            <Suspense fallback={null}>
+              <BottomNavBar />
+            </Suspense>
           </MobileFrame>
         </BrowserRouter>
       </TooltipProvider>
