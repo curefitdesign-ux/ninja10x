@@ -3,13 +3,14 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Map, Bell, MoreVertical, Plus, UserPen, LogOut } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import progressIcon from "@/assets/nav/progress-icon.png";
 import NotificationSheet from "@/components/NotificationSheet";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
   const navigate = useNavigate();
