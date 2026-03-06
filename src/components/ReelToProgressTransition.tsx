@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { X, Plus, Lock } from 'lucide-react';
 import ProfileAvatar from '@/components/ProfileAvatar';
@@ -7,6 +8,9 @@ import { isVideoUrl } from '@/lib/media';
 import { ReactionType, ActivityReaction } from '@/services/journey-service';
 import GamifiedJourneyPath from '@/components/GamifiedJourneyPath';
 import plusIconImg from '@/assets/icons/plus-icon.png';
+import cultNinjaText from '@/assets/progress/cult-ninja-text.svg';
+import certificateCardBg from '@/assets/progress/certificate-card-bg.svg';
+import finalGoalImg from '@/assets/progress/final-goal.png';
 
 
 interface Activity {
@@ -49,6 +53,7 @@ export default function ReelToProgressTransition({
   const [expandingCardId, setExpandingCardId] = useState<string | null>(null);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
+  const [showCertPopup, setShowCertPopup] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Combine current activity with public feed and sort by latest first
@@ -333,6 +338,158 @@ export default function ReelToProgressTransition({
               <div className="w-full mx-auto" style={{ maxWidth: "400px", marginTop: -20 }}>
                 <GamifiedJourneyPath completedActivities={myActivities.length} onCrystalTap={onCrystalTap} />
               </div>
+            )}
+
+            {/* Ninja Certificate Section */}
+            <motion.div
+              className="w-full mx-auto flex justify-center cursor-pointer"
+              style={{ maxWidth: '340px', marginTop: 12, marginBottom: 40, paddingInline: 16 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+              onClick={() => setShowCertPopup(true)}
+              whileTap={{ scale: 0.97 }}
+            >
+              <div
+                className="relative w-full overflow-hidden"
+                style={{
+                  borderRadius: 20,
+                  background: 'rgba(10, 10, 10, 0.5)',
+                  backdropFilter: 'blur(40px)',
+                  WebkitBackdropFilter: 'blur(40px)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  boxShadow: '0 0 30px rgba(16, 185, 129, 0.25), 0 0 60px rgba(16, 185, 129, 0.1), inset 0 1px 0 rgba(255,255,255,0.08)',
+                  padding: '24px 20px',
+                }}
+              >
+                {/* Pulsing glow border effect */}
+                <motion.div
+                  className="absolute inset-0 rounded-[20px] pointer-events-none"
+                  style={{
+                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                    boxShadow: '0 0 20px rgba(16, 185, 129, 0.2), inset 0 0 20px rgba(16, 185, 129, 0.05)',
+                  }}
+                  animate={{
+                    boxShadow: [
+                      '0 0 20px rgba(16, 185, 129, 0.2), inset 0 0 20px rgba(16, 185, 129, 0.05)',
+                      '0 0 40px rgba(16, 185, 129, 0.35), inset 0 0 30px rgba(16, 185, 129, 0.1)',
+                      '0 0 20px rgba(16, 185, 129, 0.2), inset 0 0 20px rgba(16, 185, 129, 0.05)',
+                    ],
+                  }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                />
+
+                {/* Certificate image tilted */}
+                <div className="flex justify-center" style={{ marginBottom: 16 }}>
+                  <motion.img
+                    src={finalGoalImg}
+                    alt="Ninja Certificate"
+                    style={{
+                      width: 120,
+                      height: 'auto',
+                      transform: 'rotate(12deg)',
+                      filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))',
+                    }}
+                    animate={{ y: [0, -4, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                </div>
+
+                {/* Text */}
+                <p className="text-center text-white/80 text-[15px] leading-snug font-medium" style={{ marginBottom: 8 }}>
+                  You are <span className="text-white font-bold">{Math.max(0, 12 - myActivities.length)} logs</span> away
+                  from becoming
+                </p>
+
+                {/* CULT NINJA text */}
+                <div className="flex justify-center" style={{ marginBottom: 12 }}>
+                  <img src={cultNinjaText} alt="CULT NINJA" style={{ width: 160, height: 'auto' }} />
+                </div>
+
+                {/* Subtext */}
+                <p className="text-center text-white/40 text-[11px] leading-relaxed">
+                  Inspire & Help Build India's<br />Ultimate Habit Building Product
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Certificate Popup */}
+            {createPortal(
+              <AnimatePresence>
+                {showCertPopup && (
+                  <>
+                    <motion.div
+                      className="fixed inset-0"
+                      style={{ zIndex: 90, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={() => setShowCertPopup(false)}
+                    />
+                    <motion.div
+                      className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] flex flex-col items-center"
+                      style={{
+                        zIndex: 91,
+                        borderRadius: 20,
+                        background: 'rgba(10, 10, 10, 0.85)',
+                        backdropFilter: 'blur(60px) saturate(200%)',
+                        WebkitBackdropFilter: 'blur(60px) saturate(200%)',
+                        border: '1px solid rgba(255, 255, 255, 0.12)',
+                        boxShadow: '0 0 40px rgba(16, 185, 129, 0.2), 0 24px 80px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1)',
+                        padding: '28px 24px 24px',
+                      }}
+                      initial={{ opacity: 0, scale: 0.9, y: '-45%', x: '-50%' }}
+                      animate={{ opacity: 1, scale: 1, y: '-50%', x: '-50%' }}
+                      exit={{ opacity: 0, scale: 0.9, y: '-45%', x: '-50%' }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                    >
+                      {/* Certificate image */}
+                      <motion.img
+                        src={finalGoalImg}
+                        alt="Certificate"
+                        style={{
+                          width: 100,
+                          height: 'auto',
+                          transform: 'rotate(12deg)',
+                          filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.4))',
+                          marginBottom: 20,
+                        }}
+                      />
+
+                      {/* Title */}
+                      <p className="text-center text-white/90 text-[16px] leading-snug font-medium" style={{ marginBottom: 6 }}>
+                        You are <span className="text-white font-bold">{Math.max(0, 12 - myActivities.length)} activities</span> away
+                        from becoming
+                      </p>
+
+                      {/* CULT NINJA */}
+                      <div className="flex justify-center" style={{ marginBottom: 14 }}>
+                        <img src={cultNinjaText} alt="CULT NINJA" style={{ width: 150, height: 'auto' }} />
+                      </div>
+
+                      {/* Subtext */}
+                      <p className="text-center text-white/40 text-[12px] leading-relaxed" style={{ marginBottom: 20 }}>
+                        Inspire & Help Build India's<br />Ultimate Habit Building Product
+                      </p>
+
+                      {/* CTA */}
+                      <motion.button
+                        className="w-full py-3 rounded-2xl text-[15px] font-semibold active:scale-[0.97] transition-transform"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.1) 100%)',
+                          border: '1px solid rgba(16, 185, 129, 0.3)',
+                          color: 'rgba(16, 185, 129, 1)',
+                        }}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => setShowCertPopup(false)}
+                      >
+                        Got it
+                      </motion.button>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>,
+              document.body
             )}
           </div>
 
