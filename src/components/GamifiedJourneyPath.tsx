@@ -113,23 +113,25 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
                     height: 'auto',
                     left: tile.x + TILE_W / 2 - 90,
                     top: tile.y - 85,
-                    zIndex: 6,
+                    zIndex: 20,
                     opacity: isActive ? 1 : 0.85,
-                    filter: isActive
-                      ? 'drop-shadow(0 0 14px rgba(255,200,50,0.4))'
-                      : 'drop-shadow(0 0 10px rgba(130,100,255,0.3))',
                   }}
                   initial={{ opacity: 0, scale: 0.7 }}
                   animate={{
                     opacity: isActive ? 1 : 0.85,
                     scale: 1,
+                    y: [0, -6, 0],
                     filter: [
                       'drop-shadow(0 0 10px rgba(130,100,255,0.2))',
                       'drop-shadow(0 0 20px rgba(130,100,255,0.45))',
                       'drop-shadow(0 0 10px rgba(130,100,255,0.2))',
                     ],
                   }}
-                  transition={{ type: 'spring', stiffness: 140, damping: 14, delay: 0.25, filter: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' } }}
+                  transition={{
+                    type: 'spring', stiffness: 140, damping: 14, delay: 0.25,
+                    y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+                    filter: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' },
+                  }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => onFinalGoalTap?.()}
                 />
