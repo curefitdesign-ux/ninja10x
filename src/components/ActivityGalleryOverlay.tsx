@@ -514,7 +514,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     <div className="flex items-center gap-2 shrink-0">
                       {canShare && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); handleShareStory(); }}
+                          onClick={(e) => { e.stopPropagation(); setShowShareOptions(true); }}
                           className="shrink-0 active:scale-95 transition-transform"
                           style={{
                             width: 44, height: 44, borderRadius: 22,
