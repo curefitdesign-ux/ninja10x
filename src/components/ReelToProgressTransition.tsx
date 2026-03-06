@@ -9,7 +9,6 @@ import { ReactionType, ActivityReaction } from '@/services/journey-service';
 import GamifiedJourneyPath from '@/components/GamifiedJourneyPath';
 import plusIconImg from '@/assets/icons/plus-icon.png';
 import cultNinjaText from '@/assets/progress/cult-ninja-text.svg';
-import certificateCardBg from '@/assets/progress/certificate-card-bg.svg';
 import finalGoalImg from '@/assets/progress/final-goal.png';
 
 
