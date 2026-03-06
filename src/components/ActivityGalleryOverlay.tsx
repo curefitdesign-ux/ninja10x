@@ -567,7 +567,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
             )}
 
           {/* Share Options Sheet — portaled to body to avoid clipping */}
-          {ReactDOM.createPortal(
+          {createPortal(
             <AnimatePresence>
               {showShareOptions && (
                 <>
