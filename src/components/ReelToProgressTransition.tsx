@@ -53,6 +53,7 @@ export default function ReelToProgressTransition({
   const [expandingCardId, setExpandingCardId] = useState<string | null>(null);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
+  const [showCertPopup, setShowCertPopup] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Combine current activity with public feed and sort by latest first
