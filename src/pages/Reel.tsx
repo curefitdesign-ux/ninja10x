@@ -1510,7 +1510,8 @@ const Reel = () => {
                 transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
               >
                 <div
-                  className="w-full h-[59%] overflow-hidden"
+                  className="w-full overflow-hidden"
+                  style-extra-height="true"
                   style={{
                     borderRadius: '0 10px 10px 0',
                     background: 'rgba(255,255,255,0.06)',
