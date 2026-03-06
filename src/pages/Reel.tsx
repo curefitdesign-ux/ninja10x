@@ -21,8 +21,6 @@ import SendReactionSheet from '@/components/SendReactionSheet';
 import ProfileAvatar from '@/components/ProfileAvatar';
 
 import MakePublicSheet from '@/components/MakePublicSheet';
-
-import StoryHint, { useStoryNudgeAnimation } from '@/components/StoryHint';
 import StoryHint, { useStoryNudgeAnimation } from '@/components/StoryHint';
 import { ReelViewerSkeleton } from '@/components/SkeletonLoaders';
 import { uploadToStorage } from '@/services/storage-service';
