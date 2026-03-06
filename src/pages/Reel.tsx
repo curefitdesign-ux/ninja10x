@@ -1207,154 +1207,20 @@ const Reel = () => {
           onNudge={triggerShake}
         />
 
-        {/* TOP ZONE — fixed height — brand bar + avatar strip + user name */}
+        {/* TOP ZONE — avatar strip only (brand bar moved to bottom) */}
         <div 
           className="z-50 flex flex-col justify-end shrink-0"
           style={{ 
-            paddingTop: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 32px)',
+            paddingTop: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 12px)',
           }}
         >
-          {/* Row 0: Brand bar — Bell | Ninja 10X | 3-dot */}
-          <div
-            className="flex items-center justify-between px-4 shrink-0 mb-3"
-            style={{ height: 40 }}
-          >
-            {/* Left - Notification bell */}
-            <button
-              onClick={() => setShowNotificationSheet(true)}
-              className="relative active:scale-[0.95] transition-transform flex items-center justify-center"
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: 19,
-                background: 'rgba(255, 255, 255, 0.08)',
-                backdropFilter: 'blur(40px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-              }}
-            >
-              <Bell className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
-              {unreadNotificationCount > 0 && (
-                <div
-                  className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full"
-                  style={{
-                    background: '#EF4444',
-                    border: '1.5px solid rgba(0,0,0,0.5)',
-                    boxShadow: '0 0 6px rgba(239, 68, 68, 0.6)',
-                  }}
-                />
-              )}
-            </button>
-
-            {/* Center - Brand name */}
-            <h1 
-              className="text-white font-bold tracking-tight"
-              style={{ 
-                fontSize: 20,
-                fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
-                letterSpacing: '-0.02em',
-              }}
-            >
-              Ninja 10X
-            </h1>
-
-            {/* Right - 3-dot menu */}
-            <div className="relative">
-              <button
-                onClick={() => setShowEllipsisMenu(prev => !prev)}
-                className="active:scale-[0.95] transition-transform flex items-center justify-center"
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 19,
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(40px) saturate(180%)',
-                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-                }}
-              >
-                <MoreVertical className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
-              </button>
-
-              <AnimatePresence>
-                {showEllipsisMenu && (
-                  <>
-                    <motion.div
-                      className="fixed inset-0 z-40"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      onClick={() => setShowEllipsisMenu(false)}
-                    />
-                    <motion.div
-                      className="absolute right-0 top-full mt-2 w-52 z-50 rounded-2xl overflow-hidden"
-                      style={{
-                        background: 'rgba(20, 20, 30, 0.95)',
-                        backdropFilter: 'blur(40px) saturate(180%)',
-                        border: '1px solid rgba(255, 255, 255, 0.12)',
-                        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
-                      }}
-                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <div className="py-1">
-                        <motion.button
-                          onClick={() => { setShowEllipsisMenu(false); setShowMediaSourceSheet(true); }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
-                          whileHover={{ x: 2 }}
-                        >
-                          <Plus className="w-4 h-4 text-emerald-400" />
-                          <span className="text-sm">Log Activity</span>
-                        </motion.button>
-                        <motion.button
-                          onClick={() => { setShowEllipsisMenu(false); navigate('/profile-setup?edit=true'); }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
-                          whileHover={{ x: 2 }}
-                        >
-                          <UserPen className="w-4 h-4 text-emerald-400" />
-                          <span className="text-sm">Edit Profile</span>
-                        </motion.button>
-                        <motion.button
-                          onClick={async () => {
-                            setShowEllipsisMenu(false);
-                            try {
-                              await supabase.auth.signOut();
-                              toast.success('Logged out successfully');
-                              navigate('/auth');
-                            } catch { toast.error('Failed to log out'); }
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-red-400 hover:bg-red-500/5 transition-colors"
-                          whileHover={{ x: 2 }}
-                        >
-                          <LogOut className="w-4 h-4" />
-                          <span className="text-sm">Log Out</span>
-                        </motion.button>
-                      </div>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {/* Row 1: All avatars in one centered scrollable strip */}
+          {/* Avatar strip: pinned own avatar + scrollable others */}
           <div
             className="shrink-0 overflow-hidden"
             style={{ height: 78 }}
           >
-            <div 
-              ref={avatarStripRef}
-              className="flex items-start gap-3 overflow-x-auto scrollbar-hide justify-center px-3"
-              style={{ 
-                WebkitOverflowScrolling: 'touch',
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-              }}
-            >
+            <div className="flex items-start px-3 gap-2">
+              {/* Pinned own avatar — always visible */}
               {(() => {
                 const ownIdx = effectiveUserGroups.findIndex(g => user && g.userId === user.id);
                 const isOwnActive = ownIdx >= 0 && ownIdx === currentUserIndex;
@@ -1371,7 +1237,6 @@ const Reel = () => {
                         setCurrentActivityIndex(0);
                       }
                     }}
-                    ref={isOwnActive ? activeAvatarRef : undefined}
                     className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
                     style={{ 
                       width: avatarSize,
@@ -1380,7 +1245,6 @@ const Reel = () => {
                     }}
                   >
                     <div className="relative" style={{ width: avatarSize, height: avatarSize }}>
-                      {/* Story ring around profile avatar */}
                       {ownGroup && ownActivityCount > 0 && (
                         <svg
                           className="absolute inset-0"
@@ -1453,6 +1317,20 @@ const Reel = () => {
                   </button>
                 );
               })()}
+
+              {/* Divider */}
+              <div className="flex-shrink-0 self-center" style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.15)' }} />
+
+              {/* Scrollable others */}
+              <div
+                ref={avatarStripRef}
+                className="flex items-start gap-3 overflow-x-auto scrollbar-hide flex-1 min-w-0"
+              style={{ 
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+            >
               {effectiveUserGroups.map((group, idx) => {
                     // Skip own user — already shown above
                     if (user && group.userId === user.id) return null;
@@ -1595,18 +1473,19 @@ const Reel = () => {
                       </button>
                     );
                   })}
-            </div>
-          </div>
+            </div>{/* end scrollable others */}
+            </div>{/* end flex container */}
+          </div>{/* end height:78 wrapper */}
 
-        </div>
+        </div>{/* end top zone */}
 
         {/* MIDDLE CONTAINER — flexes between profile strip and bottom nav */}
         <div
           className="relative z-30 flex-1 min-h-0 flex flex-col"
           style={{
             paddingTop: '0px',
-            marginTop: '-32px',
-            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 6px), 6px) + 64px)',
+            marginTop: '-16px',
+            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 6px), 6px) + 80px)',
           }}
         >
           {/* Reel cards fill the available middle container space */}
@@ -1740,12 +1619,12 @@ const Reel = () => {
                       className="relative overflow-hidden"
                       style={{
                         aspectRatio: '9/16',
-                        height: 'calc(90% - 50px)',
+                        height: 'calc(95% - 20px)',
                         maxWidth: '100%',
                         borderRadius: '0px',
                         overflow: 'hidden',
                         background: 'transparent',
-                        marginTop: '-30px',
+                        marginTop: '-10px',
                       }}
                       transition={{ type: 'spring', stiffness: 280, damping: 30, duration: 0.5 }}
                     >
@@ -2156,6 +2035,127 @@ const Reel = () => {
             </div>
         </div>
       </div>{/* end overflow:hidden flex container */}
+
+      {/* Bottom action buttons — bell + 3-dot flanking the nav bar */}
+      <div
+        className="fixed left-1/2 -translate-x-1/2 flex items-center gap-3"
+        style={{
+          bottom: 'calc(max(env(safe-area-inset-bottom, 10px), 10px) + 24px)',
+          zIndex: 50,
+        }}
+      >
+        {/* Bell button */}
+        <button
+          onClick={() => setShowNotificationSheet(true)}
+          className="relative active:scale-[0.95] transition-transform flex items-center justify-center"
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: 21,
+            background: 'rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(60px) saturate(200%)',
+            WebkitBackdropFilter: 'blur(60px) saturate(200%)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+          }}
+        >
+          <Bell className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
+          {unreadNotificationCount > 0 && (
+            <div
+              className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full"
+              style={{
+                background: '#EF4444',
+                border: '1.5px solid rgba(0,0,0,0.5)',
+                boxShadow: '0 0 6px rgba(239, 68, 68, 0.6)',
+              }}
+            />
+          )}
+        </button>
+
+        {/* Spacer for nav bar width */}
+        <div style={{ width: 210 }} />
+
+        {/* 3-dot menu button */}
+        <div className="relative">
+          <button
+            onClick={() => setShowEllipsisMenu(prev => !prev)}
+            className="active:scale-[0.95] transition-transform flex items-center justify-center"
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 21,
+              background: 'rgba(255, 255, 255, 0.08)',
+              backdropFilter: 'blur(60px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(60px) saturate(200%)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+            }}
+          >
+            <MoreVertical className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
+          </button>
+
+          <AnimatePresence>
+            {showEllipsisMenu && (
+              <>
+                <motion.div
+                  className="fixed inset-0 z-40"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setShowEllipsisMenu(false)}
+                />
+                <motion.div
+                  className="absolute right-0 bottom-full mb-2 w-52 z-50 rounded-2xl overflow-hidden"
+                  style={{
+                    background: 'rgba(20, 20, 30, 0.95)',
+                    backdropFilter: 'blur(40px) saturate(180%)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
+                  }}
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="py-1">
+                    <motion.button
+                      onClick={() => { setShowEllipsisMenu(false); setShowMediaSourceSheet(true); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+                      whileHover={{ x: 2 }}
+                    >
+                      <Plus className="w-4 h-4 text-emerald-400" />
+                      <span className="text-sm">Log Activity</span>
+                    </motion.button>
+                    <motion.button
+                      onClick={() => { setShowEllipsisMenu(false); navigate('/profile-setup?edit=true'); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+                      whileHover={{ x: 2 }}
+                    >
+                      <UserPen className="w-4 h-4 text-emerald-400" />
+                      <span className="text-sm">Edit Profile</span>
+                    </motion.button>
+                    <motion.button
+                      onClick={async () => {
+                        setShowEllipsisMenu(false);
+                        try {
+                          await supabase.auth.signOut();
+                          toast.success('Logged out successfully');
+                          navigate('/auth');
+                        } catch { toast.error('Failed to log out'); }
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-red-400 hover:bg-red-500/5 transition-colors"
+                      whileHover={{ x: 2 }}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="text-sm">Log Out</span>
+                    </motion.button>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
 
       {/* Progress drawer removed — now a standalone page via nav */}
 
