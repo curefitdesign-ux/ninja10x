@@ -402,9 +402,9 @@ export default function ReelToProgressTransition({
                       <motion.button
                         className="w-full py-3 rounded-2xl text-[15px] font-semibold active:scale-[0.97] transition-transform"
                         style={{
-                          background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.1) 100%)',
-                          border: '1px solid rgba(16, 185, 129, 0.3)',
-                          color: 'rgba(16, 185, 129, 1)',
+                          background: 'linear-gradient(135deg, rgba(130, 100, 255, 0.25) 0%, rgba(130, 100, 255, 0.1) 100%)',
+                          border: '1px solid rgba(130, 100, 255, 0.3)',
+                          color: 'rgba(180, 160, 220, 1)',
                         }}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => setShowCertPopup(false)}
