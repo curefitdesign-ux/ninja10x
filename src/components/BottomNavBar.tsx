@@ -98,7 +98,36 @@ const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
             />
 
             {/* Tabs container */}
-            <div className="flex items-center px-2 py-2">
+            <div className="flex items-center px-1.5 py-2">
+              {/* Home */}
+              <button
+                onClick={() => {
+                  if (window.history.length > 1) {
+                    navigate(-1);
+                  } else {
+                    navigate("/");
+                  }
+                }}
+                className={cn(
+                  "relative flex flex-col items-center justify-center",
+                  "py-1 px-2.5 min-w-[48px]",
+                  "transition-all duration-300 ease-out",
+                  "focus:outline-none active:scale-[0.95]"
+                )}
+              >
+                <div style={{ color: "rgba(200, 210, 230, 0.6)", opacity: 0.5 }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="11" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M14 8L10 12L14 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <span className="text-[9px] mt-0.5 tracking-wide whitespace-nowrap" style={{ color: "rgba(200, 210, 230, 0.5)", fontWeight: 400 }}>
+                  Home
+                </span>
+              </button>
+
+              {/* Divider */}
+              <div style={{ width: 1, height: 28, background: "rgba(255,255,255,0.18)" }} />
               {/* Bell */}
               <button
                 onClick={() => handleTabClick("bell")}
