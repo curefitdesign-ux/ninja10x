@@ -1207,148 +1207,124 @@ const Reel = () => {
           onNudge={triggerShake}
         />
 
-        {/* TOP ZONE — fixed height — brand bar + avatar strip + user name */}
+        {/* TOP ZONE — avatar strip only (brand bar moved to bottom) */}
         <div 
           className="z-50 flex flex-col justify-end shrink-0"
           style={{ 
-            paddingTop: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 32px)',
+            paddingTop: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 12px)',
           }}
         >
-          {/* Row 0: Brand bar — Bell | Ninja 10X | 3-dot */}
-          <div
-            className="flex items-center justify-between px-4 shrink-0 mb-3"
-            style={{ height: 40 }}
-          >
-            {/* Left - Notification bell */}
-            <button
-              onClick={() => setShowNotificationSheet(true)}
-              className="relative active:scale-[0.95] transition-transform flex items-center justify-center"
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: 19,
-                background: 'rgba(255, 255, 255, 0.08)',
-                backdropFilter: 'blur(40px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-              }}
-            >
-              <Bell className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
-              {unreadNotificationCount > 0 && (
-                <div
-                  className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full"
-                  style={{
-                    background: '#EF4444',
-                    border: '1.5px solid rgba(0,0,0,0.5)',
-                    boxShadow: '0 0 6px rgba(239, 68, 68, 0.6)',
-                  }}
-                />
-              )}
-            </button>
-
-            {/* Center - Brand name */}
-            <h1 
-              className="text-white font-bold tracking-tight"
-              style={{ 
-                fontSize: 20,
-                fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
-                letterSpacing: '-0.02em',
-              }}
-            >
-              Ninja 10X
-            </h1>
-
-            {/* Right - 3-dot menu */}
-            <div className="relative">
-              <button
-                onClick={() => setShowEllipsisMenu(prev => !prev)}
-                className="active:scale-[0.95] transition-transform flex items-center justify-center"
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 19,
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(40px) saturate(180%)',
-                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-                }}
-              >
-                <MoreVertical className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
-              </button>
-
-              <AnimatePresence>
-                {showEllipsisMenu && (
-                  <>
-                    <motion.div
-                      className="fixed inset-0 z-40"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      onClick={() => setShowEllipsisMenu(false)}
-                    />
-                    <motion.div
-                      className="absolute right-0 top-full mt-2 w-52 z-50 rounded-2xl overflow-hidden"
-                      style={{
-                        background: 'rgba(20, 20, 30, 0.95)',
-                        backdropFilter: 'blur(40px) saturate(180%)',
-                        border: '1px solid rgba(255, 255, 255, 0.12)',
-                        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
-                      }}
-                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <div className="py-1">
-                        <motion.button
-                          onClick={() => { setShowEllipsisMenu(false); setShowMediaSourceSheet(true); }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
-                          whileHover={{ x: 2 }}
-                        >
-                          <Plus className="w-4 h-4 text-emerald-400" />
-                          <span className="text-sm">Log Activity</span>
-                        </motion.button>
-                        <motion.button
-                          onClick={() => { setShowEllipsisMenu(false); navigate('/profile-setup?edit=true'); }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
-                          whileHover={{ x: 2 }}
-                        >
-                          <UserPen className="w-4 h-4 text-emerald-400" />
-                          <span className="text-sm">Edit Profile</span>
-                        </motion.button>
-                        <motion.button
-                          onClick={async () => {
-                            setShowEllipsisMenu(false);
-                            try {
-                              await supabase.auth.signOut();
-                              toast.success('Logged out successfully');
-                              navigate('/auth');
-                            } catch { toast.error('Failed to log out'); }
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-red-400 hover:bg-red-500/5 transition-colors"
-                          whileHover={{ x: 2 }}
-                        >
-                          <LogOut className="w-4 h-4" />
-                          <span className="text-sm">Log Out</span>
-                        </motion.button>
-                      </div>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {/* Row 1: All avatars in one centered scrollable strip */}
+          {/* Avatar strip: pinned own avatar + scrollable others */}
           <div
             className="shrink-0 overflow-hidden"
             style={{ height: 78 }}
           >
-            <div 
-              ref={avatarStripRef}
-              className="flex items-start gap-3 overflow-x-auto scrollbar-hide justify-center px-3"
+            <div className="flex items-start px-3 gap-2">
+              {/* Pinned own avatar — always visible */}
+              {(() => {
+                const ownIdx = effectiveUserGroups.findIndex(g => user && g.userId === user.id);
+                const isOwnActive = ownIdx >= 0 && ownIdx === currentUserIndex;
+                const ownGroup = ownIdx >= 0 ? effectiveUserGroups[ownIdx] : null;
+                const ownActivityCount = ownGroup?.activities.length || 0;
+                const ownCurrentIdx = isOwnActive ? currentActivityIndex : 0;
+                const avatarSize = 52;
+
+                return (
+                  <button
+                    onClick={() => {
+                      if (ownIdx >= 0) {
+                        setCurrentUserIndex(ownIdx);
+                        setCurrentActivityIndex(0);
+                      }
+                    }}
+                    className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
+                    style={{ 
+                      width: avatarSize,
+                      opacity: isOwnActive ? 1 : 0.5,
+                      transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
+                    }}
+                  >
+                    <div className="relative" style={{ width: avatarSize, height: avatarSize }}>
+                      {ownGroup && ownActivityCount > 0 && (
+                        <svg
+                          className="absolute inset-0"
+                          style={{ width: avatarSize, height: avatarSize, transform: 'rotate(-90deg)' }}
+                          viewBox="0 0 100 100"
+                        >
+                          {Array.from({ length: ownActivityCount }).map((_, segIdx) => {
+                            const gapAngle = ownActivityCount > 1 ? 10 : 0;
+                            const totalGap = gapAngle * ownActivityCount;
+                            const segmentAngle = (360 - totalGap) / ownActivityCount;
+                            const startAngle = segIdx * (segmentAngle + gapAngle);
+                            const isCurrentSegment = isOwnActive && segIdx === ownCurrentIdx;
+                            const isSegmentViewed = isOwnActive && segIdx < ownCurrentIdx;
+                            const isSegmentUnviewed = !isOwnActive || segIdx > ownCurrentIdx;
+
+                            const radius = 44;
+                            const circumference = 2 * Math.PI * radius;
+                            const segmentLength = (segmentAngle / 360) * circumference;
+                            const offset = (startAngle / 360) * circumference;
+
+                            const progressLength = isCurrentSegment && ownRingProgress > 0
+                              ? segmentLength : isCurrentSegment ? 0 : segmentLength;
+
+                            return (
+                              <g key={segIdx}>
+                                {isCurrentSegment && (
+                                  <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
+                                    stroke="rgba(255,255,255,0.15)"
+                                    strokeDasharray={`${segmentLength} ${circumference}`}
+                                    strokeDashoffset={-offset} strokeLinecap="round" />
+                                )}
+                                <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
+                                  stroke={isSegmentUnviewed ? 'rgba(255,255,255,0.25)' : 'url(#storyGradientOwn)'}
+                                  strokeDasharray={`${isCurrentSegment ? progressLength : segmentLength} ${circumference}`}
+                                  strokeDashoffset={-offset} strokeLinecap="round"
+                                  style={{
+                                    filter: (isSegmentViewed || isCurrentSegment) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
+                                    transition: isCurrentSegment && ownRingProgress > 0
+                                      ? `stroke-dasharray ${autoAdvanceDuration}ms linear`
+                                      : isCurrentSegment ? 'none' : 'stroke-dasharray 0.3s ease',
+                                  }}
+                                />
+                              </g>
+                            );
+                          })}
+                          <defs>
+                            <linearGradient id="storyGradientOwn" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#FEDA75" />
+                              <stop offset="25%" stopColor="#FA7E1E" />
+                              <stop offset="50%" stopColor="#D62976" />
+                              <stop offset="75%" stopColor="#962FBF" />
+                              <stop offset="100%" stopColor="#4F5BD5" />
+                            </linearGradient>
+                          </defs>
+                        </svg>
+                      )}
+                      <div className="relative" style={{ width: avatarSize, height: avatarSize, padding: 4 }}>
+                        <div className="w-full h-full rounded-full overflow-hidden">
+                          <ProfileAvatar
+                            src={profile?.avatar_url}
+                            name={profile?.display_name}
+                            size={avatarSize - 8}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <span className={`text-[11px] font-medium mt-1 max-w-[52px] truncate ${isOwnActive ? 'text-white font-semibold' : 'text-white/50'}`}>
+                      You
+                    </span>
+                  </button>
+                );
+              })()}
+
+              {/* Divider */}
+              <div className="flex-shrink-0 self-center" style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.15)' }} />
+
+              {/* Scrollable others */}
+              <div
+                ref={avatarStripRef}
+                className="flex items-start gap-3 overflow-x-auto scrollbar-hide flex-1 min-w-0"
               style={{ 
                 WebkitOverflowScrolling: 'touch',
                 scrollbarWidth: 'none',
