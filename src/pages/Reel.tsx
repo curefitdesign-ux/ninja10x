@@ -2241,6 +2241,70 @@ const Reel = () => {
         onClose={() => setShowNotificationSheet(false)}
         onNotificationCountChange={setUnreadNotificationCount}
       />
+
+      <AlertDialog open={showShareOptions} onOpenChange={setShowShareOptions}>
+        <AlertDialogContent
+          className="rounded-3xl border-0 max-w-[320px]"
+          style={{
+            background: 'rgba(20, 20, 30, 0.95)',
+            backdropFilter: 'blur(40px) saturate(180%)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
+          }}
+        >
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white text-center text-lg">Share Template</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/60 text-center text-sm">
+              How do you want to share this?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="grid gap-2">
+            <button
+              onClick={() => {
+                setShowShareOptions(false);
+                shareToChannel('whatsapp');
+              }}
+              className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 bg-white/10 hover:bg-white/15 transition-colors"
+            >
+              WhatsApp
+            </button>
+            <button
+              onClick={() => {
+                setShowShareOptions(false);
+                shareToChannel('instagram');
+              }}
+              className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 bg-white/10 hover:bg-white/15 transition-colors"
+            >
+              Instagram
+            </button>
+            <button
+              onClick={() => {
+                setShowShareOptions(false);
+                shareToChannel('messages');
+              }}
+              className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 bg-white/10 hover:bg-white/15 transition-colors"
+            >
+              Messages
+            </button>
+            <button
+              onClick={async () => {
+                setShowShareOptions(false);
+                await handleSystemShare();
+              }}
+              className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 bg-white/10 hover:bg-white/15 transition-colors"
+            >
+              More apps
+            </button>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-full border-0 text-white/80 hover:text-white" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              Cancel
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DynamicBlurBackground>
   );
 };
