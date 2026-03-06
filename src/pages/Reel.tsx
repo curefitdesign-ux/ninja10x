@@ -2130,16 +2130,6 @@ const Reel = () => {
         }}
         onKeepPrivate={() => setShowMakePublicSheet(false)}
       />
-      <MediaSourceSheet
-        isOpen={showMediaSourceSheet}
-        onClose={() => setShowMediaSourceSheet(false)}
-        dayNumber={myActivities.length + 1}
-      />
-      <NotificationSheet
-        isOpen={showNotificationSheet}
-        onClose={() => setShowNotificationSheet(false)}
-        onNotificationCountChange={setUnreadNotificationCount}
-      />
 
       <AlertDialog open={showShareOptions} onOpenChange={setShowShareOptions}>
         <AlertDialogContent
