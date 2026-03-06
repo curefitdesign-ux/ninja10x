@@ -196,32 +196,48 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     else goNext();
   };
 
-  const handleShareStory = async () => {
-    try {
-      const activityName = current.activity || 'workout';
-      const shareText = `Check out my ${activityName} on my fitness journey! 💪`;
-      if (navigator.share) {
-        const shareData: ShareData = { title: 'My Fitness Story', text: shareText };
-        if (mediaUrl) {
-          try {
-            const response = await fetch(mediaUrl);
-            const blob = await response.blob();
-            const ext = current.isVideo ? 'mp4' : 'jpg';
-            const file = new File([blob], `story.${ext}`, { type: blob.type });
-            if (navigator.canShare?.({ files: [file] })) shareData.files = [file];
-          } catch {
-            if (mediaUrl.startsWith('http')) shareData.url = mediaUrl;
-          }
-        }
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(shareText);
-        toast.success('Copied to clipboard!');
+  const buildSharePayload = useCallback(() => {
+    const activityName = current?.activity || 'workout';
+    const shareText = `Check out my ${activityName} on my fitness journey! 💪`;
+    const url = mediaUrl && mediaUrl.startsWith('http') ? mediaUrl : window.location.href;
+    return { title: 'My Fitness Story', text: shareText, url };
+  }, [current, mediaUrl]);
+
+  const shareToChannel = useCallback((channel: 'whatsapp' | 'instagram' | 'messages') => {
+    const payload = buildSharePayload();
+    const shareText = `${payload.text}\n\n${payload.url}`;
+
+    setTimeout(() => {
+      if (channel === 'whatsapp') {
+        const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(shareText)}`;
+        const webFallback = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+        const link = document.createElement('a');
+        link.href = whatsappUrl;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => { window.location.href = webFallback; }, 1500);
+        return;
       }
-    } catch (err: any) {
-      if (err?.name !== 'AbortError') toast.error('Failed to share');
-    }
-  };
+      if (channel === 'messages') {
+        window.location.href = `sms:&body=${encodeURIComponent(shareText)}`;
+        return;
+      }
+      if (channel === 'instagram') {
+        if (navigator.share) {
+          navigator.share(payload).catch(() => {});
+        } else {
+          navigator.clipboard.writeText(shareText).then(() => {
+            toast.success('Link copied! Paste it in Instagram.');
+          }).catch(() => {
+            toast.error('Unable to copy link');
+          });
+        }
+        return;
+      }
+    }, 100);
+  }, [buildSharePayload]);
 
 
   const overlay = (
