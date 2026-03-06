@@ -196,14 +196,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     else goNext();
   };
 
-  const buildSharePayload = useCallback(() => {
+  const buildSharePayload = () => {
     const activityName = current?.activity || 'workout';
     const shareText = `Check out my ${activityName} on my fitness journey! 💪`;
     const url = mediaUrl && mediaUrl.startsWith('http') ? mediaUrl : window.location.href;
     return { title: 'My Fitness Story', text: shareText, url };
-  }, [current, mediaUrl]);
+  };
 
-  const shareToChannel = useCallback((channel: 'whatsapp' | 'instagram' | 'messages') => {
+  const shareToChannel = (channel: 'whatsapp' | 'instagram' | 'messages') => {
     const payload = buildSharePayload();
     const shareText = `${payload.text}\n\n${payload.url}`;
 
@@ -237,7 +237,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
         return;
       }
     }, 100);
-  }, [buildSharePayload]);
+  };
 
 
   const overlay = (
