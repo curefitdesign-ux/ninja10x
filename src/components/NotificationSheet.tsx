@@ -238,10 +238,13 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
   // Navigate to specific activity in reel viewer
   const handleNotificationTap = useCallback((notif: Notification) => {
     onClose();
+    // Use replace + unique timestamp to force re-navigation even if already on /reel
     navigate('/reel', {
+      replace: true,
       state: {
         activityId: notif.activityId,
         dayNumber: notif.dayNumber,
+        _ts: Date.now(),
       },
     });
   }, [navigate, onClose]);
