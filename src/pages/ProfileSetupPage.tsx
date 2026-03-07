@@ -267,21 +267,6 @@ const ProfileSetupPage = () => {
             </div>
           )}
 
-          {/* Camera edit icon when photo selected */}
-          {heroImage && (
-            <div
-              onClick={(e) => { e.stopPropagation(); handleHeroTap(); }}
-              className="absolute bottom-4 right-4 w-9 h-9 rounded-full flex items-center justify-center cursor-pointer"
-              style={{
-                background: 'rgba(0,0,0,0.55)',
-                backdropFilter: 'blur(16px)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                zIndex: 10,
-              }}
-            >
-              <Camera className="w-4 h-4 text-white" />
-            </div>
-          )}
         </div>
 
         {/* ✕ Close / Back button — always visible (top-right) */}
@@ -358,6 +343,36 @@ const ProfileSetupPage = () => {
         {/* Preset Avatars — horizontal scroll, square tiles */}
         <div className="px-4 mb-4">
           <div className="flex gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+            {/* Camera tile — first in row */}
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              onClick={() => cameraInputRef.current?.click()}
+              disabled={loading}
+              className="relative flex-shrink-0 flex items-center justify-center"
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 12,
+                background: 'rgba(255,255,255,0.08)',
+                border: customAvatarPreview
+                  ? '2.5px solid #34d399'
+                  : '2px dashed rgba(255,255,255,0.25)',
+                boxShadow: customAvatarPreview
+                  ? '0 0 14px rgba(52,211,153,0.45)'
+                  : 'none',
+              }}
+            >
+              {customAvatarPreview ? (
+                <>
+                  <img src={customAvatarPreview} alt="Custom" className="w-full h-full object-cover" style={{ borderRadius: 10 }} />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/35" style={{ borderRadius: 10 }}>
+                    <Camera className="w-4 h-4 text-white" />
+                  </div>
+                </>
+              ) : (
+                <Camera className="w-5 h-5 text-white/50" />
+              )}
+            </motion.button>
             {PRESET_AVATARS.map((avatar) => (
               <motion.button
                 key={avatar.id}
