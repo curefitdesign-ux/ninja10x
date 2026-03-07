@@ -267,21 +267,6 @@ const ProfileSetupPage = () => {
             </div>
           )}
 
-          {/* Camera edit icon when photo selected */}
-          {heroImage && (
-            <div
-              onClick={(e) => { e.stopPropagation(); handleHeroTap(); }}
-              className="absolute bottom-4 right-4 w-9 h-9 rounded-full flex items-center justify-center cursor-pointer"
-              style={{
-                background: 'rgba(0,0,0,0.55)',
-                backdropFilter: 'blur(16px)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                zIndex: 10,
-              }}
-            >
-              <Camera className="w-4 h-4 text-white" />
-            </div>
-          )}
         </div>
 
         {/* ✕ Close / Back button — always visible (top-right) */}
