@@ -1901,8 +1901,8 @@ const Reel = () => {
                   transition: 'opacity 0.2s ease, transform 0.2s ease',
                 }}
               >
-                {/* Reaction pill + Share icon row */}
-                <div className="flex items-center justify-center gap-3 px-4">
+                {/* Reaction pill + Share icon row — hidden for log-activity placeholder */}
+                <div className="flex items-center justify-center gap-3 px-4" style={{ visibility: isLogActivityCard ? 'hidden' : 'visible' }}>
                   {/* Liquid glass reaction pill */}
                   <button
                     onClick={() => (isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true))}
