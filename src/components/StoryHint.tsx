@@ -75,7 +75,7 @@ export default function StoryHint({ hasMultipleStories, hasMultipleUsers, onNudg
                 animate={{ x: [0, -5, 0] }}
                 transition={{ duration: 0.4, repeat: 2, repeatDelay: 0.1 }}
               >
-                ← Swipe left
+                Swipe →
               </motion.span>
             </motion.div>
           )}
