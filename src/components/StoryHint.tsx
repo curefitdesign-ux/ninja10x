@@ -57,36 +57,26 @@ export default function StoryHint({ hasMultipleStories, hasMultipleUsers, onNudg
           {/* Floating nudge indicator - no overlay, just subtle visual cues */}
           {nudgeType === 'swipe' && (
             <motion.div
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-[100] pointer-events-none"
-              initial={{ opacity: 0, x: 20 }}
+              className="absolute left-1/2 -translate-x-1/2 bottom-[140px] z-[100] pointer-events-none"
+              initial={{ opacity: 0, y: 10 }}
               animate={{ 
                 opacity: [0, 1, 1, 0],
-                x: [20, 0, -30, -50],
+                y: [10, 0, 0, -5],
               }}
               exit={{ opacity: 0 }}
               transition={{ 
-                duration: 1.5,
-                times: [0, 0.2, 0.7, 1],
+                duration: 2,
+                times: [0, 0.15, 0.75, 1],
                 ease: 'easeInOut',
               }}
             >
-              <div 
-                className="flex items-center gap-2 px-4 py-2 rounded-full"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.15)',
-                  backdropFilter: 'blur(16px)',
-                  border: '1px solid rgba(255,255,255,0.25)',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-                }}
+              <motion.span 
+                className="text-white/60 text-sm font-medium whitespace-nowrap"
+                animate={{ x: [0, -5, 0] }}
+                transition={{ duration: 0.4, repeat: 2, repeatDelay: 0.1 }}
               >
-                <motion.span 
-                  className="text-white text-sm font-medium whitespace-nowrap"
-                  animate={{ x: [0, -5, 0] }}
-                  transition={{ duration: 0.4, repeat: 2, repeatDelay: 0.1 }}
-                >
-                  Swipe left →
-                </motion.span>
-              </div>
+                ← Swipe left
+              </motion.span>
             </motion.div>
           )}
 
