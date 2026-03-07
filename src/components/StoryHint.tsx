@@ -72,7 +72,7 @@ export default function StoryHint({ hasMultipleStories, hasMultipleUsers, onNudg
             >
               <motion.span 
                 className="text-white/60 text-sm font-medium whitespace-nowrap"
-                animate={{ x: [0, -5, 0] }}
+                animate={{ x: [0, 5, 0] }}
                 transition={{ duration: 0.4, repeat: 2, repeatDelay: 0.1 }}
               >
                 Swipe →
