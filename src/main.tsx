@@ -6,7 +6,8 @@ import "./index.css";
 createRoot(document.getElementById("root")!).render(<App />);
 
 // Post-render: init Capacitor + perf observer
-requestIdleCallback(() => {
+const idle = typeof requestIdleCallback === 'function' ? requestIdleCallback : (cb: () => void) => setTimeout(cb, 1);
+idle(() => {
   import("./lib/capacitor-init").then(({ initCapacitor }) => initCapacitor());
   import("./lib/perf").then(({ initPerfObserver }) => initPerfObserver());
 });
