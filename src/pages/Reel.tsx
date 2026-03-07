@@ -82,6 +82,7 @@ const Reel = () => {
   const weekRecapVideoFromNav = navState.weekRecapVideo as string | undefined;
   const weekRecapNumber = navState.weekNumber as number | undefined;
   const sourceUserId = navState.sourceUserId as string | undefined;
+  const navTimestamp = navState._ts as number | undefined;
   
   // Determine navigation intent:
   // - hasDeepLink: user tapped a specific story card (should open THAT story, never recap)
@@ -153,7 +154,7 @@ const Reel = () => {
   const { triggerShake, shakeAnimation, shakeTransition } = useStoryNudgeAnimation();
 
   // Create a unique key for this navigation to detect re-navigation
-  const currentNavKey = `${deepLinkActivityId || ''}-${deepLinkDayNumber || ''}-${weekRecapVideoFromNav || ''}`;
+  const currentNavKey = `${deepLinkActivityId || ''}-${deepLinkDayNumber || ''}-${weekRecapVideoFromNav || ''}-${navTimestamp || ''}`;
   
   // Reset navigation state when navigation changes
   useEffect(() => {
