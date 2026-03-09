@@ -50,6 +50,8 @@ interface StackedPhotoCardsProps {
 
 const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
   const navigate = useNavigate();
+  const { triggerMorph } = useMorphTransition();
+  const cardRefs = useRef<Map<string, HTMLElement>>(new Map());
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
   
   // Preload the latest 3 images immediately for instant rendering
