@@ -11,6 +11,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { PortalContainerProvider } from "@/hooks/use-portal-container";
 import { enableAutoMotion } from "@/lib/motion";
 import { useGlobalHaptics } from "@/hooks/use-global-haptics";
+import { MorphTransitionProvider } from "@/hooks/use-morph-transition";
+import MorphTransitionOverlay from "@/components/MorphTransitionOverlay";
 
 // Eagerly load Auth (initial landing page)
 import Auth from "./pages/Auth";
