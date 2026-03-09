@@ -1479,13 +1479,12 @@ const Reel = () => {
 
         </div>{/* end top zone */}
 
-        {/* SEGMENTED PROGRESS BARS — Instagram-style, above story cards */}
-        {currentGroup && currentGroup.activities.length > 0 && (
+        {/* SEGMENTED PROGRESS BARS — only in viewProfile mode */}
+        {viewProfile && currentGroup && currentGroup.activities.length > 1 && (
           <div
             className="z-40 flex items-center px-4 shrink-0"
             style={{ marginTop: '2px', marginBottom: '4px' }}
           >
-            {/* Segmented bars */}
             <div className="flex-1 flex items-center gap-1">
               {currentGroup.activities.map((_, segIdx) => {
                 const isActiveSegment = segIdx === currentActivityIndex;
@@ -1520,8 +1519,8 @@ const Reel = () => {
           </div>
         )}
 
-        {/* Week/Day label — only for real activities (dayNumber < 1000) */}
-        {currentGroup && currentActivity && !isLogActivityCard && currentActivity.dayNumber < 1000 && (
+        {/* Week/Day label — only in viewProfile mode for real activities */}
+        {viewProfile && currentGroup && currentActivity && !isLogActivityCard && currentActivity.dayNumber < 1000 && (
           <div className="z-40 text-center shrink-0" style={{ marginBottom: '2px' }}>
             <span className="text-white/50 text-xs font-medium">
               Week {Math.ceil(currentActivity.dayNumber / 3)} • Day {((currentActivity.dayNumber - 1) % 3) + 1}
