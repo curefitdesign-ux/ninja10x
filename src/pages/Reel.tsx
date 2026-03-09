@@ -1484,45 +1484,6 @@ const Reel = () => {
           </div>
         </div>{/* end top zone */}
 
-        {/* SEGMENTED PROGRESS BARS */}
-        {currentGroup && currentGroup.activities.length > 1 && (
-          <div
-            className="z-40 flex items-center px-4 shrink-0"
-            style={{ marginTop: '2px', marginBottom: '4px' }}
-          >
-            <div className="flex-1 flex items-center gap-1">
-              {currentGroup.activities.map((_, segIdx) => {
-                const isActiveSegment = segIdx === currentActivityIndex;
-                const isViewed = segIdx < currentActivityIndex;
-
-                return (
-                  <div
-                    key={segIdx}
-                    className="flex-1 h-[3px] rounded-full overflow-hidden cursor-pointer"
-                    style={{ background: 'rgba(255,255,255,0.15)' }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentActivityIndex(segIdx);
-                    }}
-                  >
-                    <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: isViewed ? '100%' : isActiveSegment && autoAdvanceProgress > 0 ? '100%' : '0%',
-                        background: 'rgba(255,255,255,0.85)',
-                        transition: isActiveSegment && autoAdvanceProgress > 0
-                          ? `width ${autoAdvanceDuration}ms linear`
-                          : isActiveSegment
-                            ? 'none'
-                            : 'width 0.3s ease',
-                      }}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* Week/Day label for real activities — hide for own stories */}
         {currentGroup && currentActivity && !isLogActivityCard && !isOwnStory && currentActivity.dayNumber < 1000 && (
