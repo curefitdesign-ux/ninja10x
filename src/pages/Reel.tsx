@@ -44,18 +44,7 @@ import {
 import fireEmoji from '@/assets/reactions/fire-3d.png';
 import clapEmoji from '@/assets/reactions/clap-3d.png';
 
-const DEFAULT_REACTIONS: Record<ReactionType, ActivityReaction> = {
-  heart: { type: 'heart', count: 0, userReacted: false },
-  clap: { type: 'clap', count: 0, userReacted: false },
-  fistbump: { type: 'fistbump', count: 0, userReacted: false },
-  wow: { type: 'wow', count: 0, userReacted: false },
-  fire: { type: 'fire', count: 0, userReacted: false },
-  flex: { type: 'flex', count: 0, userReacted: false },
-  trophy: { type: 'trophy', count: 0, userReacted: false },
-  runner: { type: 'runner', count: 0, userReacted: false },
-  energy: { type: 'energy', count: 0, userReacted: false },
-  timer: { type: 'timer', count: 0, userReacted: false },
-};
+const DEFAULT_REACTIONS: Partial<Record<ReactionType, ActivityReaction>> = {};
 
 // Reactor profile type from activities - includes reactionType for removal
 interface ReactorProfile {
@@ -107,7 +96,7 @@ const Reel = () => {
   const [showSendReactionSheet, setShowSendReactionSheet] = useState(false);
   const [localReactions, setLocalReactions] = useState<Record<string, {
     total: number;
-    reactions: Record<ReactionType, ActivityReaction>;
+    reactions: Partial<Record<ReactionType, ActivityReaction>>;
     reactorProfiles: ReactorProfile[];
   }>>({});
   
@@ -182,7 +171,7 @@ const Reel = () => {
     // Initialize reactions state with reactor profiles
     const map: Record<string, { 
       total: number; 
-      reactions: Record<ReactionType, ActivityReaction>;
+      reactions: Partial<Record<ReactionType, ActivityReaction>>;
       reactorProfiles: ReactorProfile[];
     }> = {};
     for (const group of groups) {
@@ -2056,6 +2045,7 @@ const Reel = () => {
           <SendReactionSheet
             activityId={currentActivity?.id}
             currentUserId={user?.id}
+            activityType={currentActivity?.activity || undefined}
             onReact={handleReact}
             onClose={() => setShowSendReactionSheet(false)}
             onViewReactions={() => {

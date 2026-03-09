@@ -33,7 +33,7 @@ export interface LocalActivity {
   userId?: string;
   createdAt?: string;
   reactionCount?: number;
-  reactions?: Record<ReactionType, ActivityReaction>;
+  reactions?: Partial<Record<ReactionType, ActivityReaction>>;
   displayName?: string;
   avatarUrl?: string;
   reactorProfiles?: { userId: string; displayName: string; avatarUrl?: string; reactionType?: ReactionType; createdAt?: string }[];
@@ -42,7 +42,7 @@ export interface LocalActivity {
 // Convert DB row to local shape
 function toLocal(row: JourneyActivity & { 
   reaction_count?: number; 
-  reactions?: Record<ReactionType, ActivityReaction>;
+  reactions?: Partial<Record<ReactionType, ActivityReaction>>;
   display_name?: string;
   avatar_url?: string;
 }): LocalActivity {
@@ -115,19 +115,19 @@ export function useJourneyActivities() {
         .in('activity_id', activityIds);
 
       // Build reaction counts per activity
-      const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
+      const reactionMap: Record<string, Partial<Record<ReactionType, ActivityReaction>>> = {};
       const totalMap: Record<string, number> = {};
 
       for (const r of reactions || []) {
         const type = (r.reaction_type || 'heart') as ReactionType;
         if (!reactionMap[r.activity_id]) {
-          reactionMap[r.activity_id] = { ...DEFAULT_REACTIONS };
+          reactionMap[r.activity_id] = {};
           totalMap[r.activity_id] = 0;
         }
-        reactionMap[r.activity_id][type] = {
-          ...reactionMap[r.activity_id][type],
-          count: reactionMap[r.activity_id][type].count + 1,
-        };
+        if (!reactionMap[r.activity_id][type]) {
+          reactionMap[r.activity_id][type] = { type, count: 0, userReacted: false };
+        }
+        reactionMap[r.activity_id][type]!.count++;
         totalMap[r.activity_id]++;
       }
 
@@ -369,18 +369,7 @@ export function useJourneyActivities() {
   };
 }
 
-const DEFAULT_REACTIONS: Record<ReactionType, ActivityReaction> = {
-  heart: { type: 'heart', count: 0, userReacted: false },
-  clap: { type: 'clap', count: 0, userReacted: false },
-  fistbump: { type: 'fistbump', count: 0, userReacted: false },
-  wow: { type: 'wow', count: 0, userReacted: false },
-  fire: { type: 'fire', count: 0, userReacted: false },
-  flex: { type: 'flex', count: 0, userReacted: false },
-  trophy: { type: 'trophy', count: 0, userReacted: false },
-  runner: { type: 'runner', count: 0, userReacted: false },
-  energy: { type: 'energy', count: 0, userReacted: false },
-  timer: { type: 'timer', count: 0, userReacted: false },
-};
+const DEFAULT_REACTIONS: Partial<Record<ReactionType, ActivityReaction>> = {};
 
 /**
  * Fetch all activities from all users (public feed) with reactions and profiles.
@@ -443,20 +432,20 @@ export async function fetchPublicFeed(includeAll: boolean = false): Promise<Loca
   }
 
   // Build reaction map
-  const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
+  const reactionMap: Record<string, Partial<Record<ReactionType, ActivityReaction>>> = {};
   const totalMap: Record<string, number> = {};
 
   for (const r of reactions || []) {
     const type = (r.reaction_type || 'heart') as ReactionType;
     if (!reactionMap[r.activity_id]) {
-      reactionMap[r.activity_id] = { ...DEFAULT_REACTIONS };
+      reactionMap[r.activity_id] = {};
       totalMap[r.activity_id] = 0;
     }
-    reactionMap[r.activity_id][type] = {
-      ...reactionMap[r.activity_id][type],
-      count: reactionMap[r.activity_id][type].count + 1,
-      userReacted: user && r.user_id === user.id ? true : reactionMap[r.activity_id][type].userReacted,
-    };
+    if (!reactionMap[r.activity_id][type]) {
+      reactionMap[r.activity_id][type] = { type, count: 0, userReacted: false };
+    }
+    reactionMap[r.activity_id][type]!.count++;
+    if (user && r.user_id === user.id) reactionMap[r.activity_id][type]!.userReacted = true;
     totalMap[r.activity_id]++;
   }
 
@@ -539,22 +528,22 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
 
   // Build reaction map + reactor profiles per activity (including reaction type and timestamp)
   // Each reaction row = one reaction entry (same user can have multiple reactions)
-  const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
+  const reactionMap: Record<string, Partial<Record<ReactionType, ActivityReaction>>> = {};
   const totalMap: Record<string, number> = {};
   const reactorProfilesMap: Record<string, { userId: string; displayName: string; avatarUrl?: string; reactionType: ReactionType; createdAt: string }[]> = {};
 
   for (const r of reactions || []) {
     const type = (r.reaction_type || 'heart') as ReactionType;
     if (!reactionMap[r.activity_id]) {
-      reactionMap[r.activity_id] = { ...DEFAULT_REACTIONS };
+      reactionMap[r.activity_id] = {};
       totalMap[r.activity_id] = 0;
       reactorProfilesMap[r.activity_id] = [];
     }
-    reactionMap[r.activity_id][type] = {
-      ...reactionMap[r.activity_id][type],
-      count: reactionMap[r.activity_id][type].count + 1,
-      userReacted: user && r.user_id === user.id ? true : reactionMap[r.activity_id][type].userReacted,
-    };
+    if (!reactionMap[r.activity_id][type]) {
+      reactionMap[r.activity_id][type] = { type, count: 0, userReacted: false };
+    }
+    reactionMap[r.activity_id][type]!.count++;
+    if (user && r.user_id === user.id) reactionMap[r.activity_id][type]!.userReacted = true;
     totalMap[r.activity_id]++;
     
     // Add each reaction as a separate entry with timestamp

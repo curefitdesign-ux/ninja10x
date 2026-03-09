@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export type ReactionType = 'heart' | 'clap' | 'fistbump' | 'wow' | 'fire' | 'flex' | 'trophy' | 'runner' | 'energy' | 'timer';
+export type ReactionType = 'heart' | 'clap' | 'fistbump' | 'wow' | 'fire' | 'flex' | 'trophy' | 'runner' | 'energy' | 'timer' | 'mountain' | 'compass' | 'football' | 'bicycle' | 'lotus' | 'boxing-gloves' | 'cricket-bat' | 'basketball' | 'medal' | 'shuttlecock';
 
 export interface ActivityReaction {
   type: ReactionType;
@@ -25,7 +25,7 @@ export interface JourneyActivity {
   // Joined fields
   reaction_count?: number;
   user_reacted?: boolean;
-  reactions?: Record<ReactionType, ActivityReaction>;
+  reactions?: Partial<Record<ReactionType, ActivityReaction>>;
   is_own?: boolean;
 }
 
@@ -77,35 +77,27 @@ export async function fetchAllActivities(): Promise<JourneyActivity[]> {
     .in('activity_id', activityIds);
 
   // Build reaction map with types
-  const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
+  const reactionMap: Record<string, Partial<Record<ReactionType, ActivityReaction>>> = {};
   const totalReactionMap: Record<string, { count: number; userReacted: boolean }> = {};
   
   for (const r of reactions || []) {
     const type = (r.reaction_type || 'heart') as ReactionType;
     
     if (!reactionMap[r.activity_id]) {
-      reactionMap[r.activity_id] = {
-        heart: { type: 'heart', count: 0, userReacted: false },
-        clap: { type: 'clap', count: 0, userReacted: false },
-        fistbump: { type: 'fistbump', count: 0, userReacted: false },
-        wow: { type: 'wow', count: 0, userReacted: false },
-        fire: { type: 'fire', count: 0, userReacted: false },
-        flex: { type: 'flex', count: 0, userReacted: false },
-        trophy: { type: 'trophy', count: 0, userReacted: false },
-        runner: { type: 'runner', count: 0, userReacted: false },
-        energy: { type: 'energy', count: 0, userReacted: false },
-        timer: { type: 'timer', count: 0, userReacted: false },
-      };
+      reactionMap[r.activity_id] = {};
     }
     if (!totalReactionMap[r.activity_id]) {
       totalReactionMap[r.activity_id] = { count: 0, userReacted: false };
     }
     
-    reactionMap[r.activity_id][type].count++;
+    if (!reactionMap[r.activity_id][type]) {
+      reactionMap[r.activity_id][type] = { type, count: 0, userReacted: false };
+    }
+    reactionMap[r.activity_id][type]!.count++;
     totalReactionMap[r.activity_id].count++;
     
     if (user && r.user_id === user.id) {
-      reactionMap[r.activity_id][type].userReacted = true;
+      reactionMap[r.activity_id][type]!.userReacted = true;
       totalReactionMap[r.activity_id].userReacted = true;
     }
   }
@@ -114,18 +106,7 @@ export async function fetchAllActivities(): Promise<JourneyActivity[]> {
     ...a,
     reaction_count: totalReactionMap[a.id]?.count || 0,
     user_reacted: totalReactionMap[a.id]?.userReacted || false,
-    reactions: reactionMap[a.id] || {
-      heart: { type: 'heart', count: 0, userReacted: false },
-      clap: { type: 'clap', count: 0, userReacted: false },
-      fistbump: { type: 'fistbump', count: 0, userReacted: false },
-      wow: { type: 'wow', count: 0, userReacted: false },
-      fire: { type: 'fire', count: 0, userReacted: false },
-      flex: { type: 'flex', count: 0, userReacted: false },
-      trophy: { type: 'trophy', count: 0, userReacted: false },
-      runner: { type: 'runner', count: 0, userReacted: false },
-      energy: { type: 'energy', count: 0, userReacted: false },
-      timer: { type: 'timer', count: 0, userReacted: false },
-    },
+    reactions: reactionMap[a.id] || {},
     is_own: user ? a.user_id === user.id : false,
   }));
 }
