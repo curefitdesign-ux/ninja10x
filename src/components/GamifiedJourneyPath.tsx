@@ -98,6 +98,7 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
         {tiles.map((tile) => {
           const isActive = tile.index < completedActivities;
           const isCurrent = tile.index === completedActivities - 1;
+          const isHighlighted = highlightDayNumber !== undefined && tile.index === highlightDayNumber - 1;
           const isWeekEnd = tile.isWeekEnd;
           const showFinalGoal = tile.isFinal;
 
