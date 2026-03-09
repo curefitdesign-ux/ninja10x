@@ -2056,6 +2056,7 @@ const Reel = () => {
           <SendReactionSheet
             activityId={currentActivity?.id}
             currentUserId={user?.id}
+            activityType={currentActivity?.activity || undefined}
             onReact={handleReact}
             onClose={() => setShowSendReactionSheet(false)}
             onViewReactions={() => {
