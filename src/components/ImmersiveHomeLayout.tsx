@@ -65,8 +65,6 @@ const ImmersiveHomeLayout = ({
   const navigate = useNavigate();
   const { profile } = useProfile();
   const [showMediaSheet, setShowMediaSheet] = useState(false);
-  const [focusedWeek, setFocusedWeek] = useState<number | null>(null);
-  const [hasAnimated, setHasAnimated] = useState(false);
 
   // Day card sheet state
   const [daySheetOpen, setDaySheetOpen] = useState(false);
@@ -80,16 +78,12 @@ const ImmersiveHomeLayout = ({
   const photosInWeek = photos.length % 3;
   const remaining = photosInWeek === 0 && photos.length > 0 ? 0 : 3 - photosInWeek;
 
+  // Only show today's activity (if logged today) — no past activities
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
-  const loggedToday = latestPhoto && new Date(latestPhoto.storageUrl ? latestPhoto.storageUrl : '').toDateString() === new Date().toDateString();
-  // Check if the latest photo was logged today using createdAt from activities
-  const todayPhoto = (() => {
-    if (!latestPhoto) return null;
-    // Photos are sorted by dayNumber, latest is last. Check if it was created today.
-    // We need to find the matching activity's createdAt — use a simple heuristic:
-    // If the photo's dayNumber equals photos.length, it's the latest one.
-    return latestPhoto;
-  })();
+  const loggedToday = latestPhoto?.createdAt
+    ? new Date(latestPhoto.createdAt).toDateString() === new Date().toDateString()
+    : false;
+  const todayPhoto = loggedToday ? latestPhoto : null;
 
   const openDaySheet = (photo: Photo | null, dayNum: number, layoutId: string) => {
     triggerHaptic('medium');
