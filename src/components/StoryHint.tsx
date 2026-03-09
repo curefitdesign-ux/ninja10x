@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 
 const STORAGE_KEY = 'story-hint-shown';
 const INACTIVITY_DELAY = 3000; // 3 seconds of inactivity before showing hint
@@ -14,10 +15,8 @@ export default function StoryHint({ hasMultipleStories, hasMultipleUsers, onNudg
   const [showNudge, setShowNudge] = useState(false);
   const [nudgeType, setNudgeType] = useState<'tap' | 'swipe' | null>(null);
 
-  const triggerHaptic = useCallback(() => {
-    if ('vibrate' in navigator) {
-      navigator.vibrate([15, 80, 15, 80, 15]);
-    }
+  const triggerHapticFn = useCallback(() => {
+    triggerHaptic('light');
   }, []);
 
   useEffect(() => {
@@ -32,7 +31,7 @@ export default function StoryHint({ hasMultipleStories, hasMultipleUsers, onNudg
     const nudgeTimer = setTimeout(() => {
       setNudgeType(hasMultipleUsers ? 'swipe' : 'tap');
       setShowNudge(true);
-      triggerHaptic();
+      triggerHapticFn;
       onNudge?.();
       
       // Mark as shown after displaying
@@ -48,7 +47,7 @@ export default function StoryHint({ hasMultipleStories, hasMultipleUsers, onNudg
       clearTimeout(nudgeTimer);
       clearTimeout(hideTimer);
     };
-  }, [hasMultipleStories, hasMultipleUsers, triggerHaptic, onNudge]);
+  }, [hasMultipleStories, hasMultipleUsers, triggerHapticFn, onNudge]);
 
   return (
     <AnimatePresence>
