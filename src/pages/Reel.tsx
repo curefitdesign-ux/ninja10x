@@ -1644,17 +1644,19 @@ const Reel = () => {
                         {currentActivity?.id === 'log-activity' ? (
                           // "Log Your Activity" placeholder card — dark with dot grid + green plus
                           <div 
-                            className="w-[90%] aspect-[9/15.7] flex flex-col items-center justify-center cursor-pointer relative overflow-hidden self-center"
+                            className="flex flex-col items-center justify-center cursor-pointer relative overflow-hidden self-center"
                             onClick={(e) => {
                               e.stopPropagation();
                               navigate('/camera', { state: { dayNumber: currentActivity.dayNumber } });
                             }}
                             style={{
+                              width: '100%',
+                              height: '100%',
                               background: 'rgba(255,255,255,0.10)',
                               backdropFilter: 'blur(40px)',
                               WebkitBackdropFilter: 'blur(40px)',
                               border: '1px solid rgba(255,255,255,0.08)',
-                              borderRadius: 20,
+                              borderRadius: 0,
                             }}
                           >
                             {/* Animated dot grid pattern */}
