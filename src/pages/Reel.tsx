@@ -132,7 +132,6 @@ const Reel = () => {
 
   // Data for progress overlay
   const { activities: myActivities, hasPublicActivity, makeActivityPublic } = useJourneyActivities();
-  const [publicFeed, setPublicFeed] = useState<LocalActivity[]>([]);
   
   // Privacy/share sheet state
   const [showMakePublicSheet, setShowMakePublicSheet] = useState(false);
