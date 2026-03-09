@@ -222,8 +222,19 @@ const ImmersiveHomeLayout = ({
           >
             {todayPhoto && (
               <motion.button
+                ref={todayCardRef}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => handlePhotoTap(todayPhoto)}
+                onClick={() => {
+                  if (todayCardRef.current) {
+                    triggerMorph(
+                      todayCardRef.current,
+                      todayPhoto.storageUrl,
+                      '/reel',
+                      { activityId: todayPhoto.id, dayNumber: todayPhoto.dayNumber },
+                      todayPhoto.isVideo || isVideoUrl(todayPhoto.storageUrl)
+                    );
+                  }
+                }}
                 className="relative rounded-2xl overflow-hidden"
                 style={{ width: 100, height: 120 }}
               >
