@@ -1366,11 +1366,25 @@ const Reel = () => {
                               <stop offset="100%" stopColor="#4F5BD5" />
                             </linearGradient>
                           </defs>
+                          {/* Background track */}
                           <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
-                            stroke={isStoryLocked ? 'rgba(255,255,255,0.15)' : `url(#storyGradient-${group.userId})`}
+                            stroke={isStoryLocked ? 'rgba(255,255,255,0.15)' : (isActive ? 'rgba(255,255,255,0.15)' : `url(#storyGradient-${group.userId})`)}
                             strokeLinecap="round"
-                            style={{ filter: !isStoryLocked ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none' }}
+                            style={{ filter: (!isStoryLocked && !isActive) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none' }}
                           />
+                          {/* Progress fill — only when actively viewing */}
+                          {isActive && !isStoryLocked && (
+                            <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
+                              stroke={`url(#storyGradient-${group.userId})`}
+                              strokeLinecap="round"
+                              strokeDasharray={`${2 * Math.PI * 44}`}
+                              strokeDashoffset={autoAdvanceProgress > 0 ? 0 : 2 * Math.PI * 44}
+                              style={{
+                                filter: 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))',
+                                transition: autoAdvanceProgress > 0 ? `stroke-dashoffset ${autoAdvanceDuration}ms linear` : 'none',
+                              }}
+                            />
+                          )}
                         </svg>
                         )}
                         
