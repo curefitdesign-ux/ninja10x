@@ -1553,14 +1553,10 @@ const Reel = () => {
                   <img
                     src={nextMedia}
                     alt="Next user"
-                    className="h-full object-cover"
+                    className="w-full h-full object-cover"
                     style={{ 
                       opacity: isNextLocked ? 0.35 : 0.5, 
                       filter: isNextLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                      width: 'auto',
-                      minHeight: '100%',
-                      objectPosition: 'left center',
-                      maxWidth: 'none',
                     }}
                   />
                 </div>
