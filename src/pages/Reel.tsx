@@ -1492,8 +1492,7 @@ const Reel = () => {
               <motion.div
                 key={`peek-left-${prevIdx}`}
                 className="absolute left-0 top-0 bottom-0 flex items-center cursor-pointer"
-                style={{ width: '10%', zIndex: 20, x: peekLeftX }}
-                onClick={goPrevUser}
+                style={{ width: '10%', zIndex: 20, x: peekLeftXgoPrevUser}
                 initial={{ opacity: 0, x: -10, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
@@ -1536,8 +1535,7 @@ const Reel = () => {
               <motion.div
                 key={`peek-right-${nextIdx}`}
                 className="absolute right-0 top-0 bottom-0 flex items-center cursor-pointer"
-                style={{ width: '10%', zIndex: 20, x: useTransform(dragX, [-150, 0], [-12, 0]) }}
-                onClick={goNextUser}
+                style={{ width: '10%', zIndex: 20, x: useTransform(dragX, [-150, 0]peekRightXgoNextUser}
                 initial={{ opacity: 0, x: 10, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
