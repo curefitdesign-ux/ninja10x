@@ -1346,8 +1346,8 @@ const Reel = () => {
                         }}
                       >
                         <div className="relative" style={{ width: avatarSize, height: avatarSize }}>
-                        {/* Instagram-style story ring — hidden once fully viewed */}
-                        {!isUserViewed && (
+                        {/* Story ring: gradient if unviewed, white progress if viewed & active */}
+                        {(!isUserViewed || isActive) && (
                         <svg
                           className="absolute inset-0"
                           style={{
@@ -1370,17 +1370,17 @@ const Reel = () => {
                           <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
                             stroke={isStoryLocked ? 'rgba(255,255,255,0.15)' : (isActive ? 'rgba(255,255,255,0.15)' : `url(#storyGradient-${group.userId})`)}
                             strokeLinecap="round"
-                            style={{ filter: (!isStoryLocked && !isActive) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none' }}
+                            style={{ filter: (!isStoryLocked && !isActive && !isUserViewed) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none' }}
                           />
                           {/* Progress fill — only when actively viewing */}
                           {isActive && !isStoryLocked && (
                             <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
-                              stroke={`url(#storyGradient-${group.userId})`}
+                              stroke={isUserViewed ? 'rgba(255,255,255,0.7)' : `url(#storyGradient-${group.userId})`}
                               strokeLinecap="round"
                               strokeDasharray={`${2 * Math.PI * 44}`}
                               strokeDashoffset={autoAdvanceProgress > 0 ? 0 : 2 * Math.PI * 44}
                               style={{
-                                filter: 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))',
+                                filter: !isUserViewed ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
                                 transition: autoAdvanceProgress > 0 ? `stroke-dashoffset ${autoAdvanceDuration}ms linear` : 'none',
                               }}
                             />
