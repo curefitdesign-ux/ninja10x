@@ -91,7 +91,7 @@ export default function SendReactionSheet({
     return (
       <motion.button
         key={type}
-        onClick={() => isUserReaction ? handleRemoveReaction() : onReact(type)}
+        onClick={() => { haptic(); isUserReaction ? handleRemoveReaction() : onReact(type); }}
         className="absolute flex items-center justify-center"
         style={{
           left: `${baseLeft + offset.dx}%`,
