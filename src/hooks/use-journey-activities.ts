@@ -528,21 +528,22 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
 
   // Build reaction map + reactor profiles per activity (including reaction type and timestamp)
   // Each reaction row = one reaction entry (same user can have multiple reactions)
-  const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
+  const reactionMap: Record<string, Partial<Record<ReactionType, ActivityReaction>>> = {};
   const totalMap: Record<string, number> = {};
   const reactorProfilesMap: Record<string, { userId: string; displayName: string; avatarUrl?: string; reactionType: ReactionType; createdAt: string }[]> = {};
 
   for (const r of reactions || []) {
     const type = (r.reaction_type || 'heart') as ReactionType;
     if (!reactionMap[r.activity_id]) {
-      reactionMap[r.activity_id] = { ...DEFAULT_REACTIONS };
+      reactionMap[r.activity_id] = {};
       totalMap[r.activity_id] = 0;
       reactorProfilesMap[r.activity_id] = [];
     }
-    reactionMap[r.activity_id][type] = {
-      ...reactionMap[r.activity_id][type],
-      count: reactionMap[r.activity_id][type].count + 1,
-      userReacted: user && r.user_id === user.id ? true : reactionMap[r.activity_id][type].userReacted,
+    if (!reactionMap[r.activity_id][type]) {
+      reactionMap[r.activity_id][type] = { type, count: 0, userReacted: false };
+    }
+    reactionMap[r.activity_id][type]!.count++;
+    if (user && r.user_id === user.id) reactionMap[r.activity_id][type]!.userReacted = true;
     };
     totalMap[r.activity_id]++;
     
