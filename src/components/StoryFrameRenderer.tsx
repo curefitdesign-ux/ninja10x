@@ -73,7 +73,7 @@ export default function StoryFrameRenderer({
   return (
     <div
       className="absolute inset-0 flex items-center justify-center"
-      style={{ background: 'transparent', containerType: 'inline-size' }}
+      style={{ background: 'transparent' }}
     >
       <>
         {(() => {
