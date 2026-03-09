@@ -82,7 +82,7 @@ const ArcadeFrame = ({
           position: 'relative',
           minHeight: 0,
           border: '1.5px solid rgba(255, 255, 255, 0.6)',
-          marginBottom: '20px',
+          marginBottom: '4cqw',
         }}
       >
         {/* Journey info overlay — top-left inside photo */}
