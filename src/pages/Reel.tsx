@@ -281,6 +281,11 @@ const Reel = () => {
 
     const allGroups = [myGroup, ...othersGroups];
 
+    // Insert deep-link group right after own group so navigation finds it
+    if (deepLinkGroup) {
+      allGroups.splice(1, 0, deepLinkGroup);
+    }
+
     // Put source user first if specified
     if (sourceUserId) {
       const targetIdx = allGroups.findIndex(g => g.userId === sourceUserId);
