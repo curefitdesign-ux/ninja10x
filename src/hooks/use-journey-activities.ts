@@ -470,7 +470,7 @@ async function _fetchPublicFeedImpl(includeAll: boolean): Promise<LocalActivity[
     totalMap[r.activity_id]++;
   }
 
-  return activities.map(row => {
+  const result = activities.map(row => {
     const profile = profileMap.get(row.user_id);
     return {
       ...toLocal(row),
@@ -480,6 +480,8 @@ async function _fetchPublicFeedImpl(includeAll: boolean): Promise<LocalActivity[
       avatarUrl: profile?.avatar_url,
     };
   });
+  _publicFeedCache = { data: result, ts: Date.now() };
+  return result;
 }
 
 export interface UserStoryGroup {
@@ -494,6 +496,15 @@ export interface UserStoryGroup {
  * For the Reel page to show user-based story pages.
  */
 export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[]> {
+  if (_groupedCache && Date.now() - _groupedCache.ts < CACHE_TTL) {
+    return _groupedCache.data;
+  }
+  if (_groupedInflight) return _groupedInflight;
+  _groupedInflight = _fetchAllActivitiesGroupedImpl().finally(() => { _groupedInflight = null; });
+  return _groupedInflight;
+}
+
+async function _fetchAllActivitiesGroupedImpl(): Promise<UserStoryGroup[]> {
   const { data: { user } } = await supabase.auth.getUser();
 
   // Fetch all activities
