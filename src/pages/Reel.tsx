@@ -1749,11 +1749,22 @@ const Reel = () => {
                             />
                           </div>
                         ) : isVideo ? (
+                          <div style={{
+                            width: isRecapActivity ? '90%' : '100%',
+                            height: isRecapActivity ? undefined : '100%',
+                            aspectRatio: isRecapActivity ? '9/16' : undefined,
+                            maxHeight: '100%',
+                            position: isRecapActivity ? 'relative' : undefined,
+                            margin: isRecapActivity ? '0 auto' : undefined,
+                            overflow: 'hidden',
+                          }}
+                          className={isRecapActivity ? 'self-center flex items-center justify-center' : 'absolute inset-0'}
+                          >
                           <video
                             ref={videoRef}
                             key={mediaUrl}
                             src={mediaUrl}
-                            className="absolute inset-0 w-full h-full"
+                            className="w-full h-full"
                             style={{ 
                               objectFit: 'cover',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
@@ -1773,6 +1784,7 @@ const Reel = () => {
                               }
                             }}
                           />
+                          </div>
                         ) : (
                           <img
                             key={mediaUrl}
