@@ -8,43 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 import ProfileAvatar from '@/components/ProfileAvatar';
 
-// 3D reaction assets
-import fireImg from '@/assets/reactions/fire-new.png';
-import clapImg from '@/assets/reactions/clap-hands.png';
-import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
-import wowImg from '@/assets/reactions/wow.png';
-import flexImg from '@/assets/reactions/flex.png';
-import trophyImg from '@/assets/reactions/dumbbells.png';
-import runnerImg from '@/assets/reactions/runner.png';
-import energyImg from '@/assets/reactions/energy.png';
-import timerImg from '@/assets/reactions/stopwatch.png';
-import heartImg from '@/assets/reactions/heart-workout.png';
-
-const REACTION_IMAGES: Record<string, string> = {
-  heart: heartImg,
-  fire: fireImg,
-  clap: clapImg,
-  fistbump: fistbumpImg,
-  wow: wowImg,
-  flex: flexImg,
-  trophy: trophyImg,
-  runner: runnerImg,
-  energy: energyImg,
-  timer: timerImg,
-};
-
-const REACTION_VERBS: Record<string, string> = {
-  heart: 'loved',
-  fire: 'fired up',
-  clap: 'applauded',
-  fistbump: 'fist bumped',
-  wow: 'wowed at',
-  flex: 'flexed on',
-  trophy: 'celebrated',
-  runner: 'cheered',
-  energy: 'energized',
-  timer: 'timed',
-};
+import { ALL_REACTION_IMAGES as REACTION_IMAGES, REACTION_VERBS } from '@/lib/reaction-images';
 
 // Instagram-style relative timestamp
 const formatRelativeTime = (date: Date): string => {
@@ -312,9 +276,9 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
               {notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                   <div className="flex -space-x-2 mb-4">
-                    <img src={fireImg} alt="fire" className="w-12 h-12 object-contain opacity-40" />
-                    <img src={clapImg} alt="clap" className="w-12 h-12 object-contain opacity-40" />
-                    <img src={flexImg} alt="flex" className="w-12 h-12 object-contain opacity-40" />
+                    <img src={REACTION_IMAGES['fire']} alt="fire" className="w-12 h-12 object-contain opacity-40" />
+                    <img src={REACTION_IMAGES['clap']} alt="clap" className="w-12 h-12 object-contain opacity-40" />
+                    <img src={REACTION_IMAGES['flex']} alt="flex" className="w-12 h-12 object-contain opacity-40" />
                   </div>
                   <p className="text-white/50 text-base">No reactions yet</p>
                   <p className="text-white/30 text-sm mt-1">Share your activities to get reactions!</p>

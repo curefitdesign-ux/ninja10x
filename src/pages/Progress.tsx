@@ -118,28 +118,36 @@ const Progress = () => {
     });
   };
 
+  // When coming from a notification (openGalleryAtDay), hide the progress page
+  // content entirely so the user only sees the gallery overlay.
+  const isDirectGalleryOpen = !!openGalleryAtDay;
+
   return (
     <motion.div
       className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-manipulation"
       style={{
-        background: "linear-gradient(180deg, #3A2A63 0%, #1A1530 45%, #060608 100%)",
+        background: isDirectGalleryOpen
+          ? '#000'
+          : "linear-gradient(180deg, #3A2A63 0%, #1A1530 45%, #060608 100%)",
         height: '100dvh',
         minHeight: '-webkit-fill-available',
       }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: isDirectGalleryOpen ? 0.1 : 0.25 }}
     >
-      {/* Background aurora */}
-      <div
-        className="absolute pointer-events-none"
-        style={{ left: "-53px", top: "-40px", width: "131vw", height: "auto" }}
-      >
+      {/* Background aurora — hidden when opening gallery directly */}
+      {!isDirectGalleryOpen && (
         <div
-          className="w-full h-[400px] opacity-40 mix-blend-screen"
-          style={{ background: "radial-gradient(ellipse at center, rgba(138, 100, 200, 0.4) 0%, transparent 70%)" }}
-        />
-      </div>
+          className="absolute pointer-events-none"
+          style={{ left: "-53px", top: "-40px", width: "131vw", height: "auto" }}
+        >
+          <div
+            className="w-full h-[400px] opacity-40 mix-blend-screen"
+            style={{ background: "radial-gradient(ellipse at center, rgba(138, 100, 200, 0.4) 0%, transparent 70%)" }}
+          />
+        </div>
+      )}
 
       {/* Week-complete snackbar */}
       <AnimatePresence>
@@ -204,10 +212,14 @@ const Progress = () => {
         )}
       </AnimatePresence>
 
-      {/* Header */}
+      {/* Header — hidden when opening gallery directly from notification */}
       <motion.div
         className="flex-shrink-0 w-full flex items-center justify-between px-4"
-        style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 16px)', paddingBottom: 8 }}
+        style={{
+          paddingTop: 'max(env(safe-area-inset-top, 12px), 16px)',
+          paddingBottom: 8,
+          display: isDirectGalleryOpen ? 'none' : undefined,
+        }}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}

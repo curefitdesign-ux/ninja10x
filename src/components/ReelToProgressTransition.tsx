@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { X, Plus, Lock } from 'lucide-react';
@@ -51,12 +52,14 @@ export default function ReelToProgressTransition({
   highlightDayNumber,
   openGalleryAtDay,
 }: ReelToProgressTransitionProps) {
+  const navigate = useNavigate();
   const [showTiles, setShowTiles] = useState(false);
   const [showStories, setShowStories] = useState(false);
   const [expandingCardId, setExpandingCardId] = useState<string | null>(null);
-  const [galleryOpen, setGalleryOpen] = useState(false);
+  // Open gallery immediately on mount when coming from notification
+  const [galleryOpen, setGalleryOpen] = useState(!!openGalleryAtDay);
   const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
-  const openGalleryHandledRef = useRef(false);
+  const openGalleryHandledRef = useRef(!!openGalleryAtDay);
   const [showCertPopup, setShowCertPopup] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -108,9 +111,13 @@ export default function ReelToProgressTransition({
     }, 250);
   }, [onStoryTap]);
 
-  // Auto-open gallery when navigating from notification with openGalleryAtDay
+  // Set correct gallery index when activities load (gallery already open from initial state)
   useEffect(() => {
-    if (!openGalleryAtDay || openGalleryHandledRef.current || myActivities.length === 0) return;
+    if (!openGalleryAtDay || myActivities.length === 0) return;
+    if (openGalleryHandledRef.current) {
+      // Already set index, just ensure gallery stays open
+      return;
+    }
     openGalleryHandledRef.current = true;
     const uploaded = myActivities.filter(a => a.storageUrl);
     const idx = uploaded.findIndex(a => a.dayNumber === openGalleryAtDay);
@@ -437,7 +444,13 @@ export default function ReelToProgressTransition({
         {/* Activity Gallery Overlay */}
         <ActivityGalleryOverlay
           isOpen={galleryOpen}
-          onClose={() => setGalleryOpen(false)}
+          onClose={() => {
+            setGalleryOpen(false);
+            // If opened from notification, go back to reel instead of showing progress page
+            if (openGalleryAtDay) {
+              navigate('/reel', { replace: true });
+            }
+          }}
           activities={[
             ...myActivities
               .filter(a => a.storageUrl)
