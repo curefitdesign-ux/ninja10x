@@ -55,8 +55,12 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
       }
       
       const newStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode },
-        audio: true // Enable audio for video recording
+        video: {
+          facingMode,
+          width: { ideal: 3840 },
+          height: { ideal: 2160 },
+        },
+        audio: true,
       });
       
       setStream(newStream);
