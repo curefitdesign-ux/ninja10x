@@ -1491,17 +1491,19 @@ const Reel = () => {
             return (
               <motion.div
                 key={`peek-left-${prevIdx}`}
-                className="absolute left-0 top-0 bottom-0 flex items-center cursor-pointer"
+                className="absolute left-0 top-0 bottom-0 flex items-center cursor-pointer overflow-hidden"
                 style={{ width: '10%', zIndex: 20, x: peekLeftX }}
                 onClick={goPrevUser}
-                initial={{ opacity: 0, x: -10, scale: 0.9 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
               >
+                {/* Full-size card positioned so only right edge peeks out */}
                 <div
-                  className="w-full overflow-hidden"
+                  className="absolute right-0 overflow-hidden"
                   style={{
-                    height: 'calc(59% + 20px)',
+                    width: '375px',
+                    aspectRatio: '9/16',
                     borderRadius: '0 10px 10px 0',
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.12)',
