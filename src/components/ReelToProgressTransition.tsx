@@ -47,6 +47,7 @@ export default function ReelToProgressTransition({
   onLogActivity,
   onCrystalTap,
   isInline = false,
+  highlightDayNumber,
 }: ReelToProgressTransitionProps) {
   const [showTiles, setShowTiles] = useState(false);
   const [showStories, setShowStories] = useState(false);
