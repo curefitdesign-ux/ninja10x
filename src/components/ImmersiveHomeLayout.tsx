@@ -20,6 +20,7 @@ interface Photo {
   duration?: string;
   pr?: string;
   dayNumber: number;
+  createdAt?: string;
 }
 
 interface ImmersiveHomeLayoutProps {
