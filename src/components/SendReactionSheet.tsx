@@ -4,18 +4,7 @@ import { ChevronRight, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { ReactionType, removeReaction } from '@/services/journey-service';
 import ProfileAvatar from '@/components/ProfileAvatar';
-
-// 3D reaction assets
-import clapImg from '@/assets/reactions/clap-hands.png';
-import fireImg from '@/assets/reactions/fire-new.png';
-import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
-import wowImg from '@/assets/reactions/wow.png';
-import flexImg from '@/assets/reactions/flex.png';
-import trophyImg from '@/assets/reactions/dumbbells.png';
-import runnerImg from '@/assets/reactions/runner.png';
-import energyImg from '@/assets/reactions/energy.png';
-import timerImg from '@/assets/reactions/stopwatch.png';
-import heartImg from '@/assets/reactions/heart-workout.png';
+import { ALL_REACTION_IMAGES, CORE_REACTIONS, ACTIVITY_REACTIONS } from '@/lib/reaction-images';
 
 interface ReactorProfile {
   userId: string;
@@ -27,6 +16,7 @@ interface ReactorProfile {
 interface SendReactionSheetProps {
   activityId?: string;
   currentUserId?: string;
+  activityType?: string;
   onReact: (type: ReactionType) => void;
   onClose: () => void;
   onViewReactions?: () => void;
@@ -35,25 +25,12 @@ interface SendReactionSheetProps {
   reactorProfiles?: ReactorProfile[];
 }
 
-const REACTION_IMAGES: Record<ReactionType, string> = {
-  heart: heartImg,
-  fire: fireImg,
-  clap: clapImg,
-  fistbump: fistbumpImg,
-  wow: wowImg,
-  flex: flexImg,
-  trophy: trophyImg,
-  runner: runnerImg,
-  energy: energyImg,
-  timer: timerImg,
-};
-
-// Full grid of all 10 reactions for sending
-const SEND_REACTIONS: ReactionType[] = ['fire', 'clap', 'fistbump', 'flex', 'trophy', 'runner', 'energy', 'timer', 'heart', 'wow'];
+const REACTION_IMAGES = ALL_REACTION_IMAGES;
 
 export default function SendReactionSheet({ 
   activityId,
   currentUserId,
+  activityType,
   onReact, 
   onClose, 
   onViewReactions,
@@ -70,11 +47,9 @@ export default function SendReactionSheet({
   // Find current user's reaction
   const userReaction = localReactorProfiles.find(r => r.userId === currentUserId);
   
-  // Group reactions by type with counts
-  const reactionCounts = localReactorProfiles.reduce((acc, r) => {
-    if (r.reactionType) acc[r.reactionType] = (acc[r.reactionType] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  // Get activity-specific reactions
+  const activityConfig = activityType ? ACTIVITY_REACTIONS[activityType] : null;
+  const activityReactions = activityConfig?.reactions || [];
   
   const handleRemoveReaction = async () => {
     if (!activityId || !userReaction?.reactionType || isRemoving) return;
@@ -85,13 +60,9 @@ export default function SendReactionSheet({
     try {
       const success = await removeReaction(activityId, reactionType);
       if (success) {
-        // Update local state to remove user's reaction
         setLocalReactorProfiles(prev => prev.filter(r => r.userId !== currentUserId));
-        
-        // Notify parent to update its local state without page refresh
         onReactionRemoved?.(reactionType);
         
-        // Show subtle liquid glass toast
         toast('Reaction removed', {
           duration: 1800,
           icon: '✕',
@@ -113,6 +84,76 @@ export default function SendReactionSheet({
     }
   };
 
+  const renderReactionButton = (type: ReactionType, i: number, offset: { dx: number; dy: number; rotate: number; size: number }, baseLeft: number, baseTop: number) => {
+    const isUserReaction = userReaction?.reactionType === type;
+    return (
+      <motion.button
+        key={type}
+        onClick={() => isUserReaction ? handleRemoveReaction() : onReact(type)}
+        className="absolute flex items-center justify-center"
+        style={{
+          left: `${baseLeft + offset.dx}%`,
+          top: `${baseTop + offset.dy}%`,
+          minWidth: 44,
+          minHeight: 44,
+        }}
+        initial={{ opacity: 0, scale: 0, rotate: offset.rotate - 20 }}
+        animate={{ 
+          opacity: 1, 
+          scale: 1, 
+          rotate: offset.rotate,
+        }}
+        transition={{ 
+          delay: 0.08 + i * 0.03, 
+          type: 'spring', 
+          stiffness: 400,
+          damping: 18,
+        }}
+        whileHover={{ scale: 1.15, rotate: 0 }}
+        whileTap={{ scale: 0.85 }}
+      >
+        <div className="relative">
+          <img 
+            src={REACTION_IMAGES[type]} 
+            alt={type} 
+            style={{ 
+              width: offset.size,
+              height: offset.size,
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))',
+            }}
+          />
+          {isUserReaction && (
+            <motion.div 
+              className="absolute -top-1 -right-1 w-5 h-5 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center"
+              style={{ 
+                border: '1.5px solid rgba(255,255,255,0.3)',
+              }}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 500 }}
+            >
+              <X className="w-3 h-3 text-white" strokeWidth={2.5} />
+            </motion.div>
+          )}
+        </div>
+      </motion.button>
+    );
+  };
+
+  const offsets = [
+    { dx: 2, dy: 5, rotate: -8, size: 46 },
+    { dx: -1, dy: -3, rotate: 6, size: 50 },
+    { dx: 3, dy: 8, rotate: -4, size: 44 },
+    { dx: -2, dy: 2, rotate: 10, size: 48 },
+    { dx: 1, dy: -5, rotate: -6, size: 52 },
+    { dx: -3, dy: 3, rotate: 8, size: 50 },
+    { dx: 2, dy: -2, rotate: -10, size: 44 },
+    { dx: 0, dy: 6, rotate: 5, size: 46 },
+    { dx: -1, dy: -4, rotate: -5, size: 52 },
+    { dx: 3, dy: 0, rotate: 12, size: 48 },
+  ];
+
   return (
     <>
       {/* Backdrop */}
@@ -126,7 +167,7 @@ export default function SendReactionSheet({
 
       {/* Bottom sheet - liquid glass design */}
       <motion.div
-        className="fixed bottom-0 left-0 right-0 z-50"
+        className="fixed bottom-0 left-0 right-0 z-50 overflow-y-auto"
         style={{
           borderTopLeftRadius: 28,
           borderTopRightRadius: 28,
@@ -137,6 +178,7 @@ export default function SendReactionSheet({
           borderBottom: 'none',
           boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
           paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
+          maxHeight: '80vh',
         }}
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
@@ -156,7 +198,6 @@ export default function SendReactionSheet({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
           >
-            {/* Header with total count - use actualReactionCount for accuracy */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <span className="text-white font-bold text-2xl">{actualReactionCount}</span>
@@ -171,7 +212,6 @@ export default function SendReactionSheet({
               </button>
             </div>
             
-            {/* All users' reactions - horizontal scroll with avatars */}
             <div className="flex items-center gap-4 overflow-x-auto overflow-y-visible scrollbar-none pb-2 pt-2 -mt-1">
               {reactorProfiles.slice(0, 8).map((reactor, idx) => {
                 const isCurrentUser = reactor.userId === currentUserId;
@@ -194,7 +234,6 @@ export default function SendReactionSheet({
                             : '2px solid rgba(255,255,255,0.1)',
                         }}
                       />
-                      {/* Emoji badge */}
                       {reactor.reactionType && (
                         <div className="absolute -bottom-1 -right-1">
                           <img 
@@ -205,7 +244,6 @@ export default function SendReactionSheet({
                           />
                         </div>
                       )}
-                      {/* Remove reaction button - proper tap area without cropping */}
                       {isCurrentUser && (
                         <button
                           onClick={(e) => {
@@ -222,7 +260,6 @@ export default function SendReactionSheet({
                             zIndex: 10,
                           }}
                         >
-                          {/* Visual X badge - smaller, centered in tap area */}
                           <div 
                             className="w-5 h-5 bg-white/25 backdrop-blur-md rounded-full flex items-center justify-center"
                             style={{ 
@@ -264,6 +301,77 @@ export default function SendReactionSheet({
           <div className="mx-5 h-px bg-white/10 my-2" />
         )}
 
+        {/* Activity-specific reactions section */}
+        {activityReactions.length > 0 && (
+          <div className="px-5 pt-3 pb-2">
+            <motion.span 
+              className="text-white/60 text-sm font-medium block mb-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.05 }}
+            >
+              {activityConfig?.label} reactions
+            </motion.span>
+
+            <div className="flex items-center justify-center gap-5 pb-2">
+              {activityReactions.map((type, i) => {
+                const isUserReaction = userReaction?.reactionType === type;
+                return (
+                  <motion.button
+                    key={type}
+                    onClick={() => isUserReaction ? handleRemoveReaction() : onReact(type)}
+                    className="relative flex flex-col items-center gap-1.5"
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ 
+                      delay: 0.1 + i * 0.05, 
+                      type: 'spring', 
+                      stiffness: 400,
+                      damping: 18,
+                    }}
+                    whileTap={{ scale: 0.85 }}
+                  >
+                    <div 
+                      className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                      style={{
+                        background: isUserReaction 
+                          ? 'rgba(249, 115, 22, 0.15)' 
+                          : 'rgba(255, 255, 255, 0.06)',
+                        border: isUserReaction 
+                          ? '1.5px solid rgba(249, 115, 22, 0.4)' 
+                          : '1px solid rgba(255, 255, 255, 0.08)',
+                      }}
+                    >
+                      <img 
+                        src={REACTION_IMAGES[type]} 
+                        alt={type} 
+                        className="w-10 h-10 object-contain"
+                        style={{ filter: 'drop-shadow(0 3px 8px rgba(0,0,0,0.4))' }}
+                      />
+                      {isUserReaction && (
+                        <motion.div 
+                          className="absolute -top-1 -right-1 w-5 h-5 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center"
+                          style={{ border: '1.5px solid rgba(255,255,255,0.3)' }}
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                        >
+                          <X className="w-3 h-3 text-white" strokeWidth={2.5} />
+                        </motion.div>
+                      )}
+                    </div>
+                    <span className="text-white/50 text-[10px] capitalize">{type.replace('-', ' ')}</span>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Divider between sections */}
+        {activityReactions.length > 0 && (
+          <div className="mx-5 h-px bg-white/10 my-2" />
+        )}
+
         {/* SEND REACTION SECTION - Scattered layout with subtle grid */}
         <div className="px-5 pt-3 pb-6">
           <motion.span 
@@ -288,83 +396,14 @@ export default function SendReactionSheet({
             }}
           >
             {/* Optically balanced 5x2 scattered layout */}
-            {SEND_REACTIONS.map((type, i) => {
-              const isUserReaction = userReaction?.reactionType === type;
-              // 5 columns x 2 rows - optically balanced with slight offsets
+            {CORE_REACTIONS.map((type, i) => {
               const row = Math.floor(i / 5);
               const col = i % 5;
-              // Base grid positions with organic offsets
-              const baseLeft = col * 20 + 2; // 20% per column, 2% padding
-              const baseTop = row * 50 + 10; // 50% per row, 10% padding
-              // Subtle random offsets for organic feel
-              const offsets = [
-                { dx: 2, dy: 5, rotate: -8, size: 46 },
-                { dx: -1, dy: -3, rotate: 6, size: 50 },
-                { dx: 3, dy: 8, rotate: -4, size: 44 },
-                { dx: -2, dy: 2, rotate: 10, size: 48 },
-                { dx: 1, dy: -5, rotate: -6, size: 52 },
-                { dx: -3, dy: 3, rotate: 8, size: 50 },
-                { dx: 2, dy: -2, rotate: -10, size: 44 },
-                { dx: 0, dy: 6, rotate: 5, size: 46 },
-                { dx: -1, dy: -4, rotate: -5, size: 52 },
-                { dx: 3, dy: 0, rotate: 12, size: 48 },
-              ];
+              const baseLeft = col * 20 + 2;
+              const baseTop = row * 50 + 10;
               const offset = offsets[i] || offsets[0];
               
-              return (
-                <motion.button
-                  key={type}
-                  onClick={() => isUserReaction ? handleRemoveReaction() : onReact(type)}
-                  className="absolute flex items-center justify-center"
-                  style={{
-                    left: `${baseLeft + offset.dx}%`,
-                    top: `${baseTop + offset.dy}%`,
-                    minWidth: 44,
-                    minHeight: 44,
-                  }}
-                  initial={{ opacity: 0, scale: 0, rotate: offset.rotate - 20 }}
-                  animate={{ 
-                    opacity: 1, 
-                    scale: 1, 
-                    rotate: offset.rotate,
-                  }}
-                  transition={{ 
-                    delay: 0.08 + i * 0.03, 
-                    type: 'spring', 
-                    stiffness: 400,
-                    damping: 18,
-                  }}
-                  whileHover={{ scale: 1.15, rotate: 0 }}
-                  whileTap={{ scale: 0.85 }}
-                >
-                  <div className="relative">
-                    <img 
-                      src={REACTION_IMAGES[type]} 
-                      alt={type} 
-                      style={{ 
-                        width: offset.size,
-                        height: offset.size,
-                        objectFit: 'contain',
-                        filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))',
-                      }}
-                    />
-                    {/* Small X badge on user's reaction */}
-                    {isUserReaction && (
-                      <motion.div 
-                        className="absolute -top-1 -right-1 w-5 h-5 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center"
-                        style={{ 
-                          border: '1.5px solid rgba(255,255,255,0.3)',
-                        }}
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: 'spring', stiffness: 500 }}
-                      >
-                        <X className="w-3 h-3 text-white" strokeWidth={2.5} />
-                      </motion.div>
-                    )}
-                  </div>
-                </motion.button>
-              );
+              return renderReactionButton(type, i, offset, baseLeft, baseTop);
             })}
           </div>
         </div>
