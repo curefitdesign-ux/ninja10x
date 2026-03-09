@@ -118,17 +118,23 @@ const Progress = () => {
     });
   };
 
+  // When coming from a notification (openGalleryAtDay), hide the progress page
+  // content entirely so the user only sees the gallery overlay.
+  const isDirectGalleryOpen = !!openGalleryAtDay;
+
   return (
     <motion.div
       className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-manipulation"
       style={{
-        background: "linear-gradient(180deg, #3A2A63 0%, #1A1530 45%, #060608 100%)",
+        background: isDirectGalleryOpen
+          ? '#000'
+          : "linear-gradient(180deg, #3A2A63 0%, #1A1530 45%, #060608 100%)",
         height: '100dvh',
         minHeight: '-webkit-fill-available',
       }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: isDirectGalleryOpen ? 0.1 : 0.25 }}
     >
       {/* Background aurora */}
       <div
