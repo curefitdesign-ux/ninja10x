@@ -1663,6 +1663,7 @@ const Reel = () => {
                             className="flex flex-col items-center justify-center cursor-pointer relative overflow-hidden self-center"
                             onClick={(e) => {
                               e.stopPropagation();
+                              haptic();
                               navigate('/camera', { state: { dayNumber: currentActivity.dayNumber } });
                             }}
                             style={{
