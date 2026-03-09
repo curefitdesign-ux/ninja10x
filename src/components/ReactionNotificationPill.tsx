@@ -215,7 +215,7 @@ export default function ReactionNotificationPill() {
                 transition={{ type: 'spring', stiffness: 500, damping: 20, delay: 0.1 }}
               >
                 <img
-                  src={REACTION_IMAGES[notification.reactionType] || fireImg}
+                  src={REACTION_IMAGES[notification.reactionType] || REACTION_IMAGES['fire']}
                   alt={notification.reactionType}
                   className="w-7 h-7 object-contain"
                   style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}
