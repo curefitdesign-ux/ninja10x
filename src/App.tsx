@@ -10,6 +10,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PortalContainerProvider } from "@/hooks/use-portal-container";
 import { enableAutoMotion } from "@/lib/motion";
+import { useGlobalHaptics } from "@/hooks/use-global-haptics";
 
 // Eagerly load Auth (initial landing page)
 import Auth from "./pages/Auth";
