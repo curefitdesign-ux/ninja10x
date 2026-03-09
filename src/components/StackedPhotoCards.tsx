@@ -84,13 +84,20 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
   };
 
   const handlePhotoTap = (photo: Photo) => {
-    // Navigate to reel with activity ID so it opens that specific story
-    navigate('/reel', {
-      state: { 
-        activityId: photo.id,
-        dayNumber: photo.dayNumber,
-      },
-    });
+    const el = cardRefs.current.get(photo.id);
+    if (el) {
+      triggerMorph(
+        el,
+        photo.storageUrl,
+        '/reel',
+        { activityId: photo.id, dayNumber: photo.dayNumber },
+        photo.isVideo
+      );
+    } else {
+      navigate('/reel', {
+        state: { activityId: photo.id, dayNumber: photo.dayNumber },
+      });
+    }
   };
 
   const visiblePhotos = displayPhotos;
