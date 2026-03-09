@@ -1670,7 +1670,7 @@ const Reel = () => {
                               backdropFilter: 'blur(40px)',
                               WebkitBackdropFilter: 'blur(40px)',
                               border: '1px solid rgba(255,255,255,0.08)',
-                              borderRadius: '15px',
+                              borderRadius: '10px',
                             }}
                           >
                             {/* Animated dot grid pattern */}
