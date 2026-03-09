@@ -102,15 +102,10 @@ const ImmersiveHomeLayout = ({
     openDaySheet(photo, photo.dayNumber, `day-card-${photo.id}`);
   };
 
-  const handleWeekTap = (weekNumber: number) => {
-    triggerHaptic('light');
-    setFocusedWeek(weekNumber);
-  };
-
-  // Get pill data for the focused week
+  // Get pill data for the current completed week
   const getFocusedPill = () => {
-    const targetWeek = focusedWeek || (completedWeeks > 0 ? completedWeeks : null);
-    if (!targetWeek || targetWeek > completedWeeks) return null;
+    const targetWeek = completedWeeks > 0 ? completedWeeks : null;
+    if (!targetWeek) return null;
 
     const isCached = cachedWeeks.has(targetWeek);
     const state: PillState = isCached ? 'complete' : 'idle';
@@ -126,11 +121,6 @@ const ImmersiveHomeLayout = ({
   };
 
   const activePill = getFocusedPill() || reelPill;
-
-  // Determine which photos to show expanded
-  const focusedPhotos = focusedWeek
-    ? photos.slice((focusedWeek - 1) * 3, focusedWeek * 3)
-    : [];
 
   return (
     <div className="relative flex flex-col" style={{ minHeight: '100dvh' }}>
