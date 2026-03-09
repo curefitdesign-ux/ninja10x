@@ -1934,7 +1934,7 @@ const Reel = () => {
                 <div className="flex items-center justify-center gap-3 px-4" style={{ visibility: isLogActivityCard ? 'hidden' : 'visible' }}>
                   {/* Liquid glass reaction pill */}
                   <button
-                    onClick={() => { haptic(); isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
+                    onClick={() => { isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
                     className="relative overflow-hidden active:scale-[0.97] transition-transform"
                     style={{
                       minWidth: currentReactions.total > 0 ? 180 : 160,
