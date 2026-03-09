@@ -1650,11 +1650,13 @@ const Reel = () => {
                               navigate('/camera', { state: { dayNumber: currentActivity.dayNumber } });
                             }}
                             style={{
+                              width: '100%',
+                              height: '100%',
                               background: 'rgba(255,255,255,0.10)',
                               backdropFilter: 'blur(40px)',
                               WebkitBackdropFilter: 'blur(40px)',
                               border: '1px solid rgba(255,255,255,0.08)',
-                              borderRadius: 20,
+                              borderRadius: 0,
                             }}
                           >
                             {/* Animated dot grid pattern */}
