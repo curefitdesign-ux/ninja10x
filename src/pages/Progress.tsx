@@ -335,6 +335,7 @@ const Progress = () => {
             setTimeout(() => setShowWeekSnackbar(false), 10000);
           }}
           isInline={true}
+          highlightDayNumber={highlightDayNumber}
         />
       </div>
 
