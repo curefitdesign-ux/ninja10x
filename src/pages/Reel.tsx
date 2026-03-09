@@ -106,7 +106,7 @@ const Reel = () => {
   const [showEditSheet, setShowEditSheet] = useState(false);
   
   // Auto-advance timer state — dynamic duration based on media type
-  const DEFAULT_ADVANCE_DURATION = 10000; // 10 seconds for images
+  const DEFAULT_ADVANCE_DURATION = 3000; // 3 seconds for images
   const [autoAdvanceDuration, setAutoAdvanceDuration] = useState(DEFAULT_ADVANCE_DURATION);
   const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
   // Delayed mirror of autoAdvanceProgress for the own-profile ring (needs 2-frame render for CSS transition)
@@ -482,18 +482,8 @@ const Reel = () => {
     }
   }, [currentUserIndex]);
 
-  // Mark the current user as viewed when their story is displayed
-  useEffect(() => {
-    const currentGroup = effectiveUserGroups[currentUserIndex];
-    if (currentGroup) {
-      setViewedUsers(prev => {
-        if (prev.has(currentGroup.userId)) return prev;
-        const next = new Set(prev);
-        next.add(currentGroup.userId);
-        return next;
-      });
-    }
-  }, [currentUserIndex, effectiveUserGroups]);
+  // Mark the current user as viewed AFTER their story finishes (handled by cycleActivity)
+  // Don't mark immediately — let the progress ring complete first
 
   // Defensive reset on every story/user step to prevent residual x-offset drift
   useEffect(() => {
@@ -1273,11 +1263,25 @@ const Reel = () => {
                               <stop offset="100%" stopColor="#4F5BD5" />
                             </linearGradient>
                           </defs>
+                          {/* Background track */}
                           <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
-                            stroke="url(#storyGradientOwn)"
+                            stroke={isOwnActive ? 'rgba(255,255,255,0.15)' : 'url(#storyGradientOwn)'}
                             strokeLinecap="round"
-                            style={{ filter: 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' }}
+                            style={{ filter: !isOwnActive ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none' }}
                           />
+                          {/* Progress fill — only when actively viewing */}
+                          {isOwnActive && (
+                            <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
+                              stroke="url(#storyGradientOwn)"
+                              strokeLinecap="round"
+                              strokeDasharray={`${2 * Math.PI * 44}`}
+                              strokeDashoffset={ownRingProgress > 0 ? 0 : 2 * Math.PI * 44}
+                              style={{
+                                filter: 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))',
+                                transition: ownRingProgress > 0 ? `stroke-dashoffset ${autoAdvanceDuration}ms linear` : 'none',
+                              }}
+                            />
+                          )}
                         </svg>
                       )}
                       <div className="relative" style={{ width: avatarSize, height: avatarSize, padding: 4 }}>
@@ -1362,11 +1366,25 @@ const Reel = () => {
                               <stop offset="100%" stopColor="#4F5BD5" />
                             </linearGradient>
                           </defs>
+                          {/* Background track */}
                           <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
-                            stroke={isStoryLocked ? 'rgba(255,255,255,0.15)' : `url(#storyGradient-${group.userId})`}
+                            stroke={isStoryLocked ? 'rgba(255,255,255,0.15)' : (isActive ? 'rgba(255,255,255,0.15)' : `url(#storyGradient-${group.userId})`)}
                             strokeLinecap="round"
-                            style={{ filter: !isStoryLocked ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none' }}
+                            style={{ filter: (!isStoryLocked && !isActive) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none' }}
                           />
+                          {/* Progress fill — only when actively viewing */}
+                          {isActive && !isStoryLocked && (
+                            <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
+                              stroke={`url(#storyGradient-${group.userId})`}
+                              strokeLinecap="round"
+                              strokeDasharray={`${2 * Math.PI * 44}`}
+                              strokeDashoffset={autoAdvanceProgress > 0 ? 0 : 2 * Math.PI * 44}
+                              style={{
+                                filter: 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))',
+                                transition: autoAdvanceProgress > 0 ? `stroke-dashoffset ${autoAdvanceDuration}ms linear` : 'none',
+                              }}
+                            />
+                          )}
                         </svg>
                         )}
                         
