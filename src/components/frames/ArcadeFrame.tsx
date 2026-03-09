@@ -148,9 +148,9 @@ const ArcadeFrame = ({
       </div>
 
       {/* ── Bottom Metrics — stacked, left-aligned ── */}
-      <div style={{ padding: '2.5% 5% 4% 5%', flexShrink: 0, marginTop: '-10px' }}>
+      <div style={{ padding: '2.5% 5% 4% 5%', flexShrink: 0, marginTop: '-2cqw' }}>
         {(duration || pr) ? (
-          <div style={{ display: 'flex', flexDirection: 'row', gap: '100px' }}>
+          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
             {/* Duration metric */}
             {duration && (
               <div>
