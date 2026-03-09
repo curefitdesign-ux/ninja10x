@@ -1504,8 +1504,8 @@ const Reel = () => {
                   })}
             </div>{/* end scrollable others */}
             </div>{/* end flex container */}
-          </div>{/* end height:78 wrapper */}
-          )}{/* end viewProfile ternary */}
+          </div>
+          )}
         </div>{/* end top zone */}
 
         {/* SEGMENTED PROGRESS BARS — only in viewProfile mode */}
