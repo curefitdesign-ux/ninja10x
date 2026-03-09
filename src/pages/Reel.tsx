@@ -2012,6 +2012,7 @@ const Reel = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
+                          haptic();
                           handleShareStory();
                         }}
                         className="shrink-0 active:scale-95 transition-transform"
