@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { X, Plus, Lock } from 'lucide-react';
