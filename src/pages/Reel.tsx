@@ -1583,6 +1583,41 @@ const Reel = () => {
                       }}
                       transition={{ type: 'spring', stiffness: 280, damping: 30, duration: 0.5 }}
                     >
+                    {/* Instagram-style segmented progress bar */}
+                    {currentGroup && currentGroup.activities.length > 0 && !isLogActivityCard && (
+                      <div
+                        className="absolute top-0 left-0 right-0 z-50 flex gap-[3px] px-2 pt-2"
+                        style={{ pointerEvents: 'none' }}
+                      >
+                        {currentGroup.activities.map((_, segIdx) => {
+                          const isCompleted = segIdx < currentActivityIndex;
+                          const isActive = segIdx === currentActivityIndex;
+                          return (
+                            <div
+                              key={segIdx}
+                              className="flex-1 rounded-full overflow-hidden"
+                              style={{
+                                height: 3,
+                                background: 'rgba(255,255,255,0.25)',
+                              }}
+                            >
+                              <div
+                                className="h-full rounded-full"
+                                style={{
+                                  background: 'rgba(255,255,255,0.9)',
+                                  width: isCompleted ? '100%' : isActive ? '100%' : '0%',
+                                  transform: isActive && autoAdvanceProgress === 0 ? 'scaleX(0)' : 'scaleX(1)',
+                                  transformOrigin: 'left',
+                                  transition: isActive
+                                    ? (autoAdvanceProgress > 0 ? `transform ${autoAdvanceDuration}ms linear` : 'none')
+                                    : 'none',
+                                }}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                     <AnimatePresence mode="popLayout" custom={swipeDirection}>
                       <motion.div
                         key={contentKey}
