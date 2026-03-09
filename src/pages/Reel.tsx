@@ -203,29 +203,51 @@ const Reel = () => {
     loadActivities();
   }, [loadActivities]);
 
-  // In viewProfile mode: show ALL activities for the target user.
+  // In viewProfile mode: show ALL activities per user (recent first), swipeable between users.
   // In home mode: show only the LATEST activity per user (today's feed).
   const effectiveUserGroups = useMemo(() => {
     if (!user) return userGroups;
 
-    // VIEW PROFILE MODE — single user, all activities, recent first
-    if (viewProfile && sourceUserId) {
-      const targetGroup = userGroups.find(g => g.userId === sourceUserId);
-      if (targetGroup) {
-        const sortedActivities = [...targetGroup.activities].sort((a, b) => b.dayNumber - a.dayNumber);
-        return [{ ...targetGroup, activities: sortedActivities }];
-      }
-      // If target user is self
-      if (sourceUserId === user.id) {
-        const allMyActivities = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
-        return [{
+    // VIEW PROFILE MODE — all users, all activities, recent first
+    if (viewProfile) {
+      const allGroups = userGroups.map(g => {
+        const sorted = [...g.activities].sort((a, b) => b.dayNumber - a.dayNumber);
+        return { ...g, activities: sorted };
+      });
+
+      // Include own group with all activities
+      const hasOwnGroup = allGroups.some(g => g.userId === user.id);
+      if (!hasOwnGroup && myActivities.length > 0) {
+        const ownSorted = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
+        allGroups.unshift({
           userId: user.id,
           displayName: profile?.display_name || 'You',
           avatarUrl: profile?.avatar_url || '',
-          activities: allMyActivities,
-        }];
+          activities: ownSorted,
+        });
+      } else if (hasOwnGroup) {
+        // Replace own group with full myActivities data
+        const idx = allGroups.findIndex(g => g.userId === user.id);
+        if (idx >= 0) {
+          allGroups[idx] = {
+            ...allGroups[idx],
+            displayName: profile?.display_name || 'You',
+            avatarUrl: profile?.avatar_url || '',
+            activities: [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber),
+          };
+        }
       }
-      return userGroups;
+
+      // Put source user first if specified
+      if (sourceUserId) {
+        const targetIdx = allGroups.findIndex(g => g.userId === sourceUserId);
+        if (targetIdx > 0) {
+          const [target] = allGroups.splice(targetIdx, 1);
+          allGroups.unshift(target);
+        }
+      }
+
+      return allGroups.filter(g => g.activities.length > 0);
     }
 
     // HOME MODE — only latest activity per user
