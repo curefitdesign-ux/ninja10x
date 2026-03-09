@@ -1348,8 +1348,7 @@ const Reel = () => {
                         key={group.userId}
                         ref={isActive ? activeAvatarRef : undefined}
                         onClick={() => {
-                          setCurrentUserIndex(idx);
-                          setCurrentActivityIndex(0);
+                          navigate('/reel', { state: { sourceUserId: group.userId, viewProfile: true, _ts: Date.now() } });
                         }}
                     className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
                         style={{ 
