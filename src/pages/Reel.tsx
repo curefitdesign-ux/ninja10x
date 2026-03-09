@@ -220,22 +220,13 @@ const Reel = () => {
       }));
 
     // Own user: show today's logged activity OR just the log placeholder (no past activities)
-    // Exception: if deep-linking to a specific activity, include that activity too
     const allMyActivities = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
     const latestActivity = allMyActivities[0];
     const loggedToday = latestActivity && new Date(latestActivity.createdAt).toDateString() === new Date().toDateString();
     
     const ownActivities: any[] = [];
     
-    // If deep-linking to a specific own activity, include it
-    if (deepLinkActivityId) {
-      const deepLinkedActivity = allMyActivities.find(a => a.id === deepLinkActivityId);
-      if (deepLinkedActivity) {
-        ownActivities.push(deepLinkedActivity);
-      }
-    }
-    
-    if (loggedToday && !ownActivities.some(a => a.id === latestActivity.id)) {
+    if (loggedToday) {
       ownActivities.push(latestActivity);
     }
     if (allMyActivities.length < 12) {
@@ -252,6 +243,21 @@ const Reel = () => {
         isPublic: false,
         createdAt: new Date().toISOString(),
       } as any);
+    }
+
+    // If deep-linking to a specific own activity that's not today's, create a temporary
+    // dedicated group so we can navigate to it without polluting the normal own-user group
+    let deepLinkGroup: UserStoryGroup | null = null;
+    if (deepLinkActivityId) {
+      const deepLinkedActivity = allMyActivities.find(a => a.id === deepLinkActivityId);
+      if (deepLinkedActivity && !ownActivities.some(a => a.id === deepLinkedActivity.id)) {
+        deepLinkGroup = {
+          userId: user.id + '-deeplink',
+          displayName: profile?.display_name || 'You',
+          avatarUrl: profile?.avatar_url || '',
+          activities: [deepLinkedActivity],
+        };
+      }
     }
 
     const myGroup: UserStoryGroup = {
