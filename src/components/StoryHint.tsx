@@ -14,10 +14,8 @@ export default function StoryHint({ hasMultipleStories, hasMultipleUsers, onNudg
   const [showNudge, setShowNudge] = useState(false);
   const [nudgeType, setNudgeType] = useState<'tap' | 'swipe' | null>(null);
 
-  const triggerHaptic = useCallback(() => {
-    if ('vibrate' in navigator) {
-      navigator.vibrate([15, 80, 15, 80, 15]);
-    }
+  const triggerHapticFn = useCallback(() => {
+    triggerHaptic('light');
   }, []);
 
   useEffect(() => {
