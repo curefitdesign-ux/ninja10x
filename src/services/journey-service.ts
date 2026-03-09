@@ -25,7 +25,7 @@ export interface JourneyActivity {
   // Joined fields
   reaction_count?: number;
   user_reacted?: boolean;
-  reactions?: Record<ReactionType, ActivityReaction>;
+  reactions?: Partial<Record<ReactionType, ActivityReaction>>;
   is_own?: boolean;
 }
 
