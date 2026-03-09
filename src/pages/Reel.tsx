@@ -1509,14 +1509,10 @@ const Reel = () => {
                   <img
                     src={prevMedia}
                     alt="Previous user"
-                    className="h-full object-cover"
+                    className="w-full h-full object-cover"
                     style={{ 
                       opacity: isPrevLocked ? 0.35 : 0.5, 
                       filter: isPrevLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                      width: 'auto',
-                      minHeight: '100%',
-                      objectPosition: 'right center',
-                      maxWidth: 'none',
                     }}
                   />
                 </div>
