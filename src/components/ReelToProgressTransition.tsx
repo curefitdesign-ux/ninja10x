@@ -443,7 +443,13 @@ export default function ReelToProgressTransition({
         {/* Activity Gallery Overlay */}
         <ActivityGalleryOverlay
           isOpen={galleryOpen}
-          onClose={() => setGalleryOpen(false)}
+          onClose={() => {
+            setGalleryOpen(false);
+            // If opened from notification, go back to reel instead of showing progress page
+            if (openGalleryAtDay) {
+              navigate('/reel', { replace: true });
+            }
+          }}
           activities={[
             ...myActivities
               .filter(a => a.storageUrl)
