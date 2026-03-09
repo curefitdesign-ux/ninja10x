@@ -1573,9 +1573,9 @@ const Reel = () => {
                       layoutId={sourceUserId ? `story-card-${currentGroup?.userId}` : undefined}
                       className="relative overflow-hidden"
                       style={{
-                        aspectRatio: '9/16',
-                        height: 'calc(95% - 20px)',
-                        maxWidth: '100%',
+                        aspectRatio: '9 / 16',
+                        width: '90%',
+                        maxHeight: 'calc(95% - 20px)',
                         borderRadius: '0px',
                         overflow: 'hidden',
                         background: 'transparent',
