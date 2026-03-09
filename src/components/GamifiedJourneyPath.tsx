@@ -195,13 +195,21 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
                     top: tile.y,
                     zIndex: 3,
                     opacity: 1,
-                    filter: isCurrent
+                    filter: isHighlighted
+                      ? 'drop-shadow(0 0 18px rgba(249,115,22,0.8)) drop-shadow(0 0 6px rgba(236,72,153,0.6))'
+                      : isCurrent
                       ? 'drop-shadow(0 0 12px rgba(130,100,255,0.6))'
                       : 'none',
                   }}
                   initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.18, delay: tile.index * 0.03 }}
+                  animate={{
+                    opacity: 1,
+                    scale: isHighlighted ? [1, 1.15, 1] : 1,
+                  }}
+                  transition={isHighlighted
+                    ? { duration: 0.18, delay: tile.index * 0.03, scale: { duration: 0.8, repeat: 3, ease: 'easeInOut' } }
+                    : { duration: 0.18, delay: tile.index * 0.03 }
+                  }
                 />
               )}
             </div>
