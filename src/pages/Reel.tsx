@@ -452,17 +452,17 @@ const Reel = () => {
     setCurrentUserIndex(prev => (prev - 1 + effectiveUserGroups.length) % effectiveUserGroups.length);
   }, [effectiveUserGroups.length]);
 
-  // Swipe gesture handling for horizontal navigation
+  // Swipe gesture handling for horizontal navigation - smooth scroll feel
   const dragX = useMotionValue(0);
-  const cardOpacity = useTransform(dragX, [-150, 0, 150], [0.6, 1, 0.6]);
-  const cardRotate = useTransform(dragX, [-150, 0, 150], [-8, 0, 8]);
-  const cardScale = useTransform(dragX, [-150, 0, 150], [0.95, 1, 0.95]);
+  const cardOpacity = useTransform(dragX, [-200, -100, 0, 100, 200], [0.85, 0.95, 1, 0.95, 0.85]);
+  const cardRotate = useMotionValue(0); // No rotation for smooth scroll feel
+  const cardScale = useMotionValue(1); // No scale for smooth scroll feel
   
   const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
     
-    // Horizontal swipe between users
-    if (Math.abs(offset.x) > SWIPE_THRESHOLD || Math.abs(velocity.x) > 500) {
+    // Horizontal swipe between users - lower threshold for snappier feel
+    if (Math.abs(offset.x) > 40 || Math.abs(velocity.x) > 300) {
       if (offset.x < 0) {
         setSwipeDirection('left');
         goNextUser();
@@ -1580,7 +1580,7 @@ const Reel = () => {
             drag="x"
             dragMomentum={false}
             dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.15}
+            dragElastic={0.35}
             onDragEnd={handleHorizontalDragEnd}
             onClick={handleTap}
           >
@@ -1658,23 +1658,23 @@ const Reel = () => {
                         className="absolute inset-0 flex items-center justify-center"
                         variants={{
                           enter: (dir: string) => ({ 
-                            opacity: 0, 
-                            x: dir === 'left' ? 60 : -60,
-                            scale: 0.97,
+                            opacity: 0.4, 
+                            x: dir === 'left' ? 80 : -80,
                           }),
-                          center: { opacity: 1, x: 0, scale: 1 },
+                          center: { opacity: 1, x: 0 },
                           exit: (dir: string) => ({ 
-                            opacity: 0, 
-                            x: dir === 'left' ? -60 : 60,
-                            scale: 0.97,
+                            opacity: 0.4, 
+                            x: dir === 'left' ? -80 : 80,
                           }),
                         }}
                         initial="enter"
                         animate="center"
                         exit="exit"
                         transition={{ 
-                          duration: 0.28, 
-                          ease: [0.22, 1, 0.36, 1],
+                          type: 'spring',
+                          stiffness: 350,
+                          damping: 35,
+                          mass: 0.8,
                         }}
                       >
                         {currentActivity?.id === 'log-activity' ? (
