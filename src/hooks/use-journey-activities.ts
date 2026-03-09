@@ -240,6 +240,9 @@ export function useJourneyActivities() {
 
     const local = toLocal(data);
 
+    // Invalidate shared caches so next fetch gets fresh data
+    invalidateFeedCaches();
+
     // Update local state
     setActivities(prev => {
       const without = prev.filter(a => a.dayNumber !== local.dayNumber);
