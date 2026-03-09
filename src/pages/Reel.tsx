@@ -209,12 +209,12 @@ const Reel = () => {
   const effectiveUserGroups = useMemo(() => {
     if (!user) return userGroups;
 
-    // Others: all activities, sorted recent first
+    // Others: all activities, sorted chronologically (first post to latest)
     const othersGroups = userGroups
       .filter(g => g.userId !== user.id)
       .map(g => ({
         ...g,
-        activities: [...g.activities].sort((a, b) => b.dayNumber - a.dayNumber),
+        activities: [...g.activities].sort((a, b) => a.dayNumber - b.dayNumber),
       }));
 
     // Own user: show today's logged activity OR just the log placeholder (no past activities)
