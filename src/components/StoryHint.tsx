@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 
 const STORAGE_KEY = 'story-hint-shown';
 const INACTIVITY_DELAY = 3000; // 3 seconds of inactivity before showing hint
