@@ -39,6 +39,7 @@ export default function SendReactionSheet({
   totalReactions = 0,
   reactorProfiles = []
 }: SendReactionSheetProps) {
+  const { trigger: haptic } = useWebHaptics();
   const [isRemoving, setIsRemoving] = useState(false);
   const [localReactorProfiles, setLocalReactorProfiles] = useState(reactorProfiles);
   
