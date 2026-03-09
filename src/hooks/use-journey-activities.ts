@@ -371,12 +371,33 @@ export function useJourneyActivities() {
 
 const DEFAULT_REACTIONS: Partial<Record<ReactionType, ActivityReaction>> = {};
 
+// ─── Request deduplication layer ───
+// Prevents duplicate concurrent calls (e.g. multiple components mounting simultaneously)
+let _publicFeedInflight: Promise<LocalActivity[]> | null = null;
+let _publicFeedCache: { data: LocalActivity[]; ts: number } | null = null;
+
+let _groupedInflight: Promise<UserStoryGroup[]> | null = null;
+let _groupedCache: { data: UserStoryGroup[]; ts: number } | null = null;
+
+const CACHE_TTL = 30_000; // 30s in-memory cache
+
 /**
  * Fetch all activities from all users (public feed) with reactions and profiles.
  * For the Progress page top strip.
  * @param includeAll - If true, fetch all activities (for showing blurred private content)
  */
 export async function fetchPublicFeed(includeAll: boolean = false): Promise<LocalActivity[]> {
+  // Return cached if fresh
+  if (_publicFeedCache && Date.now() - _publicFeedCache.ts < CACHE_TTL) {
+    return _publicFeedCache.data;
+  }
+  // Deduplicate in-flight requests
+  if (_publicFeedInflight) return _publicFeedInflight;
+  _publicFeedInflight = _fetchPublicFeedImpl(includeAll).finally(() => { _publicFeedInflight = null; });
+  return _publicFeedInflight;
+}
+
+async function _fetchPublicFeedImpl(includeAll: boolean): Promise<LocalActivity[]> {
   const { data: { user } } = await supabase.auth.getUser();
 
   // Build query - if includeAll, fetch everything; otherwise only public + own
