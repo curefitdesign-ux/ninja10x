@@ -1236,10 +1236,7 @@ const Reel = () => {
                 return (
                   <button
                     onClick={() => {
-                      if (ownIdx >= 0) {
-                        setCurrentUserIndex(ownIdx);
-                        setCurrentActivityIndex(0);
-                      }
+                      navigate('/reel', { state: { sourceUserId: user?.id, viewProfile: true, _ts: Date.now() } });
                     }}
                     className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
                     style={{ 
