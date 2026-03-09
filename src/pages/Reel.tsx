@@ -96,7 +96,7 @@ const Reel = () => {
   const [showSendReactionSheet, setShowSendReactionSheet] = useState(false);
   const [localReactions, setLocalReactions] = useState<Record<string, {
     total: number;
-    reactions: Record<ReactionType, ActivityReaction>;
+    reactions: Partial<Record<ReactionType, ActivityReaction>>;
     reactorProfiles: ReactorProfile[];
   }>>({});
   
