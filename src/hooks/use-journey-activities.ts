@@ -42,7 +42,7 @@ export interface LocalActivity {
 // Convert DB row to local shape
 function toLocal(row: JourneyActivity & { 
   reaction_count?: number; 
-  reactions?: Record<ReactionType, ActivityReaction>;
+  reactions?: Partial<Record<ReactionType, ActivityReaction>>;
   display_name?: string;
   avatar_url?: string;
 }): LocalActivity {
