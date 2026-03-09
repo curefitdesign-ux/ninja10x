@@ -1358,7 +1358,8 @@ const Reel = () => {
                         }}
                       >
                         <div className="relative" style={{ width: avatarSize, height: avatarSize }}>
-                        {/* Instagram-style story ring with auto-advance progress */}
+                        {/* Instagram-style story ring — hidden once fully viewed */}
+                        {!isUserViewed && (
                         <svg
                           className="absolute inset-0"
                           style={{
