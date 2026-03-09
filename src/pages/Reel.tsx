@@ -482,18 +482,8 @@ const Reel = () => {
     }
   }, [currentUserIndex]);
 
-  // Mark the current user as viewed when their story is displayed
-  useEffect(() => {
-    const currentGroup = effectiveUserGroups[currentUserIndex];
-    if (currentGroup) {
-      setViewedUsers(prev => {
-        if (prev.has(currentGroup.userId)) return prev;
-        const next = new Set(prev);
-        next.add(currentGroup.userId);
-        return next;
-      });
-    }
-  }, [currentUserIndex, effectiveUserGroups]);
+  // Mark the current user as viewed AFTER their story finishes (handled by cycleActivity)
+  // Don't mark immediately — let the progress ring complete first
 
   // Defensive reset on every story/user step to prevent residual x-offset drift
   useEffect(() => {
