@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { User, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useMorphTransition } from '@/hooks/use-morph-transition';
 
 import plusIcon from '@/assets/icons/plus-icon.png';
 import cyclingIcon from '@/assets/activities/cycling.png';
@@ -49,6 +50,8 @@ interface StackedPhotoCardsProps {
 
 const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
   const navigate = useNavigate();
+  const { triggerMorph } = useMorphTransition();
+  const cardRefs = useRef<Map<string, HTMLElement>>(new Map());
   const latestPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
   
   // Preload the latest 3 images immediately for instant rendering
@@ -81,13 +84,20 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
   };
 
   const handlePhotoTap = (photo: Photo) => {
-    // Navigate to reel with activity ID so it opens that specific story
-    navigate('/reel', {
-      state: { 
-        activityId: photo.id,
-        dayNumber: photo.dayNumber,
-      },
-    });
+    const el = cardRefs.current.get(photo.id);
+    if (el) {
+      triggerMorph(
+        el,
+        photo.storageUrl,
+        '/reel',
+        { activityId: photo.id, dayNumber: photo.dayNumber },
+        photo.isVideo
+      );
+    } else {
+      navigate('/reel', {
+        state: { activityId: photo.id, dayNumber: photo.dayNumber },
+      });
+    }
   };
 
   const visiblePhotos = displayPhotos;
@@ -146,6 +156,7 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
 
     return (
       <div 
+        ref={(el: HTMLDivElement | null) => { if (el) cardRefs.current.set(photo.id, el); }}
         className="absolute top-1/2 left-1/2 cursor-pointer" 
         style={{ transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale}) rotate(${rotate}deg)`, zIndex }} 
         onClick={() => handlePhotoTap(photo)}

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Users } from 'lucide-react';
 import { fetchPublicFeed, type LocalActivity } from '@/hooks/use-journey-activities';
 import { useAuth } from '@/hooks/use-auth';
+import { useMorphTransition } from '@/hooks/use-morph-transition';
 import ProfileAvatar from '@/components/ProfileAvatar';
 
 const isRecent = (dateStr: string) => Date.now() - new Date(dateStr).getTime() < 24 * 60 * 60 * 1000;
@@ -27,6 +28,8 @@ const activityEmoji = (activity: string) => {
 const CommunityStoriesWidget = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { triggerMorph } = useMorphTransition();
+  const avatarRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const [communityActivities, setCommunityActivities] = useState<LocalActivity[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -49,12 +52,23 @@ const CommunityStoriesWidget = () => {
   if (!loaded || communityActivities.length === 0) return null;
 
   const handleAvatarTap = (activity: LocalActivity) => {
-    navigate('/reel', {
-      state: {
-        activityId: activity.id,
-        dayNumber: activity.dayNumber,
-      },
-    });
+    const el = avatarRefs.current.get(activity.id);
+    if (el && activity.storageUrl) {
+      triggerMorph(
+        el,
+        activity.storageUrl,
+        '/reel',
+        { activityId: activity.id, dayNumber: activity.dayNumber },
+        activity.isVideo
+      );
+    } else {
+      navigate('/reel', {
+        state: {
+          activityId: activity.id,
+          dayNumber: activity.dayNumber,
+        },
+      });
+    }
   };
 
   return (
@@ -92,6 +106,7 @@ const CommunityStoriesWidget = () => {
           {communityActivities.map((activity, idx) => (
             <motion.button
               key={activity.id}
+              ref={(el: HTMLButtonElement | null) => { if (el) avatarRefs.current.set(activity.id, el); }}
               className="flex flex-col items-center gap-1.5 flex-shrink-0"
               onClick={() => handleAvatarTap(activity)}
               whileTap={{ scale: 0.92 }}

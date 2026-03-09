@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { useProfile } from '@/hooks/use-profile';
+import { useMorphTransition } from '@/hooks/use-morph-transition';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import CircularProgressRing from '@/components/CircularProgressRing';
 import ReelProgressPill, { type PillState } from '@/components/ReelProgressPill';
@@ -61,7 +62,9 @@ const ImmersiveHomeLayout = ({
 }: ImmersiveHomeLayoutProps) => {
   const navigate = useNavigate();
   const { profile } = useProfile();
+  const { triggerMorph } = useMorphTransition();
   const [showMediaSheet, setShowMediaSheet] = useState(false);
+  const todayCardRef = useRef<HTMLButtonElement>(null);
 
   // Day card sheet state
   const [daySheetOpen, setDaySheetOpen] = useState(false);
@@ -219,8 +222,19 @@ const ImmersiveHomeLayout = ({
           >
             {todayPhoto && (
               <motion.button
+                ref={todayCardRef}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => handlePhotoTap(todayPhoto)}
+                onClick={() => {
+                  if (todayCardRef.current) {
+                    triggerMorph(
+                      todayCardRef.current,
+                      todayPhoto.storageUrl,
+                      '/reel',
+                      { activityId: todayPhoto.id, dayNumber: todayPhoto.dayNumber },
+                      todayPhoto.isVideo || isVideoUrl(todayPhoto.storageUrl)
+                    );
+                  }
+                }}
                 className="relative rounded-2xl overflow-hidden"
                 style={{ width: 100, height: 120 }}
               >
