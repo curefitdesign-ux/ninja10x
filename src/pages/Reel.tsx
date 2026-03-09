@@ -1650,16 +1650,29 @@ const Reel = () => {
                               navigate('/camera', { state: { dayNumber: currentActivity.dayNumber } });
                             }}
                             style={{
-                              background: 'linear-gradient(180deg, rgba(28,28,32,1) 0%, rgba(18,18,22,1) 100%)',
+                              background: 'rgba(255,255,255,0.10)',
+                              backdropFilter: 'blur(40px)',
+                              WebkitBackdropFilter: 'blur(40px)',
                               border: '1px solid rgba(255,255,255,0.08)',
                               borderRadius: 20,
                             }}
                           >
-                            {/* Dot grid pattern */}
-                            <div className="absolute inset-0" style={{
-                              backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
-                              backgroundSize: '20px 20px',
-                            }} />
+                            {/* Animated dot grid pattern */}
+                            <motion.div 
+                              className="absolute inset-0" 
+                              style={{
+                                backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
+                                backgroundSize: '20px 20px',
+                              }}
+                              animate={{
+                                backgroundPosition: ['0px 0px', '20px 20px'],
+                                opacity: [0.4, 0.7, 0.4],
+                              }}
+                              transition={{
+                                backgroundPosition: { duration: 8, repeat: Infinity, ease: 'linear' },
+                                opacity: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+                              }}
+                            />
                             {/* Text */}
                             <div className="text-center px-6 mb-10 relative z-10">
                               <h2 className="text-foreground font-black text-2xl tracking-tight uppercase leading-tight">
