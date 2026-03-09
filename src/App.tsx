@@ -213,16 +213,19 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <MobileFrame>
-            <Suspense fallback={null}>
-              <NotificationCenter />
-              <ReactionNotificationPill />
-            </Suspense>
-            <AnimatedRoutes />
-            <Suspense fallback={null}>
-              <BottomNavBar />
-            </Suspense>
-          </MobileFrame>
+          <MorphTransitionProvider>
+            <MobileFrame>
+              <Suspense fallback={null}>
+                <NotificationCenter />
+                <ReactionNotificationPill />
+              </Suspense>
+              <MorphTransitionOverlay />
+              <AnimatedRoutes />
+              <Suspense fallback={null}>
+                <BottomNavBar />
+              </Suspense>
+            </MobileFrame>
+          </MorphTransitionProvider>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
