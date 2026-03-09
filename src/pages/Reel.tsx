@@ -1248,7 +1248,7 @@ const Reel = () => {
                     }}
                   >
                     <div className="relative" style={{ width: avatarSize, height: avatarSize }}>
-                      {ownGroup && ownActivityCount > 0 && !viewedUsers.has(user?.id || '') && (
+                      {ownGroup && ownActivityCount > 0 && (!viewedUsers.has(user?.id || '') || isOwnActive) && (
                         <svg
                           className="absolute inset-0"
                           style={{ width: avatarSize, height: avatarSize, transform: 'rotate(-90deg)' }}
@@ -1267,17 +1267,17 @@ const Reel = () => {
                           <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
                             stroke={isOwnActive ? 'rgba(255,255,255,0.15)' : 'url(#storyGradientOwn)'}
                             strokeLinecap="round"
-                            style={{ filter: !isOwnActive ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none' }}
+                            style={{ filter: (!isOwnActive && !viewedUsers.has(user?.id || '')) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none' }}
                           />
                           {/* Progress fill — only when actively viewing */}
                           {isOwnActive && (
                             <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
-                              stroke="url(#storyGradientOwn)"
+                              stroke={viewedUsers.has(user?.id || '') ? 'rgba(255,255,255,0.7)' : 'url(#storyGradientOwn)'}
                               strokeLinecap="round"
                               strokeDasharray={`${2 * Math.PI * 44}`}
                               strokeDashoffset={ownRingProgress > 0 ? 0 : 2 * Math.PI * 44}
                               style={{
-                                filter: 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))',
+                                filter: !viewedUsers.has(user?.id || '') ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
                                 transition: ownRingProgress > 0 ? `stroke-dashoffset ${autoAdvanceDuration}ms linear` : 'none',
                               }}
                             />
