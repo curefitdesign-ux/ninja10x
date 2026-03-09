@@ -1335,6 +1335,7 @@ const Reel = () => {
                     const isOwnProfile = user && group.userId === user.id;
                     // Stories are locked, but profile photos are ALWAYS visible
                     const isStoryLocked = !isOwnProfile && !profile?.stories_public;
+                    const isUserViewed = viewedUsers.has(group.userId);
                     const avatarSize = 52;
                     
                       return (
