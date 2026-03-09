@@ -276,9 +276,9 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
               {notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                   <div className="flex -space-x-2 mb-4">
-                    <img src={fireImg} alt="fire" className="w-12 h-12 object-contain opacity-40" />
-                    <img src={clapImg} alt="clap" className="w-12 h-12 object-contain opacity-40" />
-                    <img src={flexImg} alt="flex" className="w-12 h-12 object-contain opacity-40" />
+                    <img src={REACTION_IMAGES['fire']} alt="fire" className="w-12 h-12 object-contain opacity-40" />
+                    <img src={REACTION_IMAGES['clap']} alt="clap" className="w-12 h-12 object-contain opacity-40" />
+                    <img src={REACTION_IMAGES['flex']} alt="flex" className="w-12 h-12 object-contain opacity-40" />
                   </div>
                   <p className="text-white/50 text-base">No reactions yet</p>
                   <p className="text-white/30 text-sm mt-1">Share your activities to get reactions!</p>
