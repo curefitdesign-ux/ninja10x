@@ -321,6 +321,7 @@ export function useJourneyActivities() {
     }
 
     // Clear local state
+    invalidateFeedCaches();
     setActivities([]);
     
     // Clear celebrated weeks from localStorage
