@@ -212,10 +212,14 @@ const Progress = () => {
         )}
       </AnimatePresence>
 
-      {/* Header */}
+      {/* Header — hidden when opening gallery directly from notification */}
       <motion.div
         className="flex-shrink-0 w-full flex items-center justify-between px-4"
-        style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 16px)', paddingBottom: 8 }}
+        style={{
+          paddingTop: 'max(env(safe-area-inset-top, 12px), 16px)',
+          paddingBottom: 8,
+          display: isDirectGalleryOpen ? 'none' : undefined,
+        }}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
