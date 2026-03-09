@@ -64,7 +64,7 @@ const Reel = () => {
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
   const portalContainer = usePortalContainer();
-  const { trigger: haptic } = useWebHaptics();
+  
   
   // Navigation state - extract once
   const navState = location.state || {};
