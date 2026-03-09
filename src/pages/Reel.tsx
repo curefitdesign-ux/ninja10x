@@ -72,7 +72,7 @@ const Reel = () => {
   const weekRecapNumber = navState.weekNumber as number | undefined;
   const sourceUserId = navState.sourceUserId as string | undefined;
   const navTimestamp = navState._ts as number | undefined;
-  const viewProfile = navState.viewProfile as boolean | undefined;
+  // viewProfile removed — all activities shown on homepage
   
   // Determine navigation intent:
   // - hasDeepLink: user tapped a specific story card (should open THAT story, never recap)
