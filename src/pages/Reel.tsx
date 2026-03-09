@@ -1372,19 +1372,29 @@ const Reel = () => {
                             strokeLinecap="round"
                             style={{ filter: (!isStoryLocked && !isActive && !isUserViewed) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none' }}
                           />
-                          {/* Progress fill — only when actively viewing */}
-                          {isActive && !isStoryLocked && (
-                            <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
-                              stroke={isUserViewed ? 'rgba(255,255,255,0.7)' : `url(#storyGradient-${group.userId})`}
-                              strokeLinecap="round"
-                              strokeDasharray={`${2 * Math.PI * 44}`}
-                              strokeDashoffset={autoAdvanceProgress > 0 ? 0 : 2 * Math.PI * 44}
-                              style={{
-                                filter: !isUserViewed ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
-                                transition: autoAdvanceProgress > 0 ? `stroke-dashoffset ${autoAdvanceDuration}ms linear` : 'none',
-                              }}
-                            />
-                          )}
+                          {/* Progress fill — fills proportionally across ALL stories */}
+                          {isActive && !isStoryLocked && (() => {
+                            const totalActivities = group.activities.length;
+                            const circumference = 2 * Math.PI * 44;
+                            // Completed segments + current segment progress
+                            const completedFraction = currentIdx / totalActivities;
+                            const currentSegmentFraction = (autoAdvanceProgress > 0 ? 1 : 0) / totalActivities;
+                            const totalFraction = completedFraction + currentSegmentFraction;
+                            const targetOffset = circumference * (1 - totalFraction);
+                            const startOffset = circumference * (1 - completedFraction);
+                            return (
+                              <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
+                                stroke={isUserViewed ? 'rgba(255,255,255,0.7)' : `url(#storyGradient-${group.userId})`}
+                                strokeLinecap="round"
+                                strokeDasharray={`${circumference}`}
+                                strokeDashoffset={autoAdvanceProgress > 0 ? targetOffset : startOffset}
+                                style={{
+                                  filter: !isUserViewed ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
+                                  transition: autoAdvanceProgress > 0 ? `stroke-dashoffset ${autoAdvanceDuration}ms linear` : 'none',
+                                }}
+                              />
+                            );
+                          })()}
                         </svg>
                         )}
                         
