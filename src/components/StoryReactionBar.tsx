@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useWebHaptics } from 'web-haptics/react';
+
 import { ReactionType } from '@/services/journey-service';
 
 // Import 3D reaction images

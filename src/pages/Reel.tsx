@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useWebHaptics } from 'web-haptics/react';
+
 import { createPortal } from 'react-dom';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import { useNavigate, useLocation } from 'react-router-dom';
