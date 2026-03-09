@@ -21,6 +21,7 @@ const REACTIONS: { type: ReactionType; image: string; label: string }[] = [
 ];
 
 export default function StoryReactionBar({ onReact, disabled }: StoryReactionBarProps) {
+  const { trigger: haptic } = useWebHaptics();
   return (
     <motion.div
       className="flex items-center justify-center gap-2 px-4 py-3 rounded-full"
