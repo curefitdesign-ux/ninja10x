@@ -47,7 +47,7 @@ export default function StoryHint({ hasMultipleStories, hasMultipleUsers, onNudg
       clearTimeout(nudgeTimer);
       clearTimeout(hideTimer);
     };
-  }, [hasMultipleStories, hasMultipleUsers, triggerHaptFnicFnonNudge]);
+  }, [hasMultipleStories, hasMultipleUsers, triggerHapticFn, onNudge]);
 
   return (
     <AnimatePresence>
