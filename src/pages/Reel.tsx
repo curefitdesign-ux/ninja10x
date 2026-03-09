@@ -204,19 +204,23 @@ const Reel = () => {
     loadActivities();
   }, [loadActivities]);
 
-  // Show ALL activities per user (recent first) with own user's log placeholder
+  // Own user: show today's activity or log placeholder only
+  // Others: show ALL activities (recent first)
   const effectiveUserGroups = useMemo(() => {
     if (!user) return userGroups;
 
-    const allGroups = userGroups.map(g => {
-      const sorted = [...g.activities].sort((a, b) => b.dayNumber - a.dayNumber);
-      return { ...g, activities: sorted };
-    });
+    // Others: all activities, sorted recent first
+    const othersGroups = userGroups
+      .filter(g => g.userId !== user.id)
+      .map(g => ({
+        ...g,
+        activities: [...g.activities].sort((a, b) => b.dayNumber - a.dayNumber),
+      }));
 
-    // Ensure own group has full myActivities + placeholder
-    const hasOwnGroup = allGroups.some(g => g.userId === user.id);
+    // Own user: only today's activity (latest) + log placeholder
     const allMyActivities = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
-    const ownActivities = [...allMyActivities];
+    const todayActivity = allMyActivities.length > 0 ? [allMyActivities[0]] : [];
+    const ownActivities = [...todayActivity];
     if (allMyActivities.length < 12) {
       ownActivities.push({
         id: 'log-activity',
@@ -233,53 +237,26 @@ const Reel = () => {
       } as any);
     }
 
-    if (!hasOwnGroup) {
-      allGroups.unshift({
-        userId: user.id,
-        displayName: profile?.display_name || 'You',
-        avatarUrl: profile?.avatar_url || '',
-        activities: ownActivities.length > 0 ? ownActivities : [{
-          id: 'log-activity',
-          dayNumber: 1,
-          storageUrl: '',
-          originalUrl: '',
-          activity: null,
-          duration: null,
-          pr: null,
-          frame: null,
-          isVideo: false,
-          isPublic: false,
-          createdAt: new Date().toISOString(),
-        }],
-      });
-    } else {
-      const idx = allGroups.findIndex(g => g.userId === user.id);
-      if (idx >= 0) {
-        allGroups[idx] = {
-          ...allGroups[idx],
-          displayName: profile?.display_name || 'You',
-          avatarUrl: profile?.avatar_url || '',
-          activities: ownActivities.length > 0 ? ownActivities : [{
-            id: 'log-activity',
-            dayNumber: 1,
-            storageUrl: '',
-            originalUrl: '',
-            activity: null,
-            duration: null,
-            pr: null,
-            frame: null,
-            isVideo: false,
-            isPublic: false,
-            createdAt: new Date().toISOString(),
-          }],
-        };
-        // Move own group to front
-        if (idx > 0) {
-          const [own] = allGroups.splice(idx, 1);
-          allGroups.unshift(own);
-        }
-      }
-    }
+    const myGroup: UserStoryGroup = {
+      userId: user.id,
+      displayName: profile?.display_name || 'You',
+      avatarUrl: profile?.avatar_url || '',
+      activities: ownActivities.length > 0 ? ownActivities : [{
+        id: 'log-activity',
+        dayNumber: 1,
+        storageUrl: '',
+        originalUrl: '',
+        activity: null,
+        duration: null,
+        pr: null,
+        frame: null,
+        isVideo: false,
+        isPublic: false,
+        createdAt: new Date().toISOString(),
+      }],
+    };
+
+    const allGroups = [myGroup, ...othersGroups];
 
     // Put source user first if specified
     if (sourceUserId) {
