@@ -1240,7 +1240,7 @@ const Reel = () => {
                     }}
                   >
                     <div className="relative" style={{ width: avatarSize, height: avatarSize }}>
-                      {ownGroup && ownActivityCount > 0 && (
+                      {ownGroup && ownActivityCount > 0 && !viewedUsers.has(user?.id || '') && (
                         <svg
                           className="absolute inset-0"
                           style={{ width: avatarSize, height: avatarSize, transform: 'rotate(-90deg)' }}
@@ -1519,8 +1519,8 @@ const Reel = () => {
           </div>
         )}
 
-        {/* Week/Day label for real activities */}
-        {currentGroup && currentActivity && !isLogActivityCard && currentActivity.dayNumber < 1000 && (
+        {/* Week/Day label for real activities — hide for own stories */}
+        {currentGroup && currentActivity && !isLogActivityCard && !isOwnStory && currentActivity.dayNumber < 1000 && (
           <div className="z-40 text-center shrink-0" style={{ marginBottom: '2px' }}>
             <span className="text-white/50 text-xs font-medium">
               Week {Math.ceil(currentActivity.dayNumber / 3)} • Day {((currentActivity.dayNumber - 1) % 3) + 1}
