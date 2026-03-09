@@ -1687,9 +1687,6 @@ const Reel = () => {
                               <h2 className="text-foreground font-black text-2xl tracking-tight uppercase leading-tight">
                                 Today's Activity
                               </h2>
-                              <p className="text-muted-foreground text-sm mt-3 tracking-[0.2em] uppercase">
-                                Week {week} | Day {dayInWeek}
-                              </p>
                             </div>
                             {/* Glowing plus */}
                             <div className="relative flex items-center justify-center z-10" style={{ width: 64, height: 64 }}>
