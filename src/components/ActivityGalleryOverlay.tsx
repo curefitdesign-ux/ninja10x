@@ -29,18 +29,7 @@ interface ReactorProfile {
   createdAt?: string;
 }
 
-const DEFAULT_REACTIONS: Record<ReactionType, ActivityReaction> = {
-  heart: { type: 'heart', count: 0, userReacted: false },
-  clap: { type: 'clap', count: 0, userReacted: false },
-  fistbump: { type: 'fistbump', count: 0, userReacted: false },
-  wow: { type: 'wow', count: 0, userReacted: false },
-  fire: { type: 'fire', count: 0, userReacted: false },
-  flex: { type: 'flex', count: 0, userReacted: false },
-  trophy: { type: 'trophy', count: 0, userReacted: false },
-  runner: { type: 'runner', count: 0, userReacted: false },
-  energy: { type: 'energy', count: 0, userReacted: false },
-  timer: { type: 'timer', count: 0, userReacted: false },
-};
+const DEFAULT_REACTIONS: Partial<Record<ReactionType, ActivityReaction>> = {};
 
 export interface GalleryActivity {
   id: string;

@@ -5,18 +5,7 @@ import { ReactionType, ActivityReaction, removeReaction } from '@/services/journ
 import { supabase } from '@/integrations/supabase/client';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import { formatDistanceToNow } from 'date-fns';
-
-// 3D reaction assets
-import clapImg from '@/assets/reactions/clap-hands.png';
-import fireImg from '@/assets/reactions/fire-new.png';
-import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
-import wowImg from '@/assets/reactions/wow.png';
-import flexImg from '@/assets/reactions/flex.png';
-import trophyImg from '@/assets/reactions/dumbbells.png';
-import runnerImg from '@/assets/reactions/runner.png';
-import energyImg from '@/assets/reactions/energy.png';
-import timerImg from '@/assets/reactions/stopwatch.png';
-import heartImg from '@/assets/reactions/heart-workout.png';
+import { ALL_REACTION_IMAGES } from '@/lib/reaction-images';
 
 interface ReactorProfile {
   userId: string;
@@ -35,24 +24,13 @@ interface ReactorWithReaction extends ReactorProfile {
 interface ReactsSoFarSheetProps {
   activityId: string;
   total: number;
-  reactions: Record<ReactionType, ActivityReaction>;
+  reactions: Partial<Record<ReactionType, ActivityReaction>>;
   reactorProfiles: ReactorProfile[];
   onClose: () => void;
   onReactionRemoved?: () => void;
 }
 
-const REACTION_IMAGES: Record<ReactionType, string> = {
-  heart: heartImg,
-  fire: fireImg,
-  clap: clapImg,
-  fistbump: fistbumpImg,
-  wow: wowImg,
-  flex: flexImg,
-  trophy: trophyImg,
-  runner: runnerImg,
-  energy: energyImg,
-  timer: timerImg,
-};
+const REACTION_IMAGES = ALL_REACTION_IMAGES;
 
 // Format time ago (e.g., "2h ago", "3d ago")
 function formatTimeAgo(dateString?: string): string {

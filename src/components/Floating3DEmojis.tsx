@@ -1,18 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useMemo } from 'react';
 import { ReactionType } from '@/services/journey-service';
-
-// 3D reaction assets
-import clapImg from '@/assets/reactions/clap-hands.png';
-import fireImg from '@/assets/reactions/fire-new.png';
-import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
-import wowImg from '@/assets/reactions/wow.png';
-import flexImg from '@/assets/reactions/flex.png';
-import trophyImg from '@/assets/reactions/dumbbells.png';
-import runnerImg from '@/assets/reactions/runner.png';
-import energyImg from '@/assets/reactions/energy.png';
-import timerImg from '@/assets/reactions/stopwatch.png';
-import heartImg from '@/assets/reactions/heart-workout.png';
+import { ALL_REACTION_IMAGES } from '@/lib/reaction-images';
 
 interface Floating3DEmojisProps {
   reactions: ReactionType[];
@@ -20,18 +9,8 @@ interface Floating3DEmojisProps {
   isPaused?: boolean;
 }
 
-const EMOJI_ASSETS: Record<ReactionType, string> = {
-  heart: heartImg,
-  fire: fireImg,
-  clap: clapImg,
-  fistbump: fistbumpImg,
-  wow: wowImg,
-  flex: flexImg,
-  trophy: trophyImg,
-  runner: runnerImg,
-  energy: energyImg,
-  timer: timerImg,
-};
+const EMOJI_ASSETS = ALL_REACTION_IMAGES;
+
 
 interface FloatingBubble {
   id: number;

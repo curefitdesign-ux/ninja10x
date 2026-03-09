@@ -15,16 +15,7 @@ import basketballIcon from '@/assets/activities/basketball.png';
 import racquetIcon from '@/assets/activities/racquet.png';
 
 // 3D Reaction assets
-import clapImg from '@/assets/reactions/clap-hands.png';
-import fireImg from '@/assets/reactions/fire-new.png';
-import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
-import wowImg from '@/assets/reactions/wow.png';
-import flexImg from '@/assets/reactions/flex.png';
-import trophyImg from '@/assets/reactions/dumbbells.png';
-import runnerImg from '@/assets/reactions/runner.png';
-import energyImg from '@/assets/reactions/energy.png';
-import timerImg from '@/assets/reactions/stopwatch.png';
-import heartImg from '@/assets/reactions/heart-workout.png';
+import { ALL_REACTION_IMAGES } from '@/lib/reaction-images';
 
 import { ReactionType } from '@/services/journey-service';
 
@@ -38,7 +29,7 @@ interface Photo {
   duration?: string;
   pr?: string;
   dayNumber: number;
-  reactions?: Record<ReactionType, { count: number }>;
+  reactions?: Partial<Record<ReactionType, { count: number }>>;
 }
 
 const isVideoUrl = (url: string) => url.startsWith('data:video') || /\.(mp4|webm|mov|avi)$/i.test(url);
@@ -48,18 +39,7 @@ const activityIcons: { [key: string]: string } = {
   'Cricket': cricketIcon, 'Trekking': trekkingIcon, 'Boxing': boxingIcon, 'Basketball': basketballIcon, 'Racquet': racquetIcon,
 };
 
-const REACTION_IMAGES: Record<ReactionType, string> = {
-  heart: heartImg,
-  fire: fireImg,
-  clap: clapImg,
-  fistbump: fistbumpImg,
-  wow: wowImg,
-  flex: flexImg,
-  trophy: trophyImg,
-  runner: runnerImg,
-  energy: energyImg,
-  timer: timerImg,
-};
+const REACTION_IMAGES = ALL_REACTION_IMAGES;
 
 interface StackedPhotoCardsProps {
   photos: Photo[];
