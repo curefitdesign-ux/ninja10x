@@ -109,9 +109,13 @@ export default function ReelToProgressTransition({
     }, 250);
   }, [onStoryTap]);
 
-  // Auto-open gallery when navigating from notification with openGalleryAtDay
+  // Set correct gallery index when activities load (gallery already open from initial state)
   useEffect(() => {
-    if (!openGalleryAtDay || openGalleryHandledRef.current || myActivities.length === 0) return;
+    if (!openGalleryAtDay || myActivities.length === 0) return;
+    if (openGalleryHandledRef.current) {
+      // Already set index, just ensure gallery stays open
+      return;
+    }
     openGalleryHandledRef.current = true;
     const uploaded = myActivities.filter(a => a.storageUrl);
     const idx = uploaded.findIndex(a => a.dayNumber === openGalleryAtDay);
