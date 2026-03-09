@@ -1464,12 +1464,78 @@ const Reel = () => {
 
         </div>{/* end top zone */}
 
+        {/* SEGMENTED PROGRESS BARS — Instagram-style, above story cards */}
+        {currentGroup && currentGroup.activities.length > 0 && (
+          <div
+            className="z-40 flex items-center gap-2 px-4 shrink-0"
+            style={{ marginTop: '-8px', marginBottom: '4px' }}
+          >
+            {/* Counter pill */}
+            <span
+              className="text-white/60 text-xs font-medium shrink-0 tabular-nums"
+              style={{ minWidth: 32 }}
+            >
+              {currentActivityIndex + 1} / {currentGroup.activities.length}
+            </span>
+
+            {/* Segmented bars */}
+            <div className="flex-1 flex items-center gap-1">
+              {currentGroup.activities.map((_, segIdx) => {
+                const isActiveSegment = segIdx === currentActivityIndex;
+                const isViewed = segIdx < currentActivityIndex;
+
+                return (
+                  <div
+                    key={segIdx}
+                    className="flex-1 h-[3px] rounded-full overflow-hidden cursor-pointer"
+                    style={{ background: 'rgba(255,255,255,0.15)' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentActivityIndex(segIdx);
+                    }}
+                  >
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: isViewed ? '100%' : isActiveSegment && autoAdvanceProgress > 0 ? '100%' : '0%',
+                        background: 'rgba(255,255,255,0.85)',
+                        transition: isActiveSegment && autoAdvanceProgress > 0
+                          ? `width ${autoAdvanceDuration}ms linear`
+                          : isActiveSegment
+                            ? 'none'
+                            : 'width 0.3s ease',
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Close button */}
+            <button
+              onClick={handleClose}
+              className="shrink-0 w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition-colors active:scale-90"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+
+        {/* Week/Day label */}
+        {currentGroup && currentActivity && !isLogActivityCard && (
+          <div className="z-40 text-center shrink-0" style={{ marginBottom: '2px' }}>
+            <span className="text-white/50 text-xs font-medium">
+              Week {Math.ceil(currentActivity.dayNumber / 3)} • Day {((currentActivity.dayNumber - 1) % 3) + 1}
+            </span>
+          </div>
+        )}
+
         {/* MIDDLE CONTAINER — flexes between profile strip and bottom nav */}
         <div
           className="relative z-30 flex-1 min-h-0 flex flex-col"
           style={{
             paddingTop: '0px',
-            marginTop: '-16px',
+            marginTop: '-4px',
             paddingBottom: 'calc(max(env(safe-area-inset-bottom, 6px), 6px) + 80px)',
           }}
         >
