@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { useProfile } from '@/hooks/use-profile';
+import { useMorphTransition } from '@/hooks/use-morph-transition';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import CircularProgressRing from '@/components/CircularProgressRing';
 import ReelProgressPill, { type PillState } from '@/components/ReelProgressPill';
