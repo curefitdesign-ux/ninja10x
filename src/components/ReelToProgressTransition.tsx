@@ -57,7 +57,7 @@ export default function ReelToProgressTransition({
   const [showStories, setShowStories] = useState(false);
   const [expandingCardId, setExpandingCardId] = useState<string | null>(null);
   // Open gallery immediately on mount when coming from notification
-  const [galleryOpen, setGalleryOpen] = useState(!!openGalleryAtDay);
+  const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
   const openGalleryHandledRef = useRef(!!openGalleryAtDay);
   const [showCertPopup, setShowCertPopup] = useState(false);
@@ -111,18 +111,17 @@ export default function ReelToProgressTransition({
     }, 250);
   }, [onStoryTap]);
 
-  // Set correct gallery index when activities load (gallery already open from initial state)
+  // Set correct gallery index when activities load, then open gallery
   useEffect(() => {
     if (!openGalleryAtDay || myActivities.length === 0) return;
-    if (openGalleryHandledRef.current) {
-      // Already set index, just ensure gallery stays open
-      return;
-    }
+    if (openGalleryHandledRef.current) return;
     openGalleryHandledRef.current = true;
     const uploaded = myActivities.filter(a => a.storageUrl);
     const idx = uploaded.findIndex(a => a.dayNumber === openGalleryAtDay);
-    setGalleryInitialIndex(Math.max(0, idx));
-    setGalleryOpen(true);
+    const targetIndex = Math.max(0, idx);
+    setGalleryInitialIndex(targetIndex);
+    // Open gallery on next tick so initialIndex is applied first
+    requestAnimationFrame(() => setGalleryOpen(true));
   }, [openGalleryAtDay, myActivities]);
 
 
