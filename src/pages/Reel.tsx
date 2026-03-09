@@ -1486,8 +1486,8 @@ const Reel = () => {
           </div>
         </div>{/* end top zone */}
 
-        {/* SEGMENTED PROGRESS BARS — only in viewProfile mode */}
-        {viewProfile && currentGroup && currentGroup.activities.length > 1 && (
+        {/* SEGMENTED PROGRESS BARS */}
+        {currentGroup && currentGroup.activities.length > 1 && (
           <div
             className="z-40 flex items-center px-4 shrink-0"
             style={{ marginTop: '2px', marginBottom: '4px' }}
