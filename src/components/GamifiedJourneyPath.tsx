@@ -17,6 +17,7 @@ interface GamifiedJourneyPathProps {
   completedActivities: number;
   onCrystalTap?: (weekNum: number) => void;
   onFinalGoalTap?: () => void;
+  highlightDayNumber?: number;
 }
 
 const PATH_W = 380;
