@@ -1650,8 +1650,9 @@ const Reel = () => {
                               navigate('/camera', { state: { dayNumber: currentActivity.dayNumber } });
                             }}
                             style={{
-                              width: '100%',
-                              height: '100%',
+                              width: '90%',
+                              aspectRatio: '9/16',
+                              maxHeight: '100%',
                               background: 'rgba(255,255,255,0.10)',
                               backdropFilter: 'blur(40px)',
                               WebkitBackdropFilter: 'blur(40px)',
