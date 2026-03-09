@@ -115,19 +115,19 @@ export function useJourneyActivities() {
         .in('activity_id', activityIds);
 
       // Build reaction counts per activity
-      const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
+      const reactionMap: Record<string, Partial<Record<ReactionType, ActivityReaction>>> = {};
       const totalMap: Record<string, number> = {};
 
       for (const r of reactions || []) {
         const type = (r.reaction_type || 'heart') as ReactionType;
         if (!reactionMap[r.activity_id]) {
-          reactionMap[r.activity_id] = { ...DEFAULT_REACTIONS };
+          reactionMap[r.activity_id] = {};
           totalMap[r.activity_id] = 0;
         }
-        reactionMap[r.activity_id][type] = {
-          ...reactionMap[r.activity_id][type],
-          count: reactionMap[r.activity_id][type].count + 1,
-        };
+        if (!reactionMap[r.activity_id][type]) {
+          reactionMap[r.activity_id][type] = { type, count: 0, userReacted: false };
+        }
+        reactionMap[r.activity_id][type]!.count++;
         totalMap[r.activity_id]++;
       }
 
