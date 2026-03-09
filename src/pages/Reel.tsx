@@ -2037,6 +2037,7 @@ const Reel = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
+                          haptic();
                           setShowEditSheet(true);
                         }}
                         className="shrink-0 active:scale-95 transition-transform"
