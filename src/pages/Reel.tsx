@@ -457,6 +457,9 @@ const Reel = () => {
   const cardOpacity = useTransform(dragX, [-200, -100, 0, 100, 200], [0.85, 0.95, 1, 0.95, 0.85]);
   const cardRotate = useMotionValue(0); // No rotation for smooth scroll feel
   const cardScale = useMotionValue(1); // No scale for smooth scroll feel
+  // Parallax for side peek cards — drag right reveals left card, drag left reveals right card
+  const peekLeftX = useTransform(dragX, [0, 150], [0, 14]);
+  const peekRightX = useTransform(dragX, [-150, 0], [-14, 0]);
   
   const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
@@ -1489,7 +1492,7 @@ const Reel = () => {
               <motion.div
                 key={`peek-left-${prevIdx}`}
                 className="absolute left-0 top-0 bottom-0 flex items-center cursor-pointer"
-                style={{ width: '10%', zIndex: 20 }}
+                style={{ width: '10%', zIndex: 20, x: peekLeftX }}
                 onClick={goPrevUser}
                 initial={{ opacity: 0, x: -10, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -1533,7 +1536,7 @@ const Reel = () => {
               <motion.div
                 key={`peek-right-${nextIdx}`}
                 className="absolute right-0 top-0 bottom-0 flex items-center cursor-pointer"
-                style={{ width: '10%', zIndex: 20 }}
+                style={{ width: '10%', zIndex: 20, x: peekRightX }}
                 onClick={goNextUser}
                 initial={{ opacity: 0, x: 10, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
