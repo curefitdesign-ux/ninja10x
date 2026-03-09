@@ -202,54 +202,52 @@ const Reel = () => {
     loadActivities();
   }, [loadActivities]);
 
-  // For logged-in user: show today's story if uploaded, else empty state placeholder.
-  // For all other users: only their latest story (already handled in data layer).
+  // Show ALL stories per user (not just today's).
+  // For logged-in user: show all activities + placeholder if journey not complete.
   const effectiveUserGroups = useMemo(() => {
     if (!user) return userGroups;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Find today's activity from the user's own activities
-    const todayActivity = myActivities.find(a => {
-      const actDate = new Date(a.createdAt);
-      actDate.setHours(0, 0, 0, 0);
-      return actDate.getTime() === today.getTime();
-    });
-
     const othersGroups = userGroups.filter(g => g.userId !== user.id);
 
-    if (todayActivity) {
-      // Show ONLY today's story for the current user
+    // Build own group with ALL activities
+    const allMyActivities = [...myActivities].sort((a, b) => a.dayNumber - b.dayNumber);
+
+    if (allMyActivities.length > 0) {
+      // Add log-activity placeholder at the end if journey not complete
+      const activitiesWithPlaceholder = [...allMyActivities];
+      if (allMyActivities.length < 12) {
+        activitiesWithPlaceholder.push({
+          id: 'log-activity',
+          dayNumber: allMyActivities.length + 1,
+          storageUrl: '',
+          originalUrl: '',
+          activity: undefined,
+          duration: undefined,
+          pr: undefined,
+          frame: undefined,
+          isVideo: false,
+          isPublic: false,
+          createdAt: new Date().toISOString(),
+        } as any);
+      }
+
       const myGroup: UserStoryGroup = {
         userId: user.id,
         displayName: profile?.display_name || 'You',
         avatarUrl: profile?.avatar_url || '',
-        activities: [todayActivity],
+        activities: activitiesWithPlaceholder,
       };
       return [myGroup, ...othersGroups];
     }
 
-    // Journey complete — no placeholder needed
-    if (myActivities.length >= 12) return [
-      ...(userGroups.find(g => g.userId === user.id) ? [{
-        userId: user.id,
-        displayName: profile?.display_name || 'You',
-        avatarUrl: profile?.avatar_url || '',
-        activities: [],
-      } as UserStoryGroup] : []),
-      ...othersGroups,
-    ];
-
-    // Empty state placeholder — user hasn't logged today
-    const nextDay = myActivities.length + 1;
+    // No activities yet — show placeholder only
     const myPlaceholderGroup: UserStoryGroup = {
       userId: user.id,
       displayName: profile?.display_name || 'You',
       avatarUrl: profile?.avatar_url || '',
       activities: [{
         id: 'log-activity',
-        dayNumber: nextDay,
+        dayNumber: 1,
         storageUrl: '',
         originalUrl: '',
         activity: null,
