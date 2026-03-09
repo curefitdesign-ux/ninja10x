@@ -77,7 +77,7 @@ export async function fetchAllActivities(): Promise<JourneyActivity[]> {
     .in('activity_id', activityIds);
 
   // Build reaction map with types
-  const reactionMap: Record<string, Record<ReactionType, ActivityReaction>> = {};
+  const reactionMap: Record<string, Partial<Record<ReactionType, ActivityReaction>>> = {};
   const totalReactionMap: Record<string, { count: number; userReacted: boolean }> = {};
   
   for (const r of reactions || []) {
