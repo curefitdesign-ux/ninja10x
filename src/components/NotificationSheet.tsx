@@ -235,12 +235,14 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
     onClose();
   }, [onClose]);
 
-  // Navigate to progress page highlighting the specific activity tile
+  // Navigate to the specific activity in the reel viewer
   const handleNotificationTap = useCallback((notif: Notification) => {
     onClose();
-    navigate('/progress', {
+    navigate('/reel', {
+      replace: true,
       state: {
-        highlightDayNumber: notif.dayNumber,
+        activityId: notif.activityId,
+        dayNumber: notif.dayNumber,
         _ts: Date.now(),
       },
     });
