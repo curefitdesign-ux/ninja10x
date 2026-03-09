@@ -557,7 +557,11 @@ const Reel = () => {
   };
 
   const handleClose = () => {
-    navigate('/reel', { replace: true });
+    if (viewProfile) {
+      navigate('/reel', { replace: true });
+    } else {
+      navigate('/reel', { replace: true });
+    }
   };
 
 
