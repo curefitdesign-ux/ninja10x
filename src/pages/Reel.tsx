@@ -529,7 +529,6 @@ const Reel = () => {
   const handleReact = async (type: ReactionType) => {
     if (!currentActivity || isOwnStory) return;
 
-    haptic();
     setShowSendReactionSheet(false);
 
     setLocalReactions(prev => {
