@@ -1443,6 +1443,7 @@ const Reel = () => {
                             </linearGradient>
                           </defs>
                         </svg>
+                        )}
                         
                         {/* Avatar - ALWAYS visible and clear (never locked/blurred) */}
                         <div
