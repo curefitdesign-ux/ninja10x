@@ -72,6 +72,7 @@ const Reel = () => {
   const weekRecapNumber = navState.weekNumber as number | undefined;
   const sourceUserId = navState.sourceUserId as string | undefined;
   const navTimestamp = navState._ts as number | undefined;
+  const viewProfile = navState.viewProfile as boolean | undefined;
   
   // Determine navigation intent:
   // - hasDeepLink: user tapped a specific story card (should open THAT story, never recap)
@@ -143,7 +144,7 @@ const Reel = () => {
   const { triggerShake, shakeAnimation, shakeTransition } = useStoryNudgeAnimation();
 
   // Create a unique key for this navigation to detect re-navigation
-  const currentNavKey = `${deepLinkActivityId || ''}-${deepLinkDayNumber || ''}-${weekRecapVideoFromNav || ''}-${navTimestamp || ''}`;
+  const currentNavKey = `${deepLinkActivityId || ''}-${deepLinkDayNumber || ''}-${weekRecapVideoFromNav || ''}-${navTimestamp || ''}-${viewProfile ? sourceUserId : ''}`;
   
   // Reset navigation state when navigation changes
   useEffect(() => {
@@ -202,50 +203,66 @@ const Reel = () => {
     loadActivities();
   }, [loadActivities]);
 
-  // Show ALL stories per user (not just today's).
-  // For logged-in user: show all activities + placeholder if journey not complete.
+  // In viewProfile mode: show ALL activities for the target user.
+  // In home mode: show only the LATEST activity per user (today's feed).
   const effectiveUserGroups = useMemo(() => {
     if (!user) return userGroups;
 
-    const othersGroups = userGroups.filter(g => g.userId !== user.id);
-
-    // Build own group with ALL activities
-    const allMyActivities = [...myActivities].sort((a, b) => a.dayNumber - b.dayNumber);
-
-    if (allMyActivities.length > 0) {
-      // Add log-activity placeholder at the end if journey not complete
-      const activitiesWithPlaceholder = [...allMyActivities];
-      if (allMyActivities.length < 12) {
-        activitiesWithPlaceholder.push({
-          id: 'log-activity',
-          dayNumber: allMyActivities.length + 1,
-          storageUrl: '',
-          originalUrl: '',
-          activity: undefined,
-          duration: undefined,
-          pr: undefined,
-          frame: undefined,
-          isVideo: false,
-          isPublic: false,
-          createdAt: new Date().toISOString(),
-        } as any);
+    // VIEW PROFILE MODE — single user, all activities, recent first
+    if (viewProfile && sourceUserId) {
+      const targetGroup = userGroups.find(g => g.userId === sourceUserId);
+      if (targetGroup) {
+        const sortedActivities = [...targetGroup.activities].sort((a, b) => b.dayNumber - a.dayNumber);
+        return [{ ...targetGroup, activities: sortedActivities }];
       }
-
-      const myGroup: UserStoryGroup = {
-        userId: user.id,
-        displayName: profile?.display_name || 'You',
-        avatarUrl: profile?.avatar_url || '',
-        activities: activitiesWithPlaceholder,
-      };
-      return [myGroup, ...othersGroups];
+      // If target user is self
+      if (sourceUserId === user.id) {
+        const allMyActivities = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
+        return [{
+          userId: user.id,
+          displayName: profile?.display_name || 'You',
+          avatarUrl: profile?.avatar_url || '',
+          activities: allMyActivities,
+        }];
+      }
+      return userGroups;
     }
 
-    // No activities yet — show placeholder only
-    const myPlaceholderGroup: UserStoryGroup = {
+    // HOME MODE — only latest activity per user
+    const othersGroups = userGroups.filter(g => g.userId !== user.id).map(g => {
+      // Keep only the latest (most recent) activity
+      const latestActivity = g.activities.length > 0
+        ? [g.activities.reduce((latest, a) => a.dayNumber > latest.dayNumber ? a : latest, g.activities[0])]
+        : g.activities;
+      return { ...g, activities: latestActivity };
+    });
+
+    // Build own group with latest activity + placeholder
+    const allMyActivities = [...myActivities].sort((a, b) => a.dayNumber - b.dayNumber);
+    const latestOwn = allMyActivities.length > 0 ? [allMyActivities[allMyActivities.length - 1]] : [];
+
+    const activitiesWithPlaceholder = [...latestOwn];
+    if (allMyActivities.length < 12) {
+      activitiesWithPlaceholder.push({
+        id: 'log-activity',
+        dayNumber: allMyActivities.length + 1,
+        storageUrl: '',
+        originalUrl: '',
+        activity: undefined,
+        duration: undefined,
+        pr: undefined,
+        frame: undefined,
+        isVideo: false,
+        isPublic: false,
+        createdAt: new Date().toISOString(),
+      } as any);
+    }
+
+    const myGroup: UserStoryGroup = {
       userId: user.id,
       displayName: profile?.display_name || 'You',
       avatarUrl: profile?.avatar_url || '',
-      activities: [{
+      activities: activitiesWithPlaceholder.length > 0 ? activitiesWithPlaceholder : [{
         id: 'log-activity',
         dayNumber: 1,
         storageUrl: '',
@@ -260,8 +277,8 @@ const Reel = () => {
       }],
     };
 
-    return [myPlaceholderGroup, ...othersGroups];
-  }, [userGroups, user, myActivities, profile]);
+    return [myGroup, ...othersGroups];
+  }, [userGroups, user, myActivities, profile, viewProfile, sourceUserId]);
 
   // MAIN NAVIGATION EFFECT: Determine where to land based on navigation intent
   // This runs once per navigation after data is loaded
@@ -540,7 +557,11 @@ const Reel = () => {
   };
 
   const handleClose = () => {
-    navigate('/reel', { replace: true });
+    if (viewProfile) {
+      navigate('/reel', { replace: true });
+    } else {
+      navigate('/reel', { replace: true });
+    }
   };
 
 
@@ -1190,14 +1211,43 @@ const Reel = () => {
           onNudge={triggerShake}
         />
 
-        {/* TOP ZONE — avatar strip only (brand bar moved to bottom) */}
+        {/* TOP ZONE */}
         <div 
           className="z-50 flex flex-col justify-end shrink-0"
           style={{ 
             paddingTop: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 12px)',
           }}
         >
-          {/* Avatar strip: pinned own avatar + scrollable others */}
+          {viewProfile ? (
+            /* Profile view header — user info + X button */
+            <div className="flex items-center justify-between px-4 py-2" style={{ height: 78 }}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden">
+                  <ProfileAvatar
+                    src={currentGroup?.avatarUrl}
+                    name={currentGroup?.displayName}
+                    size={40}
+                  />
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">{currentGroup?.displayName}</p>
+                  <p className="text-white/40 text-xs">{currentGroup?.activities.length || 0} activities</p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/reel', { replace: true })}
+                className="w-9 h-9 flex items-center justify-center rounded-full active:scale-95 transition-transform"
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                }}
+              >
+                <X className="w-5 h-5 text-white/80" />
+              </button>
+            </div>
+          ) : (
+          /* Avatar strip: pinned own avatar + scrollable others */
           <div
             className="shrink-0 overflow-hidden"
             style={{ height: 78 }}
@@ -1215,10 +1265,7 @@ const Reel = () => {
                 return (
                   <button
                     onClick={() => {
-                      if (ownIdx >= 0) {
-                        setCurrentUserIndex(ownIdx);
-                        setCurrentActivityIndex(0);
-                      }
+                      navigate('/reel', { state: { sourceUserId: user?.id, viewProfile: true, _ts: Date.now() } });
                     }}
                     className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
                     style={{ 
@@ -1330,8 +1377,7 @@ const Reel = () => {
                         key={group.userId}
                         ref={isActive ? activeAvatarRef : undefined}
                         onClick={() => {
-                          setCurrentUserIndex(idx);
-                          setCurrentActivityIndex(0);
+                          navigate('/reel', { state: { sourceUserId: group.userId, viewProfile: true, _ts: Date.now() } });
                         }}
                     className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
                         style={{ 
@@ -1458,17 +1504,16 @@ const Reel = () => {
                   })}
             </div>{/* end scrollable others */}
             </div>{/* end flex container */}
-          </div>{/* end height:78 wrapper */}
-
+          </div>
+          )}
         </div>{/* end top zone */}
 
-        {/* SEGMENTED PROGRESS BARS — Instagram-style, above story cards */}
-        {currentGroup && currentGroup.activities.length > 0 && (
+        {/* SEGMENTED PROGRESS BARS — only in viewProfile mode */}
+        {viewProfile && currentGroup && currentGroup.activities.length > 1 && (
           <div
             className="z-40 flex items-center px-4 shrink-0"
             style={{ marginTop: '2px', marginBottom: '4px' }}
           >
-            {/* Segmented bars */}
             <div className="flex-1 flex items-center gap-1">
               {currentGroup.activities.map((_, segIdx) => {
                 const isActiveSegment = segIdx === currentActivityIndex;
@@ -1503,8 +1548,8 @@ const Reel = () => {
           </div>
         )}
 
-        {/* Week/Day label — only for real activities (dayNumber < 1000) */}
-        {currentGroup && currentActivity && !isLogActivityCard && currentActivity.dayNumber < 1000 && (
+        {/* Week/Day label — only in viewProfile mode for real activities */}
+        {viewProfile && currentGroup && currentActivity && !isLogActivityCard && currentActivity.dayNumber < 1000 && (
           <div className="z-40 text-center shrink-0" style={{ marginBottom: '2px' }}>
             <span className="text-white/50 text-xs font-medium">
               Week {Math.ceil(currentActivity.dayNumber / 3)} • Day {((currentActivity.dayNumber - 1) % 3) + 1}
