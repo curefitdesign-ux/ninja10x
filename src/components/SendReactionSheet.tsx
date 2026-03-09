@@ -321,7 +321,7 @@ export default function SendReactionSheet({
                 return (
                   <motion.button
                     key={type}
-                    onClick={() => isUserReaction ? handleRemoveReaction() : onReact(type)}
+                    onClick={() => { haptic(); isUserReaction ? handleRemoveReaction() : onReact(type); }}
                     className="relative flex flex-col items-center gap-1.5"
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
