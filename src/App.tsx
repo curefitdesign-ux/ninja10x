@@ -203,6 +203,7 @@ const MobileFrame = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => {
   useEffect(() => enableAutoMotion(), []);
+  useGlobalHaptics();
 
   return (
     <QueryClientProvider client={queryClient}>
