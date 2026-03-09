@@ -144,7 +144,7 @@ const Reel = () => {
   const { triggerShake, shakeAnimation, shakeTransition } = useStoryNudgeAnimation();
 
   // Create a unique key for this navigation to detect re-navigation
-  const currentNavKey = `${deepLinkActivityId || ''}-${deepLinkDayNumber || ''}-${weekRecapVideoFromNav || ''}-${navTimestamp || ''}`;
+  const currentNavKey = `${deepLinkActivityId || ''}-${deepLinkDayNumber || ''}-${weekRecapVideoFromNav || ''}-${navTimestamp || ''}-${viewProfile ? sourceUserId : ''}`;
   
   // Reset navigation state when navigation changes
   useEffect(() => {
