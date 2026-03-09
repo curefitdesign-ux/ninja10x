@@ -544,7 +544,6 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
     }
     reactionMap[r.activity_id][type]!.count++;
     if (user && r.user_id === user.id) reactionMap[r.activity_id][type]!.userReacted = true;
-    };
     totalMap[r.activity_id]++;
     
     // Add each reaction as a separate entry with timestamp
