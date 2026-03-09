@@ -106,18 +106,7 @@ export async function fetchAllActivities(): Promise<JourneyActivity[]> {
     ...a,
     reaction_count: totalReactionMap[a.id]?.count || 0,
     user_reacted: totalReactionMap[a.id]?.userReacted || false,
-    reactions: reactionMap[a.id] || {
-      heart: { type: 'heart', count: 0, userReacted: false },
-      clap: { type: 'clap', count: 0, userReacted: false },
-      fistbump: { type: 'fistbump', count: 0, userReacted: false },
-      wow: { type: 'wow', count: 0, userReacted: false },
-      fire: { type: 'fire', count: 0, userReacted: false },
-      flex: { type: 'flex', count: 0, userReacted: false },
-      trophy: { type: 'trophy', count: 0, userReacted: false },
-      runner: { type: 'runner', count: 0, userReacted: false },
-      energy: { type: 'energy', count: 0, userReacted: false },
-      timer: { type: 'timer', count: 0, userReacted: false },
-    },
+    reactions: reactionMap[a.id] || {},
     is_own: user ? a.user_id === user.id : false,
   }));
 }
