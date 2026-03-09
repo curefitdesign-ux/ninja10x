@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Users } from 'lucide-react';
 import { fetchPublicFeed, type LocalActivity } from '@/hooks/use-journey-activities';
 import { useAuth } from '@/hooks/use-auth';
+import { useMorphTransition } from '@/hooks/use-morph-transition';
 import ProfileAvatar from '@/components/ProfileAvatar';
 
 const isRecent = (dateStr: string) => Date.now() - new Date(dateStr).getTime() < 24 * 60 * 60 * 1000;
