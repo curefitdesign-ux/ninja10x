@@ -40,7 +40,7 @@ export default function StoryReactionBar({ onReact, disabled }: StoryReactionBar
       {REACTIONS.map((reaction, index) => (
         <motion.button
           key={reaction.type}
-          onClick={() => !disabled && onReact(reaction.type)}
+          onClick={() => { if (!disabled) { haptic(); onReact(reaction.type); } }}
           className="relative flex items-center justify-center w-12 h-12 rounded-full transition-all active:scale-90"
           style={{
             background: 'rgba(255, 255, 255, 0.05)',
