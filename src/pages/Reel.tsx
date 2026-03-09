@@ -1424,7 +1424,7 @@ const Reel = () => {
 
 
         {/* Week/Day label for real activities — hide for own stories */}
-        {currentGroup && currentActivity && !isLogActivityCard && !isOwnStory && currentActivity.dayNumber < 1000 && (
+        {currentGroup && currentActivity && !isLogActivityCard && currentActivity.dayNumber < 1000 && (
           <div className="z-40 text-center shrink-0" style={{ marginBottom: '2px' }}>
             <span className="text-white/50 text-xs font-medium">
               Week {Math.ceil(currentActivity.dayNumber / 3)} • Day {((currentActivity.dayNumber - 1) % 3) + 1}
