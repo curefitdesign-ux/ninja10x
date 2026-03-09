@@ -156,6 +156,7 @@ const StackedPhotoCards = ({ photos }: StackedPhotoCardsProps) => {
 
     return (
       <div 
+        ref={(el: HTMLDivElement | null) => { if (el) cardRefs.current.set(photo.id, el); }}
         className="absolute top-1/2 left-1/2 cursor-pointer" 
         style={{ transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale}) rotate(${rotate}deg)`, zIndex }} 
         onClick={() => handlePhotoTap(photo)}
