@@ -651,7 +651,7 @@ export default function ReelToProgressTransition({
                 animate={{ opacity: expandingCardId ? 0.3 : 1 }}
               >
                 {showTiles && (
-                  <GamifiedJourneyPath completedActivities={myActivithighlightDayNumber={highlightDayNumber} ies.length} onCrystalTap={onCrystalTap} />
+                  <GamifiedJourneyPath completedActivities={myActivities.length} onCrystalTap={onCrystalTap} highlightDayNumber={highlightDayNumber} />
                 )}
               </motion.div>
             </motion.div>
