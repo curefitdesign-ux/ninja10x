@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-
 import { ReactionType } from '@/services/journey-service';
 
 // Import 3D reaction images
@@ -21,7 +20,9 @@ const REACTIONS: { type: ReactionType; image: string; label: string }[] = [
 ];
 
 export default function StoryReactionBar({ onReact, disabled }: StoryReactionBarProps) {
-  "flex items-center justify-center gap-2 px-4 py-3 rounded-full"
+  return (
+    <motion.div
+      className="flex items-center justify-center gap-2 px-4 py-3 rounded-full"
       style={{
         background: 'rgba(60, 55, 70, 0.85)',
         backdropFilter: 'blur(40px)',
@@ -37,8 +38,8 @@ export default function StoryReactionBar({ onReact, disabled }: StoryReactionBar
       {REACTIONS.map((reaction, index) => (
         <motion.button
           key={reaction.type}
-          onClick={() => { if (!disabled) { haptic(); onReact(reaction.type); } }}
-     Name="relative flex items-center justify-center w-12 h-12 rounded-full transition-all active:scale-90"
+          onClick={() => { if (!disabled) { onReact(reaction.type); } }}
+          className="relative flex items-center justify-center w-12 h-12 rounded-full transition-all active:scale-90"
           style={{
             background: 'rgba(255, 255, 255, 0.05)',
           }}
