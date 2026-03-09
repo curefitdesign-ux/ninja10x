@@ -57,7 +57,7 @@ export default function ReelToProgressTransition({
   const [showStories, setShowStories] = useState(false);
   const [expandingCardId, setExpandingCardId] = useState<string | null>(null);
   // Open gallery immediately on mount when coming from notification
-  const [galleryOpen, setGalleryOpen] = useState(!!openGalleryAtDay);
+  const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
   const openGalleryHandledRef = useRef(!!openGalleryAtDay);
   const [showCertPopup, setShowCertPopup] = useState(false);
