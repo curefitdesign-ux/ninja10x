@@ -217,10 +217,15 @@ const Reel = () => {
         activities: [...g.activities].sort((a, b) => b.dayNumber - a.dayNumber),
       }));
 
-    // Own user: only today's activity (latest) + log placeholder
+    // Own user: show today's logged activity OR just the log placeholder (no past activities)
     const allMyActivities = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
-    const todayActivity = allMyActivities.length > 0 ? [allMyActivities[0]] : [];
-    const ownActivities = [...todayActivity];
+    const latestActivity = allMyActivities[0];
+    const loggedToday = latestActivity && new Date(latestActivity.createdAt).toDateString() === new Date().toDateString();
+    
+    const ownActivities: any[] = [];
+    if (loggedToday) {
+      ownActivities.push(latestActivity);
+    }
     if (allMyActivities.length < 12) {
       ownActivities.push({
         id: 'log-activity',
