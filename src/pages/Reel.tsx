@@ -482,6 +482,19 @@ const Reel = () => {
     }
   }, [currentUserIndex]);
 
+  // Mark the current user as viewed when their story is displayed
+  useEffect(() => {
+    const currentGroup = effectiveUserGroups[currentUserIndex];
+    if (currentGroup) {
+      setViewedUsers(prev => {
+        if (prev.has(currentGroup.userId)) return prev;
+        const next = new Set(prev);
+        next.add(currentGroup.userId);
+        return next;
+      });
+    }
+  }, [currentUserIndex, effectiveUserGroups]);
+
   // Defensive reset on every story/user step to prevent residual x-offset drift
   useEffect(() => {
     dragX.set(0);
