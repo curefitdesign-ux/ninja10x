@@ -45,6 +45,7 @@ const Progress = () => {
   const transitionDayNumber = location.state?.dayNumber || 1;
   const transitionToProgress = location.state?.transitionToProgress;
   const highlightDayNumber = location.state?.highlightDayNumber as number | undefined;
+  const openGalleryAtDay = location.state?.openGalleryAtDay as number | undefined;
 
   useEffect(() => {
     const loadFeed = async () => {
