@@ -1359,7 +1359,11 @@ const Reel = () => {
                         key={group.userId}
                         ref={isActive ? activeAvatarRef : undefined}
                         onClick={() => {
-                          navigate('/reel', { state: { sourceUserId: group.userId, viewProfile: true, _ts: Date.now() } });
+                          const targetIdx = effectiveUserGroups.findIndex(g => g.userId === group.userId);
+                          if (targetIdx >= 0) {
+                            setCurrentUserIndex(targetIdx);
+                            setCurrentActivityIndex(0);
+                          }
                         }}
                     className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
                         style={{ 
