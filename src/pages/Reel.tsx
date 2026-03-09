@@ -132,7 +132,6 @@ const Reel = () => {
 
   // Data for progress overlay
   const { activities: myActivities, hasPublicActivity, makeActivityPublic } = useJourneyActivities();
-  const [publicFeed, setPublicFeed] = useState<LocalActivity[]>([]);
   
   // Privacy/share sheet state
   const [showMakePublicSheet, setShowMakePublicSheet] = useState(false);
@@ -157,14 +156,16 @@ const Reel = () => {
     }
   }, [currentNavKey]);
 
-  // Load public feed for progress overlay
-  useEffect(() => {
-    const loadFeed = async () => {
-      const feed = await fetchPublicFeed();
-      setPublicFeed(feed);
-    };
-    loadFeed();
-  }, []);
+  // Derive public feed from userGroups instead of a separate fetch
+  // This eliminates a duplicate network request for the same data
+  const publicFeed = useMemo(() => {
+    if (!userGroups.length) return [];
+    return userGroups.flatMap(g => {
+      const latest = g.activities[g.activities.length - 1];
+      if (!latest) return [];
+      return [{ ...latest, displayName: g.displayName, avatarUrl: g.avatarUrl }];
+    });
+  }, [userGroups]);
 
   // Load all activities grouped by user
   const loadActivities = useCallback(async () => {

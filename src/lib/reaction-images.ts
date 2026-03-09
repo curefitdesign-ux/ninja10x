@@ -75,3 +75,29 @@ export const ACTIVITY_REACTIONS: Record<string, { reactions: ReactionType[]; lab
   'Running': { reactions: ['runner', 'medal'], label: 'Running' },
   'Racquet Sports': { reactions: ['shuttlecock', 'medal'], label: 'Racquet Sports' },
 };
+
+export const REACTION_LABELS: Record<string, string> = {
+  heart: '❤️ loved',
+  fire: '🔥 fired up',
+  clap: '👏 applauded',
+  fistbump: '🤜 fist bumped',
+  wow: '😮 wowed at',
+  flex: '💪 flexed on',
+  trophy: '🏆 celebrated',
+  runner: '🏃 cheered',
+  energy: '⚡ energized',
+  timer: '⏱️ timed',
+};
+
+export const REACTION_VERBS: Record<string, string> = {
+  heart: 'loved',
+  fire: 'fired up',
+  clap: 'applauded',
+  fistbump: 'fist bumped',
+  wow: 'wowed at',
+  flex: 'flexed on',
+  trophy: 'celebrated',
+  runner: 'cheered',
+  energy: 'energized',
+  timer: 'timed',
+};

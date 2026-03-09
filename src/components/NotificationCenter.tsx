@@ -4,43 +4,7 @@ import { Bell, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 
-// 3D reaction assets (clean transparency)
-import fireImg from '@/assets/reactions/fire-new.png';
-import clapImg from '@/assets/reactions/clap-hands.png';
-import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
-import wowImg from '@/assets/reactions/wow.png';
-import flexImg from '@/assets/reactions/flex.png';
-import trophyImg from '@/assets/reactions/dumbbells.png';
-import runnerImg from '@/assets/reactions/runner.png';
-import energyImg from '@/assets/reactions/energy.png';
-import timerImg from '@/assets/reactions/stopwatch.png';
-import heartImg from '@/assets/reactions/heart-workout.png';
-
-const REACTION_IMAGES: Record<string, string> = {
-  heart: heartImg,
-  fire: fireImg,
-  clap: clapImg,
-  fistbump: fistbumpImg,
-  wow: wowImg,
-  flex: flexImg,
-  trophy: trophyImg,
-  runner: runnerImg,
-  energy: energyImg,
-  timer: timerImg,
-};
-
-const REACTION_VERBS: Record<string, string> = {
-  heart: 'loved',
-  fire: 'fired up',
-  clap: 'applauded',
-  fistbump: 'fist bumped',
-  wow: 'wowed at',
-  flex: 'flexed on',
-  trophy: 'celebrated',
-  runner: 'cheered',
-  energy: 'energized',
-  timer: 'timed',
-};
+import { ALL_REACTION_IMAGES as REACTION_IMAGES, REACTION_VERBS } from '@/lib/reaction-images';
 
 // Improved Web Audio API notification sound - softer, more pleasant chime
 const playNotificationSound = () => {

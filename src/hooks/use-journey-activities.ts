@@ -240,6 +240,9 @@ export function useJourneyActivities() {
 
     const local = toLocal(data);
 
+    // Invalidate shared caches so next fetch gets fresh data
+    invalidateFeedCaches();
+
     // Update local state
     setActivities(prev => {
       const without = prev.filter(a => a.dayNumber !== local.dayNumber);
@@ -281,7 +284,8 @@ export function useJourneyActivities() {
       await deleteFromStorage(activity.originalUrl);
     }
 
-    // Update local state
+    // Update local state + invalidate caches
+    invalidateFeedCaches();
     setActivities(prev => prev.filter(a => a.dayNumber !== dayNumber));
 
     return true;
@@ -317,6 +321,7 @@ export function useJourneyActivities() {
     }
 
     // Clear local state
+    invalidateFeedCaches();
     setActivities([]);
     
     // Clear celebrated weeks from localStorage
@@ -371,12 +376,33 @@ export function useJourneyActivities() {
 
 const DEFAULT_REACTIONS: Partial<Record<ReactionType, ActivityReaction>> = {};
 
+// ─── Request deduplication layer ───
+// Prevents duplicate concurrent calls (e.g. multiple components mounting simultaneously)
+let _publicFeedInflight: Promise<LocalActivity[]> | null = null;
+let _publicFeedCache: { data: LocalActivity[]; ts: number } | null = null;
+
+let _groupedInflight: Promise<UserStoryGroup[]> | null = null;
+let _groupedCache: { data: UserStoryGroup[]; ts: number } | null = null;
+
+const CACHE_TTL = 30_000; // 30s in-memory cache
+
 /**
  * Fetch all activities from all users (public feed) with reactions and profiles.
  * For the Progress page top strip.
  * @param includeAll - If true, fetch all activities (for showing blurred private content)
  */
 export async function fetchPublicFeed(includeAll: boolean = false): Promise<LocalActivity[]> {
+  // Return cached if fresh
+  if (_publicFeedCache && Date.now() - _publicFeedCache.ts < CACHE_TTL) {
+    return _publicFeedCache.data;
+  }
+  // Deduplicate in-flight requests
+  if (_publicFeedInflight) return _publicFeedInflight;
+  _publicFeedInflight = _fetchPublicFeedImpl(includeAll).finally(() => { _publicFeedInflight = null; });
+  return _publicFeedInflight;
+}
+
+async function _fetchPublicFeedImpl(includeAll: boolean): Promise<LocalActivity[]> {
   const { data: { user } } = await supabase.auth.getUser();
 
   // Build query - if includeAll, fetch everything; otherwise only public + own
@@ -449,7 +475,7 @@ export async function fetchPublicFeed(includeAll: boolean = false): Promise<Loca
     totalMap[r.activity_id]++;
   }
 
-  return activities.map(row => {
+  const result = activities.map(row => {
     const profile = profileMap.get(row.user_id);
     return {
       ...toLocal(row),
@@ -459,6 +485,8 @@ export async function fetchPublicFeed(includeAll: boolean = false): Promise<Loca
       avatarUrl: profile?.avatar_url,
     };
   });
+  _publicFeedCache = { data: result, ts: Date.now() };
+  return result;
 }
 
 export interface UserStoryGroup {
@@ -473,6 +501,15 @@ export interface UserStoryGroup {
  * For the Reel page to show user-based story pages.
  */
 export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[]> {
+  if (_groupedCache && Date.now() - _groupedCache.ts < CACHE_TTL) {
+    return _groupedCache.data;
+  }
+  if (_groupedInflight) return _groupedInflight;
+  _groupedInflight = _fetchAllActivitiesGroupedImpl().finally(() => { _groupedInflight = null; });
+  return _groupedInflight;
+}
+
+async function _fetchAllActivitiesGroupedImpl(): Promise<UserStoryGroup[]> {
   const { data: { user } } = await supabase.auth.getUser();
 
   // Fetch all activities
@@ -612,5 +649,12 @@ export async function fetchAllActivitiesGroupedByUser(): Promise<UserStoryGroup[
     groups.push(processUserActivities(userId, userActivities));
   }
 
+  _groupedCache = { data: groups, ts: Date.now() };
   return groups;
+}
+
+/** Invalidate caches (call after mutations) */
+export function invalidateFeedCaches() {
+  _publicFeedCache = null;
+  _groupedCache = null;
 }

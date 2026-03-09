@@ -3,43 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 
-// 3D reaction assets for toast display
-import fireImg from '@/assets/reactions/fire-3d.png';
-import clapImg from '@/assets/reactions/clap-3d.png';
-import fistbumpImg from '@/assets/reactions/fistbump.png';
-import wowImg from '@/assets/reactions/wow.png';
-import flexImg from '@/assets/reactions/flex.png';
-import trophyImg from '@/assets/reactions/dumbbells.png';
-import runnerImg from '@/assets/reactions/runner.png';
-import energyImg from '@/assets/reactions/energy.png';
-import timerImg from '@/assets/reactions/stopwatch.png';
-import heartImg from '@/assets/reactions/heart-workout.png';
-
-const REACTION_IMAGES: Record<string, string> = {
-  heart: heartImg,
-  fire: fireImg,
-  clap: clapImg,
-  fistbump: fistbumpImg,
-  wow: wowImg,
-  flex: flexImg,
-  trophy: trophyImg,
-  runner: runnerImg,
-  energy: energyImg,
-  timer: timerImg,
-};
-
-const REACTION_LABELS: Record<string, string> = {
-  heart: '❤️ loved',
-  fire: '🔥 fired up',
-  clap: '👏 applauded',
-  fistbump: '🤜 fist bumped',
-  wow: '😮 wowed at',
-  flex: '💪 flexed on',
-  trophy: '🏆 celebrated',
-  runner: '🏃 cheered',
-  energy: '⚡ energized',
-  timer: '⏱️ timed',
-};
+import { ALL_REACTION_IMAGES as REACTION_IMAGES } from '@/lib/reaction-images';
+import { REACTION_LABELS } from '@/lib/reaction-images';
 
 interface ReactionPayload {
   activity_id: string;
