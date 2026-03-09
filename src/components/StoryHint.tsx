@@ -31,7 +31,7 @@ export default function StoryHint({ hasMultipleStories, hasMultipleUsers, onNudg
     const nudgeTimer = setTimeout(() => {
       setNudgeType(hasMultipleUsers ? 'swipe' : 'tap');
       setShowNudge(true);
-      triggerHapticFn();
+      triggerHapticFn;
       onNudge?.();
       
       // Mark as shown after displaying
@@ -47,7 +47,7 @@ export default function StoryHint({ hasMultipleStories, hasMultipleUsers, onNudg
       clearTimeout(nudgeTimer);
       clearTimeout(hideTimer);
     };
-  }, [hasMultipleStories, hasMultipleUsers, triggerHaptFnic, onNudge]);
+  }, [hasMultipleStories, hasMultipleUsers, triggerHaptFnicFnonNudge]);
 
   return (
     <AnimatePresence>
