@@ -106,6 +106,7 @@ const CommunityStoriesWidget = () => {
           {communityActivities.map((activity, idx) => (
             <motion.button
               key={activity.id}
+              ref={(el: HTMLButtonElement | null) => { if (el) avatarRefs.current.set(activity.id, el); }}
               className="flex flex-col items-center gap-1.5 flex-shrink-0"
               onClick={() => handleAvatarTap(activity)}
               whileTap={{ scale: 0.92 }}
