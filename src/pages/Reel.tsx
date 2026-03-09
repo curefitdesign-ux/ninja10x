@@ -527,8 +527,9 @@ const Reel = () => {
   // Progress navigation removed — now a standalone page via bottom nav
 
   const handleReact = async (type: ReactionType) => {
-    if (!currentActivity || isOwnStory) return; // Owners cannot react to their own activities
+    if (!currentActivity || isOwnStory) return;
 
+    haptic();
     setShowSendReactionSheet(false);
 
     setLocalReactions(prev => {
