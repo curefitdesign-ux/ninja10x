@@ -1658,23 +1658,23 @@ const Reel = () => {
                         className="absolute inset-0 flex items-center justify-center"
                         variants={{
                           enter: (dir: string) => ({ 
-                            opacity: 0, 
-                            x: dir === 'left' ? 60 : -60,
-                            scale: 0.97,
+                            opacity: 0.4, 
+                            x: dir === 'left' ? 80 : -80,
                           }),
-                          center: { opacity: 1, x: 0, scale: 1 },
+                          center: { opacity: 1, x: 0 },
                           exit: (dir: string) => ({ 
-                            opacity: 0, 
-                            x: dir === 'left' ? -60 : 60,
-                            scale: 0.97,
+                            opacity: 0.4, 
+                            x: dir === 'left' ? -80 : 80,
                           }),
                         }}
                         initial="enter"
                         animate="center"
                         exit="exit"
                         transition={{ 
-                          duration: 0.28, 
-                          ease: [0.22, 1, 0.36, 1],
+                          type: 'spring',
+                          stiffness: 350,
+                          damping: 35,
+                          mass: 0.8,
                         }}
                       >
                         {currentActivity?.id === 'log-activity' ? (
