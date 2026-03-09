@@ -34,6 +34,7 @@ interface ReelToProgressTransitionProps {
   onLogActivity?: () => void;
   onCrystalTap?: (weekNum: number) => void;
   isInline?: boolean;
+  highlightDayNumber?: number;
 }
 
 export default function ReelToProgressTransition({
