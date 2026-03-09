@@ -285,7 +285,7 @@ const Reel = () => {
     }
 
     return allGroups.filter(g => g.activities.length > 0);
-  }, [userGroups, user, myActivities, profile, sourceUserId]);
+  }, [userGroups, user, myActivities, profile, sourceUserId, deepLinkActivityId]);
 
   // MAIN NAVIGATION EFFECT: Determine where to land based on navigation intent
   // This runs once per navigation after data is loaded
