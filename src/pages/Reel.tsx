@@ -220,12 +220,22 @@ const Reel = () => {
       }));
 
     // Own user: show today's logged activity OR just the log placeholder (no past activities)
+    // Exception: if deep-linking to a specific activity, include that activity too
     const allMyActivities = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
     const latestActivity = allMyActivities[0];
     const loggedToday = latestActivity && new Date(latestActivity.createdAt).toDateString() === new Date().toDateString();
     
     const ownActivities: any[] = [];
-    if (loggedToday) {
+    
+    // If deep-linking to a specific own activity, include it
+    if (deepLinkActivityId) {
+      const deepLinkedActivity = allMyActivities.find(a => a.id === deepLinkActivityId);
+      if (deepLinkedActivity) {
+        ownActivities.push(deepLinkedActivity);
+      }
+    }
+    
+    if (loggedToday && !ownActivities.some(a => a.id === latestActivity.id)) {
       ownActivities.push(latestActivity);
     }
     if (allMyActivities.length < 12) {
@@ -275,7 +285,7 @@ const Reel = () => {
     }
 
     return allGroups.filter(g => g.activities.length > 0);
-  }, [userGroups, user, myActivities, profile, sourceUserId]);
+  }, [userGroups, user, myActivities, profile, sourceUserId, deepLinkActivityId]);
 
   // MAIN NAVIGATION EFFECT: Determine where to land based on navigation intent
   // This runs once per navigation after data is loaded
