@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useWebHaptics } from 'web-haptics/react';
+
 import { motion } from 'framer-motion';
 import { ChevronRight, X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -39,7 +39,7 @@ export default function SendReactionSheet({
   totalReactions = 0,
   reactorProfiles = []
 }: SendReactionSheetProps) {
-  const { trigger: haptic } = useWebHaptics();
+  
   const [isRemoving, setIsRemoving] = useState(false);
   const [localReactorProfiles, setLocalReactorProfiles] = useState(reactorProfiles);
   
@@ -91,7 +91,7 @@ export default function SendReactionSheet({
     return (
       <motion.button
         key={type}
-        onClick={() => { haptic(); isUserReaction ? handleRemoveReaction() : onReact(type); }}
+        onClick={() => { isUserReaction ? handleRemoveReaction() : onReact(type); }}
         className="absolute flex items-center justify-center"
         style={{
           left: `${baseLeft + offset.dx}%`,
@@ -321,7 +321,7 @@ export default function SendReactionSheet({
                 return (
                   <motion.button
                     key={type}
-                    onClick={() => { haptic(); isUserReaction ? handleRemoveReaction() : onReact(type); }}
+                    onClick={() => { isUserReaction ? handleRemoveReaction() : onReact(type); }}
                     className="relative flex flex-col items-center gap-1.5"
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}

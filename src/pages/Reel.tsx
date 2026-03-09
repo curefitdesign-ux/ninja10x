@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useWebHaptics } from 'web-haptics/react';
+
 import { createPortal } from 'react-dom';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -64,7 +64,7 @@ const Reel = () => {
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
   const portalContainer = usePortalContainer();
-  const { trigger: haptic } = useWebHaptics();
+  
   
   // Navigation state - extract once
   const navState = location.state || {};
@@ -529,7 +529,6 @@ const Reel = () => {
   const handleReact = async (type: ReactionType) => {
     if (!currentActivity || isOwnStory) return;
 
-    haptic();
     setShowSendReactionSheet(false);
 
     setLocalReactions(prev => {
@@ -1663,7 +1662,6 @@ const Reel = () => {
                             className="flex flex-col items-center justify-center cursor-pointer relative overflow-hidden self-center"
                             onClick={(e) => {
                               e.stopPropagation();
-                              haptic();
                               navigate('/camera', { state: { dayNumber: currentActivity.dayNumber } });
                             }}
                             style={{
@@ -1936,7 +1934,7 @@ const Reel = () => {
                 <div className="flex items-center justify-center gap-3 px-4" style={{ visibility: isLogActivityCard ? 'hidden' : 'visible' }}>
                   {/* Liquid glass reaction pill */}
                   <button
-                    onClick={() => { haptic(); isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
+                    onClick={() => { isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
                     className="relative overflow-hidden active:scale-[0.97] transition-transform"
                     style={{
                       minWidth: currentReactions.total > 0 ? 180 : 160,
@@ -2012,7 +2010,6 @@ const Reel = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          haptic();
                           handleShareStory();
                         }}
                         className="shrink-0 active:scale-95 transition-transform"
@@ -2037,7 +2034,7 @@ const Reel = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          haptic();
+                          
                           setShowEditSheet(true);
                         }}
                         className="shrink-0 active:scale-95 transition-transform"
