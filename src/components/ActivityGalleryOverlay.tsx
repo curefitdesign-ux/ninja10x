@@ -74,7 +74,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   // Local reactions state
   const [localReactions, setLocalReactions] = useState<Record<string, {
     total: number;
-    reactions: Record<ReactionType, ActivityReaction>;
+    reactions: Partial<Record<ReactionType, ActivityReaction>>;
     reactorProfiles: ReactorProfile[];
   }>>({});
 
