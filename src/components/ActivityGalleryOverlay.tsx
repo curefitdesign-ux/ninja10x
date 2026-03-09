@@ -98,7 +98,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   // Keep local reactions in sync with incoming activities
   useEffect(() => {
     if (!isOpen) return;
-    const map: Record<string, { total: number; reactions: Record<ReactionType, ActivityReaction>; reactorProfiles: ReactorProfile[] }> = {};
+    const map: Record<string, { total: number; reactions: Partial<Record<ReactionType, ActivityReaction>>; reactorProfiles: ReactorProfile[] }> = {};
     for (const a of activities) {
       map[a.id] = {
         total: a.reactionCount || 0,

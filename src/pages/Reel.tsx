@@ -171,7 +171,7 @@ const Reel = () => {
     // Initialize reactions state with reactor profiles
     const map: Record<string, { 
       total: number; 
-      reactions: Record<ReactionType, ActivityReaction>;
+      reactions: Partial<Record<ReactionType, ActivityReaction>>;
       reactorProfiles: ReactorProfile[];
     }> = {};
     for (const group of groups) {

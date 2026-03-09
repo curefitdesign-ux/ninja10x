@@ -29,7 +29,7 @@ interface ReelToProgressTransitionProps {
   onClose: () => void;
   currentActivity: Activity | null;
   publicFeed: Activity[];
-  myActivities: { id?: string; dayNumber: number; storageUrl?: string; originalUrl?: string; isVideo?: boolean; activity?: string; frame?: string; duration?: string; pr?: string; createdAt?: string; reactionCount?: number; reactions?: Record<ReactionType, ActivityReaction>; reactorProfiles?: { userId: string; displayName: string; avatarUrl?: string; reactionType?: ReactionType; createdAt?: string }[] }[];
+  myActivities: { id?: string; dayNumber: number; storageUrl?: string; originalUrl?: string; isVideo?: boolean; activity?: string; frame?: string; duration?: string; pr?: string; createdAt?: string; reactionCount?: number; reactions?: Partial<Record<ReactionType, ActivityReaction>>; reactorProfiles?: { userId: string; displayName: string; avatarUrl?: string; reactionType?: ReactionType; createdAt?: string }[] }[];
   onStoryTap: (index: number, userId?: string, activityId?: string) => void;
   onLogActivity?: () => void;
   onCrystalTap?: (weekNum: number) => void;
