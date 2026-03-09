@@ -25,7 +25,7 @@ const PATH_H = 543;
 const TILE_W = 50;
 const TILE_H = 50;
 
-const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>(function GamifiedJourneyPath({ completedActivities, onCrystalTap, onFinalGoalTap }, ref) {
+const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>(function GamifiedJourneyPath({ completedActivities, onCrystalTap, onFinalGoalTap, highlightDayNumber }, ref) {
   const tiles = useMemo(() => {
     const STEP_X = 50;
     const STEP_Y = 28;
