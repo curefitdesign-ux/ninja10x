@@ -90,7 +90,10 @@ export async function fetchAllActivities(): Promise<JourneyActivity[]> {
       totalReactionMap[r.activity_id] = { count: 0, userReacted: false };
     }
     
-    reactionMap[r.activity_id][type].count++;
+    if (!reactionMap[r.activity_id][type]) {
+      reactionMap[r.activity_id][type] = { type, count: 0, userReacted: false };
+    }
+    reactionMap[r.activity_id][type]!.count++;
     totalReactionMap[r.activity_id].count++;
     
     if (user && r.user_id === user.id) {
