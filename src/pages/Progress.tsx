@@ -136,16 +136,18 @@ const Progress = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: isDirectGalleryOpen ? 0.1 : 0.25 }}
     >
-      {/* Background aurora */}
-      <div
-        className="absolute pointer-events-none"
-        style={{ left: "-53px", top: "-40px", width: "131vw", height: "auto" }}
-      >
+      {/* Background aurora — hidden when opening gallery directly */}
+      {!isDirectGalleryOpen && (
         <div
-          className="w-full h-[400px] opacity-40 mix-blend-screen"
-          style={{ background: "radial-gradient(ellipse at center, rgba(138, 100, 200, 0.4) 0%, transparent 70%)" }}
-        />
-      </div>
+          className="absolute pointer-events-none"
+          style={{ left: "-53px", top: "-40px", width: "131vw", height: "auto" }}
+        >
+          <div
+            className="w-full h-[400px] opacity-40 mix-blend-screen"
+            style={{ background: "radial-gradient(ellipse at center, rgba(138, 100, 200, 0.4) 0%, transparent 70%)" }}
+          />
+        </div>
+      )
 
       {/* Week-complete snackbar */}
       <AnimatePresence>
