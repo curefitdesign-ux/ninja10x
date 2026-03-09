@@ -80,6 +80,9 @@ const Reel = () => {
   
   // State for user story groups
   const [userGroups, setUserGroups] = useState<UserStoryGroup[]>([]);
+  
+  // Track which users' stories have been fully viewed (all activities cycled through)
+  const [viewedUsers, setViewedUsers] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   
   // Current user index (horizontal swipe between users)
