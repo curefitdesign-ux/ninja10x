@@ -147,7 +147,7 @@ const Progress = () => {
             style={{ background: "radial-gradient(ellipse at center, rgba(138, 100, 200, 0.4) 0%, transparent 70%)" }}
           />
         </div>
-      )
+      )}
 
       {/* Week-complete snackbar */}
       <AnimatePresence>
