@@ -74,6 +74,7 @@ const Index = () => {
     duration: a.duration,
     pr: a.pr,
     dayNumber: a.dayNumber,
+    createdAt: a.createdAt,
     reactions: a.reactions ? Object.fromEntries(
       Object.entries(a.reactions).map(([type, data]) => [type, { count: data.count }])
     ) as Record<ReactionType, { count: number }> : undefined,
