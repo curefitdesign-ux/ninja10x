@@ -203,50 +203,66 @@ const Reel = () => {
     loadActivities();
   }, [loadActivities]);
 
-  // Show ALL stories per user (not just today's).
-  // For logged-in user: show all activities + placeholder if journey not complete.
+  // In viewProfile mode: show ALL activities for the target user.
+  // In home mode: show only the LATEST activity per user (today's feed).
   const effectiveUserGroups = useMemo(() => {
     if (!user) return userGroups;
 
-    const othersGroups = userGroups.filter(g => g.userId !== user.id);
-
-    // Build own group with ALL activities
-    const allMyActivities = [...myActivities].sort((a, b) => a.dayNumber - b.dayNumber);
-
-    if (allMyActivities.length > 0) {
-      // Add log-activity placeholder at the end if journey not complete
-      const activitiesWithPlaceholder = [...allMyActivities];
-      if (allMyActivities.length < 12) {
-        activitiesWithPlaceholder.push({
-          id: 'log-activity',
-          dayNumber: allMyActivities.length + 1,
-          storageUrl: '',
-          originalUrl: '',
-          activity: undefined,
-          duration: undefined,
-          pr: undefined,
-          frame: undefined,
-          isVideo: false,
-          isPublic: false,
-          createdAt: new Date().toISOString(),
-        } as any);
+    // VIEW PROFILE MODE — single user, all activities, recent first
+    if (viewProfile && sourceUserId) {
+      const targetGroup = userGroups.find(g => g.userId === sourceUserId);
+      if (targetGroup) {
+        const sortedActivities = [...targetGroup.activities].sort((a, b) => b.dayNumber - a.dayNumber);
+        return [{ ...targetGroup, activities: sortedActivities }];
       }
-
-      const myGroup: UserStoryGroup = {
-        userId: user.id,
-        displayName: profile?.display_name || 'You',
-        avatarUrl: profile?.avatar_url || '',
-        activities: activitiesWithPlaceholder,
-      };
-      return [myGroup, ...othersGroups];
+      // If target user is self
+      if (sourceUserId === user.id) {
+        const allMyActivities = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
+        return [{
+          userId: user.id,
+          displayName: profile?.display_name || 'You',
+          avatarUrl: profile?.avatar_url || '',
+          activities: allMyActivities,
+        }];
+      }
+      return userGroups;
     }
 
-    // No activities yet — show placeholder only
-    const myPlaceholderGroup: UserStoryGroup = {
+    // HOME MODE — only latest activity per user
+    const othersGroups = userGroups.filter(g => g.userId !== user.id).map(g => {
+      // Keep only the latest (most recent) activity
+      const latestActivity = g.activities.length > 0
+        ? [g.activities.reduce((latest, a) => a.dayNumber > latest.dayNumber ? a : latest, g.activities[0])]
+        : g.activities;
+      return { ...g, activities: latestActivity };
+    });
+
+    // Build own group with latest activity + placeholder
+    const allMyActivities = [...myActivities].sort((a, b) => a.dayNumber - b.dayNumber);
+    const latestOwn = allMyActivities.length > 0 ? [allMyActivities[allMyActivities.length - 1]] : [];
+
+    const activitiesWithPlaceholder = [...latestOwn];
+    if (allMyActivities.length < 12) {
+      activitiesWithPlaceholder.push({
+        id: 'log-activity',
+        dayNumber: allMyActivities.length + 1,
+        storageUrl: '',
+        originalUrl: '',
+        activity: undefined,
+        duration: undefined,
+        pr: undefined,
+        frame: undefined,
+        isVideo: false,
+        isPublic: false,
+        createdAt: new Date().toISOString(),
+      } as any);
+    }
+
+    const myGroup: UserStoryGroup = {
       userId: user.id,
       displayName: profile?.display_name || 'You',
       avatarUrl: profile?.avatar_url || '',
-      activities: [{
+      activities: activitiesWithPlaceholder.length > 0 ? activitiesWithPlaceholder : [{
         id: 'log-activity',
         dayNumber: 1,
         storageUrl: '',
@@ -261,8 +277,8 @@ const Reel = () => {
       }],
     };
 
-    return [myPlaceholderGroup, ...othersGroups];
-  }, [userGroups, user, myActivities, profile]);
+    return [myGroup, ...othersGroups];
+  }, [userGroups, user, myActivities, profile, viewProfile, sourceUserId]);
 
   // MAIN NAVIGATION EFFECT: Determine where to land based on navigation intent
   // This runs once per navigation after data is loaded
