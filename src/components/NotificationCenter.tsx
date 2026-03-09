@@ -4,20 +4,7 @@ import { Bell, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 
-import { ALL_REACTION_IMAGES as REACTION_IMAGES } from '@/lib/reaction-images';
-
-const REACTION_VERBS: Record<string, string> = {
-  heart: 'loved',
-  fire: 'fired up',
-  clap: 'applauded',
-  fistbump: 'fist bumped',
-  wow: 'wowed at',
-  flex: 'flexed on',
-  trophy: 'celebrated',
-  runner: 'cheered',
-  energy: 'energized',
-  timer: 'timed',
-};
+import { ALL_REACTION_IMAGES as REACTION_IMAGES, REACTION_VERBS } from '@/lib/reaction-images';
 
 // Improved Web Audio API notification sound - softer, more pleasant chime
 const playNotificationSound = () => {
