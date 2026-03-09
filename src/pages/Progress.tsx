@@ -337,6 +337,7 @@ const Progress = () => {
           }}
           isInline={true}
           highlightDayNumber={highlightDayNumber}
+          openGalleryAtDay={openGalleryAtDay}
         />
       </div>
 
