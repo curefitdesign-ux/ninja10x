@@ -391,10 +391,15 @@ const Reel = () => {
     
     if (currentActivityIndex < currentGroup.activities.length - 1) {
       setCurrentActivityIndex(prev => prev + 1);
-    } else if (profile?.stories_public && effectiveUserGroups.length > 1) {
-      // Auto-advance to next user when public
-      setCurrentActivityIndex(0);
-      setCurrentUserIndex(prev => (prev + 1) % effectiveUserGroups.length);
+    } else {
+      // Mark current user as fully viewed
+      setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
+      
+      if (profile?.stories_public && effectiveUserGroups.length > 1) {
+        // Auto-advance to next user when public
+        setCurrentActivityIndex(0);
+        setCurrentUserIndex(prev => (prev + 1) % effectiveUserGroups.length);
+      }
     }
   }, [currentGroup, currentActivityIndex, profile?.stories_public, effectiveUserGroups.length]);
 
