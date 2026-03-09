@@ -243,10 +243,11 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
       state: {
         activityId: notif.activityId,
         dayNumber: notif.dayNumber,
+        sourceUserId: user?.id,
         _ts: Date.now(),
       },
     });
-  }, [navigate, onClose]);
+  }, [navigate, onClose, user]);
 
   const ui = (
     <AnimatePresence>
