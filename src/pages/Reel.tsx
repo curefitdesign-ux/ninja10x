@@ -457,9 +457,6 @@ const Reel = () => {
   const cardOpacity = useTransform(dragX, [-200, -100, 0, 100, 200], [0.85, 0.95, 1, 0.95, 0.85]);
   const cardRotate = useMotionValue(0); // No rotation for smooth scroll feel
   const cardScale = useMotionValue(1); // No scale for smooth scroll feel
-  // Parallax for side peek cards — drag right reveals left card, drag left reveals right card
-  const peekLeftX = useTransform(dragX, [0, 150], [0, 14]);
-  const peekRightX = useTransform(dragX, [-150, 0], [-14, 0]);
   
   const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
@@ -1491,19 +1488,17 @@ const Reel = () => {
             return (
               <motion.div
                 key={`peek-left-${prevIdx}`}
-                className="absolute left-0 top-0 bottom-0 flex items-center cursor-pointer overflow-hidden"
-                style={{ width: '10%', zIndex: 20, x: peekLeftX }}
+                className="absolute left-0 top-0 bottom-0 flex items-center cursor-pointer"
+                style={{ width: '10%', zIndex: 20 }}
                 onClick={goPrevUser}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, x: -10, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
                 transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
               >
-                {/* Full-size card positioned so only right edge peeks out */}
                 <div
-                  className="absolute right-0 overflow-hidden"
+                  className="w-full overflow-hidden"
                   style={{
-                    width: '375px',
-                    aspectRatio: '9/16',
+                    height: 'calc(59% + 20px)',
                     borderRadius: '0 10px 10px 0',
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.12)',
@@ -1537,19 +1532,17 @@ const Reel = () => {
             return (
               <motion.div
                 key={`peek-right-${nextIdx}`}
-                className="absolute right-0 top-0 bottom-0 flex items-center cursor-pointer overflow-hidden"
-                style={{ width: '10%', zIndex: 20, x: peekRightX }}
+                className="absolute right-0 top-0 bottom-0 flex items-center cursor-pointer"
+                style={{ width: '10%', zIndex: 20 }}
                 onClick={goNextUser}
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, x: 10, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
                 transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
               >
-                {/* Full-size card positioned so only left edge peeks out */}
                 <div
-                  className="absolute left-0 overflow-hidden"
+                  className="w-full overflow-hidden"
                   style={{
-                    width: '375px',
-                    aspectRatio: '9/16',
+                    height: 'calc(59% + 20px)',
                     borderRadius: '10px 0 0 10px',
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.12)',
