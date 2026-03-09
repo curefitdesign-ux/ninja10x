@@ -33,7 +33,7 @@ export interface LocalActivity {
   userId?: string;
   createdAt?: string;
   reactionCount?: number;
-  reactions?: Record<ReactionType, ActivityReaction>;
+  reactions?: Partial<Record<ReactionType, ActivityReaction>>;
   displayName?: string;
   avatarUrl?: string;
   reactorProfiles?: { userId: string; displayName: string; avatarUrl?: string; reactionType?: ReactionType; createdAt?: string }[];
