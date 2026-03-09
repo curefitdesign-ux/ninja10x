@@ -37,6 +37,7 @@ export interface Photo {
   duration?: string;
   pr?: string;
   dayNumber: number; // 1-12, each upload = new day
+  createdAt?: string;
   reactions?: Record<ReactionType, { count: number }>;
 }
 
