@@ -1251,45 +1251,6 @@ const Reel = () => {
                           style={{ width: avatarSize, height: avatarSize, transform: 'rotate(-90deg)' }}
                           viewBox="0 0 100 100"
                         >
-                          {Array.from({ length: ownActivityCount }).map((_, segIdx) => {
-                            const gapAngle = ownActivityCount > 1 ? 10 : 0;
-                            const totalGap = gapAngle * ownActivityCount;
-                            const segmentAngle = (360 - totalGap) / ownActivityCount;
-                            const startAngle = segIdx * (segmentAngle + gapAngle);
-                            const isCurrentSegment = isOwnActive && segIdx === ownCurrentIdx;
-                            const isSegmentViewed = isOwnActive && segIdx < ownCurrentIdx;
-                            const isSegmentUnviewed = !isOwnActive || segIdx > ownCurrentIdx;
-
-                            const radius = 44;
-                            const circumference = 2 * Math.PI * radius;
-                            const segmentLength = (segmentAngle / 360) * circumference;
-                            const offset = (startAngle / 360) * circumference;
-
-                            const progressLength = isCurrentSegment && ownRingProgress > 0
-                              ? segmentLength : isCurrentSegment ? 0 : segmentLength;
-
-                            return (
-                              <g key={segIdx}>
-                                {isCurrentSegment && (
-                                  <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
-                                    stroke="rgba(255,255,255,0.15)"
-                                    strokeDasharray={`${segmentLength} ${circumference}`}
-                                    strokeDashoffset={-offset} strokeLinecap="round" />
-                                )}
-                                <circle cx="50" cy="50" r={radius} fill="none" strokeWidth="6"
-                                  stroke={isSegmentUnviewed ? 'rgba(255,255,255,0.25)' : 'url(#storyGradientOwn)'}
-                                  strokeDasharray={`${isCurrentSegment ? progressLength : segmentLength} ${circumference}`}
-                                  strokeDashoffset={-offset} strokeLinecap="round"
-                                  style={{
-                                    filter: (isSegmentViewed || isCurrentSegment) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
-                                    transition: isCurrentSegment && ownRingProgress > 0
-                                      ? `stroke-dasharray ${autoAdvanceDuration}ms linear`
-                                      : isCurrentSegment ? 'none' : 'stroke-dasharray 0.3s ease',
-                                  }}
-                                />
-                              </g>
-                            );
-                          })}
                           <defs>
                             <linearGradient id="storyGradientOwn" x1="0%" y1="0%" x2="100%" y2="100%">
                               <stop offset="0%" stopColor="#FEDA75" />
@@ -1299,6 +1260,11 @@ const Reel = () => {
                               <stop offset="100%" stopColor="#4F5BD5" />
                             </linearGradient>
                           </defs>
+                          <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
+                            stroke="url(#storyGradientOwn)"
+                            strokeLinecap="round"
+                            style={{ filter: 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' }}
+                          />
                         </svg>
                       )}
                       <div className="relative" style={{ width: avatarSize, height: avatarSize, padding: 4 }}>
