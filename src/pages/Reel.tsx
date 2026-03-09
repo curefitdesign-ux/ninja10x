@@ -1263,11 +1263,25 @@ const Reel = () => {
                               <stop offset="100%" stopColor="#4F5BD5" />
                             </linearGradient>
                           </defs>
+                          {/* Background track */}
                           <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
-                            stroke="url(#storyGradientOwn)"
+                            stroke={isOwnActive ? 'rgba(255,255,255,0.15)' : 'url(#storyGradientOwn)'}
                             strokeLinecap="round"
-                            style={{ filter: 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' }}
+                            style={{ filter: !isOwnActive ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none' }}
                           />
+                          {/* Progress fill — only when actively viewing */}
+                          {isOwnActive && (
+                            <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
+                              stroke="url(#storyGradientOwn)"
+                              strokeLinecap="round"
+                              strokeDasharray={`${2 * Math.PI * 44}`}
+                              strokeDashoffset={ownRingProgress > 0 ? 0 : 2 * Math.PI * 44}
+                              style={{
+                                filter: 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))',
+                                transition: ownRingProgress > 0 ? `stroke-dashoffset ${autoAdvanceDuration}ms linear` : 'none',
+                              }}
+                            />
+                          )}
                         </svg>
                       )}
                       <div className="relative" style={{ width: avatarSize, height: avatarSize, padding: 4 }}>
