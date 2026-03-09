@@ -62,7 +62,9 @@ const ImmersiveHomeLayout = ({
 }: ImmersiveHomeLayoutProps) => {
   const navigate = useNavigate();
   const { profile } = useProfile();
+  const { triggerMorph } = useMorphTransition();
   const [showMediaSheet, setShowMediaSheet] = useState(false);
+  const todayCardRef = useRef<HTMLButtonElement>(null);
 
   // Day card sheet state
   const [daySheetOpen, setDaySheetOpen] = useState(false);
