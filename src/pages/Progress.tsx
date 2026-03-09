@@ -44,6 +44,7 @@ const Progress = () => {
   const transitionImage = location.state?.transitionImage;
   const transitionDayNumber = location.state?.dayNumber || 1;
   const transitionToProgress = location.state?.transitionToProgress;
+  const highlightDayNumber = location.state?.highlightDayNumber as number | undefined;
 
   useEffect(() => {
     const loadFeed = async () => {
@@ -334,6 +335,7 @@ const Progress = () => {
             setTimeout(() => setShowWeekSnackbar(false), 10000);
           }}
           isInline={true}
+          highlightDayNumber={highlightDayNumber}
         />
       </div>
 

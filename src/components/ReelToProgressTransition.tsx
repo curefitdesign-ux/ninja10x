@@ -34,6 +34,7 @@ interface ReelToProgressTransitionProps {
   onLogActivity?: () => void;
   onCrystalTap?: (weekNum: number) => void;
   isInline?: boolean;
+  highlightDayNumber?: number;
 }
 
 export default function ReelToProgressTransition({
@@ -46,6 +47,7 @@ export default function ReelToProgressTransition({
   onLogActivity,
   onCrystalTap,
   isInline = false,
+  highlightDayNumber,
 }: ReelToProgressTransitionProps) {
   const [showTiles, setShowTiles] = useState(false);
   const [showStories, setShowStories] = useState(false);
@@ -335,7 +337,7 @@ export default function ReelToProgressTransition({
             {/* Gamified Journey Path */}
             {showTiles && (
               <div className="w-full mx-auto" style={{ maxWidth: "400px", marginTop: -20 }}>
-                <GamifiedJourneyPath completedActivities={myActivities.length} onCrystalTap={onCrystalTap} onFinalGoalTap={() => setShowCertPopup(true)} />
+                <GamifiedJourneyPath completedActivities={myActivities.length} onCrystalTap={onCrystalTap} onFinalGoalTap={() => setShowCertPopup(true)} highlightDayNumber={highlightDayNumber} />
               </div>
             )}
 
@@ -649,7 +651,7 @@ export default function ReelToProgressTransition({
                 animate={{ opacity: expandingCardId ? 0.3 : 1 }}
               >
                 {showTiles && (
-                  <GamifiedJourneyPath completedActivities={myActivities.length} onCrystalTap={onCrystalTap} />
+                  <GamifiedJourneyPath completedActivities={myActivities.length} onCrystalTap={onCrystalTap} highlightDayNumber={highlightDayNumber} />
                 )}
               </motion.div>
             </motion.div>

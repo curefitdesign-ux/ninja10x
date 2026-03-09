@@ -17,6 +17,7 @@ interface GamifiedJourneyPathProps {
   completedActivities: number;
   onCrystalTap?: (weekNum: number) => void;
   onFinalGoalTap?: () => void;
+  highlightDayNumber?: number;
 }
 
 const PATH_W = 380;
@@ -24,7 +25,7 @@ const PATH_H = 543;
 const TILE_W = 50;
 const TILE_H = 50;
 
-const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>(function GamifiedJourneyPath({ completedActivities, onCrystalTap, onFinalGoalTap }, ref) {
+const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>(function GamifiedJourneyPath({ completedActivities, onCrystalTap, onFinalGoalTap, highlightDayNumber }, ref) {
   const tiles = useMemo(() => {
     const STEP_X = 50;
     const STEP_Y = 28;
@@ -97,6 +98,7 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
         {tiles.map((tile) => {
           const isActive = tile.index < completedActivities;
           const isCurrent = tile.index === completedActivities - 1;
+          const isHighlighted = highlightDayNumber !== undefined && tile.index === highlightDayNumber - 1;
           const isWeekEnd = tile.isWeekEnd;
           const showFinalGoal = tile.isFinal;
 
@@ -193,13 +195,21 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
                     top: tile.y,
                     zIndex: 3,
                     opacity: 1,
-                    filter: isCurrent
+                    filter: isHighlighted
+                      ? 'drop-shadow(0 0 18px rgba(249,115,22,0.8)) drop-shadow(0 0 6px rgba(236,72,153,0.6))'
+                      : isCurrent
                       ? 'drop-shadow(0 0 12px rgba(130,100,255,0.6))'
                       : 'none',
                   }}
                   initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.18, delay: tile.index * 0.03 }}
+                  animate={{
+                    opacity: 1,
+                    scale: isHighlighted ? [1, 1.15, 1] : 1,
+                  }}
+                  transition={isHighlighted
+                    ? { duration: 0.18, delay: tile.index * 0.03, scale: { duration: 0.8, repeat: 3, ease: 'easeInOut' } }
+                    : { duration: 0.18, delay: tile.index * 0.03 }
+                  }
                 />
               )}
             </div>
