@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { User, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useMorphTransition } from '@/hooks/use-morph-transition';
 
 import plusIcon from '@/assets/icons/plus-icon.png';
 import cyclingIcon from '@/assets/activities/cycling.png';
