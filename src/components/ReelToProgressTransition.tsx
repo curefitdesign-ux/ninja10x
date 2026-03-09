@@ -35,6 +35,7 @@ interface ReelToProgressTransitionProps {
   onCrystalTap?: (weekNum: number) => void;
   isInline?: boolean;
   highlightDayNumber?: number;
+  openGalleryAtDay?: number;
 }
 
 export default function ReelToProgressTransition({
@@ -48,12 +49,14 @@ export default function ReelToProgressTransition({
   onCrystalTap,
   isInline = false,
   highlightDayNumber,
+  openGalleryAtDay,
 }: ReelToProgressTransitionProps) {
   const [showTiles, setShowTiles] = useState(false);
   const [showStories, setShowStories] = useState(false);
   const [expandingCardId, setExpandingCardId] = useState<string | null>(null);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
+  const openGalleryHandledRef = useRef(false);
   const [showCertPopup, setShowCertPopup] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
