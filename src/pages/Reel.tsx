@@ -207,20 +207,56 @@ const Reel = () => {
     loadActivities();
   }, [loadActivities]);
 
-  // Own user: show today's activity or log placeholder only
-  // Others: show ALL activities (recent first)
+  // Helper: inject virtual week-recap entries for completed weeks that don't have a published recap
+  const injectWeekRecaps = useCallback((activities: LocalActivity[], userId: string): LocalActivity[] => {
+    // Only consider real activities (day_number 1-12)
+    const realActivities = activities.filter(a => a.dayNumber >= 1 && a.dayNumber <= 12);
+    // Already-published recaps (day_number 1001+)
+    const publishedRecaps = activities.filter(a => a.dayNumber >= 1001);
+    const publishedWeeks = new Set(publishedRecaps.map(a => a.dayNumber - 1000));
+
+    const result = [...activities];
+
+    // Check each week (1-4): week N is complete if days (N-1)*3+1 to N*3 all exist
+    for (let week = 1; week <= 4; week++) {
+      const weekDays = [1, 2, 3].map(d => (week - 1) * 3 + d);
+      const hasAllDays = weekDays.every(d => realActivities.some(a => a.dayNumber === d));
+      if (hasAllDays && !publishedWeeks.has(week)) {
+        // Inject virtual week-recap entry (no video URL — will show "generating" placeholder)
+        result.push({
+          id: `week-recap-${userId}-w${week}`,
+          storageUrl: '',
+          originalUrl: '',
+          isVideo: true,
+          activity: `Week ${week} Recap`,
+          frame: 'recap',
+          duration: undefined,
+          pr: undefined,
+          dayNumber: 1000 + week,
+          isPublic: true,
+          userId,
+          createdAt: new Date().toISOString(),
+        });
+      }
+    }
+
+    return result;
+  }, []);
+
+  // Own user: show today's activity + week recaps; Others: show ALL activities (recent first)
   const effectiveUserGroups = useMemo(() => {
     if (!user) return userGroups;
 
-    // Others: all activities, sorted recent to oldest
+    // Others: all activities + injected week recaps, sorted recent to oldest
     const othersGroups = userGroups
       .filter(g => g.userId !== user.id)
       .map(g => ({
         ...g,
-        activities: [...g.activities].sort((a, b) => b.dayNumber - a.dayNumber),
+        activities: injectWeekRecaps([...g.activities], g.userId).sort((a, b) => b.dayNumber - a.dayNumber),
       }));
 
     // Own user: show today's logged activity OR just the log placeholder (no past activities)
+    // PLUS any published/virtual week recaps
     const allMyActivities = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
     const latestActivity = allMyActivities[0];
     const loggedToday = latestActivity && new Date(latestActivity.createdAt).toDateString() === new Date().toDateString();
@@ -230,6 +266,42 @@ const Reel = () => {
     if (loggedToday) {
       ownActivities.push(latestActivity);
     }
+
+    // Add published recap entries from userGroups for own user
+    const myGroup$ = userGroups.find(g => g.userId === user.id);
+    if (myGroup$) {
+      const recapsFromDb = myGroup$.activities.filter(a => a.dayNumber >= 1001);
+      for (const recap of recapsFromDb) {
+        if (!ownActivities.some(a => a.id === recap.id)) {
+          ownActivities.push(recap);
+        }
+      }
+    }
+
+    // Inject virtual week recaps for completed weeks without published recap
+    const allRealActivities = allMyActivities.filter(a => a.dayNumber >= 1 && a.dayNumber <= 12);
+    const publishedWeeks = new Set(ownActivities.filter(a => a.dayNumber >= 1001).map(a => a.dayNumber - 1000));
+    for (let week = 1; week <= 4; week++) {
+      const weekDays = [1, 2, 3].map(d => (week - 1) * 3 + d);
+      const hasAllDays = weekDays.every(d => allRealActivities.some(a => a.dayNumber === d));
+      if (hasAllDays && !publishedWeeks.has(week) && !ownActivities.some(a => a.id === `week-recap-${user.id}-w${week}`)) {
+        ownActivities.push({
+          id: `week-recap-${user.id}-w${week}`,
+          storageUrl: '',
+          originalUrl: '',
+          isVideo: true,
+          activity: `Week ${week} Recap`,
+          frame: 'recap',
+          duration: undefined,
+          pr: undefined,
+          dayNumber: 1000 + week,
+          isPublic: true,
+          userId: user.id,
+          createdAt: new Date().toISOString(),
+        });
+      }
+    }
+
     if (allMyActivities.length < 12) {
       ownActivities.push({
         id: 'log-activity',
@@ -245,6 +317,19 @@ const Reel = () => {
         createdAt: new Date().toISOString(),
       } as any);
     }
+
+    // Sort own activities: recaps first (desc by dayNumber), then regular
+    ownActivities.sort((a: any, b: any) => {
+      const aIsRecap = a.dayNumber >= 1001;
+      const bIsRecap = b.dayNumber >= 1001;
+      if (aIsRecap && !bIsRecap) return -1;
+      if (!aIsRecap && bIsRecap) return 1;
+      if (aIsRecap && bIsRecap) return b.dayNumber - a.dayNumber;
+      // log-activity always last
+      if (a.id === 'log-activity') return 1;
+      if (b.id === 'log-activity') return -1;
+      return b.dayNumber - a.dayNumber;
+    });
 
     // If deep-linking to a specific own activity that's not today's, create a temporary
     // dedicated group so we can navigate to it without polluting the normal own-user group
@@ -297,7 +382,7 @@ const Reel = () => {
     }
 
     return allGroups.filter(g => g.activities.length > 0);
-  }, [userGroups, user, myActivities, profile, sourceUserId, deepLinkActivityId]);
+  }, [userGroups, user, myActivities, profile, sourceUserId, deepLinkActivityId, injectWeekRecaps]);
 
   // MAIN NAVIGATION EFFECT: Determine where to land based on navigation intent
   // This runs once per navigation after data is loaded
