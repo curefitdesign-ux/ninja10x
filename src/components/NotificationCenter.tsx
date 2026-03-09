@@ -4,30 +4,7 @@ import { Bell, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 
-// 3D reaction assets (clean transparency)
-import fireImg from '@/assets/reactions/fire-new.png';
-import clapImg from '@/assets/reactions/clap-hands.png';
-import fistbumpImg from '@/assets/reactions/fistbump-hands.png';
-import wowImg from '@/assets/reactions/wow.png';
-import flexImg from '@/assets/reactions/flex.png';
-import trophyImg from '@/assets/reactions/dumbbells.png';
-import runnerImg from '@/assets/reactions/runner.png';
-import energyImg from '@/assets/reactions/energy.png';
-import timerImg from '@/assets/reactions/stopwatch.png';
-import heartImg from '@/assets/reactions/heart-workout.png';
-
-const REACTION_IMAGES: Record<string, string> = {
-  heart: heartImg,
-  fire: fireImg,
-  clap: clapImg,
-  fistbump: fistbumpImg,
-  wow: wowImg,
-  flex: flexImg,
-  trophy: trophyImg,
-  runner: runnerImg,
-  energy: energyImg,
-  timer: timerImg,
-};
+import { ALL_REACTION_IMAGES as REACTION_IMAGES } from '@/lib/reaction-images';
 
 const REACTION_VERBS: Record<string, string> = {
   heart: 'loved',
