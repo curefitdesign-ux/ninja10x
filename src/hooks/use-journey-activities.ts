@@ -644,5 +644,12 @@ async function _fetchAllActivitiesGroupedImpl(): Promise<UserStoryGroup[]> {
     groups.push(processUserActivities(userId, userActivities));
   }
 
+  _groupedCache = { data: groups, ts: Date.now() };
   return groups;
+}
+
+/** Invalidate caches (call after mutations) */
+export function invalidateFeedCaches() {
+  _publicFeedCache = null;
+  _groupedCache = null;
 }
