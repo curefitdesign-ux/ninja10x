@@ -203,69 +203,21 @@ const Reel = () => {
     loadActivities();
   }, [loadActivities]);
 
-  // In viewProfile mode: show ALL activities per user (recent first), swipeable between users.
-  // In home mode: show only the LATEST activity per user (today's feed).
+  // Show ALL activities per user (recent first) with own user's log placeholder
   const effectiveUserGroups = useMemo(() => {
     if (!user) return userGroups;
 
-    // VIEW PROFILE MODE — all users, all activities, recent first
-    if (viewProfile) {
-      const allGroups = userGroups.map(g => {
-        const sorted = [...g.activities].sort((a, b) => b.dayNumber - a.dayNumber);
-        return { ...g, activities: sorted };
-      });
-
-      // Include own group with all activities
-      const hasOwnGroup = allGroups.some(g => g.userId === user.id);
-      if (!hasOwnGroup && myActivities.length > 0) {
-        const ownSorted = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
-        allGroups.unshift({
-          userId: user.id,
-          displayName: profile?.display_name || 'You',
-          avatarUrl: profile?.avatar_url || '',
-          activities: ownSorted,
-        });
-      } else if (hasOwnGroup) {
-        // Replace own group with full myActivities data
-        const idx = allGroups.findIndex(g => g.userId === user.id);
-        if (idx >= 0) {
-          allGroups[idx] = {
-            ...allGroups[idx],
-            displayName: profile?.display_name || 'You',
-            avatarUrl: profile?.avatar_url || '',
-            activities: [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber),
-          };
-        }
-      }
-
-      // Put source user first if specified
-      if (sourceUserId) {
-        const targetIdx = allGroups.findIndex(g => g.userId === sourceUserId);
-        if (targetIdx > 0) {
-          const [target] = allGroups.splice(targetIdx, 1);
-          allGroups.unshift(target);
-        }
-      }
-
-      return allGroups.filter(g => g.activities.length > 0);
-    }
-
-    // HOME MODE — only latest activity per user
-    const othersGroups = userGroups.filter(g => g.userId !== user.id).map(g => {
-      // Keep only the latest (most recent) activity
-      const latestActivity = g.activities.length > 0
-        ? [g.activities.reduce((latest, a) => a.dayNumber > latest.dayNumber ? a : latest, g.activities[0])]
-        : g.activities;
-      return { ...g, activities: latestActivity };
+    const allGroups = userGroups.map(g => {
+      const sorted = [...g.activities].sort((a, b) => b.dayNumber - a.dayNumber);
+      return { ...g, activities: sorted };
     });
 
-    // Build own group with latest activity + placeholder
-    const allMyActivities = [...myActivities].sort((a, b) => a.dayNumber - b.dayNumber);
-    const latestOwn = allMyActivities.length > 0 ? [allMyActivities[allMyActivities.length - 1]] : [];
-
-    const activitiesWithPlaceholder = [...latestOwn];
+    // Ensure own group has full myActivities + placeholder
+    const hasOwnGroup = allGroups.some(g => g.userId === user.id);
+    const allMyActivities = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
+    const ownActivities = [...allMyActivities];
     if (allMyActivities.length < 12) {
-      activitiesWithPlaceholder.push({
+      ownActivities.push({
         id: 'log-activity',
         dayNumber: allMyActivities.length + 1,
         storageUrl: '',
@@ -280,27 +232,65 @@ const Reel = () => {
       } as any);
     }
 
-    const myGroup: UserStoryGroup = {
-      userId: user.id,
-      displayName: profile?.display_name || 'You',
-      avatarUrl: profile?.avatar_url || '',
-      activities: activitiesWithPlaceholder.length > 0 ? activitiesWithPlaceholder : [{
-        id: 'log-activity',
-        dayNumber: 1,
-        storageUrl: '',
-        originalUrl: '',
-        activity: null,
-        duration: null,
-        pr: null,
-        frame: null,
-        isVideo: false,
-        isPublic: false,
-        createdAt: new Date().toISOString(),
-      }],
-    };
+    if (!hasOwnGroup) {
+      allGroups.unshift({
+        userId: user.id,
+        displayName: profile?.display_name || 'You',
+        avatarUrl: profile?.avatar_url || '',
+        activities: ownActivities.length > 0 ? ownActivities : [{
+          id: 'log-activity',
+          dayNumber: 1,
+          storageUrl: '',
+          originalUrl: '',
+          activity: null,
+          duration: null,
+          pr: null,
+          frame: null,
+          isVideo: false,
+          isPublic: false,
+          createdAt: new Date().toISOString(),
+        }],
+      });
+    } else {
+      const idx = allGroups.findIndex(g => g.userId === user.id);
+      if (idx >= 0) {
+        allGroups[idx] = {
+          ...allGroups[idx],
+          displayName: profile?.display_name || 'You',
+          avatarUrl: profile?.avatar_url || '',
+          activities: ownActivities.length > 0 ? ownActivities : [{
+            id: 'log-activity',
+            dayNumber: 1,
+            storageUrl: '',
+            originalUrl: '',
+            activity: null,
+            duration: null,
+            pr: null,
+            frame: null,
+            isVideo: false,
+            isPublic: false,
+            createdAt: new Date().toISOString(),
+          }],
+        };
+        // Move own group to front
+        if (idx > 0) {
+          const [own] = allGroups.splice(idx, 1);
+          allGroups.unshift(own);
+        }
+      }
+    }
 
-    return [myGroup, ...othersGroups];
-  }, [userGroups, user, myActivities, profile, viewProfile, sourceUserId]);
+    // Put source user first if specified
+    if (sourceUserId) {
+      const targetIdx = allGroups.findIndex(g => g.userId === sourceUserId);
+      if (targetIdx > 0) {
+        const [target] = allGroups.splice(targetIdx, 1);
+        allGroups.unshift(target);
+      }
+    }
+
+    return allGroups.filter(g => g.activities.length > 0);
+  }, [userGroups, user, myActivities, profile, sourceUserId]);
 
   // MAIN NAVIGATION EFFECT: Determine where to land based on navigation intent
   // This runs once per navigation after data is loaded
