@@ -72,9 +72,7 @@ const Reel = () => {
   const weekRecapNumber = navState.weekNumber as number | undefined;
   const sourceUserId = navState.sourceUserId as string | undefined;
   const navTimestamp = navState._ts as number | undefined;
-  const viewProfile = navState.viewProfile as boolean | undefined;
-  
-  // Determine navigation intent:
+  // viewProfile removed — all activities shown on homepage // Determine navigation intent:
   // - hasDeepLink: user tapped a specific story card (should open THAT story, never recap)
   // - hasWeekRecap: user tapped PLAY NOW pill (should open week recap)
   const hasDeepLink = !!(deepLinkActivityId || (typeof deepLinkDayNumber === 'number' && deepLinkDayNumber > 0));
@@ -144,7 +142,7 @@ const Reel = () => {
   const { triggerShake, shakeAnimation, shakeTransition } = useStoryNudgeAnimation();
 
   // Create a unique key for this navigation to detect re-navigation
-  const currentNavKey = `${deepLinkActivityId || ''}-${deepLinkDayNumber || ''}-${weekRecapVideoFromNav || ''}-${navTimestamp || ''}-${viewProfile ? sourceUserId : ''}`;
+  const currentNavKey = `${deepLinkActivityId || ''}-${deepLinkDayNumber || ''}-${weekRecapVideoFromNav || ''}-${navTimestamp || ''}-${sourceUserId || ''}`;
   
   // Reset navigation state when navigation changes
   useEffect(() => {
@@ -203,69 +201,21 @@ const Reel = () => {
     loadActivities();
   }, [loadActivities]);
 
-  // In viewProfile mode: show ALL activities per user (recent first), swipeable between users.
-  // In home mode: show only the LATEST activity per user (today's feed).
+  // Show ALL activities per user (recent first) with own user's log placeholder
   const effectiveUserGroups = useMemo(() => {
     if (!user) return userGroups;
 
-    // VIEW PROFILE MODE — all users, all activities, recent first
-    if (viewProfile) {
-      const allGroups = userGroups.map(g => {
-        const sorted = [...g.activities].sort((a, b) => b.dayNumber - a.dayNumber);
-        return { ...g, activities: sorted };
-      });
-
-      // Include own group with all activities
-      const hasOwnGroup = allGroups.some(g => g.userId === user.id);
-      if (!hasOwnGroup && myActivities.length > 0) {
-        const ownSorted = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
-        allGroups.unshift({
-          userId: user.id,
-          displayName: profile?.display_name || 'You',
-          avatarUrl: profile?.avatar_url || '',
-          activities: ownSorted,
-        });
-      } else if (hasOwnGroup) {
-        // Replace own group with full myActivities data
-        const idx = allGroups.findIndex(g => g.userId === user.id);
-        if (idx >= 0) {
-          allGroups[idx] = {
-            ...allGroups[idx],
-            displayName: profile?.display_name || 'You',
-            avatarUrl: profile?.avatar_url || '',
-            activities: [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber),
-          };
-        }
-      }
-
-      // Put source user first if specified
-      if (sourceUserId) {
-        const targetIdx = allGroups.findIndex(g => g.userId === sourceUserId);
-        if (targetIdx > 0) {
-          const [target] = allGroups.splice(targetIdx, 1);
-          allGroups.unshift(target);
-        }
-      }
-
-      return allGroups.filter(g => g.activities.length > 0);
-    }
-
-    // HOME MODE — only latest activity per user
-    const othersGroups = userGroups.filter(g => g.userId !== user.id).map(g => {
-      // Keep only the latest (most recent) activity
-      const latestActivity = g.activities.length > 0
-        ? [g.activities.reduce((latest, a) => a.dayNumber > latest.dayNumber ? a : latest, g.activities[0])]
-        : g.activities;
-      return { ...g, activities: latestActivity };
+    const allGroups = userGroups.map(g => {
+      const sorted = [...g.activities].sort((a, b) => b.dayNumber - a.dayNumber);
+      return { ...g, activities: sorted };
     });
 
-    // Build own group with latest activity + placeholder
-    const allMyActivities = [...myActivities].sort((a, b) => a.dayNumber - b.dayNumber);
-    const latestOwn = allMyActivities.length > 0 ? [allMyActivities[allMyActivities.length - 1]] : [];
-
-    const activitiesWithPlaceholder = [...latestOwn];
+    // Ensure own group has full myActivities + placeholder
+    const hasOwnGroup = allGroups.some(g => g.userId === user.id);
+    const allMyActivities = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
+    const ownActivities = [...allMyActivities];
     if (allMyActivities.length < 12) {
-      activitiesWithPlaceholder.push({
+      ownActivities.push({
         id: 'log-activity',
         dayNumber: allMyActivities.length + 1,
         storageUrl: '',
@@ -280,27 +230,65 @@ const Reel = () => {
       } as any);
     }
 
-    const myGroup: UserStoryGroup = {
-      userId: user.id,
-      displayName: profile?.display_name || 'You',
-      avatarUrl: profile?.avatar_url || '',
-      activities: activitiesWithPlaceholder.length > 0 ? activitiesWithPlaceholder : [{
-        id: 'log-activity',
-        dayNumber: 1,
-        storageUrl: '',
-        originalUrl: '',
-        activity: null,
-        duration: null,
-        pr: null,
-        frame: null,
-        isVideo: false,
-        isPublic: false,
-        createdAt: new Date().toISOString(),
-      }],
-    };
+    if (!hasOwnGroup) {
+      allGroups.unshift({
+        userId: user.id,
+        displayName: profile?.display_name || 'You',
+        avatarUrl: profile?.avatar_url || '',
+        activities: ownActivities.length > 0 ? ownActivities : [{
+          id: 'log-activity',
+          dayNumber: 1,
+          storageUrl: '',
+          originalUrl: '',
+          activity: null,
+          duration: null,
+          pr: null,
+          frame: null,
+          isVideo: false,
+          isPublic: false,
+          createdAt: new Date().toISOString(),
+        }],
+      });
+    } else {
+      const idx = allGroups.findIndex(g => g.userId === user.id);
+      if (idx >= 0) {
+        allGroups[idx] = {
+          ...allGroups[idx],
+          displayName: profile?.display_name || 'You',
+          avatarUrl: profile?.avatar_url || '',
+          activities: ownActivities.length > 0 ? ownActivities : [{
+            id: 'log-activity',
+            dayNumber: 1,
+            storageUrl: '',
+            originalUrl: '',
+            activity: null,
+            duration: null,
+            pr: null,
+            frame: null,
+            isVideo: false,
+            isPublic: false,
+            createdAt: new Date().toISOString(),
+          }],
+        };
+        // Move own group to front
+        if (idx > 0) {
+          const [own] = allGroups.splice(idx, 1);
+          allGroups.unshift(own);
+        }
+      }
+    }
 
-    return [myGroup, ...othersGroups];
-  }, [userGroups, user, myActivities, profile, viewProfile, sourceUserId]);
+    // Put source user first if specified
+    if (sourceUserId) {
+      const targetIdx = allGroups.findIndex(g => g.userId === sourceUserId);
+      if (targetIdx > 0) {
+        const [target] = allGroups.splice(targetIdx, 1);
+        allGroups.unshift(target);
+      }
+    }
+
+    return allGroups.filter(g => g.activities.length > 0);
+  }, [userGroups, user, myActivities, profile, sourceUserId]);
 
   // MAIN NAVIGATION EFFECT: Determine where to land based on navigation intent
   // This runs once per navigation after data is loaded
@@ -579,11 +567,7 @@ const Reel = () => {
   };
 
   const handleClose = () => {
-    if (viewProfile) {
-      navigate('/reel', { replace: true });
-    } else {
-      navigate('/reel', { replace: true });
-    }
+    navigate('/reel', { replace: true });
   };
 
 
@@ -1240,36 +1224,7 @@ const Reel = () => {
             paddingTop: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 12px)',
           }}
         >
-          {viewProfile ? (
-            /* Profile view header — user info + X button */
-            <div className="flex items-center justify-between px-4 py-2" style={{ height: 78 }}>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full overflow-hidden">
-                  <ProfileAvatar
-                    src={currentGroup?.avatarUrl}
-                    name={currentGroup?.displayName}
-                    size={40}
-                  />
-                </div>
-                <div>
-                  <p className="text-white font-semibold text-sm">{currentGroup?.displayName}</p>
-                  <p className="text-white/40 text-xs">{currentGroup?.activities.length || 0} activities</p>
-                </div>
-              </div>
-              <button
-                onClick={() => navigate('/reel', { replace: true })}
-                className="w-9 h-9 flex items-center justify-center rounded-full active:scale-95 transition-transform"
-                style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                }}
-              >
-                <X className="w-5 h-5 text-white/80" />
-              </button>
-            </div>
-          ) : (
-          /* Avatar strip: pinned own avatar + scrollable others */
+          {/* Avatar strip: pinned own avatar + scrollable others */}
           <div
             className="shrink-0 overflow-hidden"
             style={{ height: 78 }}
@@ -1287,7 +1242,10 @@ const Reel = () => {
                 return (
                   <button
                     onClick={() => {
-                      navigate('/reel', { state: { sourceUserId: user?.id, viewProfile: true, _ts: Date.now() } });
+                      if (ownIdx >= 0) {
+                        setCurrentUserIndex(ownIdx);
+                        setCurrentActivityIndex(0);
+                      }
                     }}
                     className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
                     style={{ 
@@ -1399,7 +1357,11 @@ const Reel = () => {
                         key={group.userId}
                         ref={isActive ? activeAvatarRef : undefined}
                         onClick={() => {
-                          navigate('/reel', { state: { sourceUserId: group.userId, viewProfile: true, _ts: Date.now() } });
+                          const targetIdx = effectiveUserGroups.findIndex(g => g.userId === group.userId);
+                          if (targetIdx >= 0) {
+                            setCurrentUserIndex(targetIdx);
+                            setCurrentActivityIndex(0);
+                          }
                         }}
                     className="relative active:scale-95 flex-shrink-0 flex flex-col items-center"
                         style={{ 
@@ -1527,11 +1489,10 @@ const Reel = () => {
             </div>{/* end scrollable others */}
             </div>{/* end flex container */}
           </div>
-          )}
         </div>{/* end top zone */}
 
-        {/* SEGMENTED PROGRESS BARS — only in viewProfile mode */}
-        {viewProfile && currentGroup && currentGroup.activities.length > 1 && (
+        {/* SEGMENTED PROGRESS BARS */}
+        {currentGroup && currentGroup.activities.length > 1 && (
           <div
             className="z-40 flex items-center px-4 shrink-0"
             style={{ marginTop: '2px', marginBottom: '4px' }}
@@ -1570,8 +1531,8 @@ const Reel = () => {
           </div>
         )}
 
-        {/* Week/Day label — only in viewProfile mode for real activities */}
-        {viewProfile && currentGroup && currentActivity && !isLogActivityCard && currentActivity.dayNumber < 1000 && (
+        {/* Week/Day label for real activities */}
+        {currentGroup && currentActivity && !isLogActivityCard && currentActivity.dayNumber < 1000 && (
           <div className="z-40 text-center shrink-0" style={{ marginBottom: '2px' }}>
             <span className="text-white/50 text-xs font-medium">
               Week {Math.ceil(currentActivity.dayNumber / 3)} • Day {((currentActivity.dayNumber - 1) % 3) + 1}
