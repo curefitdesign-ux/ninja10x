@@ -1586,7 +1586,7 @@ const Reel = () => {
                         aspectRatio: '9/16',
                         height: 'calc(95% - 20px)',
                         maxWidth: '100%',
-                        borderRadius: '0px',
+                        borderRadius: '15px',
                         overflow: 'hidden',
                         background: 'transparent',
                         marginTop: '-10px',
