@@ -337,7 +337,7 @@ export default function ReelToProgressTransition({
             {/* Gamified Journey Path */}
             {showTiles && (
               <div className="w-full mx-auto" style={{ maxWidth: "400px", marginTop: -20 }}>
-                <GamifiedJourneyPath completedActivities={myActivities.length} onCrystalTap={onCrystalTap} onFinalGoalTap={() => setShowCertPopup(true)} highlightDayNumber={highlightDayNumber} highlightDayNumber={highlightDayNumber} />
+                <GamifiedJourneyPath completedActivities={myActivities.length} onCrystalTap={onCrystalTap} onFinalGoalTap={() => setShowCertPopup(true)} highlightDayNumber={highlightDayNumber} />
               </div>
             )}
 
