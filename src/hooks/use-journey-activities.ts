@@ -284,7 +284,8 @@ export function useJourneyActivities() {
       await deleteFromStorage(activity.originalUrl);
     }
 
-    // Update local state
+    // Update local state + invalidate caches
+    invalidateFeedCaches();
     setActivities(prev => prev.filter(a => a.dayNumber !== dayNumber));
 
     return true;
