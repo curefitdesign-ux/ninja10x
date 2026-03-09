@@ -1211,14 +1211,43 @@ const Reel = () => {
           onNudge={triggerShake}
         />
 
-        {/* TOP ZONE — avatar strip only (brand bar moved to bottom) */}
+        {/* TOP ZONE */}
         <div 
           className="z-50 flex flex-col justify-end shrink-0"
           style={{ 
             paddingTop: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 12px)',
           }}
         >
-          {/* Avatar strip: pinned own avatar + scrollable others */}
+          {viewProfile ? (
+            /* Profile view header — user info + X button */
+            <div className="flex items-center justify-between px-4 py-2" style={{ height: 78 }}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden">
+                  <ProfileAvatar
+                    src={currentGroup?.avatarUrl}
+                    name={currentGroup?.displayName}
+                    size={40}
+                  />
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">{currentGroup?.displayName}</p>
+                  <p className="text-white/40 text-xs">{currentGroup?.activities.length || 0} activities</p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/reel', { replace: true })}
+                className="w-9 h-9 flex items-center justify-center rounded-full active:scale-95 transition-transform"
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                }}
+              >
+                <X className="w-5 h-5 text-white/80" />
+              </button>
+            </div>
+          ) : (
+          /* Avatar strip: pinned own avatar + scrollable others */
           <div
             className="shrink-0 overflow-hidden"
             style={{ height: 78 }}
