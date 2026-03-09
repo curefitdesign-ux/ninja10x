@@ -28,6 +28,8 @@ const activityEmoji = (activity: string) => {
 const CommunityStoriesWidget = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { triggerMorph } = useMorphTransition();
+  const avatarRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const [communityActivities, setCommunityActivities] = useState<LocalActivity[]>([]);
   const [loaded, setLoaded] = useState(false);
 
