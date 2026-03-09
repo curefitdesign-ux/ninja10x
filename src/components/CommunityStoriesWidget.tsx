@@ -52,12 +52,23 @@ const CommunityStoriesWidget = () => {
   if (!loaded || communityActivities.length === 0) return null;
 
   const handleAvatarTap = (activity: LocalActivity) => {
-    navigate('/reel', {
-      state: {
-        activityId: activity.id,
-        dayNumber: activity.dayNumber,
-      },
-    });
+    const el = avatarRefs.current.get(activity.id);
+    if (el && activity.storageUrl) {
+      triggerMorph(
+        el,
+        activity.storageUrl,
+        '/reel',
+        { activityId: activity.id, dayNumber: activity.dayNumber },
+        activity.isVideo
+      );
+    } else {
+      navigate('/reel', {
+        state: {
+          activityId: activity.id,
+          dayNumber: activity.dayNumber,
+        },
+      });
+    }
   };
 
   return (
