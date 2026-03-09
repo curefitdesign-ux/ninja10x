@@ -35,6 +35,7 @@ interface ReelToProgressTransitionProps {
   onCrystalTap?: (weekNum: number) => void;
   isInline?: boolean;
   highlightDayNumber?: number;
+  openGalleryAtDay?: number;
 }
 
 export default function ReelToProgressTransition({
@@ -48,12 +49,14 @@ export default function ReelToProgressTransition({
   onCrystalTap,
   isInline = false,
   highlightDayNumber,
+  openGalleryAtDay,
 }: ReelToProgressTransitionProps) {
   const [showTiles, setShowTiles] = useState(false);
   const [showStories, setShowStories] = useState(false);
   const [expandingCardId, setExpandingCardId] = useState<string | null>(null);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
+  const openGalleryHandledRef = useRef(false);
   const [showCertPopup, setShowCertPopup] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -104,6 +107,16 @@ export default function ReelToProgressTransition({
       onStoryTap(index, story.userId, story.id);
     }, 250);
   }, [onStoryTap]);
+
+  // Auto-open gallery when navigating from notification with openGalleryAtDay
+  useEffect(() => {
+    if (!openGalleryAtDay || openGalleryHandledRef.current || myActivities.length === 0) return;
+    openGalleryHandledRef.current = true;
+    const uploaded = myActivities.filter(a => a.storageUrl);
+    const idx = uploaded.findIndex(a => a.dayNumber === openGalleryAtDay);
+    setGalleryInitialIndex(Math.max(0, idx));
+    setGalleryOpen(true);
+  }, [openGalleryAtDay, myActivities]);
 
 
   // Build week stacks data

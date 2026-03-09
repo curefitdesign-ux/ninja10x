@@ -235,19 +235,17 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
     onClose();
   }, [onClose]);
 
-  // Navigate to the specific activity in the reel viewer
+  // Navigate to the progress page gallery overlay for the specific activity
   const handleNotificationTap = useCallback((notif: Notification) => {
     onClose();
-    navigate('/reel', {
+    navigate('/progress', {
       replace: true,
       state: {
-        activityId: notif.activityId,
-        dayNumber: notif.dayNumber,
-        sourceUserId: user?.id,
+        openGalleryAtDay: notif.dayNumber,
         _ts: Date.now(),
       },
     });
-  }, [navigate, onClose, user]);
+  }, [navigate, onClose]);
 
   const ui = (
     <AnimatePresence>
