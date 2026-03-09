@@ -457,6 +457,9 @@ const Reel = () => {
   const cardOpacity = useTransform(dragX, [-200, -100, 0, 100, 200], [0.85, 0.95, 1, 0.95, 0.85]);
   const cardRotate = useMotionValue(0); // No rotation for smooth scroll feel
   const cardScale = useMotionValue(1); // No scale for smooth scroll feel
+  // Parallax for side peek cards — drag right reveals left card, drag left reveals right card
+  const peekLeftX = useTransform(dragX, [0, 150], [0, 14]);
+  const peekRightX = useTransform(dragX, [-150, 0], [-14, 0]);
   
   const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
