@@ -42,7 +42,7 @@ export interface GalleryActivity {
   pr?: string;
   dayNumber: number;
   reactionCount?: number;
-  reactions?: Record<ReactionType, ActivityReaction>;
+  reactions?: Partial<Record<ReactionType, ActivityReaction>>;
   reactorProfiles?: ReactorProfile[];
   isPlaceholder?: boolean;
 }
