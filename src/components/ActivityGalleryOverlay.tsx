@@ -263,6 +263,33 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const goNext = () => setCurrentIndex(i => Math.min(i + 1, activities.length - 1));
   const goPrev = () => setCurrentIndex(i => Math.max(i - 1, 0));
 
+  const handleReact = async (type: ReactionType) => {
+    if (!user || !current || isOwnProfile) return;
+    setShowSendReactionSheet(false);
+
+    // Optimistic update
+    setLocalReactions(prev => {
+      const curr = prev[current.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS }, reactorProfiles: [] };
+      const existing = curr.reactions[type];
+      const newCount = (existing?.count || 0) + 1;
+      return {
+        ...prev,
+        [current.id]: {
+          ...curr,
+          total: curr.total + 1,
+          reactions: { ...curr.reactions, [type]: { count: newCount, reacted: true } },
+          reactorProfiles: [...curr.reactorProfiles, { userId: user.id, displayName: 'You', reactionType: type }],
+        },
+      };
+    });
+
+    try {
+      await sendReaction(current.id, user.id, type);
+    } catch (err) {
+      console.error('Reaction failed', err);
+    }
+  };
+
   const handleTap = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const tapX = e.clientX - rect.left;
