@@ -60,6 +60,7 @@ interface ActivityGalleryOverlayProps {
   initialIndex?: number;
   onLogActivity?: () => void;
   userProfile?: UserProfileInfo;
+  isOwnProfile?: boolean;
 }
 
 const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlayProps>(function ActivityGalleryOverlay({
