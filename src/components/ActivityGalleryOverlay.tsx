@@ -400,13 +400,50 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               </motion.button>
             </div>
 
-            {/* User name + week/day info */}
-            <div className="shrink-0 pb-1 z-30">
-              <div className="flex items-center justify-center gap-2" style={{ height: 20 }}>
-                <span className="text-white/60 text-xs">
-                  Week {week} • Day {dayInWeek}
-                </span>
-              </div>
+            {/* User profile header + journey description */}
+            <div className="shrink-0 z-30 px-4 pb-2">
+              {userProfile ? (
+                <div className="flex items-start gap-3">
+                  <ProfileAvatar
+                    src={userProfile.avatarUrl}
+                    name={userProfile.displayName}
+                    size={44}
+                    style={{
+                      border: '2px solid rgba(255, 255, 255, 0.25)',
+                      flexShrink: 0,
+                    }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-bold text-sm truncate">{userProfile.displayName}</p>
+                    {userDescription.length > 0 && (
+                      <div className="mt-0.5">
+                        <p className="text-white/50 text-[11px] leading-tight">
+                          {userDescription[0]}
+                        </p>
+                        {userDescription.length > 1 && (
+                          <p className="text-white/40 text-[11px] leading-tight mt-0.5">
+                            {userDescription.slice(1).join(' • ')}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    className="px-2.5 py-1 rounded-full shrink-0"
+                    style={{ background: 'rgba(255,255,255,0.08)' }}
+                  >
+                    <span className="text-white/60 text-[10px] font-medium">
+                      W{week} • D{dayInWeek}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2" style={{ height: 20 }}>
+                  <span className="text-white/60 text-xs">
+                    Week {week} • Day {dayInWeek}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* MIDDLE CONTAINER — card fills available space */}
