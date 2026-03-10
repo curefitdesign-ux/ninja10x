@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, forwardRef, useMemo } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import paperclipImg from '@/assets/frames/paperclip-silver.png';
 import { MessageCircle } from 'lucide-react';
 import { X, Share2, Pencil, ChevronUp } from 'lucide-react';
 import SendReactionSheet from '@/components/SendReactionSheet';
