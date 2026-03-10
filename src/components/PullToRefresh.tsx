@@ -67,7 +67,7 @@ const PullToRefresh = ({ children, onRefresh, disabled = false }: PullToRefreshP
   const showIndicator = pullDistance > 10 || isRefreshing;
 
   return (
-    <div ref={containerRef} className="relative h-full overflow-auto">
+    <div ref={containerRef} className="relative h-full overflow-hidden">
       <motion.div
         className="absolute left-1/2 -translate-x-1/2 z-50 flex items-center justify-center"
         style={{
@@ -103,7 +103,7 @@ const PullToRefresh = ({ children, onRefresh, disabled = false }: PullToRefreshP
           y: isRefreshing ? 50 : pullDistance * 0.5,
           touchAction: 'pan-x',
         }}
-        className="min-h-full"
+        className="h-full relative"
       >
         {children}
       </motion.div>
