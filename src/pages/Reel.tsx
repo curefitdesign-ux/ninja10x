@@ -1758,62 +1758,130 @@ const Reel = () => {
                         }}
                       >
                         {currentActivity?.id === 'log-activity' ? (
-                          // "Log Your Activity" placeholder card — dark with dot grid + green plus
-                          <div 
-                            className="flex flex-col items-center justify-center cursor-pointer relative overflow-hidden self-center"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate('/camera', { state: { dayNumber: currentActivity.dayNumber } });
-                            }}
-                            style={{
-                              width: '90%',
-                              aspectRatio: '9/16',
-                              maxHeight: '100%',
-                              background: 'rgba(255,255,255,0.10)',
-                              backdropFilter: 'blur(40px)',
-                              WebkitBackdropFilter: 'blur(40px)',
-                              border: '1px solid rgba(255,255,255,0.08)',
-                              borderRadius: 10,
-                            }}
-                          >
-                            {/* Animated dot grid pattern */}
-                            <motion.div 
-                              className="absolute inset-0" 
-                              style={{
-                                backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
-                                backgroundSize: '20px 20px',
-                              }}
-                              animate={{
-                                backgroundPosition: ['0px 0px', '20px 20px'],
-                                opacity: [0.4, 0.7, 0.4],
-                              }}
-                              transition={{
-                                backgroundPosition: { duration: 8, repeat: Infinity, ease: 'linear' },
-                                opacity: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
-                              }}
-                            />
-                            {/* Text */}
-                            <div className="text-center px-6 mb-10 relative z-10">
-                              <h2 className="text-foreground font-black text-2xl tracking-tight uppercase leading-tight">
-                                Log Your
-                              </h2>
-                              <h2 className="text-foreground font-black text-2xl tracking-tight uppercase leading-tight">
-                                Today's Activity
-                              </h2>
-                            </div>
-                            {/* Glowing plus */}
-                            <div className="relative flex items-center justify-center z-10" style={{ width: 64, height: 64 }}>
-                              <div className="absolute inset-0 rounded-full" style={{
-                                background: 'radial-gradient(circle, rgba(15,228,152,0.4) 0%, transparent 65%)',
-                                filter: 'blur(16px)',
-                                transform: 'scale(2.5)',
-                              }} />
-                              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                                <rect x="20" y="6" width="8" height="36" rx="4" fill="#0FE498" />
-                                <rect x="6" y="20" width="36" height="8" rx="4" fill="#0FE498" />
-                              </svg>
-                            </div>
-                          </div>
+                          // "Log Your Activity" card — dark with animated glowing border
+                          (() => {
+                            // Calculate days since last activity for urgency color
+                            const lastActivity = currentGroup?.activities
+                              ?.filter(a => a.id !== 'log-activity' && a.dayNumber < 1001)
+                              ?.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())?.[0];
+                            const daysSinceLastActivity = lastActivity?.createdAt 
+                              ? Math.floor((Date.now() - new Date(lastActivity.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+                              : 0;
+                            // blue(0-1d) → green(2d) → yellow(3d) → orange(4d+)
+                            const urgencyColor = daysSinceLastActivity <= 1 
+                              ? { h: 200, s: 100, l: 55, name: 'blue' }   // blue
+                              : daysSinceLastActivity === 2 
+                              ? { h: 150, s: 90, l: 50, name: 'green' }   // green
+                              : daysSinceLastActivity === 3 
+                              ? { h: 45, s: 100, l: 55, name: 'yellow' }  // yellow
+                              : { h: 25, s: 100, l: 55, name: 'orange' }; // orange
+                            const glowHsl = `hsl(${urgencyColor.h}, ${urgencyColor.s}%, ${urgencyColor.l}%)`;
+                            const glowDim = `hsla(${urgencyColor.h}, ${urgencyColor.s}%, ${urgencyColor.l}%, 0.15)`;
+                            const glowMid = `hsla(${urgencyColor.h}, ${urgencyColor.s}%, ${urgencyColor.l}%, 0.4)`;
+
+                            return (
+                              <div 
+                                className="flex flex-col items-center justify-center cursor-pointer relative self-center"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate('/camera', { state: { dayNumber: currentActivity.dayNumber } });
+                                }}
+                                style={{
+                                  width: '90%',
+                                  aspectRatio: '9/16',
+                                  maxHeight: '100%',
+                                }}
+                              >
+                                {/* Outer glow */}
+                                <motion.div
+                                  className="absolute inset-0 rounded-2xl"
+                                  style={{
+                                    boxShadow: `0 0 30px 8px ${glowMid}, inset 0 0 30px 4px ${glowDim}`,
+                                    border: `1.5px solid ${glowMid}`,
+                                  }}
+                                  animate={{
+                                    boxShadow: [
+                                      `0 0 25px 6px ${glowMid}, inset 0 0 25px 3px ${glowDim}`,
+                                      `0 0 40px 12px ${glowMid}, inset 0 0 35px 6px ${glowDim}`,
+                                      `0 0 25px 6px ${glowMid}, inset 0 0 25px 3px ${glowDim}`,
+                                    ],
+                                  }}
+                                  transition={{
+                                    duration: 3,
+                                    repeat: Infinity,
+                                    ease: 'easeInOut',
+                                  }}
+                                />
+                                {/* Dark inner surface */}
+                                <div 
+                                  className="absolute inset-[2px] rounded-2xl overflow-hidden"
+                                  style={{
+                                    background: 'linear-gradient(180deg, rgba(10,10,10,0.95) 0%, rgba(5,5,8,0.98) 60%, rgba(10,10,10,0.9) 100%)',
+                                  }}
+                                >
+                                  {/* Subtle reflection at bottom */}
+                                  <div className="absolute bottom-0 left-0 right-0 h-[35%]" style={{
+                                    background: `radial-gradient(ellipse 80% 60% at 50% 100%, ${glowDim} 0%, transparent 70%)`,
+                                  }} />
+                                  {/* Inner border glow line */}
+                                  <motion.div
+                                    className="absolute inset-[8px] rounded-xl pointer-events-none"
+                                    style={{
+                                      border: `1px solid ${glowDim}`,
+                                      boxShadow: `inset 0 0 12px 2px ${glowDim}`,
+                                    }}
+                                    animate={{
+                                      opacity: [0.5, 0.9, 0.5],
+                                    }}
+                                    transition={{
+                                      duration: 2.5,
+                                      repeat: Infinity,
+                                      ease: 'easeInOut',
+                                    }}
+                                  />
+                                </div>
+
+                                {/* Content */}
+                                <div className="relative z-10 flex flex-col items-center justify-center h-full px-6">
+                                  {/* Text */}
+                                  <div className="text-center mb-8">
+                                    <p className="text-white/70 text-lg font-medium leading-relaxed">
+                                      {daysSinceLastActivity <= 1 
+                                        ? "Ready to crush it today?" 
+                                        : daysSinceLastActivity <= 2 
+                                        ? "Don't break your streak!"
+                                        : daysSinceLastActivity <= 3
+                                        ? "Your journey misses you!"
+                                        : "Come back stronger 💪"}
+                                    </p>
+                                  </div>
+
+                                  {/* Glowing plus */}
+                                  <div className="relative flex items-center justify-center" style={{ width: 64, height: 64 }}>
+                                    <motion.div 
+                                      className="absolute inset-0 rounded-full"
+                                      style={{
+                                        background: `radial-gradient(circle, ${glowMid} 0%, transparent 65%)`,
+                                        filter: 'blur(16px)',
+                                        transform: 'scale(2.5)',
+                                      }}
+                                      animate={{ opacity: [0.5, 1, 0.5] }}
+                                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                                    />
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                                      <rect x="20" y="6" width="8" height="36" rx="4" fill={glowHsl} />
+                                      <rect x="6" y="20" width="36" height="8" rx="4" fill={glowHsl} />
+                                    </svg>
+                                  </div>
+
+                                  {/* Label */}
+                                  <p className="mt-6 text-white/40 text-xs font-medium uppercase tracking-widest">
+                                    Day {currentActivity.dayNumber} of 12
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })()
                         ) : isRecapGenerating ? (
                           // Show generating placeholder for week recap
                           <div 
