@@ -382,15 +382,22 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     }}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-bold text-sm truncate">{userProfile.displayName}</p>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-white font-bold text-sm truncate">{userProfile.displayName}</p>
+                      {userDescription && (
+                        <span className="text-white/50 text-[11px] font-medium shrink-0">{userDescription.count}/12</span>
+                      )}
+                    </div>
                     {userDescription && (
                       <div className="mt-0.5">
                         <p className="text-white/70 text-[11px] leading-tight font-medium">
                           {userDescription.headline}
                         </p>
-                        <p className="text-white/40 text-[11px] leading-tight mt-0.5">
-                          {userDescription.details}
-                        </p>
+                        {userDescription.totalDuration && (
+                          <p className="text-white/40 text-[11px] leading-tight mt-0.5">
+                            Active for {userDescription.totalDuration}
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
