@@ -1690,92 +1690,105 @@ const Reel = () => {
           }}
         >
           {/* Reel cards fill the available middle container space */}
-          <div className="relative min-h-0 flex-1 flex items-center justify-center">
+          <div className="relative min-h-0 flex-1 flex items-center justify-center overflow-hidden">
           {/* Swipe gesture overlay */}
           <motion.div
             className="absolute inset-0 z-[60]"
             style={{ touchAction: 'none' }}
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0}
+            dragElastic={0.15}
             dragMomentum={false}
             onDragEnd={handleHorizontalDragEnd}
             onClick={handleTap}
           />
 
-          {/* Adjacent peek cards with template rendering */}
-          {effectiveUserGroups.length > 1 && [-1, 1].map(offset => {
-            const idx = (currentUserIndex + offset + effectiveUserGroups.length) % effectiveUserGroups.length;
-            const group = effectiveUserGroups[idx];
-            const activities = [...(group?.activities || [])].reverse().filter(a => a.id !== 'log-activity');
-            const act = activities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
-              || activities.find(a => !!(a.originalUrl || a.storageUrl))
-              || activities[0];
-            const peekMedia = (act?.originalUrl || act?.storageUrl || group?.avatarUrl || '').trim();
-            const isPeekOwnStory = user && group?.userId === user.id;
-            const isPeekLocked = !isPeekOwnStory && !profile?.stories_public;
-            const hasFrame = act?.frame && act.frame !== 'none';
-            if (!peekMedia && !act) return null;
+          {/* Carousel strip — renders prev, center, next as a unified row */}
+          {(() => {
+            const cardPositions = [-1, 0, 1];
+            return cardPositions.map(offset => {
+              const idx = (currentUserIndex + offset + effectiveUserGroups.length) % effectiveUserGroups.length;
+              const group = effectiveUserGroups[idx];
+              if (!group) return null;
+              const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
+              const act = activities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
+                || activities.find(a => !!(a.originalUrl || a.storageUrl))
+                || activities[0];
+              const peekMedia = (act?.originalUrl || act?.storageUrl || group?.avatarUrl || '').trim();
+              const isPeekOwnStory = user && group?.userId === user.id;
+              const isPeekLocked = !isPeekOwnStory && !profile?.stories_public;
+              const hasFrame = act?.frame && act.frame !== 'none';
+              const isCenter = offset === 0;
+              const cardScale = isCenter ? 1 : 0.8;
+              const cardOpacity = isCenter ? 1 : 0.5;
+              const xOffset = offset * 290;
 
-            return (
-              <div
-                key={`peek-${offset}-${idx}`}
-                className="absolute pointer-events-none"
-                style={{
-                  width: 'calc(80% - 24px)',
-                  maxWidth: 336,
-                  aspectRatio: '9/16',
-                  transform: `translateX(${offset * 280}px) scale(0.92)`,
-                  opacity: 0.45,
-                  transition: 'all 0.4s linear',
-                  overflow: 'hidden',
-                  borderRadius: '0px',
-                }}
-              >
-                <div
-                  className="w-full h-full overflow-hidden"
-                  style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                    filter: isPeekLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                  }}
-                >
-                  {hasFrame && act ? (
-                    <StoryFrameRenderer
-                      imageUrl={peekMedia}
-                      isVideo={act.isVideo}
-                      activity={act.activity}
-                      frame={act.frame}
-                      duration={act.duration}
-                      pr={act.pr}
-                      dayNumber={act.dayNumber}
-                    />
-                  ) : peekMedia ? (
-                    <img
-                      src={peekMedia}
-                      alt="Adjacent user"
-                      className="w-full h-full object-cover"
-                      loading="eager"
-                    />
-                  ) : null}
-                </div>
-              </div>
-            );
-          })}
+              if (!isCenter) {
+                // Peek card (left or right)
+                return (
+                  <motion.div
+                    key={`carousel-${offset}-${idx}-${currentUserIndex}`}
+                    className="absolute pointer-events-none"
+                    style={{
+                      width: 'calc(80% - 20px)',
+                      maxWidth: 340,
+                      aspectRatio: '9/16',
+                      zIndex: 10,
+                    }}
+                    initial={{ x: xOffset, scale: cardScale, opacity: 0 }}
+                    animate={{ x: xOffset, scale: cardScale, opacity: cardOpacity }}
+                    transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                  >
+                    <div
+                      className="w-full h-full overflow-hidden"
+                      style={{
+                        background: 'rgba(255,255,255,0.06)',
+                        border: '1px solid rgba(255,255,255,0.12)',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                        filter: isPeekLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.7)',
+                      }}
+                    >
+                      {hasFrame && act ? (
+                        <StoryFrameRenderer
+                          imageUrl={peekMedia}
+                          isVideo={act.isVideo}
+                          activity={act.activity}
+                          frame={act.frame}
+                          duration={act.duration}
+                          pr={act.pr}
+                          dayNumber={act.dayNumber}
+                        />
+                      ) : peekMedia ? (
+                        <img
+                          src={peekMedia}
+                          alt="Adjacent user"
+                          className="w-full h-full object-cover"
+                          loading="eager"
+                        />
+                      ) : null}
+                    </div>
+                  </motion.div>
+                );
+              }
 
-          {/* Center card with linear enter/exit */}
-          <AnimatePresence mode="wait" initial={false}>
+              // Center card — full content
+              return null; // rendered below with full content
+            });
+          })()}
+
+          {/* Center card — main content */}
+          <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
             key={`center-${currentGroup?.userId}-${currentUserIndex}`}
             className="relative flex items-center justify-center"
             style={{
               width: '100%',
               height: '100%',
+              zIndex: 20,
             }}
             initial={{
-              x: slideDirection === 'left' ? 300 : slideDirection === 'right' ? -300 : 0,
-              scale: 0.85,
+              x: slideDirection === 'left' ? 290 : slideDirection === 'right' ? -290 : 0,
+              scale: 0.8,
               opacity: 0.5,
             }}
             animate={{
@@ -1784,20 +1797,16 @@ const Reel = () => {
               opacity: 1,
             }}
             exit={{
-              x: slideDirection === 'left' ? -300 : 300,
-              scale: 0.85,
+              x: slideDirection === 'left' ? -290 : 290,
+              scale: 0.8,
               opacity: 0,
             }}
-            transition={{ duration: 0.4, ease: 'linear' }}
+            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
           >
               {/* Full templated image/video - with lock overlay for non-public users */}
               {(() => {
-                // Lock content if user's profile is private OR they haven't shared any public activity
                 const shouldShowLocked = !isOwnStory && !profile?.stories_public;
-                
-                // Generate unique key for transitions
                 const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
-                
                 return (
                   <div
                     className="relative flex items-center justify-center"
