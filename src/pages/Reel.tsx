@@ -687,14 +687,12 @@ const Reel = () => {
     }
   }, [currentUserIndex, currentGroup, effectiveUserGroups]);
 
-  // Scroll to current user when index changes
+  // Scroll Embla to current user when index changes programmatically
   useEffect(() => {
-    if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const cardWidth = container.offsetWidth;
-      container.scrollTo({ left: currentUserIndex * cardWidth, behavior: 'smooth' });
+    if (carouselApi && carouselApi.selectedScrollSnap() !== currentUserIndex) {
+      carouselApi.scrollTo(currentUserIndex);
     }
-  }, [currentUserIndex]);
+  }, [currentUserIndex, carouselApi]);
 
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     // If story is locked (viewer hasn't shared + this isn't own story), open Make Public sheet
