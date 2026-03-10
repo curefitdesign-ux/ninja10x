@@ -95,7 +95,24 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             
             const profileMap = new Map(profiles?.map(p => [p.user_id, { name: p.display_name, avatar: p.avatar_url }]) || []);
             
-            reactionNotifs = reactions.map(r => {
+            // Group reactions by same user + same activity + same day
+            const reactionGroups = new Map<string, { reaction: typeof reactions[0]; count: number; latestTime: Date }>();
+            reactions.forEach(r => {
+              const dayKey = `${r.user_id}-${r.activity_id}-${new Date(r.created_at).toDateString()}`;
+              const existing = reactionGroups.get(dayKey);
+              const ts = new Date(r.created_at);
+              if (existing) {
+                existing.count++;
+                if (ts > existing.latestTime) {
+                  existing.latestTime = ts;
+                  existing.reaction = r;
+                }
+              } else {
+                reactionGroups.set(dayKey, { reaction: r, count: 1, latestTime: ts });
+              }
+            });
+
+            reactionNotifs = Array.from(reactionGroups.values()).map(({ reaction: r }) => {
               const reactorProfile = profileMap.get(r.user_id);
               const activityInfo = activityMap.get(r.activity_id);
               return {
