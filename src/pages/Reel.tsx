@@ -1749,11 +1749,10 @@ const Reel = () => {
             return (
               <div
                 key={`card-${group.userId}`}
-                className="flex-shrink-0 flex items-center justify-center relative"
+                className="flex items-center justify-center relative"
                 style={{
                   width: '100%',
                   height: '100%',
-                  scrollSnapAlign: 'center',
                 }}
               >
                 {/* Full templated image/video - with lock overlay for non-public users */}
