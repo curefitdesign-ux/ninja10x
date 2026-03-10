@@ -103,7 +103,7 @@ const PullToRefresh = ({ children, onRefresh, disabled = false }: PullToRefreshP
           y: isRefreshing ? 50 : pullDistance * 0.5,
           touchAction: 'pan-x',
         }}
-        className="min-h-full"
+        className="h-full relative"
       >
         {children}
       </motion.div>
