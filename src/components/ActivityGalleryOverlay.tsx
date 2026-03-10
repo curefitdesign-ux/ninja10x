@@ -96,7 +96,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const autoAdvanceTimer = useRef<NodeJS.Timeout | null>(null);
   const progressStartTimer = useRef<number | null>(null);
   const [progressRunKey, setProgressRunKey] = useState(0);
-  const isPaused = showReactsSheet || showEditSheet;
+  const isPaused = showReactsSheet || showSendReactionSheet || showEditSheet;
 
   // Check if user has logged an activity today (placeholder presence means they haven't)
   const hasLoggedToday = useMemo(() => {
