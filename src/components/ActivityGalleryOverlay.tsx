@@ -538,7 +538,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     className="relative overflow-hidden"
                     style={{
                       aspectRatio: '9/16',
-                      height: '90%',
+                      maxHeight: '100%',
                       maxWidth: '100%',
                       borderRadius: '20px',
                       overflow: 'hidden',
