@@ -601,26 +601,28 @@ const Reel = () => {
     }
   }, [currentActivityIndex, goPrevUser]);
 
-  // Swipe gesture handling for horizontal navigation - smooth scroll feel
+  // Swipe gesture handling for horizontal navigation - smooth carousel feel
   const dragX = useMotionValue(0);
-  // No animated transforms — clean instant transitions
-  const dragConstraints = useMemo(() => ({ left: 0, right: 0 }), []);
+  const dragConstraints = useMemo(() => ({ left: -200, right: 200 }), []);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
   
   const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
     
-    // Horizontal swipe between users - lower threshold for snappier feel
+    // Horizontal swipe between users
     if (Math.abs(offset.x) > 40 || Math.abs(velocity.x) > 300) {
       if (offset.x < 0) {
         setSwipeDirection('left');
+        setSlideDirection('left');
         goNextUser();
       } else {
         setSwipeDirection('right');
+        setSlideDirection('right');
         goPrevUser();
       }
     }
 
-    // Always hard-reset drag offset so container never stays shifted
+    // Spring back to center
     dragX.set(0);
   }, [goNextUser, goPrevUser, dragX]);
 
@@ -1693,12 +1695,24 @@ const Reel = () => {
           }}
         >
           {/* Reel cards fill the available middle container space */}
-          <div className="relative min-h-0 flex-1 flex items-center justify-center">
-          {/* Previous user peek card - 12% visible on left */}
+          <div className="relative min-h-0 flex-1 flex items-center justify-center overflow-hidden">
+          {/* Carousel container - peek cards + main card move together */}
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ x: dragX }}
+            animate={shakeAnimation}
+            transition={shakeTransition}
+            drag="x"
+            dragMomentum={false}
+            dragConstraints={dragConstraints}
+            dragElastic={0.4}
+            onDragEnd={handleHorizontalDragEnd}
+            onClick={handleTap}
+          >
+          {/* Previous user peek card - 10% visible on left */}
           {effectiveUserGroups.length > 1 && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
             const prevGroup = effectiveUserGroups[prevIdx];
-            // Pick best available preview: prefer non-video media, then any media, then avatar fallback
             const prevActivities = [...(prevGroup?.activities || [])].reverse().filter(a => a.id !== 'log-activity');
             const prevAct = prevActivities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
               || prevActivities.find(a => !!(a.originalUrl || a.storageUrl))
@@ -1730,11 +1744,7 @@ const Reel = () => {
                     <video
                       src={prevMedia}
                       className="w-full h-full object-cover"
-                      muted
-                      playsInline
-                      preload="metadata"
-                      autoPlay
-                      loop
+                      muted playsInline preload="metadata" autoPlay loop
                       style={{ 
                         opacity: isPrevLocked ? 0.35 : 0.5, 
                         filter: isPrevLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
@@ -1793,11 +1803,7 @@ const Reel = () => {
                     <video
                       src={nextMedia}
                       className="w-full h-full object-cover"
-                      muted
-                      playsInline
-                      preload="metadata"
-                      autoPlay
-                      loop
+                      muted playsInline preload="metadata" autoPlay loop
                       style={{ 
                         opacity: isNextLocked ? 0.35 : 0.5, 
                         filter: isNextLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
@@ -1821,23 +1827,8 @@ const Reel = () => {
             );
           })()}
 
-          {/* Card container with shake animation */}
-          <motion.div 
-            className="relative flex items-center justify-center"
-            style={{ 
-              width: '100%',
-              height: '100%',
-              x: dragX,
-            }}
-            animate={shakeAnimation}
-            transition={shakeTransition}
-            drag="x"
-            dragMomentum={false}
-            dragConstraints={dragConstraints}
-            dragElastic={0.35}
-            onDragEnd={handleHorizontalDragEnd}
-            onClick={handleTap}
-          >
+          {/* Main card content */}
+          <div className="relative flex items-center justify-center" style={{ width: '100%', height: '100%' }}>
               {/* Full templated image/video - with lock overlay for non-public users */}
               {(() => {
                 // Lock content if user's profile is private OR they haven't shared any public activity
@@ -2163,6 +2154,7 @@ const Reel = () => {
                   </div>
                 );
               })()}
+          </div>
           </motion.div>
           
           {/* Right arrow indicator - only on first story */}
