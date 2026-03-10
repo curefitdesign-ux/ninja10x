@@ -1725,7 +1725,7 @@ const Reel = () => {
                   key={`card-${group.userId}`}
                   className="flex-shrink-0 flex items-center justify-center"
                   style={{
-                    width: '85%',
+                    width: '100%',
                     height: '100%',
                     scrollSnapAlign: 'center',
                   }}
@@ -1772,7 +1772,7 @@ const Reel = () => {
                 key={`card-${group.userId}`}
                 className="flex-shrink-0 flex items-center justify-center relative"
                 style={{
-                  width: '85%',
+                  width: '100%',
                   height: '100%',
                   scrollSnapAlign: 'center',
                 }}
