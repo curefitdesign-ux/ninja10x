@@ -613,6 +613,11 @@ const Reel = () => {
       }
     }
   }, [goNextUser, goPrevUser]);
+
+  const [lastTap, setLastTap] = useState(0);
+  const [userTransitionFlash, setUserTransitionFlash] = useState(false);
+  const prevUserIndexRef = useRef(currentUserIndex);
+
   
   // Flash highlight + center active avatar ONLY when user changes
   useEffect(() => {
