@@ -523,15 +523,16 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   <motion.div
                     className="absolute overflow-hidden"
                     style={{
-                      width: '46%',
-                      aspectRatio: '9/16',
-                      right: '-4%',
-                      top: '10%',
+                      width: '42%',
+                      height: '85%',
+                      right: '-2%',
+                      top: '8%',
                       borderRadius: 14,
                       transform: 'rotate(10deg)',
                       zIndex: 5,
                       filter: 'brightness(0.55)',
                       boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
+                      overflow: 'hidden',
                     }}
                     initial={{ opacity: 0, x: 40 }}
                     animate={{ opacity: 1, x: 0 }}
