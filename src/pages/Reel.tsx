@@ -2100,9 +2100,9 @@ const Reel = () => {
                   </div>
                 );
               })()}
-            </motion.div>
-          );
-        })}
+              </div>
+            );
+          })}
 
           
           {/* Right arrow indicator - only on first story */}
