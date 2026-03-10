@@ -474,7 +474,27 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               </motion.button>
             </div>
 
-            {/* FANNED CARDS AREA */}
+            {/* Avatar — centered above cards */}
+            {userProfile && (
+              <div className="shrink-0 flex justify-center z-40" style={{ marginBottom: -20 }}>
+                <div
+                  className="rounded-full overflow-hidden"
+                  style={{
+                    width: 64,
+                    height: 64,
+                    border: '3px solid rgba(255,255,255,0.3)',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+                  }}
+                >
+                  <ProfileAvatar
+                    src={userProfile.avatarUrl}
+                    name={userProfile.displayName}
+                    size={64}
+                  />
+                </div>
+              </div>
+            )}
+
             <div
               className="relative z-30 flex-shrink-0"
               style={{ height: '46%', marginTop: 8 }}
@@ -632,27 +652,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
             {/* PROFILE SECTION — avatar, name, tags, description, stats */}
             <div className="flex-1 min-h-0 flex flex-col items-center z-30 overflow-y-auto" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)' }}>
-              {/* Avatar — overlapping cards */}
-              {userProfile && (
-                <div className="shrink-0" style={{ marginTop: -28 }}>
-                  <div
-                    className="rounded-full overflow-hidden"
-                    style={{
-                      width: 64,
-                      height: 64,
-                      border: '3px solid rgba(255,255,255,0.3)',
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-                    }}
-                  >
-                    <ProfileAvatar
-                      src={userProfile.avatarUrl}
-                      name={userProfile.displayName}
-                      size={64}
-                    />
-                  </div>
-                </div>
-              )}
-
               {/* Name */}
               {userProfile && (
                 <h2
@@ -661,20 +660,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 >
                   {userProfile.displayName}
                 </h2>
-              )}
-
-              {/* Activity type tags */}
-              {activityTags.length > 0 && (
-                <div className="flex items-center justify-center gap-2 mt-1.5 px-4 flex-wrap">
-                  {activityTags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-white/60 text-xs font-medium"
-                    >
-                      # {tag.charAt(0).toUpperCase() + tag.slice(1)}
-                    </span>
-                  ))}
-                </div>
               )}
 
               {/* Description */}
