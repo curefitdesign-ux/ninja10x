@@ -2079,7 +2079,7 @@ const Reel = () => {
                       </div>
                     )}
                     
-                    </motion.div>{/* end 9:16 card */}
+                    </div>{/* end 9:16 card */}
 
                     {/* Floating 3D emoji reactions - OUTSIDE overflow-hidden card so they aren't clipped */}
                     {!shouldShowLocked && (
