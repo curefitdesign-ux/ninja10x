@@ -1711,9 +1711,8 @@ const Reel = () => {
             return (
               <motion.div
                 key={`peek-left-${prevIdx}`}
-                className="absolute left-0 top-0 bottom-0 flex items-center cursor-pointer"
+                className="absolute left-0 top-0 bottom-0 flex items-center pointer-events-none"
                 style={{ width: '10%', zIndex: 20 }}
-                onClick={goPrevUser}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.15 }}
