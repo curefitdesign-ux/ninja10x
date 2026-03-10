@@ -49,11 +49,11 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
 
   if (shouldHide) return null;
 
-  const activeTab = location.pathname === "/progress" ? "progress" : "discover";
+  const activeTab = showNotificationSheet ? "bell" : location.pathname === "/progress" ? "progress" : "discover";
 
   const handleTabClick = (tabId: string) => {
     if (tabId === "bell") {
-      setShowNotificationSheet(true);
+      setShowNotificationSheet(prev => !prev);
       setUnreadNotificationCount(0);
       return;
     }
