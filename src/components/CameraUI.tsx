@@ -40,9 +40,9 @@ const CameraUI = ({ activity, week, day, onCapture, onClose, initialCaptureMode 
   const [countdownActive, setCountdownActive] = useState(false);
   const [countdownValue, setCountdownValue] = useState(0);
   const [captureMode, setCaptureMode] = useState<CaptureMode>(initialCaptureMode);
-  const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const recordingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const countdownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const recordingStartRef = useRef<number>(0);
   const isLongPressRef = useRef(false);
 

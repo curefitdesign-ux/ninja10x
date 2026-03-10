@@ -32,7 +32,7 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
   const [cropDimensions, setCropDimensions] = useState({ width: 0, height: 0 });
   const [baseScale, setBaseScale] = useState(1);
   const [showZoomIndicator, setShowZoomIndicator] = useState(false);
-  const zoomIndicatorTimeout = useRef<NodeJS.Timeout | null>(null);
+  const zoomIndicatorTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Calculate crop area dimensions - constrained to viewport
   useEffect(() => {

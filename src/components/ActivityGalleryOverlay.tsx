@@ -96,7 +96,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   // Auto-advance timer
   const AUTO_ADVANCE_MS = 10000;
   const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
-  const autoAdvanceTimer = useRef<NodeJS.Timeout | null>(null);
+  const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const progressStartTimer = useRef<number | null>(null);
   const [progressRunKey, setProgressRunKey] = useState(0);
   const isPaused = showReactsSheet || showSendReactionSheet || showEditSheet;
