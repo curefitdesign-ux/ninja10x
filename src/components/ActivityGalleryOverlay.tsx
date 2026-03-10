@@ -386,39 +386,31 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 height: 56,
               }}
             >
-              {/* 12-pill progress bar: 4 groups of 3, separated by gaps */}
-              <div className="flex items-center gap-0.5 flex-1">
-                {Array.from({ length: 12 }, (_, i) => {
-                  const dayNum = i + 1;
-                  const isCurrent = dayNum === current.dayNumber;
-                  const isCompleted = activities.some(a => !a.isPlaceholder && a.dayNumber === dayNum);
-                  const isPastCurrentIndex = (() => {
-                    const actIdx = activities.findIndex(a => a.dayNumber === dayNum);
-                    return actIdx >= 0 && actIdx < currentIndex;
-                  })();
-                  
-                  // Add gap between week groups (after pill 3, 6, 9)
-                  const groupGap = (i > 0 && i % 3 === 0) ? 'ml-2' : '';
-                  
+              {/* Progress segments — only for real activities, latest first */}
+              <div className="flex items-center gap-1 flex-1 mx-3">
+                {activities.map((a, i) => {
+                  if (a.isPlaceholder) return null;
+                  const isCurrent = i === currentIndex;
+                  const isPast = i < currentIndex;
+
                   return (
                     <div
-                      key={dayNum}
-                      className={`flex-1 h-[3px] rounded-full overflow-hidden ${groupGap}`}
+                      key={a.id}
+                      className="flex-1 h-[3px] rounded-full overflow-hidden"
                       style={{ background: 'rgba(255,255,255,0.1)' }}
                     >
-                      {isCurrent ? (
-                        <div
-                          key={`pill-${dayNum}-${progressRunKey}`}
-                          className="h-full rounded-full"
-                          style={{
-                            background: 'rgba(255,255,255,0.5)',
-                            width: `${autoAdvanceProgress * 100}%`,
-                            transition: autoAdvanceProgress > 0 ? `width ${AUTO_ADVANCE_MS}ms linear` : 'none',
-                          }}
-                        />
-                      ) : (isPastCurrentIndex || isCompleted) ? (
-                        <div className="h-full w-full rounded-full" style={{ background: 'rgba(255,255,255,0.9)' }} />
-                      ) : null}
+                      <div
+                        key={isCurrent ? `${a.id}-${progressRunKey}` : `${a.id}-static`}
+                        className="h-full rounded-full"
+                        style={{
+                          background: (isPast || isCurrent) ? 'rgba(255,255,255,0.9)' : 'transparent',
+                          width: isPast ? '100%'
+                            : isCurrent ? `${autoAdvanceProgress * 100}%` : '0%',
+                          transition: isCurrent
+                            ? (autoAdvanceProgress > 0 ? `width ${AUTO_ADVANCE_MS}ms linear` : 'none')
+                            : 'none',
+                        }}
+                      />
                     </div>
                   );
                 })}
@@ -513,7 +505,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 >
                   {/* 9:16 Card */}
                   <motion.div
-                    className="relative overflow-hidden w-full h-full"
+                    className="relative overflow-hidden"
                     style={{
                       aspectRatio: '9/16',
                       maxHeight: '100%',
