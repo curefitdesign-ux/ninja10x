@@ -1090,7 +1090,10 @@ const Reel = () => {
     setShowShareOptions(true);
   }, []);
 
-  if (loading) {
+  const handlePullRefresh = useCallback(async () => {
+    await loadActivities();
+  }, [loadActivities]);
+
     return <ReelViewerSkeleton />;
   }
 
