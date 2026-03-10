@@ -1705,10 +1705,11 @@ const Reel = () => {
               loop: effectiveUserGroups.length > 1,
               skipSnaps: false,
               containScroll: false,
+              slidesToScroll: 1,
             }}
             className="h-full"
           >
-            <CarouselContent className="h-full -ml-0">
+            <CarouselContent className="h-full -ml-2">
               {effectiveUserGroups.map((group, idx) => {
                 const isCenter = idx === currentUserIndex;
                 const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
@@ -1734,18 +1735,17 @@ const Reel = () => {
                   return (
                     <CarouselItem
                       key={`card-${group.userId}`}
-                      className="pl-0 flex items-center justify-center h-full"
+                      className="pl-2 flex items-center justify-center h-full basis-[82%]"
                     >
                       <div
                         className="flex items-center justify-center w-full h-full"
                         style={cardStyle}
                       >
                         <div
-                          className="overflow-hidden rounded-3xl"
+                          className="overflow-hidden rounded-3xl w-full h-full"
                           style={{
-                            width: 'calc(80% - 20px)',
-                            maxWidth: 340,
                             aspectRatio: '9/16',
+                            maxHeight: 'calc(95% - 20px)',
                             background: 'rgba(255,255,255,0.06)',
                             border: '1px solid rgba(255,255,255,0.12)',
                             boxShadow: '0 8px 32px rgba(0,0,0,0.22)',
@@ -1779,7 +1779,7 @@ const Reel = () => {
                 return (
                   <CarouselItem
                     key={`card-${group.userId}`}
-                    className="pl-0 flex items-center justify-center relative h-full"
+                    className="pl-2 flex items-center justify-center relative h-full basis-[82%]"
                   >
                     <div
                       className="flex items-center justify-center w-full h-full"
