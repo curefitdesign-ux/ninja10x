@@ -338,14 +338,32 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 height: 56,
               }}
             >
-              {/* Combined counter + week/day pill */}
-              <div
-                className="px-3 py-1.5 rounded-full text-white/70 text-xs font-medium flex items-center gap-1.5"
-                style={{ background: 'rgba(255,255,255,0.08)' }}
-              >
-                <span>W{week} • D{dayInWeek}</span>
-                <span className="text-white/40">|</span>
-                <span>{currentIndex + 1}/{totalActivities}</span>
+              {/* Combined counter + week/day indicator */}
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="px-3 py-1.5 rounded-full text-white text-xs font-semibold tracking-wide"
+                  style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}
+                >
+                  Week {week}
+                </div>
+                {/* Day dots for the week */}
+                <div className="flex items-center gap-1.5">
+                  {[1, 2, 3].map(d => (
+                    <div
+                      key={d}
+                      className="rounded-full"
+                      style={{
+                        width: d === dayInWeek ? 20 : 7,
+                        height: 7,
+                        borderRadius: d === dayInWeek ? 4 : 999,
+                        background: d <= dayInWeek
+                          ? 'rgba(255,255,255,0.85)'
+                          : 'rgba(255,255,255,0.2)',
+                        transition: 'all 0.3s ease',
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
 
               {/* Progress segments */}
