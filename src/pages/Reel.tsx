@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, PanInfo } from 'framer-motion';
 import { X, ChevronLeft, ChevronUp, Pencil, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, History } from 'lucide-react';
 import PullToRefresh from '@/components/PullToRefresh';
 import ProfileMenu from '@/components/ProfileMenu';
@@ -601,15 +601,12 @@ const Reel = () => {
     }
   }, [currentActivityIndex, goPrevUser]);
 
-  // Swipe gesture handling for horizontal navigation - smooth carousel feel
-  const dragX = useMotionValue(0);
-  const dragConstraints = useMemo(() => ({ left: -200, right: 200 }), []);
+  // 3D carousel swipe handling
   const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
   
   const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
     
-    // Horizontal swipe between users
     if (Math.abs(offset.x) > 40 || Math.abs(velocity.x) > 300) {
       if (offset.x < 0) {
         setSwipeDirection('left');
@@ -621,10 +618,7 @@ const Reel = () => {
         goPrevUser();
       }
     }
-
-    // Spring back to center
-    dragX.set(0);
-  }, [goNextUser, goPrevUser, dragX]);
+  }, [goNextUser, goPrevUser]);
 
   // Bottom sheet drag removed — progress is now a standalone page
 
@@ -692,10 +686,11 @@ const Reel = () => {
     }
   }, [currentUserIndex, currentGroup, effectiveUserGroups]);
 
-  // Defensive reset on every story/user step to prevent residual x-offset drift
+  // Reset slide direction after animation completes
   useEffect(() => {
-    dragX.set(0);
-  }, [currentUserIndex, currentActivityIndex, dragX]);
+    const timer = setTimeout(() => setSlideDirection(null), 600);
+    return () => clearTimeout(timer);
+  }, [currentUserIndex]);
 
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     // If story is locked, open Make Public sheet on any tap
@@ -1695,140 +1690,117 @@ const Reel = () => {
           }}
         >
           {/* Reel cards fill the available middle container space */}
-          <div className="relative min-h-0 flex-1 flex items-center justify-center overflow-hidden">
-          {/* Carousel container - peek cards + main card move together */}
+          <div className="relative min-h-0 flex-1 flex items-center justify-center" style={{ perspective: '1200px' }}>
+          {/* Swipe gesture overlay */}
           <motion.div
-            className="absolute inset-0 flex items-center justify-center"
-            style={{ x: dragX }}
-            animate={shakeAnimation}
-            transition={shakeTransition}
+            className="absolute inset-0 z-[60]"
+            style={{ touchAction: 'none' }}
             drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0}
             dragMomentum={false}
-            dragConstraints={dragConstraints}
-            dragElastic={0.4}
             onDragEnd={handleHorizontalDragEnd}
             onClick={handleTap}
+          />
+
+          {/* 3D Adjacent peek cards */}
+          {effectiveUserGroups.length > 1 && [-1, 1].map(offset => {
+            const idx = (currentUserIndex + offset + effectiveUserGroups.length) % effectiveUserGroups.length;
+            const group = effectiveUserGroups[idx];
+            const activities = [...(group?.activities || [])].reverse().filter(a => a.id !== 'log-activity');
+            const act = activities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
+              || activities.find(a => !!(a.originalUrl || a.storageUrl))
+              || activities[0];
+            const media = (act?.originalUrl || act?.storageUrl || group?.avatarUrl || '').trim();
+            const isPeekOwnStory = user && group?.userId === user.id;
+            const isPeekLocked = !isPeekOwnStory && !profile?.stories_public;
+            const isPeekVideo = !!(act?.originalUrl || act?.storageUrl) && isVideoUrl(media);
+            if (!media) return null;
+
+            return (
+              <motion.div
+                key={`peek-3d-${offset}-${idx}`}
+                className="absolute pointer-events-none"
+                style={{
+                  transformStyle: 'preserve-3d',
+                  width: 'calc(100% - 24px)',
+                  maxWidth: 420,
+                  aspectRatio: '9/16',
+                }}
+                animate={{
+                  x: offset * 320,
+                  scale: 0.82,
+                  rotateY: offset * -12,
+                  opacity: 0.5,
+                  z: -80,
+                }}
+                transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+              >
+                <div
+                  className="w-full h-full rounded-3xl overflow-hidden"
+                  style={{
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                  }}
+                >
+                  {isPeekVideo ? (
+                    <video
+                      src={media}
+                      className="w-full h-full object-cover"
+                      muted playsInline preload="metadata" autoPlay loop
+                      style={{
+                        opacity: isPeekLocked ? 0.35 : 0.6,
+                        filter: isPeekLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={media}
+                      alt="Adjacent user"
+                      className="w-full h-full object-cover"
+                      loading="eager"
+                      style={{
+                        opacity: isPeekLocked ? 0.35 : 0.6,
+                        filter: isPeekLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
+                      }}
+                    />
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
+
+          {/* Center card with 3D enter/exit animation */}
+          <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div
+            key={`center-${currentGroup?.userId}-${currentUserIndex}`}
+            className="relative flex items-center justify-center"
+            style={{
+              transformStyle: 'preserve-3d',
+              width: '100%',
+              height: '100%',
+            }}
+            initial={{
+              x: slideDirection === 'left' ? 320 : slideDirection === 'right' ? -320 : 0,
+              scale: 0.82,
+              rotateY: slideDirection === 'left' ? -12 : slideDirection === 'right' ? 12 : 0,
+              opacity: 0.5,
+            }}
+            animate={{
+              x: 0,
+              scale: 1,
+              rotateY: 0,
+              opacity: 1,
+            }}
+            exit={{
+              x: slideDirection === 'left' ? -320 : 320,
+              scale: 0.82,
+              rotateY: slideDirection === 'left' ? 12 : -12,
+              opacity: 0,
+            }}
+            transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
-          {/* Previous user peek card - 10% visible on left */}
-          {effectiveUserGroups.length > 1 && (() => {
-            const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
-            const prevGroup = effectiveUserGroups[prevIdx];
-            const prevActivities = [...(prevGroup?.activities || [])].reverse().filter(a => a.id !== 'log-activity');
-            const prevAct = prevActivities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
-              || prevActivities.find(a => !!(a.originalUrl || a.storageUrl))
-              || prevActivities[0];
-            const prevMedia = (prevAct?.originalUrl || prevAct?.storageUrl || prevGroup?.avatarUrl || '').trim();
-            const isPrevOwnStory = user && prevGroup?.userId === user.id;
-            const isPrevLocked = !isPrevOwnStory && !profile?.stories_public;
-            const hasPrevStoryMedia = !!(prevAct?.originalUrl || prevAct?.storageUrl);
-            const isPrevVideo = hasPrevStoryMedia && isVideoUrl(prevMedia);
-            if (!prevMedia) return null;
-            return (
-              <div
-                key={`peek-left-${prevIdx}`}
-                className="absolute left-0 top-0 bottom-0 flex items-center pointer-events-none"
-                style={{ width: '10%', zIndex: 20 }}
-              >
-                <div
-                  className="w-full overflow-hidden"
-                  style={{
-                    height: 'calc(59% + 20px)',
-                    borderRadius: '0 10px 10px 0',
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    borderLeft: 'none',
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 32px rgba(0,0,0,0.3)',
-                  }}
-                >
-                  {isPrevVideo ? (
-                    <video
-                      src={prevMedia}
-                      className="w-full h-full object-cover"
-                      muted playsInline preload="metadata" autoPlay loop
-                      style={{ 
-                        opacity: isPrevLocked ? 0.35 : 0.5, 
-                        filter: isPrevLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                      }}
-                    />
-                  ) : (
-                    <img
-                      src={prevMedia}
-                      alt="Previous user"
-                      className="w-full h-full object-cover"
-                      loading="eager"
-                      fetchPriority="high"
-                      style={{ 
-                        opacity: isPrevLocked ? 0.35 : 0.5, 
-                        filter: isPrevLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                      }}
-                    />
-                  )}
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Next user peek card - 10% visible on right */}
-          {effectiveUserGroups.length > 1 && (() => {
-            const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
-            const nextGroup = effectiveUserGroups[nextIdx];
-            const nextActivities = [...(nextGroup?.activities || [])].reverse().filter(a => a.id !== 'log-activity');
-            const nextAct = nextActivities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
-              || nextActivities.find(a => !!(a.originalUrl || a.storageUrl))
-              || nextActivities[0];
-            const nextMedia = (nextAct?.originalUrl || nextAct?.storageUrl || nextGroup?.avatarUrl || '').trim();
-            const isNextOwnStory = user && nextGroup?.userId === user.id;
-            const isNextLocked = !isNextOwnStory && !profile?.stories_public;
-            const hasNextStoryMedia = !!(nextAct?.originalUrl || nextAct?.storageUrl);
-            const isNextVideo = hasNextStoryMedia && isVideoUrl(nextMedia);
-            if (!nextMedia) return null;
-            return (
-              <div
-                key={`peek-right-${nextIdx}`}
-                className="absolute right-0 top-0 bottom-0 flex items-center pointer-events-none"
-                style={{ width: '10%', zIndex: 20 }}
-              >
-                <div
-                  className="w-full overflow-hidden"
-                  style={{
-                    height: 'calc(59% + 20px)',
-                    borderRadius: '10px 0 0 10px',
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    borderRight: 'none',
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 32px rgba(0,0,0,0.3)',
-                  }}
-                >
-                  {isNextVideo ? (
-                    <video
-                      src={nextMedia}
-                      className="w-full h-full object-cover"
-                      muted playsInline preload="metadata" autoPlay loop
-                      style={{ 
-                        opacity: isNextLocked ? 0.35 : 0.5, 
-                        filter: isNextLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                      }}
-                    />
-                  ) : (
-                    <img
-                      src={nextMedia}
-                      alt="Next user"
-                      className="w-full h-full object-cover"
-                      loading="eager"
-                      fetchPriority="high"
-                      style={{ 
-                        opacity: isNextLocked ? 0.35 : 0.5, 
-                        filter: isNextLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                      }}
-                    />
-                  )}
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Main card content */}
-          <div className="relative flex items-center justify-center" style={{ width: '100%', height: '100%' }}>
               {/* Full templated image/video - with lock overlay for non-public users */}
               {(() => {
                 // Lock content if user's profile is private OR they haven't shared any public activity
@@ -2154,14 +2126,14 @@ const Reel = () => {
                   </div>
                 );
               })()}
-          </div>
           </motion.div>
+          </AnimatePresence>
           
           {/* Right arrow indicator - only on first story */}
           {effectiveUserGroups.length > 1 && currentUserIndex === 0 && currentActivityIndex === 0 && (
             <motion.button
               onClick={goNextUser}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-[65]"
               initial={{ opacity: 0, x: -5 }}
               animate={{ 
                 opacity: [0.4, 1, 0.4],
