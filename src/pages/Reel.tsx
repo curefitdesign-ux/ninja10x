@@ -1677,20 +1677,22 @@ const Reel = () => {
           {effectiveUserGroups.length > 1 && (() => {
             const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
             const nextGroup = effectiveUserGroups[nextIdx];
-            const nextActivity = nextGroup?.activities[nextGroup.activities.length - 1];
+            const nextActivity = [...(nextGroup?.activities || [])].reverse().find(a => 
+              !isVideoUrl(a.storageUrl || '') && a.dayNumber < 1001
+            ) || nextGroup?.activities[nextGroup.activities.length - 1];
             const nextMedia = nextActivity?.storageUrl || nextActivity?.originalUrl;
             const isNextOwnStory = user && nextGroup?.userId === user.id;
             const isNextLocked = !isNextOwnStory && !profile?.stories_public;
-            if (!nextMedia) return null;
+            if (!nextMedia || isVideoUrl(nextMedia)) return null;
             return (
               <motion.div
                 key={`peek-right-${nextIdx}`}
                 className="absolute right-0 top-0 bottom-0 flex items-center cursor-pointer"
                 style={{ width: '10%', zIndex: 20 }}
                 onClick={goNextUser}
-                initial={{ opacity: 0, x: 10, scale: 0.9 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.15 }}
               >
                 <div
                   className="w-full overflow-hidden"
@@ -1707,6 +1709,8 @@ const Reel = () => {
                     src={nextMedia}
                     alt="Next user"
                     className="w-full h-full object-cover"
+                    loading="eager"
+                    fetchPriority="high"
                     style={{ 
                       opacity: isNextLocked ? 0.35 : 0.5, 
                       filter: isNextLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
