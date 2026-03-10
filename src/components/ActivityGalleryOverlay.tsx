@@ -420,9 +420,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         {/* Timeline dot */}
                         <div className="absolute rounded-full" style={{
                           left: 22, top: 28, width: 14, height: 14,
-                          background: isSelected ? 'linear-gradient(135deg, #F97316, #EC4899)' : 'rgba(255,255,255,0.15)',
-                          border: `2px solid ${isSelected ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.1)'}`,
-                          boxShadow: isSelected ? '0 0 12px rgba(249,115,22,0.4)' : 'none', zIndex: 5,
+                          background: isSelected ? 'linear-gradient(135deg, #34D399, #10B981)' : 'rgba(255,255,255,0.15)',
+                          border: `2px solid ${isSelected ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                          boxShadow: isSelected ? '0 0 12px rgba(52,211,153,0.4)' : 'none', zIndex: 5,
                         }} />
 
                         {/* Handwritten date */}
