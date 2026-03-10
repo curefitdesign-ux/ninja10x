@@ -63,6 +63,7 @@ interface ActivityGalleryOverlayProps {
   onLogActivity?: () => void;
   userProfile?: UserProfileInfo;
   isOwnProfile?: boolean;
+  targetUserId?: string; // user ID of the profile being viewed (for nudges)
 }
 
 const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlayProps>(function ActivityGalleryOverlay({
