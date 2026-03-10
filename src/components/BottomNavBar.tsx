@@ -80,12 +80,14 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
 
   return (
     <>
-      <div
+      <motion.div
         className="fixed left-0 right-0 bottom-0"
         style={{
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
           zIndex: 9999,
         }}
+        animate={{ y: galleryOpen ? 100 : 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 28 }}
       >
         <div
           className="relative"
