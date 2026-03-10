@@ -608,9 +608,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   style={{ transform: 'translateY(-32px)' }}
                 >
                   <div className="flex items-center justify-center gap-3 px-4">
-                    {/* Reaction pill — own stories show "Reacts So Far" */}
+                    {/* Reaction pill — own stories: "Reacts So Far", others: "Tap to react" */}
                     <button
-                      onClick={(e) => { e.stopPropagation(); setShowReactsSheet(true); }}
+                      onClick={(e) => { e.stopPropagation(); isOwnProfile ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
                       className="relative overflow-hidden active:scale-[0.97] transition-transform"
                       style={{
                         minWidth: currentReactions.total > 0 ? 180 : 160,
@@ -635,6 +635,11 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               <span className="text-white/50 text-sm">reacts</span>
                             </div>
                             <ChevronUp className="w-4 h-4 text-white/40" />
+                          </>
+                        ) : !isOwnProfile ? (
+                          <>
+                            <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain opacity-60" />
+                            <span className="text-white/60 text-sm font-medium">Tap to react</span>
                           </>
                         ) : (
                           <>
