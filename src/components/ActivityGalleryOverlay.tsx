@@ -346,7 +346,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   </div>
                   <h2 className="text-white font-bold text-center mt-1.5 px-6 truncate w-full" style={{ fontSize: 18, letterSpacing: '-0.02em' }}>{userProfile.displayName}</h2>
                   {userDescription && (
-                    <p className="text-white/50 text-[11px] text-center mt-1 px-8 leading-relaxed" style={{ maxWidth: 280 }}>
+                    <p className="text-white/50 text-[13px] text-center mt-1.5 px-6 leading-relaxed" style={{ maxWidth: 300 }}>
                       {userDescription.diary}{userDescription.varietyLine ? ` ${userDescription.varietyLine}` : ''}
                     </p>
                   )}
@@ -559,7 +559,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     if (user && targetUserId) {
                       const { error } = await supabase.from('nudges').insert({ from_user_id: user.id, to_user_id: targetUserId });
                       const name = userProfile?.displayName?.split(' ')[0] || 'them';
-                      if (!error) toast.success(`🔔 Nudge sent to ${name}!`, { description: `Keep pushing, ${name} will love the motivation!`, position: 'top-center', style: { marginTop: 'env(safe-area-inset-top, 44px)' } });
+                      if (!error) toast.success(`🔔 Nudge sent to ${name}!`, { description: `Keep pushing, ${name} will love the motivation!`, position: 'top-center', duration: 3000, style: { zIndex: 99999, marginTop: '60px' } });
                       else toast.error('Could not send nudge');
                     }
                   }}
