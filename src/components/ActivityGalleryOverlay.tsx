@@ -147,19 +147,20 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
       parts.push(`🚀 ${name} just started the journey!`);
     }
 
+    let varietyLine = '';
     if (variety >= 3) {
       const top3 = sorted.slice(0, 3).map(([k]) => k.toLowerCase());
-      parts.push(`Mixing it up with ${top3.join(', ')} & more ✨`);
+      varietyLine = `Mixing it up with ${top3.join(', ')} & more ✨`;
     } else if (variety === 2) {
-      parts.push(`Loves ${sorted[0][0].toLowerCase()} & ${sorted[1][0].toLowerCase()} 🎯`);
+      varietyLine = `Loves ${sorted[0][0].toLowerCase()} & ${sorted[1][0].toLowerCase()} 🎯`;
     } else if (count > 1) {
-      parts.push(`All-in on ${topActivity} 🎯`);
+      varietyLine = `All-in on ${topActivity} 🎯`;
     }
 
     const mainLine = parts.join(' · ');
     const durationLine = durationStr ? `⏱️ ${durationStr} of pure grind so far` : '';
 
-    return { diary: mainLine, durationLine, count };
+    return { diary: mainLine, varietyLine, durationLine, count };
   }, [activities, userProfile]);
 
   // Media loading
