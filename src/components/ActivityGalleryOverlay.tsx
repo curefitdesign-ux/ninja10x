@@ -60,6 +60,7 @@ interface ActivityGalleryOverlayProps {
   initialIndex?: number;
   onLogActivity?: () => void;
   userProfile?: UserProfileInfo;
+  isOwnProfile?: boolean;
 }
 
 const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlayProps>(function ActivityGalleryOverlay({
@@ -69,6 +70,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   initialIndex = 0,
   onLogActivity,
   userProfile,
+  isOwnProfile,
 }, _ref) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const portalContainer = usePortalContainer();
@@ -634,8 +636,28 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       </div>
                     </button>
 
-                    {/* Edit button */}
+                    {/* Nudge & Edit buttons */}
                     <div className="flex items-center gap-2 shrink-0">
+                      {!isOwnProfile && !current.isPlaceholder && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast('👋 Poke sent!', { description: `You nudged ${userProfile?.displayName?.split(' ')[0] || 'them'} to keep going!` });
+                          }}
+                          className="shrink-0 active:scale-95 transition-transform"
+                          style={{
+                            width: 44, height: 44, borderRadius: 22,
+                            background: 'rgba(255, 255, 255, 0.08)',
+                            backdropFilter: 'blur(40px) saturate(180%)',
+                            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                            border: '1px solid rgba(255, 255, 255, 0.06)',
+                            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}
+                        >
+                          <span className="text-lg leading-none">👋</span>
+                        </button>
+                      )}
                       {canEdit && (
                         <button
                           onClick={(e) => { e.stopPropagation(); setShowEditSheet(true); }}

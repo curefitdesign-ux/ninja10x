@@ -2104,31 +2104,8 @@ const Reel = () => {
                   )}
                   </button>
 
-                  {/* Nudge & History buttons — aligned with reaction pill */}
-                  <div className="flex items-center gap-2 shrink-0">
-                    {!isOwnStory && !isLogActivityCard && !isWeekRecapStory && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toast('👋 Poke sent!', { description: `You nudged ${currentGroup?.displayName?.split(' ')[0] || 'them'} to keep going!` });
-                        }}
-                        className="shrink-0 active:scale-95 transition-transform flex items-center gap-1.5 whitespace-nowrap"
-                        style={{
-                          height: 42,
-                          borderRadius: 21,
-                          paddingLeft: 14,
-                          paddingRight: 16,
-                          background: 'rgba(255, 255, 255, 0.08)',
-                          backdropFilter: 'blur(40px) saturate(180%)',
-                          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                          border: '1px solid rgba(255, 255, 255, 0.06)',
-                          boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
-                        }}
-                      >
-                        <span className="text-lg leading-none">👋</span>
-                        <span className="text-white/60 text-xs font-medium">Nudge</span>
-                      </button>
-                    )}
+                   {/* History button — aligned with reaction pill */}
+                   <div className="flex items-center gap-2 shrink-0">
                     {/* History button — view all past activities of this user */}
                     {!isLogActivityCard && !isWeekRecapStory && (
                       <button
@@ -2262,6 +2239,7 @@ const Reel = () => {
             onClose={() => setShowHistoryGallery(false)}
             activities={allUserActivities}
             initialIndex={currentIdx >= 0 ? currentIdx : 0}
+            isOwnProfile={isOwnStory || false}
             userProfile={{
               displayName: currentGroup.displayName,
               avatarUrl: currentGroup.avatarUrl,
