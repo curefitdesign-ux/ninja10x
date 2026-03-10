@@ -565,23 +565,23 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     }
                   }}
                   className="relative overflow-hidden active:scale-[0.95] transition-transform"
-                  style={{
-                    height: 46, borderRadius: 23, paddingLeft: 16, paddingRight: 20,
+                   style={{
+                    height: 52, borderRadius: 26, paddingLeft: 18, paddingRight: 24,
                     background: 'rgba(255, 255, 255, 0.08)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)',
                     border: '1px solid rgba(255, 255, 255, 0.12)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
                   }}
                 >
-                  <div className="flex items-center gap-2.5 h-full">
+                  <div className="flex items-center gap-3 h-full">
                     <motion.img
                       src={deskBellImg}
                       alt="bell"
-                      className="w-7 h-7 object-contain"
+                      className="w-9 h-9 object-contain"
                       style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))', transformOrigin: 'bottom center' }}
                       animate={nudgeBellAnim ? { rotate: [0, -25, 20, -15, 10, -5, 0], scale: [1, 1.2, 1.15, 1.1, 1.05, 1] } : {}}
                       transition={{ duration: 0.6, ease: 'easeInOut' }}
                       onAnimationComplete={() => setNudgeBellAnim(false)}
                     />
-                    <span className="text-white/80 text-xs font-medium">Nudge to log activity</span>
+                    <span className="text-white/80 text-sm font-medium">Nudge to log activity</span>
                   </div>
                 </button>
               )}
