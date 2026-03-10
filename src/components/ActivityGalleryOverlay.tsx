@@ -23,9 +23,6 @@ import { supabase } from '@/integrations/supabase/client';
 import fireEmoji from '@/assets/reactions/fire-3d.png';
 import clapEmoji from '@/assets/reactions/clap-3d.png';
 
-import fireEmoji from '@/assets/reactions/fire-3d.png';
-import clapEmoji from '@/assets/reactions/clap-3d.png';
-
 interface ReactorProfile {
   userId: string;
   displayName: string;
