@@ -239,6 +239,24 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     return () => { if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current); };
   }, [currentIndex, isOpen, isPaused, activities.length]);
 
+  // Preload adjacent gallery images for instant transitions
+  useEffect(() => {
+    if (!isOpen) return;
+    const indices = [currentIndex - 1, currentIndex + 1, currentIndex + 2];
+    for (const idx of indices) {
+      if (idx >= 0 && idx < activities.length) {
+        const act = activities[idx];
+        if (act && !act.isPlaceholder && !act.isVideo) {
+          const url = act.originalUrl || act.storageUrl;
+          if (url) {
+            const img = new Image();
+            img.src = url;
+          }
+        }
+      }
+    }
+  }, [currentIndex, isOpen, activities]);
+
   if (!isOpen || activities.length === 0) return null;
 
   const current = activities[currentIndex];
