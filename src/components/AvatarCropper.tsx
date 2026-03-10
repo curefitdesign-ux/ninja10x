@@ -27,7 +27,7 @@ const AvatarCropper = ({ imageSrc, onConfirm, onCancel }: AvatarCropperProps) =>
   const [cropSize, setCropSize] = useState(240);
   const [baseScale, setBaseScale] = useState(1);
   const [showZoomIndicator, setShowZoomIndicator] = useState(false);
-  const zoomIndicatorTimeout = useRef<NodeJS.Timeout | null>(null);
+  const zoomIndicatorTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Calculate crop size based on viewport
   useEffect(() => {

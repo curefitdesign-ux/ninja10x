@@ -62,7 +62,7 @@ export default function ReactionNotificationPill() {
   const [isVisible, setIsVisible] = useState(false);
   const [showNotificationSheet, setShowNotificationSheet] = useState(false);
   const userActivitiesRef = useRef<Set<string>>(new Set());
-  const dismissTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const dismissTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Fetch user's activity IDs on mount
   useEffect(() => {

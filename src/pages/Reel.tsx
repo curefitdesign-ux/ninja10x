@@ -181,7 +181,7 @@ const Reel = () => {
   const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
   // Delayed mirror of autoAdvanceProgress for the own-profile ring (needs 2-frame render for CSS transition)
   const [ownRingProgress, setOwnRingProgress] = useState(0);
-  const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoAdvanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoAdvanceStartRef = useRef<number>(0);
   
   
