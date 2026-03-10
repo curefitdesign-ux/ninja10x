@@ -116,6 +116,48 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
     fetchMyActivitiesAndReactions();
   }, [user]);
 
+  // Fetch past nudges
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchNudges = async () => {
+      const { data: nudges } = await supabase
+        .from('nudges')
+        .select('id, from_user_id, created_at')
+        .eq('to_user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (nudges && nudges.length > 0) {
+        const senderIds = [...new Set(nudges.map(n => n.from_user_id))];
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, avatar_url')
+          .in('user_id', senderIds);
+
+        const profileMap = new Map(profiles?.map(p => [p.user_id, { name: p.display_name, avatar: p.avatar_url }]) || []);
+
+        const nudgeNotifs: Notification[] = nudges.map(n => ({
+          id: `nudge-${n.id}`,
+          activityId: '',
+          reactorName: profileMap.get(n.from_user_id)?.name || 'Someone',
+          reactorAvatarUrl: profileMap.get(n.from_user_id)?.avatar || undefined,
+          reactionType: 'nudge',
+          timestamp: new Date(n.created_at),
+          isNudge: true,
+        }));
+
+        setNotifications(prev => {
+          const combined = [...prev, ...nudgeNotifs];
+          combined.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+          return combined.slice(0, 30);
+        });
+      }
+    };
+
+    fetchNudges();
+  }, [user]);
+
   // Subscribe to realtime reaction inserts
   useEffect(() => {
     if (!user) return;
@@ -137,20 +179,16 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             reaction_type: string;
           };
           
-          // Only notify if this is a reaction to the current user's activity
-          // and it's from someone else
           if (
             userActivitiesRef.current.has(newReaction.activity_id) &&
             newReaction.user_id !== user.id
           ) {
-            // Fetch reactor's profile
             const { data: profile } = await supabase
               .from('profiles')
               .select('display_name, avatar_url')
               .eq('user_id', newReaction.user_id)
               .maybeSingle();
 
-            // Fetch activity info
             const { data: activityInfo } = await supabase
               .from('journey_activities')
               .select('day_number, storage_url, activity')
@@ -172,10 +210,43 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             };
 
             setNotifications(prev => {
-              const updated = [newNotif, ...prev].slice(0, 20); // Keep max 20
+              const updated = [newNotif, ...prev].slice(0, 30);
               return updated;
             });
           }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'nudges',
+          filter: `to_user_id=eq.${user.id}`,
+        },
+        async (payload) => {
+          const nudge = payload.new as {
+            id: string;
+            from_user_id: string;
+          };
+
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('display_name, avatar_url')
+            .eq('user_id', nudge.from_user_id)
+            .maybeSingle();
+
+          const newNotif: Notification = {
+            id: `nudge-${nudge.id}`,
+            activityId: '',
+            reactorName: profile?.display_name || 'Someone',
+            reactorAvatarUrl: profile?.avatar_url || undefined,
+            reactionType: 'nudge',
+            timestamp: new Date(),
+            isNudge: true,
+          };
+
+          setNotifications(prev => [newNotif, ...prev].slice(0, 30));
         }
       )
       .subscribe();
