@@ -1978,7 +1978,7 @@ const Reel = () => {
                     onClick={() => { isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
                     className="relative overflow-hidden active:scale-[0.97] transition-transform"
                     style={{
-                      minWidth: currentReactions.total > 0 ? 180 : 160,
+                      minWidth: currentReactions.total > 0 ? 175 : 155,
                       height: 44,
                       borderRadius: 22,
                       background: 'rgba(255, 255, 255, 0.08)',
