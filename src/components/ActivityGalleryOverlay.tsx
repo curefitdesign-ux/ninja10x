@@ -253,6 +253,31 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     }
   }, [isOpen, activities]);
 
+  // Derive activity type tags from all activities
+  const activityTags = useMemo(() => {
+    const types = new Set<string>();
+    for (const a of activities) {
+      if (!a.isPlaceholder && a.activity) types.add(a.activity.toLowerCase());
+    }
+    return Array.from(types).slice(0, 4);
+  }, [activities]);
+
+  // Duration summary
+  const totalDurationStr = useMemo(() => {
+    let totalMins = 0;
+    for (const a of activities) {
+      if (a.isPlaceholder || !a.duration) continue;
+      const minMatch = a.duration.match(/(\d+)\s*min/i);
+      const hrMatch = a.duration.match(/(\d+)\s*h/i);
+      if (minMatch) totalMins += parseInt(minMatch[1]);
+      if (hrMatch) totalMins += parseInt(hrMatch[1]) * 60;
+    }
+    if (totalMins === 0) return null;
+    const hrs = Math.floor(totalMins / 60);
+    const mins = totalMins % 60;
+    return hrs > 0 ? (mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`) : `${mins}m`;
+  }, [activities]);
+
   if (!isOpen || activities.length === 0) return null;
 
   const current = activities[currentIndex];
