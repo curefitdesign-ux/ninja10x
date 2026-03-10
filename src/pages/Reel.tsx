@@ -598,17 +598,30 @@ const Reel = () => {
     }
   }, [currentActivityIndex, goPrevUser]);
 
-  // Simple swipe handling — just navigate between users
-  const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const { offset, velocity } = info;
-    if (Math.abs(offset.x) > SWIPE_THRESHOLD || Math.abs(velocity.x) > 300) {
-      if (offset.x < 0) {
-        goNextUser();
-      } else {
-        goPrevUser();
-      }
+  // Embla carousel onSelect — sync currentUserIndex when user swipes
+  const onCarouselSelect = useCallback(() => {
+    if (!carouselApi) return;
+    const newIndex = carouselApi.selectedScrollSnap();
+    if (newIndex !== currentUserIndex && newIndex >= 0 && newIndex < effectiveUserGroups.length) {
+      navigatingRef.current = true;
+      const targetGroup = effectiveUserGroups[newIndex];
+      if (targetGroup) currentUserIdRef.current = targetGroup.userId;
+      const prevGroup = effectiveUserGroups[currentUserIndex];
+      if (prevGroup) setViewedUsers(prev => new Set(prev).add(prevGroup.userId));
+      setCurrentUserIndex(newIndex);
+      setCurrentActivityIndex(0);
     }
-  }, [goNextUser, goPrevUser]);
+  }, [carouselApi, currentUserIndex, effectiveUserGroups]);
+
+  useEffect(() => {
+    if (!carouselApi) return;
+    carouselApi.on('select', onCarouselSelect);
+    carouselApi.on('reInit', onCarouselSelect);
+    return () => {
+      carouselApi.off('select', onCarouselSelect);
+      carouselApi.off('reInit', onCarouselSelect);
+    };
+  }, [carouselApi, onCarouselSelect]);
 
   const [lastTap, setLastTap] = useState(0);
   const [userTransitionFlash, setUserTransitionFlash] = useState(false);
