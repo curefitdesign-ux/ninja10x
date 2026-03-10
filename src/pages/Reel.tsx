@@ -1877,32 +1877,10 @@ const Reel = () => {
                       transition={{ type: 'spring', stiffness: 280, damping: 30, duration: 0.5 }}
                     >
                     {/* Progress bar removed — timing indicated via avatar ring */}
-                    <AnimatePresence mode="popLayout" custom={swipeDirection}>
-                      <motion.div
-                        key={contentKey}
-                        custom={swipeDirection}
-                        className="absolute inset-0 flex items-center justify-center"
-                        variants={{
-                          enter: (dir: string) => ({ 
-                            opacity: 0.4, 
-                            x: dir === 'left' ? 80 : -80,
-                          }),
-                          center: { opacity: 1, x: 0 },
-                          exit: (dir: string) => ({ 
-                            opacity: 0.4, 
-                            x: dir === 'left' ? -80 : 80,
-                          }),
-                        }}
-                        initial="enter"
-                        animate="center"
-                        exit="exit"
-                        transition={{ 
-                          type: 'spring',
-                          stiffness: 350,
-                          damping: 35,
-                          mass: 0.8,
-                        }}
-                      >
+                    <div
+                      key={contentKey}
+                      className="absolute inset-0 flex items-center justify-center"
+                    >
                         {currentActivity?.id === 'log-activity' ? (
                           // "Log Your Activity" card — dark with animated glowing border
                           (() => {
