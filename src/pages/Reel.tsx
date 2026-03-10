@@ -1718,7 +1718,8 @@ const Reel = () => {
                   ? currentActivity
                   : activities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
                     || activities.find(a => !!(a.originalUrl || a.storageUrl))
-                    || activities[0];
+                    || activities[0]
+                    || null;
 
                 const media = (activity?.originalUrl || activity?.storageUrl || group.avatarUrl || '').trim();
                 const isOwnCard = !!user && group.userId === user.id;
@@ -1767,7 +1768,11 @@ const Reel = () => {
                               className="w-full h-full object-cover"
                               loading="eager"
                             />
-                          ) : null}
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)' }}>
+                              <ProfileAvatar src={group.avatarUrl} name={group.displayName} size={80} />
+                            </div>
+                          )}
                         </div>
                       </div>
                     </CarouselItem>
