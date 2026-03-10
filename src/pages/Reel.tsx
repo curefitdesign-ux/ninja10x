@@ -1678,103 +1678,81 @@ const Reel = () => {
             paddingBottom: 'calc(max(env(safe-area-inset-bottom, 6px), 6px) + 80px)',
           }}
         >
-        {/* Reel cards — simple horizontal scroll with snap */}
+        {/* Reel cards — fixed center card with peek cards on sides */}
         <div
           ref={scrollContainerRef}
-          className="relative min-h-0 flex-1 flex overflow-x-auto overflow-y-hidden scrollbar-hide"
-          style={{
-            scrollSnapType: 'x mandatory',
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-          }}
-          onScroll={(e) => {
-            const container = e.currentTarget;
-            const cardWidth = container.offsetWidth;
-            if (cardWidth <= 0) return;
-            const newIndex = Math.round(container.scrollLeft / cardWidth);
-            if (newIndex !== currentUserIndex && newIndex >= 0 && newIndex < effectiveUserGroups.length) {
-              navigatingRef.current = true;
-              const targetGroup = effectiveUserGroups[newIndex];
-              if (targetGroup) currentUserIdRef.current = targetGroup.userId;
-              const prevGroup = effectiveUserGroups[currentUserIndex];
-              if (prevGroup) setViewedUsers(prev => new Set(prev).add(prevGroup.userId));
-              setCurrentUserIndex(newIndex);
-              setCurrentActivityIndex(0);
-            }
-          }}
+          className="relative min-h-0 flex-1 overflow-hidden"
           onClick={handleTap}
         >
-          {effectiveUserGroups.map((group, idx) => {
-            const isCenter = idx === currentUserIndex;
+          {/* Peek card: NEXT user (right side) */}
+          {(() => {
+            const nextIdx = currentUserIndex + 1;
+            if (nextIdx >= effectiveUserGroups.length) return null;
+            const group = effectiveUserGroups[nextIdx];
             const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
-            const activity = isCenter
-              ? currentActivity
-              : activities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
-                || activities.find(a => !!(a.originalUrl || a.storageUrl))
-                || activities[0];
-
+            const activity = activities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
+              || activities.find(a => !!(a.originalUrl || a.storageUrl))
+              || activities[0];
             const media = (activity?.originalUrl || activity?.storageUrl || group.avatarUrl || '').trim();
             const isOwnCard = user && group.userId === user.id;
             const isLockedCard = !isOwnCard && !profile?.stories_public;
             const hasFrame = activity?.frame && activity.frame !== 'none';
 
-            if (!isCenter) {
-              return (
+            return (
+              <div
+                className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none"
+                style={{
+                  width: '25%',
+                  zIndex: 10,
+                  transform: 'translateY(-50%) translateX(30%)',
+                }}
+              >
                 <div
-                  key={`card-${group.userId}`}
-                  className="flex-shrink-0 flex items-center justify-center"
+                  className="overflow-hidden rounded-xl"
                   style={{
-                    width: '100%',
-                    height: '100%',
-                    scrollSnapAlign: 'center',
+                    aspectRatio: '9/16',
+                    opacity: 0.5,
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.22)',
+                    filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
                   }}
                 >
-                  <div
-                    className="overflow-hidden"
-                    style={{
-                      width: 'calc(80% - 20px)',
-                      maxWidth: 340,
-                      aspectRatio: '9/16',
-                      transform: 'scale(0.85)',
-                      opacity: 0.55,
-                      background: 'rgba(255,255,255,0.06)',
-                      border: '1px solid rgba(255,255,255,0.12)',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.22)',
-                      filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                    }}
-                  >
-                    {hasFrame && activity ? (
-                      <StoryFrameRenderer
-                        imageUrl={media}
-                        isVideo={activity.isVideo}
-                        activity={activity.activity}
-                        frame={activity.frame}
-                        duration={activity.duration}
-                        pr={activity.pr}
-                        dayNumber={activity.dayNumber}
-                      />
-                    ) : media ? (
-                      <img
-                        src={media}
-                        alt="User story"
-                        className="w-full h-full object-cover"
-                        loading="eager"
-                      />
-                    ) : null}
-                  </div>
+                  {hasFrame && activity ? (
+                    <StoryFrameRenderer
+                      imageUrl={media}
+                      isVideo={activity.isVideo}
+                      activity={activity.activity}
+                      frame={activity.frame}
+                      duration={activity.duration}
+                      pr={activity.pr}
+                      dayNumber={activity.dayNumber}
+                    />
+                  ) : media ? (
+                    <img
+                      src={media}
+                      alt="Next story"
+                      className="w-full h-full object-cover"
+                      loading="eager"
+                    />
+                  ) : null}
                 </div>
-              );
-            }
+              </div>
+            );
+          })()}
+
+          {/* Center card — always in center, full size */}
+          {(() => {
+            const group = effectiveUserGroups[currentUserIndex];
+            if (!group) return null;
 
             return (
               <div
                 key={`card-${group.userId}`}
-                className="flex-shrink-0 flex items-center justify-center relative"
+                className="flex items-center justify-center relative"
                 style={{
                   width: '100%',
                   height: '100%',
-                  scrollSnapAlign: 'center',
                 }}
               >
                 {/* Full templated image/video - with lock overlay for non-public users */}
@@ -2096,7 +2074,7 @@ const Reel = () => {
               })()}
               </div>
             );
-          })}
+          })()}
 
           
           {/* Right arrow indicator - only on first story */}
