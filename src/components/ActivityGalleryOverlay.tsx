@@ -571,7 +571,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   }}
                 >
                   <div className="flex items-center gap-2.5 h-full">
-                    <Bell className="w-5 h-5 text-amber-400" strokeWidth={2} />
+                    <img src={deskBellImg} alt="bell" className="w-7 h-7 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                     <span className="text-white/80 text-xs font-medium">Nudge to log activity</span>
                   </div>
                 </button>
