@@ -436,34 +436,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
             className="absolute inset-0 flex flex-col"
             style={{ overflow: 'hidden', touchAction: 'none' }}
           >
-            {/* TOP ZONE: progress segments | close */}
+            {/* TOP ZONE: close button only */}
             <div
-              className="z-50 flex items-center justify-between px-4 shrink-0"
+              className="z-50 flex items-center justify-end px-4 shrink-0"
               style={{
                 paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
-                height: 56,
+                height: 48,
               }}
             >
-              <div className="flex items-center gap-1 flex-1 mx-3">
-                {activities.map((a, i) => {
-                  if (a.isPlaceholder) return null;
-                  const isCurrent = i === currentIndex;
-                  const isPast = i < currentIndex;
-                  return (
-                    <div key={a.id} className="flex-1 h-[3px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
-                      <div
-                        key={isCurrent ? `${a.id}-${progressRunKey}` : `${a.id}-static`}
-                        className="h-full rounded-full"
-                        style={{
-                          background: (isPast || isCurrent) ? 'rgba(255,255,255,0.9)' : 'transparent',
-                          width: isPast ? '100%' : isCurrent ? `${autoAdvanceProgress * 100}%` : '0%',
-                          transition: isCurrent ? (autoAdvanceProgress > 0 ? `width ${AUTO_ADVANCE_MS}ms linear` : 'none') : 'none',
-                        }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
               <motion.button
                 className="w-9 h-9 flex items-center justify-center rounded-full active:scale-90"
                 style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}
@@ -474,11 +454,57 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               </motion.button>
             </div>
 
+            {/* PROFILE SECTION — above cards */}
+            {userProfile && (
+              <div className="shrink-0 flex flex-col items-center z-50 px-4 pb-2" style={{ marginTop: 0 }}>
+                <div
+                  className="rounded-full overflow-hidden"
+                  style={{
+                    width: 56,
+                    height: 56,
+                    border: '2.5px solid rgba(255,255,255,0.3)',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+                  }}
+                >
+                  <ProfileAvatar
+                    src={userProfile.avatarUrl}
+                    name={userProfile.displayName}
+                    size={56}
+                  />
+                </div>
+                <h2
+                  className="text-white font-bold text-center mt-1.5 px-6 truncate w-full"
+                  style={{ fontSize: 18, letterSpacing: '-0.02em' }}
+                >
+                  {userProfile.displayName}
+                </h2>
+                {userDescription && (
+                  <p className="text-white/50 text-[11px] text-center mt-1 px-8 leading-relaxed" style={{ maxWidth: 280 }}>
+                    {userDescription.diary}
+                    {userDescription.varietyLine ? ` ${userDescription.varietyLine}` : ''}
+                  </p>
+                )}
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                    <span className="text-white text-[11px] font-semibold">{totalActivities}/12 Days</span>
+                  </div>
+                  {totalDurationStr && (
+                    <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                      <span className="text-white text-[11px] font-semibold">{totalDurationStr} Total</span>
+                    </div>
+                  )}
+                  <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                    <span className="text-white text-[11px] font-semibold">W{week}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
 
 
             <div
               className="relative z-30 flex-shrink-0"
-              style={{ height: '46%', marginTop: 48 }}
+              style={{ height: '42%', marginTop: 8 }}
               onClick={handleTap}
             >
               <div className="relative w-full h-full flex items-center justify-center" style={{ gap: '10px' }}>
@@ -633,82 +659,42 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               </div>
             </div>
 
-            {/* PROFILE SECTION — avatar overlapping cards bottom, name, description, stats */}
-            <div className="flex-1 min-h-0 flex flex-col items-center z-50 overflow-y-auto" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)', marginTop: 45 }}>
-              {/* Avatar — above name */}
-              {userProfile && (
-                <div className="shrink-0 flex justify-center">
-                  <div
-                    className="rounded-full overflow-hidden"
-                    style={{
-                      width: 68,
-                      height: 68,
-                      border: '3px solid rgba(255,255,255,0.3)',
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-                    }}
-                  >
-                    <ProfileAvatar
-                      src={userProfile.avatarUrl}
-                      name={userProfile.displayName}
-                      size={68}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Name */}
-              {userProfile && (
-                <h2
-                  className="text-white font-bold text-center mt-1.5 px-6 truncate w-full"
-                  style={{ fontSize: 22, letterSpacing: '-0.02em' }}
-                >
-                  {userProfile.displayName}
-                </h2>
-              )}
-
-              {/* Description */}
-              {userDescription && (
-                <p className="text-white/50 text-xs text-center mt-1.5 px-8 leading-relaxed" style={{ maxWidth: 300 }}>
-                  {userDescription.diary}
-                  {userDescription.varietyLine ? ` ${userDescription.varietyLine}` : ''}
-                </p>
-              )}
-
-              {/* Stats pills */}
-              <div className="flex items-center justify-center gap-2 mt-3 px-4">
-                <div
-                  className="rounded-full px-4 py-1.5 flex items-center justify-center"
-                  style={{
-                    background: 'rgba(255,255,255,0.08)',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                  }}
-                >
-                  <span className="text-white text-xs font-semibold">{totalActivities}/12 Days</span>
-                </div>
-                {totalDurationStr && (
-                  <div
-                    className="rounded-full px-4 py-1.5 flex items-center justify-center"
-                    style={{
-                      background: 'rgba(255,255,255,0.08)',
-                      border: '1px solid rgba(255,255,255,0.12)',
-                    }}
-                  >
-                    <span className="text-white text-xs font-semibold">{totalDurationStr} Total</span>
-                  </div>
-                )}
-                <div
-                  className="rounded-full px-4 py-1.5 flex items-center justify-center"
-                  style={{
-                    background: 'rgba(255,255,255,0.08)',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                  }}
-                >
-                  <span className="text-white text-xs font-semibold">W{week}</span>
-                </div>
+            {/* DOTS + TIMER below cards */}
+            <div className="shrink-0 flex flex-col items-center z-50 pt-4">
+              <div className="flex items-center gap-2">
+                {activities.map((a, i) => {
+                  if (a.isPlaceholder) return null;
+                  const isCurrent = i === currentIndex;
+                  const isPast = i < currentIndex;
+                  return (
+                    <div
+                      key={a.id}
+                      className="relative rounded-full overflow-hidden"
+                      style={{
+                        width: isCurrent ? 24 : 6,
+                        height: 6,
+                        background: 'rgba(255,255,255,0.15)',
+                        transition: 'width 0.3s ease',
+                      }}
+                    >
+                      <div
+                        key={isCurrent ? `${a.id}-${progressRunKey}` : `${a.id}-static`}
+                        className="h-full rounded-full"
+                        style={{
+                          background: (isPast || isCurrent) ? 'rgba(255,255,255,0.9)' : 'transparent',
+                          width: isPast ? '100%' : isCurrent ? `${autoAdvanceProgress * 100}%` : '0%',
+                          transition: isCurrent ? (autoAdvanceProgress > 0 ? `width ${AUTO_ADVANCE_MS}ms linear` : 'none') : 'none',
+                        }}
+                      />
+                    </div>
+                  );
+                })}
               </div>
+            </div>
 
-              {/* Bottom action row */}
-              <div className="shrink-0 flex items-center justify-center gap-3 px-4" style={{ marginTop: 30 }}>
+            {/* Bottom action row */}
+            <div className="flex-1 min-h-0 flex flex-col items-center justify-end z-50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)' }}>
+              <div className="shrink-0 flex items-center justify-center gap-3 px-4" style={{ marginTop: 16 }}>
                 <button
                   onClick={(e) => { e.stopPropagation(); isOwnProfile ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
                   className="relative overflow-hidden active:scale-[0.97] transition-transform"
