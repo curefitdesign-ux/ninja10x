@@ -56,16 +56,18 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const userActivitiesRef = useRef<Set<string>>(new Set());
 
-  // Fetch user's activity IDs and past reactions on mount
+  // Fetch user's activity reactions AND nudges together to avoid race conditions
   useEffect(() => {
     if (!user) return;
 
-    const fetchMyActivitiesAndReactions = async () => {
-      // First get user's activity IDs
+    const fetchAll = async () => {
+      // Fetch activities
       const { data: activities } = await supabase
         .from('journey_activities')
         .select('id, day_number, storage_url, original_url, is_video, activity')
         .eq('user_id', user.id);
+      
+      let reactionNotifs: Notification[] = [];
       
       if (activities) {
         const activityIds = activities.map(a => a.id);
@@ -73,7 +75,6 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
         const activityMap = new Map(activities.map(a => [a.id, a]));
         
         if (activityIds.length > 0) {
-          // Fetch past reactions on user's activities (excluding self-reactions)
           const { data: reactions } = await supabase
             .from('activity_reactions')
             .select('id, activity_id, user_id, reaction_type, created_at')
@@ -83,7 +84,6 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             .limit(20);
           
           if (reactions && reactions.length > 0) {
-            // Fetch all reactor profiles in one query
             const reactorIds = [...new Set(reactions.map(r => r.user_id))];
             const { data: profiles } = await supabase
               .from('profiles')
@@ -92,7 +92,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             
             const profileMap = new Map(profiles?.map(p => [p.user_id, { name: p.display_name, avatar: p.avatar_url }]) || []);
             
-            const pastNotifications: Notification[] = reactions.map(r => {
+            reactionNotifs = reactions.map(r => {
               const reactorProfile = profileMap.get(r.user_id);
               const activityInfo = activityMap.get(r.activity_id);
               return {
@@ -107,21 +107,12 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                 activityType: activityInfo?.activity || undefined,
               };
             });
-            
-            setNotifications(pastNotifications);
           }
         }
       }
-    };
 
-    fetchMyActivitiesAndReactions();
-  }, [user]);
-
-  // Fetch past nudges
-  useEffect(() => {
-    if (!user) return;
-
-    const fetchNudges = async () => {
+      // Fetch nudges in the same effect
+      let nudgeNotifs: Notification[] = [];
       const { data: nudges } = await supabase
         .from('nudges')
         .select('id, from_user_id, created_at')
@@ -138,13 +129,12 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
 
         const profileMap = new Map(profiles?.map(p => [p.user_id, { name: p.display_name, avatar: p.avatar_url }]) || []);
 
-        // Count total nudges per sender
         const nudgeCountMap = new Map<string, number>();
         nudges.forEach(n => {
           nudgeCountMap.set(n.from_user_id, (nudgeCountMap.get(n.from_user_id) || 0) + 1);
         });
 
-        const nudgeNotifs: Notification[] = nudges.map(n => ({
+        nudgeNotifs = nudges.map(n => ({
           id: `nudge-${n.id}`,
           activityId: '',
           reactorName: profileMap.get(n.from_user_id)?.name || 'Someone',
@@ -154,16 +144,15 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
           isNudge: true,
           nudgeCount: nudgeCountMap.get(n.from_user_id) || 1,
         }));
-
-        setNotifications(prev => {
-          const combined = [...prev, ...nudgeNotifs];
-          combined.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-          return combined.slice(0, 30);
-        });
       }
+
+      // Combine and sort all notifications together
+      const combined = [...reactionNotifs, ...nudgeNotifs];
+      combined.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      setNotifications(combined.slice(0, 30));
     };
 
-    fetchNudges();
+    fetchAll();
   }, [user]);
 
   // Subscribe to realtime reaction inserts
