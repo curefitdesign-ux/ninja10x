@@ -705,7 +705,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               </div>
 
               {/* Bottom action row */}
-              <div className="shrink-0 flex items-center justify-center gap-3 mt-3 px-4">
+              <div className="shrink-0 flex items-center justify-center gap-3 px-4" style={{ marginTop: 30 }}>
                 <button
                   onClick={(e) => { e.stopPropagation(); isOwnProfile ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
                   className="relative overflow-hidden active:scale-[0.97] transition-transform"
