@@ -1835,7 +1835,7 @@ const Reel = () => {
                       className="relative overflow-hidden"
                       style={{
                         aspectRatio: '9/16',
-                        height: 'calc(95% - 20px)',
+                        height: 'calc(98% - 10px)',
                         maxWidth: '100%',
                         borderRadius: '0px',
                         overflow: 'hidden',
@@ -1886,7 +1886,7 @@ const Reel = () => {
                                   navigate('/camera', { state: { dayNumber: currentActivity.dayNumber } });
                                 }}
                                 style={{
-                                  width: '90%',
+                                  width: '98%',
                                   aspectRatio: '9/16',
                                   maxHeight: '100%',
                                 }}
@@ -1941,7 +1941,7 @@ const Reel = () => {
                                 </div>
 
                                 {/* Content */}
-                                <div className="relative z-10 flex flex-col items-center justify-center h-full px-6" style={{ marginTop: -30 }}>
+                                <div className="relative z-10 flex flex-col items-center justify-center h-full px-6" style={{ marginTop: -60 }}>
                                   {/* Animated gradient text */}
                                   <motion.div 
                                     className="text-center mb-6"
@@ -1960,9 +1960,19 @@ const Reel = () => {
                                     />
                                   </motion.div>
 
-                                  {/* Glowing plus - centered */}
-                                  <div className="absolute inset-0 flex items-center justify-center">
+                                   {/* Glowing plus - centered */}
+                                    <div className="absolute inset-0 flex items-center justify-center">
                                     <div className="relative flex items-center justify-center" style={{ width: 90, height: 90 }}>
+                                      {/* Purple glow behind plus */}
+                                      <div 
+                                        className="absolute rounded-full"
+                                        style={{
+                                          width: 80,
+                                          height: 80,
+                                          background: `radial-gradient(circle, hsla(270, 80%, 60%, 0.5) 0%, hsla(260, 70%, 50%, 0.25) 40%, transparent 70%)`,
+                                          filter: 'blur(18px)',
+                                        }}
+                                      />
                                       <motion.div 
                                         className="absolute inset-0 rounded-full"
                                         style={{
@@ -1981,7 +1991,7 @@ const Reel = () => {
                                   </div>
 
                                   {/* Label */}
-                                  <p className="mt-6 text-white/40 text-xs font-medium uppercase tracking-widest" style={{ marginTop: 21 }}>
+                                  <p className="mt-6 text-white/40 text-xs font-medium uppercase tracking-widest" style={{ marginTop: 36 }}>
                                     Day {currentActivity.dayNumber} of 12
                                   </p>
                                 </div>
