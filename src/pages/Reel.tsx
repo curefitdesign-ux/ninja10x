@@ -1835,7 +1835,7 @@ const Reel = () => {
                       className="relative overflow-hidden"
                       style={{
                         aspectRatio: '9/16',
-                        height: 'calc(95% - 20px)',
+                        height: 'calc(98% - 10px)',
                         maxWidth: '100%',
                         borderRadius: '0px',
                         overflow: 'hidden',
