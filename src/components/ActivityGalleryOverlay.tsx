@@ -79,6 +79,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
   // Sheets
   const [showReactsSheet, setShowReactsSheet] = useState(false);
+  const [showSendReactionSheet, setShowSendReactionSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
 
