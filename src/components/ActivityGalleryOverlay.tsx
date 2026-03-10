@@ -495,14 +495,15 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 }}
                 style={{ touchAction: 'pan-y' }}
               >
-                <div
-                  className="relative flex items-center justify-center"
-                  style={{ width: '100%', height: '100%' }}
-                >
+                  <div
+                    className="relative flex items-center justify-center"
+                    style={{ width: '100%', height: '100%' }}
+                  >
                   {/* 9:16 Card */}
                   <motion.div
                     className="relative overflow-hidden"
                     style={{
+                      width: '100%',
                       aspectRatio: '9/16',
                       maxHeight: '100%',
                       maxWidth: '100%',
