@@ -474,26 +474,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               </motion.button>
             </div>
 
-            {/* Avatar — centered above cards */}
-            {userProfile && (
-              <div className="shrink-0 flex justify-center z-40" style={{ marginBottom: -20 }}>
-                <div
-                  className="rounded-full overflow-hidden"
-                  style={{
-                    width: 64,
-                    height: 64,
-                    border: '3px solid rgba(255,255,255,0.3)',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-                  }}
-                >
-                  <ProfileAvatar
-                    src={userProfile.avatarUrl}
-                    name={userProfile.displayName}
-                    size={64}
-                  />
-                </div>
-              </div>
-            )}
+
 
             <div
               className="relative z-30 flex-shrink-0"
@@ -649,12 +630,33 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               </div>
             </div>
 
-            {/* PROFILE SECTION — avatar, name, tags, description, stats */}
-            <div className="flex-1 min-h-0 flex flex-col items-center z-30 overflow-y-auto" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)' }}>
+            {/* PROFILE SECTION — avatar overlapping cards bottom, name, description, stats */}
+            <div className="flex-1 min-h-0 flex flex-col items-center z-40 overflow-y-auto" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)' }}>
+              {/* Avatar — overlapping bottom of cards */}
+              {userProfile && (
+                <div className="shrink-0 flex justify-center" style={{ marginTop: -36 }}>
+                  <div
+                    className="rounded-full overflow-hidden"
+                    style={{
+                      width: 68,
+                      height: 68,
+                      border: '3px solid rgba(255,255,255,0.3)',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+                    }}
+                  >
+                    <ProfileAvatar
+                      src={userProfile.avatarUrl}
+                      name={userProfile.displayName}
+                      size={68}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Name */}
               {userProfile && (
                 <h2
-                  className="text-white font-bold text-center mt-2 px-6 truncate w-full"
+                  className="text-white font-bold text-center mt-1.5 px-6 truncate w-full"
                   style={{ fontSize: 22, letterSpacing: '-0.02em' }}
                 >
                   {userProfile.displayName}
@@ -703,7 +705,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               </div>
 
               {/* Bottom action row */}
-              <div className="shrink-0 flex items-center justify-center gap-3 mt-3 px-4">
+              <div className="shrink-0 flex items-center justify-center gap-3 px-4" style={{ marginTop: 30 }}>
                 <button
                   onClick={(e) => { e.stopPropagation(); isOwnProfile ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
                   className="relative overflow-hidden active:scale-[0.97] transition-transform"
