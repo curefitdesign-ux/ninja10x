@@ -56,6 +56,8 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
   const portalContainer = usePortalContainer();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const userActivitiesRef = useRef<Set<string>>(new Set());
+  const [showMediaSheet, setShowMediaSheet] = useState(false);
+  const [nextDayNumber, setNextDayNumber] = useState(1);
 
   // Fetch user's activity reactions AND nudges together to avoid race conditions
   useEffect(() => {
