@@ -1733,6 +1733,8 @@ const Reel = () => {
                 };
 
                 if (!isCenter) {
+                  // For peek cards, extract a thumbnail URL for the blurred background
+                  const peekBgUrl = (!isVideoUrl(media)) ? media : '';
                   return (
                     <CarouselItem
                       key={`card-${group.userId}`}
@@ -1743,31 +1745,60 @@ const Reel = () => {
                         style={cardStyle}
                       >
                         <div
-                          className="overflow-hidden w-full h-full"
+                          className="relative overflow-hidden w-full h-full rounded-2xl"
                           style={{
                             aspectRatio: '9/16',
                             maxHeight: 'calc(95% - 20px)',
-                            filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
                           }}
                         >
-                          {hasFrame && activity ? (
-                            <StoryFrameRenderer
-                              imageUrl={media}
-                              isVideo={activity.isVideo}
-                              activity={activity.activity}
-                              frame={activity.frame}
-                              duration={activity.duration}
-                              pr={activity.pr}
-                              dayNumber={activity.dayNumber}
+                          {/* Blurred background layer from media */}
+                          {peekBgUrl ? (
+                            <div
+                              className="absolute inset-0"
+                              style={{
+                                backgroundImage: `url(${peekBgUrl})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                filter: 'blur(40px) saturate(150%) brightness(0.35)',
+                                transform: 'scale(1.3)',
+                              }}
                             />
-                          ) : media ? (
-                            <img
-                              src={media}
-                              alt="User story"
-                              className="w-full h-full object-cover"
-                              loading="eager"
+                          ) : (
+                            <div
+                              className="absolute inset-0"
+                              style={{
+                                background: 'radial-gradient(ellipse at 50% 30%, hsl(248 40% 22%) 0%, hsl(248 60% 7%) 80%)',
+                              }}
                             />
-                          ) : null}
+                          )}
+                          {/* Dark overlay */}
+                          <div className="absolute inset-0 bg-black/30" />
+                          {/* Content */}
+                          <div
+                            className="relative w-full h-full"
+                            style={{
+                              filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.85)',
+                            }}
+                          >
+                            {hasFrame && activity ? (
+                              <StoryFrameRenderer
+                                imageUrl={media}
+                                isVideo={activity.isVideo}
+                                activity={activity.activity}
+                                frame={activity.frame}
+                                duration={activity.duration}
+                                pr={activity.pr}
+                                dayNumber={activity.dayNumber}
+                              />
+                            ) : media ? (
+                              <img
+                                src={media}
+                                alt="User story"
+                                className="w-full h-full object-cover"
+                                loading="eager"
+                              />
+                            ) : null}
+                          </div>
                         </div>
                       </div>
                     </CarouselItem>
