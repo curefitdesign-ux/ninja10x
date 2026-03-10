@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback, forwardRef, useMemo } from 'r
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
 import { X, Share2, Pencil, ChevronUp } from 'lucide-react';
+import SendReactionSheet from '@/components/SendReactionSheet';
 import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
 import { useAuth } from '@/hooks/use-auth';
@@ -78,6 +79,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
   // Sheets
   const [showReactsSheet, setShowReactsSheet] = useState(false);
+  const [showSendReactionSheet, setShowSendReactionSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
 
@@ -94,7 +96,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const autoAdvanceTimer = useRef<NodeJS.Timeout | null>(null);
   const progressStartTimer = useRef<number | null>(null);
   const [progressRunKey, setProgressRunKey] = useState(0);
-  const isPaused = showReactsSheet || showEditSheet;
+  const isPaused = showReactsSheet || showSendReactionSheet || showEditSheet;
 
   // Check if user has logged an activity today (placeholder presence means they haven't)
   const hasLoggedToday = useMemo(() => {
@@ -261,6 +263,33 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const goNext = () => setCurrentIndex(i => Math.min(i + 1, activities.length - 1));
   const goPrev = () => setCurrentIndex(i => Math.max(i - 1, 0));
 
+  const handleReact = async (type: ReactionType) => {
+    if (!user || !current || isOwnProfile) return;
+    setShowSendReactionSheet(false);
+
+    // Optimistic update
+    setLocalReactions(prev => {
+      const curr = prev[current.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS }, reactorProfiles: [] };
+      const existing = curr.reactions[type];
+      const newCount = (existing?.count || 0) + 1;
+      return {
+        ...prev,
+        [current.id]: {
+          ...curr,
+          total: curr.total + 1,
+          reactions: { ...curr.reactions, [type]: { count: newCount, reacted: true } },
+          reactorProfiles: [...curr.reactorProfiles, { userId: user.id, displayName: 'You', reactionType: type }],
+        },
+      };
+    });
+
+    try {
+      await sendReaction(current.id, type);
+    } catch (err) {
+      console.error('Reaction failed', err);
+    }
+  };
+
   const handleTap = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const tapX = e.clientX - rect.left;
@@ -336,14 +365,32 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 height: 56,
               }}
             >
-              {/* Combined counter + week/day pill */}
-              <div
-                className="px-3 py-1.5 rounded-full text-white/70 text-xs font-medium flex items-center gap-1.5"
-                style={{ background: 'rgba(255,255,255,0.08)' }}
-              >
-                <span>W{week} • D{dayInWeek}</span>
-                <span className="text-white/40">|</span>
-                <span>{currentIndex + 1}/{totalActivities}</span>
+              {/* Combined counter + week/day indicator */}
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="px-3 py-1.5 rounded-full text-white text-xs font-semibold tracking-wide"
+                  style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}
+                >
+                  Week {week}
+                </div>
+                {/* Day dots for the week */}
+                <div className="flex items-center gap-1.5">
+                  {[1, 2, 3].map(d => (
+                    <div
+                      key={d}
+                      className="rounded-full"
+                      style={{
+                        width: d === dayInWeek ? 20 : 7,
+                        height: 7,
+                        borderRadius: d === dayInWeek ? 4 : 999,
+                        background: d <= dayInWeek
+                          ? 'rgba(255,255,255,0.85)'
+                          : 'rgba(255,255,255,0.2)',
+                        transition: 'all 0.3s ease',
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
 
               {/* Progress segments */}
@@ -588,9 +635,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   style={{ transform: 'translateY(-32px)' }}
                 >
                   <div className="flex items-center justify-center gap-3 px-4">
-                    {/* Reaction pill — own stories show "Reacts So Far" */}
+                    {/* Reaction pill — own stories: "Reacts So Far", others: "Tap to react" */}
                     <button
-                      onClick={(e) => { e.stopPropagation(); setShowReactsSheet(true); }}
+                      onClick={(e) => { e.stopPropagation(); isOwnProfile ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
                       className="relative overflow-hidden active:scale-[0.97] transition-transform"
                       style={{
                         minWidth: currentReactions.total > 0 ? 180 : 160,
@@ -615,6 +662,11 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               <span className="text-white/50 text-sm">reacts</span>
                             </div>
                             <ChevronUp className="w-4 h-4 text-white/40" />
+                          </>
+                        ) : !isOwnProfile ? (
+                          <>
+                            <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain opacity-60" />
+                            <span className="text-white/60 text-sm font-medium">Tap to react</span>
                           </>
                         ) : (
                           <>
@@ -686,6 +738,42 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 reactions={currentReactions.reactions}
                 reactorProfiles={currentReactions.reactorProfiles}
                 onClose={() => setShowReactsSheet(false)}
+              />,
+              document.body,
+            )}
+
+          {/* Send Reaction Sheet for other users */}
+          {showSendReactionSheet &&
+            createPortal(
+              <SendReactionSheet
+                activityId={current.id}
+                currentUserId={user?.id}
+                activityType={current.activity || undefined}
+                onReact={handleReact}
+                onClose={() => setShowSendReactionSheet(false)}
+                onViewReactions={() => {
+                  setShowSendReactionSheet(false);
+                  setShowReactsSheet(true);
+                }}
+                onReactionRemoved={(reactionType) => {
+                  setLocalReactions(prev => {
+                    const curr = prev[current.id];
+                    if (!curr) return prev;
+                    const existing = curr.reactions[reactionType];
+                    const newCount = Math.max((existing?.count || 0) - 1, 0);
+                    return {
+                      ...prev,
+                      [current.id]: {
+                        ...curr,
+                        total: Math.max(curr.total - 1, 0),
+                        reactions: { ...curr.reactions, [reactionType]: { count: newCount, reacted: newCount > 0 } },
+                        reactorProfiles: curr.reactorProfiles.filter(r => !(r.userId === user?.id && r.reactionType === reactionType)),
+                      },
+                    };
+                  });
+                }}
+                totalReactions={currentReactions.total}
+                reactorProfiles={currentReactions.reactorProfiles}
               />,
               document.body,
             )}
