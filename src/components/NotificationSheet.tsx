@@ -121,7 +121,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
         .select('id, from_user_id, created_at')
         .eq('to_user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(50);
 
       if (nudges && nudges.length > 0) {
         const senderIds = [...new Set(nudges.map(n => n.from_user_id))];
@@ -132,22 +132,41 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
 
         const profileMap = new Map(profiles?.map(p => [p.user_id, { name: p.display_name, avatar: p.avatar_url }]) || []);
 
-        const nudgeCountMap = new Map<string, number>();
+        // Group nudges by sender + same day
+        const nudgeGroups = new Map<string, { count: number; latestId: string; latestTime: Date; senderId: string }>();
         nudges.forEach(n => {
-          nudgeCountMap.set(n.from_user_id, (nudgeCountMap.get(n.from_user_id) || 0) + 1);
+          const dayKey = `${n.from_user_id}-${new Date(n.created_at).toDateString()}`;
+          const existing = nudgeGroups.get(dayKey);
+          const ts = new Date(n.created_at);
+          if (existing) {
+            existing.count++;
+            if (ts > existing.latestTime) {
+              existing.latestTime = ts;
+              existing.latestId = n.id;
+            }
+          } else {
+            nudgeGroups.set(dayKey, { count: 1, latestId: n.id, latestTime: ts, senderId: n.from_user_id });
+          }
         });
 
-        nudgeNotifs = nudges.map(n => ({
-          id: `nudge-${n.id}`,
+        nudgeNotifs = Array.from(nudgeGroups.values()).map(g => ({
+          id: `nudge-${g.latestId}`,
           activityId: '',
-          reactorName: profileMap.get(n.from_user_id)?.name || 'Someone',
-          reactorAvatarUrl: profileMap.get(n.from_user_id)?.avatar || undefined,
+          reactorName: profileMap.get(g.senderId)?.name || 'Someone',
+          reactorAvatarUrl: profileMap.get(g.senderId)?.avatar || undefined,
           reactionType: 'nudge',
-          timestamp: new Date(n.created_at),
+          timestamp: g.latestTime,
           isNudge: true,
-          nudgeCount: nudgeCountMap.get(n.from_user_id) || 1,
+          nudgeCount: g.count,
         }));
       }
+
+      // Fetch user's activity count to determine next day number
+      const { count: activityCount } = await supabase
+        .from('journey_activities')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      setNextDayNumber(Math.min((activityCount || 0) + 1, 12));
 
       // Combine and sort all notifications together
       const combined = [...reactionNotifs, ...nudgeNotifs];
