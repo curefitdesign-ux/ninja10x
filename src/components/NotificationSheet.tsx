@@ -33,12 +33,13 @@ export interface Notification {
   activityId: string;
   reactorName: string;
   reactorAvatarUrl?: string;
-  reactionType: string; // 'nudge' for nudges, reaction type for reactions
+  reactionType: string;
   timestamp: Date;
   dayNumber?: number;
   activityImageUrl?: string;
   activityType?: string;
   isNudge?: boolean;
+  nudgeCount?: number;
 }
 
 interface NotificationSheetProps {
