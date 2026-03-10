@@ -601,26 +601,28 @@ const Reel = () => {
     }
   }, [currentActivityIndex, goPrevUser]);
 
-  // Swipe gesture handling for horizontal navigation - smooth scroll feel
+  // Swipe gesture handling for horizontal navigation - smooth carousel feel
   const dragX = useMotionValue(0);
-  // No animated transforms — clean instant transitions
-  const dragConstraints = useMemo(() => ({ left: 0, right: 0 }), []);
+  const dragConstraints = useMemo(() => ({ left: -200, right: 200 }), []);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
   
   const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
     
-    // Horizontal swipe between users - lower threshold for snappier feel
+    // Horizontal swipe between users
     if (Math.abs(offset.x) > 40 || Math.abs(velocity.x) > 300) {
       if (offset.x < 0) {
         setSwipeDirection('left');
+        setSlideDirection('left');
         goNextUser();
       } else {
         setSwipeDirection('right');
+        setSlideDirection('right');
         goPrevUser();
       }
     }
 
-    // Always hard-reset drag offset so container never stays shifted
+    // Spring back to center
     dragX.set(0);
   }, [goNextUser, goPrevUser, dragX]);
 
