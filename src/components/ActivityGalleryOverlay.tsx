@@ -346,7 +346,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   </div>
                   <h2 className="text-white font-bold text-center mt-1.5 px-6 truncate w-full" style={{ fontSize: 18, letterSpacing: '-0.02em' }}>{userProfile.displayName}</h2>
                   {userDescription && (
-                    <p className="text-white/50 text-[11px] text-center mt-1 px-8 leading-relaxed" style={{ maxWidth: 280 }}>
+                    <p className="text-white/50 text-[13px] text-center mt-1.5 px-6 leading-relaxed" style={{ maxWidth: 300 }}>
                       {userDescription.diary}{userDescription.varietyLine ? ` ${userDescription.varietyLine}` : ''}
                     </p>
                   )}
