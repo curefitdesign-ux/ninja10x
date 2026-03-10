@@ -540,21 +540,11 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 <button
                   onClick={async (e) => {
                     e.stopPropagation();
-                    // Play desk bell sound
+                    // Play nudge bell sound
                     try {
-                      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-                      const osc = audioCtx.createOscillator();
-                      const gain = audioCtx.createGain();
-                      osc.connect(gain);
-                      gain.connect(audioCtx.destination);
-                      osc.type = 'sine';
-                      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                      osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
-                      osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.3);
-                      gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-                      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-                      osc.start(audioCtx.currentTime);
-                      osc.stop(audioCtx.currentTime + 0.5);
+                      const audio = new Audio('/sounds/nudge-bell.mp3');
+                      audio.volume = 0.7;
+                      audio.play().catch(() => {});
                     } catch {}
                     if (user && targetUserId) {
                       const { error } = await supabase.from('nudges').insert({ from_user_id: user.id, to_user_id: targetUserId });
