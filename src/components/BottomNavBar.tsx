@@ -51,9 +51,11 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
       return;
     }
     if (tabId === "discover") {
+      setShowNotificationSheet(false);
       if (location.pathname !== "/reel" && location.pathname !== "/") navigate("/reel");
     }
     if (tabId === "progress") {
+      setShowNotificationSheet(false);
       if (location.pathname !== "/progress") navigate("/progress");
     }
   };

@@ -415,7 +415,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                         {/* Activity thumbnail on right */}
                         {notif.activityImageUrl ? (
                           <div 
-                            className="w-11 h-11 rounded-md overflow-hidden flex-shrink-0"
+                            className="w-11 h-11 rounded-[5px] overflow-hidden flex-shrink-0"
                             style={{ border: '1px solid rgba(255,255,255,0.1)' }}
                           >
                             <img 
