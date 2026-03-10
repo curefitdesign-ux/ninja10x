@@ -1798,21 +1798,21 @@ const Reel = () => {
                           <AnimatePresence>
                           {showStackedCards && isCenter && (
                             <>
-                              {/* Back card (deeper, smaller) */}
+                              {/* Back card (deepest peek) */}
                               <motion.div
                                 key={`stack-2-${group.userId}`}
-                                initial={{ scale: 0.56, opacity: 0, y: 0 }}
-                                animate={{ scale: 0.56, opacity: 0.4, y: 150 }}
-                                exit={{ scale: 0.56, opacity: 0, y: 0 }}
+                                initial={{ scale: 0.88, opacity: 0, y: 0 }}
+                                animate={{ scale: 0.88, opacity: 0.4, y: 'calc(50% + 40px)' }}
+                                exit={{ scale: 0.88, opacity: 0, y: 0 }}
                                 transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.08 }}
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(37% - 10px)',
+                                  height: 'calc(95% - 20px)',
                                   overflow: 'hidden',
                                   zIndex: 1,
-                                  borderRadius: '12px',
+                                  borderRadius: '16px',
                                   background: 'rgba(255,255,255,0.04)',
                                   border: '1px solid rgba(255,255,255,0.08)',
                                   backdropFilter: 'blur(20px) saturate(1.4)',
@@ -1823,21 +1823,21 @@ const Reel = () => {
                                 <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(80,60,140,0.15) 0%, rgba(20,15,50,0.3) 100%)' }} />
                                 <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(170deg, rgba(255,255,255,0.06) 0%, transparent 30%)' }} />
                               </motion.div>
-                              {/* Front card (closer behind main) */}
+                              {/* Front card (closer peek) */}
                               <motion.div
                                 key={`stack-1-${group.userId}`}
-                                initial={{ scale: 0.62, opacity: 0, y: 0 }}
-                                animate={{ scale: 0.62, opacity: 0.55, y: 124 }}
-                                exit={{ scale: 0.62, opacity: 0, y: 0 }}
+                                initial={{ scale: 0.93, opacity: 0, y: 0 }}
+                                animate={{ scale: 0.93, opacity: 0.55, y: 'calc(50% + 12px)' }}
+                                exit={{ scale: 0.93, opacity: 0, y: 0 }}
                                 transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.04 }}
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(41% - 10px)',
+                                  height: 'calc(95% - 20px)',
                                   overflow: 'hidden',
                                   zIndex: 2,
-                                  borderRadius: '12px',
+                                  borderRadius: '16px',
                                   background: 'rgba(255,255,255,0.05)',
                                   border: '1px solid rgba(255,255,255,0.12)',
                                   backdropFilter: 'blur(24px) saturate(1.5)',
