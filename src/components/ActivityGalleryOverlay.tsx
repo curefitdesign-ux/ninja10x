@@ -263,11 +263,16 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               className="shrink-0 z-50"
               style={{
                 paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
-                background: isScrolled ? 'rgba(10, 7, 32, 0.7)' : 'transparent',
-                backdropFilter: isScrolled ? 'blur(40px) saturate(180%)' : 'none',
-                WebkitBackdropFilter: isScrolled ? 'blur(40px) saturate(180%)' : 'none',
-                borderBottom: isScrolled ? '1px solid rgba(255,255,255,0.06)' : '1px solid transparent',
-                transition: 'background 0.3s ease, backdrop-filter 0.3s ease, border-bottom 0.3s ease',
+                background: isScrolled ? 'rgba(255, 255, 255, 0.06)' : 'transparent',
+                backdropFilter: isScrolled ? 'blur(60px) saturate(200%)' : 'none',
+                WebkitBackdropFilter: isScrolled ? 'blur(60px) saturate(200%)' : 'none',
+                borderBottom: isScrolled ? '1px solid rgba(255,255,255,0.08)' : '1px solid transparent',
+                boxShadow: isScrolled ? '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 -1px 0 rgba(255,255,255,0.05)' : 'none',
+                transition: 'all 0.3s ease',
+                ...(isScrolled ? {
+                  maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
+                  WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
+                } : {}),
               }}
             >
               {/* Compact header (scrolled) */}
