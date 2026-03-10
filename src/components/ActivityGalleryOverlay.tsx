@@ -402,36 +402,62 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
             {/* User profile header + journey description */}
             <div className="shrink-0 z-30 px-4 pb-2">
               {userProfile ? (
-                <div className="flex items-start gap-3">
-                  <ProfileAvatar
-                    src={userProfile.avatarUrl}
-                    name={userProfile.displayName}
-                    size={44}
-                    style={{
-                      border: '2px solid rgba(255, 255, 255, 0.25)',
-                      flexShrink: 0,
-                    }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline gap-2">
-                      <p className="text-white font-bold text-sm truncate">{userProfile.displayName}</p>
-                      {userDescription && (
-                        <span className="text-white/50 text-[11px] font-medium shrink-0">{userDescription.count}/12</span>
-                      )}
+                <div>
+                  {/* W.D pill + Share button row — above the profile info */}
+                  <div className="flex items-center justify-between mb-2">
+                    <div
+                      className="px-2.5 py-1 rounded-full"
+                      style={{ background: 'rgba(255,255,255,0.08)' }}
+                    >
+                      <span className="text-white/60 text-[10px] font-medium">
+                        W{week} • D{dayInWeek}
+                      </span>
                     </div>
-                    {userDescription && (
-                      <p className="mt-0.5 text-[11px] leading-snug text-white/60">
-                        {userDescription.diary}
-                      </p>
+                    {canShare && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setShowShareOptions(true); }}
+                        className="shrink-0 active:scale-95 transition-transform"
+                        style={{
+                          width: 32, height: 32, borderRadius: 16,
+                          background: 'rgba(255, 255, 255, 0.08)',
+                          border: '1px solid rgba(255, 255, 255, 0.06)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}
+                      >
+                        <Share2 className="w-[14px] h-[14px] text-white/60" strokeWidth={1.5} />
+                      </button>
                     )}
                   </div>
-                  <div
-                    className="px-2.5 py-1 rounded-full shrink-0"
-                    style={{ background: 'rgba(255,255,255,0.08)' }}
-                  >
-                    <span className="text-white/60 text-[10px] font-medium">
-                      W{week} • D{dayInWeek}
-                    </span>
+                  <div className="flex items-start gap-3">
+                    <ProfileAvatar
+                      src={userProfile.avatarUrl}
+                      name={userProfile.displayName}
+                      size={44}
+                      style={{
+                        border: '2px solid rgba(255, 255, 255, 0.25)',
+                        flexShrink: 0,
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline gap-2">
+                        <p className="text-white font-bold text-sm truncate">{userProfile.displayName}</p>
+                        {userDescription && (
+                          <span className="text-white/50 text-[11px] font-medium shrink-0">{userDescription.count}/12</span>
+                        )}
+                      </div>
+                      {userDescription && (
+                        <>
+                          <p className="mt-0.5 text-[11px] leading-snug text-white/60">
+                            {userDescription.diary}
+                          </p>
+                          {userDescription.durationLine && (
+                            <p className="text-[11px] leading-snug text-white/50">
+                              {userDescription.durationLine}
+                            </p>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               ) : (
