@@ -474,26 +474,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               </motion.button>
             </div>
 
-            {/* Avatar — centered above cards */}
-            {userProfile && (
-              <div className="shrink-0 flex justify-center z-40" style={{ marginBottom: -20 }}>
-                <div
-                  className="rounded-full overflow-hidden"
-                  style={{
-                    width: 64,
-                    height: 64,
-                    border: '3px solid rgba(255,255,255,0.3)',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-                  }}
-                >
-                  <ProfileAvatar
-                    src={userProfile.avatarUrl}
-                    name={userProfile.displayName}
-                    size={64}
-                  />
-                </div>
-              </div>
-            )}
+
 
             <div
               className="relative z-30 flex-shrink-0"
