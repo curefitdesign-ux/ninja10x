@@ -1992,10 +1992,7 @@ const Reel = () => {
                             style={{ 
                               objectFit: 'cover',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                              opacity: mediaLoaded ? 1 : 0,
-                              transition: 'opacity 0.2s ease',
                             }}
-                            onLoad={() => setLoadedMediaUrl(mediaUrl)}
                             onError={(e) => {
                               const img = e.currentTarget;
                               if (!img.dataset.retried) {
