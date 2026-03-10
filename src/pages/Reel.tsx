@@ -1684,34 +1684,35 @@ const Reel = () => {
             paddingBottom: 'calc(max(env(safe-area-inset-bottom, 6px), 6px) + 80px)',
           }}
         >
-        {/* Reel cards — 3-card peek layout with CSS transitions */}
+        {/* Reel cards — simple horizontal scroll with snap */}
         <div
-          className="relative min-h-0 flex-1 flex items-center justify-center overflow-hidden"
+          ref={scrollContainerRef}
+          className="relative min-h-0 flex-1 flex overflow-x-auto overflow-y-hidden scrollbar-hide"
+          style={{
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+          onScroll={(e) => {
+            const container = e.currentTarget;
+            const cardWidth = container.offsetWidth;
+            if (cardWidth <= 0) return;
+            const newIndex = Math.round(container.scrollLeft / cardWidth);
+            if (newIndex !== currentUserIndex && newIndex >= 0 && newIndex < effectiveUserGroups.length) {
+              navigatingRef.current = true;
+              const targetGroup = effectiveUserGroups[newIndex];
+              if (targetGroup) currentUserIdRef.current = targetGroup.userId;
+              const prevGroup = effectiveUserGroups[currentUserIndex];
+              if (prevGroup) setViewedUsers(prev => new Set(prev).add(prevGroup.userId));
+              setCurrentUserIndex(newIndex);
+              setCurrentActivityIndex(0);
+            }
+          }}
+          onClick={handleTap}
         >
-          {/* Swipe gesture layer */}
-          <motion.div
-            className="absolute inset-0 z-[60]"
-            style={{ touchAction: 'pan-y' }}
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.15}
-            dragMomentum={false}
-            onDragEnd={handleHorizontalDragEnd}
-            onClick={handleTap}
-          />
-
-          {/* Three visible cards: prev (-1), center (0), next (+1) */}
-          {([-1, 0, 1] as const).map((offset) => {
-            const idx = (currentUserIndex + offset + effectiveUserGroups.length) % effectiveUserGroups.length;
-            // Don't render duplicate if only 1 user
-            if (effectiveUserGroups.length === 1 && offset !== 0) return null;
-            // Don't render duplicate if only 2 users and both offsets point to same
-            if (effectiveUserGroups.length === 2 && offset === -1 && idx === (currentUserIndex + 1) % effectiveUserGroups.length) return null;
-
-            const group = effectiveUserGroups[idx];
-            if (!group) return null;
-
-            const isCenter = offset === 0;
+          {effectiveUserGroups.map((group, idx) => {
+            const isCenter = idx === currentUserIndex;
             const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
             const activity = isCenter
               ? currentActivity
@@ -1724,32 +1725,29 @@ const Reel = () => {
             const isLockedCard = !isOwnCard && !profile?.stories_public;
             const hasFrame = activity?.frame && activity.frame !== 'none';
 
-            // Peek cards: smaller, dimmed, offset to sides
             if (!isCenter) {
-              const peekX = offset < 0 ? 'calc(-50% - 30px)' : 'calc(50% + 30px)';
               return (
                 <div
-                  key={`peek-${offset}-${idx}`}
-                  className="absolute pointer-events-none"
+                  key={`card-${group.userId}`}
+                  className="flex-shrink-0 flex items-center justify-center"
                   style={{
-                    width: '65%',
-                    maxWidth: 280,
-                    aspectRatio: '9/16',
-                    left: '50%',
-                    top: '50%',
-                    transform: `translate(${peekX}, -50%) scale(0.82)`,
-                    opacity: 0.5,
-                    zIndex: 10,
-                    transition: 'transform 0.3s ease, opacity 0.3s ease',
+                    width: '100%',
+                    height: '100%',
+                    scrollSnapAlign: 'center',
                   }}
                 >
                   <div
-                    className="w-full h-full overflow-hidden rounded-xl"
+                    className="overflow-hidden"
                     style={{
+                      width: 'calc(80% - 20px)',
+                      maxWidth: 340,
+                      aspectRatio: '9/16',
+                      transform: 'scale(0.85)',
+                      opacity: 0.55,
                       background: 'rgba(255,255,255,0.06)',
                       border: '1px solid rgba(255,255,255,0.12)',
                       boxShadow: '0 8px 32px rgba(0,0,0,0.22)',
-                      filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.7)',
+                      filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
                     }}
                   >
                     {hasFrame && activity ? (
@@ -1763,31 +1761,42 @@ const Reel = () => {
                         dayNumber={activity.dayNumber}
                       />
                     ) : media ? (
-                      <img src={media} alt="Adjacent" className="w-full h-full object-cover" loading="eager" />
+                      <img
+                        src={media}
+                        alt="User story"
+                        className="w-full h-full object-cover"
+                        loading="eager"
+                      />
                     ) : null}
                   </div>
                 </div>
               );
             }
 
-            // Center card
             return (
               <div
-                key={`center-${group.userId}-${currentUserIndex}`}
-                className="absolute inset-0 flex items-center justify-center"
+                key={`card-${group.userId}`}
+                className="flex-shrink-0 flex items-center justify-center relative"
                 style={{
-                  zIndex: 20,
-                  transition: 'transform 0.3s ease, opacity 0.3s ease',
+                  width: '100%',
+                  height: '100%',
+                  scrollSnapAlign: 'center',
                 }}
               >
+                {/* Full templated image/video - with lock overlay for non-public users */}
                 {(() => {
                   const shouldShowLocked = !isOwnStory && !profile?.stories_public;
                   const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
                   return (
                     <div
                       className="relative flex items-center justify-center"
-                      style={{ width: '100%', height: '100%', background: 'transparent' }}
+                      style={{ 
+                        width: '100%',
+                        height: '100%',
+                        background: 'transparent',
+                      }}
                     >
+                      {/* Card — 9:16 aspect ratio, constrained to available space */}
                       <div
                         className="relative overflow-hidden"
                         style={{
