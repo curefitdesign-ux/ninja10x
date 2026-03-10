@@ -258,20 +258,6 @@ const PremiumLoader = () => {
         />
       </motion.div>
       
-      {/* Subtle text */}
-      <motion.span
-        className="text-white/30 text-xs font-medium tracking-widest uppercase"
-        animate={{
-          opacity: [0.3, 0.5, 0.3],
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      >
-        Loading
-      </motion.span>
     </div>
   );
 };
