@@ -73,7 +73,7 @@ export default function StoryFrameRenderer({
   return (
     <div
       className="absolute inset-0 flex items-center justify-center"
-      style={{ background: 'transparent' }}
+      style={{ background: 'transparent', '--frame-fill': '100%' } as React.CSSProperties}
     >
       <>
         {(() => {
