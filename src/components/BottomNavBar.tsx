@@ -212,6 +212,8 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
       </Sheet>
     </>
   );
-};
+});
+
+BottomNavBar.displayName = 'BottomNavBar';
 
 export default BottomNavBar;
