@@ -95,7 +95,7 @@ const MediaSourceSheet = forwardRef<HTMLDivElement, MediaSourceSheetProps>(funct
               WebkitBackdropFilter: 'blur(60px) saturate(200%)',
               boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
               border: '1px solid rgba(255, 255, 255, 0.12)',
-              paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+              paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)',
             }}
           >
             {/* Handle */}

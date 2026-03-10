@@ -95,7 +95,24 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             
             const profileMap = new Map(profiles?.map(p => [p.user_id, { name: p.display_name, avatar: p.avatar_url }]) || []);
             
-            reactionNotifs = reactions.map(r => {
+            // Group reactions by same user + same activity + same day
+            const reactionGroups = new Map<string, { reaction: typeof reactions[0]; count: number; latestTime: Date }>();
+            reactions.forEach(r => {
+              const dayKey = `${r.user_id}-${r.activity_id}-${new Date(r.created_at).toDateString()}`;
+              const existing = reactionGroups.get(dayKey);
+              const ts = new Date(r.created_at);
+              if (existing) {
+                existing.count++;
+                if (ts > existing.latestTime) {
+                  existing.latestTime = ts;
+                  existing.reaction = r;
+                }
+              } else {
+                reactionGroups.set(dayKey, { reaction: r, count: 1, latestTime: ts });
+              }
+            });
+
+            reactionNotifs = Array.from(reactionGroups.values()).map(({ reaction: r }) => {
               const reactorProfile = profileMap.get(r.user_id);
               const activityInfo = activityMap.get(r.activity_id);
               return {
@@ -434,9 +451,20 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
 
                         {/* Right side: nudge icon or reaction badge + thumbnail */}
                         {notif.isNudge ? (
-                          <div className="flex-shrink-0 flex flex-col items-center gap-1">
+                          <div className="relative flex-shrink-0">
                             <img src={deskBellImg} alt="Nudge" className="w-9 h-9 object-contain" />
-                            <span className="text-white/30 text-[10px]">{formatRelativeTime(notif.timestamp)}</span>
+                            {(notif.nudgeCount || 0) > 1 && (
+                              <div
+                                className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center"
+                                style={{
+                                  background: '#EF4444',
+                                  border: '1.5px solid rgba(0,0,0,0.4)',
+                                  boxShadow: '0 0 6px rgba(239, 68, 68, 0.5)',
+                                }}
+                              >
+                                <span className="text-white text-[9px] font-bold leading-none">{notif.nudgeCount}</span>
+                              </div>
+                            )}
                           </div>
                         ) : notif.activityImageUrl ? (
                           <div className="relative flex-shrink-0">
