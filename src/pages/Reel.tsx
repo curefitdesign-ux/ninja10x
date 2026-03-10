@@ -1814,7 +1814,7 @@ const Reel = () => {
                                 key={`stack-back-${group.userId}`}
                                 initial={{ rotate: 0, scale: 0.88, opacity: 0, y: 106 }}
                                 animate={{ rotate: 5, scale: 0.90, opacity: 1, y: 100 }}
-                                exit={{ rotate: 0, scale: 0.88, opacity: 0, y: 6 }}
+                                exit={{ rotate: 0, scale: 0.88, opacity: 0, y: 106 }}
                                 transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.12 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
