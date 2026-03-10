@@ -134,18 +134,17 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     const parts: string[] = [];
 
     if (count >= 12) {
-      parts.push(`🏆 ${name} crushed it — all 12 days done!`);
+      parts.push(`🏆 ${name} crushed all 12 days!`);
     } else if (count >= 9) {
-      parts.push(`🔥 ${name}'s on fire — ${count} days in, almost there!`);
+      parts.push(`🔥 ${name}'s on fire, ${count} days in, almost there!`);
     } else if (count >= 6) {
-      parts.push(`💪 Halfway beast mode — ${count} days and counting`);
+      parts.push(`💪 Halfway beast mode, ${count} days and counting.`);
     } else if (count >= 3) {
-      parts.push(`⚡ ${name}'s building momentum — ${count} days strong`);
+      parts.push(`⚡ ${name}'s building momentum, ${count} days strong.`);
     } else {
-      parts.push(`🚀 ${name} just started the journey — day ${count}!`);
+      parts.push(`🚀 ${name} just started the journey, day ${count}!`);
     }
 
-    // Activity flavor
     if (variety >= 3) {
       const top3 = sorted.slice(0, 3).map(([k]) => k.toLowerCase());
       parts.push(`Mixing it up with ${top3.join(', ')} & more ✨`);
@@ -155,12 +154,11 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
       parts.push(`All-in on ${topActivity} 🎯`);
     }
 
-    // Duration flavor
     if (durationStr) {
       parts.push(`⏱️ ${durationStr} of pure grind so far`);
     }
 
-    return { diary: parts.join('\n'), count };
+    return { diary: parts.join(' · '), count };
   }, [activities, userProfile]);
 
   // Media loading
@@ -423,15 +421,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       )}
                     </div>
                     {userDescription && (
-                      <div className="mt-0.5 space-y-0.5">
-                        {userDescription.diary.split('\n').map((line, i) => (
-                          <p key={i} className={
-                            i === 0 ? "text-[11px] leading-snug text-white/80 font-semibold" : "text-[11px] leading-snug text-white/50"
-                          }>
-                            {line}
-                          </p>
-                        ))}
-                      </div>
+                      <p className="mt-0.5 text-[11px] leading-snug text-white/60">
+                        {userDescription.diary}
+                      </p>
                     )}
                   </div>
                   <div
