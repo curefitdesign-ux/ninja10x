@@ -516,8 +516,9 @@ const Reel = () => {
 
   const currentGroup = effectiveUserGroups[currentUserIndex];
   const currentActivity = currentGroup?.activities[currentActivityIndex];
+  const currentActivityName = currentActivity?.activity?.toLowerCase?.() ?? '';
   const isWeekRecapStory = currentActivity?.id?.startsWith('week-recap');
-  const isRecapActivity = currentActivity?.activity?.toLowerCase().includes('recap') || currentActivity?.frame === 'recap';
+  const isRecapActivity = currentActivityName.includes('recap') || currentActivity?.frame === 'recap';
   const isOwnStory = user && currentGroup?.userId === user.id;
   
   // Check if activity was created within the last 24 hours
@@ -1520,8 +1521,8 @@ const Reel = () => {
                     const activityCount = group.activities.length;
                     const currentIdx = idx === currentUserIndex ? currentActivityIndex : 0;
                     const isOwnProfile = user && group.userId === user.id;
-                    // Stories are locked, but profile photos are ALWAYS visible
-                    const isStoryLocked = !isOwnProfile && !profile?.stories_public;
+                    const groupStoriesPublic = group.activities.some(activity => activity.isPublic);
+                    const isStoryLocked = !isOwnProfile && !groupStoriesPublic;
                     const isUserViewed = viewedUsers.has(group.userId);
                     const avatarSize = 52;
                     
