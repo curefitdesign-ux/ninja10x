@@ -1991,7 +1991,7 @@ const Reel = () => {
                                   </div>
 
                                   {/* Label */}
-                                  <p className="mt-6 text-white/40 text-xs font-medium uppercase tracking-widest" style={{ marginTop: 21 }}>
+                                  <p className="mt-6 text-white/40 text-xs font-medium uppercase tracking-widest" style={{ marginTop: 36 }}>
                                     Day {currentActivity.dayNumber} of 12
                                   </p>
                                 </div>
