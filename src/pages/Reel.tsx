@@ -1639,18 +1639,33 @@ const Reel = () => {
         </div>{/* end top zone */}
 
 
-        {/* Week/Day label + Share button row */}
+        {/* Week/Day label + profile name + Share button row */}
         {currentGroup && currentActivity && (
           <div className="z-40 flex items-center justify-between px-4 shrink-0" style={{ marginBottom: '2px' }}>
-            <div>
+            <div className="flex items-center gap-2">
+              {/* Current user avatar — synced with card */}
+              {!isOwnStory && (
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+                    <ProfileAvatar
+                      src={currentGroup.avatarUrl}
+                      name={currentGroup.displayName}
+                      size={24}
+                    />
+                  </div>
+                  <span className="text-white/80 text-xs font-semibold truncate max-w-[100px]">
+                    {currentGroup.displayName?.split(' ')[0] || 'User'}
+                  </span>
+                </div>
+              )}
               {isOwnStory ? null : (
                 currentActivity.dayNumber >= 1001 ? (
-                  <span className="text-white/50 text-xs font-medium">
-                    Week {currentActivity.dayNumber - 1000} Recap
+                  <span className="text-white/40 text-xs font-medium">
+                    • Week {currentActivity.dayNumber - 1000} Recap
                   </span>
                 ) : currentActivity.dayNumber >= 1 && currentActivity.dayNumber <= 12 ? (
-                  <span className="text-white/50 text-xs font-medium">
-                    Week {Math.ceil(currentActivity.dayNumber / 3)} • Day {((currentActivity.dayNumber - 1) % 3) + 1}
+                  <span className="text-white/40 text-xs font-medium">
+                    • W{Math.ceil(currentActivity.dayNumber / 3)} D{((currentActivity.dayNumber - 1) % 3) + 1}
                   </span>
                 ) : null
               )}
