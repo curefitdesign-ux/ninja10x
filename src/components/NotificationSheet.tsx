@@ -348,16 +348,16 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                   <p className="text-white/30 text-sm mt-1">Share your activities to get reactions!</p>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-5">
                   {notifications.map((notif, index) => {
                     const iconSrc = notif.isNudge ? undefined : REACTION_IMAGES[notif.reactionType];
                     return (
                       <motion.div
                         key={notif.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20, height: 0 }}
-                        transition={{ delay: index * 0.03 }}
+                        initial={{ opacity: 0, y: -15, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, height: 0 }}
+                        transition={{ delay: index * 0.04, type: 'spring', stiffness: 300, damping: 22 }}
                         className="relative flex items-center gap-3 p-3 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform"
                         style={{
                           background: 'rgba(255, 255, 255, 0.06)',
