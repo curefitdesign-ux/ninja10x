@@ -1700,14 +1700,16 @@ const Reel = () => {
           {effectiveUserGroups.length > 1 && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
             const prevGroup = effectiveUserGroups[prevIdx];
-            // Use the latest non-recap activity for peek image; prefer non-video but fall back to any
-            const prevAct = [...(prevGroup?.activities || [])].reverse().find(a => 
-              !isVideoUrl(a.storageUrl || '') && a.dayNumber < 1001 && a.id !== 'log-activity'
-            ) || [...(prevGroup?.activities || [])].reverse().find(a => a.dayNumber < 1001 && a.id !== 'log-activity');
-            const prevMedia = prevAct?.originalUrl || prevAct?.storageUrl;
+            // Pick best available preview: prefer non-video media, then any media, then avatar fallback
+            const prevActivities = [...(prevGroup?.activities || [])].reverse().filter(a => a.id !== 'log-activity');
+            const prevAct = prevActivities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
+              || prevActivities.find(a => !!(a.originalUrl || a.storageUrl))
+              || prevActivities[0];
+            const prevMedia = (prevAct?.originalUrl || prevAct?.storageUrl || prevGroup?.avatarUrl || '').trim();
             const isPrevOwnStory = user && prevGroup?.userId === user.id;
             const isPrevLocked = !isPrevOwnStory && !profile?.stories_public;
-            const isPrevVideo = isVideoUrl(prevMedia || '');
+            const hasPrevStoryMedia = !!(prevAct?.originalUrl || prevAct?.storageUrl);
+            const isPrevVideo = hasPrevStoryMedia && isVideoUrl(prevMedia);
             if (!prevMedia) return null;
             return (
               <motion.div
@@ -1736,6 +1738,8 @@ const Reel = () => {
                       muted
                       playsInline
                       preload="metadata"
+                      autoPlay
+                      loop
                       style={{ 
                         opacity: isPrevLocked ? 0.35 : 0.5, 
                         filter: isPrevLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
@@ -1763,13 +1767,15 @@ const Reel = () => {
           {effectiveUserGroups.length > 1 && (() => {
             const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
             const nextGroup = effectiveUserGroups[nextIdx];
-            const nextAct = [...(nextGroup?.activities || [])].reverse().find(a => 
-              !isVideoUrl(a.storageUrl || '') && a.dayNumber < 1001 && a.id !== 'log-activity'
-            ) || [...(nextGroup?.activities || [])].reverse().find(a => a.dayNumber < 1001 && a.id !== 'log-activity');
-            const nextMedia = nextAct?.originalUrl || nextAct?.storageUrl;
+            const nextActivities = [...(nextGroup?.activities || [])].reverse().filter(a => a.id !== 'log-activity');
+            const nextAct = nextActivities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
+              || nextActivities.find(a => !!(a.originalUrl || a.storageUrl))
+              || nextActivities[0];
+            const nextMedia = (nextAct?.originalUrl || nextAct?.storageUrl || nextGroup?.avatarUrl || '').trim();
             const isNextOwnStory = user && nextGroup?.userId === user.id;
             const isNextLocked = !isNextOwnStory && !profile?.stories_public;
-            const isNextVideo = isVideoUrl(nextMedia || '');
+            const hasNextStoryMedia = !!(nextAct?.originalUrl || nextAct?.storageUrl);
+            const isNextVideo = hasNextStoryMedia && isVideoUrl(nextMedia);
             if (!nextMedia) return null;
             return (
               <motion.div
@@ -1798,6 +1804,8 @@ const Reel = () => {
                       muted
                       playsInline
                       preload="metadata"
+                      autoPlay
+                      loop
                       style={{ 
                         opacity: isNextLocked ? 0.35 : 0.5, 
                         filter: isNextLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
