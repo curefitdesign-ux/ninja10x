@@ -531,7 +531,7 @@ const Reel = () => {
     }
     setCurrentActivityIndex(0);
     setCurrentUserIndex(prevIdx);
-  }, [effectiveUserGroups.length]);
+  }, [effectiveUserGroups, currentUserIndex, currentGroup]);
 
   // Swipe gesture handling for horizontal navigation - smooth scroll feel
   const dragX = useMotionValue(0);
