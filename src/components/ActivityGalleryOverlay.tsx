@@ -452,7 +452,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             )}
                           </div>
 
-                          {isSelected && <div className="absolute inset-0 pointer-events-none" style={{ border: '2px solid rgba(249,115,22,0.4)', borderRadius: 6 }} />}
+                          {isSelected && <div className="absolute inset-0 pointer-events-none" style={{ border: '2px solid rgba(255,255,255,0.2)', borderRadius: 6 }} />}
 
                           {/* Paperclip */}
                           {decorType === 0 && (
