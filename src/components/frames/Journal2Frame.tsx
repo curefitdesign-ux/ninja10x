@@ -47,6 +47,9 @@ const Journal2Frame = ({ imageUrl, activity, week, day, duration, pr, imagePosit
           src={imageUrl}
           alt="Activity"
           className="w-full h-full object-cover"
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
           style={{
             transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
           }}

@@ -95,6 +95,9 @@ const TokenFrame = ({
             src={imageUrl}
             alt="Activity"
             className="absolute inset-0 w-full h-full object-cover"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
             style={{
               transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
             }}
