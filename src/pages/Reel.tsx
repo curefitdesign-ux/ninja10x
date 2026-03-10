@@ -606,6 +606,7 @@ const Reel = () => {
   const cardOpacity = useTransform(dragX, [-200, -100, 0, 100, 200], [0.85, 0.95, 1, 0.95, 0.85]);
   const cardRotate = useMotionValue(0); // No rotation for smooth scroll feel
   const cardScale = useMotionValue(1); // No scale for smooth scroll feel
+  const dragConstraints = useMemo(() => ({ left: 0, right: 0 }), []);
   
   const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
@@ -1711,9 +1712,8 @@ const Reel = () => {
             return (
               <motion.div
                 key={`peek-left-${prevIdx}`}
-                className="absolute left-0 top-0 bottom-0 flex items-center cursor-pointer"
+                className="absolute left-0 top-0 bottom-0 flex items-center pointer-events-none"
                 style={{ width: '10%', zIndex: 20 }}
-                onClick={goPrevUser}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.15 }}
@@ -1774,9 +1774,8 @@ const Reel = () => {
             return (
               <motion.div
                 key={`peek-right-${nextIdx}`}
-                className="absolute right-0 top-0 bottom-0 flex items-center cursor-pointer"
+                className="absolute right-0 top-0 bottom-0 flex items-center pointer-events-none"
                 style={{ width: '10%', zIndex: 20 }}
-                onClick={goNextUser}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.15 }}
@@ -1837,7 +1836,7 @@ const Reel = () => {
             transition={shakeTransition}
             drag="x"
             dragMomentum={false}
-            dragConstraints={{ left: 0, right: 0 }}
+            dragConstraints={dragConstraints}
             dragElastic={0.35}
             onDragEnd={handleHorizontalDragEnd}
             onClick={handleTap}
