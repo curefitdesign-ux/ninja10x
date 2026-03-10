@@ -272,17 +272,36 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             .eq('user_id', nudge.from_user_id)
             .maybeSingle();
 
-          const newNotif: Notification = {
-            id: `nudge-${nudge.id}`,
-            activityId: '',
-            reactorName: profile?.display_name || 'Someone',
-            reactorAvatarUrl: profile?.avatar_url || undefined,
-            reactionType: 'nudge',
-            timestamp: new Date(),
-            isNudge: true,
-          };
+          const senderName = profile?.display_name || 'Someone';
+          const today = new Date().toDateString();
 
-          setNotifications(prev => [newNotif, ...prev].slice(0, 30));
+          setNotifications(prev => {
+            // Try to merge with existing nudge from same user today
+            const existingIdx = prev.findIndex(
+              n => n.isNudge && n.reactorName === senderName && n.timestamp.toDateString() === today
+            );
+            if (existingIdx >= 0) {
+              const updated = [...prev];
+              const existing = { ...updated[existingIdx] };
+              existing.nudgeCount = (existing.nudgeCount || 1) + 1;
+              existing.timestamp = new Date();
+              existing.id = `nudge-${nudge.id}`;
+              updated.splice(existingIdx, 1);
+              return [existing, ...updated].slice(0, 30);
+            }
+            // New nudge notification
+            const newNotif: Notification = {
+              id: `nudge-${nudge.id}`,
+              activityId: '',
+              reactorName: senderName,
+              reactorAvatarUrl: profile?.avatar_url || undefined,
+              reactionType: 'nudge',
+              timestamp: new Date(),
+              isNudge: true,
+              nudgeCount: 1,
+            };
+            return [newNotif, ...prev].slice(0, 30);
+          });
         }
       )
       .subscribe();
