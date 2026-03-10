@@ -329,7 +329,11 @@ const Reel = () => {
 
   // Stabilize currentUserIndex when groups reorder due to viewedUsers change
   const currentUserIdRef = useRef<string>('');
+  // Flag to suppress ref-update effect during programmatic navigation
+  const navigatingRef = useRef(false);
+  
   useEffect(() => {
+    if (navigatingRef.current) return; // Don't overwrite during navigation
     if (effectiveUserGroups.length === 0) return;
     const currentGroup = effectiveUserGroups[currentUserIndex];
     if (currentGroup) {
@@ -344,6 +348,7 @@ const Reel = () => {
     if (newIdx >= 0 && newIdx !== currentUserIndex) {
       setCurrentUserIndex(newIdx);
     }
+    navigatingRef.current = false; // Clear navigation flag after stabilization
   }, [effectiveUserGroups]);
 
   // MAIN NAVIGATION EFFECT: Determine where to land based on navigation intent
