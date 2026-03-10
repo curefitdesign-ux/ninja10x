@@ -505,7 +505,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 >
                   {/* 9:16 Card */}
                   <motion.div
-                    className="relative overflow-hidden w-full h-full"
+                    className="relative overflow-hidden"
                     style={{
                       aspectRatio: '9/16',
                       maxHeight: '100%',
