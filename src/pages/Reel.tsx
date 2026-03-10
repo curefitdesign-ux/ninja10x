@@ -1726,9 +1726,9 @@ const Reel = () => {
                 const hasFrame = activity?.frame && activity.frame !== 'none';
 
                 const cardStyle: React.CSSProperties = {
-                  transform: `scale(${isCenter ? 1.0 : 0.72})`,
+                  transform: `scale(${isCenter ? 1.0 : 0.78})`,
                   transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease',
-                  opacity: isCenter ? 1 : 0.4,
+                  opacity: isCenter ? 1 : 0.45,
                   zIndex: isCenter ? 10 : 1,
                 };
 
@@ -1736,7 +1736,7 @@ const Reel = () => {
                   return (
                     <CarouselItem
                       key={`card-${group.userId}`}
-                      className="pl-1 flex items-center justify-center h-full basis-[88%]"
+                      className="pl-1 flex items-center justify-center h-full basis-[80%]"
                     >
                       <div
                         className="flex items-center justify-center w-full h-full"
@@ -1780,7 +1780,7 @@ const Reel = () => {
                 return (
                   <CarouselItem
                     key={`card-${group.userId}`}
-                    className="pl-1 flex items-center justify-center relative h-full basis-[88%]"
+                    className="pl-1 flex items-center justify-center relative h-full basis-[80%]"
                   >
                     <div
                       className="flex items-center justify-center w-full h-full"
