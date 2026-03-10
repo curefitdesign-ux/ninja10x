@@ -1545,18 +1545,37 @@ const Reel = () => {
         </div>{/* end top zone */}
 
 
-        {/* Week/Day label for real activities + recap label */}
+        {/* Week/Day label + Share button row */}
         {currentGroup && currentActivity && (
-          <div className="z-40 text-center shrink-0" style={{ marginBottom: '2px' }}>
-            {currentActivity.dayNumber >= 1001 ? (
-              <span className="text-white/50 text-xs font-medium">
-                Week {currentActivity.dayNumber - 1000} Recap
-              </span>
-            ) : currentActivity.dayNumber >= 1 && currentActivity.dayNumber <= 12 ? (
-              <span className="text-white/50 text-xs font-medium">
-                Week {Math.ceil(currentActivity.dayNumber / 3)} • Day {((currentActivity.dayNumber - 1) % 3) + 1}
-              </span>
-            ) : null}
+          <div className="z-40 flex items-center justify-between px-4 shrink-0" style={{ marginBottom: '2px' }}>
+            <div>
+              {currentActivity.dayNumber >= 1001 ? (
+                <span className="text-white/50 text-xs font-medium">
+                  Week {currentActivity.dayNumber - 1000} Recap
+                </span>
+              ) : currentActivity.dayNumber >= 1 && currentActivity.dayNumber <= 12 ? (
+                <span className="text-white/50 text-xs font-medium">
+                  Week {Math.ceil(currentActivity.dayNumber / 3)} • Day {((currentActivity.dayNumber - 1) % 3) + 1}
+                </span>
+              ) : null}
+            </div>
+            {isOwnStory && !isWeekRecapStory && !isLogActivityCard && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleShareStory();
+                }}
+                className="shrink-0 active:scale-95 transition-transform"
+                style={{
+                  width: 32, height: 32, borderRadius: 16,
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.06)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <Share2 className="w-[14px] h-[14px] text-white/60" strokeWidth={1.5} />
+              </button>
+            )}
           </div>
         )}
 
