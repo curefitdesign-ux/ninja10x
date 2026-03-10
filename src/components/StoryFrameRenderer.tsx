@@ -5,21 +5,24 @@
  *
  * IMPORTANT: Props passed to each frame component MUST match exactly what Preview.tsx passes.
  * Preview passes raw duration/pr strings (no formatting), and uses getActivityConfig for labels.
+ *
+ * Frame components are lazy-loaded to reduce initial bundle size.
  */
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense, memo } from 'react';
 import { getActivityConfig } from '@/lib/activity-context';
 
-import ShakyFrame from '@/components/frames/ShakyFrame';
-import VogueFrame from '@/components/frames/VogueFrame';
-import JournalFrame from '@/components/frames/JournalFrame';
-import Journal2Frame from '@/components/frames/Journal2Frame';
-import FitnessFrame from '@/components/frames/FitnessFrame';
-import TicketFrame from '@/components/frames/TicketFrame';
-import TokenFrame from '@/components/frames/TokenFrame';
-import HolographicFrame from '@/components/frames/HolographicFrame';
-import ScrapbookFrame from '@/components/frames/ScrapbookFrame';
-import ArcadeFrame from '@/components/frames/ArcadeFrame';
-import BoldFrame from '@/components/frames/BoldFrame';
+// Lazy-load frame components — they are only needed when viewing stories
+const ShakyFrame = lazy(() => import('@/components/frames/ShakyFrame'));
+const VogueFrame = lazy(() => import('@/components/frames/VogueFrame'));
+const JournalFrame = lazy(() => import('@/components/frames/JournalFrame'));
+const Journal2Frame = lazy(() => import('@/components/frames/Journal2Frame'));
+const FitnessFrame = lazy(() => import('@/components/frames/FitnessFrame'));
+const TicketFrame = lazy(() => import('@/components/frames/TicketFrame'));
+const TokenFrame = lazy(() => import('@/components/frames/TokenFrame'));
+const HolographicFrame = lazy(() => import('@/components/frames/HolographicFrame'));
+const ScrapbookFrame = lazy(() => import('@/components/frames/ScrapbookFrame'));
+const ArcadeFrame = lazy(() => import('@/components/frames/ArcadeFrame'));
+const BoldFrame = lazy(() => import('@/components/frames/BoldFrame'));
 
 interface StoryFrameRendererProps {
   imageUrl: string;         // originalUrl — raw media
@@ -32,7 +35,7 @@ interface StoryFrameRendererProps {
   onLoad?: () => void;
 }
 
-export default function StoryFrameRenderer({
+function StoryFrameRendererInner({
   imageUrl,
   isVideo,
   activity = '',
@@ -75,7 +78,7 @@ export default function StoryFrameRenderer({
       className="absolute inset-0 flex items-center justify-center"
       style={{ background: 'transparent' }}
     >
-      <>
+      <Suspense fallback={<div className="absolute inset-0" />}>
         {(() => {
           switch ((frame || 'shaky').toLowerCase()) {
             case 'shaky':       return <ShakyFrame {...sharedProps} />;
@@ -107,7 +110,9 @@ export default function StoryFrameRenderer({
             default:            return <ShakyFrame {...sharedProps} />;
           }
         })()}
-      </>
+      </Suspense>
     </div>
   );
 }
+
+export default memo(StoryFrameRendererInner);

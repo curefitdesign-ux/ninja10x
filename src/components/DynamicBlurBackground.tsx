@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 
 interface DynamicBlurBackgroundProps {
   imageUrl: string;
   children: React.ReactNode;
 }
 
-export default function DynamicBlurBackground({ imageUrl, children }: DynamicBlurBackgroundProps) {
+const DynamicBlurBackground = memo(function DynamicBlurBackground({ imageUrl, children }: DynamicBlurBackgroundProps) {
   const [layers, setLayers] = useState<[string, string]>([imageUrl, imageUrl]);
   const [frontLayer, setFrontLayer] = useState<'a' | 'b'>('a');
   const prevUrlRef = useRef(imageUrl);
@@ -74,4 +74,6 @@ export default function DynamicBlurBackground({ imageUrl, children }: DynamicBlu
       {children}
     </div>
   );
-}
+});
+
+export default DynamicBlurBackground;
