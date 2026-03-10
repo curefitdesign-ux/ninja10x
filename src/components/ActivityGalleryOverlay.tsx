@@ -368,79 +368,39 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 height: 56,
               }}
             >
-              {/* Combined counter + week/day indicator */}
-              <div className="flex items-center gap-2.5">
-                <div
-                  className="px-3 py-1.5 rounded-full text-white text-xs font-semibold tracking-wide"
-                  style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}
-                >
-                  Week {week}
-                </div>
-                {/* Day dots for the week */}
-                <div className="flex items-center gap-1.5">
-                  {[1, 2, 3].map(d => (
-                    <div
-                      key={d}
-                      className="rounded-full"
-                      style={{
-                        width: d === dayInWeek ? 20 : 7,
-                        height: 7,
-                        borderRadius: d === dayInWeek ? 4 : 999,
-                        background: d <= dayInWeek
-                          ? 'rgba(255,255,255,0.85)'
-                          : 'rgba(255,255,255,0.2)',
-                        transition: 'all 0.3s ease',
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Progress segments */}
-              <div className="flex-1 flex items-center gap-1 mx-3">
-                {activities.map((a, i) => {
-                  const isPlaceholder = !!a.isPlaceholder;
-                  const isCurrent = i === currentIndex;
-                  const isPast = i < currentIndex;
-
-                  if (isPlaceholder) {
-                    return (
-                      <div
-                        key={a.id}
-                        className="flex items-center justify-center"
-                        style={{ width: 8 }}
-                      >
-                        <div
-                          className="rounded-full"
-                          style={{
-                            width: isCurrent ? 8 : 5,
-                            height: isCurrent ? 8 : 5,
-                            background: isCurrent ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.2)',
-                            transition: 'all 0.3s ease',
-                          }}
-                        />
-                      </div>
-                    );
-                  }
-
+              {/* 12-pill progress bar: 4 groups of 3, separated by gaps */}
+              <div className="flex items-center gap-0.5 flex-1">
+                {Array.from({ length: 12 }, (_, i) => {
+                  const dayNum = i + 1;
+                  const isCurrent = dayNum === current.dayNumber;
+                  const isCompleted = activities.some(a => !a.isPlaceholder && a.dayNumber === dayNum);
+                  const isPastCurrentIndex = (() => {
+                    const actIdx = activities.findIndex(a => a.dayNumber === dayNum);
+                    return actIdx >= 0 && actIdx < currentIndex;
+                  })();
+                  
+                  // Add gap between week groups (after pill 3, 6, 9)
+                  const groupGap = (i > 0 && i % 3 === 0) ? 'ml-2' : '';
+                  
                   return (
                     <div
-                      key={a.id}
-                      className="flex-1 h-[3px] rounded-full overflow-hidden"
-                      style={{ background: 'rgba(255,255,255,0.15)' }}
+                      key={dayNum}
+                      className={`flex-1 h-[3px] rounded-full overflow-hidden ${groupGap}`}
+                      style={{ background: 'rgba(255,255,255,0.1)' }}
                     >
-                      <div
-                        key={isCurrent ? `${a.id}-${progressRunKey}` : `${a.id}-static`}
-                        className="h-full rounded-full"
-                        style={{
-                          background: (isPast || isCurrent) ? 'rgba(255,255,255,0.9)' : 'transparent',
-                          width: isPast ? '100%'
-                            : isCurrent ? `${autoAdvanceProgress * 100}%` : '0%',
-                          transition: isCurrent
-                            ? (autoAdvanceProgress > 0 ? `width ${AUTO_ADVANCE_MS}ms linear` : 'none')
-                            : 'none',
-                        }}
-                      />
+                      {isCurrent ? (
+                        <div
+                          key={`pill-${dayNum}-${progressRunKey}`}
+                          className="h-full rounded-full"
+                          style={{
+                            background: 'rgba(255,255,255,0.5)',
+                            width: `${autoAdvanceProgress * 100}%`,
+                            transition: autoAdvanceProgress > 0 ? `width ${AUTO_ADVANCE_MS}ms linear` : 'none',
+                          }}
+                        />
+                      ) : (isPastCurrentIndex || isCompleted) ? (
+                        <div className="h-full w-full rounded-full" style={{ background: 'rgba(255,255,255,0.9)' }} />
+                      ) : null}
                     </div>
                   );
                 })}
