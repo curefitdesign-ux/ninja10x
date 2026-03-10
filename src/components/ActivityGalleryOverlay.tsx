@@ -99,6 +99,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [showSendReactionSheet, setShowSendReactionSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
+  const [cardReactId, setCardReactId] = useState<string | null>(null);
 
   const [localReactions, setLocalReactions] = useState<Record<string, {
     total: number;
@@ -479,13 +480,22 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
                             </div>
                           )}
-                          {/* Reactions */}
-                          {(() => {
-                            const ar = localReactions[act.id];
-                            const types = ar ? Object.entries(ar.reactions).filter(([, r]) => r.count > 0).map(([t]) => t as ReactionType) : [];
-                            if (!types.length) return null;
-                            return <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 25, overflow: 'visible' }}><Floating3DEmojis reactions={types} newReaction={null} isPaused={isPaused} /></div>;
-                          })()}
+                          {/* React button per card */}
+                          {!isOwnProfile && (
+                            <button
+                              className="absolute flex items-center gap-1 active:scale-90 transition-transform"
+                              style={{
+                                top: -10, right: -10, zIndex: 30,
+                                background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(12px)',
+                                borderRadius: 20, padding: '4px 10px',
+                                border: '1px solid rgba(255,255,255,0.15)',
+                              }}
+                              onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}
+                            >
+                              <span style={{ fontSize: 14 }}>🔥</span>
+                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>React</span>
+                            </button>
+                          )}
                           {/* Like count badge */}
                           {(() => {
                             const ar = localReactions[act.id];
