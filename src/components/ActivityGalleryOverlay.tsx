@@ -95,11 +95,11 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const isPaused = showReactsSheet || showEditSheet;
 
   // Generate dynamic user description from activity data
-  const userDescription = useMemo((): string[] => {
-    if (!userProfile || activities.length === 0) return [];
+  const userDescription = useMemo((): { headline: string; details: string } | null => {
+    if (!userProfile || activities.length === 0) return null;
     
     const realActivities = activities.filter(a => !a.isPlaceholder && a.dayNumber < 1001);
-    if (realActivities.length === 0) return [];
+    if (realActivities.length === 0) return null;
     
     // Count activities by type
     const activityCounts: Record<string, number> = {};
@@ -108,8 +108,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     for (const a of realActivities) {
       const type = a.activity || 'Workout';
       activityCounts[type] = (activityCounts[type] || 0) + 1;
-      
-      // Parse duration (e.g., "45 min", "1h 30m")
       if (a.duration) {
         const minMatch = a.duration.match(/(\d+)\s*min/i);
         const hrMatch = a.duration.match(/(\d+)\s*h/i);
@@ -118,47 +116,43 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
       }
     }
     
-    // Top activities sorted by count
     const topActivities = Object.entries(activityCounts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 3);
+      .slice(0, 2);
     
-    // Start date
-    const startDate = userProfile.startDate 
-      ? new Date(userProfile.startDate)
-      : null;
-    
+    const startDate = userProfile.startDate ? new Date(userProfile.startDate) : null;
     const daysSinceStart = startDate 
       ? Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24))
       : 0;
+
+    // Fun headline based on progress
+    const count = realActivities.length;
+    let headline = '';
+    if (count >= 12) headline = '🏆 Journey complete!';
+    else if (count >= 9) headline = '🔥 Almost there — final stretch!';
+    else if (count >= 6) headline = '💪 Halfway beast mode';
+    else if (count >= 3) headline = '⚡ Building momentum';
+    else if (count >= 1) headline = '🚀 Just getting started';
     
-    // Current week
-    const currentWeek = Math.ceil(realActivities.length / 3);
-    
-    // Build description parts
-    const parts: string[] = [];
-    
-    if (daysSinceStart > 0) {
-      parts.push(`${daysSinceStart} day${daysSinceStart !== 1 ? 's' : ''} into the journey`);
-    }
-    
-    parts.push(`Week ${currentWeek} • ${realActivities.length}/12 activities logged`);
+    // Crisp detail line
+    const detailParts: string[] = [];
+    detailParts.push(`${count}/12 logged`);
     
     if (topActivities.length > 0) {
-      const activityStr = topActivities.map(([name, count]) => 
-        `${name} (${count}x)`
-      ).join(', ');
-      parts.push(activityStr);
+      detailParts.push(topActivities.map(([name, c]) => `${name} ×${c}`).join(', '));
     }
     
     if (totalDurationMins > 0) {
       const hrs = Math.floor(totalDurationMins / 60);
       const mins = totalDurationMins % 60;
-      const durStr = hrs > 0 ? `${hrs}h ${mins}m` : `${mins} min`;
-      parts.push(`${durStr} total`);
+      detailParts.push(hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`);
     }
     
-    return parts;
+    if (daysSinceStart > 0) {
+      detailParts.push(`Day ${daysSinceStart}`);
+    }
+    
+    return { headline, details: detailParts.join(' · ') };
   }, [activities, userProfile]);
 
   // Media loading
@@ -415,16 +409,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-bold text-sm truncate">{userProfile.displayName}</p>
-                    {userDescription.length > 0 && (
+                    {userDescription && (
                       <div className="mt-0.5">
-                        <p className="text-white/50 text-[11px] leading-tight">
-                          {userDescription[0]}
+                        <p className="text-white/70 text-[11px] leading-tight font-medium">
+                          {userDescription.headline}
                         </p>
-                        {userDescription.length > 1 && (
-                          <p className="text-white/40 text-[11px] leading-tight mt-0.5">
-                            {userDescription.slice(1).join(' • ')}
-                          </p>
-                        )}
+                        <p className="text-white/40 text-[11px] leading-tight mt-0.5">
+                          {userDescription.details}
+                        </p>
                       </div>
                     )}
                   </div>
