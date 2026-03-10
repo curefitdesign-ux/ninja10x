@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronLeft, ChevronUp, Pencil, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause } from 'lucide-react';
+import { X, ChevronLeft, ChevronUp, Pencil, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, History } from 'lucide-react';
 import PullToRefresh from '@/components/PullToRefresh';
 import ProfileMenu from '@/components/ProfileMenu';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
@@ -20,6 +20,7 @@ import StoryEmojiRain from '@/components/StoryEmojiRain';
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
 import SendReactionSheet from '@/components/SendReactionSheet';
 import ProfileAvatar from '@/components/ProfileAvatar';
+import ActivityGalleryOverlay, { GalleryActivity } from '@/components/ActivityGalleryOverlay';
 
 import MakePublicSheet from '@/components/MakePublicSheet';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
@@ -141,6 +142,7 @@ const Reel = () => {
   const [isAddingToStories, setIsAddingToStories] = useState(false);
   const [showDeleteRecapConfirm, setShowDeleteRecapConfirm] = useState(false);
   const [recapPlaying, setRecapPlaying] = useState(true);
+  const [showHistoryGallery, setShowHistoryGallery] = useState(false);
 
   // Story nudge animation for inactivity hint
   const { triggerShake, shakeAnimation, shakeTransition } = useStoryNudgeAnimation();
@@ -2102,6 +2104,31 @@ const Reel = () => {
                         <Pencil className="w-[18px] h-[18px] text-white/70" strokeWidth={1.5} />
                       </button>
                     )}
+                    {/* History button — view all past activities of this user */}
+                    {!isLogActivityCard && !isWeekRecapStory && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowHistoryGallery(true);
+                        }}
+                        className="shrink-0 active:scale-95 transition-transform"
+                        style={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: 22,
+                          background: 'rgba(255, 255, 255, 0.08)',
+                          backdropFilter: 'blur(40px) saturate(180%)',
+                          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                          border: '1px solid rgba(255, 255, 255, 0.06)',
+                          boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <History className="w-[18px] h-[18px] text-white/70" strokeWidth={1.5} />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2171,6 +2198,41 @@ const Reel = () => {
           portalContainer,
         )}
 
+
+      {/* History Gallery Overlay — shows all past activities of the currently viewed user */}
+      {showHistoryGallery && currentGroup && (() => {
+        // Get ALL activities for this user from userGroups (not filtered)
+        const fullGroup = userGroups.find(g => g.userId === currentGroup.userId);
+        const allUserActivities: GalleryActivity[] = (fullGroup?.activities || currentGroup.activities)
+          .filter(a => a.dayNumber < 1001 && a.id !== 'log-activity')
+          .sort((a, b) => b.dayNumber - a.dayNumber)
+          .map(a => ({
+            id: a.id,
+            storageUrl: a.storageUrl,
+            originalUrl: a.originalUrl || undefined,
+            isVideo: a.isVideo || false,
+            activity: a.activity || undefined,
+            frame: a.frame || undefined,
+            duration: a.duration || undefined,
+            pr: a.pr || undefined,
+            dayNumber: a.dayNumber,
+            reactionCount: localReactions[a.id]?.total || a.reactionCount || 0,
+            reactions: localReactions[a.id]?.reactions || a.reactions || {},
+            reactorProfiles: localReactions[a.id]?.reactorProfiles || a.reactorProfiles || [],
+          }));
+        
+        // Find current activity index in the full list
+        const currentIdx = allUserActivities.findIndex(a => a.id === currentActivity?.id);
+        
+        return (
+          <ActivityGalleryOverlay
+            isOpen={true}
+            onClose={() => setShowHistoryGallery(false)}
+            activities={allUserActivities}
+            initialIndex={currentIdx >= 0 ? currentIdx : 0}
+          />
+        );
+      })()}
 
       {/* Edit/Replace Sheet */}
       <MediaSourceSheet
