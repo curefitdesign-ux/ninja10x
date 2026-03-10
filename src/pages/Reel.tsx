@@ -1722,8 +1722,8 @@ const Reel = () => {
                 || activities[0];
 
             const media = (activity?.originalUrl || activity?.storageUrl || group.avatarUrl || '').trim();
-            const isOwnCard = user && group.userId === user.id;
-            const isLockedCard = !isOwnCard && !profile?.stories_public;
+            const isOwnCard = !!user && group.userId === user.id;
+            const isLockedCard = !isOwnCard && !viewerCanSeeCommunity;
             const hasFrame = activity?.frame && activity.frame !== 'none';
 
             if (!isCenter) {
