@@ -1437,6 +1437,9 @@ const Reel = () => {
                         onClick={() => {
                           const targetIdx = effectiveUserGroups.findIndex(g => g.userId === group.userId);
                           if (targetIdx >= 0) {
+                            // Set ref to TARGET user before triggering reorder
+                            navigatingRef.current = true;
+                            currentUserIdRef.current = group.userId;
                             // Mark current user as viewed when tapping another avatar
                             const prevGroup = effectiveUserGroups[currentUserIndex];
                             if (prevGroup && prevGroup.userId !== group.userId) {
