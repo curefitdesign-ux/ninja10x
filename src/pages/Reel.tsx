@@ -1978,7 +1978,7 @@ const Reel = () => {
                     onClick={() => { isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
                     className="relative overflow-hidden active:scale-[0.97] transition-transform"
                     style={{
-                      minWidth: currentReactions.total > 0 ? 180 : 160,
+                      minWidth: currentReactions.total > 0 ? 175 : 155,
                       height: 44,
                       borderRadius: 22,
                       background: 'rgba(255, 255, 255, 0.08)',
@@ -2103,22 +2103,21 @@ const Reel = () => {
                           e.stopPropagation();
                           setShowHistoryGallery(true);
                         }}
-                        className="shrink-0 active:scale-95 transition-transform"
+                        className="shrink-0 active:scale-95 transition-transform flex items-center gap-1.5"
                         style={{
-                          width: 44,
                           height: 44,
                           borderRadius: 22,
+                          paddingLeft: 14,
+                          paddingRight: 16,
                           background: 'rgba(255, 255, 255, 0.08)',
                           backdropFilter: 'blur(40px) saturate(180%)',
                           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
                           border: '1px solid rgba(255, 255, 255, 0.06)',
                           boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
                         }}
                       >
-                        <History className="w-[18px] h-[18px] text-white/70" strokeWidth={1.5} />
+                        <History className="w-[16px] h-[16px] text-white/60" strokeWidth={1.5} />
+                        <span className="text-white/60 text-xs font-medium whitespace-nowrap">View their Progress</span>
                       </button>
                     )}
                   </div>
