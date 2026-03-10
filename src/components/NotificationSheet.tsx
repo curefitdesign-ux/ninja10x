@@ -411,7 +411,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                             <span className="font-semibold">{notif.reactorName}</span>
                             <span className="text-white/60">
                               {notif.isNudge 
-                                ? ' nudged you to keep going! 💪' 
+                                ? ` nudged you${(notif.nudgeCount || 0) > 1 ? ` (${notif.nudgeCount}x)` : ''} to keep going! 💪` 
                                 : ` ${REACTION_VERBS[notif.reactionType] || 'reacted to'} your ${notif.activityType || 'activity'}`}
                             </span>
                           </p>
