@@ -1888,7 +1888,7 @@ const Reel = () => {
                                         WebkitTextFillColor: 'transparent',
                                       }}
                                     >
-                                      Ready to<br/>crush it today?
+                                      {profile?.display_name?.split(' ')[0] || 'Hey'}, ready to<br/>crush it today?
                                     </p>
                                   </motion.div>
 
