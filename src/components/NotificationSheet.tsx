@@ -137,6 +137,12 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
 
         const profileMap = new Map(profiles?.map(p => [p.user_id, { name: p.display_name, avatar: p.avatar_url }]) || []);
 
+        // Count total nudges per sender
+        const nudgeCountMap = new Map<string, number>();
+        nudges.forEach(n => {
+          nudgeCountMap.set(n.from_user_id, (nudgeCountMap.get(n.from_user_id) || 0) + 1);
+        });
+
         const nudgeNotifs: Notification[] = nudges.map(n => ({
           id: `nudge-${n.id}`,
           activityId: '',
@@ -145,6 +151,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
           reactionType: 'nudge',
           timestamp: new Date(n.created_at),
           isNudge: true,
+          nudgeCount: nudgeCountMap.get(n.from_user_id) || 1,
         }));
 
         setNotifications(prev => {
