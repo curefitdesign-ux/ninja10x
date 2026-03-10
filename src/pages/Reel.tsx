@@ -670,9 +670,10 @@ const Reel = () => {
     setLocalReactions(prev => {
       const existing = prev[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS }, reactorProfiles: [] };
       const newReactions = { ...existing.reactions };
+      const currentReaction = newReactions[type] || { type, count: 0, userReacted: false };
       newReactions[type] = {
-        ...newReactions[type],
-        count: newReactions[type].count + 1,
+        ...currentReaction,
+        count: currentReaction.count + 1,
         userReacted: true,
       };
       // Add current user to reactor profiles if not already there
