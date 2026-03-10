@@ -33,7 +33,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
       .then(({ count }) => setActivityCount(count || 0));
   }, [user]);
 
-  const hiddenPaths = ["/auth", "/profile-setup", "/avatar-crop", "/camera", "/preview", "/gallery", "/reel-generation", "/progress"];
+  const hiddenPaths = ["/auth", "/profile-setup", "/avatar-crop", "/camera", "/preview", "/gallery", "/reel-generation"];
   const shouldHide = hidden || hiddenPaths.some(path => location.pathname.startsWith(path));
 
   if (shouldHide) return null;
