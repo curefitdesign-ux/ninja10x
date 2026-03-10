@@ -1684,28 +1684,37 @@ const Reel = () => {
             paddingBottom: 'calc(max(env(safe-area-inset-bottom, 6px), 6px) + 80px)',
           }}
         >
-        {/* Reel cards fill the available middle container space */}
-        <div className="relative min-h-0 flex-1 flex items-center justify-center overflow-hidden">
-          <motion.div
-            className="absolute inset-0 z-[60]"
-            style={{ touchAction: 'pan-y' }}
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.08}
-            dragMomentum={false}
-            onDrag={handleHorizontalDrag}
-            onDragStart={() => setIsCarouselDragging(true)}
-            onDragEnd={handleHorizontalDragEnd}
-            onClick={handleTap}
-          />
-
-          {([-1, 0, 1] as const).map((relativeIndex) => {
-            const userIndex = (currentUserIndex + relativeIndex + effectiveUserGroups.length) % effectiveUserGroups.length;
-            const group = effectiveUserGroups[userIndex];
-            if (!group) return null;
-
+        {/* Reel cards — simple horizontal scroll with snap */}
+        <div
+          ref={scrollContainerRef}
+          className="relative min-h-0 flex-1 flex overflow-x-auto overflow-y-hidden scrollbar-hide"
+          style={{
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+          onScroll={(e) => {
+            const container = e.currentTarget;
+            const cardWidth = container.offsetWidth;
+            if (cardWidth <= 0) return;
+            const newIndex = Math.round(container.scrollLeft / cardWidth);
+            if (newIndex !== currentUserIndex && newIndex >= 0 && newIndex < effectiveUserGroups.length) {
+              navigatingRef.current = true;
+              const targetGroup = effectiveUserGroups[newIndex];
+              if (targetGroup) currentUserIdRef.current = targetGroup.userId;
+              const prevGroup = effectiveUserGroups[currentUserIndex];
+              if (prevGroup) setViewedUsers(prev => new Set(prev).add(prevGroup.userId));
+              setCurrentUserIndex(newIndex);
+              setCurrentActivityIndex(0);
+            }
+          }}
+          onClick={handleTap}
+        >
+          {effectiveUserGroups.map((group, idx) => {
+            const isCenter = idx === currentUserIndex;
             const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
-            const activity = relativeIndex === 0
+            const activity = isCenter
               ? currentActivity
               : activities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
                 || activities.find(a => !!(a.originalUrl || a.storageUrl))
@@ -1715,40 +1724,30 @@ const Reel = () => {
             const isOwnCard = user && group.userId === user.id;
             const isLockedCard = !isOwnCard && !profile?.stories_public;
             const hasFrame = activity?.frame && activity.frame !== 'none';
-            const interpolatedIndex = relativeIndex + dragProgress;
-            const distanceFromCenter = Math.abs(interpolatedIndex);
-            const scale = distanceFromCenter <= 1
-              ? 1 - distanceFromCenter * (1 - SIDE_CARD_SCALE)
-              : SIDE_CARD_SCALE - Math.min(distanceFromCenter - 1, 1) * (SIDE_CARD_SCALE - FAR_CARD_SCALE);
-            const opacity = distanceFromCenter <= 1 ? 1 - distanceFromCenter * 0.45 : 0.35;
-            const brightness = distanceFromCenter <= 1 ? 1 - distanceFromCenter * 0.18 : 0.72;
-            const x = interpolatedIndex * CARD_STEP;
-            const zIndex = relativeIndex === 0 ? 30 : 20 - Math.round(distanceFromCenter * 5);
-            const transition = isCarouselDragging
-              ? { duration: 0 }
-              : { type: 'spring' as const, stiffness: 340, damping: 32, mass: 0.8 };
 
-            if (relativeIndex !== 0) {
+            if (!isCenter) {
               return (
-                <motion.div
-                  key={`peek-${group.userId}-${relativeIndex}`}
-                  className="absolute pointer-events-none"
+                <div
+                  key={`card-${group.userId}`}
+                  className="flex-shrink-0 flex items-center justify-center"
                   style={{
-                    width: 'calc(80% - 20px)',
-                    maxWidth: 340,
-                    aspectRatio: '9/16',
-                    zIndex,
+                    width: '100%',
+                    height: '100%',
+                    scrollSnapAlign: 'center',
                   }}
-                  animate={{ x, scale, opacity }}
-                  transition={transition}
                 >
                   <div
-                    className="w-full h-full overflow-hidden"
+                    className="overflow-hidden"
                     style={{
+                      width: 'calc(80% - 20px)',
+                      maxWidth: 340,
+                      aspectRatio: '9/16',
+                      transform: 'scale(0.85)',
+                      opacity: 0.55,
                       background: 'rgba(255,255,255,0.06)',
                       border: '1px solid rgba(255,255,255,0.12)',
                       boxShadow: '0 8px 32px rgba(0,0,0,0.22)',
-                      filter: `${isLockedCard ? 'blur(16px) ' : ''}brightness(${brightness})`,
+                      filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
                     }}
                   >
                     {hasFrame && activity ? (
@@ -1764,23 +1763,25 @@ const Reel = () => {
                     ) : media ? (
                       <img
                         src={media}
-                        alt="Adjacent user"
+                        alt="User story"
                         className="w-full h-full object-cover"
                         loading="eager"
                       />
                     ) : null}
                   </div>
-                </motion.div>
+                </div>
               );
             }
 
             return (
-              <motion.div
-                key={`center-${currentGroup?.userId}-${currentUserIndex}`}
-                className="absolute inset-0 flex items-center justify-center"
-                style={{ zIndex }}
-                animate={{ x, scale, opacity }}
-                transition={transition}
+              <div
+                key={`card-${group.userId}`}
+                className="flex-shrink-0 flex items-center justify-center relative"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  scrollSnapAlign: 'center',
+                }}
               >
                 {/* Full templated image/video - with lock overlay for non-public users */}
                 {(() => {
@@ -1796,8 +1797,7 @@ const Reel = () => {
                       }}
                     >
                       {/* Card — 9:16 aspect ratio, constrained to available space */}
-                      <motion.div
-                        layoutId={sourceUserId ? `story-card-${currentGroup?.userId}` : undefined}
+                      <div
                         className="relative overflow-hidden"
                         style={{
                           aspectRatio: '9/16',
@@ -1808,7 +1808,6 @@ const Reel = () => {
                           background: 'transparent',
                           marginTop: '-10px',
                         }}
-                        transition={{ type: 'spring', stiffness: 280, damping: 30, duration: 0.5 }}
                       >
                     {/* Progress bar removed — timing indicated via avatar ring */}
                     <div
