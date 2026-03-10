@@ -314,20 +314,12 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             className="relative flex flex-col h-full"
             style={{
               paddingTop: 'calc(env(safe-area-inset-top) + 16px)',
-              paddingBottom: 'env(safe-area-inset-bottom)',
+              paddingBottom: 'calc(env(safe-area-inset-bottom) + 80px)',
             }}
           >
-            {/* Header - back arrow left, title center */}
+            {/* Header — back arrow removed, bottom nav handles navigation */}
             <div className="flex items-center justify-between px-4 pb-4 flex-shrink-0">
-              <button
-                onClick={onClose}
-                className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{
-                  background: 'rgba(255,255,255,0.08)',
-                }}
-              >
-                <ChevronLeft className="w-5 h-5 text-white/80" />
-              </button>
+              <div style={{ width: 40, height: 40 }} />
               
               <h2 className="text-white text-lg font-semibold">Reactions</h2>
               
