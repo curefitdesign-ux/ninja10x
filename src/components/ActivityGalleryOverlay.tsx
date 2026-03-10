@@ -284,7 +284,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     });
 
     try {
-      await sendReaction(current.id, user.id, type);
+      await sendReaction(current.id, type);
     } catch (err) {
       console.error('Reaction failed', err);
     }
