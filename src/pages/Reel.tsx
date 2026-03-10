@@ -609,14 +609,14 @@ const Reel = () => {
     
     if (Math.abs(offset.x) > 40 || Math.abs(velocity.x) > 300) {
       if (offset.x < 0) {
-        // Swiped left — cards move left, next user slides in from right
+        // Swiped left — center exits left, next enters from right
         setSwipeDirection('left');
-        setSlideDirection('right');
+        setSlideDirection('left');
         goNextUser();
       } else {
-        // Swiped right — cards move right, prev user slides in from left
+        // Swiped right — center exits right, prev enters from left
         setSwipeDirection('right');
-        setSlideDirection('left');
+        setSlideDirection('right');
         goPrevUser();
       }
     }
