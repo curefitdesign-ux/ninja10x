@@ -455,6 +455,22 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                             <img src={deskBellImg} alt="Nudge" className="w-9 h-9 object-contain" />
                             <span className="text-white/30 text-[10px]">{formatRelativeTime(notif.timestamp)}</span>
                           </div>
+                        ) : notif.isNudge ? (
+                          <div className="relative flex-shrink-0">
+                            <img src={deskBellImg} alt="Nudge" className="w-9 h-9 object-contain" />
+                            {(notif.nudgeCount || 0) > 1 && (
+                              <div
+                                className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center"
+                                style={{
+                                  background: '#EF4444',
+                                  border: '1.5px solid rgba(0,0,0,0.4)',
+                                  boxShadow: '0 0 6px rgba(239, 68, 68, 0.5)',
+                                }}
+                              >
+                                <span className="text-white text-[9px] font-bold leading-none">{notif.nudgeCount}</span>
+                              </div>
+                            )}
+                          </div>
                         ) : notif.activityImageUrl ? (
                           <div className="relative flex-shrink-0">
                             <div 
