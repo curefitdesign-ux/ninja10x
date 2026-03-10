@@ -560,7 +560,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     if (user && targetUserId) {
                       const { error } = await supabase.from('nudges').insert({ from_user_id: user.id, to_user_id: targetUserId });
                       const name = userProfile?.displayName?.split(' ')[0] || 'them';
-                      if (!error) toast(`🔔 Nudge sent to ${name}!`, { description: `Keep pushing, ${name} will love the motivation!` });
+                      if (!error) toast.success(`🔔 Nudge sent to ${name}!`, { description: `Keep pushing, ${name} will love the motivation!`, position: 'top-center', style: { marginTop: 'env(safe-area-inset-top, 44px)' } });
                       else toast.error('Could not send nudge');
                     }
                   }}
