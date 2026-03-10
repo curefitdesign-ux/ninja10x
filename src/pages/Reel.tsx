@@ -1836,16 +1836,14 @@ const Reel = () => {
                                     transition={{ delay: 0.5, duration: 0.8, ease: 'easeOut' }}
                                   >
                                     <p 
-                                      className="text-2xl font-semibold leading-relaxed"
+                                      className="text-[28px] font-bold leading-tight"
                                       style={{
-                                        background: 'linear-gradient(135deg, hsla(260, 80%, 72%, 1), hsla(280, 70%, 65%, 1), hsla(240, 70%, 72%, 1))',
-                                        backgroundSize: '200% 200%',
+                                        background: 'linear-gradient(180deg, hsla(255, 60%, 75%, 1) 0%, hsla(260, 50%, 55%, 1) 100%)',
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent',
-                                        animation: 'gradientShift 4s ease infinite',
                                       }}
                                     >
-                                      Ready to crush it today?
+                                      Ready to<br/>crush it today?
                                     </p>
                                   </motion.div>
 
