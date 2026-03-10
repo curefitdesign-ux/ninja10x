@@ -561,20 +561,11 @@ const Reel = () => {
     }
   }, [currentGroup, currentActivityIndex, profile?.stories_public, effectiveUserGroups, currentUserIndex]);
 
-  // Navigate to previous activity within current user only
-  const prevActivity = useCallback(() => {
-    if (currentActivityIndex > 0) {
-      setCurrentActivityIndex(prev => prev - 1);
-    }
-    // Don't go to previous user — user must swipe to change users
-  }, [currentActivityIndex]);
-
   // Navigate between users (horizontal swipe)
   const goNextUser = useCallback(() => {
     if (effectiveUserGroups.length === 0) return;
     const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
     const nextGroup = effectiveUserGroups[nextIdx];
-    // Set ref to TARGET user before triggering reorder
     if (nextGroup) {
       navigatingRef.current = true;
       currentUserIdRef.current = nextGroup.userId;
@@ -590,7 +581,6 @@ const Reel = () => {
     if (effectiveUserGroups.length === 0) return;
     const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
     const prevGroup = effectiveUserGroups[prevIdx];
-    // Set ref to TARGET user before triggering reorder
     if (prevGroup) {
       navigatingRef.current = true;
       currentUserIdRef.current = prevGroup.userId;
@@ -601,6 +591,15 @@ const Reel = () => {
     setCurrentActivityIndex(0);
     setCurrentUserIndex(prevIdx);
   }, [effectiveUserGroups, currentUserIndex, currentGroup]);
+
+  // Navigate to previous activity within current user, or go to previous user if at first activity
+  const prevActivity = useCallback(() => {
+    if (currentActivityIndex > 0) {
+      setCurrentActivityIndex(prev => prev - 1);
+    } else {
+      goPrevUser();
+    }
+  }, [currentActivityIndex, goPrevUser]);
 
   // Swipe gesture handling for horizontal navigation - smooth scroll feel
   const dragX = useMotionValue(0);
