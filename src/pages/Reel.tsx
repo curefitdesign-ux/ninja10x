@@ -1805,17 +1805,17 @@ const Reel = () => {
                             overflow: 'visible',
                           }}
                         >
-                          {/* Stacked dummy cards behind the main card — tap to open history */}
+                          {/* Stacked cards behind — clean liquid glass aesthetic */}
                           <AnimatePresence>
                           {showStackedCards && isCenter && (
                             <>
-                              {/* Back card (deepest) — liquid glass stacked card */}
+                              {/* Back card (deepest) */}
                               <motion.div
                                 key={`stack-back-${group.userId}`}
-                                initial={{ rotate: 0, scale: 0.86, opacity: 0, y: 106 }}
-                                animate={{ rotate: 5, scale: 0.88, opacity: 1, y: 100 }}
-                                exit={{ rotate: 0, scale: 0.86, opacity: 0, y: 106 }}
-                                transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.12 }}
+                                initial={{ scale: 0.88, opacity: 0, y: 8 }}
+                                animate={{ scale: 0.89, opacity: 0.7, y: 16 }}
+                                exit={{ scale: 0.88, opacity: 0, y: 8 }}
+                                transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.1 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setShowHistoryGallery(true);
@@ -1823,37 +1823,38 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(92% - 20px)',
+                                  height: 'calc(95% - 20px)',
                                   marginTop: '-10px',
                                   overflow: 'hidden',
                                   zIndex: 1,
-                                  borderRadius: '4px',
-                                  background: 'rgba(255,255,255,0.06)',
-                                  border: '1px solid rgba(255,255,255,0.15)',
-                                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.12), inset 0 -1px 1px rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.4)',
+                                  borderRadius: '14px',
+                                  background: 'rgba(255,255,255,0.04)',
+                                  border: '1px solid rgba(255,255,255,0.12)',
+                                  boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.1)',
                                 }}
                               >
                                 {activities.length > 2 && (() => {
                                   const stackActivity = activities[2] || activities[1];
                                   const stackMedia = (stackActivity?.originalUrl || stackActivity?.storageUrl || '').trim();
                                   return stackMedia ? (
-                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(6px) brightness(0.5) saturate(1.4)', transform: 'scale(1.1)' }} loading="lazy" />
+                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(12px) brightness(0.4) saturate(1.6)', transform: 'scale(1.15)' }} loading="lazy" />
                                   ) : (
-                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(60,40,120,0.6) 0%, rgba(20,10,50,0.8) 100%)' }} />
+                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(80,60,140,0.4) 0%, rgba(20,15,50,0.6) 100%)' }} />
                                   );
                                 })()}
-                                {/* Glass reflection overlay */}
                                 <div className="absolute inset-0 pointer-events-none" style={{
-                                  background: 'linear-gradient(160deg, rgba(255,255,255,0.10) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.03) 100%)',
+                                  background: 'linear-gradient(170deg, rgba(255,255,255,0.08) 0%, transparent 30%)',
+                                  backdropFilter: 'blur(40px) saturate(180%)',
+                                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
                                 }} />
                               </motion.div>
-                              {/* Middle card — liquid glass layer */}
+                              {/* Middle card */}
                               <motion.div
                                 key={`stack-mid-${group.userId}`}
-                                initial={{ rotate: 0, scale: 0.90, opacity: 0, y: 104 }}
-                                animate={{ rotate: -3, scale: 0.92, opacity: 1, y: 100 }}
-                                exit={{ rotate: 0, scale: 0.90, opacity: 0, y: 104 }}
-                                transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.06 }}
+                                initial={{ scale: 0.92, opacity: 0, y: 4 }}
+                                animate={{ scale: 0.93, opacity: 0.85, y: 8 }}
+                                exit={{ scale: 0.92, opacity: 0, y: 4 }}
+                                transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.05 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setShowHistoryGallery(true);
@@ -1861,45 +1862,50 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(93% - 20px)',
+                                  height: 'calc(95% - 20px)',
                                   marginTop: '-10px',
                                   overflow: 'hidden',
                                   zIndex: 2,
-                                  borderRadius: '4px',
-                                  background: 'rgba(255,255,255,0.08)',
-                                  border: '1px solid rgba(255,255,255,0.18)',
-                                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 1px rgba(255,255,255,0.05), 0 6px 24px rgba(0,0,0,0.35)',
+                                  borderRadius: '14px',
+                                  background: 'rgba(255,255,255,0.05)',
+                                  border: '1px solid rgba(255,255,255,0.16)',
+                                  boxShadow: '0 8px 30px rgba(0,0,0,0.25), inset 0 0.5px 0 rgba(255,255,255,0.14)',
                                 }}
                               >
                                 {(() => {
                                   const stackActivity = activities[1] || activities[0];
                                   const stackMedia = (stackActivity?.originalUrl || stackActivity?.storageUrl || '').trim();
                                   return stackMedia ? (
-                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(4px) brightness(0.55) saturate(1.5)', transform: 'scale(1.08)' }} loading="lazy" />
+                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(8px) brightness(0.45) saturate(1.5)', transform: 'scale(1.1)' }} loading="lazy" />
                                   ) : (
-                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(60,40,120,0.5) 0%, rgba(20,10,50,0.7) 100%)' }} />
+                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(80,60,140,0.35) 0%, rgba(20,15,50,0.55) 100%)' }} />
                                   );
                                 })()}
-                                {/* Glass reflection overlay */}
                                 <div className="absolute inset-0 pointer-events-none" style={{
-                                  background: 'linear-gradient(155deg, rgba(255,255,255,0.12) 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.04) 100%)',
+                                  background: 'linear-gradient(165deg, rgba(255,255,255,0.10) 0%, transparent 35%)',
+                                  backdropFilter: 'blur(40px) saturate(180%)',
+                                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
                                 }} />
                               </motion.div>
                             </>
                           )}
                           </AnimatePresence>
-                          {/* Card — 9:16 aspect ratio, constrained to available space */}
+                          {/* Main card — 9:16 aspect ratio */}
                           <div
                             className="relative overflow-hidden"
                             style={{
                               aspectRatio: '9/16',
                               height: 'calc(95% - 20px)',
                               maxWidth: '100%',
-                              borderRadius: isLogActivityCard ? '18px' : '0px',
+                              borderRadius: isLogActivityCard ? '18px' : (showStackedCards && isCenter ? '14px' : '0px'),
                               overflow: 'hidden',
                               background: isLogActivityCard ? '#0A0A0F' : 'transparent',
                               marginTop: '-10px',
                               zIndex: 3,
+                              ...(showStackedCards && isCenter && !isLogActivityCard ? {
+                                boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.08)',
+                                border: '1px solid rgba(255,255,255,0.10)',
+                              } : {}),
                               ...(isLogActivityCard ? {
                                 border: '1.5px solid rgba(139, 92, 246, 0.35)',
                                 boxShadow: '0 0 30px rgba(139, 92, 246, 0.15), inset 0 1px 1px rgba(255,255,255,0.05)',
