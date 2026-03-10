@@ -2457,6 +2457,7 @@ const Reel = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </DynamicBlurBackground>
     </PullToRefresh>
   );
 };
