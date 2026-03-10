@@ -18,6 +18,10 @@ import Floating3DEmojis from '@/components/Floating3DEmojis';
 import StoryEmojiRain from '@/components/StoryEmojiRain';
 import { isVideoUrl } from '@/lib/media';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+
+import fireEmoji from '@/assets/reactions/fire-3d.png';
+import clapEmoji from '@/assets/reactions/clap-3d.png';
 
 import fireEmoji from '@/assets/reactions/fire-3d.png';
 import clapEmoji from '@/assets/reactions/clap-3d.png';
