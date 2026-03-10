@@ -273,12 +273,11 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             .maybeSingle();
 
           const senderName = profile?.display_name || 'Someone';
-          const today = new Date().toDateString();
 
           setNotifications(prev => {
-            // Try to merge with existing nudge from same user today
+            // Try to merge with existing nudge from same sender (regardless of day)
             const existingIdx = prev.findIndex(
-              n => n.isNudge && n.reactorName === senderName && n.timestamp.toDateString() === today
+              n => n.isNudge && n.reactorName === senderName
             );
             if (existingIdx >= 0) {
               const updated = [...prev];
