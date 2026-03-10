@@ -1841,22 +1841,29 @@ const Reel = () => {
                                       borderRadius: '50%',
                                       background: `radial-gradient(circle, ${glowMid} 0%, transparent 60%)`,
                                       filter: 'blur(50px)',
-                                      top: '45%', left: '50%', transform: 'translate(-50%, -50%)',
+                                      top: '40%', left: '50%', transform: 'translate(-50%, -50%)',
                                     }}
                                   />
 
-                                  {/* Curo mascot peeking */}
-                                  <motion.img
-                                    src={curoPeekingImg}
-                                    alt="Curo mascot"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.05, duration: 0.5, type: 'spring', stiffness: 120 }}
+                                  {/* Curo mascot looping video */}
+                                  <motion.div
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: 0.05, duration: 0.5 }}
                                     className="z-10 mb-4"
-                                    style={{ width: 140, height: 'auto', objectFit: 'contain' }}
-                                  />
+                                    style={{ width: 160, height: 160, borderRadius: '50%', overflow: 'hidden' }}
+                                  >
+                                    <video
+                                      src="/videos/curo-peeking.mp4"
+                                      autoPlay
+                                      loop
+                                      muted
+                                      playsInline
+                                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                  </motion.div>
 
-                                  {/* Greeting */}
+                                  {/* Greeting — warm tones inspired by video */}
                                   <motion.div
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -1866,7 +1873,7 @@ const Reel = () => {
                                     <p
                                       className="text-2xl font-bold leading-tight"
                                       style={{
-                                        background: `linear-gradient(135deg, ${glowHsl}, rgba(255,255,255,0.9))`,
+                                        background: 'linear-gradient(135deg, #C4A1FF, #E8D5FF, #FFFFFF)',
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent',
                                       }}
@@ -1874,25 +1881,25 @@ const Reel = () => {
                                     />
                                   </motion.div>
 
-                                  {/* Glowing plus with pulse animation */}
+                                  {/* Glowing plus — simple zoom in/out */}
                                   <div className="relative flex items-center justify-center mb-5" style={{ width: 90, height: 90 }}>
                                     <motion.div 
                                       className="absolute inset-0 rounded-full"
                                       style={{
-                                        background: `radial-gradient(circle, ${glowMid} 0%, transparent 60%)`,
+                                        background: `radial-gradient(circle, rgba(167, 100, 255, 0.3) 0%, transparent 60%)`,
                                         filter: 'blur(20px)',
                                         transform: 'scale(3)',
                                       }}
-                                      animate={{ opacity: [0.4, 0.9, 0.4] }}
+                                      animate={{ opacity: [0.4, 0.8, 0.4] }}
                                       transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                                     />
                                     <motion.svg 
                                       width="56" height="56" viewBox="0 0 48 48" fill="none"
-                                      animate={{ scale: [1, 1.12, 1], rotate: [0, 5, -5, 0] }}
-                                      transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                                      animate={{ scale: [1, 1.15, 1] }}
+                                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                                     >
-                                      <rect x="20" y="6" width="8" height="36" rx="4" fill={glowHsl} />
-                                      <rect x="6" y="20" width="36" height="8" rx="4" fill={glowHsl} />
+                                      <rect x="20" y="6" width="8" height="36" rx="4" fill="#C4A1FF" />
+                                      <rect x="6" y="20" width="36" height="8" rx="4" fill="#C4A1FF" />
                                     </motion.svg>
                                   </div>
 
