@@ -70,7 +70,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
         className="fixed left-0 right-0 bottom-0"
         style={{
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          zIndex: 40,
+          zIndex: 9999,
         }}
       >
         <div
