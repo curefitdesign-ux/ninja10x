@@ -2239,6 +2239,7 @@ const Reel = () => {
             onClose={() => setShowHistoryGallery(false)}
             activities={allUserActivities}
             initialIndex={currentIdx >= 0 ? currentIdx : 0}
+            isOwnProfile={isOwnStory || false}
             userProfile={{
               displayName: currentGroup.displayName,
               avatarUrl: currentGroup.avatarUrl,
