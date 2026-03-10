@@ -519,7 +519,9 @@ const Reel = () => {
   const currentActivityName = currentActivity?.activity?.toLowerCase?.() ?? '';
   const isWeekRecapStory = currentActivity?.id?.startsWith('week-recap');
   const isRecapActivity = currentActivityName.includes('recap') || currentActivity?.frame === 'recap';
-  const isOwnStory = user && currentGroup?.userId === user.id;
+  const isOwnStory = !!user && currentGroup?.userId === user.id;
+  const viewerCanSeeCommunity = !!profile?.stories_public;
+  const currentGroupStoriesPublic = currentGroup?.activities?.some(activity => activity.isPublic) ?? false;
   
   // Check if activity was created within the last 24 hours
   const isWithin24Hours = currentActivity ? 
