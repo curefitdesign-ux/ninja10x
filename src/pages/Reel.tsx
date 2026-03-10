@@ -1724,7 +1724,7 @@ const Reel = () => {
                   return (
                     <CarouselItem
                       key={`card-${group.userId}`}
-                      className="pl-3 flex items-center justify-center h-full basis-[85%]"
+                      className="pl-3 flex items-center justify-center h-full basis-[75%]"
                     >
                       <div
                         className="flex items-center justify-center w-full h-full pointer-events-none"
