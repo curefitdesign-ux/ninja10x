@@ -1796,14 +1796,14 @@ const Reel = () => {
                                 <motion.div
                                   className="absolute inset-0 rounded-2xl"
                                   style={{
-                                    boxShadow: `0 0 30px 8px ${glowMid}, inset 0 0 30px 4px ${glowDim}`,
+                                    boxShadow: `inset 0 0 30px 4px ${glowDim}`,
                                     border: `1.5px solid ${glowMid}`,
                                   }}
                                   animate={{
                                     boxShadow: [
-                                      `0 0 25px 6px ${glowMid}, inset 0 0 25px 3px ${glowDim}`,
-                                      `0 0 40px 12px ${glowMid}, inset 0 0 35px 6px ${glowDim}`,
-                                      `0 0 25px 6px ${glowMid}, inset 0 0 25px 3px ${glowDim}`,
+                                      `inset 0 0 25px 3px ${glowDim}`,
+                                      `inset 0 0 40px 8px ${glowMid}`,
+                                      `inset 0 0 25px 3px ${glowDim}`,
                                     ],
                                   }}
                                   transition={{
