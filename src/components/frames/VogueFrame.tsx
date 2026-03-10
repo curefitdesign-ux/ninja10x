@@ -45,6 +45,9 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
             src={imageUrl}
             alt="Activity"
             className="absolute inset-0 w-full h-full object-cover"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
             style={{
               transform: (imagePosition.x || imagePosition.y || imageScale !== 1) ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` : `scale(${imageScale})`,
             }}
