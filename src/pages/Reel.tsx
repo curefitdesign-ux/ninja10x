@@ -1719,22 +1719,19 @@ const Reel = () => {
 
             return (
               <motion.div
-                key={`peek-3d-${offset}-${idx}`}
+                key={`peek-${offset}-${idx}`}
                 className="absolute pointer-events-none"
                 style={{
-                  transformStyle: 'preserve-3d',
                   width: 'calc(100% - 24px)',
                   maxWidth: 420,
                   aspectRatio: '9/16',
                 }}
                 animate={{
-                  x: offset * 320,
-                  scale: 0.82,
-                  rotateY: offset * -12,
+                  x: offset * 300,
+                  scale: 0.85,
                   opacity: 0.5,
-                  z: -80,
                 }}
-                transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                transition={{ duration: 0.4, ease: 'linear' }}
               >
                 <div
                   className="w-full h-full rounded-3xl overflow-hidden"
