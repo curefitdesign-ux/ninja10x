@@ -426,17 +426,43 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                             <span className="font-semibold">{notif.reactorName}</span>
                             <span className="text-white/60">
                               {notif.isNudge 
-                                ? ` nudged you${(notif.nudgeCount || 0) > 1 ? ` (${notif.nudgeCount}x)` : ''} to keep going! 💪` 
+                                ? <>{(notif.nudgeCount || 0) > 1 ? ` nudged you ${notif.nudgeCount}x` : ' nudged you'} — time to crush it! 🔥</>
                                 : ` ${REACTION_VERBS[notif.reactionType] || 'reacted to'} your ${notif.activityType || 'activity'}`}
                             </span>
                           </p>
                           <p className="text-white/35 text-xs mt-0.5">
                             {notif.dayNumber ? `Day ${notif.dayNumber} · ` : ''}{formatRelativeTime(notif.timestamp)}
                           </p>
+                          {notif.isNudge && (
+                            <motion.button
+                              whileTap={{ scale: 0.95 }}
+                              onClick={(e) => { e.stopPropagation(); handleLogActivity(); }}
+                              className="mt-2 px-3 py-1 rounded-full text-xs font-semibold"
+                              style={{
+                                background: 'linear-gradient(135deg, #F97316, #EC4899)',
+                                color: '#fff',
+                              }}
+                            >
+                              Log Activity 💪
+                            </motion.button>
+                          )}
                         </div>
 
-                        {/* Activity thumbnail on right */}
-                        {notif.activityImageUrl ? (
+                        {/* Right side: thumbnail or bell icon for nudges */}
+                        {notif.isNudge ? (
+                          <div className="flex-shrink-0 flex flex-col items-center gap-1">
+                            <div
+                              className="w-10 h-10 rounded-full flex items-center justify-center"
+                              style={{
+                                background: 'rgba(255,255,255,0.08)',
+                                border: '1px solid rgba(255,255,255,0.12)',
+                              }}
+                            >
+                              <Bell className="w-5 h-5 text-amber-400" />
+                            </div>
+                            <span className="text-white/30 text-[10px]">{formatRelativeTime(notif.timestamp)}</span>
+                          </div>
+                        ) : notif.activityImageUrl ? (
                           <div 
                             className="w-11 h-11 rounded-[5px] overflow-hidden flex-shrink-0"
                             style={{ border: '1px solid rgba(255,255,255,0.1)' }}
