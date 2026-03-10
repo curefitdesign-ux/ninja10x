@@ -631,8 +631,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 </div>
               </motion.div>
 
-              {/* Bottom action row: reaction pill + share + delete */}
-              <div className="shrink-0 flex flex-col items-center justify-center pt-3 pb-2" style={{ minHeight: 56 }}>
+              {/* Bottom action row: reaction pill + share + nudge */}
+              <div className="shrink-0 flex flex-col items-center justify-center pt-3 pb-2 relative z-40" style={{ minHeight: 56 }}>
                 <div
                   className="w-full flex flex-col items-center"
                   style={{ transform: 'translateY(-32px)' }}
