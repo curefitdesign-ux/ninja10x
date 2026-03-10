@@ -2227,7 +2227,7 @@ const Reel = () => {
                         }}
                       >
                         <History className="w-[14px] h-[14px] text-white/60" strokeWidth={1.5} />
-                        <span className="text-white/60 text-xs font-medium">View their Progress</span>
+                        <span className="text-white/60 text-xs font-medium">View Progress</span>
                       </button>
                     )}
                   </div>
