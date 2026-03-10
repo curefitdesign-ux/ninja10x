@@ -540,7 +540,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 <button
                   onClick={async (e) => {
                     e.stopPropagation();
-                    // Play nudge bell sound
+                    // Play nudge bell sound + animate
+                    setNudgeBellAnim(true);
                     try {
                       const audio = new Audio('/sounds/nudge-bell.mp3');
                       audio.volume = 0.7;
