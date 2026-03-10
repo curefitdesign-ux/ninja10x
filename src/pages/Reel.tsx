@@ -188,7 +188,6 @@ const Reel = () => {
         };
       }
     }
-    }
     setLocalReactions(map);
     setLoading(false);
   }, []);
