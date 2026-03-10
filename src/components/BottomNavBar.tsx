@@ -12,7 +12,7 @@ import NotificationSheet from "@/components/NotificationSheet";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
-const BottomNavBar = ({ hidden = false }: { hidden?: boolean }) => {
+const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
