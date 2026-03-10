@@ -1941,7 +1941,7 @@ const Reel = () => {
                                 </div>
 
                                 {/* Content */}
-                                <div className="relative z-10 flex flex-col items-center justify-center h-full px-6" style={{ marginTop: -30 }}>
+                                <div className="relative z-10 flex flex-col items-center justify-center h-full px-6" style={{ marginTop: 0 }}>
                                   {/* Animated gradient text */}
                                   <motion.div 
                                     className="text-center mb-6"
