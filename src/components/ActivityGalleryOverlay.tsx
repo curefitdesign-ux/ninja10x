@@ -485,7 +485,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 {/* Previous card (left, rotated) */}
                 {prevActivity && !prevActivity.isPlaceholder && (
                   <motion.div
-                    className="absolute overflow-hidden"
+                    className="absolute gallery-card-fill"
                     style={{
                       width: '42%',
                       height: '85%',
@@ -521,7 +521,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 {/* Next card (right, rotated) */}
                 {nextActivity && !nextActivity.isPlaceholder && (
                   <motion.div
-                    className="absolute overflow-hidden"
+                    className="absolute gallery-card-fill"
                     style={{
                       width: '42%',
                       height: '85%',
@@ -554,15 +554,16 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   </motion.div>
                 )}
 
-                {/* Current card (center, front) — no border/padding */}
+                {/* Current card (center, front) — no padding */}
                 <motion.div
-                  className="relative overflow-hidden"
+                  className="relative gallery-card-fill"
                   style={{
                     width: '62%',
                     aspectRatio: '9/16',
                     borderRadius: 4,
                     zIndex: 10,
                     boxShadow: '0 16px 64px rgba(0,0,0,0.5)',
+                    overflow: 'hidden',
                   }}
                 >
                   <AnimatePresence mode="wait">
@@ -633,7 +634,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
             </div>
 
             {/* PROFILE SECTION — avatar overlapping cards bottom, name, description, stats */}
-            <div className="flex-1 min-h-0 flex flex-col items-center z-50 overflow-y-auto" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)', marginTop: 60 }}>
+            <div className="flex-1 min-h-0 flex flex-col items-center z-50 overflow-y-auto" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)', marginTop: 45 }}>
               {/* Avatar — above name */}
               {userProfile && (
                 <div className="shrink-0 flex justify-center">
