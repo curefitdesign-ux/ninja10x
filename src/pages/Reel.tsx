@@ -1759,8 +1759,8 @@ const Reel = () => {
             );
           })()}
 
-          {/* Next user peek card - 10% visible on right */}
-          {effectiveUserGroups.length > 1 && (() => {
+          {/* Next user peek card - 10% visible on right — hidden during user transitions */}
+          {effectiveUserGroups.length > 1 && !userTransitionFlash && (() => {
             const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
             const nextGroup = effectiveUserGroups[nextIdx];
             const nextAct = [...(nextGroup?.activities || [])].reverse().find(a => 
