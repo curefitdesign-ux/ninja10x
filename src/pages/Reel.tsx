@@ -1806,10 +1806,16 @@ const Reel = () => {
                           }}
                         >
                           {/* Stacked dummy cards behind the main card — tap to open history */}
-                          {showStackedCards && (
+                          <AnimatePresence>
+                          {showStackedCards && isCenter && (
                             <>
                               {/* Back card (deepest) */}
-                              <div
+                              <motion.div
+                                key={`stack-back-${group.userId}`}
+                                initial={{ rotate: 0, x: 0, scale: 0.92, opacity: 0 }}
+                                animate={{ rotate: 4, x: 8, scale: 0.93, opacity: 1 }}
+                                exit={{ rotate: 0, x: 0, scale: 0.92, opacity: 0 }}
+                                transition={{ type: 'spring', stiffness: 120, damping: 18, delay: 0.1 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setShowHistoryGallery(true);
@@ -1823,7 +1829,6 @@ const Reel = () => {
                                   marginTop: '-10px',
                                   background: 'rgba(255,255,255,0.04)',
                                   border: '1px solid rgba(255,255,255,0.06)',
-                                  transform: 'rotate(4deg) translateX(8px) scale(0.95)',
                                   filter: 'brightness(0.5)',
                                   overflow: 'hidden',
                                   zIndex: 1,
@@ -1838,9 +1843,14 @@ const Reel = () => {
                                     <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)' }} />
                                   );
                                 })()}
-                              </div>
+                              </motion.div>
                               {/* Middle card */}
-                              <div
+                              <motion.div
+                                key={`stack-mid-${group.userId}`}
+                                initial={{ rotate: 0, x: 0, scale: 0.95, opacity: 0 }}
+                                animate={{ rotate: -3, x: -6, scale: 0.96, opacity: 1 }}
+                                exit={{ rotate: 0, x: 0, scale: 0.95, opacity: 0 }}
+                                transition={{ type: 'spring', stiffness: 120, damping: 18, delay: 0.05 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setShowHistoryGallery(true);
@@ -1854,7 +1864,6 @@ const Reel = () => {
                                   marginTop: '-10px',
                                   background: 'rgba(255,255,255,0.06)',
                                   border: '1px solid rgba(255,255,255,0.08)',
-                                  transform: 'rotate(-3deg) translateX(-6px) scale(0.97)',
                                   filter: 'brightness(0.6)',
                                   overflow: 'hidden',
                                   zIndex: 2,
@@ -1869,9 +1878,10 @@ const Reel = () => {
                                     <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)' }} />
                                   );
                                 })()}
-                              </div>
+                              </motion.div>
                             </>
                           )}
+                          </AnimatePresence>
                           {/* Card — 9:16 aspect ratio, constrained to available space */}
                           <div
                             className="relative overflow-hidden"
