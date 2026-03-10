@@ -1812,9 +1812,9 @@ const Reel = () => {
                               {/* Back card (deepest) — slightly smaller, rotated to peek behind */}
                               <motion.div
                                 key={`stack-back-${group.userId}`}
-                                initial={{ rotate: 0, scale: 0.88, opacity: 0, y: 6 }}
-                                animate={{ rotate: 5, scale: 0.90, opacity: 1, y: 0 }}
-                                exit={{ rotate: 0, scale: 0.88, opacity: 0, y: 6 }}
+                                initial={{ rotate: 0, scale: 0.88, opacity: 0, y: 106 }}
+                                animate={{ rotate: 5, scale: 0.90, opacity: 1, y: 100 }}
+                                exit={{ rotate: 0, scale: 0.88, opacity: 0, y: 106 }}
                                 transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.12 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1846,9 +1846,9 @@ const Reel = () => {
                               {/* Middle card — between back and front */}
                               <motion.div
                                 key={`stack-mid-${group.userId}`}
-                                initial={{ rotate: 0, scale: 0.92, opacity: 0, y: 4 }}
-                                animate={{ rotate: -3, scale: 0.93, opacity: 1, y: 0 }}
-                                exit={{ rotate: 0, scale: 0.92, opacity: 0, y: 4 }}
+                                initial={{ rotate: 0, scale: 0.92, opacity: 0, y: 104 }}
+                                animate={{ rotate: -3, scale: 0.93, opacity: 1, y: 100 }}
+                                exit={{ rotate: 0, scale: 0.92, opacity: 0, y: 104 }}
                                 transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.06 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
