@@ -436,34 +436,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
             className="absolute inset-0 flex flex-col"
             style={{ overflow: 'hidden', touchAction: 'none' }}
           >
-            {/* TOP ZONE: progress segments | close */}
+            {/* TOP ZONE: close button only */}
             <div
-              className="z-50 flex items-center justify-between px-4 shrink-0"
+              className="z-50 flex items-center justify-end px-4 shrink-0"
               style={{
                 paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
-                height: 56,
+                height: 48,
               }}
             >
-              <div className="flex items-center gap-1 flex-1 mx-3">
-                {activities.map((a, i) => {
-                  if (a.isPlaceholder) return null;
-                  const isCurrent = i === currentIndex;
-                  const isPast = i < currentIndex;
-                  return (
-                    <div key={a.id} className="flex-1 h-[3px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
-                      <div
-                        key={isCurrent ? `${a.id}-${progressRunKey}` : `${a.id}-static`}
-                        className="h-full rounded-full"
-                        style={{
-                          background: (isPast || isCurrent) ? 'rgba(255,255,255,0.9)' : 'transparent',
-                          width: isPast ? '100%' : isCurrent ? `${autoAdvanceProgress * 100}%` : '0%',
-                          transition: isCurrent ? (autoAdvanceProgress > 0 ? `width ${AUTO_ADVANCE_MS}ms linear` : 'none') : 'none',
-                        }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
               <motion.button
                 className="w-9 h-9 flex items-center justify-center rounded-full active:scale-90"
                 style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}
@@ -473,6 +453,52 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 <X className="w-5 h-5 text-white/80" />
               </motion.button>
             </div>
+
+            {/* PROFILE SECTION — above cards */}
+            {userProfile && (
+              <div className="shrink-0 flex flex-col items-center z-50 px-4 pb-2" style={{ marginTop: 0 }}>
+                <div
+                  className="rounded-full overflow-hidden"
+                  style={{
+                    width: 56,
+                    height: 56,
+                    border: '2.5px solid rgba(255,255,255,0.3)',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+                  }}
+                >
+                  <ProfileAvatar
+                    src={userProfile.avatarUrl}
+                    name={userProfile.displayName}
+                    size={56}
+                  />
+                </div>
+                <h2
+                  className="text-white font-bold text-center mt-1.5 px-6 truncate w-full"
+                  style={{ fontSize: 18, letterSpacing: '-0.02em' }}
+                >
+                  {userProfile.displayName}
+                </h2>
+                {userDescription && (
+                  <p className="text-white/50 text-[11px] text-center mt-1 px-8 leading-relaxed" style={{ maxWidth: 280 }}>
+                    {userDescription.diary}
+                    {userDescription.varietyLine ? ` ${userDescription.varietyLine}` : ''}
+                  </p>
+                )}
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                    <span className="text-white text-[11px] font-semibold">{totalActivities}/12 Days</span>
+                  </div>
+                  {totalDurationStr && (
+                    <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                      <span className="text-white text-[11px] font-semibold">{totalDurationStr} Total</span>
+                    </div>
+                  )}
+                  <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                    <span className="text-white text-[11px] font-semibold">W{week}</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
 
 
