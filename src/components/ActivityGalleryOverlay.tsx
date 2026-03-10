@@ -561,7 +561,15 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   }}
                 >
                   <div className="flex items-center gap-2.5 h-full">
-                    <img src={deskBellImg} alt="bell" className="w-7 h-7 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                    <motion.img
+                      src={deskBellImg}
+                      alt="bell"
+                      className="w-7 h-7 object-contain"
+                      style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))', transformOrigin: 'bottom center' }}
+                      animate={nudgeBellAnim ? { rotate: [0, -25, 20, -15, 10, -5, 0], scale: [1, 1.2, 1.15, 1.1, 1.05, 1] } : {}}
+                      transition={{ duration: 0.6, ease: 'easeInOut' }}
+                      onAnimationComplete={() => setNudgeBellAnim(false)}
+                    />
                     <span className="text-white/80 text-xs font-medium">Nudge to log activity</span>
                   </div>
                 </button>
