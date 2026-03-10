@@ -48,6 +48,77 @@ import clapEmoji from '@/assets/reactions/clap-3d.png';
 
 const DEFAULT_REACTIONS: Partial<Record<ReactionType, ActivityReaction>> = {};
 
+/**
+ * Generate contextual nudge message based on user's activity behavior
+ */
+function getContextualNudge(name: string, activities: any[]): string {
+  const sorted = [...activities].sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  const total = sorted.length;
+  const now = new Date();
+
+  if (total === 0) {
+    return `${name}, let's start<br/>your journey! 💪`;
+  }
+
+  const lastDate = new Date(sorted[0].createdAt);
+  const daysSinceLast = Math.floor((now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+
+  // Completed journey
+  if (total >= 12) {
+    return `${name}, you're a<br/>true Ninja! 🥷`;
+  }
+
+  // Logged today — encourage them
+  if (daysSinceLast === 0) {
+    const todayMessages = [
+      `${name}, you showed<br/>up today. Legend! 🔥`,
+      `${name}, today's done.<br/>You're unstoppable! ⚡`,
+      `Crushed it today,<br/>${name}! Keep rolling 💪`,
+    ];
+    return todayMessages[total % todayMessages.length];
+  }
+
+  // Active yesterday or today — on a streak
+  if (daysSinceLast === 1) {
+    const streakMessages = [
+      `${name}, you're on<br/>a roll! Keep going 🚀`,
+      `Back again, ${name}?<br/>That's the spirit! 🔥`,
+      `${name}, consistency<br/>looks good on you ✨`,
+    ];
+    return streakMessages[total % streakMessages.length];
+  }
+
+  // 2-3 days gap — gentle nudge
+  if (daysSinceLast >= 2 && daysSinceLast <= 3) {
+    const gentleMessages = [
+      `${name}, we saved<br/>your spot! Jump back in 💜`,
+      `${name}, ${daysSinceLast} days away?<br/>Let's fix that today 💪`,
+      `Miss you, ${name}!<br/>One quick log? 🙌`,
+    ];
+    return gentleMessages[total % gentleMessages.length];
+  }
+
+  // 4-6 days — been a while, motivational
+  if (daysSinceLast >= 4 && daysSinceLast <= 6) {
+    const comebackMessages = [
+      `${name}, it's never<br/>too late to restart 🌟`,
+      `${name}, your journey<br/>is waiting for you 💜`,
+      `Small steps count,<br/>${name}. Log one today! 🏃`,
+    ];
+    return comebackMessages[total % comebackMessages.length];
+  }
+
+  // 7+ days — missed a week+, warm & supportive
+  const longGapMessages = [
+    `${name}, every champion<br/>takes a break. Welcome back! 💜`,
+    `${name}, the hardest part<br/>is showing up. You're here! ✨`,
+    `New week, fresh start,<br/>${name}. Let's go! 🚀`,
+  ];
+  return longGapMessages[total % longGapMessages.length];
+}
+
 // Reactor profile type from activities - includes reactionType for removal
 interface ReactorProfile {
   userId: string;
@@ -1888,9 +1959,8 @@ const Reel = () => {
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent',
                                       }}
-                                    >
-                                      {profile?.display_name?.split(' ')[0] || 'Hey'}, ready to<br/>crush it today?
-                                    </p>
+                                      dangerouslySetInnerHTML={{ __html: getContextualNudge(profile?.display_name?.split(' ')[0] || 'Hey', myActivities) }}
+                                    />
                                   </motion.div>
 
                                   {/* Glowing plus */}
