@@ -63,7 +63,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
       // First get user's activity IDs
       const { data: activities } = await supabase
         .from('journey_activities')
-        .select('id, day_number, storage_url, activity')
+        .select('id, day_number, storage_url, original_url, is_video, activity')
         .eq('user_id', user.id);
       
       if (activities) {
