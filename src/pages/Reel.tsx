@@ -2115,10 +2115,10 @@ const Reel = () => {
                           e.stopPropagation();
                           setShowHistoryGallery(true);
                         }}
-                        className="shrink-0 active:scale-95 transition-transform flex items-center gap-1.5"
+                        className="shrink-0 active:scale-95 transition-transform flex items-center gap-1.5 whitespace-nowrap"
                         style={{
-                          height: 44,
-                          borderRadius: 22,
+                          height: 42,
+                          borderRadius: 21,
                           paddingLeft: 14,
                           paddingRight: 16,
                           background: 'rgba(255, 255, 255, 0.08)',
@@ -2128,8 +2128,8 @@ const Reel = () => {
                           boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
                         }}
                       >
-                        <History className="w-[16px] h-[16px] text-white/60" strokeWidth={1.5} />
-                        <span className="text-white/60 text-xs font-medium whitespace-nowrap">View their Progress</span>
+                        <History className="w-[14px] h-[14px] text-white/60" strokeWidth={1.5} />
+                        <span className="text-white/60 text-xs font-medium">View their Progress</span>
                       </button>
                     )}
                   </div>
