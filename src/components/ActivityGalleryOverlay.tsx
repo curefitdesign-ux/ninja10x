@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
+import { useState, useRef, useEffect, useCallback, forwardRef, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
 import { X, Share2, Pencil, ChevronUp } from 'lucide-react';
@@ -47,12 +47,19 @@ export interface GalleryActivity {
   isPlaceholder?: boolean;
 }
 
+interface UserProfileInfo {
+  displayName: string;
+  avatarUrl: string;
+  startDate?: string; // ISO date string of first activity
+}
+
 interface ActivityGalleryOverlayProps {
   isOpen: boolean;
   onClose: () => void;
   activities: GalleryActivity[];
   initialIndex?: number;
   onLogActivity?: () => void;
+  userProfile?: UserProfileInfo;
 }
 
 const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlayProps>(function ActivityGalleryOverlay({
@@ -61,6 +68,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   activities,
   initialIndex = 0,
   onLogActivity,
+  userProfile,
 }, _ref) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const portalContainer = usePortalContainer();
@@ -85,6 +93,73 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const progressStartTimer = useRef<number | null>(null);
   const [progressRunKey, setProgressRunKey] = useState(0);
   const isPaused = showReactsSheet || showEditSheet;
+
+  // Generate dynamic user description from activity data
+  const userDescription = useMemo((): string[] => {
+    if (!userProfile || activities.length === 0) return [];
+    
+    const realActivities = activities.filter(a => !a.isPlaceholder && a.dayNumber < 1001);
+    if (realActivities.length === 0) return [];
+    
+    // Count activities by type
+    const activityCounts: Record<string, number> = {};
+    let totalDurationMins = 0;
+    
+    for (const a of realActivities) {
+      const type = a.activity || 'Workout';
+      activityCounts[type] = (activityCounts[type] || 0) + 1;
+      
+      // Parse duration (e.g., "45 min", "1h 30m")
+      if (a.duration) {
+        const minMatch = a.duration.match(/(\d+)\s*min/i);
+        const hrMatch = a.duration.match(/(\d+)\s*h/i);
+        if (minMatch) totalDurationMins += parseInt(minMatch[1]);
+        if (hrMatch) totalDurationMins += parseInt(hrMatch[1]) * 60;
+      }
+    }
+    
+    // Top activities sorted by count
+    const topActivities = Object.entries(activityCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+    
+    // Start date
+    const startDate = userProfile.startDate 
+      ? new Date(userProfile.startDate)
+      : null;
+    
+    const daysSinceStart = startDate 
+      ? Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+      : 0;
+    
+    // Current week
+    const currentWeek = Math.ceil(realActivities.length / 3);
+    
+    // Build description parts
+    const parts: string[] = [];
+    
+    if (daysSinceStart > 0) {
+      parts.push(`${daysSinceStart} day${daysSinceStart !== 1 ? 's' : ''} into the journey`);
+    }
+    
+    parts.push(`Week ${currentWeek} • ${realActivities.length}/12 activities logged`);
+    
+    if (topActivities.length > 0) {
+      const activityStr = topActivities.map(([name, count]) => 
+        `${name} (${count}x)`
+      ).join(', ');
+      parts.push(activityStr);
+    }
+    
+    if (totalDurationMins > 0) {
+      const hrs = Math.floor(totalDurationMins / 60);
+      const mins = totalDurationMins % 60;
+      const durStr = hrs > 0 ? `${hrs}h ${mins}m` : `${mins} min`;
+      parts.push(`${durStr} total`);
+    }
+    
+    return parts;
+  }, [activities, userProfile]);
 
   // Media loading
   const [loadedMediaUrl, setLoadedMediaUrl] = useState('');
@@ -325,13 +400,50 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               </motion.button>
             </div>
 
-            {/* User name + week/day info */}
-            <div className="shrink-0 pb-1 z-30">
-              <div className="flex items-center justify-center gap-2" style={{ height: 20 }}>
-                <span className="text-white/60 text-xs">
-                  Week {week} • Day {dayInWeek}
-                </span>
-              </div>
+            {/* User profile header + journey description */}
+            <div className="shrink-0 z-30 px-4 pb-2">
+              {userProfile ? (
+                <div className="flex items-start gap-3">
+                  <ProfileAvatar
+                    src={userProfile.avatarUrl}
+                    name={userProfile.displayName}
+                    size={44}
+                    style={{
+                      border: '2px solid rgba(255, 255, 255, 0.25)',
+                      flexShrink: 0,
+                    }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-bold text-sm truncate">{userProfile.displayName}</p>
+                    {userDescription.length > 0 && (
+                      <div className="mt-0.5">
+                        <p className="text-white/50 text-[11px] leading-tight">
+                          {userDescription[0]}
+                        </p>
+                        {userDescription.length > 1 && (
+                          <p className="text-white/40 text-[11px] leading-tight mt-0.5">
+                            {userDescription.slice(1).join(' • ')}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    className="px-2.5 py-1 rounded-full shrink-0"
+                    style={{ background: 'rgba(255,255,255,0.08)' }}
+                  >
+                    <span className="text-white/60 text-[10px] font-medium">
+                      W{week} • D{dayInWeek}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2" style={{ height: 20 }}>
+                  <span className="text-white/60 text-xs">
+                    Week {week} • Day {dayInWeek}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* MIDDLE CONTAINER — card fills available space */}
