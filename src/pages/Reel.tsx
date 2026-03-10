@@ -2025,7 +2025,7 @@ const Reel = () => {
                     </div>
                   ) : (
                     <div
-                      className="flex items-center justify-center gap-3 h-full px-5"
+                      className="flex items-center justify-center gap-2 h-full px-4 whitespace-nowrap"
                     >
                       {currentReactions.total > 0 ? (
                         <>
@@ -2033,9 +2033,9 @@ const Reel = () => {
                             <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                             <img src={clapEmoji} alt="clap" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                           </div>
-                          <span className="text-white font-bold text-sm">{currentReactions.total}</span>
-                          <div className="w-px h-4 bg-white/20" />
-                          <span className="text-white/70 text-sm">Tap to react</span>
+                          <span className="text-white font-bold text-xs">{currentReactions.total}</span>
+                          <div className="w-px h-3.5 bg-white/20" />
+                          <span className="text-white/70 text-xs">Tap to react</span>
                         </>
                       ) : (
                         <>
