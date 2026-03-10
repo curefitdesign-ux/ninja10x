@@ -238,6 +238,7 @@ const Reel = () => {
   // Load all activities grouped by user
   const loadActivities = useCallback(async () => {
     setLoading(true);
+    invalidateFeedCaches();
     const groups = await fetchAllActivitiesGroupedByUser();
     setUserGroups(groups);
     

@@ -653,8 +653,9 @@ async function _fetchAllActivitiesGroupedImpl(): Promise<UserStoryGroup[]> {
   return groups;
 }
 
-/** Invalidate caches (call after mutations) */
 export function invalidateFeedCaches() {
   _publicFeedCache = null;
   _groupedCache = null;
+  _publicFeedInflight = null;
+  _groupedInflight = null;
 }
