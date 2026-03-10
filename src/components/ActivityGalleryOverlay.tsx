@@ -341,7 +341,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         }} />
 
                         {/* Handwritten date */}
-                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.45)', marginBottom: 6, transform: `rotate(${rotation * 0.3}deg)`, marginLeft: offsetX }}>
+                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 18, color: 'rgba(255,255,255,0.45)', marginBottom: 6, transform: `rotate(${rotation * 0.3}deg)`, marginLeft: offsetX }}>
                           W{wk} · Day {dw} — <span style={{ color: 'rgba(255,255,255,0.3)' }}>{handDate}</span>
                         </p>
 
@@ -391,7 +391,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
                               transform: `rotate(${-rotation * 0.5}deg)`,
                             }}>
-                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
+                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
                             </div>
                           )}
                           {/* Reactions */}
@@ -405,7 +405,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                         {/* Quote */}
                         {(decorType === 2 || decorType === 1) && (
-                          <p style={{ fontFamily: "'Caveat', cursive", fontSize: 14, color: 'rgba(255,255,255,0.3)', marginTop: 6, marginLeft: idx % 2 === 0 ? '60%' : '5%', transform: `rotate(${-rotation * 0.8}deg)` }}>{handQuote}</p>
+                          <p style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.3)', marginTop: 6, marginLeft: idx % 2 === 0 ? '60%' : '5%', transform: `rotate(${-rotation * 0.8}deg)` }}>{handQuote}</p>
                         )}
                         {/* Arrow */}
                         {idx < sortedActivities.length - 1 && decorType !== 4 && (
@@ -421,7 +421,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 {/* Journey start */}
                 <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
                   <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.1)' }} />
-                  <p style={{ fontFamily: "'Caveat', cursive", fontSize: 18, color: 'rgba(255,255,255,0.2)', transform: 'rotate(-1deg)' }}>
+                  <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: 'rgba(255,255,255,0.2)', transform: 'rotate(-1deg)' }}>
                     the journey begins here... 🌱
                   </p>
                 </div>
