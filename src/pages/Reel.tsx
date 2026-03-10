@@ -1812,8 +1812,8 @@ const Reel = () => {
                               {/* Back card (deepest) — slightly smaller, rotated to peek behind */}
                               <motion.div
                                 key={`stack-back-${group.userId}`}
-                                initial={{ rotate: 0, scale: 0.88, opacity: 0, y: 6 }}
-                                animate={{ rotate: 5, scale: 0.90, opacity: 1, y: 0 }}
+                                initial={{ rotate: 0, scale: 0.88, opacity: 0, y: 106 }}
+                                animate={{ rotate: 5, scale: 0.90, opacity: 1, y: 100 }}
                                 exit={{ rotate: 0, scale: 0.88, opacity: 0, y: 6 }}
                                 transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.12 }}
                                 onClick={(e) => {
