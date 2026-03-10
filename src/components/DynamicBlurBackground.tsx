@@ -74,4 +74,6 @@ const DynamicBlurBackground = memo(function DynamicBlurBackground({ imageUrl, ch
       {children}
     </div>
   );
-}
+});
+
+export default DynamicBlurBackground;
