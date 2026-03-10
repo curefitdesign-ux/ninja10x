@@ -1783,10 +1783,11 @@ const Reel = () => {
                   <CarouselItem
                     key={`card-${group.userId}`}
                     className="pl-3 flex items-center justify-center relative h-full basis-[85%]"
+                    style={{ overflow: 'visible' }}
                   >
                     <div
                       className="flex items-center justify-center w-full h-full"
-                      style={cardStyle}
+                      style={{ ...cardStyle, overflow: 'visible' }}
                     >
                     {/* Full templated image/video - with lock overlay for non-public users */}
                     {(() => {
@@ -1801,13 +1802,20 @@ const Reel = () => {
                             width: '100%',
                             height: '100%',
                             background: 'transparent',
+                            overflow: 'visible',
                           }}
                         >
                           {/* Stacked dummy cards behind the main card — tap to open history */}
-                          {showStackedCards && (
+                          <AnimatePresence>
+                          {showStackedCards && isCenter && (
                             <>
-                              {/* Back card (deepest) */}
-                              <div
+                              {/* Back card (deepest) — slightly smaller, rotated to peek behind */}
+                              <motion.div
+                                key={`stack-back-${group.userId}`}
+                                initial={{ rotate: 0, scale: 0.88, opacity: 0, y: 6 }}
+                                animate={{ rotate: 5, scale: 0.90, opacity: 1, y: 0 }}
+                                exit={{ rotate: 0, scale: 0.88, opacity: 0, y: 6 }}
+                                transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.12 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setShowHistoryGallery(true);
@@ -1815,16 +1823,14 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(95% - 20px)',
-                                  maxWidth: '100%',
-                                  width: '100%',
+                                  height: 'calc(92% - 20px)',
                                   marginTop: '-10px',
                                   background: 'rgba(255,255,255,0.04)',
-                                  border: '1px solid rgba(255,255,255,0.06)',
-                                  transform: 'rotate(4deg) translateX(8px) scale(0.95)',
-                                  filter: 'brightness(0.5)',
+                                  border: '1px solid rgba(255,255,255,0.08)',
+                                  filter: 'brightness(0.45)',
                                   overflow: 'hidden',
                                   zIndex: 1,
+                                  borderRadius: '2px',
                                 }}
                               >
                                 {activities.length > 2 && (() => {
@@ -1836,9 +1842,14 @@ const Reel = () => {
                                     <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)' }} />
                                   );
                                 })()}
-                              </div>
-                              {/* Middle card */}
-                              <div
+                              </motion.div>
+                              {/* Middle card — between back and front */}
+                              <motion.div
+                                key={`stack-mid-${group.userId}`}
+                                initial={{ rotate: 0, scale: 0.92, opacity: 0, y: 4 }}
+                                animate={{ rotate: -3, scale: 0.93, opacity: 1, y: 0 }}
+                                exit={{ rotate: 0, scale: 0.92, opacity: 0, y: 4 }}
+                                transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.06 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setShowHistoryGallery(true);
@@ -1846,16 +1857,14 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(95% - 20px)',
-                                  maxWidth: '100%',
-                                  width: '100%',
+                                  height: 'calc(93% - 20px)',
                                   marginTop: '-10px',
                                   background: 'rgba(255,255,255,0.06)',
-                                  border: '1px solid rgba(255,255,255,0.08)',
-                                  transform: 'rotate(-3deg) translateX(-6px) scale(0.97)',
-                                  filter: 'brightness(0.6)',
+                                  border: '1px solid rgba(255,255,255,0.10)',
+                                  filter: 'brightness(0.55)',
                                   overflow: 'hidden',
                                   zIndex: 2,
+                                  borderRadius: '2px',
                                 }}
                               >
                                 {(() => {
@@ -1867,9 +1876,10 @@ const Reel = () => {
                                     <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)' }} />
                                   );
                                 })()}
-                              </div>
+                              </motion.div>
                             </>
                           )}
+                          </AnimatePresence>
                           {/* Card — 9:16 aspect ratio, constrained to available space */}
                           <div
                             className="relative overflow-hidden"
