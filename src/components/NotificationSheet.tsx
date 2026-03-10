@@ -465,6 +465,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                                 <span className="text-white text-[9px] font-bold leading-none">{notif.nudgeCount}</span>
                               </div>
                             )}
+                          </div>
                         ) : notif.activityImageUrl ? (
                           <div className="relative flex-shrink-0">
                             <div 
