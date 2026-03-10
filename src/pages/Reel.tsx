@@ -243,29 +243,6 @@ const Reel = () => {
       }
     }
 
-    // Inject virtual week recaps for completed weeks without published recap
-    const allRealActivities = allMyActivities.filter(a => a.dayNumber >= 1 && a.dayNumber <= 12);
-    const publishedWeeks = new Set(ownActivities.filter(a => a.dayNumber >= 1001).map(a => a.dayNumber - 1000));
-    for (let week = 1; week <= 4; week++) {
-      const weekDays = [1, 2, 3].map(d => (week - 1) * 3 + d);
-      const hasAllDays = weekDays.every(d => allRealActivities.some(a => a.dayNumber === d));
-      if (hasAllDays && !publishedWeeks.has(week) && !ownActivities.some(a => a.id === `week-recap-${user.id}-w${week}`)) {
-        ownActivities.push({
-          id: `week-recap-${user.id}-w${week}`,
-          storageUrl: '',
-          originalUrl: '',
-          isVideo: true,
-          activity: `Week ${week} Recap`,
-          frame: 'recap',
-          duration: undefined,
-          pr: undefined,
-          dayNumber: 1000 + week,
-          isPublic: true,
-          userId: user.id,
-          createdAt: new Date().toISOString(),
-        });
-      }
-    }
 
     if (allMyActivities.length < 12) {
       ownActivities.push({
