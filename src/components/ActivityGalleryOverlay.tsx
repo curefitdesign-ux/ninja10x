@@ -97,7 +97,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const isPaused = showReactsSheet || showEditSheet;
 
   // Generate dynamic user description from activity data
-  const userDescription = useMemo((): { diary: string; durationLine: string; count: number } | null => {
+  const userDescription = useMemo((): { diary: string; varietyLine: string; durationLine: string; count: number } | null => {
     if (!userProfile || activities.length === 0) return null;
     
     const realActivities = activities.filter(a => !a.isPlaceholder && a.dayNumber < 1001);
