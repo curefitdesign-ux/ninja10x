@@ -18,6 +18,7 @@ import Floating3DEmojis from '@/components/Floating3DEmojis';
 import StoryEmojiRain from '@/components/StoryEmojiRain';
 import { isVideoUrl } from '@/lib/media';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 import fireEmoji from '@/assets/reactions/fire-3d.png';
 import clapEmoji from '@/assets/reactions/clap-3d.png';
@@ -62,6 +63,7 @@ interface ActivityGalleryOverlayProps {
   onLogActivity?: () => void;
   userProfile?: UserProfileInfo;
   isOwnProfile?: boolean;
+  targetUserId?: string; // user ID of the profile being viewed (for nudges)
 }
 
 const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlayProps>(function ActivityGalleryOverlay({
@@ -72,6 +74,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   onLogActivity,
   userProfile,
   isOwnProfile,
+  targetUserId,
 }, _ref) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const portalContainer = usePortalContainer();
@@ -535,7 +538,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     className="relative overflow-hidden"
                     style={{
                       aspectRatio: '9/16',
-                      height: '90%',
+                      maxHeight: '100%',
                       maxWidth: '100%',
                       borderRadius: '20px',
                       overflow: 'hidden',
@@ -628,8 +631,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 </div>
               </motion.div>
 
-              {/* Bottom action row: reaction pill + share + delete */}
-              <div className="shrink-0 flex flex-col items-center justify-center pt-3 pb-2" style={{ minHeight: 56 }}>
+              {/* Bottom action row: reaction pill + share + nudge */}
+              <div className="shrink-0 flex flex-col items-center justify-center pt-3 pb-2 relative z-40" style={{ minHeight: 56 }}>
                 <div
                   className="w-full flex flex-col items-center"
                   style={{ transform: 'translateY(-32px)' }}
@@ -682,11 +685,21 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       {/* Nudge for other users' stories, or own profile if no activity today */}
                       {((!isOwnProfile && !current.isPlaceholder) || (isOwnProfile && !hasLoggedToday)) && (
                         <button
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
                             if (isOwnProfile) {
                               onClose();
                               onLogActivity?.();
+                            } else if (user && targetUserId) {
+                              // Insert nudge into database
+                              const { error } = await supabase
+                                .from('nudges')
+                                .insert({ from_user_id: user.id, to_user_id: targetUserId });
+                              if (!error) {
+                                toast('👋 Poke sent!', { description: `You nudged ${userProfile?.displayName?.split(' ')[0] || 'them'} to keep going!` });
+                              } else {
+                                toast.error('Could not send nudge');
+                              }
                             } else {
                               toast('👋 Poke sent!', { description: `You nudged ${userProfile?.displayName?.split(' ')[0] || 'them'} to keep going!` });
                             }

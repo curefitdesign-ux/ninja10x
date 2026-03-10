@@ -2240,6 +2240,7 @@ const Reel = () => {
             activities={allUserActivities}
             initialIndex={currentIdx >= 0 ? currentIdx : 0}
             isOwnProfile={isOwnStory || false}
+            targetUserId={currentGroup.userId}
             userProfile={{
               displayName: currentGroup.displayName,
               avatarUrl: currentGroup.avatarUrl,
