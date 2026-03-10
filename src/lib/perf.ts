@@ -1,6 +1,6 @@
 /**
  * Lightweight performance instrumentation.
- * Logs FCP, LCP, TTFB and slow network requests to console.
+ * Logs FCP, LCP, TTFB, long tasks, and slow network requests to console.
  */
 export function initPerfObserver() {
   if (typeof window === 'undefined' || !('PerformanceObserver' in window)) return;
@@ -38,6 +38,18 @@ export function initPerfObserver() {
     navObs.observe({ type: 'navigation', buffered: true });
   } catch {}
 
+  // Long tasks (>50ms) — detect jank sources
+  try {
+    const longTaskObs = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        if (entry.duration > 100) {
+          console.warn(`[Perf] Long task: ${Math.round(entry.duration)}ms`);
+        }
+      }
+    });
+    longTaskObs.observe({ type: 'longtask', buffered: true });
+  } catch {}
+
   // Slow resource requests (>1s)
   try {
     const resObs = new PerformanceObserver((list) => {
@@ -50,5 +62,13 @@ export function initPerfObserver() {
       }
     });
     resObs.observe({ type: 'resource', buffered: false });
+  } catch {}
+
+  // Log total JS heap if available
+  try {
+    if ('memory' in performance) {
+      const mem = (performance as any).memory;
+      console.log(`[Perf] JS Heap: ${Math.round(mem.usedJSHeapSize / 1024 / 1024)}MB / ${Math.round(mem.jsHeapSizeLimit / 1024 / 1024)}MB`);
+    }
   } catch {}
 }
