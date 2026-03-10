@@ -142,6 +142,7 @@ const Reel = () => {
   const [isAddingToStories, setIsAddingToStories] = useState(false);
   const [showDeleteRecapConfirm, setShowDeleteRecapConfirm] = useState(false);
   const [recapPlaying, setRecapPlaying] = useState(true);
+  const [showHistoryGallery, setShowHistoryGallery] = useState(false);
 
   // Story nudge animation for inactivity hint
   const { triggerShake, shakeAnimation, shakeTransition } = useStoryNudgeAnimation();
