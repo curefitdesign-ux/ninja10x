@@ -149,11 +149,11 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
 
         const profileMap = new Map(profiles?.map(p => [p.user_id, { name: p.display_name, avatar: p.avatar_url }]) || []);
 
-        // Group nudges by sender + same day
+        // Group ALL nudges by sender (combine regardless of day)
         const nudgeGroups = new Map<string, { count: number; latestId: string; latestTime: Date; senderId: string }>();
         nudges.forEach(n => {
-          const dayKey = `${n.from_user_id}-${new Date(n.created_at).toDateString()}`;
-          const existing = nudgeGroups.get(dayKey);
+          const key = n.from_user_id;
+          const existing = nudgeGroups.get(key);
           const ts = new Date(n.created_at);
           if (existing) {
             existing.count++;
@@ -162,7 +162,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
               existing.latestId = n.id;
             }
           } else {
-            nudgeGroups.set(dayKey, { count: 1, latestId: n.id, latestTime: ts, senderId: n.from_user_id });
+            nudgeGroups.set(key, { count: 1, latestId: n.id, latestTime: ts, senderId: n.from_user_id });
           }
         });
 
@@ -273,12 +273,11 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             .maybeSingle();
 
           const senderName = profile?.display_name || 'Someone';
-          const today = new Date().toDateString();
 
           setNotifications(prev => {
-            // Try to merge with existing nudge from same user today
+            // Try to merge with existing nudge from same sender (regardless of day)
             const existingIdx = prev.findIndex(
-              n => n.isNudge && n.reactorName === senderName && n.timestamp.toDateString() === today
+              n => n.isNudge && n.reactorName === senderName
             );
             if (existingIdx >= 0) {
               const updated = [...prev];
@@ -470,7 +469,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
 
                         {/* Right side: nudge icon or reaction badge + thumbnail */}
                         {notif.isNudge ? (
-                          <div className="relative flex-shrink-0">
+                          <div className="relative flex-shrink-0 self-start mt-0.5">
                             <div 
                               className="w-11 h-11 rounded-[5px] overflow-hidden flex items-center justify-center"
                               style={{
