@@ -2126,14 +2126,14 @@ const Reel = () => {
                   </div>
                 );
               })()}
-          </div>
           </motion.div>
+          </AnimatePresence>
           
           {/* Right arrow indicator - only on first story */}
           {effectiveUserGroups.length > 1 && currentUserIndex === 0 && currentActivityIndex === 0 && (
             <motion.button
               onClick={goNextUser}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-[65]"
               initial={{ opacity: 0, x: -5 }}
               animate={{ 
                 opacity: [0.4, 1, 0.4],
