@@ -96,6 +96,12 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [progressRunKey, setProgressRunKey] = useState(0);
   const isPaused = showReactsSheet || showEditSheet;
 
+  // Check if user has logged an activity today (placeholder presence means they haven't)
+  const hasLoggedToday = useMemo(() => {
+    if (!isOwnProfile) return true;
+    return !activities.some(a => a.isPlaceholder);
+  }, [activities, isOwnProfile]);
+
   // Generate dynamic user description from activity data
   const userDescription = useMemo((): { diary: string; varietyLine: string; durationLine: string; count: number } | null => {
     if (!userProfile || activities.length === 0) return null;
@@ -330,12 +336,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 height: 56,
               }}
             >
-              {/* Counter pill */}
+              {/* Combined counter + week/day pill */}
               <div
-                className="px-3 py-1.5 rounded-full text-white/70 text-xs font-medium"
+                className="px-3 py-1.5 rounded-full text-white/70 text-xs font-medium flex items-center gap-1.5"
                 style={{ background: 'rgba(255,255,255,0.08)' }}
               >
-                {currentIndex + 1} / {totalActivities}
+                <span>W{week} • D{dayInWeek}</span>
+                <span className="text-white/40">|</span>
+                <span>{currentIndex + 1}/{totalActivities}</span>
               </div>
 
               {/* Progress segments */}
@@ -420,29 +428,21 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       <div className="flex items-center gap-2">
                         <p className="text-white font-bold text-sm truncate">{userProfile.displayName}</p>
                         {userDescription && (
-                          <span className="text-white/50 text-[11px] font-medium shrink-0">{userDescription.count}/12</span>
+                          <span className="text-white/50 text-xs font-medium shrink-0">{userDescription.count}/12</span>
                         )}
-                        <div
-                          className="px-2 py-0.5 rounded-full shrink-0"
-                          style={{ background: 'rgba(255,255,255,0.08)' }}
-                        >
-                          <span className="text-white/60 text-[10px] font-medium">
-                            W{week} • D{dayInWeek}
-                          </span>
-                        </div>
                       </div>
                       {userDescription && (
                         <>
-                          <p className="mt-0.5 text-[11px] leading-snug text-white/60">
+                          <p className="mt-0.5 text-xs leading-snug text-white/70">
                             {userDescription.diary}
                           </p>
                           {userDescription.varietyLine && (
-                            <p className="text-[11px] leading-snug text-white/60">
+                            <p className="text-xs leading-snug text-white/70">
                               {userDescription.varietyLine}
                             </p>
                           )}
                           {userDescription.durationLine && (
-                            <p className="text-[11px] leading-snug text-white/50">
+                            <p className="text-xs leading-snug text-white/60">
                               {userDescription.durationLine}
                             </p>
                           )}
@@ -627,11 +627,17 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                     {/* Nudge & Share buttons */}
                     <div className="flex items-center gap-2 shrink-0">
-                      {!isOwnProfile && !current.isPlaceholder && (
+                      {/* Nudge for other users' stories, or own profile if no activity today */}
+                      {((!isOwnProfile && !current.isPlaceholder) || (isOwnProfile && !hasLoggedToday)) && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            toast('👋 Poke sent!', { description: `You nudged ${userProfile?.displayName?.split(' ')[0] || 'them'} to keep going!` });
+                            if (isOwnProfile) {
+                              onClose();
+                              onLogActivity?.();
+                            } else {
+                              toast('👋 Poke sent!', { description: `You nudged ${userProfile?.displayName?.split(' ')[0] || 'them'} to keep going!` });
+                            }
                           }}
                           className="shrink-0 active:scale-95 transition-transform"
                           style={{
@@ -644,7 +650,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                           }}
                         >
-                          <span className="text-lg leading-none">👋</span>
+                          <span className="text-lg leading-none">{isOwnProfile ? '➕' : '👋'}</span>
                         </button>
                       )}
                       {canShare && (
