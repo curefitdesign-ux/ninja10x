@@ -485,6 +485,26 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             if (!types.length) return null;
                             return <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 25, overflow: 'visible' }}><Floating3DEmojis reactions={types} newReaction={null} isPaused={isPaused} /></div>;
                           })()}
+                          {/* Like count badge */}
+                          {(() => {
+                            const ar = localReactions[act.id];
+                            const total = ar?.total || 0;
+                            if (total === 0) return null;
+                            return (
+                              <div className="absolute pointer-events-none" style={{
+                                bottom: -8, left: -6, zIndex: 30,
+                                transform: `rotate(${-rotation * 0.6}deg)`,
+                              }}>
+                                <span style={{
+                                  fontFamily: "'Caveat', cursive", fontSize: 16,
+                                  color: 'rgba(255,255,255,0.55)',
+                                  textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                                }}>
+                                  {total} ❤️
+                                </span>
+                              </div>
+                            );
+                          })()}
                         </motion.div>
 
                         {/* Quote */}
