@@ -436,7 +436,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           style={{
                             width: '55%', aspectRatio: '9/16', borderRadius: 6,
                             transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
-                            boxShadow: isSelected ? '0 8px 24px rgba(0,0,0,0.4), 0 0 0 2px rgba(249,115,22,0.3)' : 'none',
+                            boxShadow: isSelected ? '0 8px 24px rgba(0,0,0,0.4)' : 'none',
                             marginLeft: idx % 2 === 0 ? '0%' : '12%',
                           }}
                           onClick={() => { const ri = activities.findIndex(a => a.id === act.id); if (ri >= 0) setCurrentIndex(ri); }}
@@ -452,7 +452,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             )}
                           </div>
 
-                          {isSelected && <div className="absolute inset-0 pointer-events-none" style={{ border: '2px solid rgba(249,115,22,0.4)', borderRadius: 6 }} />}
+                          {isSelected && <div className="absolute inset-0 pointer-events-none" style={{ border: '2px solid rgba(255,255,255,0.2)', borderRadius: 6 }} />}
 
                           {/* Paperclip */}
                           {decorType === 0 && (
