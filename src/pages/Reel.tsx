@@ -1790,20 +1790,17 @@ const Reel = () => {
             }}
             initial={{
               x: slideDirection === 'left' ? 290 : slideDirection === 'right' ? -290 : 0,
-              scale: 0.8,
               opacity: 0.5,
             }}
             animate={{
               x: 0,
-              scale: 1,
               opacity: 1,
             }}
             exit={{
               x: slideDirection === 'left' ? -290 : 290,
-              scale: 0.8,
               opacity: 0,
             }}
-            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
           >
               {/* Full templated image/video - with lock overlay for non-public users */}
               {(() => {
