@@ -500,20 +500,20 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               style={{ height: '46%', marginTop: 8 }}
               onClick={handleTap}
             >
-              <div className="relative w-full h-full flex items-center justify-center">
+              <div className="relative w-full h-full flex items-center justify-center" style={{ gap: '10px' }}>
                 {/* Previous card (left, rotated) */}
                 {prevActivity && !prevActivity.isPlaceholder && (
                   <motion.div
                     className="absolute overflow-hidden"
                     style={{
-                      width: '48%',
+                      width: '46%',
                       aspectRatio: '9/16',
-                      left: '-6%',
-                      top: '8%',
-                      borderRadius: 16,
+                      left: '-4%',
+                      top: '10%',
+                      borderRadius: 14,
                       transform: 'rotate(-10deg)',
                       zIndex: 5,
-                      filter: 'brightness(0.6)',
+                      filter: 'brightness(0.55)',
                       boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
                     }}
                     initial={{ opacity: 0, x: -40 }}
@@ -541,14 +541,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   <motion.div
                     className="absolute overflow-hidden"
                     style={{
-                      width: '48%',
+                      width: '46%',
                       aspectRatio: '9/16',
-                      right: '-6%',
-                      top: '8%',
-                      borderRadius: 16,
+                      right: '-4%',
+                      top: '10%',
+                      borderRadius: 14,
                       transform: 'rotate(10deg)',
                       zIndex: 5,
-                      filter: 'brightness(0.6)',
+                      filter: 'brightness(0.55)',
                       boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
                     }}
                     initial={{ opacity: 0, x: 40 }}
@@ -571,15 +571,15 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   </motion.div>
                 )}
 
-                {/* Current card (center, front) */}
+                {/* Current card (center, front) — no border/padding */}
                 <motion.div
                   className="relative overflow-hidden"
                   style={{
                     width: '62%',
                     aspectRatio: '9/16',
-                    borderRadius: 18,
+                    borderRadius: 4,
                     zIndex: 10,
-                    boxShadow: '0 16px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)',
+                    boxShadow: '0 16px 64px rgba(0,0,0,0.5)',
                   }}
                 >
                   <AnimatePresence mode="wait">
@@ -597,8 +597,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           onClick={(e) => { e.stopPropagation(); onClose(); onLogActivity?.(); }}
                           style={{
                             background: 'linear-gradient(180deg, rgba(28,28,32,1) 0%, rgba(18,18,22,1) 100%)',
-                            border: '1px solid rgba(255,255,255,0.08)',
-                            borderRadius: 18,
+                            borderRadius: 4,
                           }}
                         >
                           <div className="absolute inset-0" style={{
@@ -639,14 +638,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       )}
                     </motion.div>
                   </AnimatePresence>
-                </motion.div>
 
-                {/* Floating emoji reactions on cards */}
-                {activeReactionTypes.length > 0 && (
-                  <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 25 }}>
-                    <Floating3DEmojis reactions={activeReactionTypes} newReaction={null} isPaused={isPaused} />
-                  </div>
-                )}
+                  {/* Reaction stickers around the card edges */}
+                  {activeReactionTypes.length > 0 && (
+                    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 25, overflow: 'visible' }}>
+                      <Floating3DEmojis reactions={activeReactionTypes} newReaction={null} isPaused={isPaused} />
+                    </div>
+                  )}
+                </motion.div>
               </div>
             </div>
 
