@@ -1710,13 +1710,10 @@ const Reel = () => {
             const isPrevVideo = hasPrevStoryMedia && isVideoUrl(prevMedia);
             if (!prevMedia) return null;
             return (
-              <motion.div
+              <div
                 key={`peek-left-${prevIdx}`}
                 className="absolute left-0 top-0 bottom-0 flex items-center pointer-events-none"
                 style={{ width: '10%', zIndex: 20 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.15 }}
               >
                 <div
                   className="w-full overflow-hidden"
