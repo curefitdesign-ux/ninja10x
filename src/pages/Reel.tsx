@@ -2109,8 +2109,7 @@ const Reel = () => {
                   </div>
                 );
               })()}
-          </motion.div>
-          </AnimatePresence>
+          </div>
           
           {/* Right arrow indicator - only on first story */}
           {effectiveUserGroups.length > 1 && currentUserIndex === 0 && currentActivityIndex === 0 && (
