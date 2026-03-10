@@ -438,7 +438,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             width: '55%', aspectRatio: '9/16', borderRadius: 6,
                             transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
                             marginLeft: idx % 2 === 0 ? '0%' : '12%',
-                            marginLeft: idx % 2 === 0 ? '0%' : '12%',
                           }}
                           onClick={() => { const ri = activities.findIndex(a => a.id === act.id); if (ri >= 0) setCurrentIndex(ri); }}
                           whileTap={{ scale: 0.97 }}
