@@ -1802,14 +1802,14 @@ const Reel = () => {
                               <motion.div
                                 key={`stack-2-${group.userId}`}
                                 initial={{ scale: 0.56, opacity: 0, y: 0 }}
-                                animate={{ scale: 0.56, opacity: 0.4, y: 250 }}
+                                animate={{ scale: 0.56, opacity: 0.4, y: 200 }}
                                 exit={{ scale: 0.56, opacity: 0, y: 0 }}
                                 transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.08 }}
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(37% - 10px)',
+                                  height: 'calc(74% - 10px)',
                                   overflow: 'hidden',
                                   zIndex: 1,
                                   borderRadius: '12px',
@@ -1827,14 +1827,14 @@ const Reel = () => {
                               <motion.div
                                 key={`stack-1-${group.userId}`}
                                 initial={{ scale: 0.62, opacity: 0, y: 0 }}
-                                animate={{ scale: 0.62, opacity: 0.55, y: 174 }}
+                                animate={{ scale: 0.62, opacity: 0.55, y: 124 }}
                                 exit={{ scale: 0.62, opacity: 0, y: 0 }}
                                 transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.04 }}
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(41% - 10px)',
+                                  height: 'calc(82% - 10px)',
                                   overflow: 'hidden',
                                   zIndex: 2,
                                   borderRadius: '12px',
