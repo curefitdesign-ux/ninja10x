@@ -670,7 +670,7 @@ const Reel = () => {
     setLocalReactions(prev => {
       const existing = prev[currentActivity.id] || { total: 0, reactions: { ...DEFAULT_REACTIONS }, reactorProfiles: [] };
       const newReactions = { ...existing.reactions };
-      const currentReaction = newReactions[type] || { count: 0, userReacted: false };
+      const currentReaction = newReactions[type] || { type, count: 0, userReacted: false };
       newReactions[type] = {
         ...currentReaction,
         count: currentReaction.count + 1,
