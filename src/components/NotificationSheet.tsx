@@ -471,17 +471,24 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                         {/* Right side: nudge icon or reaction badge + thumbnail */}
                         {notif.isNudge ? (
                           <div className="relative flex-shrink-0">
-                            <img src={deskBellImg} alt="Nudge" className="w-9 h-9 object-contain" />
+                            <div 
+                              className="w-11 h-11 rounded-[5px] overflow-hidden flex items-center justify-center"
+                              style={{
+                                background: 'rgba(255, 255, 255, 0.10)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                              }}
+                            >
+                              <img src={deskBellImg} alt="Nudge" className="w-8 h-8 object-contain" />
+                            </div>
                             {(notif.nudgeCount || 0) > 1 && (
-                              <div
-                                className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center"
+                              <div 
+                                className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
                                 style={{
-                                  background: '#EF4444',
-                                  border: '1.5px solid rgba(0,0,0,0.4)',
-                                  boxShadow: '0 0 6px rgba(239, 68, 68, 0.5)',
+                                  background: 'rgba(30, 18, 69, 0.9)',
+                                  border: '1.5px solid rgba(255,255,255,0.15)',
                                 }}
                               >
-                                <span className="text-white text-[9px] font-bold leading-none">{notif.nudgeCount}</span>
+                                <span className="text-white text-[10px] font-bold leading-none">{notif.nudgeCount}</span>
                               </div>
                             )}
                           </div>
