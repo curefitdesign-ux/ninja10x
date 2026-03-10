@@ -80,6 +80,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 }, _ref) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [nudgeBellAnim, setNudgeBellAnim] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const portalContainer = usePortalContainer();
   const { user } = useAuth();
@@ -420,9 +421,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         {/* Timeline dot */}
                         <div className="absolute rounded-full" style={{
                           left: 22, top: 28, width: 14, height: 14,
-                          background: isSelected ? 'linear-gradient(135deg, #F97316, #EC4899)' : 'rgba(255,255,255,0.15)',
-                          border: `2px solid ${isSelected ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.1)'}`,
-                          boxShadow: isSelected ? '0 0 12px rgba(249,115,22,0.4)' : 'none', zIndex: 5,
+                          background: isSelected ? 'linear-gradient(135deg, #34D399, #10B981)' : 'rgba(255,255,255,0.15)',
+                          border: `2px solid ${isSelected ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                          boxShadow: isSelected ? '0 0 12px rgba(52,211,153,0.4)' : 'none', zIndex: 5,
                         }} />
 
                         {/* Handwritten date */}
@@ -436,7 +437,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           style={{
                             width: '55%', aspectRatio: '9/16', borderRadius: 6,
                             transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
-                            boxShadow: isSelected ? '0 8px 24px rgba(0,0,0,0.4)' : 'none',
                             marginLeft: idx % 2 === 0 ? '0%' : '12%',
                           }}
                           onClick={() => { const ri = activities.findIndex(a => a.id === act.id); if (ri >= 0) setCurrentIndex(ri); }}
@@ -452,7 +452,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             )}
                           </div>
 
-                          {isSelected && <div className="absolute inset-0 pointer-events-none" style={{ border: '2px solid rgba(255,255,255,0.2)', borderRadius: 6 }} />}
+                          
 
                           {/* Paperclip */}
                           {decorType === 0 && (
@@ -540,7 +540,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 <button
                   onClick={async (e) => {
                     e.stopPropagation();
-                    // Play nudge bell sound
+                    // Play nudge bell sound + animate
+                    setNudgeBellAnim(true);
                     try {
                       const audio = new Audio('/sounds/nudge-bell.mp3');
                       audio.volume = 0.7;
@@ -561,7 +562,15 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   }}
                 >
                   <div className="flex items-center gap-2.5 h-full">
-                    <img src={deskBellImg} alt="bell" className="w-7 h-7 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                    <motion.img
+                      src={deskBellImg}
+                      alt="bell"
+                      className="w-7 h-7 object-contain"
+                      style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))', transformOrigin: 'bottom center' }}
+                      animate={nudgeBellAnim ? { rotate: [0, -25, 20, -15, 10, -5, 0], scale: [1, 1.2, 1.15, 1.1, 1.05, 1] } : {}}
+                      transition={{ duration: 0.6, ease: 'easeInOut' }}
+                      onAnimationComplete={() => setNudgeBellAnim(false)}
+                    />
                     <span className="text-white/80 text-xs font-medium">Nudge to log activity</span>
                   </div>
                 </button>
