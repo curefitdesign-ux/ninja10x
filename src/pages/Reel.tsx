@@ -1696,8 +1696,8 @@ const Reel = () => {
         >
           {/* Reel cards fill the available middle container space */}
           <div className="relative min-h-0 flex-1 flex items-center justify-center">
-          {/* Previous user peek card - 12% visible on left */}
-          {effectiveUserGroups.length > 1 && (() => {
+          {/* Previous user peek card - 12% visible on left — hidden during user transitions */}
+          {effectiveUserGroups.length > 1 && !userTransitionFlash && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
             const prevGroup = effectiveUserGroups[prevIdx];
             // Use the latest non-recap activity for peek image; prefer non-video but fall back to any
