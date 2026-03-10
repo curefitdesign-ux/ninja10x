@@ -5,7 +5,7 @@ interface DynamicBlurBackgroundProps {
   children: React.ReactNode;
 }
 
-export default function DynamicBlurBackground({ imageUrl, children }: DynamicBlurBackgroundProps) {
+const DynamicBlurBackground = memo(function DynamicBlurBackground({ imageUrl, children }: DynamicBlurBackgroundProps) {
   const [layers, setLayers] = useState<[string, string]>([imageUrl, imageUrl]);
   const [frontLayer, setFrontLayer] = useState<'a' | 'b'>('a');
   const prevUrlRef = useRef(imageUrl);
