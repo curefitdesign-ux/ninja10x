@@ -589,29 +589,35 @@ const Reel = () => {
   // Mark the current user as viewed AFTER their story finishes (handled by cycleActivity)
   // Don't mark immediately — let the progress ring complete first
 
-  // Preload ALL images in current user's story + next user's first image
+  // Preload ALL images in current user's story + adjacent users' images for smooth scrolling
   useEffect(() => {
     if (!currentGroup) return;
+    
+    const preloadUrl = (url: string | undefined | null) => {
+      if (url && !isVideoUrl(url)) {
+        const img = new Image();
+        img.src = url;
+      }
+    };
+    
     // Preload all activities in current user
     for (const act of currentGroup.activities) {
-      if (act && !act.id?.startsWith('week-recap') && act.id !== 'log-activity' && !act.isVideo) {
-        const url = act.originalUrl || act.storageUrl;
-        if (url) {
-          const img = new Image();
-          img.src = url;
-        }
+      if (act && !act.id?.startsWith('week-recap') && act.id !== 'log-activity') {
+        preloadUrl(act.originalUrl || act.storageUrl);
       }
     }
-    // Preload next user's first activity
-    const nextUserIdx = currentUserIndex + 1;
-    if (nextUserIdx < effectiveUserGroups.length) {
-      const nextGroup = effectiveUserGroups[nextUserIdx];
-      const firstAct = nextGroup?.activities?.[0];
-      if (firstAct && !firstAct.isVideo) {
-        const url = firstAct.originalUrl || firstAct.storageUrl;
-        if (url) {
-          const img = new Image();
-          img.src = url;
+    
+    // Preload next AND previous user's images for instant peek + transitions
+    const adjacentOffsets = [-1, 1, 2];
+    for (const offset of adjacentOffsets) {
+      const idx = (currentUserIndex + offset + effectiveUserGroups.length) % effectiveUserGroups.length;
+      if (idx === currentUserIndex) continue;
+      const group = effectiveUserGroups[idx];
+      if (group) {
+        for (const act of group.activities) {
+          if (act && !act.isVideo) {
+            preloadUrl(act.originalUrl || act.storageUrl);
+          }
         }
       }
     }
