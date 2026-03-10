@@ -1899,7 +1899,7 @@ const Reel = () => {
                               overflow: 'hidden',
                               background: isLogActivityCard ? '#0A0A0F' : 'transparent',
                               marginTop: '-10px',
-                              zIndex: 3,
+                              zIndex: 4,
                               ...(showStackedCards && isCenter && !isLogActivityCard ? {
                                 boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.08)',
                                 border: '1px solid rgba(255,255,255,0.10)',
