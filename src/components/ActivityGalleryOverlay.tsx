@@ -503,13 +503,12 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   <motion.div
                     className="relative overflow-hidden"
                     style={{
-                      width: '100%',
+                      width: '88%',
                       aspectRatio: '9/16',
                       maxHeight: '100%',
-                      maxWidth: '100%',
+                      maxWidth: '88%',
                       borderRadius: '20px',
                       overflow: 'hidden',
-                      background: 'rgba(0,0,0,0.3)',
                     }}
                   >
                     <AnimatePresence mode="wait">
@@ -712,49 +711,53 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
           {/* Reacts So Far Sheet */}
           {showReactsSheet &&
             createPortal(
-              <ReactsSoFarSheet
-                activityId={current.id}
-                total={currentReactions.total}
-                reactions={currentReactions.reactions}
-                reactorProfiles={currentReactions.reactorProfiles}
-                onClose={() => setShowReactsSheet(false)}
-              />,
+              <div style={{ position: 'relative', zIndex: 70 }}>
+                <ReactsSoFarSheet
+                  activityId={current.id}
+                  total={currentReactions.total}
+                  reactions={currentReactions.reactions}
+                  reactorProfiles={currentReactions.reactorProfiles}
+                  onClose={() => setShowReactsSheet(false)}
+                />
+              </div>,
               document.body,
             )}
 
           {/* Send Reaction Sheet for other users */}
           {showSendReactionSheet &&
             createPortal(
-              <SendReactionSheet
-                activityId={current.id}
-                currentUserId={user?.id}
-                activityType={current.activity || undefined}
-                onReact={handleReact}
-                onClose={() => setShowSendReactionSheet(false)}
-                onViewReactions={() => {
-                  setShowSendReactionSheet(false);
-                  setShowReactsSheet(true);
-                }}
-                onReactionRemoved={(reactionType) => {
-                  setLocalReactions(prev => {
-                    const curr = prev[current.id];
-                    if (!curr) return prev;
-                    const existing = curr.reactions[reactionType];
-                    const newCount = Math.max((existing?.count || 0) - 1, 0);
-                    return {
-                      ...prev,
-                      [current.id]: {
-                        ...curr,
-                        total: Math.max(curr.total - 1, 0),
-                        reactions: { ...curr.reactions, [reactionType]: { count: newCount, reacted: newCount > 0 } },
-                        reactorProfiles: curr.reactorProfiles.filter(r => !(r.userId === user?.id && r.reactionType === reactionType)),
-                      },
-                    };
-                  });
-                }}
-                totalReactions={currentReactions.total}
-                reactorProfiles={currentReactions.reactorProfiles}
-              />,
+              <div style={{ position: 'relative', zIndex: 70 }}>
+                <SendReactionSheet
+                  activityId={current.id}
+                  currentUserId={user?.id}
+                  activityType={current.activity || undefined}
+                  onReact={handleReact}
+                  onClose={() => setShowSendReactionSheet(false)}
+                  onViewReactions={() => {
+                    setShowSendReactionSheet(false);
+                    setShowReactsSheet(true);
+                  }}
+                  onReactionRemoved={(reactionType) => {
+                    setLocalReactions(prev => {
+                      const curr = prev[current.id];
+                      if (!curr) return prev;
+                      const existing = curr.reactions[reactionType];
+                      const newCount = Math.max((existing?.count || 0) - 1, 0);
+                      return {
+                        ...prev,
+                        [current.id]: {
+                          ...curr,
+                          total: Math.max(curr.total - 1, 0),
+                          reactions: { ...curr.reactions, [reactionType]: { count: newCount, reacted: newCount > 0 } },
+                          reactorProfiles: curr.reactorProfiles.filter(r => !(r.userId === user?.id && r.reactionType === reactionType)),
+                        },
+                      };
+                    });
+                  }}
+                  totalReactions={currentReactions.total}
+                  reactorProfiles={currentReactions.reactorProfiles}
+                />
+              </div>,
               document.body,
             )}
 
