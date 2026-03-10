@@ -470,7 +470,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
 
                         {/* Right side: nudge icon or reaction badge + thumbnail */}
                         {notif.isNudge ? (
-                          <div className="relative flex-shrink-0">
+                          <div className="relative flex-shrink-0 self-start mt-0.5">
                             <div 
                               className="w-11 h-11 rounded-[5px] overflow-hidden flex items-center justify-center"
                               style={{
