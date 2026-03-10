@@ -1760,24 +1760,9 @@ const Reel = () => {
                         {currentActivity?.id === 'log-activity' ? (
                           // "Log Your Activity" card — dark with animated glowing border
                           (() => {
-                            // Calculate days since last activity for urgency color
-                            const lastActivity = currentGroup?.activities
-                              ?.filter(a => a.id !== 'log-activity' && a.dayNumber < 1001)
-                              ?.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())?.[0];
-                            const daysSinceLastActivity = lastActivity?.createdAt 
-                              ? Math.floor((Date.now() - new Date(lastActivity.createdAt).getTime()) / (1000 * 60 * 60 * 24))
-                              : 0;
-                            // blue(0-1d) → green(2d) → yellow(3d) → orange(4d+)
-                            const urgencyColor = daysSinceLastActivity <= 1 
-                              ? { h: 200, s: 100, l: 55, name: 'blue' }   // blue
-                              : daysSinceLastActivity === 2 
-                              ? { h: 150, s: 90, l: 50, name: 'green' }   // green
-                              : daysSinceLastActivity === 3 
-                              ? { h: 45, s: 100, l: 55, name: 'yellow' }  // yellow
-                              : { h: 25, s: 100, l: 55, name: 'orange' }; // orange
-                            const glowHsl = `hsl(${urgencyColor.h}, ${urgencyColor.s}%, ${urgencyColor.l}%)`;
-                            const glowDim = `hsla(${urgencyColor.h}, ${urgencyColor.s}%, ${urgencyColor.l}%, 0.15)`;
-                            const glowMid = `hsla(${urgencyColor.h}, ${urgencyColor.s}%, ${urgencyColor.l}%, 0.4)`;
+                            const glowHsl = `hsl(260, 70%, 65%)`;
+                            const glowDim = `hsla(260, 70%, 65%, 0.15)`;
+                            const glowMid = `hsla(260, 70%, 65%, 0.35)`;
 
                             return (
                               <div 
@@ -1843,18 +1828,26 @@ const Reel = () => {
 
                                 {/* Content */}
                                 <div className="relative z-10 flex flex-col items-center justify-center h-full px-6">
-                                  {/* Text */}
-                                  <div className="text-center mb-8">
-                                    <p className="text-white/70 text-lg font-medium leading-relaxed">
-                                      {daysSinceLastActivity <= 1 
-                                        ? "Ready to crush it today?" 
-                                        : daysSinceLastActivity <= 2 
-                                        ? "Don't break your streak!"
-                                        : daysSinceLastActivity <= 3
-                                        ? "Your journey misses you!"
-                                        : "Come back stronger 💪"}
+                                  {/* Animated gradient text */}
+                                  <motion.div 
+                                    className="text-center mb-8"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.5, duration: 0.8, ease: 'easeOut' }}
+                                  >
+                                    <p 
+                                      className="text-2xl font-semibold leading-relaxed"
+                                      style={{
+                                        background: 'linear-gradient(135deg, hsla(260, 80%, 72%, 1), hsla(280, 70%, 65%, 1), hsla(240, 70%, 72%, 1))',
+                                        backgroundSize: '200% 200%',
+                                        WebkitBackgroundClip: 'text',
+                                        WebkitTextFillColor: 'transparent',
+                                        animation: 'gradientShift 4s ease infinite',
+                                      }}
+                                    >
+                                      Ready to crush it today?
                                     </p>
-                                  </div>
+                                  </motion.div>
 
                                   {/* Glowing plus */}
                                   <div className="relative flex items-center justify-center" style={{ width: 64, height: 64 }}>
