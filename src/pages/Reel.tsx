@@ -1964,8 +1964,6 @@ const Reel = () => {
                             style={{ 
                               objectFit: 'cover',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                              opacity: mediaLoaded ? 1 : 0,
-                              transition: 'opacity 0.2s ease',
                             }}
                             autoPlay
                             loop
