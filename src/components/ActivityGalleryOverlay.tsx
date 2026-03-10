@@ -136,13 +136,13 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     if (count >= 12) {
       parts.push(`🏆 ${name} crushed all 12 days!`);
     } else if (count >= 9) {
-      parts.push(`🔥 ${name}'s on fire, ${count} days in, almost there!`);
+      parts.push(`🔥 ${name}'s on fire, almost there!`);
     } else if (count >= 6) {
-      parts.push(`💪 Halfway beast mode, ${count} days and counting.`);
+      parts.push(`💪 Halfway beast mode.`);
     } else if (count >= 3) {
-      parts.push(`⚡ ${name}'s building momentum, ${count} days strong.`);
+      parts.push(`⚡ ${name}'s building momentum.`);
     } else {
-      parts.push(`🚀 ${name} just started the journey, day ${count}!`);
+      parts.push(`🚀 ${name} just started the journey!`);
     }
 
     if (variety >= 3) {
@@ -154,11 +154,10 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
       parts.push(`All-in on ${topActivity} 🎯`);
     }
 
-    if (durationStr) {
-      parts.push(`⏱️ ${durationStr} of pure grind so far`);
-    }
+    const mainLine = parts.join(' · ');
+    const durationLine = durationStr ? `⏱️ ${durationStr} of pure grind so far` : '';
 
-    return { diary: parts.join(' · '), count };
+    return { diary: mainLine, durationLine, count };
   }, [activities, userProfile]);
 
   // Media loading
