@@ -492,5 +492,15 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
 
   // Portal to body to avoid being clipped by transformed/scroll containers on mobile.
   if (typeof document === 'undefined') return null;
-  return createPortal(ui, portalContainer);
+  return (
+    <>
+      {createPortal(ui, portalContainer)}
+      <MediaSourceSheet
+        isOpen={showMediaSheet}
+        onClose={() => setShowMediaSheet(false)}
+        dayNumber={nextDayNumber}
+        zIndex={60}
+      />
+    </>
+  );
 }
