@@ -84,7 +84,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
           <div
             className="relative overflow-hidden"
             style={{
-              borderRadius: 9999,
+              borderRadius: 0,
               background: "rgba(255, 255, 255, 0.03)",
               backdropFilter: "blur(60px) saturate(200%)",
               WebkitBackdropFilter: "blur(60px) saturate(200%)",
