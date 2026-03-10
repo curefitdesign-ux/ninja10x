@@ -1690,7 +1690,7 @@ const Reel = () => {
           }}
         >
           {/* Reel cards fill the available middle container space */}
-          <div className="relative min-h-0 flex-1 flex items-center justify-center" style={{ perspective: '1200px' }}>
+          <div className="relative min-h-0 flex-1 flex items-center justify-center">
           {/* Swipe gesture overlay */}
           <motion.div
             className="absolute inset-0 z-[60]"
