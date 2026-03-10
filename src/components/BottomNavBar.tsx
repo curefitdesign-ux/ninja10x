@@ -67,101 +67,80 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
   return (
     <>
       <div
-        className="fixed left-1/2 -translate-x-1/2"
+        className="fixed left-0 right-0 bottom-0"
         style={{
-          bottom: "calc(max(env(safe-area-inset-bottom, 10px), 10px) + 24px)",
           zIndex: 40,
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          background: "rgba(10, 7, 32, 0.85)",
+          backdropFilter: "blur(60px) saturate(200%)",
+          WebkitBackdropFilter: "blur(60px) saturate(200%)",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
         }}
       >
-        <div
-          className="relative"
-          style={{
-            borderRadius: 9999,
-            padding: 1,
-            background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%)",
-          }}
-        >
-          <div
-            className="relative overflow-hidden"
-            style={{
-              borderRadius: 9999,
-              background: "rgba(255, 255, 255, 0.03)",
-              backdropFilter: "blur(60px) saturate(200%)",
-              WebkitBackdropFilter: "blur(60px) saturate(200%)",
-              boxShadow: `inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -0.5px 0 rgba(255,255,255,0.04)`,
-            }}
-          >
-            <div
-              className="absolute top-0 left-[15%] right-[15%] h-px pointer-events-none"
-              style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)" }}
-            />
-
-            <div className="flex items-center justify-evenly px-2 py-2">
-              {/* Home */}
-              <button onClick={() => { window.history.length > 1 ? navigate(-1) : navigate("/"); }} className={btnClass}>
-                <div style={{ color: "rgba(200, 210, 230, 0.6)", opacity: 0.5 }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="11" stroke="currentColor" strokeWidth="1.5" />
-                    <path d="M14 8L10 12L14 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-                <span className="text-[9px] mt-0.5 tracking-wide whitespace-nowrap" style={{ color: "rgba(200, 210, 230, 0.5)", fontWeight: 400 }}>Home</span>
-              </button>
-
-              {/* Discover */}
-              <button onClick={() => handleTabClick("discover")} className={btnClass}>
-                <div className="transition-all duration-300" style={{
-                  color: activeTab === "discover" ? "#ffffff" : "rgba(200, 210, 230, 0.6)",
-                  opacity: activeTab === "discover" ? 1 : 0.3,
-                  transform: activeTab === "discover" ? "scale(1.1)" : "scale(1)",
-                }}>
-                  <Map className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap transition-all duration-300" style={{
-                  color: activeTab === "discover" ? "#ffffff" : "rgba(200, 210, 230, 0.5)",
-                  fontWeight: activeTab === "discover" ? 700 : 400,
-                }}>Discover</span>
-              </button>
-
-              {/* My Progress */}
-              <button onClick={() => handleTabClick("progress")} className={btnClass}>
-                <div className="transition-all duration-300" style={{
-                  color: activeTab === "progress" ? "#ffffff" : "rgba(200, 210, 230, 0.6)",
-                  opacity: activeTab === "progress" ? 1 : 0.3,
-                  transform: activeTab === "progress" ? "scale(1.1)" : "scale(1)",
-                }}>
-                  <img src={progressIcon} alt="My Progress" className="w-5 h-5 object-contain" />
-                </div>
-                <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap transition-all duration-300" style={{
-                  color: activeTab === "progress" ? "#ffffff" : "rgba(200, 210, 230, 0.5)",
-                  fontWeight: activeTab === "progress" ? 700 : 400,
-                }}>My Progress</span>
-              </button>
-
-              {/* Alerts */}
-              <button onClick={() => handleTabClick("bell")} className={btnClass}>
-                <div style={{ color: "rgba(200, 210, 230, 0.6)", opacity: 0.5 }} className="relative">
-                  <Bell className="w-5 h-5" strokeWidth={1.5} />
-                  {unreadNotificationCount > 0 && (
-                    <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full" style={{
-                      background: '#EF4444',
-                      border: '1.5px solid rgba(0,0,0,0.5)',
-                      boxShadow: '0 0 6px rgba(239, 68, 68, 0.6)',
-                    }} />
-                  )}
-                </div>
-                <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap" style={{ color: "rgba(200, 210, 230, 0.5)", fontWeight: 400 }}>Alerts</span>
-              </button>
-
-              {/* Menu */}
-              <button onClick={() => handleTabClick("menu")} className={btnClass}>
-                <div style={{ color: "rgba(200, 210, 230, 0.6)", opacity: 0.5 }}>
-                  <MoreVertical className="w-5 h-5" strokeWidth={1.5} />
-                </div>
-                <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap" style={{ color: "rgba(200, 210, 230, 0.5)", fontWeight: 400 }}>Menu</span>
-              </button>
+        <div className="flex items-center justify-evenly px-2 py-2">
+          {/* Home */}
+          <button onClick={() => { window.history.length > 1 ? navigate(-1) : navigate("/"); }} className={btnClass}>
+            <div style={{ color: "rgba(200, 210, 230, 0.6)", opacity: 0.5 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="11" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M14 8L10 12L14 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </div>
-          </div>
+            <span className="text-[9px] mt-0.5 tracking-wide whitespace-nowrap" style={{ color: "rgba(200, 210, 230, 0.5)", fontWeight: 400 }}>Home</span>
+          </button>
+
+          {/* Discover */}
+          <button onClick={() => handleTabClick("discover")} className={btnClass}>
+            <div className="transition-all duration-300" style={{
+              color: activeTab === "discover" ? "#ffffff" : "rgba(200, 210, 230, 0.6)",
+              opacity: activeTab === "discover" ? 1 : 0.3,
+              transform: activeTab === "discover" ? "scale(1.1)" : "scale(1)",
+            }}>
+              <Map className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap transition-all duration-300" style={{
+              color: activeTab === "discover" ? "#ffffff" : "rgba(200, 210, 230, 0.5)",
+              fontWeight: activeTab === "discover" ? 700 : 400,
+            }}>Discover</span>
+          </button>
+
+          {/* My Progress */}
+          <button onClick={() => handleTabClick("progress")} className={btnClass}>
+            <div className="transition-all duration-300" style={{
+              color: activeTab === "progress" ? "#ffffff" : "rgba(200, 210, 230, 0.6)",
+              opacity: activeTab === "progress" ? 1 : 0.3,
+              transform: activeTab === "progress" ? "scale(1.1)" : "scale(1)",
+            }}>
+              <img src={progressIcon} alt="My Progress" className="w-5 h-5 object-contain" />
+            </div>
+            <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap transition-all duration-300" style={{
+              color: activeTab === "progress" ? "#ffffff" : "rgba(200, 210, 230, 0.5)",
+              fontWeight: activeTab === "progress" ? 700 : 400,
+            }}>My Progress</span>
+          </button>
+
+          {/* Alerts */}
+          <button onClick={() => handleTabClick("bell")} className={btnClass}>
+            <div style={{ color: "rgba(200, 210, 230, 0.6)", opacity: 0.5 }} className="relative">
+              <Bell className="w-5 h-5" strokeWidth={1.5} />
+              {unreadNotificationCount > 0 && (
+                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full" style={{
+                  background: '#EF4444',
+                  border: '1.5px solid rgba(0,0,0,0.5)',
+                  boxShadow: '0 0 6px rgba(239, 68, 68, 0.6)',
+                }} />
+              )}
+            </div>
+            <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap" style={{ color: "rgba(200, 210, 230, 0.5)", fontWeight: 400 }}>Alerts</span>
+          </button>
+
+          {/* Menu */}
+          <button onClick={() => handleTabClick("menu")} className={btnClass}>
+            <div style={{ color: "rgba(200, 210, 230, 0.6)", opacity: 0.5 }}>
+              <MoreVertical className="w-5 h-5" strokeWidth={1.5} />
+            </div>
+            <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap" style={{ color: "rgba(200, 210, 230, 0.5)", fontWeight: 400 }}>Menu</span>
+          </button>
         </div>
       </div>
 
