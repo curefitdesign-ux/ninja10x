@@ -1759,17 +1759,18 @@ const Reel = () => {
             );
           })()}
 
-          {/* Next user peek card - 20% visible on right */}
+          {/* Next user peek card - 10% visible on right */}
           {effectiveUserGroups.length > 1 && (() => {
             const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
             const nextGroup = effectiveUserGroups[nextIdx];
-            const nextActivity = [...(nextGroup?.activities || [])].reverse().find(a => 
-              !isVideoUrl(a.storageUrl || '') && a.dayNumber < 1001
-            ) || nextGroup?.activities[nextGroup.activities.length - 1];
-            const nextMedia = nextActivity?.storageUrl || nextActivity?.originalUrl;
+            const nextAct = [...(nextGroup?.activities || [])].reverse().find(a => 
+              !isVideoUrl(a.storageUrl || '') && a.dayNumber < 1001 && a.id !== 'log-activity'
+            ) || [...(nextGroup?.activities || [])].reverse().find(a => a.dayNumber < 1001 && a.id !== 'log-activity');
+            const nextMedia = nextAct?.originalUrl || nextAct?.storageUrl;
             const isNextOwnStory = user && nextGroup?.userId === user.id;
             const isNextLocked = !isNextOwnStory && !profile?.stories_public;
-            if (!nextMedia || isVideoUrl(nextMedia)) return null;
+            const isNextVideo = isVideoUrl(nextMedia || '');
+            if (!nextMedia) return null;
             return (
               <motion.div
                 key={`peek-right-${nextIdx}`}
@@ -1791,17 +1792,31 @@ const Reel = () => {
                     boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 32px rgba(0,0,0,0.3)',
                   }}
                 >
-                  <img
-                    src={nextMedia}
-                    alt="Next user"
-                    className="w-full h-full object-cover"
-                    loading="eager"
-                    fetchPriority="high"
-                    style={{ 
-                      opacity: isNextLocked ? 0.35 : 0.5, 
-                      filter: isNextLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                    }}
-                  />
+                  {isNextVideo ? (
+                    <video
+                      src={nextMedia}
+                      className="w-full h-full object-cover"
+                      muted
+                      playsInline
+                      preload="metadata"
+                      style={{ 
+                        opacity: isNextLocked ? 0.35 : 0.5, 
+                        filter: isNextLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={nextMedia}
+                      alt="Next user"
+                      className="w-full h-full object-cover"
+                      loading="eager"
+                      fetchPriority="high"
+                      style={{ 
+                        opacity: isNextLocked ? 0.35 : 0.5, 
+                        filter: isNextLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
+                      }}
+                    />
+                  )}
                 </div>
               </motion.div>
             );
