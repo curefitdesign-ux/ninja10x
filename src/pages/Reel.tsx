@@ -301,7 +301,14 @@ const Reel = () => {
       }],
     };
 
-    const allGroups = [myGroup, ...othersGroups];
+    // Sort others: unseen users first, viewed users to the back
+    const sortedOthers = [...othersGroups].sort((a, b) => {
+      const aViewed = viewedUsers.has(a.userId) ? 1 : 0;
+      const bViewed = viewedUsers.has(b.userId) ? 1 : 0;
+      return aViewed - bViewed;
+    });
+
+    const allGroups = [myGroup, ...sortedOthers];
 
     // Insert deep-link group right after own group so navigation finds it
     if (deepLinkGroup) {
@@ -318,7 +325,26 @@ const Reel = () => {
     }
 
     return allGroups.filter(g => g.activities.length > 0);
-  }, [userGroups, user, myActivities, profile, sourceUserId, deepLinkActivityId]);
+  }, [userGroups, user, myActivities, profile, sourceUserId, deepLinkActivityId, viewedUsers]);
+
+  // Stabilize currentUserIndex when groups reorder due to viewedUsers change
+  const currentUserIdRef = useRef<string>('');
+  useEffect(() => {
+    if (effectiveUserGroups.length === 0) return;
+    const currentGroup = effectiveUserGroups[currentUserIndex];
+    if (currentGroup) {
+      currentUserIdRef.current = currentGroup.userId;
+    }
+  }, [currentUserIndex, effectiveUserGroups]);
+
+  // When groups reorder, find the correct index for the current user
+  useEffect(() => {
+    if (!currentUserIdRef.current || effectiveUserGroups.length === 0) return;
+    const newIdx = effectiveUserGroups.findIndex(g => g.userId === currentUserIdRef.current);
+    if (newIdx >= 0 && newIdx !== currentUserIndex) {
+      setCurrentUserIndex(newIdx);
+    }
+  }, [effectiveUserGroups]);
 
   // MAIN NAVIGATION EFFECT: Determine where to land based on navigation intent
   // This runs once per navigation after data is loaded
@@ -1644,41 +1670,7 @@ const Reel = () => {
                       }}
                       transition={{ type: 'spring', stiffness: 280, damping: 30, duration: 0.5 }}
                     >
-                    {/* Instagram-style segmented progress bar */}
-                    {currentGroup && currentGroup.activities.length > 0 && !isLogActivityCard && (
-                      <div
-                        className="absolute top-0 left-0 right-0 z-50 flex gap-[3px] px-2 pt-2"
-                        style={{ pointerEvents: 'none' }}
-                      >
-                        {currentGroup.activities.map((_, segIdx) => {
-                          const isCompleted = segIdx < currentActivityIndex;
-                          const isActive = segIdx === currentActivityIndex;
-                          return (
-                            <div
-                              key={segIdx}
-                              className="flex-1 rounded-full overflow-hidden"
-                              style={{
-                                height: 3,
-                                background: 'rgba(255,255,255,0.25)',
-                              }}
-                            >
-                              <div
-                                className="h-full rounded-full"
-                                style={{
-                                  background: 'rgba(255,255,255,0.9)',
-                                  width: isCompleted ? '100%' : isActive ? '100%' : '0%',
-                                  transform: isActive && autoAdvanceProgress === 0 ? 'scaleX(0)' : 'scaleX(1)',
-                                  transformOrigin: 'left',
-                                  transition: isActive
-                                    ? (autoAdvanceProgress > 0 ? `transform ${autoAdvanceDuration}ms linear` : 'none')
-                                    : 'none',
-                                }}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                    {/* Progress bar removed — timing indicated via avatar ring */}
                     <AnimatePresence mode="popLayout" custom={swipeDirection}>
                       <motion.div
                         key={contentKey}
