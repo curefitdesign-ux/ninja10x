@@ -23,6 +23,8 @@ import cricketBatImg from '@/assets/reactions/cricket-bat.png';
 import basketballImg from '@/assets/reactions/basketball.png';
 import medalImg from '@/assets/reactions/medal.png';
 import shuttlecockImg from '@/assets/reactions/shuttlecock.png';
+import sneakersImg from '@/assets/reactions/sneakers.png';
+import kettlebellsImg from '@/assets/reactions/kettlebells.png';
 
 // 3D reaction images for story bar (different assets)
 import fire3dImg from '@/assets/reactions/fire-3d.png';
@@ -50,6 +52,8 @@ export const ALL_REACTION_IMAGES: Record<ReactionType, string> = {
   basketball: basketballImg,
   medal: medalImg,
   shuttlecock: shuttlecockImg,
+  sneakers: sneakersImg,
+  kettlebells: kettlebellsImg,
 };
 
 export const STORY_BAR_IMAGES = {
@@ -62,18 +66,21 @@ export const STORY_BAR_IMAGES = {
 // Core reactions (always shown)
 export const CORE_REACTIONS: ReactionType[] = ['fire', 'clap', 'fistbump', 'flex', 'trophy', 'runner', 'energy', 'timer', 'heart', 'wow'];
 
-// Activity-specific reactions mapping
+// Activity-specific reactions mapping — these appear first in the grid for the matching activity
 export const ACTIVITY_REACTIONS: Record<string, { reactions: ReactionType[]; label: string }> = {
-  'Trekking': { reactions: ['mountain', 'compass', 'medal'], label: 'Trekking' },
-  'Football': { reactions: ['football', 'medal'], label: 'Football' },
-  'Cycling': { reactions: ['bicycle', 'medal'], label: 'Cycling' },
-  'Yoga': { reactions: ['lotus'], label: 'Yoga' },
-  'Boxing': { reactions: ['boxing-gloves', 'medal'], label: 'Boxing' },
-  'HRX': { reactions: ['boxing-gloves', 'medal'], label: 'HRX' },
+  'Trekking': { reactions: ['mountain', 'compass', 'sneakers', 'medal'], label: 'Trekking' },
+  'Football': { reactions: ['football', 'sneakers', 'medal'], label: 'Football' },
+  'Cycling': { reactions: ['bicycle', 'timer', 'medal'], label: 'Cycling' },
+  'Yoga': { reactions: ['lotus', 'heart', 'medal'], label: 'Yoga' },
+  'Boxing': { reactions: ['boxing-gloves', 'kettlebells', 'medal'], label: 'Boxing' },
+  'HRX': { reactions: ['boxing-gloves', 'kettlebells', 'flex', 'medal'], label: 'HRX' },
   'Cricket': { reactions: ['cricket-bat', 'medal'], label: 'Cricket' },
-  'Basketball': { reactions: ['basketball', 'medal'], label: 'Basketball' },
-  'Running': { reactions: ['runner', 'medal'], label: 'Running' },
-  'Racquet Sports': { reactions: ['shuttlecock', 'medal'], label: 'Racquet Sports' },
+  'Basketball': { reactions: ['basketball', 'sneakers', 'medal'], label: 'Basketball' },
+  'Running': { reactions: ['runner', 'sneakers', 'timer', 'medal'], label: 'Running' },
+  'Racquet Sports': { reactions: ['shuttlecock', 'sneakers', 'medal'], label: 'Racquet Sports' },
+  'GYM': { reactions: ['kettlebells', 'flex', 'trophy', 'medal'], label: 'GYM' },
+  'Swimming': { reactions: ['timer', 'medal', 'energy'], label: 'Swimming' },
+  'Other': { reactions: ['sneakers', 'medal'], label: 'Workout' },
 };
 
 export const REACTION_LABELS: Record<string, string> = {
@@ -87,6 +94,8 @@ export const REACTION_LABELS: Record<string, string> = {
   runner: '🏃 cheered',
   energy: '⚡ energized',
   timer: '⏱️ timed',
+  sneakers: '👟 ran with',
+  kettlebells: '🏋️ lifted for',
 };
 
 export const REACTION_VERBS: Record<string, string> = {
@@ -100,4 +109,6 @@ export const REACTION_VERBS: Record<string, string> = {
   runner: 'cheered',
   energy: 'energized',
   timer: 'timed',
+  sneakers: 'ran with',
+  kettlebells: 'lifted for',
 };
