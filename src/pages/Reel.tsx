@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import curoPeekingImg from '@/assets/mascot/curo-peeking.png';
 
 import { createPortal } from 'react-dom';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
