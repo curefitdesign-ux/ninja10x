@@ -490,12 +490,20 @@ const Reel = () => {
   // Navigate between users (horizontal swipe)
   const goNextUser = useCallback(() => {
     if (effectiveUserGroups.length === 0) return;
+    // Mark current user as viewed when swiping away
+    if (currentGroup) {
+      setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
+    }
     setCurrentActivityIndex(0);
     setCurrentUserIndex(prev => (prev + 1) % effectiveUserGroups.length);
-  }, [effectiveUserGroups.length]);
+  }, [effectiveUserGroups.length, currentGroup]);
 
   const goPrevUser = useCallback(() => {
     if (effectiveUserGroups.length === 0) return;
+    // Mark current user as viewed when swiping away
+    if (currentGroup) {
+      setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
+    }
     setCurrentActivityIndex(0);
     setCurrentUserIndex(prev => (prev - 1 + effectiveUserGroups.length) % effectiveUserGroups.length);
   }, [effectiveUserGroups.length]);
