@@ -503,13 +503,12 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   <motion.div
                     className="relative overflow-hidden"
                     style={{
-                      width: '100%',
+                      width: '88%',
                       aspectRatio: '9/16',
                       maxHeight: '100%',
-                      maxWidth: '100%',
+                      maxWidth: '88%',
                       borderRadius: '20px',
                       overflow: 'hidden',
-                      background: 'rgba(0,0,0,0.3)',
                     }}
                   >
                     <AnimatePresence mode="wait">
