@@ -195,12 +195,7 @@ const Reel = () => {
   // Bottom sheet states and transition animations
   const [isTransitioning, setIsTransitioning] = useState(false);
   const bottomSheetY = useMotionValue(0);
-  const CARD_STEP = 290;
-  const SIDE_CARD_SCALE = 0.84;
-  const FAR_CARD_SCALE = 0.78;
-  const [carouselOffset, setCarouselOffset] = useState(0);
-  const [isCarouselDragging, setIsCarouselDragging] = useState(false);
-  const carouselCommitTimeoutRef = useRef<number | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Data for progress overlay
   const { activities: myActivities, hasPublicActivity, makeActivityPublic } = useJourneyActivities();
