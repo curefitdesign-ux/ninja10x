@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { X, ChevronLeft, ChevronUp, Pencil, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, History, Plus } from 'lucide-react';
+import { X, ChevronLeft, ChevronUp, Pencil, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, History } from 'lucide-react';
 import PullToRefresh from '@/components/PullToRefresh';
 import ProfileMenu from '@/components/ProfileMenu';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
@@ -1652,26 +1652,18 @@ const Reel = () => {
         {/* Week/Day label + Share button row */}
         {currentGroup && currentActivity && (
           <div className="z-40 flex items-center justify-between px-4 shrink-0" style={{ marginBottom: '2px' }}>
-            <div className="flex items-center gap-2">
-              {/* Profile avatar + name for all stories */}
-              <ProfileAvatar
-                src={currentGroup.avatarUrl}
-                name={currentGroup.displayName}
-                size={24}
-                style={{ border: '1.5px solid rgba(255,255,255,0.2)' }}
-              />
-              <span className="text-white/80 text-xs font-semibold">
-                {isOwnStory ? 'You' : (currentGroup.displayName?.split(' ')[0] || 'User')}
-              </span>
-              {currentActivity.dayNumber >= 1001 ? (
-                <span className="text-white/40 text-xs font-medium">
-                  • Week {currentActivity.dayNumber - 1000} Recap
-                </span>
-              ) : currentActivity.dayNumber >= 1 && currentActivity.dayNumber <= 12 && !isLogActivityCard ? (
-                <span className="text-white/40 text-xs font-medium">
-                  • W{Math.ceil(currentActivity.dayNumber / 3)} Day {((currentActivity.dayNumber - 1) % 3) + 1}
-                </span>
-              ) : null}
+            <div>
+              {isOwnStory ? null : (
+                currentActivity.dayNumber >= 1001 ? (
+                  <span className="text-white/50 text-xs font-medium">
+                    Week {currentActivity.dayNumber - 1000} Recap
+                  </span>
+                ) : currentActivity.dayNumber >= 1 && currentActivity.dayNumber <= 12 ? (
+                  <span className="text-white/50 text-xs font-medium">
+                    Week {Math.ceil(currentActivity.dayNumber / 3)} • Day {((currentActivity.dayNumber - 1) % 3) + 1}
+                  </span>
+                ) : null
+              )}
             </div>
             {isOwnStory && !isWeekRecapStory && !isLogActivityCard && (
               <button
@@ -1917,26 +1909,122 @@ const Reel = () => {
                         }}
                       >
                         {currentActivity?.id === 'log-activity' ? (
-                          // Simple "Log Activity" card — matches Home page style
-                          <div 
-                            className="flex flex-col items-center justify-center cursor-pointer self-center"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate('/camera', { state: { dayNumber: currentActivity.dayNumber } });
-                            }}
-                            style={{
-                              width: '90%',
-                              aspectRatio: '9/16',
-                              maxHeight: '100%',
-                              border: '1.5px dashed rgba(255,255,255,0.15)',
-                              borderRadius: 16,
-                              background: 'rgba(255,255,255,0.04)',
-                            }}
-                          >
-                            <Plus className="w-8 h-8 text-white/40 mb-2" />
-                            <span className="text-white/50 text-sm font-medium">Log Activity</span>
-                            <span className="text-white/30 text-xs mt-1">Day {currentActivity.dayNumber} of 12</span>
-                          </div>
+                          // "Log Your Activity" card — dark with animated glowing border
+                          (() => {
+                            const glowHsl = `hsl(260, 70%, 65%)`;
+                            const glowDim = `hsla(260, 70%, 65%, 0.15)`;
+                            const glowMid = `hsla(260, 70%, 65%, 0.35)`;
+
+                            return (
+                              <div 
+                                className="flex flex-col items-center justify-center cursor-pointer relative self-center"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate('/camera', { state: { dayNumber: currentActivity.dayNumber } });
+                                }}
+                                style={{
+                                  width: '90%',
+                                  aspectRatio: '9/16',
+                                  maxHeight: '100%',
+                                }}
+                              >
+                                {/* Outer glow */}
+                                <motion.div
+                                  className="absolute inset-0 rounded-2xl"
+                                  style={{
+                                    boxShadow: `inset 0 0 30px 4px ${glowDim}`,
+                                    border: `1.5px solid ${glowMid}`,
+                                  }}
+                                  animate={{
+                                    boxShadow: [
+                                      `inset 0 0 25px 3px ${glowDim}`,
+                                      `inset 0 0 40px 8px ${glowMid}`,
+                                      `inset 0 0 25px 3px ${glowDim}`,
+                                    ],
+                                  }}
+                                  transition={{
+                                    duration: 3,
+                                    repeat: Infinity,
+                                    ease: 'easeInOut',
+                                  }}
+                                />
+                                {/* Dark inner surface */}
+                                <div 
+                                  className="absolute inset-[2px] rounded-2xl overflow-hidden"
+                                  style={{
+                                    background: 'linear-gradient(180deg, rgba(10,10,10,0.95) 0%, rgba(5,5,8,0.98) 60%, rgba(10,10,10,0.9) 100%)',
+                                  }}
+                                >
+                                  {/* Subtle reflection at bottom */}
+                                  <div className="absolute bottom-0 left-0 right-0 h-[35%]" style={{
+                                    background: `radial-gradient(ellipse 80% 60% at 50% 100%, ${glowDim} 0%, transparent 70%)`,
+                                  }} />
+                                  {/* Inner border glow line */}
+                                  <motion.div
+                                    className="absolute inset-[8px] rounded-xl pointer-events-none"
+                                    style={{
+                                      border: `1px solid ${glowDim}`,
+                                      boxShadow: `inset 0 0 12px 2px ${glowDim}`,
+                                    }}
+                                    animate={{
+                                      opacity: [0.5, 0.9, 0.5],
+                                    }}
+                                    transition={{
+                                      duration: 2.5,
+                                      repeat: Infinity,
+                                      ease: 'easeInOut',
+                                    }}
+                                  />
+                                </div>
+
+                                {/* Content */}
+                                <div className="relative z-10 flex flex-col items-center justify-center h-full px-6" style={{ marginTop: 0 }}>
+                                  {/* Animated gradient text */}
+                                  <motion.div 
+                                    className="text-center mb-6"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.5, duration: 0.8, ease: 'easeOut' }}
+                                  >
+                                    <p 
+                                      className="text-[18px] font-bold leading-tight"
+                                      style={{
+                                        background: 'linear-gradient(180deg, hsla(255, 60%, 75%, 1) 0%, hsla(260, 50%, 55%, 1) 100%)',
+                                        WebkitBackgroundClip: 'text',
+                                        WebkitTextFillColor: 'transparent',
+                                      }}
+                                      dangerouslySetInnerHTML={{ __html: getContextualNudge(profile?.display_name?.split(' ')[0] || 'Hey', myActivities) }}
+                                    />
+                                  </motion.div>
+
+                                  {/* Glowing plus - centered */}
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="relative flex items-center justify-center" style={{ width: 90, height: 90 }}>
+                                      <motion.div 
+                                        className="absolute inset-0 rounded-full"
+                                        style={{
+                                          background: `radial-gradient(circle, ${glowMid} 0%, transparent 60%)`,
+                                          filter: 'blur(20px)',
+                                          transform: 'scale(3)',
+                                        }}
+                                        animate={{ opacity: [0.4, 0.9, 0.4] }}
+                                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                                      />
+                                      <svg width="56" height="56" viewBox="0 0 48 48" fill="none">
+                                        <rect x="20" y="6" width="8" height="36" rx="4" fill={glowHsl} />
+                                        <rect x="6" y="20" width="36" height="8" rx="4" fill={glowHsl} />
+                                      </svg>
+                                    </div>
+                                  </div>
+
+                                  {/* Label */}
+                                  <p className="mt-6 text-white/40 text-xs font-medium uppercase tracking-widest" style={{ marginTop: 21 }}>
+                                    Day {currentActivity.dayNumber} of 12
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })()
                         ) : isRecapGenerating ? (
                           // Show generating placeholder for week recap
                           <div 
