@@ -480,39 +480,38 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
                             </div>
                           )}
-                          {/* React button per card */}
-                          {!isOwnProfile && (
-                            <button
-                              className="absolute flex items-center gap-1 active:scale-90 transition-transform"
-                              style={{
-                                top: -10, right: -10, zIndex: 30,
-                                background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(12px)',
-                                borderRadius: 20, padding: '4px 10px',
-                                border: '1px solid rgba(255,255,255,0.15)',
-                              }}
-                              onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}
-                            >
-                              <span style={{ fontSize: 14 }}>🔥</span>
-                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>React</span>
-                            </button>
-                          )}
-                          {/* Like count badge */}
+                          {/* Like count badge + react button */}
                           {(() => {
                             const ar = localReactions[act.id];
                             const total = ar?.total || 0;
-                            if (total === 0) return null;
                             return (
-                              <div className="absolute pointer-events-none" style={{
-                                bottom: -8, left: -6, zIndex: 30,
+                              <div className="absolute flex items-center gap-1" style={{
+                                bottom: -10, left: -6, zIndex: 30,
                                 transform: `rotate(${-rotation * 0.6}deg)`,
                               }}>
-                                <span style={{
-                                  fontFamily: "'Caveat', cursive", fontSize: 16,
-                                  color: 'rgba(255,255,255,0.55)',
-                                  textShadow: '0 1px 4px rgba(0,0,0,0.5)',
-                                }}>
-                                  {total} ❤️
-                                </span>
+                                {total > 0 && (
+                                  <span style={{
+                                    fontFamily: "'Caveat', cursive", fontSize: 16,
+                                    color: 'rgba(255,255,255,0.55)',
+                                    textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                                  }}>
+                                    {total} ❤️
+                                  </span>
+                                )}
+                                {!isOwnProfile && (
+                                  <button
+                                    className="flex items-center gap-0.5 active:scale-90 transition-transform"
+                                    style={{
+                                      background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
+                                      borderRadius: 14, padding: '3px 8px',
+                                      border: '1px solid rgba(255,255,255,0.12)',
+                                    }}
+                                    onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}
+                                  >
+                                    <span style={{ fontSize: 12 }}>🔥</span>
+                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>React</span>
+                                  </button>
+                                )}
                               </div>
                             );
                           })()}
@@ -560,28 +559,28 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     if (user && targetUserId) {
                       const { error } = await supabase.from('nudges').insert({ from_user_id: user.id, to_user_id: targetUserId });
                       const name = userProfile?.displayName?.split(' ')[0] || 'them';
-                      if (!error) toast(`🔔 Nudge sent to ${name}!`, { description: `Keep pushing, ${name} will love the motivation!` });
+                      if (!error) toast.success(`🔔 Nudge sent to ${name}!`, { description: `Keep pushing, ${name} will love the motivation!`, position: 'top-center', style: { marginTop: 'env(safe-area-inset-top, 44px)' } });
                       else toast.error('Could not send nudge');
                     }
                   }}
                   className="relative overflow-hidden active:scale-[0.95] transition-transform"
-                  style={{
-                    height: 46, borderRadius: 23, paddingLeft: 16, paddingRight: 20,
+                   style={{
+                    height: 52, borderRadius: 26, paddingLeft: 18, paddingRight: 24,
                     background: 'rgba(255, 255, 255, 0.08)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)',
                     border: '1px solid rgba(255, 255, 255, 0.12)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
                   }}
                 >
-                  <div className="flex items-center gap-2.5 h-full">
+                  <div className="flex items-center gap-3 h-full">
                     <motion.img
                       src={deskBellImg}
                       alt="bell"
-                      className="w-7 h-7 object-contain"
+                      className="w-9 h-9 object-contain"
                       style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))', transformOrigin: 'bottom center' }}
                       animate={nudgeBellAnim ? { rotate: [0, -25, 20, -15, 10, -5, 0], scale: [1, 1.2, 1.15, 1.1, 1.05, 1] } : {}}
                       transition={{ duration: 0.6, ease: 'easeInOut' }}
                       onAnimationComplete={() => setNudgeBellAnim(false)}
                     />
-                    <span className="text-white/80 text-xs font-medium">Nudge to log activity</span>
+                    <span className="text-white/80 text-sm font-medium">Nudge to log activity</span>
                   </div>
                 </button>
               )}
