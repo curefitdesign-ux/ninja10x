@@ -1812,9 +1812,9 @@ const Reel = () => {
                               {/* Back card (deepest) */}
                               <motion.div
                                 key={`stack-back-${group.userId}`}
-                                initial={{ scale: 0.88, opacity: 0, y: 8 }}
-                                animate={{ scale: 0.89, opacity: 0.7, y: 16 }}
-                                exit={{ scale: 0.88, opacity: 0, y: 8 }}
+                                initial={{ scale: 0.86, opacity: 0, y: 0 }}
+                                animate={{ scale: 0.86, opacity: 0.65, y: 28 }}
+                                exit={{ scale: 0.86, opacity: 0, y: 0 }}
                                 transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.1 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1844,16 +1844,14 @@ const Reel = () => {
                                 })()}
                                 <div className="absolute inset-0 pointer-events-none" style={{
                                   background: 'linear-gradient(170deg, rgba(255,255,255,0.08) 0%, transparent 30%)',
-                                  backdropFilter: 'blur(40px) saturate(180%)',
-                                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
                                 }} />
                               </motion.div>
                               {/* Middle card */}
                               <motion.div
                                 key={`stack-mid-${group.userId}`}
-                                initial={{ scale: 0.92, opacity: 0, y: 4 }}
-                                animate={{ scale: 0.93, opacity: 0.85, y: 8 }}
-                                exit={{ scale: 0.92, opacity: 0, y: 4 }}
+                                initial={{ scale: 0.91, opacity: 0, y: 0 }}
+                                animate={{ scale: 0.91, opacity: 0.8, y: 14 }}
+                                exit={{ scale: 0.91, opacity: 0, y: 0 }}
                                 transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.05 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1883,8 +1881,6 @@ const Reel = () => {
                                 })()}
                                 <div className="absolute inset-0 pointer-events-none" style={{
                                   background: 'linear-gradient(165deg, rgba(255,255,255,0.10) 0%, transparent 35%)',
-                                  backdropFilter: 'blur(40px) saturate(180%)',
-                                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
                                 }} />
                               </motion.div>
                             </>
