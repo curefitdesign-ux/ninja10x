@@ -2120,8 +2120,8 @@ const Reel = () => {
           )}
             </div>
 
-            {/* React row sits below the reel card with a fixed 10px gap */}
-            <div className="shrink-0 flex flex-col items-center justify-center pt-3 pb-2" style={{ minHeight: 56 }}>
+            {/* React row sits below the reel card — persistent at bottom */}
+            <div className="shrink-0 flex flex-col items-center justify-center pt-2 pb-2" style={{ minHeight: 56, paddingBottom: 'calc(max(env(safe-area-inset-bottom, 8px), 8px) + 4px)' }}>
           {(() => {
             // Lock content if user's profile is private OR they haven't shared any public activity
             const isContentLocked = !isOwnStory && !profile?.stories_public;
