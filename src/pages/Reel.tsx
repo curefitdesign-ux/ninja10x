@@ -1846,9 +1846,9 @@ const Reel = () => {
                               {/* Middle card — between back and front */}
                               <motion.div
                                 key={`stack-mid-${group.userId}`}
-                                initial={{ rotate: 0, scale: 0.92, opacity: 0, y: 4 }}
-                                animate={{ rotate: -3, scale: 0.93, opacity: 1, y: 0 }}
-                                exit={{ rotate: 0, scale: 0.92, opacity: 0, y: 4 }}
+                                initial={{ rotate: 0, scale: 0.92, opacity: 0, y: 104 }}
+                                animate={{ rotate: -3, scale: 0.93, opacity: 1, y: 100 }}
+                                exit={{ rotate: 0, scale: 0.92, opacity: 0, y: 104 }}
                                 transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.06 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
