@@ -601,15 +601,12 @@ const Reel = () => {
     }
   }, [currentActivityIndex, goPrevUser]);
 
-  // Swipe gesture handling for horizontal navigation - smooth carousel feel
-  const dragX = useMotionValue(0);
-  const dragConstraints = useMemo(() => ({ left: -200, right: 200 }), []);
+  // 3D carousel swipe handling
   const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
   
   const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
     
-    // Horizontal swipe between users
     if (Math.abs(offset.x) > 40 || Math.abs(velocity.x) > 300) {
       if (offset.x < 0) {
         setSwipeDirection('left');
@@ -621,10 +618,7 @@ const Reel = () => {
         goPrevUser();
       }
     }
-
-    // Spring back to center
-    dragX.set(0);
-  }, [goNextUser, goPrevUser, dragX]);
+  }, [goNextUser, goPrevUser]);
 
   // Bottom sheet drag removed — progress is now a standalone page
 
