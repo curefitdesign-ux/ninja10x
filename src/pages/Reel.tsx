@@ -1861,7 +1861,8 @@ const Reel = () => {
                                 }}
                               >
                                 {(() => {
-                                  const stackActivity = activities[1] || activities[0];
+                                  const origActivities = originalGroup?.activities?.filter(a => a.dayNumber < 1001) || [];
+                                  const stackActivity = origActivities[origActivities.length - 2] || origActivities[0];
                                   const stackMedia = (stackActivity?.originalUrl || stackActivity?.storageUrl || '').trim();
                                   return stackMedia ? (
                                     <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(8px) brightness(0.45) saturate(1.5)', transform: 'scale(1.1)' }} loading="lazy" />
