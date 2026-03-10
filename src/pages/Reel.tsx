@@ -1783,10 +1783,11 @@ const Reel = () => {
                   <CarouselItem
                     key={`card-${group.userId}`}
                     className="pl-3 flex items-center justify-center relative h-full basis-[85%]"
+                    style={{ overflow: 'visible' }}
                   >
                     <div
                       className="flex items-center justify-center w-full h-full"
-                      style={cardStyle}
+                      style={{ ...cardStyle, overflow: 'visible' }}
                     >
                     {/* Full templated image/video - with lock overlay for non-public users */}
                     {(() => {
