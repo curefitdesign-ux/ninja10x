@@ -1942,7 +1942,7 @@ const Reel = () => {
                                 </div>
 
                                 {/* Content */}
-                                <div className="relative z-10 flex flex-col items-center justify-center h-full px-6">
+                                <div className="relative z-10 flex flex-col items-center justify-center h-full px-6" style={{ marginTop: -10 }}>
                                   {/* Animated gradient text */}
                                   <motion.div 
                                     className="text-center mb-8"
@@ -1962,7 +1962,7 @@ const Reel = () => {
                                   </motion.div>
 
                                   {/* Glowing plus */}
-                                  <div className="relative flex items-center justify-center" style={{ width: 64, height: 64 }}>
+                                  <div className="relative flex items-center justify-center" style={{ width: 80, height: 80 }}>
                                     <motion.div 
                                       className="absolute inset-0 rounded-full"
                                       style={{
@@ -1973,7 +1973,7 @@ const Reel = () => {
                                       animate={{ opacity: [0.5, 1, 0.5] }}
                                       transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                                     />
-                                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                                    <svg width="56" height="56" viewBox="0 0 48 48" fill="none">
                                       <rect x="20" y="6" width="8" height="36" rx="4" fill={glowHsl} />
                                       <rect x="6" y="20" width="36" height="8" rx="4" fill={glowHsl} />
                                     </svg>
