@@ -1675,7 +1675,7 @@ const Reel = () => {
           style={{
             paddingTop: '0px',
             marginTop: '-4px',
-            paddingBottom: '0px',
+            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 6px), 6px) + 80px)',
           }}
         >
         {/* Reel cards — simple horizontal scroll with snap */}
@@ -1795,11 +1795,12 @@ const Reel = () => {
                         className="relative overflow-hidden"
                         style={{
                           aspectRatio: '9/16',
-                          height: '100%',
+                          height: 'calc(95% - 20px)',
                           maxWidth: '100%',
                           borderRadius: '0px',
                           overflow: 'hidden',
                           background: 'transparent',
+                          marginTop: '-10px',
                         }}
                       >
                     {/* Progress bar removed — timing indicated via avatar ring */}
@@ -2120,8 +2121,8 @@ const Reel = () => {
           )}
             </div>
 
-            {/* React row sits below the reel card — persistent at bottom */}
-            <div className="shrink-0 flex flex-col items-center justify-center pt-2 pb-2" style={{ minHeight: 56, paddingBottom: 'calc(max(env(safe-area-inset-bottom, 8px), 8px) + 4px)' }}>
+            {/* React row sits below the reel card with a fixed 10px gap */}
+            <div className="shrink-0 flex flex-col items-center justify-center pt-3 pb-2" style={{ minHeight: 56 }}>
           {(() => {
             // Lock content if user's profile is private OR they haven't shared any public activity
             const isContentLocked = !isOwnStory && !profile?.stories_public;
@@ -2132,7 +2133,8 @@ const Reel = () => {
                 style={{
                   pointerEvents: isContentLocked ? 'none' : 'auto',
                   opacity: isTransitioning ? 0 : 1,
-                  transition: 'opacity 0.2s ease',
+                  transform: isTransitioning ? 'translateY(-142px)' : 'translateY(-42px)',
+                  transition: 'opacity 0.2s ease, transform 0.2s ease',
                 }}
               >
                 {/* Reaction pill + Share icon row — hidden for log-activity placeholder */}
