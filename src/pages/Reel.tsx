@@ -2199,6 +2199,41 @@ const Reel = () => {
         )}
 
 
+      {/* History Gallery Overlay — shows all past activities of the currently viewed user */}
+      {showHistoryGallery && currentGroup && (() => {
+        // Get ALL activities for this user from userGroups (not filtered)
+        const fullGroup = userGroups.find(g => g.userId === currentGroup.userId);
+        const allUserActivities: GalleryActivity[] = (fullGroup?.activities || currentGroup.activities)
+          .filter(a => a.dayNumber < 1001 && a.id !== 'log-activity')
+          .sort((a, b) => b.dayNumber - a.dayNumber)
+          .map(a => ({
+            id: a.id,
+            storageUrl: a.storageUrl,
+            originalUrl: a.originalUrl || undefined,
+            isVideo: a.isVideo || false,
+            activity: a.activity || undefined,
+            frame: a.frame || undefined,
+            duration: a.duration || undefined,
+            pr: a.pr || undefined,
+            dayNumber: a.dayNumber,
+            reactionCount: localReactions[a.id]?.total || a.reactionCount || 0,
+            reactions: localReactions[a.id]?.reactions || a.reactions || {},
+            reactorProfiles: localReactions[a.id]?.reactorProfiles || a.reactorProfiles || [],
+          }));
+        
+        // Find current activity index in the full list
+        const currentIdx = allUserActivities.findIndex(a => a.id === currentActivity?.id);
+        
+        return (
+          <ActivityGalleryOverlay
+            isOpen={true}
+            onClose={() => setShowHistoryGallery(false)}
+            activities={allUserActivities}
+            initialIndex={currentIdx >= 0 ? currentIdx : 0}
+          />
+        );
+      })()}
+
       {/* Edit/Replace Sheet */}
       <MediaSourceSheet
         isOpen={showEditSheet}
