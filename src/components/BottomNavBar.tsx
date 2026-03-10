@@ -3,7 +3,7 @@ import { useState, useEffect, memo, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Map, Bell, MoreVertical, Plus, UserPen, LogOut } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -11,6 +11,9 @@ import progressIcon from "@/assets/nav/progress-icon.png";
 import NotificationSheet from "@/components/NotificationSheet";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+
+// Tab config for the reflective indicator
+const TAB_IDS = ["home", "discover", "progress", "bell", "menu"] as const;
 
 const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
   const navigate = useNavigate();
@@ -51,6 +54,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
   if (shouldHide) return null;
 
   const activeTab = showNotificationSheet ? "bell" : location.pathname === "/progress" ? "progress" : "discover";
+  const activeIndex = TAB_IDS.indexOf(activeTab as typeof TAB_IDS[number]);
 
   const handleTabClick = (tabId: string) => {
     if (tabId === "bell") {
@@ -113,7 +117,62 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
               className="absolute top-0 left-[15%] right-[15%] h-px pointer-events-none"
               style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)" }}
             />
-        <div className="flex items-center justify-evenly px-2 py-2">
+        <div className="relative flex items-center justify-evenly px-2 py-2">
+          {/* Reflective sliding indicator */}
+          <motion.div
+            className="absolute pointer-events-none"
+            animate={{
+              left: `${(activeIndex / TAB_IDS.length) * 100 + (100 / TAB_IDS.length / 2)}%`,
+            }}
+            transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+            style={{
+              width: '48px',
+              height: '100%',
+              top: 0,
+              transform: 'translateX(-50%)',
+            }}
+          >
+            {/* Top reflective beam */}
+            <div
+              className="absolute top-0 left-1/2 -translate-x-1/2"
+              style={{
+                width: '36px',
+                height: '2px',
+                borderRadius: '1px',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.7), rgba(200,180,255,0.9), rgba(255,255,255,0.7), transparent)',
+                boxShadow: '0 0 8px rgba(200,180,255,0.5), 0 0 20px rgba(180,160,240,0.3)',
+              }}
+            />
+            {/* Glow halo */}
+            <div
+              className="absolute top-0 left-1/2 -translate-x-1/2"
+              style={{
+                width: '48px',
+                height: '24px',
+                background: 'radial-gradient(ellipse at center top, rgba(180,160,255,0.15) 0%, transparent 70%)',
+              }}
+            />
+            {/* Shimmer sweep animation */}
+            <motion.div
+              className="absolute top-0 left-1/2 -translate-x-1/2"
+              animate={{
+                opacity: [0.4, 1, 0.4],
+                scaleX: [0.8, 1.1, 0.8],
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+              style={{
+                width: '28px',
+                height: '1.5px',
+                borderRadius: '1px',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent)',
+              }}
+            />
+          </motion.div>
+
           {/* Home */}
           <button onClick={() => { window.history.length > 1 ? navigate(-1) : navigate("/"); }} className={btnClass}>
             <div style={{ color: "rgba(200, 210, 230, 0.6)", opacity: 0.5 }}>
