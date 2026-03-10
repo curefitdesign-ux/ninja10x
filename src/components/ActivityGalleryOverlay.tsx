@@ -330,12 +330,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 height: 56,
               }}
             >
-              {/* Counter pill */}
+              {/* Combined counter + week/day pill */}
               <div
-                className="px-3 py-1.5 rounded-full text-white/70 text-xs font-medium"
+                className="px-3 py-1.5 rounded-full text-white/70 text-xs font-medium flex items-center gap-1.5"
                 style={{ background: 'rgba(255,255,255,0.08)' }}
               >
-                {currentIndex + 1} / {totalActivities}
+                <span>W{week} • D{dayInWeek}</span>
+                <span className="text-white/40">|</span>
+                <span>{currentIndex + 1}/{totalActivities}</span>
               </div>
 
               {/* Progress segments */}
