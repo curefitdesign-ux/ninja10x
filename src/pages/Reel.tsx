@@ -1710,7 +1710,7 @@ const Reel = () => {
             }}
             className="h-full"
           >
-            <CarouselContent className="h-full -ml-1">
+            <CarouselContent className="h-full -ml-3" viewportClassName="h-full px-[40px]">
               {effectiveUserGroups.map((group, idx) => {
                 const isCenter = idx === currentUserIndex;
                 const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
@@ -1736,7 +1736,7 @@ const Reel = () => {
                   return (
                     <CarouselItem
                       key={`card-${group.userId}`}
-                      className="pl-1 flex items-center justify-center h-full basis-[80%]"
+                      className="pl-3 flex items-center justify-center h-full basis-[85%]"
                     >
                       <div
                         className="flex items-center justify-center w-full h-full"
@@ -1780,7 +1780,7 @@ const Reel = () => {
                 return (
                   <CarouselItem
                     key={`card-${group.userId}`}
-                    className="pl-1 flex items-center justify-center relative h-full basis-[80%]"
+                    className="pl-3 flex items-center justify-center relative h-full basis-[85%]"
                   >
                     <div
                       className="flex items-center justify-center w-full h-full"
