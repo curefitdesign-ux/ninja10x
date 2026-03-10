@@ -512,7 +512,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       background: 'rgba(0,0,0,0.3)',
                     }}
                   >
-                    <AnimatePresence mode="popLayout">
+                    <AnimatePresence mode="wait">
                       <motion.div
                         key={current.id}
                         className="absolute inset-0 flex items-center justify-center"
