@@ -191,7 +191,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
 
             const { data: activityInfo } = await supabase
               .from('journey_activities')
-              .select('day_number, storage_url, activity')
+              .select('day_number, storage_url, original_url, is_video, activity')
               .eq('id', newReaction.activity_id)
               .maybeSingle();
 
