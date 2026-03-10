@@ -556,7 +556,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                 {/* Current card (center, front) — no padding */}
                 <motion.div
-                  className="relative gallery-card-fill"
+                  className="relative overflow-hidden"
                   style={{
                     width: '62%',
                     aspectRatio: '9/16',
