@@ -2221,6 +2221,14 @@ const Reel = () => {
             reactorProfiles: localReactions[a.id]?.reactorProfiles || a.reactorProfiles || [],
           }));
         
+        // Find earliest activity date for start date
+        const sortedByDate = [...allUserActivities].sort((a, b) => {
+          const aDate = (fullGroup?.activities.find(x => x.id === a.id) as any)?.createdAt;
+          const bDate = (fullGroup?.activities.find(x => x.id === b.id) as any)?.createdAt;
+          return new Date(aDate || 0).getTime() - new Date(bDate || 0).getTime();
+        });
+        const startDate = (fullGroup?.activities.find(x => x.id === sortedByDate[0]?.id) as any)?.createdAt;
+        
         // Find current activity index in the full list
         const currentIdx = allUserActivities.findIndex(a => a.id === currentActivity?.id);
         
@@ -2230,6 +2238,11 @@ const Reel = () => {
             onClose={() => setShowHistoryGallery(false)}
             activities={allUserActivities}
             initialIndex={currentIdx >= 0 ? currentIdx : 0}
+            userProfile={{
+              displayName: currentGroup.displayName,
+              avatarUrl: currentGroup.avatarUrl,
+              startDate: startDate || undefined,
+            }}
           />
         );
       })()}
