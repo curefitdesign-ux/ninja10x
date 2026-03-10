@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback, forwardRef, useMemo } from 'r
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
 import { X, Share2, Pencil, ChevronUp } from 'lucide-react';
+import SendReactionSheet from '@/components/SendReactionSheet';
 import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
 import { useAuth } from '@/hooks/use-auth';
