@@ -33,12 +33,13 @@ export interface Notification {
   activityId: string;
   reactorName: string;
   reactorAvatarUrl?: string;
-  reactionType: string; // 'nudge' for nudges, reaction type for reactions
+  reactionType: string;
   timestamp: Date;
   dayNumber?: number;
   activityImageUrl?: string;
   activityType?: string;
   isNudge?: boolean;
+  nudgeCount?: number;
 }
 
 interface NotificationSheetProps {
@@ -137,6 +138,12 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
 
         const profileMap = new Map(profiles?.map(p => [p.user_id, { name: p.display_name, avatar: p.avatar_url }]) || []);
 
+        // Count total nudges per sender
+        const nudgeCountMap = new Map<string, number>();
+        nudges.forEach(n => {
+          nudgeCountMap.set(n.from_user_id, (nudgeCountMap.get(n.from_user_id) || 0) + 1);
+        });
+
         const nudgeNotifs: Notification[] = nudges.map(n => ({
           id: `nudge-${n.id}`,
           activityId: '',
@@ -145,6 +152,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
           reactionType: 'nudge',
           timestamp: new Date(n.created_at),
           isNudge: true,
+          nudgeCount: nudgeCountMap.get(n.from_user_id) || 1,
         }));
 
         setNotifications(prev => {
@@ -403,7 +411,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                             <span className="font-semibold">{notif.reactorName}</span>
                             <span className="text-white/60">
                               {notif.isNudge 
-                                ? ' nudged you to keep going! 💪' 
+                                ? ` nudged you${(notif.nudgeCount || 0) > 1 ? ` (${notif.nudgeCount}x)` : ''} to keep going! 💪` 
                                 : ` ${REACTION_VERBS[notif.reactionType] || 'reacted to'} your ${notif.activityType || 'activity'}`}
                             </span>
                           </p>
