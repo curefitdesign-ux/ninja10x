@@ -609,14 +609,14 @@ const Reel = () => {
     
     if (Math.abs(offset.x) > 40 || Math.abs(velocity.x) > 300) {
       if (offset.x < 0) {
-        // Swiped left — cards move left, next user slides in from right
+        // Swiped left — center exits left, next enters from right
         setSwipeDirection('left');
-        setSlideDirection('right');
+        setSlideDirection('left');
         goNextUser();
       } else {
-        // Swiped right — cards move right, prev user slides in from left
+        // Swiped right — center exits right, prev enters from left
         setSwipeDirection('right');
-        setSlideDirection('left');
+        setSlideDirection('right');
         goPrevUser();
       }
     }
@@ -1790,20 +1790,17 @@ const Reel = () => {
             }}
             initial={{
               x: slideDirection === 'left' ? 290 : slideDirection === 'right' ? -290 : 0,
-              scale: 0.8,
               opacity: 0.5,
             }}
             animate={{
               x: 0,
-              scale: 1,
               opacity: 1,
             }}
             exit={{
               x: slideDirection === 'left' ? -290 : 290,
-              scale: 0.8,
               opacity: 0,
             }}
-            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
           >
               {/* Full templated image/video - with lock overlay for non-public users */}
               {(() => {
