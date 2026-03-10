@@ -126,7 +126,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
             }}
             transition={{ type: 'spring', stiffness: 350, damping: 30 }}
             style={{
-              width: '48px',
+              width: '64px',
               height: '100%',
               top: 0,
               transform: 'translateX(-50%)',
@@ -136,20 +136,20 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
             <div
               className="absolute top-0 left-1/2 -translate-x-1/2"
               style={{
-                width: '36px',
-                height: '2px',
-                borderRadius: '1px',
+                width: '52px',
+                height: '2.5px',
+                borderRadius: '2px',
                 background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.7), rgba(200,180,255,0.9), rgba(255,255,255,0.7), transparent)',
-                boxShadow: '0 0 8px rgba(200,180,255,0.5), 0 0 20px rgba(180,160,240,0.3)',
+                boxShadow: '0 0 10px rgba(200,180,255,0.5), 0 0 24px rgba(180,160,240,0.3)',
               }}
             />
             {/* Glow halo */}
             <div
               className="absolute top-0 left-1/2 -translate-x-1/2"
               style={{
-                width: '48px',
-                height: '24px',
-                background: 'radial-gradient(ellipse at center top, rgba(180,160,255,0.15) 0%, transparent 70%)',
+                width: '64px',
+                height: '28px',
+                background: 'radial-gradient(ellipse at center top, rgba(180,160,255,0.18) 0%, transparent 70%)',
               }}
             />
             {/* Shimmer sweep animation */}
