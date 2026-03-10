@@ -1887,7 +1887,8 @@ const Reel = () => {
                               const glowMid = isEvenDay ? 'rgba(167, 100, 255, 0.35)' : 'rgba(249, 115, 22, 0.35)';
                               return (
                                 <div
-                                  className="w-full h-full flex flex-col items-center justify-end pb-[18%] relative"
+                                  className="w-full h-full flex flex-col items-center justify-end pb-[18%] relative cursor-pointer"
+                                  onClick={() => setShowEditSheet(true)}
                                 >
                                   {/* Faint radial glow behind content */}
                                   <div
