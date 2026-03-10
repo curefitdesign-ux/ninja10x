@@ -2091,8 +2091,7 @@ const Reel = () => {
                             }}
                           />
                         )}
-                      </motion.div>
-                    </AnimatePresence>
+                      </div>
 
                     {/* Share button removed from card — now in bottom zone */}
                     
