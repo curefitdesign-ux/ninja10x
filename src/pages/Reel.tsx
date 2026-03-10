@@ -1809,12 +1809,12 @@ const Reel = () => {
                           <AnimatePresence>
                           {showStackedCards && isCenter && (
                             <>
-                              {/* Back card (deepest) — slightly smaller, rotated to peek behind */}
+                              {/* Back card (deepest) — liquid glass stacked card */}
                               <motion.div
                                 key={`stack-back-${group.userId}`}
-                                initial={{ rotate: 0, scale: 0.88, opacity: 0, y: 106 }}
-                                animate={{ rotate: 5, scale: 0.90, opacity: 1, y: 100 }}
-                                exit={{ rotate: 0, scale: 0.88, opacity: 0, y: 106 }}
+                                initial={{ rotate: 0, scale: 0.86, opacity: 0, y: 106 }}
+                                animate={{ rotate: 5, scale: 0.88, opacity: 1, y: 100 }}
+                                exit={{ rotate: 0, scale: 0.86, opacity: 0, y: 106 }}
                                 transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.12 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1825,30 +1825,34 @@ const Reel = () => {
                                   aspectRatio: '9/16',
                                   height: 'calc(92% - 20px)',
                                   marginTop: '-10px',
-                                  background: 'rgba(255,255,255,0.04)',
-                                  border: '1px solid rgba(255,255,255,0.08)',
-                                  filter: 'brightness(0.45)',
                                   overflow: 'hidden',
                                   zIndex: 1,
-                                  borderRadius: '2px',
+                                  borderRadius: '4px',
+                                  background: 'rgba(255,255,255,0.06)',
+                                  border: '1px solid rgba(255,255,255,0.15)',
+                                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.12), inset 0 -1px 1px rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.4)',
                                 }}
                               >
                                 {activities.length > 2 && (() => {
                                   const stackActivity = activities[2] || activities[1];
                                   const stackMedia = (stackActivity?.originalUrl || stackActivity?.storageUrl || '').trim();
                                   return stackMedia ? (
-                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" loading="lazy" />
+                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(6px) brightness(0.5) saturate(1.4)', transform: 'scale(1.1)' }} loading="lazy" />
                                   ) : (
-                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)' }} />
+                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(60,40,120,0.6) 0%, rgba(20,10,50,0.8) 100%)' }} />
                                   );
                                 })()}
+                                {/* Glass reflection overlay */}
+                                <div className="absolute inset-0 pointer-events-none" style={{
+                                  background: 'linear-gradient(160deg, rgba(255,255,255,0.10) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.03) 100%)',
+                                }} />
                               </motion.div>
-                              {/* Middle card — between back and front */}
+                              {/* Middle card — liquid glass layer */}
                               <motion.div
                                 key={`stack-mid-${group.userId}`}
-                                initial={{ rotate: 0, scale: 0.92, opacity: 0, y: 104 }}
-                                animate={{ rotate: -3, scale: 0.93, opacity: 1, y: 100 }}
-                                exit={{ rotate: 0, scale: 0.92, opacity: 0, y: 104 }}
+                                initial={{ rotate: 0, scale: 0.90, opacity: 0, y: 104 }}
+                                animate={{ rotate: -3, scale: 0.92, opacity: 1, y: 100 }}
+                                exit={{ rotate: 0, scale: 0.90, opacity: 0, y: 104 }}
                                 transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.06 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1859,23 +1863,27 @@ const Reel = () => {
                                   aspectRatio: '9/16',
                                   height: 'calc(93% - 20px)',
                                   marginTop: '-10px',
-                                  background: 'rgba(255,255,255,0.06)',
-                                  border: '1px solid rgba(255,255,255,0.10)',
-                                  filter: 'brightness(0.55)',
                                   overflow: 'hidden',
                                   zIndex: 2,
-                                  borderRadius: '2px',
+                                  borderRadius: '4px',
+                                  background: 'rgba(255,255,255,0.08)',
+                                  border: '1px solid rgba(255,255,255,0.18)',
+                                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 1px rgba(255,255,255,0.05), 0 6px 24px rgba(0,0,0,0.35)',
                                 }}
                               >
                                 {(() => {
                                   const stackActivity = activities[1] || activities[0];
                                   const stackMedia = (stackActivity?.originalUrl || stackActivity?.storageUrl || '').trim();
                                   return stackMedia ? (
-                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" loading="lazy" />
+                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(4px) brightness(0.55) saturate(1.5)', transform: 'scale(1.08)' }} loading="lazy" />
                                   ) : (
-                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)' }} />
+                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(60,40,120,0.5) 0%, rgba(20,10,50,0.7) 100%)' }} />
                                   );
                                 })()}
+                                {/* Glass reflection overlay */}
+                                <div className="absolute inset-0 pointer-events-none" style={{
+                                  background: 'linear-gradient(155deg, rgba(255,255,255,0.12) 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.04) 100%)',
+                                }} />
                               </motion.div>
                             </>
                           )}
