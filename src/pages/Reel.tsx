@@ -212,12 +212,12 @@ const Reel = () => {
   const effectiveUserGroups = useMemo(() => {
     if (!user) return userGroups;
 
-    // Others: all activities + injected week recaps, sorted recent to oldest
+    // Others: all activities sorted recent to oldest
     const othersGroups = userGroups
       .filter(g => g.userId !== user.id)
       .map(g => ({
         ...g,
-        activities: injectWeekRecaps([...g.activities], g.userId).sort((a, b) => b.dayNumber - a.dayNumber),
+        activities: [...g.activities].sort((a, b) => b.dayNumber - a.dayNumber),
       }));
 
     // Own user: show today's logged activity OR just the log placeholder (no past activities)
