@@ -102,7 +102,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                 reactionType: r.reaction_type,
                 timestamp: new Date(r.created_at),
                 dayNumber: activityInfo?.day_number,
-                activityImageUrl: activityInfo?.storage_url,
+                activityImageUrl: activityInfo?.is_video ? (activityInfo?.original_url || undefined) : activityInfo?.storage_url,
                 activityType: activityInfo?.activity || undefined,
               };
             });
