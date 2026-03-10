@@ -541,24 +541,20 @@ const Reel = () => {
     if (currentActivityIndex < currentGroup.activities.length - 1) {
       setCurrentActivityIndex(prev => prev + 1);
     } else {
-      // Mark current user as fully viewed
-      if (profile?.stories_public && effectiveUserGroups.length > 1) {
-        // Auto-advance to next user when public
+      // Mark current user as fully viewed and always auto-advance to next user
+      setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
+      if (effectiveUserGroups.length > 1) {
         const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
         const nextGroup = effectiveUserGroups[nextIdx];
-        // Set ref to TARGET user before triggering reorder
         if (nextGroup) {
           navigatingRef.current = true;
           currentUserIdRef.current = nextGroup.userId;
         }
-        setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
         setCurrentActivityIndex(0);
         setCurrentUserIndex(nextIdx);
-      } else {
-        setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
       }
     }
-  }, [currentGroup, currentActivityIndex, profile?.stories_public, effectiveUserGroups, currentUserIndex]);
+  }, [currentGroup, currentActivityIndex, effectiveUserGroups, currentUserIndex]);
 
   // Navigate between users (horizontal swipe)
   const goNextUser = useCallback(() => {
