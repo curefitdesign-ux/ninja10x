@@ -2132,8 +2132,7 @@ const Reel = () => {
                 style={{
                   pointerEvents: isContentLocked ? 'none' : 'auto',
                   opacity: isTransitioning ? 0 : 1,
-                  transform: isTransitioning ? 'translateY(-142px)' : 'translateY(-42px)',
-                  transition: 'opacity 0.2s ease, transform 0.2s ease',
+                  transition: 'opacity 0.2s ease',
                 }}
               >
                 {/* Reaction pill + Share icon row — hidden for log-activity placeholder */}
