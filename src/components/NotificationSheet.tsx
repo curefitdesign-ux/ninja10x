@@ -3,10 +3,11 @@ import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 import ProfileAvatar from '@/components/ProfileAvatar';
+import MediaSourceSheet from '@/components/MediaSourceSheet';
 
 import { ALL_REACTION_IMAGES as REACTION_IMAGES, REACTION_VERBS } from '@/lib/reaction-images';
 
@@ -55,6 +56,8 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
   const portalContainer = usePortalContainer();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const userActivitiesRef = useRef<Set<string>>(new Set());
+  const [showMediaSheet, setShowMediaSheet] = useState(false);
+  const [nextDayNumber, setNextDayNumber] = useState(1);
 
   // Fetch user's activity reactions AND nudges together to avoid race conditions
   useEffect(() => {
@@ -118,7 +121,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
         .select('id, from_user_id, created_at')
         .eq('to_user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(50);
 
       if (nudges && nudges.length > 0) {
         const senderIds = [...new Set(nudges.map(n => n.from_user_id))];
@@ -129,22 +132,41 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
 
         const profileMap = new Map(profiles?.map(p => [p.user_id, { name: p.display_name, avatar: p.avatar_url }]) || []);
 
-        const nudgeCountMap = new Map<string, number>();
+        // Group nudges by sender + same day
+        const nudgeGroups = new Map<string, { count: number; latestId: string; latestTime: Date; senderId: string }>();
         nudges.forEach(n => {
-          nudgeCountMap.set(n.from_user_id, (nudgeCountMap.get(n.from_user_id) || 0) + 1);
+          const dayKey = `${n.from_user_id}-${new Date(n.created_at).toDateString()}`;
+          const existing = nudgeGroups.get(dayKey);
+          const ts = new Date(n.created_at);
+          if (existing) {
+            existing.count++;
+            if (ts > existing.latestTime) {
+              existing.latestTime = ts;
+              existing.latestId = n.id;
+            }
+          } else {
+            nudgeGroups.set(dayKey, { count: 1, latestId: n.id, latestTime: ts, senderId: n.from_user_id });
+          }
         });
 
-        nudgeNotifs = nudges.map(n => ({
-          id: `nudge-${n.id}`,
+        nudgeNotifs = Array.from(nudgeGroups.values()).map(g => ({
+          id: `nudge-${g.latestId}`,
           activityId: '',
-          reactorName: profileMap.get(n.from_user_id)?.name || 'Someone',
-          reactorAvatarUrl: profileMap.get(n.from_user_id)?.avatar || undefined,
+          reactorName: profileMap.get(g.senderId)?.name || 'Someone',
+          reactorAvatarUrl: profileMap.get(g.senderId)?.avatar || undefined,
           reactionType: 'nudge',
-          timestamp: new Date(n.created_at),
+          timestamp: g.latestTime,
           isNudge: true,
-          nudgeCount: nudgeCountMap.get(n.from_user_id) || 1,
+          nudgeCount: g.count,
         }));
       }
+
+      // Fetch user's activity count to determine next day number
+      const { count: activityCount } = await supabase
+        .from('journey_activities')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      setNextDayNumber(Math.min((activityCount || 0) + 1, 12));
 
       // Combine and sort all notifications together
       const combined = [...reactionNotifs, ...nudgeNotifs];
@@ -280,6 +302,10 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
     });
   }, [navigate, onClose]);
 
+  const handleLogActivity = useCallback(() => {
+    setShowMediaSheet(true);
+  }, []);
+
   const ui = (
     <AnimatePresence>
       {isOpen && (
@@ -400,17 +426,43 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                             <span className="font-semibold">{notif.reactorName}</span>
                             <span className="text-white/60">
                               {notif.isNudge 
-                                ? ` nudged you${(notif.nudgeCount || 0) > 1 ? ` (${notif.nudgeCount}x)` : ''} to keep going! 💪` 
+                                ? <>{(notif.nudgeCount || 0) > 1 ? ` nudged you ${notif.nudgeCount}x` : ' nudged you'} — time to crush it! 🔥</>
                                 : ` ${REACTION_VERBS[notif.reactionType] || 'reacted to'} your ${notif.activityType || 'activity'}`}
                             </span>
                           </p>
                           <p className="text-white/35 text-xs mt-0.5">
                             {notif.dayNumber ? `Day ${notif.dayNumber} · ` : ''}{formatRelativeTime(notif.timestamp)}
                           </p>
+                          {notif.isNudge && (
+                            <motion.button
+                              whileTap={{ scale: 0.95 }}
+                              onClick={(e) => { e.stopPropagation(); handleLogActivity(); }}
+                              className="mt-2 px-3 py-1 rounded-full text-xs font-semibold"
+                              style={{
+                                background: 'linear-gradient(135deg, #F97316, #EC4899)',
+                                color: '#fff',
+                              }}
+                            >
+                              Log Activity 💪
+                            </motion.button>
+                          )}
                         </div>
 
-                        {/* Activity thumbnail on right */}
-                        {notif.activityImageUrl ? (
+                        {/* Right side: thumbnail or bell icon for nudges */}
+                        {notif.isNudge ? (
+                          <div className="flex-shrink-0 flex flex-col items-center gap-1">
+                            <div
+                              className="w-10 h-10 rounded-full flex items-center justify-center"
+                              style={{
+                                background: 'rgba(255,255,255,0.08)',
+                                border: '1px solid rgba(255,255,255,0.12)',
+                              }}
+                            >
+                              <Bell className="w-5 h-5 text-amber-400" />
+                            </div>
+                            <span className="text-white/30 text-[10px]">{formatRelativeTime(notif.timestamp)}</span>
+                          </div>
+                        ) : notif.activityImageUrl ? (
                           <div 
                             className="w-11 h-11 rounded-[5px] overflow-hidden flex-shrink-0"
                             style={{ border: '1px solid rgba(255,255,255,0.1)' }}
@@ -440,5 +492,15 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
 
   // Portal to body to avoid being clipped by transformed/scroll containers on mobile.
   if (typeof document === 'undefined') return null;
-  return createPortal(ui, portalContainer);
+  return (
+    <>
+      {createPortal(ui, portalContainer)}
+      <MediaSourceSheet
+        isOpen={showMediaSheet}
+        onClose={() => setShowMediaSheet(false)}
+        dayNumber={nextDayNumber}
+        zIndex={60}
+      />
+    </>
+  );
 }
