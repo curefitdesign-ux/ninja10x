@@ -491,6 +491,7 @@ export default function ReelToProgressTransition({
           ]}
           initialIndex={galleryInitialIndex}
           onLogActivity={onLogActivity}
+          isOwnProfile={true}
         />
       </div>
     );
