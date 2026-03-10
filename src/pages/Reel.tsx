@@ -303,10 +303,14 @@ const Reel = () => {
     }
 
 
-    if (allMyActivities.length < 12) {
+    // Use myActivities count, but fallback to userGroups own activities count if myActivities hasn't loaded yet
+    const myGroupActivities = myGroup$?.activities.filter(a => a.dayNumber < 1001) || [];
+    const effectiveCount = Math.max(allMyActivities.length, myGroupActivities.length);
+    
+    if (effectiveCount < 12) {
       ownActivities.push({
         id: 'log-activity',
-        dayNumber: allMyActivities.length + 1,
+        dayNumber: effectiveCount + 1,
         storageUrl: '',
         originalUrl: '',
         activity: undefined,
