@@ -490,12 +490,20 @@ const Reel = () => {
   // Navigate between users (horizontal swipe)
   const goNextUser = useCallback(() => {
     if (effectiveUserGroups.length === 0) return;
+    // Mark current user as viewed when swiping away
+    if (currentGroup) {
+      setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
+    }
     setCurrentActivityIndex(0);
     setCurrentUserIndex(prev => (prev + 1) % effectiveUserGroups.length);
-  }, [effectiveUserGroups.length]);
+  }, [effectiveUserGroups.length, currentGroup]);
 
   const goPrevUser = useCallback(() => {
     if (effectiveUserGroups.length === 0) return;
+    // Mark current user as viewed when swiping away
+    if (currentGroup) {
+      setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
+    }
     setCurrentActivityIndex(0);
     setCurrentUserIndex(prev => (prev - 1 + effectiveUserGroups.length) % effectiveUserGroups.length);
   }, [effectiveUserGroups.length]);
@@ -1404,6 +1412,11 @@ const Reel = () => {
                         onClick={() => {
                           const targetIdx = effectiveUserGroups.findIndex(g => g.userId === group.userId);
                           if (targetIdx >= 0) {
+                            // Mark current user as viewed when tapping another avatar
+                            const prevGroup = effectiveUserGroups[currentUserIndex];
+                            if (prevGroup && prevGroup.userId !== group.userId) {
+                              setViewedUsers(prev => new Set(prev).add(prevGroup.userId));
+                            }
                             setCurrentUserIndex(targetIdx);
                             setCurrentActivityIndex(0);
                           }
@@ -1972,15 +1985,14 @@ const Reel = () => {
                 }}
               >
                 {/* Reaction pill + Share icon row — hidden for log-activity placeholder */}
-                <div className="flex items-center justify-center gap-3 px-4" style={{ visibility: isLogActivityCard ? 'hidden' : 'visible' }}>
+                <div className="flex items-center justify-center gap-2 px-4" style={{ visibility: isLogActivityCard ? 'hidden' : 'visible' }}>
                   {/* Liquid glass reaction pill */}
                   <button
                     onClick={() => { isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
-                    className="relative overflow-hidden active:scale-[0.97] transition-transform"
+                    className="relative overflow-hidden active:scale-[0.97] transition-transform flex-1"
                     style={{
-                      minWidth: currentReactions.total > 0 ? 175 : 155,
-                      height: 44,
-                      borderRadius: 22,
+                      height: 42,
+                      borderRadius: 21,
                       background: 'rgba(255, 255, 255, 0.08)',
                       backdropFilter: 'blur(40px) saturate(180%)',
                       WebkitBackdropFilter: 'blur(40px) saturate(180%)',
@@ -2013,7 +2025,7 @@ const Reel = () => {
                     </div>
                   ) : (
                     <div
-                      className="flex items-center justify-center gap-3 h-full px-5"
+                      className="flex items-center justify-center gap-2 h-full px-4 whitespace-nowrap"
                     >
                       {currentReactions.total > 0 ? (
                         <>
@@ -2021,9 +2033,9 @@ const Reel = () => {
                             <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                             <img src={clapEmoji} alt="clap" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                           </div>
-                          <span className="text-white font-bold text-sm">{currentReactions.total}</span>
-                          <div className="w-px h-4 bg-white/20" />
-                          <span className="text-white/70 text-sm">Tap to react</span>
+                          <span className="text-white font-bold text-xs">{currentReactions.total}</span>
+                          <div className="w-px h-3.5 bg-white/20" />
+                          <span className="text-white/70 text-xs">Tap to react</span>
                         </>
                       ) : (
                         <>
@@ -2103,10 +2115,10 @@ const Reel = () => {
                           e.stopPropagation();
                           setShowHistoryGallery(true);
                         }}
-                        className="shrink-0 active:scale-95 transition-transform flex items-center gap-1.5"
+                        className="shrink-0 active:scale-95 transition-transform flex items-center gap-1.5 whitespace-nowrap"
                         style={{
-                          height: 44,
-                          borderRadius: 22,
+                          height: 42,
+                          borderRadius: 21,
                           paddingLeft: 14,
                           paddingRight: 16,
                           background: 'rgba(255, 255, 255, 0.08)',
@@ -2116,8 +2128,8 @@ const Reel = () => {
                           boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
                         }}
                       >
-                        <History className="w-[16px] h-[16px] text-white/60" strokeWidth={1.5} />
-                        <span className="text-white/60 text-xs font-medium whitespace-nowrap">View their Progress</span>
+                        <History className="w-[14px] h-[14px] text-white/60" strokeWidth={1.5} />
+                        <span className="text-white/60 text-xs font-medium">View their Progress</span>
                       </button>
                     )}
                   </div>
