@@ -2075,7 +2075,7 @@ const Reel = () => {
               })()}
               </div>
             );
-          })}
+          })()}
 
           
           {/* Right arrow indicator - only on first story */}
