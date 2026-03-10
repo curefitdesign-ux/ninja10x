@@ -425,10 +425,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     {userDescription && (
                       <div className="mt-0.5 space-y-0.5">
                         {userDescription.diary.split('\n').map((line, i) => (
-                          <p key={i} className={cn(
-                            "text-[11px] leading-snug",
-                            i === 0 ? "text-white/80 font-semibold" : "text-white/50"
-                          )}>
+                          <p key={i} className={
+                            i === 0 ? "text-[11px] leading-snug text-white/80 font-semibold" : "text-[11px] leading-snug text-white/50"
+                          }>
                             {line}
                           </p>
                         ))}
