@@ -1709,7 +1709,7 @@ const Reel = () => {
             }}
             className="h-full"
           >
-            <CarouselContent className="h-full -ml-2">
+            <CarouselContent className="h-full -ml-1">
               {effectiveUserGroups.map((group, idx) => {
                 const isCenter = idx === currentUserIndex;
                 const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
@@ -1725,9 +1725,9 @@ const Reel = () => {
                 const hasFrame = activity?.frame && activity.frame !== 'none';
 
                 const cardStyle: React.CSSProperties = {
-                  transform: `scale(${isCenter ? 1.0 : 0.88})`,
+                  transform: `scale(${isCenter ? 1.0 : 0.72})`,
                   transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease',
-                  opacity: isCenter ? 1 : 0.5,
+                  opacity: isCenter ? 1 : 0.4,
                   zIndex: isCenter ? 10 : 1,
                 };
 
@@ -1735,7 +1735,7 @@ const Reel = () => {
                   return (
                     <CarouselItem
                       key={`card-${group.userId}`}
-                      className="pl-2 flex items-center justify-center h-full basis-[82%]"
+                      className="pl-1 flex items-center justify-center h-full basis-[88%]"
                     >
                       <div
                         className="flex items-center justify-center w-full h-full"
@@ -1779,7 +1779,7 @@ const Reel = () => {
                 return (
                   <CarouselItem
                     key={`card-${group.userId}`}
-                    className="pl-2 flex items-center justify-center relative h-full basis-[82%]"
+                    className="pl-1 flex items-center justify-center relative h-full basis-[88%]"
                   >
                     <div
                       className="flex items-center justify-center w-full h-full"
