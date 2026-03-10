@@ -678,13 +678,12 @@ const Reel = () => {
     }
   }, [currentUserIndex, currentGroup, effectiveUserGroups]);
 
-  // Reset drag lane after user changes
+  // Scroll to current user when index changes
   useEffect(() => {
-    setCarouselOffset(0);
-    setIsCarouselDragging(false);
-    if (carouselCommitTimeoutRef.current) {
-      window.clearTimeout(carouselCommitTimeoutRef.current);
-      carouselCommitTimeoutRef.current = null;
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const cardWidth = container.offsetWidth;
+      container.scrollTo({ left: currentUserIndex * cardWidth, behavior: 'smooth' });
     }
   }, [currentUserIndex]);
 
