@@ -344,9 +344,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         <motion.div
                           className="relative overflow-visible cursor-pointer"
                           style={{
-                            width: '85%', aspectRatio: '9/16', borderRadius: 6,
+                            width: '55%', aspectRatio: '9/16', borderRadius: 6,
                             transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
-                            boxShadow: isSelected ? '0 12px 48px rgba(0,0,0,0.5), 0 0 0 2px rgba(249,115,22,0.3)' : '0 8px 32px rgba(0,0,0,0.4)',
+                            boxShadow: isSelected ? '0 8px 24px rgba(0,0,0,0.4), 0 0 0 2px rgba(249,115,22,0.3)' : 'none',
                             marginLeft: idx % 2 === 0 ? '0%' : '12%',
                           }}
                           onClick={() => { const ri = activities.findIndex(a => a.id === act.id); if (ri >= 0) setCurrentIndex(ri); }}
