@@ -1378,9 +1378,6 @@ const Reel = () => {
 
   const isLogActivityCard = currentActivity?.id === 'log-activity';
 
-  const handlePullRefresh = useCallback(async () => {
-    await loadActivities();
-  }, [loadActivities]);
 
   return (
     <PullToRefresh onRefresh={handlePullRefresh}>
