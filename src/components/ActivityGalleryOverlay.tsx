@@ -422,29 +422,21 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       <div className="flex items-center gap-2">
                         <p className="text-white font-bold text-sm truncate">{userProfile.displayName}</p>
                         {userDescription && (
-                          <span className="text-white/50 text-[11px] font-medium shrink-0">{userDescription.count}/12</span>
+                          <span className="text-white/50 text-xs font-medium shrink-0">{userDescription.count}/12</span>
                         )}
-                        <div
-                          className="px-2 py-0.5 rounded-full shrink-0"
-                          style={{ background: 'rgba(255,255,255,0.08)' }}
-                        >
-                          <span className="text-white/60 text-[10px] font-medium">
-                            W{week} • D{dayInWeek}
-                          </span>
-                        </div>
                       </div>
                       {userDescription && (
                         <>
-                          <p className="mt-0.5 text-[11px] leading-snug text-white/60">
+                          <p className="mt-0.5 text-xs leading-snug text-white/70">
                             {userDescription.diary}
                           </p>
                           {userDescription.varietyLine && (
-                            <p className="text-[11px] leading-snug text-white/60">
+                            <p className="text-xs leading-snug text-white/70">
                               {userDescription.varietyLine}
                             </p>
                           )}
                           {userDescription.durationLine && (
-                            <p className="text-[11px] leading-snug text-white/50">
+                            <p className="text-xs leading-snug text-white/60">
                               {userDescription.durationLine}
                             </p>
                           )}
