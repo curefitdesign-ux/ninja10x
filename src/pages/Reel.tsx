@@ -519,7 +519,9 @@ const Reel = () => {
   const currentActivityName = currentActivity?.activity?.toLowerCase?.() ?? '';
   const isWeekRecapStory = currentActivity?.id?.startsWith('week-recap');
   const isRecapActivity = currentActivityName.includes('recap') || currentActivity?.frame === 'recap';
-  const isOwnStory = user && currentGroup?.userId === user.id;
+  const isOwnStory = !!user && currentGroup?.userId === user.id;
+  const viewerCanSeeCommunity = !!profile?.stories_public;
+  const currentGroupStoriesPublic = currentGroup?.activities?.some(activity => activity.isPublic) ?? false;
   
   // Check if activity was created within the last 24 hours
   const isWithin24Hours = currentActivity ? 
@@ -539,24 +541,20 @@ const Reel = () => {
     if (currentActivityIndex < currentGroup.activities.length - 1) {
       setCurrentActivityIndex(prev => prev + 1);
     } else {
-      // Mark current user as fully viewed
-      if (profile?.stories_public && effectiveUserGroups.length > 1) {
-        // Auto-advance to next user when public
+      // Mark current user as fully viewed and always auto-advance to next user
+      setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
+      if (effectiveUserGroups.length > 1) {
         const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
         const nextGroup = effectiveUserGroups[nextIdx];
-        // Set ref to TARGET user before triggering reorder
         if (nextGroup) {
           navigatingRef.current = true;
           currentUserIdRef.current = nextGroup.userId;
         }
-        setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
         setCurrentActivityIndex(0);
         setCurrentUserIndex(nextIdx);
-      } else {
-        setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
       }
     }
-  }, [currentGroup, currentActivityIndex, profile?.stories_public, effectiveUserGroups, currentUserIndex]);
+  }, [currentGroup, currentActivityIndex, effectiveUserGroups, currentUserIndex]);
 
   // Navigate between users (horizontal swipe)
   const goNextUser = useCallback(() => {
@@ -684,8 +682,8 @@ const Reel = () => {
   }, [currentUserIndex]);
 
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    // If story is locked, open Make Public sheet on any tap
-    const locked = !isOwnStory && !profile?.stories_public;
+    // If story is locked (viewer hasn't shared + this isn't own story), open Make Public sheet
+    const locked = !isOwnStory && !viewerCanSeeCommunity;
     if (locked) {
       setShowMakePublicSheet(true);
       return;
@@ -713,7 +711,7 @@ const Reel = () => {
       }
     }
     setLastTap(now);
-  }, [lastTap, cycleActivity, prevActivity, isOwnStory, profile?.stories_public]);
+  }, [lastTap, cycleActivity, prevActivity, isOwnStory, viewerCanSeeCommunity]);
 
   // Progress navigation removed — now a standalone page via bottom nav
 
@@ -759,8 +757,8 @@ const Reel = () => {
 
 
   // Auto-advance timer - pause when modals are open OR content is locked
-  // Determine if story should be locked (user's profile is private OR they haven't shared any public activity)
-  const isStoryLocked = !isOwnStory && !profile?.stories_public;
+  // Story locked = viewer hasn't shared publicly AND this isn't own story
+  const isStoryLocked = !isOwnStory && !viewerCanSeeCommunity;
   const isPaused = showReactsSheet || showSendReactionSheet || showEditSheet || showMakePublicSheet || isStoryLocked || showHistoryGallery;
   
   // Reset progress/duration when activity changes (NOT mediaLoaded — that's URL-keyed to avoid race condition)
@@ -1697,6 +1695,7 @@ const Reel = () => {
             msOverflowStyle: 'none',
           }}
           onScroll={(e) => {
+            if (navigatingRef.current) return;
             const container = e.currentTarget;
             const cardWidth = container.offsetWidth;
             if (cardWidth <= 0) return;
@@ -1723,8 +1722,8 @@ const Reel = () => {
                 || activities[0];
 
             const media = (activity?.originalUrl || activity?.storageUrl || group.avatarUrl || '').trim();
-            const isOwnCard = user && group.userId === user.id;
-            const isLockedCard = !isOwnCard && !profile?.stories_public;
+            const isOwnCard = !!user && group.userId === user.id;
+            const isLockedCard = !isOwnCard && !viewerCanSeeCommunity;
             const hasFrame = activity?.frame && activity.frame !== 'none';
 
             if (!isCenter) {
@@ -1787,7 +1786,7 @@ const Reel = () => {
               >
                 {/* Full templated image/video - with lock overlay for non-public users */}
                 {(() => {
-                  const shouldShowLocked = !isOwnStory && !profile?.stories_public;
+                  const shouldShowLocked = !isOwnStory && !viewerCanSeeCommunity;
                   const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
                   return (
                     <div
@@ -2133,8 +2132,8 @@ const Reel = () => {
             {/* React row sits below the reel card with a fixed 10px gap */}
             <div className="shrink-0 flex flex-col items-center justify-center pt-3 pb-2" style={{ minHeight: 56 }}>
           {(() => {
-            // Lock content if user's profile is private OR they haven't shared any public activity
-            const isContentLocked = !isOwnStory && !profile?.stories_public;
+            // Lock content if viewer hasn't shared publicly and this isn't own story
+            const isContentLocked = !isOwnStory && !viewerCanSeeCommunity;
             
             return (
               <div 
