@@ -682,8 +682,8 @@ const Reel = () => {
   }, [currentUserIndex]);
 
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    // If story is locked, open Make Public sheet on any tap
-    const locked = !isOwnStory && !profile?.stories_public;
+    // If story is locked (viewer hasn't shared + this isn't own story), open Make Public sheet
+    const locked = !isOwnStory && !viewerCanSeeCommunity;
     if (locked) {
       setShowMakePublicSheet(true);
       return;
@@ -711,7 +711,7 @@ const Reel = () => {
       }
     }
     setLastTap(now);
-  }, [lastTap, cycleActivity, prevActivity, isOwnStory, profile?.stories_public]);
+  }, [lastTap, cycleActivity, prevActivity, isOwnStory, viewerCanSeeCommunity]);
 
   // Progress navigation removed — now a standalone page via bottom nav
 
