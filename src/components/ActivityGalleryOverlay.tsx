@@ -437,7 +437,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           style={{
                             width: '55%', aspectRatio: '9/16', borderRadius: 6,
                             transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
-                            boxShadow: isSelected ? '0 8px 24px rgba(0,0,0,0.4)' : 'none',
+                            marginLeft: idx % 2 === 0 ? '0%' : '12%',
                             marginLeft: idx % 2 === 0 ? '0%' : '12%',
                           }}
                           onClick={() => { const ri = activities.findIndex(a => a.id === act.id); if (ri >= 0) setCurrentIndex(ri); }}
