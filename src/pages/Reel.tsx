@@ -1836,7 +1836,7 @@ const Reel = () => {
             transition={shakeTransition}
             drag="x"
             dragMomentum={false}
-            dragConstraints={{ left: 0, right: 0 }}
+            dragConstraints={dragConstraints}
             dragElastic={0.35}
             onDragEnd={handleHorizontalDragEnd}
             onClick={handleTap}
