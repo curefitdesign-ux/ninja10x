@@ -687,8 +687,13 @@ const Reel = () => {
 
   // Reset drag lane after user changes
   useEffect(() => {
-    carouselX.set(0);
-  }, [currentUserIndex, carouselX]);
+    setCarouselOffset(0);
+    setIsCarouselDragging(false);
+    if (carouselCommitTimeoutRef.current) {
+      window.clearTimeout(carouselCommitTimeoutRef.current);
+      carouselCommitTimeoutRef.current = null;
+    }
+  }, [currentUserIndex]);
 
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     // If story is locked, open Make Public sheet on any tap
