@@ -1698,7 +1698,7 @@ const Reel = () => {
           }}
         >
         {/* Reel cards — Embla Carousel with spotlight scale animation */}
-        <div className="relative min-h-0 flex-1 overflow-hidden" onClick={handleTap}>
+        <div className="relative min-h-0 flex-1" style={{ overflow: 'clip' }} onClick={handleTap}>
           <Carousel
             setApi={setCarouselApi}
             opts={{
