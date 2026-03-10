@@ -1779,11 +1779,11 @@ const Reel = () => {
                 return (
                   <CarouselItem
                     key={`card-${group.userId}`}
-                    className="pl-2 flex items-center justify-center relative h-full basis-[82%]"
+                    className={`pl-2 flex items-center justify-center relative h-full ${isLogActivityCard ? 'basis-full' : 'basis-[82%]'}`}
                   >
                     <div
                       className="flex items-center justify-center w-full h-full"
-                      style={cardStyle}
+                      style={isLogActivityCard ? { zIndex: 10 } : cardStyle}
                     >
                     {/* Full templated image/video - with lock overlay for non-public users */}
                     {(() => {
@@ -1801,7 +1801,13 @@ const Reel = () => {
                           {/* Card — 9:16 aspect ratio, constrained to available space */}
                           <div
                             className="relative overflow-hidden"
-                            style={{
+                            style={isLogActivityCard ? {
+                              width: '100%',
+                              height: '100%',
+                              overflow: 'hidden',
+                              background: 'transparent',
+                              borderRadius: '10px',
+                            } : {
                               aspectRatio: '9/16',
                               height: 'calc(95% - 20px)',
                               maxWidth: '100%',
