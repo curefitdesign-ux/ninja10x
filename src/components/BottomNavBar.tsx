@@ -55,7 +55,8 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
   const handleTabClick = (tabId: string) => {
     if (tabId === "bell") {
       setShowNotificationSheet(prev => !prev);
-      setUnreadNotificationCount(0);
+      // Mark all current notifications as seen
+      seenCountRef.current = totalNotificationCount;
       return;
     }
     if (tabId === "menu") {
