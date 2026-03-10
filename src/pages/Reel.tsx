@@ -1795,12 +1795,11 @@ const Reel = () => {
                         className="relative overflow-hidden"
                         style={{
                           aspectRatio: '9/16',
-                          height: 'calc(95% - 20px)',
+                          height: '100%',
                           maxWidth: '100%',
                           borderRadius: '0px',
                           overflow: 'hidden',
                           background: 'transparent',
-                          marginTop: '-10px',
                         }}
                       >
                     {/* Progress bar removed — timing indicated via avatar ring */}
