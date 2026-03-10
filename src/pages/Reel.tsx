@@ -1888,9 +1888,8 @@ const Reel = () => {
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent',
                                       }}
-                                    >
-                                      {profile?.display_name?.split(' ')[0] || 'Hey'}, ready to<br/>crush it today?
-                                    </p>
+                                      dangerouslySetInnerHTML={{ __html: getContextualNudge(profile?.display_name?.split(' ')[0] || 'Hey', myActivities) }}
+                                    />
                                   </motion.div>
 
                                   {/* Glowing plus */}
