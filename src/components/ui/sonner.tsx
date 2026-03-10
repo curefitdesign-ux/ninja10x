@@ -8,6 +8,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme="dark"
       className="toaster group"
       position="top-center"
+      style={{ zIndex: 99999 }}
+      offset={60}
       toastOptions={{
         style: {
           background: 'rgba(255, 255, 255, 0.08)',
