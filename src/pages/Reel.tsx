@@ -1951,6 +1951,11 @@ const Reel = () => {
                               position: isRecapActivity ? 'relative' : undefined,
                               margin: isRecapActivity ? '0 auto' : undefined,
                               overflow: 'hidden',
+                              borderRadius: isRecapActivity ? '10px' : undefined,
+                              border: isRecapActivity ? '1px solid rgba(255, 255, 255, 0.15)' : undefined,
+                              boxShadow: isRecapActivity
+                                ? 'inset 0 1px 1px rgba(255,255,255,0.2), inset 0 -1px 1px rgba(255,255,255,0.05), 0 0 20px rgba(167, 100, 255, 0.15)'
+                                : undefined,
                             }}
                             className={isRecapActivity ? 'self-center flex items-center justify-center' : 'absolute inset-0'}
                             >
