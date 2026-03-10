@@ -2013,6 +2013,7 @@ const Reel = () => {
                               objectFit: 'cover',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
                             }}
+                            onLoad={() => setLoadedMediaUrl(mediaUrl)}
                             onError={(e) => {
                               const img = e.currentTarget;
                               if (!img.dataset.retried) {
