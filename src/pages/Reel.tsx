@@ -1628,20 +1628,23 @@ const Reel = () => {
           {effectiveUserGroups.length > 1 && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
             const prevGroup = effectiveUserGroups[prevIdx];
-            const prevActivity = prevGroup?.activities[prevGroup.activities.length - 1];
+            // Use the latest non-video, non-recap activity for peek image
+            const prevActivity = [...(prevGroup?.activities || [])].reverse().find(a => 
+              !isVideoUrl(a.storageUrl || '') && a.dayNumber < 1001
+            ) || prevGroup?.activities[prevGroup.activities.length - 1];
             const prevMedia = prevActivity?.storageUrl || prevActivity?.originalUrl;
             const isPrevOwnStory = user && prevGroup?.userId === user.id;
             const isPrevLocked = !isPrevOwnStory && !profile?.stories_public;
-            if (!prevMedia) return null;
+            if (!prevMedia || isVideoUrl(prevMedia)) return null;
             return (
               <motion.div
                 key={`peek-left-${prevIdx}`}
                 className="absolute left-0 top-0 bottom-0 flex items-center cursor-pointer"
                 style={{ width: '10%', zIndex: 20 }}
                 onClick={goPrevUser}
-                initial={{ opacity: 0, x: -10, scale: 0.9 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.15 }}
               >
                 <div
                   className="w-full overflow-hidden"
@@ -1658,6 +1661,8 @@ const Reel = () => {
                     src={prevMedia}
                     alt="Previous user"
                     className="w-full h-full object-cover"
+                    loading="eager"
+                    fetchPriority="high"
                     style={{ 
                       opacity: isPrevLocked ? 0.35 : 0.5, 
                       filter: isPrevLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
