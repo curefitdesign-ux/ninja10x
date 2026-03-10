@@ -1945,13 +1945,13 @@ const Reel = () => {
                                 <div className="relative z-10 flex flex-col items-center justify-center h-full px-6" style={{ marginTop: -10 }}>
                                   {/* Animated gradient text */}
                                   <motion.div 
-                                    className="text-center mb-8"
+                                    className="text-center mb-6"
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.5, duration: 0.8, ease: 'easeOut' }}
                                   >
                                     <p 
-                                      className="text-[28px] font-bold leading-tight"
+                                      className="text-[18px] font-bold leading-tight"
                                       style={{
                                         background: 'linear-gradient(180deg, hsla(255, 60%, 75%, 1) 0%, hsla(260, 50%, 55%, 1) 100%)',
                                         WebkitBackgroundClip: 'text',
@@ -1961,22 +1961,24 @@ const Reel = () => {
                                     />
                                   </motion.div>
 
-                                  {/* Glowing plus */}
-                                  <div className="relative flex items-center justify-center" style={{ width: 80, height: 80 }}>
-                                    <motion.div 
-                                      className="absolute inset-0 rounded-full"
-                                      style={{
-                                        background: `radial-gradient(circle, ${glowMid} 0%, transparent 65%)`,
-                                        filter: 'blur(16px)',
-                                        transform: 'scale(2.5)',
-                                      }}
-                                      animate={{ opacity: [0.5, 1, 0.5] }}
-                                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                                    />
-                                    <svg width="56" height="56" viewBox="0 0 48 48" fill="none">
-                                      <rect x="20" y="6" width="8" height="36" rx="4" fill={glowHsl} />
-                                      <rect x="6" y="20" width="36" height="8" rx="4" fill={glowHsl} />
-                                    </svg>
+                                  {/* Glowing plus - centered */}
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="relative flex items-center justify-center" style={{ width: 90, height: 90 }}>
+                                      <motion.div 
+                                        className="absolute inset-0 rounded-full"
+                                        style={{
+                                          background: `radial-gradient(circle, ${glowMid} 0%, transparent 60%)`,
+                                          filter: 'blur(20px)',
+                                          transform: 'scale(3)',
+                                        }}
+                                        animate={{ opacity: [0.4, 0.9, 0.4] }}
+                                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                                      />
+                                      <svg width="56" height="56" viewBox="0 0 48 48" fill="none">
+                                        <rect x="20" y="6" width="8" height="36" rx="4" fill={glowHsl} />
+                                        <rect x="6" y="20" width="36" height="8" rx="4" fill={glowHsl} />
+                                      </svg>
+                                    </div>
                                   </div>
 
                                   {/* Label */}
