@@ -70,6 +70,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   initialIndex = 0,
   onLogActivity,
   userProfile,
+  isOwnProfile,
 }, _ref) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const portalContainer = usePortalContainer();
