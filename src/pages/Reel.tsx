@@ -1985,15 +1985,14 @@ const Reel = () => {
                 }}
               >
                 {/* Reaction pill + Share icon row — hidden for log-activity placeholder */}
-                <div className="flex items-center justify-center gap-3 px-4" style={{ visibility: isLogActivityCard ? 'hidden' : 'visible' }}>
+                <div className="flex items-center justify-center gap-2 px-4" style={{ visibility: isLogActivityCard ? 'hidden' : 'visible' }}>
                   {/* Liquid glass reaction pill */}
                   <button
                     onClick={() => { isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
-                    className="relative overflow-hidden active:scale-[0.97] transition-transform"
+                    className="relative overflow-hidden active:scale-[0.97] transition-transform flex-1"
                     style={{
-                      minWidth: currentReactions.total > 0 ? 175 : 155,
-                      height: 44,
-                      borderRadius: 22,
+                      height: 42,
+                      borderRadius: 21,
                       background: 'rgba(255, 255, 255, 0.08)',
                       backdropFilter: 'blur(40px) saturate(180%)',
                       WebkitBackdropFilter: 'blur(40px) saturate(180%)',
