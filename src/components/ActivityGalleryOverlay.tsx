@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, forwardRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Bell } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { X, Share2, Pencil, ChevronUp } from 'lucide-react';
 import SendReactionSheet from '@/components/SendReactionSheet';
 import { createPortal } from 'react-dom';
@@ -23,6 +23,7 @@ import { supabase } from '@/integrations/supabase/client';
 import fireEmoji from '@/assets/reactions/fire-3d.png';
 import clapEmoji from '@/assets/reactions/clap-3d.png';
 import paperclipImg from '@/assets/frames/paperclip-silver.png';
+import deskBellImg from '@/assets/icons/desk-bell-3d.png';
 
 interface ReactorProfile {
   userId: string;
@@ -570,7 +571,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   }}
                 >
                   <div className="flex items-center gap-2.5 h-full">
-                    <Bell className="w-5 h-5 text-amber-400" strokeWidth={2} />
+                    <img src={deskBellImg} alt="bell" className="w-7 h-7 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                     <span className="text-white/80 text-xs font-medium">Nudge to log activity</span>
                   </div>
                 </button>
