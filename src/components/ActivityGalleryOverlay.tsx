@@ -99,7 +99,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     if (!userProfile || activities.length === 0) return [];
     
     const realActivities = activities.filter(a => !a.isPlaceholder && a.dayNumber < 1001);
-    if (realActivities.length === 0) return '';
+    if (realActivities.length === 0) return [];
     
     // Count activities by type
     const activityCounts: Record<string, number> = {};
