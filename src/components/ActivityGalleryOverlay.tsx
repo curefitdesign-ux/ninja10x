@@ -78,8 +78,20 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   targetUserId,
 }, _ref) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const portalContainer = usePortalContainer();
   const { user } = useAuth();
+
+  // Hide bottom nav on open, show on close
+  useEffect(() => {
+    if (isOpen) {
+      window.dispatchEvent(new CustomEvent('gallery-overlay', { detail: { visible: true } }));
+    }
+    return () => {
+      window.dispatchEvent(new CustomEvent('gallery-overlay', { detail: { visible: false } }));
+    };
+  }, [isOpen]);
 
   const [showReactsSheet, setShowReactsSheet] = useState(false);
   const [showSendReactionSheet, setShowSendReactionSheet] = useState(false);
