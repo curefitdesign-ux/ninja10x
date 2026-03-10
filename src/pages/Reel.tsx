@@ -1801,15 +1801,15 @@ const Reel = () => {
                               {/* Back card (deeper, smaller) */}
                               <motion.div
                                 key={`stack-2-${group.userId}`}
-                                initial={{ scale: 0.86, opacity: 0, y: 0 }}
-                                animate={{ scale: 0.86, opacity: 0.5, y: 40 }}
-                                exit={{ scale: 0.86, opacity: 0, y: 0 }}
+                                initial={{ scale: 0.80, opacity: 0, y: 0 }}
+                                animate={{ scale: 0.80, opacity: 0.4, y: 50 }}
+                                exit={{ scale: 0.80, opacity: 0, y: 0 }}
                                 transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.08 }}
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(85% - 20px)',
+                                  height: 'calc(75% - 20px)',
                                   overflow: 'hidden',
                                   zIndex: 1,
                                   borderRadius: '16px',
@@ -1826,15 +1826,15 @@ const Reel = () => {
                               {/* Front card (closer behind main) */}
                               <motion.div
                                 key={`stack-1-${group.userId}`}
-                                initial={{ scale: 0.93, opacity: 0, y: 0 }}
-                                animate={{ scale: 0.93, opacity: 0.65, y: 18 }}
-                                exit={{ scale: 0.93, opacity: 0, y: 0 }}
+                                initial={{ scale: 0.88, opacity: 0, y: 0 }}
+                                animate={{ scale: 0.88, opacity: 0.55, y: 24 }}
+                                exit={{ scale: 0.88, opacity: 0, y: 0 }}
                                 transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.04 }}
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(90% - 20px)',
+                                  height: 'calc(82% - 20px)',
                                   overflow: 'hidden',
                                   zIndex: 2,
                                   borderRadius: '16px',
