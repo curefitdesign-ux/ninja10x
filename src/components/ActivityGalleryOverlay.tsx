@@ -534,55 +534,52 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
             {/* Bottom action row */}
             <div className="shrink-0 flex items-center justify-center gap-3 px-4 z-50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 12px)', paddingTop: 8 }}>
-              <button
-                onClick={(e) => { e.stopPropagation(); isOwnProfile ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
-                className="relative overflow-hidden active:scale-[0.97] transition-transform"
-                style={{
-                  minWidth: currentReactions.total > 0 ? 170 : 150, height: 42, borderRadius: 21,
-                  background: 'rgba(255, 255, 255, 0.08)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-                }}
-              >
-                <div className="flex items-center justify-center gap-3 h-full px-4">
-                  {currentReactions.total > 0 ? (
-                    <>
-                      <div className="flex -space-x-1">
-                        <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                        <img src={clapEmoji} alt="clap" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-white font-bold text-sm">{currentReactions.total}</span>
-                        <span className="text-white/50 text-xs">reacts</span>
-                      </div>
-                      <ChevronUp className="w-3.5 h-3.5 text-white/40" />
-                    </>
-                  ) : !isOwnProfile ? (
-                    <>
-                      <img src={fireEmoji} alt="fire" className="w-4 h-4 object-contain opacity-60" />
-                      <span className="text-white/60 text-xs font-medium">Tap to react</span>
-                    </>
-                  ) : (
-                    <>
-                      <img src={fireEmoji} alt="fire" className="w-4 h-4 object-contain opacity-40" />
-                      <span className="text-white/50 text-xs font-medium">No reacts yet</span>
-                    </>
-                  )}
-                </div>
-              </button>
-
-              {((!isOwnProfile && !current.isPlaceholder) || (isOwnProfile && !hasLoggedToday)) && (
+              {/* Nudge button — shown for other users' profiles */}
+              {!isOwnProfile && !current.isPlaceholder && (
                 <button
                   onClick={async (e) => {
                     e.stopPropagation();
-                    if (isOwnProfile) { onClose(); onLogActivity?.(); }
-                    else if (user && targetUserId) {
+                    // Play desk bell sound
+                    try {
+                      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+                      const osc = audioCtx.createOscillator();
+                      const gain = audioCtx.createGain();
+                      osc.connect(gain);
+                      gain.connect(audioCtx.destination);
+                      osc.type = 'sine';
+                      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                      osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
+                      osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.3);
+                      gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                      osc.start(audioCtx.currentTime);
+                      osc.stop(audioCtx.currentTime + 0.5);
+                    } catch {}
+                    if (user && targetUserId) {
                       const { error } = await supabase.from('nudges').insert({ from_user_id: user.id, to_user_id: targetUserId });
-                      if (!error) toast('👋 Poke sent!', { description: `You nudged ${userProfile?.displayName?.split(' ')[0] || 'them'} to keep going!` });
+                      const name = userProfile?.displayName?.split(' ')[0] || 'them';
+                      if (!error) toast(`🔔 Nudge sent to ${name}!`, { description: `Keep pushing, ${name} will love the motivation!` });
                       else toast.error('Could not send nudge');
-                    } else {
-                      toast('👋 Poke sent!', { description: `You nudged ${userProfile?.displayName?.split(' ')[0] || 'them'} to keep going!` });
                     }
                   }}
+                  className="relative overflow-hidden active:scale-[0.95] transition-transform"
+                  style={{
+                    height: 46, borderRadius: 23, paddingLeft: 16, paddingRight: 20,
+                    background: 'rgba(255, 255, 255, 0.08)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+                  }}
+                >
+                  <div className="flex items-center gap-2.5 h-full">
+                    <Bell className="w-5 h-5 text-amber-400" strokeWidth={2} />
+                    <span className="text-white/80 text-xs font-medium">Nudge to log activity</span>
+                  </div>
+                </button>
+              )}
+
+              {/* Log activity for own profile */}
+              {isOwnProfile && !hasLoggedToday && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onClose(); onLogActivity?.(); }}
                   className="shrink-0 active:scale-95 transition-transform"
                   style={{
                     width: 42, height: 42, borderRadius: 21,
@@ -591,9 +588,10 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}
                 >
-                  <span className="text-base leading-none">{isOwnProfile ? '➕' : '👋'}</span>
+                  <span className="text-base leading-none">➕</span>
                 </button>
               )}
+
               {canShare && (
                 <button
                   onClick={(e) => { e.stopPropagation(); setShowShareOptions(true); }}
