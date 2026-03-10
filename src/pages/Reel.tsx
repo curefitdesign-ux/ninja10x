@@ -2104,55 +2104,29 @@ const Reel = () => {
                   )}
                   </button>
 
-                  {/* Share & Edit buttons — aligned with reaction pill */}
+                  {/* Nudge & History buttons — aligned with reaction pill */}
                   <div className="flex items-center gap-2 shrink-0">
-                    {isOwnStory && !isWeekRecapStory && (
+                    {!isOwnStory && !isLogActivityCard && !isWeekRecapStory && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleShareStory();
+                          toast('👋 Poke sent!', { description: `You nudged ${currentGroup?.displayName?.split(' ')[0] || 'them'} to keep going!` });
                         }}
-                        className="shrink-0 active:scale-95 transition-transform"
+                        className="shrink-0 active:scale-95 transition-transform flex items-center gap-1.5 whitespace-nowrap"
                         style={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: 22,
+                          height: 42,
+                          borderRadius: 21,
+                          paddingLeft: 14,
+                          paddingRight: 16,
                           background: 'rgba(255, 255, 255, 0.08)',
                           backdropFilter: 'blur(40px) saturate(180%)',
                           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
                           border: '1px solid rgba(255, 255, 255, 0.06)',
                           boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
                         }}
                       >
-                        <Share2 className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
-                      </button>
-                    )}
-                    {canEdit && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          
-                          setShowEditSheet(true);
-                        }}
-                        className="shrink-0 active:scale-95 transition-transform"
-                        style={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: 22,
-                          background: 'rgba(255, 255, 255, 0.08)',
-                          backdropFilter: 'blur(40px) saturate(180%)',
-                          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                          border: '1px solid rgba(255, 255, 255, 0.06)',
-                          boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <Pencil className="w-[18px] h-[18px] text-white/70" strokeWidth={1.5} />
+                        <span className="text-lg leading-none">👋</span>
+                        <span className="text-white/60 text-xs font-medium">Nudge</span>
                       </button>
                     )}
                     {/* History button — view all past activities of this user */}
