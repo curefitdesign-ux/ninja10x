@@ -685,11 +685,21 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       {/* Nudge for other users' stories, or own profile if no activity today */}
                       {((!isOwnProfile && !current.isPlaceholder) || (isOwnProfile && !hasLoggedToday)) && (
                         <button
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
                             if (isOwnProfile) {
                               onClose();
                               onLogActivity?.();
+                            } else if (user && targetUserId) {
+                              // Insert nudge into database
+                              const { error } = await supabase
+                                .from('nudges')
+                                .insert({ from_user_id: user.id, to_user_id: targetUserId });
+                              if (!error) {
+                                toast('👋 Poke sent!', { description: `You nudged ${userProfile?.displayName?.split(' ')[0] || 'them'} to keep going!` });
+                              } else {
+                                toast.error('Could not send nudge');
+                              }
                             } else {
                               toast('👋 Poke sent!', { description: `You nudged ${userProfile?.displayName?.split(' ')[0] || 'them'} to keep going!` });
                             }
