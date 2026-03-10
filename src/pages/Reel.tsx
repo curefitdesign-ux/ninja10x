@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import curoPeekingImg from '@/assets/mascot/curo-peeking.png';
 
 import { createPortal } from 'react-dom';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
@@ -1829,7 +1830,7 @@ const Reel = () => {
                               const glowMid = isEvenDay ? 'rgba(167, 100, 255, 0.35)' : 'rgba(249, 115, 22, 0.35)';
                               return (
                                 <div
-                                  className="w-full h-full flex flex-col items-center justify-center gap-7 relative"
+                                  className="w-full h-full flex flex-col items-center justify-end pb-[18%] relative"
                                 >
                                   {/* Faint radial glow behind content */}
                                   <div
@@ -1840,16 +1841,27 @@ const Reel = () => {
                                       borderRadius: '50%',
                                       background: `radial-gradient(circle, ${glowMid} 0%, transparent 60%)`,
                                       filter: 'blur(50px)',
-                                      top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                                      top: '45%', left: '50%', transform: 'translate(-50%, -50%)',
                                     }}
+                                  />
+
+                                  {/* Curo mascot peeking */}
+                                  <motion.img
+                                    src={curoPeekingImg}
+                                    alt="Curo mascot"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.05, duration: 0.5, type: 'spring', stiffness: 120 }}
+                                    className="z-10 mb-4"
+                                    style={{ width: 140, height: 'auto', objectFit: 'contain' }}
                                   />
 
                                   {/* Greeting */}
                                   <motion.div
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.1, duration: 0.5 }}
-                                    className="text-center z-10"
+                                    transition={{ delay: 0.15, duration: 0.5 }}
+                                    className="text-center z-10 mb-6"
                                   >
                                     <p
                                       className="text-2xl font-bold leading-tight"
@@ -1862,8 +1874,8 @@ const Reel = () => {
                                     />
                                   </motion.div>
 
-                                  {/* Glowing plus - centered */}
-                                  <div className="relative flex items-center justify-center" style={{ width: 90, height: 90 }}>
+                                  {/* Glowing plus with pulse animation */}
+                                  <div className="relative flex items-center justify-center mb-5" style={{ width: 90, height: 90 }}>
                                     <motion.div 
                                       className="absolute inset-0 rounded-full"
                                       style={{
@@ -1874,10 +1886,14 @@ const Reel = () => {
                                       animate={{ opacity: [0.4, 0.9, 0.4] }}
                                       transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                                     />
-                                    <svg width="56" height="56" viewBox="0 0 48 48" fill="none">
+                                    <motion.svg 
+                                      width="56" height="56" viewBox="0 0 48 48" fill="none"
+                                      animate={{ scale: [1, 1.12, 1], rotate: [0, 5, -5, 0] }}
+                                      transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                                    >
                                       <rect x="20" y="6" width="8" height="36" rx="4" fill={glowHsl} />
                                       <rect x="6" y="20" width="36" height="8" rx="4" fill={glowHsl} />
-                                    </svg>
+                                    </motion.svg>
                                   </div>
 
                                   {/* Label */}
