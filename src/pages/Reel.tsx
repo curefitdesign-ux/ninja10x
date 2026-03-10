@@ -1774,29 +1774,25 @@ const Reel = () => {
             key={`center-${currentGroup?.userId}-${currentUserIndex}`}
             className="relative flex items-center justify-center"
             style={{
-              transformStyle: 'preserve-3d',
               width: '100%',
               height: '100%',
             }}
             initial={{
-              x: slideDirection === 'left' ? 320 : slideDirection === 'right' ? -320 : 0,
-              scale: 0.82,
-              rotateY: slideDirection === 'left' ? -12 : slideDirection === 'right' ? 12 : 0,
+              x: slideDirection === 'left' ? 300 : slideDirection === 'right' ? -300 : 0,
+              scale: 0.85,
               opacity: 0.5,
             }}
             animate={{
               x: 0,
               scale: 1,
-              rotateY: 0,
               opacity: 1,
             }}
             exit={{
-              x: slideDirection === 'left' ? -320 : 320,
-              scale: 0.82,
-              rotateY: slideDirection === 'left' ? 12 : -12,
+              x: slideDirection === 'left' ? -300 : 300,
+              scale: 0.85,
               opacity: 0,
             }}
-            transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+            transition={{ duration: 0.4, ease: 'linear' }}
           >
               {/* Full templated image/video - with lock overlay for non-public users */}
               {(() => {
