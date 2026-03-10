@@ -1699,14 +1699,15 @@ const Reel = () => {
           {effectiveUserGroups.length > 1 && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
             const prevGroup = effectiveUserGroups[prevIdx];
-            // Use the latest non-video, non-recap activity for peek image
-            const prevActivity = [...(prevGroup?.activities || [])].reverse().find(a => 
-              !isVideoUrl(a.storageUrl || '') && a.dayNumber < 1001
-            ) || prevGroup?.activities[prevGroup.activities.length - 1];
-            const prevMedia = prevActivity?.storageUrl || prevActivity?.originalUrl;
+            // Use the latest non-recap activity for peek image; prefer non-video but fall back to any
+            const prevAct = [...(prevGroup?.activities || [])].reverse().find(a => 
+              !isVideoUrl(a.storageUrl || '') && a.dayNumber < 1001 && a.id !== 'log-activity'
+            ) || [...(prevGroup?.activities || [])].reverse().find(a => a.dayNumber < 1001 && a.id !== 'log-activity');
+            const prevMedia = prevAct?.originalUrl || prevAct?.storageUrl;
             const isPrevOwnStory = user && prevGroup?.userId === user.id;
             const isPrevLocked = !isPrevOwnStory && !profile?.stories_public;
-            if (!prevMedia || isVideoUrl(prevMedia)) return null;
+            const isPrevVideo = isVideoUrl(prevMedia || '');
+            if (!prevMedia) return null;
             return (
               <motion.div
                 key={`peek-left-${prevIdx}`}
@@ -1728,33 +1729,48 @@ const Reel = () => {
                     boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 32px rgba(0,0,0,0.3)',
                   }}
                 >
-                  <img
-                    src={prevMedia}
-                    alt="Previous user"
-                    className="w-full h-full object-cover"
-                    loading="eager"
-                    fetchPriority="high"
-                    style={{ 
-                      opacity: isPrevLocked ? 0.35 : 0.5, 
-                      filter: isPrevLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                    }}
-                  />
+                  {isPrevVideo ? (
+                    <video
+                      src={prevMedia}
+                      className="w-full h-full object-cover"
+                      muted
+                      playsInline
+                      preload="metadata"
+                      style={{ 
+                        opacity: isPrevLocked ? 0.35 : 0.5, 
+                        filter: isPrevLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={prevMedia}
+                      alt="Previous user"
+                      className="w-full h-full object-cover"
+                      loading="eager"
+                      fetchPriority="high"
+                      style={{ 
+                        opacity: isPrevLocked ? 0.35 : 0.5, 
+                        filter: isPrevLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
+                      }}
+                    />
+                  )}
                 </div>
               </motion.div>
             );
           })()}
 
-          {/* Next user peek card - 20% visible on right */}
+          {/* Next user peek card - 10% visible on right */}
           {effectiveUserGroups.length > 1 && (() => {
             const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
             const nextGroup = effectiveUserGroups[nextIdx];
-            const nextActivity = [...(nextGroup?.activities || [])].reverse().find(a => 
-              !isVideoUrl(a.storageUrl || '') && a.dayNumber < 1001
-            ) || nextGroup?.activities[nextGroup.activities.length - 1];
-            const nextMedia = nextActivity?.storageUrl || nextActivity?.originalUrl;
+            const nextAct = [...(nextGroup?.activities || [])].reverse().find(a => 
+              !isVideoUrl(a.storageUrl || '') && a.dayNumber < 1001 && a.id !== 'log-activity'
+            ) || [...(nextGroup?.activities || [])].reverse().find(a => a.dayNumber < 1001 && a.id !== 'log-activity');
+            const nextMedia = nextAct?.originalUrl || nextAct?.storageUrl;
             const isNextOwnStory = user && nextGroup?.userId === user.id;
             const isNextLocked = !isNextOwnStory && !profile?.stories_public;
-            if (!nextMedia || isVideoUrl(nextMedia)) return null;
+            const isNextVideo = isVideoUrl(nextMedia || '');
+            if (!nextMedia) return null;
             return (
               <motion.div
                 key={`peek-right-${nextIdx}`}
@@ -1776,17 +1792,31 @@ const Reel = () => {
                     boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 32px rgba(0,0,0,0.3)',
                   }}
                 >
-                  <img
-                    src={nextMedia}
-                    alt="Next user"
-                    className="w-full h-full object-cover"
-                    loading="eager"
-                    fetchPriority="high"
-                    style={{ 
-                      opacity: isNextLocked ? 0.35 : 0.5, 
-                      filter: isNextLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                    }}
-                  />
+                  {isNextVideo ? (
+                    <video
+                      src={nextMedia}
+                      className="w-full h-full object-cover"
+                      muted
+                      playsInline
+                      preload="metadata"
+                      style={{ 
+                        opacity: isNextLocked ? 0.35 : 0.5, 
+                        filter: isNextLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={nextMedia}
+                      alt="Next user"
+                      className="w-full h-full object-cover"
+                      loading="eager"
+                      fetchPriority="high"
+                      style={{ 
+                        opacity: isNextLocked ? 0.35 : 0.5, 
+                        filter: isNextLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
+                      }}
+                    />
+                  )}
                 </div>
               </motion.div>
             );
