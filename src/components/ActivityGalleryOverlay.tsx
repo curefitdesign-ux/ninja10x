@@ -94,6 +94,73 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [progressRunKey, setProgressRunKey] = useState(0);
   const isPaused = showReactsSheet || showEditSheet;
 
+  // Generate dynamic user description from activity data
+  const userDescription = useMemo(() => {
+    if (!userProfile || activities.length === 0) return '';
+    
+    const realActivities = activities.filter(a => !a.isPlaceholder && a.dayNumber < 1001);
+    if (realActivities.length === 0) return '';
+    
+    // Count activities by type
+    const activityCounts: Record<string, number> = {};
+    let totalDurationMins = 0;
+    
+    for (const a of realActivities) {
+      const type = a.activity || 'Workout';
+      activityCounts[type] = (activityCounts[type] || 0) + 1;
+      
+      // Parse duration (e.g., "45 min", "1h 30m")
+      if (a.duration) {
+        const minMatch = a.duration.match(/(\d+)\s*min/i);
+        const hrMatch = a.duration.match(/(\d+)\s*h/i);
+        if (minMatch) totalDurationMins += parseInt(minMatch[1]);
+        if (hrMatch) totalDurationMins += parseInt(hrMatch[1]) * 60;
+      }
+    }
+    
+    // Top activities sorted by count
+    const topActivities = Object.entries(activityCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+    
+    // Start date
+    const startDate = userProfile.startDate 
+      ? new Date(userProfile.startDate)
+      : null;
+    
+    const daysSinceStart = startDate 
+      ? Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+      : 0;
+    
+    // Current week
+    const currentWeek = Math.ceil(realActivities.length / 3);
+    
+    // Build description parts
+    const parts: string[] = [];
+    
+    if (daysSinceStart > 0) {
+      parts.push(`${daysSinceStart} day${daysSinceStart !== 1 ? 's' : ''} into the journey`);
+    }
+    
+    parts.push(`Week ${currentWeek} • ${realActivities.length}/12 activities logged`);
+    
+    if (topActivities.length > 0) {
+      const activityStr = topActivities.map(([name, count]) => 
+        `${name} (${count}x)`
+      ).join(', ');
+      parts.push(activityStr);
+    }
+    
+    if (totalDurationMins > 0) {
+      const hrs = Math.floor(totalDurationMins / 60);
+      const mins = totalDurationMins % 60;
+      const durStr = hrs > 0 ? `${hrs}h ${mins}m` : `${mins} min`;
+      parts.push(`${durStr} total`);
+    }
+    
+    return parts;
+  }, [activities, userProfile]);
+
   // Media loading
   const [loadedMediaUrl, setLoadedMediaUrl] = useState('');
 
