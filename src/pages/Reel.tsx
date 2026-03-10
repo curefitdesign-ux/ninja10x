@@ -197,7 +197,7 @@ const Reel = () => {
   // Bottom sheet states and transition animations
   const [isTransitioning, setIsTransitioning] = useState(false);
   const bottomSheetY = useMotionValue(0);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
 
   // Data for progress overlay
   const { activities: myActivities, hasPublicActivity, makeActivityPublic } = useJourneyActivities();
