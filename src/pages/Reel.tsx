@@ -589,29 +589,35 @@ const Reel = () => {
   // Mark the current user as viewed AFTER their story finishes (handled by cycleActivity)
   // Don't mark immediately — let the progress ring complete first
 
-  // Preload ALL images in current user's story + next user's first image
+  // Preload ALL images in current user's story + adjacent users' images for smooth scrolling
   useEffect(() => {
     if (!currentGroup) return;
+    
+    const preloadUrl = (url: string | undefined | null) => {
+      if (url && !isVideoUrl(url)) {
+        const img = new Image();
+        img.src = url;
+      }
+    };
+    
     // Preload all activities in current user
     for (const act of currentGroup.activities) {
-      if (act && !act.id?.startsWith('week-recap') && act.id !== 'log-activity' && !act.isVideo) {
-        const url = act.originalUrl || act.storageUrl;
-        if (url) {
-          const img = new Image();
-          img.src = url;
-        }
+      if (act && !act.id?.startsWith('week-recap') && act.id !== 'log-activity') {
+        preloadUrl(act.originalUrl || act.storageUrl);
       }
     }
-    // Preload next user's first activity
-    const nextUserIdx = currentUserIndex + 1;
-    if (nextUserIdx < effectiveUserGroups.length) {
-      const nextGroup = effectiveUserGroups[nextUserIdx];
-      const firstAct = nextGroup?.activities?.[0];
-      if (firstAct && !firstAct.isVideo) {
-        const url = firstAct.originalUrl || firstAct.storageUrl;
-        if (url) {
-          const img = new Image();
-          img.src = url;
+    
+    // Preload next AND previous user's images for instant peek + transitions
+    const adjacentOffsets = [-1, 1, 2];
+    for (const offset of adjacentOffsets) {
+      const idx = (currentUserIndex + offset + effectiveUserGroups.length) % effectiveUserGroups.length;
+      if (idx === currentUserIndex) continue;
+      const group = effectiveUserGroups[idx];
+      if (group) {
+        for (const act of group.activities) {
+          if (act && !act.isVideo) {
+            preloadUrl(act.originalUrl || act.storageUrl);
+          }
         }
       }
     }
@@ -1622,20 +1628,23 @@ const Reel = () => {
           {effectiveUserGroups.length > 1 && (() => {
             const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
             const prevGroup = effectiveUserGroups[prevIdx];
-            const prevActivity = prevGroup?.activities[prevGroup.activities.length - 1];
+            // Use the latest non-video, non-recap activity for peek image
+            const prevActivity = [...(prevGroup?.activities || [])].reverse().find(a => 
+              !isVideoUrl(a.storageUrl || '') && a.dayNumber < 1001
+            ) || prevGroup?.activities[prevGroup.activities.length - 1];
             const prevMedia = prevActivity?.storageUrl || prevActivity?.originalUrl;
             const isPrevOwnStory = user && prevGroup?.userId === user.id;
             const isPrevLocked = !isPrevOwnStory && !profile?.stories_public;
-            if (!prevMedia) return null;
+            if (!prevMedia || isVideoUrl(prevMedia)) return null;
             return (
               <motion.div
                 key={`peek-left-${prevIdx}`}
                 className="absolute left-0 top-0 bottom-0 flex items-center cursor-pointer"
                 style={{ width: '10%', zIndex: 20 }}
                 onClick={goPrevUser}
-                initial={{ opacity: 0, x: -10, scale: 0.9 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.15 }}
               >
                 <div
                   className="w-full overflow-hidden"
@@ -1652,6 +1661,8 @@ const Reel = () => {
                     src={prevMedia}
                     alt="Previous user"
                     className="w-full h-full object-cover"
+                    loading="eager"
+                    fetchPriority="high"
                     style={{ 
                       opacity: isPrevLocked ? 0.35 : 0.5, 
                       filter: isPrevLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
@@ -1666,20 +1677,22 @@ const Reel = () => {
           {effectiveUserGroups.length > 1 && (() => {
             const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
             const nextGroup = effectiveUserGroups[nextIdx];
-            const nextActivity = nextGroup?.activities[nextGroup.activities.length - 1];
+            const nextActivity = [...(nextGroup?.activities || [])].reverse().find(a => 
+              !isVideoUrl(a.storageUrl || '') && a.dayNumber < 1001
+            ) || nextGroup?.activities[nextGroup.activities.length - 1];
             const nextMedia = nextActivity?.storageUrl || nextActivity?.originalUrl;
             const isNextOwnStory = user && nextGroup?.userId === user.id;
             const isNextLocked = !isNextOwnStory && !profile?.stories_public;
-            if (!nextMedia) return null;
+            if (!nextMedia || isVideoUrl(nextMedia)) return null;
             return (
               <motion.div
                 key={`peek-right-${nextIdx}`}
                 className="absolute right-0 top-0 bottom-0 flex items-center cursor-pointer"
                 style={{ width: '10%', zIndex: 20 }}
                 onClick={goNextUser}
-                initial={{ opacity: 0, x: 10, scale: 0.9 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                transition={{ delay: 0.05, type: 'spring', stiffness: 180, damping: 22 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.15 }}
               >
                 <div
                   className="w-full overflow-hidden"
@@ -1696,6 +1709,8 @@ const Reel = () => {
                     src={nextMedia}
                     alt="Next user"
                     className="w-full h-full object-cover"
+                    loading="eager"
+                    fetchPriority="high"
                     style={{ 
                       opacity: isNextLocked ? 0.35 : 0.5, 
                       filter: isNextLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
@@ -1958,8 +1973,6 @@ const Reel = () => {
                             style={{ 
                               objectFit: 'cover',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                              opacity: mediaLoaded ? 1 : 0,
-                              transition: 'opacity 0.2s ease',
                             }}
                             autoPlay
                             loop
@@ -1986,10 +1999,7 @@ const Reel = () => {
                             style={{ 
                               objectFit: 'cover',
                               filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                              opacity: mediaLoaded ? 1 : 0,
-                              transition: 'opacity 0.2s ease',
                             }}
-                            onLoad={() => setLoadedMediaUrl(mediaUrl)}
                             onError={(e) => {
                               const img = e.currentTarget;
                               if (!img.dataset.retried) {
