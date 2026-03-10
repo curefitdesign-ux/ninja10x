@@ -1695,6 +1695,7 @@ const Reel = () => {
             msOverflowStyle: 'none',
           }}
           onScroll={(e) => {
+            if (navigatingRef.current) return;
             const container = e.currentTarget;
             const cardWidth = container.offsetWidth;
             if (cardWidth <= 0) return;
