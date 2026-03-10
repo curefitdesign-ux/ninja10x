@@ -1809,13 +1809,13 @@ const Reel = () => {
                           <AnimatePresence>
                           {showStackedCards && isCenter && (
                             <>
-                              {/* Back card (deepest) */}
+                              {/* Back card (deepest) — slightly smaller, rotated to peek behind */}
                               <motion.div
                                 key={`stack-back-${group.userId}`}
-                                initial={{ rotate: 0, x: 0, scale: 0.92, opacity: 0 }}
-                                animate={{ rotate: 4, x: 8, scale: 0.93, opacity: 1 }}
-                                exit={{ rotate: 0, x: 0, scale: 0.92, opacity: 0 }}
-                                transition={{ type: 'spring', stiffness: 120, damping: 18, delay: 0.1 }}
+                                initial={{ rotate: 0, scale: 0.88, opacity: 0, y: 6 }}
+                                animate={{ rotate: 5, scale: 0.90, opacity: 1, y: 0 }}
+                                exit={{ rotate: 0, scale: 0.88, opacity: 0, y: 6 }}
+                                transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.12 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setShowHistoryGallery(true);
@@ -1823,15 +1823,14 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(95% - 20px)',
-                                  maxWidth: '100%',
-                                  width: '100%',
+                                  height: 'calc(92% - 20px)',
                                   marginTop: '-10px',
                                   background: 'rgba(255,255,255,0.04)',
-                                  border: '1px solid rgba(255,255,255,0.06)',
-                                  filter: 'brightness(0.5)',
+                                  border: '1px solid rgba(255,255,255,0.08)',
+                                  filter: 'brightness(0.45)',
                                   overflow: 'hidden',
                                   zIndex: 1,
+                                  borderRadius: '2px',
                                 }}
                               >
                                 {activities.length > 2 && (() => {
@@ -1844,13 +1843,13 @@ const Reel = () => {
                                   );
                                 })()}
                               </motion.div>
-                              {/* Middle card */}
+                              {/* Middle card — between back and front */}
                               <motion.div
                                 key={`stack-mid-${group.userId}`}
-                                initial={{ rotate: 0, x: 0, scale: 0.95, opacity: 0 }}
-                                animate={{ rotate: -3, x: -6, scale: 0.96, opacity: 1 }}
-                                exit={{ rotate: 0, x: 0, scale: 0.95, opacity: 0 }}
-                                transition={{ type: 'spring', stiffness: 120, damping: 18, delay: 0.05 }}
+                                initial={{ rotate: 0, scale: 0.92, opacity: 0, y: 4 }}
+                                animate={{ rotate: -3, scale: 0.93, opacity: 1, y: 0 }}
+                                exit={{ rotate: 0, scale: 0.92, opacity: 0, y: 4 }}
+                                transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.06 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setShowHistoryGallery(true);
@@ -1858,15 +1857,14 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(95% - 20px)',
-                                  maxWidth: '100%',
-                                  width: '100%',
+                                  height: 'calc(93% - 20px)',
                                   marginTop: '-10px',
                                   background: 'rgba(255,255,255,0.06)',
-                                  border: '1px solid rgba(255,255,255,0.08)',
-                                  filter: 'brightness(0.6)',
+                                  border: '1px solid rgba(255,255,255,0.10)',
+                                  filter: 'brightness(0.55)',
                                   overflow: 'hidden',
                                   zIndex: 2,
+                                  borderRadius: '2px',
                                 }}
                               >
                                 {(() => {
