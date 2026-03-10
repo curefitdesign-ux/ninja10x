@@ -207,41 +207,6 @@ const Reel = () => {
     loadActivities();
   }, [loadActivities]);
 
-  // Helper: inject virtual week-recap entries for completed weeks that don't have a published recap
-  const injectWeekRecaps = useCallback((activities: LocalActivity[], userId: string): LocalActivity[] => {
-    // Only consider real activities (day_number 1-12)
-    const realActivities = activities.filter(a => a.dayNumber >= 1 && a.dayNumber <= 12);
-    // Already-published recaps (day_number 1001+)
-    const publishedRecaps = activities.filter(a => a.dayNumber >= 1001);
-    const publishedWeeks = new Set(publishedRecaps.map(a => a.dayNumber - 1000));
-
-    const result = [...activities];
-
-    // Check each week (1-4): week N is complete if days (N-1)*3+1 to N*3 all exist
-    for (let week = 1; week <= 4; week++) {
-      const weekDays = [1, 2, 3].map(d => (week - 1) * 3 + d);
-      const hasAllDays = weekDays.every(d => realActivities.some(a => a.dayNumber === d));
-      if (hasAllDays && !publishedWeeks.has(week)) {
-        // Inject virtual week-recap entry (no video URL — will show "generating" placeholder)
-        result.push({
-          id: `week-recap-${userId}-w${week}`,
-          storageUrl: '',
-          originalUrl: '',
-          isVideo: true,
-          activity: `Week ${week} Recap`,
-          frame: 'recap',
-          duration: undefined,
-          pr: undefined,
-          dayNumber: 1000 + week,
-          isPublic: true,
-          userId,
-          createdAt: new Date().toISOString(),
-        });
-      }
-    }
-
-    return result;
-  }, []);
 
   // Own user: show today's activity + week recaps; Others: show ALL activities (recent first)
   const effectiveUserGroups = useMemo(() => {
