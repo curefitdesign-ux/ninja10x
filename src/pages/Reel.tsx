@@ -1726,7 +1726,7 @@ const Reel = () => {
                 const hasFrame = activity?.frame && activity.frame !== 'none';
 
                 const cardStyle: React.CSSProperties = {
-                  transform: `scale(${isCenter ? 1.0 : 0.78})`,
+                  transform: `scale(${isCenter ? 1.0 : 1.0})`,
                   transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease',
                   opacity: isCenter ? 1 : 0.45,
                   zIndex: isCenter ? 10 : 1,
@@ -1739,17 +1739,14 @@ const Reel = () => {
                       className="pl-3 flex items-center justify-center h-full basis-[85%]"
                     >
                       <div
-                        className="flex items-center justify-center w-full h-full"
+                        className="flex items-center justify-center w-full h-full pointer-events-none"
                         style={cardStyle}
                       >
                         <div
-                          className="overflow-hidden rounded-3xl w-full h-full"
+                          className="overflow-hidden w-full h-full"
                           style={{
                             aspectRatio: '9/16',
                             maxHeight: 'calc(95% - 20px)',
-                            background: 'rgba(255,255,255,0.06)',
-                            border: '1px solid rgba(255,255,255,0.12)',
-                            boxShadow: '0 8px 32px rgba(0,0,0,0.22)',
                             filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
                           }}
                         >
