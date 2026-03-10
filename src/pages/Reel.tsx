@@ -1583,15 +1583,17 @@ const Reel = () => {
         {currentGroup && currentActivity && (
           <div className="z-40 flex items-center justify-between px-4 shrink-0" style={{ marginBottom: '2px' }}>
             <div>
-              {currentActivity.dayNumber >= 1001 ? (
-                <span className="text-white/50 text-xs font-medium">
-                  Week {currentActivity.dayNumber - 1000} Recap
-                </span>
-              ) : currentActivity.dayNumber >= 1 && currentActivity.dayNumber <= 12 ? (
-                <span className="text-white/50 text-xs font-medium">
-                  Week {Math.ceil(currentActivity.dayNumber / 3)} • Day {((currentActivity.dayNumber - 1) % 3) + 1}
-                </span>
-              ) : null}
+              {isOwnStory ? null : (
+                currentActivity.dayNumber >= 1001 ? (
+                  <span className="text-white/50 text-xs font-medium">
+                    Week {currentActivity.dayNumber - 1000} Recap
+                  </span>
+                ) : currentActivity.dayNumber >= 1 && currentActivity.dayNumber <= 12 ? (
+                  <span className="text-white/50 text-xs font-medium">
+                    Week {Math.ceil(currentActivity.dayNumber / 3)} • Day {((currentActivity.dayNumber - 1) % 3) + 1}
+                  </span>
+                ) : null
+              )}
             </div>
             {isOwnStory && !isWeekRecapStory && !isLogActivityCard && (
               <button
@@ -1886,7 +1888,7 @@ const Reel = () => {
                                         WebkitTextFillColor: 'transparent',
                                       }}
                                     >
-                                      Ready to<br/>crush it today?
+                                      {profile?.display_name?.split(' ')[0] || 'Hey'}, ready to<br/>crush it today?
                                     </p>
                                   </motion.div>
 
