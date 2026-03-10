@@ -495,14 +495,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 >
                   {/* 9:16 Card */}
                   <motion.div
-                    className="relative overflow-hidden"
+                    className="relative overflow-hidden w-full h-full"
                     style={{
                       aspectRatio: '9/16',
                       maxHeight: '100%',
                       maxWidth: '100%',
                       borderRadius: '20px',
                       overflow: 'hidden',
-                      background: 'transparent',
+                      background: 'rgba(0,0,0,0.3)',
                     }}
                   >
                     <AnimatePresence mode="popLayout">
