@@ -1764,8 +1764,8 @@ const Reel = () => {
             );
           })}
 
-          {/* Center card with 3D enter/exit animation */}
-          <AnimatePresence mode="popLayout" initial={false}>
+          {/* Center card with linear enter/exit */}
+          <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={`center-${currentGroup?.userId}-${currentUserIndex}`}
             className="relative flex items-center justify-center"
