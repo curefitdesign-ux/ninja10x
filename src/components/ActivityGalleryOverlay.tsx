@@ -95,19 +95,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const isPaused = showReactsSheet || showEditSheet;
 
   // Generate dynamic user description from activity data
-  const userDescription = useMemo((): { headline: string; details: string } | null => {
+  const userDescription = useMemo((): { headline: string; totalDuration: string; count: number } | null => {
     if (!userProfile || activities.length === 0) return null;
     
     const realActivities = activities.filter(a => !a.isPlaceholder && a.dayNumber < 1001);
     if (realActivities.length === 0) return null;
     
-    // Count activities by type
-    const activityCounts: Record<string, number> = {};
     let totalDurationMins = 0;
-    
     for (const a of realActivities) {
-      const type = a.activity || 'Workout';
-      activityCounts[type] = (activityCounts[type] || 0) + 1;
       if (a.duration) {
         const minMatch = a.duration.match(/(\d+)\s*min/i);
         const hrMatch = a.duration.match(/(\d+)\s*h/i);
@@ -115,17 +110,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
         if (hrMatch) totalDurationMins += parseInt(hrMatch[1]) * 60;
       }
     }
-    
-    const topActivities = Object.entries(activityCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 2);
-    
-    const startDate = userProfile.startDate ? new Date(userProfile.startDate) : null;
-    const daysSinceStart = startDate 
-      ? Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24))
-      : 0;
 
-    // Fun headline based on progress
     const count = realActivities.length;
     let headline = '';
     if (count >= 12) headline = '🏆 Journey complete!';
@@ -134,25 +119,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     else if (count >= 3) headline = '⚡ Building momentum';
     else if (count >= 1) headline = '🚀 Just getting started';
     
-    // Crisp detail line
-    const detailParts: string[] = [];
-    detailParts.push(`${count}/12 logged`);
-    
-    if (topActivities.length > 0) {
-      detailParts.push(topActivities.map(([name, c]) => `${name} ×${c}`).join(', '));
-    }
-    
+    let totalDuration = '';
     if (totalDurationMins > 0) {
       const hrs = Math.floor(totalDurationMins / 60);
       const mins = totalDurationMins % 60;
-      detailParts.push(hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`);
+      totalDuration = hrs > 0 ? (mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`) : `${mins}m`;
     }
     
-    if (daysSinceStart > 0) {
-      detailParts.push(`Day ${daysSinceStart}`);
-    }
-    
-    return { headline, details: detailParts.join(' · ') };
+    return { headline, totalDuration, count };
   }, [activities, userProfile]);
 
   // Media loading
