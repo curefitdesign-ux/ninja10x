@@ -405,7 +405,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                         {/* Quote */}
                         {(decorType === 2 || decorType === 1) && (
-                          <p style={{ fontFamily: "'Caveat', cursive", fontSize: 14, color: 'rgba(255,255,255,0.3)', marginTop: 6, marginLeft: idx % 2 === 0 ? '60%' : '5%', transform: `rotate(${-rotation * 0.8}deg)` }}>{handQuote}</p>
+                          <p style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.3)', marginTop: 6, marginLeft: idx % 2 === 0 ? '60%' : '5%', transform: `rotate(${-rotation * 0.8}deg)` }}>{handQuote}</p>
                         )}
                         {/* Arrow */}
                         {idx < sortedActivities.length - 1 && decorType !== 4 && (
