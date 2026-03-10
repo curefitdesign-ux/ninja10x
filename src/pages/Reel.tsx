@@ -109,7 +109,7 @@ const Reel = () => {
   const [showEditSheet, setShowEditSheet] = useState(false);
   
   // Auto-advance timer state — dynamic duration based on media type
-  const DEFAULT_ADVANCE_DURATION = 3000; // 3 seconds for images
+  const DEFAULT_ADVANCE_DURATION = 7000; // 7 seconds for images (Instagram-like)
   const [autoAdvanceDuration, setAutoAdvanceDuration] = useState(DEFAULT_ADVANCE_DURATION);
   const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
   // Delayed mirror of autoAdvanceProgress for the own-profile ring (needs 2-frame render for CSS transition)
