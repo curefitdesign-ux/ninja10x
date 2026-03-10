@@ -296,11 +296,16 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 38px, rgba(255,255,255,0.03) 38px, rgba(255,255,255,0.03) 39px)',
                   backgroundPosition: '0 20px',
                 }} />
-                {/* Timeline dashed line */}
-                <div className="absolute pointer-events-none" style={{
-                  left: 28, top: 0, bottom: 0, width: 2,
-                  backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.12) 6px, transparent 6px, transparent 12px)',
-                }} />
+                {/* Curved timeline SVG */}
+                <svg className="absolute pointer-events-none" style={{ left: 0, top: 0, width: 60, height: '100%', overflow: 'visible' }} preserveAspectRatio="none">
+                  <path
+                    d="M 29 0 C 45 80, 12 160, 29 240 C 46 320, 12 400, 29 480 C 46 560, 12 640, 29 720 C 46 800, 12 880, 29 960 C 46 1040, 12 1120, 29 1200 C 46 1280, 12 1360, 29 1440 C 46 1520, 12 1600, 29 1680 C 46 1760, 12 1840, 29 1920 C 46 2000, 12 2080, 29 2160 C 46 2240, 12 2320, 29 2400 C 46 2480, 12 2560, 29 2640 C 46 2720, 12 2800, 29 2880 C 46 2960, 12 3040, 29 3120 C 46 3200, 12 3280, 29 3360 C 46 3440, 12 3520, 29 3600 C 46 3680, 12 3760, 29 3840 C 46 3920, 12 4000, 29 4080"
+                    stroke="rgba(255,255,255,0.1)"
+                    strokeWidth="2"
+                    strokeDasharray="6 6"
+                    fill="none"
+                  />
+                </svg>
 
                 {(() => {
                   const sortedActivities = [...activities].filter(a => !a.isPlaceholder);
