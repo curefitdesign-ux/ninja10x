@@ -47,12 +47,19 @@ export interface GalleryActivity {
   isPlaceholder?: boolean;
 }
 
+interface UserProfileInfo {
+  displayName: string;
+  avatarUrl: string;
+  startDate?: string; // ISO date string of first activity
+}
+
 interface ActivityGalleryOverlayProps {
   isOpen: boolean;
   onClose: () => void;
   activities: GalleryActivity[];
   initialIndex?: number;
   onLogActivity?: () => void;
+  userProfile?: UserProfileInfo;
 }
 
 const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlayProps>(function ActivityGalleryOverlay({
