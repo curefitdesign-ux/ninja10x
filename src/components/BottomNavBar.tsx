@@ -49,11 +49,11 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
 
   if (shouldHide) return null;
 
-  const activeTab = location.pathname === "/progress" ? "progress" : "discover";
+  const activeTab = showNotificationSheet ? "bell" : location.pathname === "/progress" ? "progress" : "discover";
 
   const handleTabClick = (tabId: string) => {
     if (tabId === "bell") {
-      setShowNotificationSheet(true);
+      setShowNotificationSheet(prev => !prev);
       setUnreadNotificationCount(0);
       return;
     }
@@ -155,7 +155,11 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
 
           {/* Alerts */}
           <button onClick={() => handleTabClick("bell")} className={btnClass}>
-            <div style={{ color: "rgba(200, 210, 230, 0.6)", opacity: 0.5 }} className="relative">
+            <div className="relative transition-all duration-300" style={{
+              color: activeTab === "bell" ? "#ffffff" : "rgba(200, 210, 230, 0.6)",
+              opacity: activeTab === "bell" ? 1 : 0.5,
+              transform: activeTab === "bell" ? "scale(1.1)" : "scale(1)",
+            }}>
               <Bell className="w-5 h-5" strokeWidth={1.5} />
               {unreadNotificationCount > 0 && (
                 <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full" style={{
@@ -165,7 +169,10 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
                 }} />
               )}
             </div>
-            <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap" style={{ color: "rgba(200, 210, 230, 0.5)", fontWeight: 400 }}>Alerts</span>
+            <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap transition-all duration-300" style={{
+              color: activeTab === "bell" ? "#ffffff" : "rgba(200, 210, 230, 0.5)",
+              fontWeight: activeTab === "bell" ? 700 : 400,
+            }}>Alerts</span>
           </button>
 
           {/* Menu */}
