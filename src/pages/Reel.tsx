@@ -601,11 +601,11 @@ const Reel = () => {
     }
   }, [currentActivityIndex, goPrevUser]);
 
-  // Swipe gesture handling for horizontal navigation - smooth scroll feel
+  // Swipe gesture handling for horizontal navigation - clean simple scroll
   const dragX = useMotionValue(0);
-  const cardOpacity = useTransform(dragX, [-200, -100, 0, 100, 200], [0.85, 0.95, 1, 0.95, 0.85]);
-  const cardRotate = useMotionValue(0); // No rotation for smooth scroll feel
-  const cardScale = useMotionValue(1); // No scale for smooth scroll feel
+  const cardOpacity = useMotionValue(1); // No opacity change during drag
+  const cardRotate = useMotionValue(0);
+  const cardScale = useMotionValue(1);
   const dragConstraints = useMemo(() => ({ left: 0, right: 0 }), []);
   
   const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -1890,31 +1890,14 @@ const Reel = () => {
                       transition={{ type: 'spring', stiffness: 280, damping: 30, duration: 0.5 }}
                     >
                     {/* Progress bar removed — timing indicated via avatar ring */}
-                    <AnimatePresence mode="popLayout" custom={swipeDirection}>
+                    <AnimatePresence mode="popLayout">
                       <motion.div
                         key={contentKey}
-                        custom={swipeDirection}
                         className="absolute inset-0 flex items-center justify-center"
-                        variants={{
-                          enter: (dir: string) => ({ 
-                            opacity: 0.4, 
-                            x: dir === 'left' ? 80 : -80,
-                          }),
-                          center: { opacity: 1, x: 0 },
-                          exit: (dir: string) => ({ 
-                            opacity: 0.4, 
-                            x: dir === 'left' ? -80 : 80,
-                          }),
-                        }}
-                        initial="enter"
-                        animate="center"
-                        exit="exit"
-                        transition={{ 
-                          type: 'spring',
-                          stiffness: 350,
-                          damping: 35,
-                          mass: 0.8,
-                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
                       >
                         {currentActivity?.id === 'log-activity' ? (
                           // Simple "Log Activity" card — matches Home page style
