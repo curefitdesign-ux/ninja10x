@@ -99,6 +99,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [showSendReactionSheet, setShowSendReactionSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
+  const [cardReactId, setCardReactId] = useState<string | null>(null);
 
   const [localReactions, setLocalReactions] = useState<Record<string, {
     total: number;
