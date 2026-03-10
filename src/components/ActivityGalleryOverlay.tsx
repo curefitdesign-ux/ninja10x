@@ -631,7 +631,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
             </div>
 
             {/* PROFILE SECTION — avatar overlapping cards bottom, name, description, stats */}
-            <div className="flex-1 min-h-0 flex flex-col items-center z-40 overflow-y-auto" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)' }}>
+            <div className="flex-1 min-h-0 flex flex-col items-center z-50 overflow-y-auto" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)', marginTop: 30 }}>
               {/* Avatar — overlapping bottom of cards */}
               {userProfile && (
                 <div className="shrink-0 flex justify-center" style={{ marginTop: -36 }}>
