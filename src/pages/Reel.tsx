@@ -1794,32 +1794,51 @@ const Reel = () => {
                             overflow: 'visible',
                           }}
                         >
-                          {/* Stacked cards behind — clean liquid glass aesthetic */}
+                          {/* Stacked cards behind — progressively smaller & lower */}
                           <AnimatePresence>
                           {showStackedCards && isCenter && (
                             <>
-                              {/* Back card (deepest) */}
+                              {/* 3rd card (deepest, smallest) */}
                               <motion.div
-                                key={`stack-back-${group.userId}`}
-                                initial={{ scale: 0.86, opacity: 0, y: 0 }}
-                                animate={{ scale: 0.86, opacity: 0.65, y: 28 }}
-                                exit={{ scale: 0.86, opacity: 0, y: 0 }}
-                                transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.1 }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setShowHistoryGallery(true);
-                                }}
+                                key={`stack-3-${group.userId}`}
+                                initial={{ scale: 0.78, opacity: 0, y: 0 }}
+                                animate={{ scale: 0.78, opacity: 0.45, y: 56 }}
+                                exit={{ scale: 0.78, opacity: 0, y: 0 }}
+                                transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.12 }}
+                                onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(95% - 20px)',
-                                  marginTop: '-10px',
+                                  height: 'calc(80% - 20px)',
                                   overflow: 'hidden',
                                   zIndex: 1,
-                                  borderRadius: '14px',
+                                  borderRadius: '16px',
+                                  background: 'rgba(255,255,255,0.03)',
+                                  border: '1px solid rgba(255,255,255,0.08)',
+                                  boxShadow: '0 12px 40px rgba(0,0,0,0.25), inset 0 0.5px 0 rgba(255,255,255,0.06)',
+                                }}
+                              >
+                                <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(80,60,140,0.3) 0%, rgba(20,15,50,0.5) 100%)' }} />
+                                <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(170deg, rgba(255,255,255,0.06) 0%, transparent 30%)' }} />
+                              </motion.div>
+                              {/* 2nd card (middle) */}
+                              <motion.div
+                                key={`stack-2-${group.userId}`}
+                                initial={{ scale: 0.84, opacity: 0, y: 0 }}
+                                animate={{ scale: 0.84, opacity: 0.55, y: 36 }}
+                                exit={{ scale: 0.84, opacity: 0, y: 0 }}
+                                transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.08 }}
+                                onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
+                                className="absolute cursor-pointer"
+                                style={{
+                                  aspectRatio: '9/16',
+                                  height: 'calc(85% - 20px)',
+                                  overflow: 'hidden',
+                                  zIndex: 2,
+                                  borderRadius: '16px',
                                   background: 'rgba(255,255,255,0.04)',
-                                  border: '1px solid rgba(255,255,255,0.12)',
-                                  boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.1)',
+                                  border: '1px solid rgba(255,255,255,0.10)',
+                                  boxShadow: '0 8px 30px rgba(0,0,0,0.2), inset 0 0.5px 0 rgba(255,255,255,0.08)',
                                 }}
                               >
                                 {totalActivities > 2 && (() => {
@@ -1827,37 +1846,31 @@ const Reel = () => {
                                   const stackActivity = origActivities[origActivities.length - 3] || origActivities[0];
                                   const stackMedia = (stackActivity?.originalUrl || stackActivity?.storageUrl || '').trim();
                                   return stackMedia ? (
-                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(12px) brightness(0.4) saturate(1.6)', transform: 'scale(1.15)' }} loading="lazy" />
+                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(12px) brightness(0.35) saturate(1.4)', transform: 'scale(1.15)' }} loading="lazy" />
                                   ) : (
-                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(80,60,140,0.4) 0%, rgba(20,15,50,0.6) 100%)' }} />
+                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(80,60,140,0.35) 0%, rgba(20,15,50,0.55) 100%)' }} />
                                   );
                                 })()}
-                                <div className="absolute inset-0 pointer-events-none" style={{
-                                  background: 'linear-gradient(170deg, rgba(255,255,255,0.08) 0%, transparent 30%)',
-                                }} />
+                                <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(170deg, rgba(255,255,255,0.08) 0%, transparent 30%)' }} />
                               </motion.div>
-                              {/* Middle card */}
+                              {/* 1st card (closest behind main) */}
                               <motion.div
-                                key={`stack-mid-${group.userId}`}
-                                initial={{ scale: 0.91, opacity: 0, y: 0 }}
-                                animate={{ scale: 0.91, opacity: 0.8, y: 14 }}
-                                exit={{ scale: 0.91, opacity: 0, y: 0 }}
-                                transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.05 }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setShowHistoryGallery(true);
-                                }}
+                                key={`stack-1-${group.userId}`}
+                                initial={{ scale: 0.92, opacity: 0, y: 0 }}
+                                animate={{ scale: 0.92, opacity: 0.7, y: 16 }}
+                                exit={{ scale: 0.92, opacity: 0, y: 0 }}
+                                transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.04 }}
+                                onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(95% - 20px)',
-                                  marginTop: '-10px',
+                                  height: 'calc(90% - 20px)',
                                   overflow: 'hidden',
-                                  zIndex: 2,
-                                  borderRadius: '14px',
+                                  zIndex: 3,
+                                  borderRadius: '16px',
                                   background: 'rgba(255,255,255,0.05)',
-                                  border: '1px solid rgba(255,255,255,0.16)',
-                                  boxShadow: '0 8px 30px rgba(0,0,0,0.25), inset 0 0.5px 0 rgba(255,255,255,0.14)',
+                                  border: '1px solid rgba(255,255,255,0.14)',
+                                  boxShadow: '0 6px 24px rgba(0,0,0,0.2), inset 0 0.5px 0 rgba(255,255,255,0.12)',
                                 }}
                               >
                                 {(() => {
@@ -1865,14 +1878,12 @@ const Reel = () => {
                                   const stackActivity = origActivities[origActivities.length - 2] || origActivities[0];
                                   const stackMedia = (stackActivity?.originalUrl || stackActivity?.storageUrl || '').trim();
                                   return stackMedia ? (
-                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(8px) brightness(0.45) saturate(1.5)', transform: 'scale(1.1)' }} loading="lazy" />
+                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(8px) brightness(0.4) saturate(1.5)', transform: 'scale(1.1)' }} loading="lazy" />
                                   ) : (
-                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(80,60,140,0.35) 0%, rgba(20,15,50,0.55) 100%)' }} />
+                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(80,60,140,0.3) 0%, rgba(20,15,50,0.5) 100%)' }} />
                                   );
                                 })()}
-                                <div className="absolute inset-0 pointer-events-none" style={{
-                                  background: 'linear-gradient(165deg, rgba(255,255,255,0.10) 0%, transparent 35%)',
-                                }} />
+                                <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(165deg, rgba(255,255,255,0.10) 0%, transparent 35%)' }} />
                               </motion.div>
                             </>
                           )}
