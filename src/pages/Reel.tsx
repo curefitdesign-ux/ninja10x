@@ -601,22 +601,14 @@ const Reel = () => {
     }
   }, [currentActivityIndex, goPrevUser]);
 
-  // 3D carousel swipe handling
-  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
-  
+  // Horizontal swipe handling — keep cards on one track and only snap positions
   const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
-    
-    if (Math.abs(offset.x) > 40 || Math.abs(velocity.x) > 300) {
+
+    if (Math.abs(offset.x) > SWIPE_THRESHOLD || Math.abs(velocity.x) > 300) {
       if (offset.x < 0) {
-        // Swiped left — center exits left, next enters from right
-        setSwipeDirection('left');
-        setSlideDirection('left');
         goNextUser();
       } else {
-        // Swiped right — center exits right, prev enters from left
-        setSwipeDirection('right');
-        setSlideDirection('right');
         goPrevUser();
       }
     }
@@ -626,7 +618,6 @@ const Reel = () => {
 
   const [lastTap, setLastTap] = useState(0);
   const [userTransitionFlash, setUserTransitionFlash] = useState(false);
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right'>('left');
   const prevUserIndexRef = useRef(currentUserIndex);
   
   // Flash highlight + center active avatar ONLY when user changes
