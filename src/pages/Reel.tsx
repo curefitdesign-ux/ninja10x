@@ -1809,7 +1809,7 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(37% - 10px)',
+                                  height: 'calc(74% - 10px)',
                                   overflow: 'hidden',
                                   zIndex: 1,
                                   borderRadius: '12px',
