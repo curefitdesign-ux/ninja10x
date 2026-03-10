@@ -96,6 +96,12 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [progressRunKey, setProgressRunKey] = useState(0);
   const isPaused = showReactsSheet || showEditSheet;
 
+  // Check if user has logged an activity today (placeholder presence means they haven't)
+  const hasLoggedToday = useMemo(() => {
+    if (!isOwnProfile) return true;
+    return !activities.some(a => a.isPlaceholder);
+  }, [activities, isOwnProfile]);
+
   // Generate dynamic user description from activity data
   const userDescription = useMemo((): { diary: string; varietyLine: string; durationLine: string; count: number } | null => {
     if (!userProfile || activities.length === 0) return null;
