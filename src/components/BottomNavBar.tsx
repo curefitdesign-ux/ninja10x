@@ -67,9 +67,9 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
   return (
     <>
       <div
-        className="fixed left-1/2 -translate-x-1/2"
+        className="fixed left-0 right-0 bottom-0"
         style={{
-          bottom: "calc(max(env(safe-area-inset-bottom, 10px), 10px) + 24px)",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
           zIndex: 40,
         }}
       >
