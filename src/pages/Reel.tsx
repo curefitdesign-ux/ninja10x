@@ -603,9 +603,7 @@ const Reel = () => {
 
   // Swipe gesture handling for horizontal navigation - smooth scroll feel
   const dragX = useMotionValue(0);
-  const cardOpacity = useTransform(dragX, [-200, -100, 0, 100, 200], [0.85, 0.95, 1, 0.95, 0.85]);
-  const cardRotate = useMotionValue(0); // No rotation for smooth scroll feel
-  const cardScale = useMotionValue(1); // No scale for smooth scroll feel
+  // No animated transforms — clean instant transitions
   const dragConstraints = useMemo(() => ({ left: 0, right: 0 }), []);
   
   const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
