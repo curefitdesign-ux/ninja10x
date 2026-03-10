@@ -301,7 +301,14 @@ const Reel = () => {
       }],
     };
 
-    const allGroups = [myGroup, ...othersGroups];
+    // Sort others: unseen users first, viewed users to the back
+    const sortedOthers = [...othersGroups].sort((a, b) => {
+      const aViewed = viewedUsers.has(a.userId) ? 1 : 0;
+      const bViewed = viewedUsers.has(b.userId) ? 1 : 0;
+      return aViewed - bViewed;
+    });
+
+    const allGroups = [myGroup, ...sortedOthers];
 
     // Insert deep-link group right after own group so navigation finds it
     if (deepLinkGroup) {
