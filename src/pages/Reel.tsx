@@ -1698,7 +1698,7 @@ const Reel = () => {
           }}
         >
         {/* Reel cards — Embla Carousel with spotlight scale animation */}
-        <div className="relative min-h-0 flex-1" onClick={handleTap}>
+        <div className="relative min-h-0 flex-1 overflow-hidden" onClick={handleTap}>
           <Carousel
             setApi={setCarouselApi}
             opts={{
@@ -1710,7 +1710,7 @@ const Reel = () => {
             }}
             className="h-full"
           >
-            <CarouselContent className="h-full -ml-1">
+            <CarouselContent className="h-full -ml-1" style={{ overflow: 'visible' }}>
               {effectiveUserGroups.map((group, idx) => {
                 const isCenter = idx === currentUserIndex;
                 const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
