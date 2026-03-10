@@ -1942,7 +1942,7 @@ const Reel = () => {
                                 </div>
 
                                 {/* Content */}
-                                <div className="relative z-10 flex flex-col items-center justify-center h-full px-6" style={{ marginTop: -10 }}>
+                                <div className="relative z-10 flex flex-col items-center justify-center h-full px-6" style={{ marginTop: -30 }}>
                                   {/* Animated gradient text */}
                                   <motion.div 
                                     className="text-center mb-6"
@@ -1982,7 +1982,7 @@ const Reel = () => {
                                   </div>
 
                                   {/* Label */}
-                                  <p className="mt-6 text-white/40 text-xs font-medium uppercase tracking-widest">
+                                  <p className="mt-6 text-white/40 text-xs font-medium uppercase tracking-widest" style={{ marginTop: 21 }}>
                                     Day {currentActivity.dayNumber} of 12
                                   </p>
                                 </div>
