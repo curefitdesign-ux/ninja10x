@@ -634,25 +634,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       </div>
                     </button>
 
-                    {/* Share & Delete buttons */}
+                    {/* Edit button */}
                     <div className="flex items-center gap-2 shrink-0">
-                      {canShare && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setShowShareOptions(true); }}
-                          className="shrink-0 active:scale-95 transition-transform"
-                          style={{
-                            width: 44, height: 44, borderRadius: 22,
-                            background: 'rgba(255, 255, 255, 0.08)',
-                            backdropFilter: 'blur(40px) saturate(180%)',
-                            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                            border: '1px solid rgba(255, 255, 255, 0.12)',
-                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          }}
-                        >
-                          <Share2 className="w-[18px] h-[18px] text-white/80" strokeWidth={1.5} />
-                        </button>
-                      )}
                       {canEdit && (
                         <button
                           onClick={(e) => { e.stopPropagation(); setShowEditSheet(true); }}
@@ -662,8 +645,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             background: 'rgba(255, 255, 255, 0.08)',
                             backdropFilter: 'blur(40px) saturate(180%)',
                             WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                            border: '1px solid rgba(255, 255, 255, 0.12)',
-                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+                            border: '1px solid rgba(255, 255, 255, 0.06)',
+                            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                           }}
                         >
