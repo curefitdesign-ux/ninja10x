@@ -1725,9 +1725,9 @@ const Reel = () => {
                 const hasFrame = activity?.frame && activity.frame !== 'none';
 
                 const cardStyle: React.CSSProperties = {
-                  transform: `scale(${isCenter ? 1.0 : 0.88})`,
+                  transform: `scale(${isCenter ? 1.0 : 0.72})`,
                   transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease',
-                  opacity: isCenter ? 1 : 0.5,
+                  opacity: isCenter ? 1 : 0.4,
                   zIndex: isCenter ? 10 : 1,
                 };
 
