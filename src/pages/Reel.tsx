@@ -1803,10 +1803,10 @@ const Reel = () => {
             }}
             transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
           >
-                
-                // Generate unique key for transitions
+              {/* Full templated image/video - with lock overlay for non-public users */}
+              {(() => {
+                const shouldShowLocked = !isOwnStory && !profile?.stories_public;
                 const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
-                
                 return (
                   <div
                     className="relative flex items-center justify-center"
