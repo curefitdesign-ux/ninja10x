@@ -1780,8 +1780,10 @@ const Reel = () => {
                     {(() => {
                       const shouldShowLocked = !isOwnStory && !viewerCanSeeCommunity;
                       const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
-                      // Show stacked cards behind for other users' stories (not own, not log-activity)
-                      const showStackedCards = !isOwnCard && !isLogActivityCard && activities.length > 1;
+                      // Show stacked cards for other users who have multiple activities (check original groups)
+                      const originalGroup = userGroups.find(g => g.userId === group.userId);
+                      const totalActivities = originalGroup?.activities?.filter(a => a.dayNumber < 1001).length || 0;
+                      const showStackedCards = !isOwnCard && !isLogActivityCard && totalActivities > 1;
                       return (
                         <div
                           className="relative flex items-center justify-center"
@@ -1820,8 +1822,9 @@ const Reel = () => {
                                   boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.1)',
                                 }}
                               >
-                                {activities.length > 2 && (() => {
-                                  const stackActivity = activities[2] || activities[1];
+                                {totalActivities > 2 && (() => {
+                                  const origActivities = originalGroup?.activities?.filter(a => a.dayNumber < 1001) || [];
+                                  const stackActivity = origActivities[origActivities.length - 3] || origActivities[0];
                                   const stackMedia = (stackActivity?.originalUrl || stackActivity?.storageUrl || '').trim();
                                   return stackMedia ? (
                                     <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(12px) brightness(0.4) saturate(1.6)', transform: 'scale(1.15)' }} loading="lazy" />
@@ -1858,7 +1861,8 @@ const Reel = () => {
                                 }}
                               >
                                 {(() => {
-                                  const stackActivity = activities[1] || activities[0];
+                                  const origActivities = originalGroup?.activities?.filter(a => a.dayNumber < 1001) || [];
+                                  const stackActivity = origActivities[origActivities.length - 2] || origActivities[0];
                                   const stackMedia = (stackActivity?.originalUrl || stackActivity?.storageUrl || '').trim();
                                   return stackMedia ? (
                                     <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(8px) brightness(0.45) saturate(1.5)', transform: 'scale(1.1)' }} loading="lazy" />
