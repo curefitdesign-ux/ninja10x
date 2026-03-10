@@ -1,5 +1,5 @@
 // Floating glass tab bar — Home | Discover | My Progress | Alerts | ⋮ Menu
-import { useState, useEffect, memo, useCallback } from "react";
+import { useState, useEffect, memo, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Map, Bell, MoreVertical, Plus, UserPen, LogOut } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
