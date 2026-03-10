@@ -1767,13 +1767,15 @@ const Reel = () => {
           {effectiveUserGroups.length > 1 && (() => {
             const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
             const nextGroup = effectiveUserGroups[nextIdx];
-            const nextAct = [...(nextGroup?.activities || [])].reverse().find(a => 
-              !isVideoUrl(a.storageUrl || '') && a.dayNumber < 1001 && a.id !== 'log-activity'
-            ) || [...(nextGroup?.activities || [])].reverse().find(a => a.dayNumber < 1001 && a.id !== 'log-activity');
-            const nextMedia = nextAct?.originalUrl || nextAct?.storageUrl;
+            const nextActivities = [...(nextGroup?.activities || [])].reverse().filter(a => a.id !== 'log-activity');
+            const nextAct = nextActivities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
+              || nextActivities.find(a => !!(a.originalUrl || a.storageUrl))
+              || nextActivities[0];
+            const nextMedia = (nextAct?.originalUrl || nextAct?.storageUrl || nextGroup?.avatarUrl || '').trim();
             const isNextOwnStory = user && nextGroup?.userId === user.id;
             const isNextLocked = !isNextOwnStory && !profile?.stories_public;
-            const isNextVideo = isVideoUrl(nextMedia || '');
+            const hasNextStoryMedia = !!(nextAct?.originalUrl || nextAct?.storageUrl);
+            const isNextVideo = hasNextStoryMedia && isVideoUrl(nextMedia);
             if (!nextMedia) return null;
             return (
               <motion.div
@@ -1802,6 +1804,8 @@ const Reel = () => {
                       muted
                       playsInline
                       preload="metadata"
+                      autoPlay
+                      loop
                       style={{ 
                         opacity: isNextLocked ? 0.35 : 0.5, 
                         filter: isNextLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
