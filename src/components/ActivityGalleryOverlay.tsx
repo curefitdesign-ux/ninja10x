@@ -97,7 +97,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const isPaused = showReactsSheet || showEditSheet;
 
   // Generate dynamic user description from activity data
-  const userDescription = useMemo((): { diary: string; durationLine: string; count: number } | null => {
+  const userDescription = useMemo((): { diary: string; varietyLine: string; durationLine: string; count: number } | null => {
     if (!userProfile || activities.length === 0) return null;
     
     const realActivities = activities.filter(a => !a.isPlaceholder && a.dayNumber < 1001);
@@ -147,19 +147,20 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
       parts.push(`🚀 ${name} just started the journey!`);
     }
 
+    let varietyLine = '';
     if (variety >= 3) {
       const top3 = sorted.slice(0, 3).map(([k]) => k.toLowerCase());
-      parts.push(`Mixing it up with ${top3.join(', ')} & more ✨`);
+      varietyLine = `Mixing it up with ${top3.join(', ')} & more ✨`;
     } else if (variety === 2) {
-      parts.push(`Loves ${sorted[0][0].toLowerCase()} & ${sorted[1][0].toLowerCase()} 🎯`);
+      varietyLine = `Loves ${sorted[0][0].toLowerCase()} & ${sorted[1][0].toLowerCase()} 🎯`;
     } else if (count > 1) {
-      parts.push(`All-in on ${topActivity} 🎯`);
+      varietyLine = `All-in on ${topActivity} 🎯`;
     }
 
     const mainLine = parts.join(' · ');
     const durationLine = durationStr ? `⏱️ ${durationStr} of pure grind so far` : '';
 
-    return { diary: mainLine, durationLine, count };
+    return { diary: mainLine, varietyLine, durationLine, count };
   }, [activities, userProfile]);
 
   // Media loading
@@ -405,31 +406,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
             <div className="shrink-0 z-30 px-4 pb-2">
               {userProfile ? (
                 <div>
-                  {/* W.D pill + Share button row — above the profile info */}
-                  <div className="flex items-center justify-between mb-2">
-                    <div
-                      className="px-2.5 py-1 rounded-full"
-                      style={{ background: 'rgba(255,255,255,0.08)' }}
-                    >
-                      <span className="text-white/60 text-[10px] font-medium">
-                        W{week} • D{dayInWeek}
-                      </span>
-                    </div>
-                    {canShare && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setShowShareOptions(true); }}
-                        className="shrink-0 active:scale-95 transition-transform"
-                        style={{
-                          width: 32, height: 32, borderRadius: 16,
-                          background: 'rgba(255, 255, 255, 0.08)',
-                          border: '1px solid rgba(255, 255, 255, 0.06)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}
-                      >
-                        <Share2 className="w-[14px] h-[14px] text-white/60" strokeWidth={1.5} />
-                      </button>
-                    )}
-                  </div>
                   <div className="flex items-start gap-3">
                     <ProfileAvatar
                       src={userProfile.avatarUrl}
@@ -441,17 +417,30 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       }}
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-baseline gap-2">
+                      <div className="flex items-center gap-2">
                         <p className="text-white font-bold text-sm truncate">{userProfile.displayName}</p>
                         {userDescription && (
                           <span className="text-white/50 text-[11px] font-medium shrink-0">{userDescription.count}/12</span>
                         )}
+                        <div
+                          className="px-2 py-0.5 rounded-full shrink-0"
+                          style={{ background: 'rgba(255,255,255,0.08)' }}
+                        >
+                          <span className="text-white/60 text-[10px] font-medium">
+                            W{week} • D{dayInWeek}
+                          </span>
+                        </div>
                       </div>
                       {userDescription && (
                         <>
                           <p className="mt-0.5 text-[11px] leading-snug text-white/60">
                             {userDescription.diary}
                           </p>
+                          {userDescription.varietyLine && (
+                            <p className="text-[11px] leading-snug text-white/60">
+                              {userDescription.varietyLine}
+                            </p>
+                          )}
                           {userDescription.durationLine && (
                             <p className="text-[11px] leading-snug text-white/50">
                               {userDescription.durationLine}
@@ -636,7 +625,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       </div>
                     </button>
 
-                    {/* Nudge & Edit buttons */}
+                    {/* Nudge & Share buttons */}
                     <div className="flex items-center gap-2 shrink-0">
                       {!isOwnProfile && !current.isPlaceholder && (
                         <button
@@ -656,6 +645,23 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           }}
                         >
                           <span className="text-lg leading-none">👋</span>
+                        </button>
+                      )}
+                      {canShare && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setShowShareOptions(true); }}
+                          className="shrink-0 active:scale-95 transition-transform"
+                          style={{
+                            width: 44, height: 44, borderRadius: 22,
+                            background: 'rgba(255, 255, 255, 0.08)',
+                            backdropFilter: 'blur(40px) saturate(180%)',
+                            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                            border: '1px solid rgba(255, 255, 255, 0.06)',
+                            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}
+                        >
+                          <Share2 className="w-[18px] h-[18px] text-white/70" strokeWidth={1.5} />
                         </button>
                       )}
                     </div>
