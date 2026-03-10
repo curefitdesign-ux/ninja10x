@@ -1760,24 +1760,9 @@ const Reel = () => {
                         {currentActivity?.id === 'log-activity' ? (
                           // "Log Your Activity" card — dark with animated glowing border
                           (() => {
-                            // Calculate days since last activity for urgency color
-                            const lastActivity = currentGroup?.activities
-                              ?.filter(a => a.id !== 'log-activity' && a.dayNumber < 1001)
-                              ?.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())?.[0];
-                            const daysSinceLastActivity = lastActivity?.createdAt 
-                              ? Math.floor((Date.now() - new Date(lastActivity.createdAt).getTime()) / (1000 * 60 * 60 * 24))
-                              : 0;
-                            // blue(0-1d) → green(2d) → yellow(3d) → orange(4d+)
-                            const urgencyColor = daysSinceLastActivity <= 1 
-                              ? { h: 200, s: 100, l: 55, name: 'blue' }   // blue
-                              : daysSinceLastActivity === 2 
-                              ? { h: 150, s: 90, l: 50, name: 'green' }   // green
-                              : daysSinceLastActivity === 3 
-                              ? { h: 45, s: 100, l: 55, name: 'yellow' }  // yellow
-                              : { h: 25, s: 100, l: 55, name: 'orange' }; // orange
-                            const glowHsl = `hsl(${urgencyColor.h}, ${urgencyColor.s}%, ${urgencyColor.l}%)`;
-                            const glowDim = `hsla(${urgencyColor.h}, ${urgencyColor.s}%, ${urgencyColor.l}%, 0.15)`;
-                            const glowMid = `hsla(${urgencyColor.h}, ${urgencyColor.s}%, ${urgencyColor.l}%, 0.4)`;
+                            const glowHsl = `hsl(260, 70%, 65%)`;
+                            const glowDim = `hsla(260, 70%, 65%, 0.15)`;
+                            const glowMid = `hsla(260, 70%, 65%, 0.35)`;
 
                             return (
                               <div 
