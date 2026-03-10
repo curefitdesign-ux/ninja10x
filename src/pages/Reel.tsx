@@ -1652,18 +1652,26 @@ const Reel = () => {
         {/* Week/Day label + Share button row */}
         {currentGroup && currentActivity && (
           <div className="z-40 flex items-center justify-between px-4 shrink-0" style={{ marginBottom: '2px' }}>
-            <div>
-              {isOwnStory ? null : (
-                currentActivity.dayNumber >= 1001 ? (
-                  <span className="text-white/50 text-xs font-medium">
-                    Week {currentActivity.dayNumber - 1000} Recap
-                  </span>
-                ) : currentActivity.dayNumber >= 1 && currentActivity.dayNumber <= 12 ? (
-                  <span className="text-white/50 text-xs font-medium">
-                    Week {Math.ceil(currentActivity.dayNumber / 3)} • Day {((currentActivity.dayNumber - 1) % 3) + 1}
-                  </span>
-                ) : null
-              )}
+            <div className="flex items-center gap-2">
+              {/* Profile avatar + name for all stories */}
+              <ProfileAvatar
+                src={currentGroup.avatarUrl}
+                name={currentGroup.displayName}
+                size={24}
+                style={{ border: '1.5px solid rgba(255,255,255,0.2)' }}
+              />
+              <span className="text-white/80 text-xs font-semibold">
+                {isOwnStory ? 'You' : (currentGroup.displayName?.split(' ')[0] || 'User')}
+              </span>
+              {currentActivity.dayNumber >= 1001 ? (
+                <span className="text-white/40 text-xs font-medium">
+                  • Week {currentActivity.dayNumber - 1000} Recap
+                </span>
+              ) : currentActivity.dayNumber >= 1 && currentActivity.dayNumber <= 12 && !isLogActivityCard ? (
+                <span className="text-white/40 text-xs font-medium">
+                  • W{Math.ceil(currentActivity.dayNumber / 3)} Day {((currentActivity.dayNumber - 1) % 3) + 1}
+                </span>
+              ) : null}
             </div>
             {isOwnStory && !isWeekRecapStory && !isLogActivityCard && (
               <button
