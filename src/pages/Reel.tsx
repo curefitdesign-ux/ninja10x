@@ -1792,16 +1792,16 @@ const Reel = () => {
                             overflow: 'visible',
                           }}
                         >
-                          {/* Stacked cards behind — clean liquid glass aesthetic */}
+                          {/* Stacked cards behind — peek from bottom only */}
                           <AnimatePresence>
                           {showStackedCards && isCenter && (
                             <>
-                              {/* Back card (deepest) */}
+                              {/* Back card (deepest) — peeks furthest from bottom */}
                               <motion.div
                                 key={`stack-back-${group.userId}`}
-                                initial={{ scale: 0.86, opacity: 0, y: 0 }}
-                                animate={{ scale: 0.86, opacity: 0.65, y: 28 }}
-                                exit={{ scale: 0.86, opacity: 0, y: 0 }}
+                                initial={{ scale: 0.82, opacity: 0, y: 0 }}
+                                animate={{ scale: 0.82, opacity: 0.5, y: 0 }}
+                                exit={{ scale: 0.82, opacity: 0, y: 0 }}
                                 transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.1 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1811,34 +1811,28 @@ const Reel = () => {
                                 style={{
                                   aspectRatio: '9/16',
                                   height: 'calc(95% - 20px)',
-                                  marginTop: '-10px',
+                                  bottom: '-36px',
                                   overflow: 'hidden',
                                   zIndex: 1,
                                   borderRadius: '14px',
-                                  background: 'rgba(255,255,255,0.04)',
-                                  border: '1px solid rgba(255,255,255,0.12)',
-                                  boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.1)',
+                                  background: 'rgba(255,255,255,0.03)',
+                                  border: '1px solid rgba(255,255,255,0.10)',
+                                  boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.08)',
+                                  backdropFilter: 'blur(20px) saturate(1.6)',
+                                  WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
                                 }}
                               >
-                                {activities.length > 2 && (() => {
-                                  const stackActivity = activities[2] || activities[1];
-                                  const stackMedia = (stackActivity?.originalUrl || stackActivity?.storageUrl || '').trim();
-                                  return stackMedia ? (
-                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(12px) brightness(0.4) saturate(1.6)', transform: 'scale(1.15)' }} loading="lazy" />
-                                  ) : (
-                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(80,60,140,0.4) 0%, rgba(20,15,50,0.6) 100%)' }} />
-                                  );
-                                })()}
+                                <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(60,45,120,0.3) 0%, rgba(15,10,40,0.5) 100%)' }} />
                                 <div className="absolute inset-0 pointer-events-none" style={{
-                                  background: 'linear-gradient(170deg, rgba(255,255,255,0.08) 0%, transparent 30%)',
+                                  background: 'linear-gradient(170deg, rgba(255,255,255,0.06) 0%, transparent 30%)',
                                 }} />
                               </motion.div>
-                              {/* Middle card */}
+                              {/* Middle card — peeks slightly from bottom */}
                               <motion.div
                                 key={`stack-mid-${group.userId}`}
-                                initial={{ scale: 0.91, opacity: 0, y: 0 }}
-                                animate={{ scale: 0.91, opacity: 0.8, y: 14 }}
-                                exit={{ scale: 0.91, opacity: 0, y: 0 }}
+                                initial={{ scale: 0.88, opacity: 0, y: 0 }}
+                                animate={{ scale: 0.88, opacity: 0.65, y: 0 }}
+                                exit={{ scale: 0.88, opacity: 0, y: 0 }}
                                 transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.05 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1848,26 +1842,20 @@ const Reel = () => {
                                 style={{
                                   aspectRatio: '9/16',
                                   height: 'calc(95% - 20px)',
-                                  marginTop: '-10px',
+                                  bottom: '-20px',
                                   overflow: 'hidden',
                                   zIndex: 2,
                                   borderRadius: '14px',
-                                  background: 'rgba(255,255,255,0.05)',
-                                  border: '1px solid rgba(255,255,255,0.16)',
-                                  boxShadow: '0 8px 30px rgba(0,0,0,0.25), inset 0 0.5px 0 rgba(255,255,255,0.14)',
+                                  background: 'rgba(255,255,255,0.04)',
+                                  border: '1px solid rgba(255,255,255,0.14)',
+                                  boxShadow: '0 8px 30px rgba(0,0,0,0.25), inset 0 0.5px 0 rgba(255,255,255,0.12)',
+                                  backdropFilter: 'blur(24px) saturate(1.8)',
+                                  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
                                 }}
                               >
-                                {(() => {
-                                  const stackActivity = activities[1] || activities[0];
-                                  const stackMedia = (stackActivity?.originalUrl || stackActivity?.storageUrl || '').trim();
-                                  return stackMedia ? (
-                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(8px) brightness(0.45) saturate(1.5)', transform: 'scale(1.1)' }} loading="lazy" />
-                                  ) : (
-                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(80,60,140,0.35) 0%, rgba(20,15,50,0.55) 100%)' }} />
-                                  );
-                                })()}
+                                <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(70,50,130,0.25) 0%, rgba(15,10,40,0.45) 100%)' }} />
                                 <div className="absolute inset-0 pointer-events-none" style={{
-                                  background: 'linear-gradient(165deg, rgba(255,255,255,0.10) 0%, transparent 35%)',
+                                  background: 'linear-gradient(165deg, rgba(255,255,255,0.08) 0%, transparent 35%)',
                                 }} />
                               </motion.div>
                             </>
