@@ -1805,10 +1805,14 @@ const Reel = () => {
                               aspectRatio: '9/16',
                               height: 'calc(95% - 20px)',
                               maxWidth: '100%',
-                              borderRadius: '0px',
+                              borderRadius: isLogActivityCard ? '18px' : '0px',
                               overflow: 'hidden',
-                              background: 'transparent',
+                              background: isLogActivityCard ? '#0A0A0F' : 'transparent',
                               marginTop: '-10px',
+                              ...(isLogActivityCard ? {
+                                border: '1.5px solid rgba(139, 92, 246, 0.35)',
+                                boxShadow: '0 0 30px rgba(139, 92, 246, 0.15), inset 0 1px 1px rgba(255,255,255,0.05)',
+                              } : {}),
                             }}
                           >
                         {/* Progress bar removed — timing indicated via avatar ring */}
