@@ -327,6 +327,25 @@ const Reel = () => {
     return allGroups.filter(g => g.activities.length > 0);
   }, [userGroups, user, myActivities, profile, sourceUserId, deepLinkActivityId, viewedUsers]);
 
+  // Stabilize currentUserIndex when groups reorder due to viewedUsers change
+  const currentUserIdRef = useRef<string>('');
+  useEffect(() => {
+    if (effectiveUserGroups.length === 0) return;
+    const currentGroup = effectiveUserGroups[currentUserIndex];
+    if (currentGroup) {
+      currentUserIdRef.current = currentGroup.userId;
+    }
+  }, [currentUserIndex, effectiveUserGroups]);
+
+  // When groups reorder, find the correct index for the current user
+  useEffect(() => {
+    if (!currentUserIdRef.current || effectiveUserGroups.length === 0) return;
+    const newIdx = effectiveUserGroups.findIndex(g => g.userId === currentUserIdRef.current);
+    if (newIdx >= 0 && newIdx !== currentUserIndex) {
+      setCurrentUserIndex(newIdx);
+    }
+  }, [effectiveUserGroups]);
+
   // MAIN NAVIGATION EFFECT: Determine where to land based on navigation intent
   // This runs once per navigation after data is loaded
   useEffect(() => {
