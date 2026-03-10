@@ -358,7 +358,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
               ) : (
                 <div className="space-y-2">
                   {notifications.map((notif, index) => {
-                    const iconSrc = REACTION_IMAGES[notif.reactionType];
+                    const iconSrc = notif.isNudge ? undefined : REACTION_IMAGES[notif.reactionType];
                     return (
                       <motion.div
                         key={notif.id}
@@ -371,9 +371,9 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                           background: 'rgba(255, 255, 255, 0.06)',
                           border: '1px solid rgba(255, 255, 255, 0.1)',
                         }}
-                        onClick={() => handleNotificationTap(notif)}
+                        onClick={() => !notif.isNudge && handleNotificationTap(notif)}
                       >
-                        {/* Reactor avatar with reaction badge */}
+                        {/* Reactor avatar with reaction/nudge badge */}
                         <div className="relative flex-shrink-0">
                           <div className="w-11 h-11 rounded-full overflow-hidden">
                             <ProfileAvatar
@@ -382,8 +382,17 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                               size={44}
                             />
                           </div>
-                          {/* Reaction badge on avatar */}
-                          {iconSrc && (
+                          {notif.isNudge ? (
+                            <div 
+                              className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
+                              style={{
+                                background: 'rgba(30, 18, 69, 0.9)',
+                                border: '1.5px solid rgba(255,255,255,0.15)',
+                              }}
+                            >
+                              <span className="text-xs">👋</span>
+                            </div>
+                          ) : iconSrc && (
                             <div 
                               className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
                               style={{
@@ -400,7 +409,11 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                         <div className="flex-1 min-w-0">
                           <p className="text-white text-sm leading-snug">
                             <span className="font-semibold">{notif.reactorName}</span>
-                            <span className="text-white/60"> {REACTION_VERBS[notif.reactionType] || 'reacted to'} your {notif.activityType || 'activity'}</span>
+                            <span className="text-white/60">
+                              {notif.isNudge 
+                                ? ' nudged you to keep going! 💪' 
+                                : ` ${REACTION_VERBS[notif.reactionType] || 'reacted to'} your ${notif.activityType || 'activity'}`}
+                            </span>
                           </p>
                           <p className="text-white/35 text-xs mt-0.5">
                             {notif.dayNumber ? `Day ${notif.dayNumber} · ` : ''}{formatRelativeTime(notif.timestamp)}
