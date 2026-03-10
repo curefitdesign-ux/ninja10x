@@ -474,15 +474,23 @@ const Reel = () => {
       setCurrentActivityIndex(prev => prev + 1);
     } else {
       // Mark current user as fully viewed
-      setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
-      
       if (profile?.stories_public && effectiveUserGroups.length > 1) {
         // Auto-advance to next user when public
+        const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
+        const nextGroup = effectiveUserGroups[nextIdx];
+        // Set ref to TARGET user before triggering reorder
+        if (nextGroup) {
+          navigatingRef.current = true;
+          currentUserIdRef.current = nextGroup.userId;
+        }
+        setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
         setCurrentActivityIndex(0);
-        setCurrentUserIndex(prev => (prev + 1) % effectiveUserGroups.length);
+        setCurrentUserIndex(nextIdx);
+      } else {
+        setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
       }
     }
-  }, [currentGroup, currentActivityIndex, profile?.stories_public, effectiveUserGroups.length]);
+  }, [currentGroup, currentActivityIndex, profile?.stories_public, effectiveUserGroups, currentUserIndex]);
 
   // Navigate to previous activity within current user only
   const prevActivity = useCallback(() => {
@@ -495,22 +503,34 @@ const Reel = () => {
   // Navigate between users (horizontal swipe)
   const goNextUser = useCallback(() => {
     if (effectiveUserGroups.length === 0) return;
-    // Mark current user as viewed when swiping away
+    const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
+    const nextGroup = effectiveUserGroups[nextIdx];
+    // Set ref to TARGET user before triggering reorder
+    if (nextGroup) {
+      navigatingRef.current = true;
+      currentUserIdRef.current = nextGroup.userId;
+    }
     if (currentGroup) {
       setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
     }
     setCurrentActivityIndex(0);
-    setCurrentUserIndex(prev => (prev + 1) % effectiveUserGroups.length);
-  }, [effectiveUserGroups.length, currentGroup]);
+    setCurrentUserIndex(nextIdx);
+  }, [effectiveUserGroups, currentUserIndex, currentGroup]);
 
   const goPrevUser = useCallback(() => {
     if (effectiveUserGroups.length === 0) return;
-    // Mark current user as viewed when swiping away
+    const prevIdx = (currentUserIndex - 1 + effectiveUserGroups.length) % effectiveUserGroups.length;
+    const prevGroup = effectiveUserGroups[prevIdx];
+    // Set ref to TARGET user before triggering reorder
+    if (prevGroup) {
+      navigatingRef.current = true;
+      currentUserIdRef.current = prevGroup.userId;
+    }
     if (currentGroup) {
       setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
     }
     setCurrentActivityIndex(0);
-    setCurrentUserIndex(prev => (prev - 1 + effectiveUserGroups.length) % effectiveUserGroups.length);
+    setCurrentUserIndex(prevIdx);
   }, [effectiveUserGroups.length]);
 
   // Swipe gesture handling for horizontal navigation - smooth scroll feel
