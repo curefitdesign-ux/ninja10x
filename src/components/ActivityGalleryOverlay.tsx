@@ -95,13 +95,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const isPaused = showReactsSheet || showEditSheet;
 
   // Generate dynamic user description from activity data
-  const userDescription = useMemo((): { headline: string; totalDuration: string; count: number } | null => {
+  const userDescription = useMemo((): { diary: string; count: number } | null => {
     if (!userProfile || activities.length === 0) return null;
     
     const realActivities = activities.filter(a => !a.isPlaceholder && a.dayNumber < 1001);
     if (realActivities.length === 0) return null;
     
     let totalDurationMins = 0;
+    const activityCounts: Record<string, number> = {};
     for (const a of realActivities) {
       if (a.duration) {
         const minMatch = a.duration.match(/(\d+)\s*min/i);
@@ -109,24 +110,57 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
         if (minMatch) totalDurationMins += parseInt(minMatch[1]);
         if (hrMatch) totalDurationMins += parseInt(hrMatch[1]) * 60;
       }
+      const type = a.activity || 'workout';
+      activityCounts[type] = (activityCounts[type] || 0) + 1;
     }
 
     const count = realActivities.length;
-    let headline = '';
-    if (count >= 12) headline = '🏆 Journey complete!';
-    else if (count >= 9) headline = '🔥 Almost there — final stretch!';
-    else if (count >= 6) headline = '💪 Halfway beast mode';
-    else if (count >= 3) headline = '⚡ Building momentum';
-    else if (count >= 1) headline = '🚀 Just getting started';
+    const name = userProfile.displayName?.split(' ')[0] || 'This one';
     
-    let totalDuration = '';
+    // Format duration naturally
+    let durationStr = '';
     if (totalDurationMins > 0) {
       const hrs = Math.floor(totalDurationMins / 60);
       const mins = totalDurationMins % 60;
-      totalDuration = hrs > 0 ? (mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`) : `${mins}m`;
+      durationStr = hrs > 0 ? (mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`) : `${mins} min`;
     }
-    
-    return { headline, totalDuration, count };
+
+    // Get top activities sorted by frequency
+    const sorted = Object.entries(activityCounts).sort((a, b) => b[1] - a[1]);
+    const topActivity = sorted[0]?.[0]?.toLowerCase() || 'working out';
+    const variety = sorted.length;
+
+    // Build diary-style narrative
+    const parts: string[] = [];
+
+    if (count >= 12) {
+      parts.push(`🏆 ${name} crushed it — all 12 days done!`);
+    } else if (count >= 9) {
+      parts.push(`🔥 ${name}'s on fire — ${count} days in, almost there!`);
+    } else if (count >= 6) {
+      parts.push(`💪 Halfway beast mode — ${count} days and counting`);
+    } else if (count >= 3) {
+      parts.push(`⚡ ${name}'s building momentum — ${count} days strong`);
+    } else {
+      parts.push(`🚀 ${name} just started the journey — day ${count}!`);
+    }
+
+    // Activity flavor
+    if (variety >= 3) {
+      const top3 = sorted.slice(0, 3).map(([k]) => k.toLowerCase());
+      parts.push(`Mixing it up with ${top3.join(', ')} & more ✨`);
+    } else if (variety === 2) {
+      parts.push(`Loves ${sorted[0][0].toLowerCase()} & ${sorted[1][0].toLowerCase()} 🎯`);
+    } else if (count > 1) {
+      parts.push(`All-in on ${topActivity} 🎯`);
+    }
+
+    // Duration flavor
+    if (durationStr) {
+      parts.push(`⏱️ ${durationStr} of pure grind so far`);
+    }
+
+    return { diary: parts.join('\n'), count };
   }, [activities, userProfile]);
 
   // Media loading
@@ -389,15 +423,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       )}
                     </div>
                     {userDescription && (
-                      <div className="mt-0.5">
-                        <p className="text-white/70 text-[11px] leading-tight font-medium">
-                          {userDescription.headline}
-                        </p>
-                        {userDescription.totalDuration && (
-                          <p className="text-white/40 text-[11px] leading-tight mt-0.5">
-                            Active for {userDescription.totalDuration}
+                      <div className="mt-0.5 space-y-0.5">
+                        {userDescription.diary.split('\n').map((line, i) => (
+                          <p key={i} className={
+                            i === 0 ? "text-[11px] leading-snug text-white/80 font-semibold" : "text-[11px] leading-snug text-white/50"
+                          }>
+                            {line}
                           </p>
-                        )}
+                        ))}
                       </div>
                     )}
                   </div>
