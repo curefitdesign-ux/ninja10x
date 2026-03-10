@@ -258,49 +258,116 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
         <motion.div className="fixed inset-0" style={{ zIndex: 60 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
         <DynamicBlurBackground imageUrl={mediaUrl}>
           <div className="absolute inset-0 flex flex-col" style={{ overflow: 'hidden' }}>
-            {/* TOP: close button */}
-            <div className="z-50 flex items-center justify-end px-4 shrink-0" style={{ paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)', height: 48 }}>
-              <motion.button
-                className="w-9 h-9 flex items-center justify-center rounded-full active:scale-90"
-                style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}
-                onClick={onClose} whileTap={{ scale: 0.85 }}
-              >
-                <X className="w-5 h-5 text-white/80" />
-              </motion.button>
+            {/* TOP HEADER — collapses on scroll */}
+            <div
+              className="shrink-0 z-50"
+              style={{
+                paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
+                background: isScrolled ? 'rgba(10, 7, 32, 0.7)' : 'transparent',
+                backdropFilter: isScrolled ? 'blur(40px) saturate(180%)' : 'none',
+                WebkitBackdropFilter: isScrolled ? 'blur(40px) saturate(180%)' : 'none',
+                borderBottom: isScrolled ? '1px solid rgba(255,255,255,0.06)' : '1px solid transparent',
+                transition: 'background 0.3s ease, backdrop-filter 0.3s ease, border-bottom 0.3s ease',
+              }}
+            >
+              {/* Compact header (scrolled) */}
+              <AnimatePresence mode="wait">
+                {isScrolled && userProfile ? (
+                  <motion.div
+                    key="compact"
+                    className="flex items-center justify-between px-4 pb-2"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="rounded-full overflow-hidden" style={{ width: 32, height: 32, border: '1.5px solid rgba(255,255,255,0.25)' }}>
+                        <ProfileAvatar src={userProfile.avatarUrl} name={userProfile.displayName} size={32} />
+                      </div>
+                      <div>
+                        <h2 className="text-white font-bold truncate" style={{ fontSize: 14, letterSpacing: '-0.02em', maxWidth: 160 }}>{userProfile.displayName}</h2>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-white/40 text-[10px] font-medium">{totalActivities}/12 Days</span>
+                          {totalDurationStr && <span className="text-white/30 text-[10px]">·</span>}
+                          {totalDurationStr && <span className="text-white/40 text-[10px] font-medium">{totalDurationStr}</span>}
+                        </div>
+                      </div>
+                    </div>
+                    <motion.button
+                      className="w-8 h-8 flex items-center justify-center rounded-full active:scale-90"
+                      style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      onClick={onClose} whileTap={{ scale: 0.85 }}
+                    >
+                      <X className="w-4 h-4 text-white/80" />
+                    </motion.button>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="full"
+                    className="flex items-center justify-end px-4"
+                    style={{ height: 40 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <motion.button
+                      className="w-9 h-9 flex items-center justify-center rounded-full active:scale-90"
+                      style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      onClick={onClose} whileTap={{ scale: 0.85 }}
+                    >
+                      <X className="w-5 h-5 text-white/80" />
+                    </motion.button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            {/* PROFILE */}
-            {userProfile && (
-              <div className="shrink-0 flex flex-col items-center z-50 px-4 pb-2">
-                <div className="rounded-full overflow-hidden" style={{ width: 56, height: 56, border: '2.5px solid rgba(255,255,255,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
-                  <ProfileAvatar src={userProfile.avatarUrl} name={userProfile.displayName} size={56} />
-                </div>
-                <h2 className="text-white font-bold text-center mt-1.5 px-6 truncate w-full" style={{ fontSize: 18, letterSpacing: '-0.02em' }}>{userProfile.displayName}</h2>
-                {userDescription && (
-                  <p className="text-white/50 text-[11px] text-center mt-1 px-8 leading-relaxed" style={{ maxWidth: 280 }}>
-                    {userDescription.diary}{userDescription.varietyLine ? ` ${userDescription.varietyLine}` : ''}
-                  </p>
-                )}
-                <div className="flex items-center justify-center gap-2 mt-2">
-                  <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                    <span className="text-white text-[11px] font-semibold">{totalActivities}/12 Days</span>
+            {/* FULL PROFILE — only when not scrolled */}
+            <AnimatePresence>
+              {!isScrolled && userProfile && (
+                <motion.div
+                  className="shrink-0 flex flex-col items-center z-40 px-4 pb-2"
+                  initial={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0, paddingBottom: 0 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <div className="rounded-full overflow-hidden" style={{ width: 56, height: 56, border: '2.5px solid rgba(255,255,255,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
+                    <ProfileAvatar src={userProfile.avatarUrl} name={userProfile.displayName} size={56} />
                   </div>
-                  {totalDurationStr && (
-                    <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                      <span className="text-white text-[11px] font-semibold">{totalDurationStr} Total</span>
-                    </div>
+                  <h2 className="text-white font-bold text-center mt-1.5 px-6 truncate w-full" style={{ fontSize: 18, letterSpacing: '-0.02em' }}>{userProfile.displayName}</h2>
+                  {userDescription && (
+                    <p className="text-white/50 text-[11px] text-center mt-1 px-8 leading-relaxed" style={{ maxWidth: 280 }}>
+                      {userDescription.diary}{userDescription.varietyLine ? ` ${userDescription.varietyLine}` : ''}
+                    </p>
                   )}
-                  <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                    <span className="text-white text-[11px] font-semibold">W{week}</span>
+                  <div className="flex items-center justify-center gap-2 mt-2">
+                    <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                      <span className="text-white text-[11px] font-semibold">{totalActivities}/12 Days</span>
+                    </div>
+                    {totalDurationStr && (
+                      <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                        <span className="text-white text-[11px] font-semibold">{totalDurationStr} Total</span>
+                      </div>
+                    )}
+                    <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                      <span className="text-white text-[11px] font-semibold">W{week}</span>
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* SCRAPBOOK TIMELINE */}
             <div
+              ref={scrollRef}
               className="flex-1 min-h-0 z-30 overflow-y-auto overflow-x-hidden"
               style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', paddingBottom: 120, paddingTop: 8 }}
+              onScroll={(e) => {
+                const scrollTop = (e.target as HTMLDivElement).scrollTop;
+                setIsScrolled(scrollTop > 30);
+              }}
             >
               <div className="relative" style={{ minHeight: '100%' }}>
                 {/* Notebook lines */}
