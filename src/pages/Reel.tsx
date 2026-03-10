@@ -686,10 +686,11 @@ const Reel = () => {
     }
   }, [currentUserIndex, currentGroup, effectiveUserGroups]);
 
-  // Defensive reset on every story/user step to prevent residual x-offset drift
+  // Reset slide direction after animation completes
   useEffect(() => {
-    dragX.set(0);
-  }, [currentUserIndex, currentActivityIndex, dragX]);
+    const timer = setTimeout(() => setSlideDirection(null), 600);
+    return () => clearTimeout(timer);
+  }, [currentUserIndex]);
 
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     // If story is locked, open Make Public sheet on any tap
