@@ -4,6 +4,8 @@ import { createPortal } from 'react-dom';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, PanInfo } from 'framer-motion';
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel';
+import Autoplay from 'embla-carousel-autoplay';
 import { X, ChevronLeft, ChevronUp, Pencil, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, History } from 'lucide-react';
 import PullToRefresh from '@/components/PullToRefresh';
 import ProfileMenu from '@/components/ProfileMenu';
@@ -195,7 +197,7 @@ const Reel = () => {
   // Bottom sheet states and transition animations
   const [isTransitioning, setIsTransitioning] = useState(false);
   const bottomSheetY = useMotionValue(0);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
 
   // Data for progress overlay
   const { activities: myActivities, hasPublicActivity, makeActivityPublic } = useJourneyActivities();
@@ -596,17 +598,30 @@ const Reel = () => {
     }
   }, [currentActivityIndex, goPrevUser]);
 
-  // Simple swipe handling — just navigate between users
-  const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const { offset, velocity } = info;
-    if (Math.abs(offset.x) > SWIPE_THRESHOLD || Math.abs(velocity.x) > 300) {
-      if (offset.x < 0) {
-        goNextUser();
-      } else {
-        goPrevUser();
-      }
+  // Embla carousel onSelect — sync currentUserIndex when user swipes
+  const onCarouselSelect = useCallback(() => {
+    if (!carouselApi) return;
+    const newIndex = carouselApi.selectedScrollSnap();
+    if (newIndex !== currentUserIndex && newIndex >= 0 && newIndex < effectiveUserGroups.length) {
+      navigatingRef.current = true;
+      const targetGroup = effectiveUserGroups[newIndex];
+      if (targetGroup) currentUserIdRef.current = targetGroup.userId;
+      const prevGroup = effectiveUserGroups[currentUserIndex];
+      if (prevGroup) setViewedUsers(prev => new Set(prev).add(prevGroup.userId));
+      setCurrentUserIndex(newIndex);
+      setCurrentActivityIndex(0);
     }
-  }, [goNextUser, goPrevUser]);
+  }, [carouselApi, currentUserIndex, effectiveUserGroups]);
+
+  useEffect(() => {
+    if (!carouselApi) return;
+    carouselApi.on('select', onCarouselSelect);
+    carouselApi.on('reInit', onCarouselSelect);
+    return () => {
+      carouselApi.off('select', onCarouselSelect);
+      carouselApi.off('reInit', onCarouselSelect);
+    };
+  }, [carouselApi, onCarouselSelect]);
 
   const [lastTap, setLastTap] = useState(0);
   const [userTransitionFlash, setUserTransitionFlash] = useState(false);
@@ -672,14 +687,12 @@ const Reel = () => {
     }
   }, [currentUserIndex, currentGroup, effectiveUserGroups]);
 
-  // Scroll to current user when index changes
+  // Scroll Embla to current user when index changes programmatically
   useEffect(() => {
-    if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const cardWidth = container.offsetWidth;
-      container.scrollTo({ left: currentUserIndex * cardWidth, behavior: 'smooth' });
+    if (carouselApi && carouselApi.selectedScrollSnap() !== currentUserIndex) {
+      carouselApi.scrollTo(currentUserIndex);
     }
-  }, [currentUserIndex]);
+  }, [currentUserIndex, carouselApi]);
 
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     // If story is locked (viewer hasn't shared + this isn't own story), open Make Public sheet
@@ -1684,219 +1697,161 @@ const Reel = () => {
             paddingBottom: 'calc(max(env(safe-area-inset-bottom, 6px), 6px) + 80px)',
           }}
         >
-        {/* Reel cards — simple horizontal scroll with snap */}
-        <div
-          ref={scrollContainerRef}
-          className="relative min-h-0 flex-1 flex overflow-x-auto overflow-y-hidden scrollbar-hide"
-          style={{
-            scrollSnapType: 'x mandatory',
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-          }}
-          onScroll={(e) => {
-            if (navigatingRef.current) return;
-            const container = e.currentTarget;
-            const cardWidth = container.offsetWidth;
-            if (cardWidth <= 0) return;
-            const newIndex = Math.round(container.scrollLeft / cardWidth);
-            if (newIndex !== currentUserIndex && newIndex >= 0 && newIndex < effectiveUserGroups.length) {
-              navigatingRef.current = true;
-              const targetGroup = effectiveUserGroups[newIndex];
-              if (targetGroup) currentUserIdRef.current = targetGroup.userId;
-              const prevGroup = effectiveUserGroups[currentUserIndex];
-              if (prevGroup) setViewedUsers(prev => new Set(prev).add(prevGroup.userId));
-              setCurrentUserIndex(newIndex);
-              setCurrentActivityIndex(0);
-            }
-          }}
-          onClick={handleTap}
-        >
-          {effectiveUserGroups.map((group, idx) => {
-            const isCenter = idx === currentUserIndex;
-            const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
-            const activity = isCenter
-              ? currentActivity
-              : activities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
-                || activities.find(a => !!(a.originalUrl || a.storageUrl))
-                || activities[0];
+        {/* Reel cards — Embla Carousel with spotlight scale animation */}
+        <div className="relative min-h-0 flex-1" onClick={handleTap}>
+          <Carousel
+            setApi={setCarouselApi}
+            opts={{
+              align: 'center',
+              loop: effectiveUserGroups.length > 1,
+              skipSnaps: false,
+              containScroll: false,
+            }}
+            className="h-full"
+          >
+            <CarouselContent className="h-full -ml-0">
+              {effectiveUserGroups.map((group, idx) => {
+                const isCenter = idx === currentUserIndex;
+                const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
+                const activity = isCenter
+                  ? currentActivity
+                  : activities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
+                    || activities.find(a => !!(a.originalUrl || a.storageUrl))
+                    || activities[0];
 
-            const media = (activity?.originalUrl || activity?.storageUrl || group.avatarUrl || '').trim();
-            const isOwnCard = !!user && group.userId === user.id;
-            const isLockedCard = !isOwnCard && !viewerCanSeeCommunity;
-            const hasFrame = activity?.frame && activity.frame !== 'none';
+                const media = (activity?.originalUrl || activity?.storageUrl || group.avatarUrl || '').trim();
+                const isOwnCard = !!user && group.userId === user.id;
+                const isLockedCard = !isOwnCard && !viewerCanSeeCommunity;
+                const hasFrame = activity?.frame && activity.frame !== 'none';
 
-            if (!isCenter) {
-              return (
-                <div
-                  key={`card-${group.userId}`}
-                  className="flex-shrink-0 flex items-center justify-center"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    scrollSnapAlign: 'center',
-                  }}
-                >
-                  <div
-                    className="overflow-hidden"
-                    style={{
-                      width: 'calc(80% - 20px)',
-                      maxWidth: 340,
-                      aspectRatio: '9/16',
-                      transform: 'scale(0.85)',
-                      opacity: 0.55,
-                      background: 'rgba(255,255,255,0.06)',
-                      border: '1px solid rgba(255,255,255,0.12)',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.22)',
-                      filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                    }}
-                  >
-                    {hasFrame && activity ? (
-                      <StoryFrameRenderer
-                        imageUrl={media}
-                        isVideo={activity.isVideo}
-                        activity={activity.activity}
-                        frame={activity.frame}
-                        duration={activity.duration}
-                        pr={activity.pr}
-                        dayNumber={activity.dayNumber}
-                      />
-                    ) : media ? (
-                      <img
-                        src={media}
-                        alt="User story"
-                        className="w-full h-full object-cover"
-                        loading="eager"
-                      />
-                    ) : null}
-                  </div>
-                </div>
-              );
-            }
+                const cardStyle: React.CSSProperties = {
+                  transform: `scale(${isCenter ? 1.0 : 0.88})`,
+                  transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease',
+                  opacity: isCenter ? 1 : 0.5,
+                  zIndex: isCenter ? 10 : 1,
+                };
 
-            return (
-              <div
-                key={`card-${group.userId}`}
-                className="flex-shrink-0 flex items-center justify-center relative"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  scrollSnapAlign: 'center',
-                }}
-              >
-                {/* Full templated image/video - with lock overlay for non-public users */}
-                {(() => {
-                  const shouldShowLocked = !isOwnStory && !viewerCanSeeCommunity;
-                  const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
+                if (!isCenter) {
                   return (
-                    <div
-                      className="relative flex items-center justify-center"
-                      style={{ 
-                        width: '100%',
-                        height: '100%',
-                        background: 'transparent',
-                      }}
+                    <CarouselItem
+                      key={`card-${group.userId}`}
+                      className="pl-0 flex items-center justify-center h-full"
                     >
-                      {/* Card — 9:16 aspect ratio, constrained to available space */}
                       <div
-                        className="relative overflow-hidden"
-                        style={{
-                          aspectRatio: '9/16',
-                          height: 'calc(95% - 20px)',
-                          maxWidth: '100%',
-                          borderRadius: '0px',
-                          overflow: 'hidden',
-                          background: 'transparent',
-                          marginTop: '-10px',
-                        }}
+                        className="flex items-center justify-center w-full h-full"
+                        style={cardStyle}
                       >
-                    {/* Progress bar removed — timing indicated via avatar ring */}
-                    <div
-                      key={contentKey}
-                      className="absolute inset-0 flex items-center justify-center"
-                    >
-                        {currentActivity?.id === 'log-activity' ? (
-                          // "Log Your Activity" card — dark with animated glowing border
-                          (() => {
-                            const glowHsl = `hsl(260, 70%, 65%)`;
-                            const glowDim = `hsla(260, 70%, 65%, 0.15)`;
-                            const glowMid = `hsla(260, 70%, 65%, 0.35)`;
+                        <div
+                          className="overflow-hidden rounded-3xl"
+                          style={{
+                            width: 'calc(80% - 20px)',
+                            maxWidth: 340,
+                            aspectRatio: '9/16',
+                            background: 'rgba(255,255,255,0.06)',
+                            border: '1px solid rgba(255,255,255,0.12)',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.22)',
+                            filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
+                          }}
+                        >
+                          {hasFrame && activity ? (
+                            <StoryFrameRenderer
+                              imageUrl={media}
+                              isVideo={activity.isVideo}
+                              activity={activity.activity}
+                              frame={activity.frame}
+                              duration={activity.duration}
+                              pr={activity.pr}
+                              dayNumber={activity.dayNumber}
+                            />
+                          ) : media ? (
+                            <img
+                              src={media}
+                              alt="User story"
+                              className="w-full h-full object-cover"
+                              loading="eager"
+                            />
+                          ) : null}
+                        </div>
+                      </div>
+                    </CarouselItem>
+                  );
+                }
 
-                            return (
-                              <div 
-                                className="flex flex-col items-center justify-center cursor-pointer relative self-center"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate('/camera', { state: { dayNumber: currentActivity.dayNumber } });
-                                }}
-                                style={{
-                                  width: '90%',
-                                  aspectRatio: '9/16',
-                                  maxHeight: '100%',
-                                }}
-                              >
-                                {/* Outer glow */}
-                                <motion.div
-                                  className="absolute inset-0 rounded-2xl"
-                                  style={{
-                                    boxShadow: `inset 0 0 30px 4px ${glowDim}`,
-                                    border: `1.5px solid ${glowMid}`,
-                                  }}
-                                  animate={{
-                                    boxShadow: [
-                                      `inset 0 0 25px 3px ${glowDim}`,
-                                      `inset 0 0 40px 8px ${glowMid}`,
-                                      `inset 0 0 25px 3px ${glowDim}`,
-                                    ],
-                                  }}
-                                  transition={{
-                                    duration: 3,
-                                    repeat: Infinity,
-                                    ease: 'easeInOut',
-                                  }}
-                                />
-                                {/* Dark inner surface */}
-                                <div 
-                                  className="absolute inset-[2px] rounded-2xl overflow-hidden"
-                                  style={{
-                                    background: 'linear-gradient(180deg, rgba(10,10,10,0.95) 0%, rgba(5,5,8,0.98) 60%, rgba(10,10,10,0.9) 100%)',
-                                  }}
+                return (
+                  <CarouselItem
+                    key={`card-${group.userId}`}
+                    className="pl-0 flex items-center justify-center relative h-full"
+                  >
+                    <div
+                      className="flex items-center justify-center w-full h-full"
+                      style={cardStyle}
+                    >
+                    {/* Full templated image/video - with lock overlay for non-public users */}
+                    {(() => {
+                      const shouldShowLocked = !isOwnStory && !viewerCanSeeCommunity;
+                      const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
+                      return (
+                        <div
+                          className="relative flex items-center justify-center"
+                          style={{ 
+                            width: '100%',
+                            height: '100%',
+                            background: 'transparent',
+                          }}
+                        >
+                          {/* Card — 9:16 aspect ratio, constrained to available space */}
+                          <div
+                            className="relative overflow-hidden"
+                            style={{
+                              aspectRatio: '9/16',
+                              height: 'calc(95% - 20px)',
+                              maxWidth: '100%',
+                              borderRadius: '0px',
+                              overflow: 'hidden',
+                              background: 'transparent',
+                              marginTop: '-10px',
+                            }}
+                          >
+                        {/* Progress bar removed — timing indicated via avatar ring */}
+                        <div
+                          key={contentKey}
+                          className="absolute inset-0 flex items-center justify-center"
+                        >
+                          {isLogActivityCard ? (
+                            (() => {
+                              const totalActivities = myActivities.length;
+                              const progressPercent = Math.round((totalActivities / 12) * 100);
+                              const isEvenDay = totalActivities % 2 === 0;
+                              const glowHsl = isEvenDay ? 'hsl(280, 80%, 65%)' : 'hsl(25, 95%, 60%)';
+                              const glowMid = isEvenDay ? 'rgba(167, 100, 255, 0.35)' : 'rgba(249, 115, 22, 0.35)';
+                              return (
+                                <div
+                                  className="w-full h-full flex flex-col items-center justify-center gap-7 relative"
                                 >
-                                  {/* Subtle reflection at bottom */}
-                                  <div className="absolute bottom-0 left-0 right-0 h-[35%]" style={{
-                                    background: `radial-gradient(ellipse 80% 60% at 50% 100%, ${glowDim} 0%, transparent 70%)`,
-                                  }} />
-                                  {/* Inner border glow line */}
-                                  <motion.div
-                                    className="absolute inset-[8px] rounded-xl pointer-events-none"
+                                  {/* Faint radial glow behind content */}
+                                  <div
+                                    className="absolute pointer-events-none"
                                     style={{
-                                      border: `1px solid ${glowDim}`,
-                                      boxShadow: `inset 0 0 12px 2px ${glowDim}`,
-                                    }}
-                                    animate={{
-                                      opacity: [0.5, 0.9, 0.5],
-                                    }}
-                                    transition={{
-                                      duration: 2.5,
-                                      repeat: Infinity,
-                                      ease: 'easeInOut',
+                                      width: '280px',
+                                      height: '280px',
+                                      borderRadius: '50%',
+                                      background: `radial-gradient(circle, ${glowMid} 0%, transparent 60%)`,
+                                      filter: 'blur(50px)',
+                                      top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
                                     }}
                                   />
-                                </div>
 
-                                {/* Content — text above center, plus at center, label below */}
-                                <div className="relative z-10 flex flex-col items-center justify-between h-full px-6 py-[20%]">
-                                  {/* Animated gradient text — pinned above the plus */}
-                                  <motion.div 
-                                    className="text-center"
-                                    initial={{ opacity: 0, y: 20 }}
+                                  {/* Greeting */}
+                                  <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.5, duration: 0.8, ease: 'easeOut' }}
+                                    transition={{ delay: 0.1, duration: 0.5 }}
+                                    className="text-center z-10"
                                   >
-                                    <p 
-                                      className="text-[18px] font-bold leading-tight"
+                                    <p
+                                      className="text-2xl font-bold leading-tight"
                                       style={{
-                                        background: 'linear-gradient(180deg, hsla(255, 60%, 75%, 1) 0%, hsla(260, 50%, 55%, 1) 100%)',
+                                        background: `linear-gradient(135deg, ${glowHsl}, rgba(255,255,255,0.9))`,
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent',
                                       }}
@@ -1927,185 +1882,179 @@ const Reel = () => {
                                     Day {currentActivity.dayNumber} of 12
                                   </p>
                                 </div>
+                              );
+                            })()
+                          ) : isRecapGenerating ? (
+                            <div 
+                              className="w-full h-full flex flex-col items-center justify-center gap-6"
+                              style={{
+                                background: 'linear-gradient(135deg, hsl(var(--muted)) 0%, hsl(var(--background)) 100%)',
+                              }}
+                            >
+                              <div className="relative w-16 h-16">
+                                <svg className="absolute inset-0 w-full h-full animate-spin" viewBox="0 0 64 64">
+                                  <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--foreground) / 0.1)" strokeWidth="4" />
+                                  <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--primary))" strokeWidth="4" strokeLinecap="round"
+                                    strokeDasharray={`${2 * Math.PI * 28 * 0.3} ${2 * Math.PI * 28 * 0.7}`} />
+                                </svg>
                               </div>
-                            );
-                          })()
-                        ) : isRecapGenerating ? (
-                          // Show generating placeholder for week recap
-                          <div 
-                            className="w-full h-full flex flex-col items-center justify-center gap-6"
-                            style={{
-                              background: 'linear-gradient(135deg, hsl(var(--muted)) 0%, hsl(var(--background)) 100%)',
+                              <div className="text-center px-8">
+                                <p className="text-foreground font-semibold text-lg mb-2">Generating your AI recap...</p>
+                                <p className="text-muted-foreground text-sm">This usually takes 1-2 minutes</p>
+                              </div>
+                            </div>
+                          ) : hasLiveFrame ? (
+                            <div style={{ 
+                              width: '100%', height: '100%', 
+                              filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                            }}>
+                              <StoryFrameRenderer
+                                imageUrl={mediaUrl}
+                                isVideo={currentActivity.isVideo}
+                                activity={currentActivity.activity}
+                                frame={currentActivity.frame}
+                                duration={currentActivity.duration}
+                                pr={currentActivity.pr}
+                                dayNumber={currentActivity.dayNumber}
+                                onLoad={() => setLoadedMediaUrl(mediaUrl)}
+                              />
+                            </div>
+                          ) : isVideo ? (
+                            <div style={{
+                              width: isRecapActivity ? '90%' : '100%',
+                              height: isRecapActivity ? undefined : '100%',
+                              aspectRatio: isRecapActivity ? '9/16' : undefined,
+                              maxHeight: '100%',
+                              position: isRecapActivity ? 'relative' : undefined,
+                              margin: isRecapActivity ? '0 auto' : undefined,
+                              overflow: 'hidden',
                             }}
-                          >
-                            <div className="relative w-16 h-16">
-                              <svg className="absolute inset-0 w-full h-full animate-spin" viewBox="0 0 64 64">
-                                <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--foreground) / 0.1)" strokeWidth="4" />
-                                <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--primary))" strokeWidth="4" strokeLinecap="round"
-                                  strokeDasharray={`${2 * Math.PI * 28 * 0.3} ${2 * Math.PI * 28 * 0.7}`} />
-                              </svg>
-                            </div>
-                            <div className="text-center px-8">
-                              <p className="text-foreground font-semibold text-lg mb-2">Generating your AI recap...</p>
-                              <p className="text-muted-foreground text-sm">This usually takes 1-2 minutes</p>
-                            </div>
-                          </div>
-                        ) : hasLiveFrame ? (
-                          // Live frame render — pixel-perfect at any resolution
-                          <div style={{ 
-                            width: '100%', height: '100%', 
-                            filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                          }}>
-                            <StoryFrameRenderer
-                              imageUrl={mediaUrl}
-                              isVideo={currentActivity.isVideo}
-                              activity={currentActivity.activity}
-                              frame={currentActivity.frame}
-                              duration={currentActivity.duration}
-                              pr={currentActivity.pr}
-                              dayNumber={currentActivity.dayNumber}
-                              onLoad={() => setLoadedMediaUrl(mediaUrl)}
+                            className={isRecapActivity ? 'self-center flex items-center justify-center' : 'absolute inset-0'}
+                            >
+                            <video
+                              ref={videoRef}
+                              key={mediaUrl}
+                              src={mediaUrl}
+                              className="w-full h-full"
+                              style={{ 
+                                objectFit: 'cover',
+                                filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                              }}
+                              autoPlay
+                              loop
+                              muted={true}
+                              playsInline
+                              onLoadedData={(e) => {
+                                setLoadedMediaUrl(mediaUrl);
+                                const vid = e.currentTarget;
+                                if (vid.duration && isFinite(vid.duration) && vid.duration > 0) {
+                                  const videoDurationMs = Math.ceil(vid.duration * 1000);
+                                  setAutoAdvanceDuration(videoDurationMs);
+                                }
+                              }}
                             />
-                          </div>
-                        ) : isVideo ? (
-                          <div style={{
-                            width: isRecapActivity ? '90%' : '100%',
-                            height: isRecapActivity ? undefined : '100%',
-                            aspectRatio: isRecapActivity ? '9/16' : undefined,
-                            maxHeight: '100%',
-                            position: isRecapActivity ? 'relative' : undefined,
-                            margin: isRecapActivity ? '0 auto' : undefined,
-                            overflow: 'hidden',
-                          }}
-                          className={isRecapActivity ? 'self-center flex items-center justify-center' : 'absolute inset-0'}
-                          >
-                          <video
-                            ref={videoRef}
-                            key={mediaUrl}
-                            src={mediaUrl}
-                            className="w-full h-full"
-                            style={{ 
-                              objectFit: 'cover',
-                              filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                            }}
-                            autoPlay
-                            loop
-                            muted={true}
-                            playsInline
-                            onLoadedData={(e) => {
-                              setLoadedMediaUrl(mediaUrl);
-                              const vid = e.currentTarget;
-                              if (vid.duration && isFinite(vid.duration) && vid.duration > 0) {
-                                const videoDurationMs = Math.ceil(vid.duration * 1000);
-                                setAutoAdvanceDuration(videoDurationMs);
-                              }
-                            }}
-                          />
-                          </div>
-                        ) : (
-                          <img
-                            key={mediaUrl}
-                            src={mediaUrl}
-                            alt={`Day ${currentActivity.dayNumber}`}
-                            className="absolute inset-0 w-full h-full"
-                            loading="eager"
-                            decoding="async"
-                            style={{ 
-                              objectFit: 'cover',
-                              filter: shouldShowLocked ? 'blur(20px)' : 'none',
-                            }}
-                            onLoad={() => setLoadedMediaUrl(mediaUrl)}
-                            onError={(e) => {
-                              const img = e.currentTarget;
-                              if (!img.dataset.retried) {
-                                img.dataset.retried = "true";
-                                img.src = mediaUrl + "?t=" + Date.now();
-                              }
-                            }}
-                          />
-                        )}
-                      </div>
-
-                    {/* Share button removed from card — now in bottom zone */}
-                    
-                    {/* Lock overlay for locked content */}
-                    {shouldShowLocked && (
-                      <div
-                        className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-3xl cursor-pointer"
-                        style={{
-                          border: '1.5px solid rgba(255,255,255,0.15)',
-                          boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 8px 32px rgba(0,0,0,0.2)',
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowMakePublicSheet(true);
-                        }}
-                      >
-                        <div
-                          className="flex flex-col items-center gap-3"
-                        >
-                          <div 
-                            className="w-16 h-16 rounded-full flex items-center justify-center"
-                            style={{
-                              background: 'rgba(255,255,255,0.12)',
-                              backdropFilter: 'blur(16px)',
-                              border: '2px solid rgba(255,255,255,0.25)',
-                              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                            }}
-                          >
-                            <Lock className="w-7 h-7 text-white" />
-                          </div>
-                          
-                          <div className="text-center px-6">
-                            <p className="text-white font-semibold text-lg">Share to see others</p>
-                            <p className="text-white/60 text-sm mt-1">
-                              Make your workout public to unlock
-                            </p>
-                          </div>
-                          
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowMakePublicSheet(true);
-                            }}
-                            className="mt-2 px-6 py-2.5 rounded-full font-semibold text-sm active:scale-95 transition-transform"
-                            style={{
-                              background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%)',
-                              color: '#000',
-                              boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
-                            }}
-                          >
-                            View Post
-                          </button>
+                            </div>
+                          ) : (
+                            <img
+                              key={mediaUrl}
+                              src={mediaUrl}
+                              alt={`Day ${currentActivity.dayNumber}`}
+                              className="absolute inset-0 w-full h-full"
+                              loading="eager"
+                              decoding="async"
+                              style={{ 
+                                objectFit: 'cover',
+                                filter: shouldShowLocked ? 'blur(20px)' : 'none',
+                              }}
+                              onLoad={() => setLoadedMediaUrl(mediaUrl)}
+                              onError={(e) => {
+                                const img = e.currentTarget;
+                                if (!img.dataset.retried) {
+                                  img.dataset.retried = "true";
+                                  img.src = mediaUrl + "?t=" + Date.now();
+                                }
+                              }}
+                            />
+                          )}
                         </div>
-                      </div>
-                    )}
-                    
-                    </div>{/* end 9:16 card */}
 
-                    {/* Floating 3D emoji reactions - OUTSIDE overflow-hidden card so they aren't clipped */}
-                    {!shouldShowLocked && (
-                      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 25, overflow: 'hidden', borderRadius: '0px' }}>
-                        <Floating3DEmojis 
-                          reactions={activeReactionTypes}
-                          newReaction={null}
-                          isPaused={isPaused}
-                        />
-                        {/* iMessage-style emoji rain on story load */}
-                        <StoryEmojiRain
-                          triggerKey={contentKey}
-                          reactions={activeReactionTypes}
-                          active={mediaLoaded && activeReactionTypes.length > 0}
-                        />
-                      </div>
-                    )}
-                  </div>
+                      {/* Lock overlay for locked content */}
+                      {shouldShowLocked && (
+                        <div
+                          className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-3xl cursor-pointer"
+                          style={{
+                            border: '1.5px solid rgba(255,255,255,0.15)',
+                            boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 8px 32px rgba(0,0,0,0.2)',
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowMakePublicSheet(true);
+                          }}
+                        >
+                          <div className="flex flex-col items-center gap-3">
+                            <div 
+                              className="w-16 h-16 rounded-full flex items-center justify-center"
+                              style={{
+                                background: 'rgba(255,255,255,0.12)',
+                                backdropFilter: 'blur(16px)',
+                                border: '2px solid rgba(255,255,255,0.25)',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                              }}
+                            >
+                              <Lock className="w-7 h-7 text-white" />
+                            </div>
+                            
+                            <div className="text-center px-6">
+                              <p className="text-white font-semibold text-lg">Share to see others</p>
+                              <p className="text-white/60 text-sm mt-1">
+                                Make your workout public to unlock
+                              </p>
+                            </div>
+                            
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowMakePublicSheet(true);
+                              }}
+                              className="mt-2 px-6 py-2.5 rounded-full font-semibold text-sm active:scale-95 transition-transform"
+                              style={{
+                                background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%)',
+                                color: '#000',
+                                boxShadow: '0 4px 20px rgba(255,255,255,0.2)',
+                              }}
+                            >
+                              View Post
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      
+                      </div>{/* end 9:16 card */}
+
+                      {/* Floating 3D emoji reactions */}
+                      {!shouldShowLocked && (
+                        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 25, overflow: 'hidden', borderRadius: '0px' }}>
+                          <Floating3DEmojis 
+                            reactions={activeReactionTypes}
+                            newReaction={null}
+                            isPaused={isPaused}
+                          />
+                          <StoryEmojiRain
+                            triggerKey={contentKey}
+                            reactions={activeReactionTypes}
+                            active={mediaLoaded && activeReactionTypes.length > 0}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+                </div>
+                  </CarouselItem>
                 );
-              })()}
-              </div>
-            );
-          })}
-
+              })}
+            </CarouselContent>
+          </Carousel>
           
           {/* Right arrow indicator - only on first story */}
           {effectiveUserGroups.length > 1 && currentUserIndex === 0 && currentActivityIndex === 0 && (
@@ -2127,7 +2076,7 @@ const Reel = () => {
               <ChevronRight className="w-7 h-7 text-white drop-shadow-lg" />
             </motion.button>
           )}
-            </div>
+        </div>
 
             {/* React row sits below the reel card with a fixed 10px gap */}
             <div className="shrink-0 flex flex-col items-center justify-center pt-3 pb-2" style={{ minHeight: 56 }}>
