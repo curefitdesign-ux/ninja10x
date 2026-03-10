@@ -160,6 +160,8 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
             <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap" style={{ color: "rgba(200, 210, 230, 0.5)", fontWeight: 400 }}>Menu</span>
           </button>
         </div>
+          </div>
+        </div>
       </div>
 
       <NotificationSheet isOpen={showNotificationSheet} onClose={() => setShowNotificationSheet(false)} onNotificationCountChange={setUnreadNotificationCount} />
