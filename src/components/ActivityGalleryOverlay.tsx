@@ -391,7 +391,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
                               transform: `rotate(${-rotation * 0.5}deg)`,
                             }}>
-                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
+                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
                             </div>
                           )}
                           {/* Reactions */}
