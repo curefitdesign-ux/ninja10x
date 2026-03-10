@@ -589,21 +589,16 @@ const Reel = () => {
   // Mark the current user as viewed AFTER their story finishes (handled by cycleActivity)
   // Don't mark immediately — let the progress ring complete first
 
-  // Preload adjacent story images for instant transitions
+  // Preload ALL images in current user's story + next user's first image
   useEffect(() => {
     if (!currentGroup) return;
-    const activities = currentGroup.activities;
-    // Preload next 2 and previous 1 activities in current user
-    const indices = [currentActivityIndex - 1, currentActivityIndex + 1, currentActivityIndex + 2];
-    for (const idx of indices) {
-      if (idx >= 0 && idx < activities.length) {
-        const act = activities[idx];
-        if (act && !act.id?.startsWith('week-recap') && act.id !== 'log-activity') {
-          const url = act.originalUrl || act.storageUrl;
-          if (url && !act.isVideo) {
-            const img = new Image();
-            img.src = url;
-          }
+    // Preload all activities in current user
+    for (const act of currentGroup.activities) {
+      if (act && !act.id?.startsWith('week-recap') && act.id !== 'log-activity' && !act.isVideo) {
+        const url = act.originalUrl || act.storageUrl;
+        if (url) {
+          const img = new Image();
+          img.src = url;
         }
       }
     }
@@ -620,7 +615,7 @@ const Reel = () => {
         }
       }
     }
-  }, [currentActivityIndex, currentUserIndex, currentGroup, effectiveUserGroups]);
+  }, [currentUserIndex, currentGroup, effectiveUserGroups]);
 
   // Defensive reset on every story/user step to prevent residual x-offset drift
   useEffect(() => {
