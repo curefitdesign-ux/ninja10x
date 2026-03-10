@@ -303,7 +303,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 }} />
 
                 {(() => {
-                  const sortedActivities = [...activities].filter(a => !a.isPlaceholder).reverse();
+                  const sortedActivities = [...activities].filter(a => !a.isPlaceholder);
                   const getCardStyle = (index: number, dayNumber: number) => {
                     const seed = dayNumber * 7 + index * 13;
                     return { rotation: ((seed % 11) - 5) * 1.2, offsetX: ((seed * 3) % 7) - 2, decorType: seed % 5 };
