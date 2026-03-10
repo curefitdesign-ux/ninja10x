@@ -742,6 +742,42 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               document.body,
             )}
 
+          {/* Send Reaction Sheet for other users */}
+          {showSendReactionSheet &&
+            createPortal(
+              <SendReactionSheet
+                activityId={current.id}
+                currentUserId={user?.id}
+                activityType={current.activity || undefined}
+                onReact={handleReact}
+                onClose={() => setShowSendReactionSheet(false)}
+                onViewReactions={() => {
+                  setShowSendReactionSheet(false);
+                  setShowReactsSheet(true);
+                }}
+                onReactionRemoved={(reactionType) => {
+                  setLocalReactions(prev => {
+                    const curr = prev[current.id];
+                    if (!curr) return prev;
+                    const existing = curr.reactions[reactionType];
+                    const newCount = Math.max((existing?.count || 0) - 1, 0);
+                    return {
+                      ...prev,
+                      [current.id]: {
+                        ...curr,
+                        total: Math.max(curr.total - 1, 0),
+                        reactions: { ...curr.reactions, [reactionType]: { count: newCount, reacted: newCount > 0 } },
+                        reactorProfiles: curr.reactorProfiles.filter(r => !(r.userId === user?.id && r.reactionType === reactionType)),
+                      },
+                    };
+                  });
+                }}
+                totalReactions={currentReactions.total}
+                reactorProfiles={currentReactions.reactorProfiles}
+              />,
+              document.body,
+            )}
+
           {/* Share Options Sheet — portaled to body to avoid clipping */}
           {createPortal(
             <AnimatePresence>
