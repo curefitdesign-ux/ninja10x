@@ -504,7 +504,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
             <div
               className="relative z-30 flex-shrink-0"
-              style={{ height: '46%', marginTop: 48 }}
+              style={{ height: '42%', marginTop: 8 }}
               onClick={handleTap}
             >
               <div className="relative w-full h-full flex items-center justify-center" style={{ gap: '10px' }}>
