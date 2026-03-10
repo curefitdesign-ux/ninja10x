@@ -1675,7 +1675,7 @@ const Reel = () => {
           style={{
             paddingTop: '0px',
             marginTop: '-4px',
-            paddingBottom: 'calc(max(env(safe-area-inset-bottom, 6px), 6px) + 80px)',
+            paddingBottom: '0px',
           }}
         >
         {/* Reel cards — simple horizontal scroll with snap */}
