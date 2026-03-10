@@ -621,11 +621,17 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                     {/* Nudge & Share buttons */}
                     <div className="flex items-center gap-2 shrink-0">
-                      {!isOwnProfile && !current.isPlaceholder && (
+                      {/* Nudge for other users' stories, or own profile if no activity today */}
+                      {((!isOwnProfile && !current.isPlaceholder) || (isOwnProfile && !hasLoggedToday)) && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            toast('👋 Poke sent!', { description: `You nudged ${userProfile?.displayName?.split(' ')[0] || 'them'} to keep going!` });
+                            if (isOwnProfile) {
+                              onClose();
+                              onLogActivity?.();
+                            } else {
+                              toast('👋 Poke sent!', { description: `You nudged ${userProfile?.displayName?.split(' ')[0] || 'them'} to keep going!` });
+                            }
                           }}
                           className="shrink-0 active:scale-95 transition-transform"
                           style={{
@@ -638,7 +644,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                           }}
                         >
-                          <span className="text-lg leading-none">👋</span>
+                          <span className="text-lg leading-none">{isOwnProfile ? '➕' : '👋'}</span>
                         </button>
                       )}
                       {canShare && (
