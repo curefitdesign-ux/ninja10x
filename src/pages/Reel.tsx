@@ -757,8 +757,8 @@ const Reel = () => {
 
 
   // Auto-advance timer - pause when modals are open OR content is locked
-  // Determine if story should be locked (user's profile is private OR they haven't shared any public activity)
-  const isStoryLocked = !isOwnStory && !profile?.stories_public;
+  // Story locked = viewer hasn't shared publicly AND this isn't own story
+  const isStoryLocked = !isOwnStory && !viewerCanSeeCommunity;
   const isPaused = showReactsSheet || showSendReactionSheet || showEditSheet || showMakePublicSheet || isStoryLocked || showHistoryGallery;
   
   // Reset progress/duration when activity changes (NOT mediaLoaded — that's URL-keyed to avoid race condition)
