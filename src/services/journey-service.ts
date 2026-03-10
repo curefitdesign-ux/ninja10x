@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export type ReactionType = 'heart' | 'clap' | 'fistbump' | 'wow' | 'fire' | 'flex' | 'trophy' | 'runner' | 'energy' | 'timer' | 'mountain' | 'compass' | 'football' | 'bicycle' | 'lotus' | 'boxing-gloves' | 'cricket-bat' | 'basketball' | 'medal' | 'shuttlecock';
+export type ReactionType = 'heart' | 'clap' | 'fistbump' | 'wow' | 'fire' | 'flex' | 'trophy' | 'runner' | 'energy' | 'timer' | 'mountain' | 'compass' | 'football' | 'bicycle' | 'lotus' | 'boxing-gloves' | 'cricket-bat' | 'basketball' | 'medal' | 'shuttlecock' | 'sneakers' | 'kettlebells';
 
 export interface ActivityReaction {
   type: ReactionType;
