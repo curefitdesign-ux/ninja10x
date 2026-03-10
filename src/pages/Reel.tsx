@@ -1705,10 +1705,11 @@ const Reel = () => {
               loop: effectiveUserGroups.length > 1,
               skipSnaps: false,
               containScroll: false,
+              slidesToScroll: 1,
             }}
             className="h-full"
           >
-            <CarouselContent className="h-full -ml-0">
+            <CarouselContent className="h-full -ml-2">
               {effectiveUserGroups.map((group, idx) => {
                 const isCenter = idx === currentUserIndex;
                 const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
