@@ -608,23 +608,53 @@ const Reel = () => {
   }, [currentActivityIndex, goPrevUser]);
 
   // Horizontal swipe handling — keep cards on one track and only snap positions
+  const handleHorizontalDrag = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const nextOffset = Math.max(-CARD_STEP, Math.min(CARD_STEP, info.offset.x));
+    setCarouselOffset(nextOffset);
+    setIsCarouselDragging(true);
+  }, [CARD_STEP]);
+
+  const commitCarouselSwipe = useCallback((direction: 'next' | 'prev') => {
+    const targetOffset = direction === 'next' ? -CARD_STEP : CARD_STEP;
+    setIsCarouselDragging(false);
+    setCarouselOffset(targetOffset);
+
+    if (carouselCommitTimeoutRef.current) {
+      window.clearTimeout(carouselCommitTimeoutRef.current);
+    }
+
+    carouselCommitTimeoutRef.current = window.setTimeout(() => {
+      carouselCommitTimeoutRef.current = null;
+      if (direction === 'next') {
+        goNextUser();
+      } else {
+        goPrevUser();
+      }
+    }, 180);
+  }, [goNextUser, goPrevUser, CARD_STEP]);
+
   const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
 
     if (Math.abs(offset.x) > SWIPE_THRESHOLD || Math.abs(velocity.x) > 300) {
       if (offset.x < 0) {
-        goNextUser();
+        commitCarouselSwipe('next');
       } else {
-        goPrevUser();
+        commitCarouselSwipe('prev');
       }
+      return;
     }
-  }, [goNextUser, goPrevUser]);
+
+    setIsCarouselDragging(false);
+    setCarouselOffset(0);
+  }, [commitCarouselSwipe]);
 
   // Bottom sheet drag removed — progress is now a standalone page
 
   const [lastTap, setLastTap] = useState(0);
   const [userTransitionFlash, setUserTransitionFlash] = useState(false);
   const prevUserIndexRef = useRef(currentUserIndex);
+  const dragProgress = Math.max(-1, Math.min(1, carouselOffset / CARD_STEP));
   
   // Flash highlight + center active avatar ONLY when user changes
   useEffect(() => {
