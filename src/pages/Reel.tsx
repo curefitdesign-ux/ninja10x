@@ -1922,11 +1922,11 @@ const Reel = () => {
                                   />
                                 </div>
 
-                                {/* Content */}
-                                <div className="relative z-10 flex flex-col items-center justify-center h-full px-6" style={{ marginTop: 0 }}>
-                                  {/* Animated gradient text */}
+                                {/* Content — text above center, plus at center, label below */}
+                                <div className="relative z-10 flex flex-col items-center justify-between h-full px-6 py-[20%]">
+                                  {/* Animated gradient text — pinned above the plus */}
                                   <motion.div 
-                                    className="text-center mb-6"
+                                    className="text-center"
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.5, duration: 0.8, ease: 'easeOut' }}
@@ -1943,27 +1943,25 @@ const Reel = () => {
                                   </motion.div>
 
                                   {/* Glowing plus - centered */}
-                                  <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="relative flex items-center justify-center" style={{ width: 90, height: 90 }}>
-                                      <motion.div 
-                                        className="absolute inset-0 rounded-full"
-                                        style={{
-                                          background: `radial-gradient(circle, ${glowMid} 0%, transparent 60%)`,
-                                          filter: 'blur(20px)',
-                                          transform: 'scale(3)',
-                                        }}
-                                        animate={{ opacity: [0.4, 0.9, 0.4] }}
-                                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                                      />
-                                      <svg width="56" height="56" viewBox="0 0 48 48" fill="none">
-                                        <rect x="20" y="6" width="8" height="36" rx="4" fill={glowHsl} />
-                                        <rect x="6" y="20" width="36" height="8" rx="4" fill={glowHsl} />
-                                      </svg>
-                                    </div>
+                                  <div className="relative flex items-center justify-center" style={{ width: 90, height: 90 }}>
+                                    <motion.div 
+                                      className="absolute inset-0 rounded-full"
+                                      style={{
+                                        background: `radial-gradient(circle, ${glowMid} 0%, transparent 60%)`,
+                                        filter: 'blur(20px)',
+                                        transform: 'scale(3)',
+                                      }}
+                                      animate={{ opacity: [0.4, 0.9, 0.4] }}
+                                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                                    />
+                                    <svg width="56" height="56" viewBox="0 0 48 48" fill="none">
+                                      <rect x="20" y="6" width="8" height="36" rx="4" fill={glowHsl} />
+                                      <rect x="6" y="20" width="36" height="8" rx="4" fill={glowHsl} />
+                                    </svg>
                                   </div>
 
                                   {/* Label */}
-                                  <p className="mt-6 text-white/40 text-xs font-medium uppercase tracking-widest" style={{ marginTop: 21 }}>
+                                  <p className="text-white/40 text-xs font-medium uppercase tracking-widest">
                                     Day {currentActivity.dayNumber} of 12
                                   </p>
                                 </div>
