@@ -1705,12 +1705,11 @@ const Reel = () => {
             onClick={handleTap}
           />
 
-          {/* Carousel strip — renders prev, center, next only (3 cards) */}
+          {/* Carousel strip — renders prev, center, next as a unified row */}
           {(() => {
-            const peekOffsets = [-1, 1];
-            return peekOffsets.map(offset => {
+            const cardPositions = [-1, 0, 1];
+            return cardPositions.map(offset => {
               const idx = (currentUserIndex + offset + effectiveUserGroups.length) % effectiveUserGroups.length;
-              if (idx === currentUserIndex) return null;
               const group = effectiveUserGroups[idx];
               if (!group) return null;
               const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
@@ -1721,80 +1720,72 @@ const Reel = () => {
               const isPeekOwnStory = user && group?.userId === user.id;
               const isPeekLocked = !isPeekOwnStory && !profile?.stories_public;
               const hasFrame = act?.frame && act.frame !== 'none';
+              const isCenter = offset === 0;
+              const cardScale = isCenter ? 1 : 0.8;
+              const cardOpacity = isCenter ? 1 : 0.5;
               const xOffset = offset * 290;
 
-              return (
-                <motion.div
-                  key={`peek-${offset}-${idx}`}
-                  className="absolute pointer-events-none"
-                  style={{
-                    width: 'calc(80% - 20px)',
-                    maxWidth: 340,
-                    aspectRatio: '9/16',
-                    zIndex: 10,
-                  }}
-                  animate={{ x: xOffset, scale: 0.8, opacity: 0.5 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-                >
-                  <div
-                    className="w-full h-full overflow-hidden"
+              if (!isCenter) {
+                // Peek card (left or right)
+                return (
+                  <motion.div
+                    key={`carousel-${offset}-${idx}-${currentUserIndex}`}
+                    className="absolute pointer-events-none"
                     style={{
-                      background: 'rgba(255,255,255,0.06)',
-                      border: '1px solid rgba(255,255,255,0.12)',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                      filter: isPeekLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.7)',
+                      width: 'calc(80% - 20px)',
+                      maxWidth: 340,
+                      aspectRatio: '9/16',
+                      zIndex: 10,
                     }}
+                    initial={{ x: xOffset, scale: cardScale, opacity: 0 }}
+                    animate={{ x: xOffset, scale: cardScale, opacity: cardOpacity }}
+                    transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
                   >
-                    {hasFrame && act ? (
-                      <StoryFrameRenderer
-                        imageUrl={peekMedia}
-                        isVideo={act.isVideo}
-                        activity={act.activity}
-                        frame={act.frame}
-                        duration={act.duration}
-                        pr={act.pr}
-                        dayNumber={act.dayNumber}
-                      />
-                    ) : peekMedia ? (
-                      <img
-                        src={peekMedia}
-                        alt="Adjacent user"
-                        className="w-full h-full object-cover"
-                        loading="eager"
-                      />
-                    ) : null}
-                  </div>
-                </motion.div>
-              );
+                    <div
+                      className="w-full h-full overflow-hidden"
+                      style={{
+                        background: 'rgba(255,255,255,0.06)',
+                        border: '1px solid rgba(255,255,255,0.12)',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                        filter: isPeekLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.7)',
+                      }}
+                    >
+                      {hasFrame && act ? (
+                        <StoryFrameRenderer
+                          imageUrl={peekMedia}
+                          isVideo={act.isVideo}
+                          activity={act.activity}
+                          frame={act.frame}
+                          duration={act.duration}
+                          pr={act.pr}
+                          dayNumber={act.dayNumber}
+                        />
+                      ) : peekMedia ? (
+                        <img
+                          src={peekMedia}
+                          alt="Adjacent user"
+                          className="w-full h-full object-cover"
+                          loading="eager"
+                        />
+                      ) : null}
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              // Center card — full content
+              return null; // rendered below with full content
             });
           })()}
 
-          {/* Center card — slides in/out based on swipe direction with bounce */}
-          <AnimatePresence mode="popLayout" initial={false}>
-          <motion.div
+          {/* Center card — main content (no AnimatePresence, instant swap) */}
+          <div
             key={`center-${currentGroup?.userId}-${currentUserIndex}`}
             className="relative flex items-center justify-center"
             style={{
               width: '100%',
               height: '100%',
               zIndex: 20,
-            }}
-            initial={{
-              x: slideDirection === 'left' ? 290 : slideDirection === 'right' ? -290 : 0,
-              scale: slideDirection ? 0.8 : 1,
-              opacity: slideDirection ? 0.5 : 1,
-            }}
-            animate={{ x: 0, scale: 1, opacity: 1 }}
-            exit={{
-              x: slideDirection === 'left' ? -290 : slideDirection === 'right' ? 290 : 0,
-              scale: 0.8,
-              opacity: 0,
-            }}
-            transition={{
-              type: 'spring',
-              stiffness: 260,
-              damping: 24,
-              mass: 0.8,
             }}
           >
               {/* Full templated image/video - with lock overlay for non-public users */}
@@ -2118,8 +2109,7 @@ const Reel = () => {
                   </div>
                 );
               })()}
-          </motion.div>
-          </AnimatePresence>
+          </div>
           
           {/* Right arrow indicator - only on first story */}
           {effectiveUserGroups.length > 1 && currentUserIndex === 0 && currentActivityIndex === 0 && (
