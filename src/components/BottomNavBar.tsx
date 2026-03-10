@@ -18,7 +18,8 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
   const { user } = useAuth();
 
   const [showNotificationSheet, setShowNotificationSheet] = useState(false);
-  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+  const [totalNotificationCount, setTotalNotificationCount] = useState(0);
+  const seenCountRef = useRef(0);
   const [showEllipsisMenu, setShowEllipsisMenu] = useState(false);
   const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
