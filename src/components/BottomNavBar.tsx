@@ -163,13 +163,19 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
               transform: activeTab === "bell" ? "scale(1.1)" : "scale(1)",
             }}>
               <Bell className="w-5 h-5" strokeWidth={1.5} />
-              {unreadNotificationCount > 0 && (
-                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full" style={{
-                  background: '#EF4444',
-                  border: '1.5px solid rgba(0,0,0,0.5)',
-                  boxShadow: '0 0 6px rgba(239, 68, 68, 0.6)',
-                }} />
-              )}
+              {(() => {
+                const unread = totalNotificationCount - seenCountRef.current;
+                if (unread <= 0) return null;
+                return (
+                  <div className="absolute -top-2 -right-3 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center" style={{
+                    background: '#EF4444',
+                    border: '1.5px solid rgba(0,0,0,0.5)',
+                    boxShadow: '0 0 6px rgba(239, 68, 68, 0.6)',
+                  }}>
+                    <span className="text-white text-[9px] font-bold leading-none">{unread > 99 ? '99+' : unread}</span>
+                  </div>
+                );
+              })()}
             </div>
             <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap transition-all duration-300" style={{
               color: activeTab === "bell" ? "#ffffff" : "rgba(200, 210, 230, 0.5)",
