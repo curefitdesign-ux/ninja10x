@@ -188,16 +188,6 @@ const Reel = () => {
         };
       }
     }
-    // Add week recap entries for all users with completed weeks
-    for (const group of groups) {
-      const completedWeekCount = Math.floor(group.activities.length / 3);
-      if (completedWeekCount > 0) {
-        map[`week-recap-${group.userId}`] = {
-          total: 0,
-          reactions: { ...DEFAULT_REACTIONS },
-          reactorProfiles: [],
-        };
-      }
     }
     setLocalReactions(map);
     setLoading(false);
