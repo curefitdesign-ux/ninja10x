@@ -1718,7 +1718,8 @@ const Reel = () => {
                   ? currentActivity
                   : activities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
                     || activities.find(a => !!(a.originalUrl || a.storageUrl))
-                    || activities[0];
+                    || activities[0]
+                    || null;
 
                 const media = (activity?.originalUrl || activity?.storageUrl || group.avatarUrl || '').trim();
                 const isOwnCard = !!user && group.userId === user.id;
