@@ -496,23 +496,38 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>React</span>
                             </button>
                           )}
-                          {/* Like count badge */}
+                          {/* Like count badge + react button */}
                           {(() => {
                             const ar = localReactions[act.id];
                             const total = ar?.total || 0;
-                            if (total === 0) return null;
                             return (
-                              <div className="absolute pointer-events-none" style={{
-                                bottom: -8, left: -6, zIndex: 30,
+                              <div className="absolute flex items-center gap-1" style={{
+                                bottom: -10, left: -6, zIndex: 30,
                                 transform: `rotate(${-rotation * 0.6}deg)`,
                               }}>
-                                <span style={{
-                                  fontFamily: "'Caveat', cursive", fontSize: 16,
-                                  color: 'rgba(255,255,255,0.55)',
-                                  textShadow: '0 1px 4px rgba(0,0,0,0.5)',
-                                }}>
-                                  {total} ❤️
-                                </span>
+                                {total > 0 && (
+                                  <span style={{
+                                    fontFamily: "'Caveat', cursive", fontSize: 16,
+                                    color: 'rgba(255,255,255,0.55)',
+                                    textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                                  }}>
+                                    {total} ❤️
+                                  </span>
+                                )}
+                                {!isOwnProfile && (
+                                  <button
+                                    className="flex items-center gap-0.5 active:scale-90 transition-transform"
+                                    style={{
+                                      background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
+                                      borderRadius: 14, padding: '3px 8px',
+                                      border: '1px solid rgba(255,255,255,0.12)',
+                                    }}
+                                    onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}
+                                  >
+                                    <span style={{ fontSize: 12 }}>🔥</span>
+                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>React</span>
+                                  </button>
+                                )}
                               </div>
                             );
                           })()}
