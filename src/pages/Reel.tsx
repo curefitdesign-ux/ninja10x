@@ -1822,8 +1822,9 @@ const Reel = () => {
                                   boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.1)',
                                 }}
                               >
-                                {activities.length > 2 && (() => {
-                                  const stackActivity = activities[2] || activities[1];
+                                {totalActivities > 2 && (() => {
+                                  const origActivities = originalGroup?.activities?.filter(a => a.dayNumber < 1001) || [];
+                                  const stackActivity = origActivities[origActivities.length - 3] || origActivities[0];
                                   const stackMedia = (stackActivity?.originalUrl || stackActivity?.storageUrl || '').trim();
                                   return stackMedia ? (
                                     <img src={stackMedia} alt="" className="w-full h-full object-cover" style={{ filter: 'blur(12px) brightness(0.4) saturate(1.6)', transform: 'scale(1.15)' }} loading="lazy" />
