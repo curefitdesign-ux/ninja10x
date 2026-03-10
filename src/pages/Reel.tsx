@@ -603,9 +603,7 @@ const Reel = () => {
 
   // Swipe gesture handling for horizontal navigation - smooth scroll feel
   const dragX = useMotionValue(0);
-  const cardOpacity = useTransform(dragX, [-200, -100, 0, 100, 200], [0.85, 0.95, 1, 0.95, 0.85]);
-  const cardRotate = useMotionValue(0); // No rotation for smooth scroll feel
-  const cardScale = useMotionValue(1); // No scale for smooth scroll feel
+  // No animated transforms — clean instant transitions
   const dragConstraints = useMemo(() => ({ left: 0, right: 0 }), []);
   
   const handleHorizontalDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -1712,13 +1710,10 @@ const Reel = () => {
             const isPrevVideo = hasPrevStoryMedia && isVideoUrl(prevMedia);
             if (!prevMedia) return null;
             return (
-              <motion.div
+              <div
                 key={`peek-left-${prevIdx}`}
                 className="absolute left-0 top-0 bottom-0 flex items-center pointer-events-none"
                 style={{ width: '10%', zIndex: 20 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.15 }}
               >
                 <div
                   className="w-full overflow-hidden"
@@ -1759,7 +1754,7 @@ const Reel = () => {
                     />
                   )}
                 </div>
-              </motion.div>
+              </div>
             );
           })()}
 
@@ -1778,13 +1773,10 @@ const Reel = () => {
             const isNextVideo = hasNextStoryMedia && isVideoUrl(nextMedia);
             if (!nextMedia) return null;
             return (
-              <motion.div
+              <div
                 key={`peek-right-${nextIdx}`}
                 className="absolute right-0 top-0 bottom-0 flex items-center pointer-events-none"
                 style={{ width: '10%', zIndex: 20 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.15 }}
               >
                 <div
                   className="w-full overflow-hidden"
@@ -1825,7 +1817,7 @@ const Reel = () => {
                     />
                   )}
                 </div>
-              </motion.div>
+              </div>
             );
           })()}
 
@@ -1836,9 +1828,6 @@ const Reel = () => {
               width: '100%',
               height: '100%',
               x: dragX,
-              opacity: cardOpacity,
-              rotateY: cardRotate,
-              scale: cardScale,
             }}
             animate={shakeAnimation}
             transition={shakeTransition}
@@ -1882,32 +1871,10 @@ const Reel = () => {
                       transition={{ type: 'spring', stiffness: 280, damping: 30, duration: 0.5 }}
                     >
                     {/* Progress bar removed — timing indicated via avatar ring */}
-                    <AnimatePresence mode="popLayout" custom={swipeDirection}>
-                      <motion.div
-                        key={contentKey}
-                        custom={swipeDirection}
-                        className="absolute inset-0 flex items-center justify-center"
-                        variants={{
-                          enter: (dir: string) => ({ 
-                            opacity: 0.4, 
-                            x: dir === 'left' ? 80 : -80,
-                          }),
-                          center: { opacity: 1, x: 0 },
-                          exit: (dir: string) => ({ 
-                            opacity: 0.4, 
-                            x: dir === 'left' ? -80 : 80,
-                          }),
-                        }}
-                        initial="enter"
-                        animate="center"
-                        exit="exit"
-                        transition={{ 
-                          type: 'spring',
-                          stiffness: 350,
-                          damping: 35,
-                          mass: 0.8,
-                        }}
-                      >
+                    <div
+                      key={contentKey}
+                      className="absolute inset-0 flex items-center justify-center"
+                    >
                         {currentActivity?.id === 'log-activity' ? (
                           // "Log Your Activity" card — dark with animated glowing border
                           (() => {
@@ -2118,8 +2085,7 @@ const Reel = () => {
                             }}
                           />
                         )}
-                      </motion.div>
-                    </AnimatePresence>
+                      </div>
 
                     {/* Share button removed from card — now in bottom zone */}
                     
