@@ -54,6 +54,8 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
   const navigate = useNavigate();
   const portalContainer = usePortalContainer();
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const userActivitiesRef = useRef<Set<string>>(new Set());
+
   // Fetch user's activity reactions AND nudges together to avoid race conditions
   useEffect(() => {
     if (!user) return;
