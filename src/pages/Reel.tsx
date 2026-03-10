@@ -1834,9 +1834,6 @@ const Reel = () => {
               width: '100%',
               height: '100%',
               x: dragX,
-              opacity: cardOpacity,
-              rotateY: cardRotate,
-              scale: cardScale,
             }}
             animate={shakeAnimation}
             transition={shakeTransition}
