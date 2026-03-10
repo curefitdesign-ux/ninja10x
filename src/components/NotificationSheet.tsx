@@ -302,6 +302,10 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
     });
   }, [navigate, onClose]);
 
+  const handleLogActivity = useCallback(() => {
+    setShowMediaSheet(true);
+  }, []);
+
   const ui = (
     <AnimatePresence>
       {isOpen && (
