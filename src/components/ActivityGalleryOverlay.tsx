@@ -485,7 +485,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 {/* Previous card (left, rotated) */}
                 {prevActivity && !prevActivity.isPlaceholder && (
                   <motion.div
-                    className="absolute overflow-hidden"
+                    className="absolute gallery-card-fill"
                     style={{
                       width: '42%',
                       height: '85%',
