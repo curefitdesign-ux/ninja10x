@@ -67,16 +67,34 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
   return (
     <>
       <div
-        className="fixed left-0 right-0 bottom-0"
+        className="fixed left-1/2 -translate-x-1/2"
         style={{
+          bottom: "calc(max(env(safe-area-inset-bottom, 10px), 10px) + 24px)",
           zIndex: 40,
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          background: "rgba(10, 7, 32, 0.85)",
-          backdropFilter: "blur(60px) saturate(200%)",
-          WebkitBackdropFilter: "blur(60px) saturate(200%)",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
         }}
       >
+        <div
+          className="relative"
+          style={{
+            borderRadius: 9999,
+            padding: 1,
+            background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%)",
+          }}
+        >
+          <div
+            className="relative overflow-hidden"
+            style={{
+              borderRadius: 9999,
+              background: "rgba(255, 255, 255, 0.03)",
+              backdropFilter: "blur(60px) saturate(200%)",
+              WebkitBackdropFilter: "blur(60px) saturate(200%)",
+              boxShadow: `inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -0.5px 0 rgba(255,255,255,0.04)`,
+            }}
+          >
+            <div
+              className="absolute top-0 left-[15%] right-[15%] h-px pointer-events-none"
+              style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)" }}
+            />
         <div className="flex items-center justify-evenly px-2 py-2">
           {/* Home */}
           <button onClick={() => { window.history.length > 1 ? navigate(-1) : navigate("/"); }} className={btnClass}>
@@ -141,6 +159,8 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
             </div>
             <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap" style={{ color: "rgba(200, 210, 230, 0.5)", fontWeight: 400 }}>Menu</span>
           </button>
+        </div>
+          </div>
         </div>
       </div>
 
