@@ -1786,7 +1786,7 @@ const Reel = () => {
               >
                 {/* Full templated image/video - with lock overlay for non-public users */}
                 {(() => {
-                  const shouldShowLocked = !isOwnStory && !profile?.stories_public;
+                  const shouldShowLocked = !isOwnStory && !viewerCanSeeCommunity;
                   const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
                   return (
                     <div
