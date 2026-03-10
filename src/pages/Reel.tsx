@@ -1724,7 +1724,7 @@ const Reel = () => {
                   return (
                     <CarouselItem
                       key={`card-${group.userId}`}
-                      className="pl-3 flex items-center justify-center h-full basis-[85%]"
+                      className="pl-3 flex items-center justify-center h-full basis-[75%]"
                     >
                       <div
                         className="flex items-center justify-center w-full h-full pointer-events-none"
@@ -1769,7 +1769,7 @@ const Reel = () => {
                 return (
                   <CarouselItem
                     key={`card-${group.userId}`}
-                    className="pl-3 flex items-center justify-center relative h-full basis-[85%]"
+                    className="pl-3 flex items-center justify-center relative h-full basis-[75%]"
                     style={{ overflow: 'visible' }}
                   >
                     <div
@@ -1802,7 +1802,7 @@ const Reel = () => {
                               <motion.div
                                 key={`stack-2-${group.userId}`}
                                 initial={{ scale: 0.56, opacity: 0, y: 0 }}
-                                animate={{ scale: 0.56, opacity: 0.4, y: 150 }}
+                                animate={{ scale: 0.56, opacity: 0.4, y: 250 }}
                                 exit={{ scale: 0.56, opacity: 0, y: 0 }}
                                 transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.08 }}
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
@@ -1827,7 +1827,7 @@ const Reel = () => {
                               <motion.div
                                 key={`stack-1-${group.userId}`}
                                 initial={{ scale: 0.62, opacity: 0, y: 0 }}
-                                animate={{ scale: 0.62, opacity: 0.55, y: 124 }}
+                                animate={{ scale: 0.62, opacity: 0.55, y: 174 }}
                                 exit={{ scale: 0.62, opacity: 0, y: 0 }}
                                 transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.04 }}
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
