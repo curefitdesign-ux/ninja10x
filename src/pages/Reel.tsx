@@ -1803,13 +1803,16 @@ const Reel = () => {
                               aspectRatio: '9/16',
                               height: 'calc(95% - 20px)',
                               maxWidth: '100%',
-                              borderRadius: isLogActivityCard ? '18px' : '0px',
+                              borderRadius: isLogActivityCard ? '18px' : (isRecapActivity ? '10px' : '0px'),
                               overflow: 'hidden',
-                              background: isLogActivityCard ? '#0A0A0F' : 'transparent',
+                              background: isLogActivityCard ? '#0A0A0F' : (isRecapActivity ? 'linear-gradient(180deg, #1a1035 0%, #0a0720 100%)' : 'transparent'),
                               marginTop: '-10px',
                               ...(isLogActivityCard ? {
                                 border: '1.5px solid rgba(139, 92, 246, 0.35)',
                                 boxShadow: '0 0 30px rgba(139, 92, 246, 0.15), inset 0 1px 1px rgba(255,255,255,0.05)',
+                              } : isRecapActivity ? {
+                                border: '1px solid rgba(255, 255, 255, 0.12)',
+                                boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 1px rgba(255,255,255,0.03), 0 0 25px rgba(167, 100, 255, 0.12)',
                               } : {}),
                             }}
                           >
