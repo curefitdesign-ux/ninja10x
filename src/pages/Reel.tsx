@@ -1094,6 +1094,7 @@ const Reel = () => {
     await loadActivities();
   }, [loadActivities]);
 
+  if (loading) {
     return <ReelViewerSkeleton />;
   }
 
