@@ -561,13 +561,15 @@ const Reel = () => {
     }
   }, [currentGroup, currentActivityIndex, profile?.stories_public, effectiveUserGroups, currentUserIndex]);
 
-  // Navigate to previous activity within current user only
+  // Navigate to previous activity within current user, or go to previous user if at first activity
   const prevActivity = useCallback(() => {
     if (currentActivityIndex > 0) {
       setCurrentActivityIndex(prev => prev - 1);
+    } else {
+      // At first activity — go to previous user
+      goPrevUser();
     }
-    // Don't go to previous user — user must swipe to change users
-  }, [currentActivityIndex]);
+  }, [currentActivityIndex, goPrevUser]);
 
   // Navigate between users (horizontal swipe)
   const goNextUser = useCallback(() => {
