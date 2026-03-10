@@ -485,7 +485,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 {/* Previous card (left, rotated) */}
                 {prevActivity && !prevActivity.isPlaceholder && (
                   <motion.div
-                    className="absolute gallery-card-fill"
+                    className="absolute overflow-hidden"
                     style={{
                       width: '42%',
                       height: '85%',
@@ -521,7 +521,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 {/* Next card (right, rotated) */}
                 {nextActivity && !nextActivity.isPlaceholder && (
                   <motion.div
-                    className="absolute gallery-card-fill"
+                    className="absolute overflow-hidden"
                     style={{
                       width: '42%',
                       height: '85%',
@@ -556,7 +556,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                 {/* Current card (center, front) — no padding */}
                 <motion.div
-                  className="relative gallery-card-fill"
+                  className="relative overflow-hidden"
                   style={{
                     width: '62%',
                     aspectRatio: '9/16',

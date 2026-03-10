@@ -27,11 +27,6 @@ body::after {
   display: none;
 }
 
-/* Gallery card fill — force frame templates to fill 100% */
-.gallery-card-fill > div > div > div > div {
-  width: 100% !important;
-  margin: 0 !important;
-}
 
 
 @keyframes acknowledge-icon {
