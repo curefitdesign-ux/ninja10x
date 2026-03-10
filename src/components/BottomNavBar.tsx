@@ -21,6 +21,17 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const [showEllipsisMenu, setShowEllipsisMenu] = useState(false);
   const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+
+  // Listen for gallery overlay open/close
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      setGalleryOpen(detail?.visible ?? false);
+    };
+    window.addEventListener('gallery-overlay', handler);
+    return () => window.removeEventListener('gallery-overlay', handler);
+  }, []);
 
   const [activityCount, setActivityCount] = useState(0);
   useEffect(() => {
