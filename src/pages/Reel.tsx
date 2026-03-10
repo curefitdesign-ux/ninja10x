@@ -679,11 +679,10 @@ const Reel = () => {
     }
   }, [currentUserIndex, currentGroup, effectiveUserGroups]);
 
-  // Reset slide direction after animation completes
+  // Reset drag lane after user changes
   useEffect(() => {
-    const timer = setTimeout(() => setSlideDirection(null), 600);
-    return () => clearTimeout(timer);
-  }, [currentUserIndex]);
+    carouselX.set(0);
+  }, [currentUserIndex, carouselX]);
 
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     // If story is locked, open Make Public sheet on any tap
