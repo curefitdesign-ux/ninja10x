@@ -1090,6 +1090,10 @@ const Reel = () => {
     setShowShareOptions(true);
   }, []);
 
+  const handlePullRefresh = useCallback(async () => {
+    await loadActivities();
+  }, [loadActivities]);
+
   if (loading) {
     return <ReelViewerSkeleton />;
   }
@@ -1375,7 +1379,9 @@ const Reel = () => {
 
   const isLogActivityCard = currentActivity?.id === 'log-activity';
 
+
   return (
+    <PullToRefresh onRefresh={handlePullRefresh}>
     <DynamicBlurBackground imageUrl={mediaUrl}>
       {/* Purple gradient background for log-activity empty state (matches Progress page) */}
       {isLogActivityCard && (
@@ -2453,6 +2459,7 @@ const Reel = () => {
         </AlertDialogContent>
       </AlertDialog>
     </DynamicBlurBackground>
+    </PullToRefresh>
   );
 };
 
