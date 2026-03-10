@@ -3,11 +3,11 @@ import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
+import deskBellImg from '@/assets/icons/desk-bell-3d.png';
 
 import { ALL_REACTION_IMAGES as REACTION_IMAGES, REACTION_VERBS } from '@/lib/reaction-images';
 
