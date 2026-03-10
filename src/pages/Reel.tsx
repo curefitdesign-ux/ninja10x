@@ -176,7 +176,7 @@ const Reel = () => {
   const [showEditSheet, setShowEditSheet] = useState(false);
   
   // Auto-advance timer state — dynamic duration based on media type
-  const DEFAULT_ADVANCE_DURATION = 7000; // 7 seconds for images (Instagram-like)
+  const DEFAULT_ADVANCE_DURATION = 10000; // 10 seconds for images
   const [autoAdvanceDuration, setAutoAdvanceDuration] = useState(DEFAULT_ADVANCE_DURATION);
   const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
   // Delayed mirror of autoAdvanceProgress for the own-profile ring (needs 2-frame render for CSS transition)
@@ -1792,6 +1792,8 @@ const Reel = () => {
                     {(() => {
                       const shouldShowLocked = !isOwnStory && !viewerCanSeeCommunity;
                       const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
+                      // Show stacked cards behind for other users' stories (not own, not log-activity)
+                      const showStackedCards = !isOwnCard && !isLogActivityCard && activities.length > 1;
                       return (
                         <div
                           className="relative flex items-center justify-center"
@@ -1801,6 +1803,73 @@ const Reel = () => {
                             background: 'transparent',
                           }}
                         >
+                          {/* Stacked dummy cards behind the main card — tap to open history */}
+                          {showStackedCards && (
+                            <>
+                              {/* Back card (deepest) */}
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowHistoryGallery(true);
+                                }}
+                                className="absolute cursor-pointer"
+                                style={{
+                                  aspectRatio: '9/16',
+                                  height: 'calc(95% - 20px)',
+                                  maxWidth: '100%',
+                                  width: '100%',
+                                  marginTop: '-10px',
+                                  background: 'rgba(255,255,255,0.04)',
+                                  border: '1px solid rgba(255,255,255,0.06)',
+                                  transform: 'rotate(4deg) translateX(8px) scale(0.95)',
+                                  filter: 'brightness(0.5)',
+                                  overflow: 'hidden',
+                                  zIndex: 1,
+                                }}
+                              >
+                                {activities.length > 2 && (() => {
+                                  const stackActivity = activities[2] || activities[1];
+                                  const stackMedia = (stackActivity?.originalUrl || stackActivity?.storageUrl || '').trim();
+                                  return stackMedia ? (
+                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" loading="lazy" />
+                                  ) : (
+                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)' }} />
+                                  );
+                                })()}
+                              </div>
+                              {/* Middle card */}
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowHistoryGallery(true);
+                                }}
+                                className="absolute cursor-pointer"
+                                style={{
+                                  aspectRatio: '9/16',
+                                  height: 'calc(95% - 20px)',
+                                  maxWidth: '100%',
+                                  width: '100%',
+                                  marginTop: '-10px',
+                                  background: 'rgba(255,255,255,0.06)',
+                                  border: '1px solid rgba(255,255,255,0.08)',
+                                  transform: 'rotate(-3deg) translateX(-6px) scale(0.97)',
+                                  filter: 'brightness(0.6)',
+                                  overflow: 'hidden',
+                                  zIndex: 2,
+                                }}
+                              >
+                                {(() => {
+                                  const stackActivity = activities[1] || activities[0];
+                                  const stackMedia = (stackActivity?.originalUrl || stackActivity?.storageUrl || '').trim();
+                                  return stackMedia ? (
+                                    <img src={stackMedia} alt="" className="w-full h-full object-cover" loading="lazy" />
+                                  ) : (
+                                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)' }} />
+                                  );
+                                })()}
+                              </div>
+                            </>
+                          )}
                           {/* Card — 9:16 aspect ratio, constrained to available space */}
                           <div
                             className="relative overflow-hidden"
@@ -1812,6 +1881,7 @@ const Reel = () => {
                               overflow: 'hidden',
                               background: isLogActivityCard ? '#0A0A0F' : 'transparent',
                               marginTop: '-10px',
+                              zIndex: 3,
                               ...(isLogActivityCard ? {
                                 border: '1.5px solid rgba(139, 92, 246, 0.35)',
                                 boxShadow: '0 0 30px rgba(139, 92, 246, 0.15), inset 0 1px 1px rgba(255,255,255,0.05)',
