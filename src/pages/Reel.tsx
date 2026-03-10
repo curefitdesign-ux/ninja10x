@@ -12,7 +12,7 @@ import { isVideoUrl } from '@/lib/media';
 import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
 import { usePortalContainer } from '@/hooks/use-portal-container';
-import { fetchAllActivitiesGroupedByUser, fetchPublicFeed, UserStoryGroup, LocalActivity } from '@/hooks/use-journey-activities';
+import { fetchAllActivitiesGroupedByUser, fetchPublicFeed, UserStoryGroup, LocalActivity, invalidateFeedCaches } from '@/hooks/use-journey-activities';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 import DynamicBlurBackground from '@/components/DynamicBlurBackground';
 import Floating3DEmojis from '@/components/Floating3DEmojis';
@@ -238,6 +238,7 @@ const Reel = () => {
   // Load all activities grouped by user
   const loadActivities = useCallback(async () => {
     setLoading(true);
+    invalidateFeedCaches();
     const groups = await fetchAllActivitiesGroupedByUser();
     setUserGroups(groups);
     
