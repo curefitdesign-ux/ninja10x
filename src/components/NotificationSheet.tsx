@@ -63,7 +63,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
       // First get user's activity IDs
       const { data: activities } = await supabase
         .from('journey_activities')
-        .select('id, day_number, storage_url, activity')
+        .select('id, day_number, storage_url, original_url, is_video, activity')
         .eq('user_id', user.id);
       
       if (activities) {
@@ -102,7 +102,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                 reactionType: r.reaction_type,
                 timestamp: new Date(r.created_at),
                 dayNumber: activityInfo?.day_number,
-                activityImageUrl: activityInfo?.storage_url,
+                activityImageUrl: activityInfo?.is_video ? (activityInfo?.original_url || undefined) : activityInfo?.storage_url,
                 activityType: activityInfo?.activity || undefined,
               };
             });
@@ -191,7 +191,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
 
             const { data: activityInfo } = await supabase
               .from('journey_activities')
-              .select('day_number, storage_url, activity')
+              .select('day_number, storage_url, original_url, is_video, activity')
               .eq('id', newReaction.activity_id)
               .maybeSingle();
 
@@ -205,7 +205,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
               reactionType: newReaction.reaction_type,
               timestamp: new Date(),
               dayNumber: activityInfo?.day_number,
-              activityImageUrl: activityInfo?.storage_url,
+              activityImageUrl: activityInfo?.is_video ? (activityInfo?.original_url || undefined) : activityInfo?.storage_url,
               activityType: activityInfo?.activity || undefined,
             };
 
@@ -415,7 +415,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                         {/* Activity thumbnail on right */}
                         {notif.activityImageUrl ? (
                           <div 
-                            className="w-11 h-14 rounded-lg overflow-hidden flex-shrink-0"
+                            className="w-11 h-11 rounded-md overflow-hidden flex-shrink-0"
                             style={{ border: '1px solid rgba(255,255,255,0.1)' }}
                           >
                             <img 
