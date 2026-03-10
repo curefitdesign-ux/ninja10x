@@ -1703,7 +1703,7 @@ const Reel = () => {
             onClick={handleTap}
           />
 
-          {/* 3D Adjacent peek cards */}
+          {/* Adjacent peek cards with template rendering */}
           {effectiveUserGroups.length > 1 && [-1, 1].map(offset => {
             const idx = (currentUserIndex + offset + effectiveUserGroups.length) % effectiveUserGroups.length;
             const group = effectiveUserGroups[idx];
@@ -1711,65 +1711,61 @@ const Reel = () => {
             const act = activities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
               || activities.find(a => !!(a.originalUrl || a.storageUrl))
               || activities[0];
-            const media = (act?.originalUrl || act?.storageUrl || group?.avatarUrl || '').trim();
+            const peekMedia = (act?.originalUrl || act?.storageUrl || group?.avatarUrl || '').trim();
             const isPeekOwnStory = user && group?.userId === user.id;
             const isPeekLocked = !isPeekOwnStory && !profile?.stories_public;
-            const isPeekVideo = !!(act?.originalUrl || act?.storageUrl) && isVideoUrl(media);
-            if (!media) return null;
+            const hasFrame = act?.frame && act.frame !== 'none';
+            if (!peekMedia && !act) return null;
 
             return (
-              <motion.div
+              <div
                 key={`peek-${offset}-${idx}`}
                 className="absolute pointer-events-none"
                 style={{
-                  width: 'calc(100% - 24px)',
-                  maxWidth: 420,
+                  width: 'calc(80% - 24px)',
+                  maxWidth: 336,
                   aspectRatio: '9/16',
+                  transform: `translateX(${offset * 280}px) scale(0.92)`,
+                  opacity: 0.45,
+                  transition: 'all 0.4s linear',
+                  overflow: 'hidden',
+                  borderRadius: '0px',
                 }}
-                animate={{
-                  x: offset * 300,
-                  scale: 0.85,
-                  opacity: 0.5,
-                }}
-                transition={{ duration: 0.4, ease: 'linear' }}
               >
                 <div
-                  className="w-full h-full rounded-3xl overflow-hidden"
+                  className="w-full h-full overflow-hidden"
                   style={{
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.12)',
                     boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                    filter: isPeekLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
                   }}
                 >
-                  {isPeekVideo ? (
-                    <video
-                      src={media}
-                      className="w-full h-full object-cover"
-                      muted playsInline preload="metadata" autoPlay loop
-                      style={{
-                        opacity: isPeekLocked ? 0.35 : 0.6,
-                        filter: isPeekLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                      }}
+                  {hasFrame && act ? (
+                    <StoryFrameRenderer
+                      imageUrl={peekMedia}
+                      isVideo={act.isVideo}
+                      activity={act.activity}
+                      frame={act.frame}
+                      duration={act.duration}
+                      pr={act.pr}
+                      dayNumber={act.dayNumber}
                     />
-                  ) : (
+                  ) : peekMedia ? (
                     <img
-                      src={media}
+                      src={peekMedia}
                       alt="Adjacent user"
                       className="w-full h-full object-cover"
                       loading="eager"
-                      style={{
-                        opacity: isPeekLocked ? 0.35 : 0.6,
-                        filter: isPeekLocked ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                      }}
                     />
-                  )}
+                  ) : null}
                 </div>
-              </motion.div>
+              </div>
             );
           })}
 
-          {/* Center card with 3D enter/exit animation */}
-          <AnimatePresence mode="popLayout" initial={false}>
+          {/* Center card with linear enter/exit */}
+          <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={`center-${currentGroup?.userId}-${currentUserIndex}`}
             className="relative flex items-center justify-center"
