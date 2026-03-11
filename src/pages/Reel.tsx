@@ -1723,50 +1723,43 @@ const Reel = () => {
                 };
 
                 if (!isCenter) {
-                  const peekMedia = media;
-                  const peekIsVideo = peekMedia ? isVideoUrl(peekMedia) : false;
                   return (
                     <CarouselItem
                       key={`card-${group.userId}`}
                       className="pl-3 flex items-center justify-center h-full basis-[85%]"
                     >
-                      <div className="w-full h-full flex items-center justify-center" style={cardStyle}>
+                      <div
+                        className="flex items-center justify-center w-full h-full pointer-events-none"
+                        style={cardStyle}
+                      >
                         <div
-                          className="relative overflow-hidden"
+                          className="overflow-hidden w-full h-full"
                           style={{
                             aspectRatio: '9/16',
-                            height: 'calc(95% - 10px)',
-                            maxWidth: '100%',
-                            borderRadius: '0px',
-                            background: '#0A0A0F',
+                            maxHeight: 'calc(95% - 20px)',
+                            filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
                           }}
                         >
-                          {isLockedCard ? (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
-                              <Lock className="w-6 h-6 text-white/40 mb-2" />
-                              <span className="text-white/40 text-xs">Private</span>
-                            </div>
-                          ) : hasFrame && activity ? (
-                            <div className="absolute inset-0">
-                              <StoryFrameRenderer
-                                frame={activity.frame!}
-                                imageUrl={peekMedia}
-                                isVideo={peekIsVideo}
-                                activity={activity.activity || ''}
-                                duration={activity.duration || ''}
-                                pr={activity.pr || ''}
-                                dayNumber={activity.dayNumber}
-                              />
-                            </div>
-                          ) : peekMedia ? (
-                            peekIsVideo ? (
-                              <video src={peekMedia} className="absolute inset-0 w-full h-full object-cover" muted playsInline />
-                            ) : (
-                              <img src={peekMedia} className="absolute inset-0 w-full h-full object-cover" alt="" />
-                            )
+                          {hasFrame && activity ? (
+                            <StoryFrameRenderer
+                              imageUrl={media}
+                              isVideo={activity.isVideo}
+                              activity={activity.activity}
+                              frame={activity.frame}
+                              duration={activity.duration}
+                              pr={activity.pr}
+                              dayNumber={activity.dayNumber}
+                            />
+                          ) : media ? (
+                            <img
+                              src={media}
+                              alt="User story"
+                              className="w-full h-full object-cover"
+                              loading="eager"
+                            />
                           ) : (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                              <img src={group.avatarUrl || ''} className="w-16 h-16 rounded-full" alt="" />
+                            <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)' }}>
+                              <ProfileAvatar src={group.avatarUrl} name={group.displayName} size={80} />
                             </div>
                           )}
                         </div>
@@ -1789,6 +1782,12 @@ const Reel = () => {
                     {(() => {
                       const shouldShowLocked = !isOwnStory && !viewerCanSeeCommunity;
                       const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
+                      // Show stacked cards behind for all users with multiple activities (not log-activity)
+                      const showStackedCards = !isLogActivityCard && activities.length > 1;
+                      // Get previous activity thumbnails for stacked cards
+                      const stackActivities = activities.filter(a => a.id !== activity?.id && !a.id?.startsWith('log-'));
+                      const backCardThumb = stackActivities[1]?.originalUrl || stackActivities[1]?.storageUrl || stackActivities[0]?.originalUrl || stackActivities[0]?.storageUrl;
+                      const midCardThumb = stackActivities[0]?.originalUrl || stackActivities[0]?.storageUrl;
                       return (
                         <div
                           className="relative flex items-center justify-center"
@@ -1799,12 +1798,81 @@ const Reel = () => {
                             overflow: 'visible',
                           }}
                         >
+                          {/* Stacked cards behind — vertical deck style */}
+                          {showStackedCards && (
+                            <>
+                              {/* Back card (deepest) — peeks below main card */}
+                              <motion.div
+                                key={`stack-back-${group.userId}`}
+                                initial={false}
+                                animate={isCenter ? { opacity: 0.5 } : { opacity: 0 }}
+                                transition={{ type: 'spring', stiffness: 200, damping: 22 }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowHistoryGallery(true);
+                                }}
+                                className="absolute cursor-pointer"
+                                style={{
+                                  width: '82%',
+                                  height: 18,
+                                  bottom: -28,
+                                  left: '50%',
+                                  transform: 'translateX(-50%)',
+                                  zIndex: 1,
+                                  borderRadius: '0 0 10px 10px',
+                                  background: 'rgba(255,255,255,0.06)',
+                                  border: '1px solid rgba(255,255,255,0.10)',
+                                  borderTop: 'none',
+                                  boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
+                                  backdropFilter: 'blur(20px) saturate(1.6)',
+                                  WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+                                  pointerEvents: isCenter ? 'auto' : 'none',
+                                }}
+                              >
+                                {backCardThumb && (
+                                  <img src={backCardThumb} alt="" className="w-full h-full object-cover object-bottom" style={{ borderRadius: '0 0 10px 10px', opacity: 0.4 }} loading="lazy" />
+                                )}
+                              </motion.div>
+                              {/* Middle card — peeks just below main card */}
+                              <motion.div
+                                key={`stack-mid-${group.userId}`}
+                                initial={false}
+                                animate={isCenter ? { opacity: 0.7 } : { opacity: 0 }}
+                                transition={{ type: 'spring', stiffness: 200, damping: 22 }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowHistoryGallery(true);
+                                }}
+                                className="absolute cursor-pointer"
+                                style={{
+                                  width: '90%',
+                                  height: 18,
+                                  bottom: -14,
+                                  left: '50%',
+                                  transform: 'translateX(-50%)',
+                                  zIndex: 2,
+                                  borderRadius: '0 0 10px 10px',
+                                  background: 'rgba(255,255,255,0.08)',
+                                  border: '1px solid rgba(255,255,255,0.14)',
+                                  borderTop: 'none',
+                                  boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+                                  backdropFilter: 'blur(24px) saturate(1.8)',
+                                  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+                                  pointerEvents: isCenter ? 'auto' : 'none',
+                                }}
+                              >
+                                {midCardThumb && (
+                                  <img src={midCardThumb} alt="" className="w-full h-full object-cover object-bottom" style={{ borderRadius: '0 0 10px 10px', opacity: 0.5 }} loading="lazy" />
+                                )}
+                              </motion.div>
+                            </>
+                          )}
                           {/* Main card — 9:16 aspect ratio */}
                           <div
                             className="relative overflow-hidden"
                             style={{
                               aspectRatio: '9/16',
-                              height: 'calc(95% - 10px)',
+                              height: 'calc(95% - 20px)',
                               maxWidth: '100%',
                               borderRadius: isLogActivityCard ? '13px' : '0px',
                               overflow: 'hidden',
