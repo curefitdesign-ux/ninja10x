@@ -117,14 +117,6 @@ const FRAME_COLORS: Record<FrameType, { accent: string; gradient: string }> = {
     accent: 'rgba(80, 60, 160, 0.55)', 
     gradient: 'linear-gradient(160deg, rgba(90, 65, 180, 0.4) 0%, rgba(30, 20, 70, 0.6) 100%)'
   },
-  journal: { 
-    accent: 'rgba(20, 120, 90, 0.55)', 
-    gradient: 'linear-gradient(160deg, rgba(25, 140, 105, 0.4) 0%, rgba(10, 55, 40, 0.6) 100%)'
-  },
-  vogue: { 
-    accent: 'rgba(30, 30, 40, 0.65)', 
-    gradient: 'linear-gradient(160deg, rgba(50, 50, 65, 0.5) 0%, rgba(10, 10, 18, 0.7) 100%)'
-  },
   fitness: { 
     accent: 'rgba(200, 160, 20, 0.45)', 
     gradient: 'linear-gradient(160deg, rgba(220, 180, 25, 0.35) 0%, rgba(80, 65, 10, 0.6) 100%)'
