@@ -389,6 +389,21 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               onScroll={(e) => {
                 const scrollTop = (e.target as HTMLDivElement).scrollTop;
                 setIsScrolled(scrollTop > 30);
+                // Determine which card is at the top of the scroll viewport
+                const scrollEl = e.target as HTMLDivElement;
+                const scrollRect = scrollEl.getBoundingClientRect();
+                let closestId: string | null = null;
+                let closestDist = Infinity;
+                for (const [id, el] of Object.entries(cardRefs.current)) {
+                  if (!el) continue;
+                  const rect = el.getBoundingClientRect();
+                  const dist = Math.abs(rect.top - scrollRect.top - 60);
+                  if (dist < closestDist && rect.top < scrollRect.top + 200) {
+                    closestDist = dist;
+                    closestId = id;
+                  }
+                }
+                setTopCardId(closestId);
               }}
             >
               <div className="relative" style={{ minHeight: '100%' }}>
