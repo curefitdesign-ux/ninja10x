@@ -144,19 +144,14 @@ const Index = () => {
     }
   }, [location.state?.openCameraWithActivity, location.state?.captureMode, location.state?.instantCamera, navigate]);
 
-  // Detect week completion and auto-trigger recap generation
+  // Week completion detection (reel auto-trigger disabled)
   useEffect(() => {
     if (photos.length > previousPhotoCount && photos.length % 3 === 0 && photos.length > 0) {
       setWeekTransitionAnimation(true);
       setTimeout(() => setWeekTransitionAnimation(false), 2000);
-      
-      // Auto-trigger recap generation after brief celebration
-      setTimeout(() => {
-        handleGenerateReel(photos);
-      }, 2200);
     }
     setPreviousPhotoCount(photos.length);
-  }, [photos.length, previousPhotoCount, handleGenerateReel, photos]);
+  }, [photos.length, previousPhotoCount]);
 
   // Get current date (or simulated date for testing)
   const getCurrentDate = () => {

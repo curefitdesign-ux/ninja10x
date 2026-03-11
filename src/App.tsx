@@ -140,7 +140,7 @@ const AnimatedRoutes = () => {
           <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
           
           <Route path="/reel" element={<ProtectedRoute><Reel /></ProtectedRoute>} />
-          <Route path="/reel-generation" element={<ProtectedRoute><ReelGeneration /></ProtectedRoute>} />
+          {/* <Route path="/reel-generation" element={<ProtectedRoute><ReelGeneration /></ProtectedRoute>} /> */}
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
