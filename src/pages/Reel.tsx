@@ -1899,19 +1899,18 @@ const Reel = () => {
                               const glowMid = isEvenDay ? 'rgba(167, 100, 255, 0.35)' : 'rgba(249, 115, 22, 0.35)';
                               return (
                                 <div
-                                  className="w-full h-full flex flex-col items-center justify-center relative"
-                                  style={{ containerType: 'size' }}
+                                  className="w-full h-full flex flex-col items-center justify-end pb-[18%] relative"
                                 >
                                   {/* Faint radial glow behind content */}
                                   <div
                                     className="absolute pointer-events-none"
                                     style={{
-                                      width: '70cqw',
-                                      height: '70cqw',
+                                      width: '280px',
+                                      height: '280px',
                                       borderRadius: '50%',
                                       background: `radial-gradient(circle, ${glowMid} 0%, transparent 60%)`,
                                       filter: 'blur(50px)',
-                                      top: '35%', left: '50%', transform: 'translate(-50%, -50%)',
+                                      top: '40%', left: '50%', transform: 'translate(-50%, -50%)',
                                     }}
                                   />
 
@@ -1920,8 +1919,8 @@ const Reel = () => {
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ delay: 0.05, duration: 0.5 }}
-                                    className="z-10"
-                                    style={{ width: '38cqw', height: '38cqw', borderRadius: '50%', overflow: 'hidden', marginBottom: '3cqh' }}
+                                    className="z-10 mb-4"
+                                    style={{ width: 160, height: 160, borderRadius: '50%', overflow: 'hidden' }}
                                   >
                                     <video
                                       src="/videos/curo-peeking.mp4"
@@ -1938,13 +1937,11 @@ const Reel = () => {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.15, duration: 0.5 }}
-                                    className="text-center z-10"
-                                    style={{ marginBottom: '4cqh', padding: '0 6cqw' }}
+                                    className="text-center z-10 mb-6"
                                   >
                                     <p
-                                      className="font-bold leading-tight"
+                                      className="text-2xl font-bold leading-tight"
                                       style={{
-                                        fontSize: '5.5cqw',
                                         background: 'linear-gradient(135deg, #C4A1FF, #E8D5FF, #FFFFFF)',
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent',
@@ -1955,8 +1952,8 @@ const Reel = () => {
 
                                   {/* Glowing plus — simple zoom in/out, tapping opens camera/gallery */}
                                   <button
-                                    className="relative flex items-center justify-center active:scale-95 transition-transform"
-                                    style={{ width: '20cqw', height: '20cqw', marginBottom: '3cqh' }}
+                                    className="relative flex items-center justify-center mb-5 active:scale-95 transition-transform"
+                                    style={{ width: 90, height: 90 }}
                                     onClick={(e) => { e.stopPropagation(); setShowEditSheet(true); }}
                                   >
                                     <motion.div 
@@ -1970,7 +1967,7 @@ const Reel = () => {
                                       transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                                     />
                                     <motion.svg 
-                                      width="100%" height="100%" viewBox="0 0 48 48" fill="none"
+                                      width="56" height="56" viewBox="0 0 48 48" fill="none"
                                       animate={{ scale: [1, 1.15, 1] }}
                                       transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                                     >
@@ -1980,7 +1977,7 @@ const Reel = () => {
                                   </button>
 
                                   {/* Label */}
-                                  <p className="text-white/40 font-medium uppercase tracking-widest" style={{ fontSize: '2.5cqw' }}>
+                                  <p className="text-white/40 text-xs font-medium uppercase tracking-widest">
                                     Day {currentActivity.dayNumber} of 12
                                   </p>
                                 </div>
