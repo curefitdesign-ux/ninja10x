@@ -1782,8 +1782,8 @@ const Reel = () => {
                     {(() => {
                       const shouldShowLocked = !isOwnStory && !viewerCanSeeCommunity;
                       const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
-                      // Show stacked cards behind for all users with multiple activities (not log-activity)
-                      const showStackedCards = !isLogActivityCard && activities.length > 1;
+                      // Show stacked cards behind for all users (not log-activity)
+                      const showStackedCards = !isLogActivityCard;
                       // Get previous activity thumbnails for stacked cards
                       const stackActivities = activities.filter(a => a.id !== activity?.id && !a.id?.startsWith('log-'));
                       const backCardThumb = stackActivities[1]?.originalUrl || stackActivities[1]?.storageUrl || stackActivities[0]?.originalUrl || stackActivities[0]?.storageUrl;
