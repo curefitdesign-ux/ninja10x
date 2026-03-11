@@ -1879,7 +1879,11 @@ const Reel = () => {
                                   pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
                               >
-                                <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(70,50,130,0.25) 0%, rgba(15,10,40,0.45) 100%)' }} />
+                                {midCardThumb ? (
+                                  <img src={midCardThumb} alt="" className="w-full h-full object-cover" loading="lazy" />
+                                ) : (
+                                  <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(70,50,130,0.25) 0%, rgba(15,10,40,0.45) 100%)' }} />
+                                )}
                                 <div className="absolute inset-0 pointer-events-none" style={{
                                   background: 'linear-gradient(165deg, rgba(255,255,255,0.08) 0%, transparent 35%)',
                                 }} />
