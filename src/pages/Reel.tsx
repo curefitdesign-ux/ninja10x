@@ -1736,7 +1736,7 @@ const Reel = () => {
                           className="overflow-hidden w-full h-full"
                           style={{
                             aspectRatio: '9/16',
-                            maxHeight: 'calc(95% - 20px)',
+                            maxHeight: 'calc(95% - 10px)',
                             filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
                           }}
                         >
@@ -1782,8 +1782,8 @@ const Reel = () => {
                     {(() => {
                       const shouldShowLocked = !isOwnStory && !viewerCanSeeCommunity;
                       const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
-                      // Show stacked cards behind for all users with multiple activities (not log-activity)
-                      const showStackedCards = !isLogActivityCard && activities.length > 1;
+                      // Show stacked cards behind for all users (not log-activity)
+                      const showStackedCards = !isLogActivityCard;
                       // Get previous activity thumbnails for stacked cards
                       const stackActivities = activities.filter(a => a.id !== activity?.id && !a.id?.startsWith('log-'));
                       const backCardThumb = stackActivities[1]?.originalUrl || stackActivities[1]?.storageUrl || stackActivities[0]?.originalUrl || stackActivities[0]?.storageUrl;
@@ -1825,7 +1825,7 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(95% - 20px)',
+                                  height: 'calc(95% - 10px)',
                                   marginTop: '-10px',
                                   overflow: 'hidden',
                                   zIndex: 1,
@@ -1872,7 +1872,7 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   aspectRatio: '9/16',
-                                  height: 'calc(95% - 20px)',
+                                  height: 'calc(95% - 10px)',
                                   marginTop: '-10px',
                                   overflow: 'hidden',
                                   zIndex: 2,
@@ -1902,7 +1902,7 @@ const Reel = () => {
                             className="relative overflow-hidden"
                             style={{
                               aspectRatio: '9/16',
-                              height: 'calc(95% - 20px)',
+                              height: 'calc(95% - 10px)',
                               maxWidth: '100%',
                               borderRadius: isLogActivityCard ? '13px' : '0px',
                               overflow: 'hidden',
