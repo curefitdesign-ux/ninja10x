@@ -440,7 +440,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     return (
                       <motion.div
                         key={act.id} className="relative"
-                        style={{ padding: '12px 16px 12px 48px', marginBottom: idx < sortedActivities.length - 1 ? 16 : 0 }}
+                        style={{ padding: '12px 16px 12px 48px', marginBottom: idx < reversedActivities.length - 1 ? 16 : 0 }}
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.06, type: 'spring', stiffness: 200, damping: 20 }}
