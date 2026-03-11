@@ -157,7 +157,25 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     const activityNames = Array.from(activitySet).join(', ') || 'fitness';
     const minsStr = totalDurationMins > 0 ? `${totalDurationMins}` : '0';
 
-    return `A ${title}. Spent ${minsStr} minutes sharpening skills in ${activityNames} 🎯 over ${weeksCompleted} ${weeksCompleted === 1 ? 'week' : 'weeks'} 🗓️`;
+    // Dynamic middle phrases
+    const midPhrases = [
+      `Spent ${minsStr} minutes sharpening skills`,
+      `Put in ${minsStr} minutes of pure effort`,
+      `Clocked ${minsStr} minutes of hustle`,
+      `Dedicated ${minsStr} minutes to the craft`,
+      `Grinded for ${minsStr} minutes straight`,
+    ];
+    const endPhrases = [
+      `in ${activityNames} 🎯 over ${weeksCompleted} ${weeksCompleted === 1 ? 'week' : 'weeks'} 🗓️`,
+      `across ${activityNames} 💥 spanning ${weeksCompleted} ${weeksCompleted === 1 ? 'week' : 'weeks'} 📈`,
+      `doing ${activityNames} 🏆 for ${weeksCompleted} ${weeksCompleted === 1 ? 'week' : 'weeks'} 🔥`,
+    ];
+    // Seed from name length for consistency per user
+    const seed = (userProfile?.displayName?.length || 3);
+    const mid = midPhrases[seed % midPhrases.length];
+    const end = endPhrases[seed % endPhrases.length];
+
+    return `A ${title}\n${mid} ${end}`;
   }, [activities, userProfile]);
 
   useEffect(() => {
@@ -346,12 +364,13 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                    <h2 className="text-white text-center mt-2 px-4 w-full" style={{ fontFamily: "'Inter', -apple-system, system-ui, sans-serif", fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em' }}>{userProfile.displayName}</h2>
                    {userBioLine && (
                      <p className="text-center mt-2 px-5 leading-[1.6]" style={{ 
-                        fontFamily: "'Special Elite', 'Courier New', monospace", 
+                        fontFamily: "'Inter', -apple-system, system-ui, sans-serif", 
                         fontSize: 14, 
                         fontWeight: 400,
                         color: '#FFFFFF',
                         maxWidth: 300,
-                        letterSpacing: '0.02em',
+                        letterSpacing: '0.01em',
+                        whiteSpace: 'pre-line',
                       }}>
                        {userBioLine}
                      </p>
@@ -364,7 +383,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
             <div
               ref={scrollRef}
               className="flex-1 min-h-0 z-30 overflow-y-auto overflow-x-hidden"
-              style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', paddingBottom: 120, paddingTop: 8 }}
+              style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', paddingBottom: 120, paddingTop: 28 }}
               onScroll={(e) => {
                 const scrollTop = (e.target as HTMLDivElement).scrollTop;
                 setIsScrolled(scrollTop > 30);
@@ -389,6 +408,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                 {(() => {
                   const sortedActivities = [...activities].filter(a => !a.isPlaceholder);
+                  // Reverse: show from end-goal down to oldest (most recent first, oldest last)
+                  const reversedActivities = [...sortedActivities].reverse();
+                  const remainingDays = 12 - sortedActivities.length;
                   const getCardStyle = (index: number, dayNumber: number) => {
                     const seed = dayNumber * 7 + index * 13;
                     return { rotation: ((seed % 11) - 5) * 1.2, offsetX: ((seed * 3) % 7) - 2, decorType: seed % 5 };
@@ -396,7 +418,18 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   const handDates = ['just now ✨','yesterday','a few days ago','last week','feeling strong 💪','what a session!','crushed it 🔥','new PR day','getting better','consistency > all','momentum building','unstoppable 🚀'];
                   const handQuotes = ['→ keep showing up!','↓ the grind continues...','★ proud of this one','~ good vibes only','✓ done & dusted','♡ self care day'];
 
-                  return sortedActivities.map((act, idx) => {
+                  return (
+                    <>
+                      {/* End goal — certificate */}
+                      <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
+                        <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: sortedActivities.length >= 12 ? 'linear-gradient(135deg, #F59E0B, #EF4444)' : 'rgba(255,255,255,0.08)', border: `2px solid ${sortedActivities.length >= 12 ? 'rgba(245,158,11,0.4)' : 'rgba(255,255,255,0.1)'}` }} />
+                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: sortedActivities.length >= 12 ? 'rgba(245,158,11,0.7)' : 'rgba(255,255,255,0.2)', transform: 'rotate(1deg)' }}>
+                          {sortedActivities.length >= 12 ? '🏆 journey complete! you did it!' : `🏆 ${remainingDays} ${remainingDays === 1 ? 'day' : 'days'} to go... keep pushing!`}
+                        </p>
+                      </div>
+
+                      {/* Activities: recent → oldest */}
+                      {reversedActivities.map((act, idx) => {
                     const { rotation, offsetX, decorType } = getCardStyle(idx, act.dayNumber);
                     const wk = Math.ceil(act.dayNumber / 3);
                     const dw = ((act.dayNumber - 1) % 3) + 1;
@@ -407,7 +440,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     return (
                       <motion.div
                         key={act.id} className="relative"
-                        style={{ padding: '12px 16px 12px 48px', marginBottom: idx < sortedActivities.length - 1 ? 16 : 0 }}
+                        style={{ padding: '12px 16px 12px 48px', marginBottom: idx < reversedActivities.length - 1 ? 16 : 0 }}
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.06, type: 'spring', stiffness: 200, damping: 20 }}
@@ -515,23 +548,25 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           <p style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.3)', marginTop: 6, marginLeft: idx % 2 === 0 ? '60%' : '5%', transform: `rotate(${-rotation * 0.8}deg)` }}>{handQuote}</p>
                         )}
                         {/* Arrow */}
-                        {idx < sortedActivities.length - 1 && decorType !== 4 && (
+                        {idx < reversedActivities.length - 1 && decorType !== 4 && (
                           <svg className="absolute pointer-events-none" style={{ left: 20 + offsetX, bottom: -20, width: 24, height: 28, opacity: 0.2 }} viewBox="0 0 24 28" fill="none">
                             <path d="M12 2 C12 2 10 14 12 20 C13 14 15 18 12 20 M8 16 L12 24 L16 16" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                           </svg>
                         )}
                       </motion.div>
                     );
-                  });
-                })()}
+                  })}
 
-                {/* Journey start */}
-                <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
-                  <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.1)' }} />
-                  <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: 'rgba(255,255,255,0.2)', transform: 'rotate(-1deg)' }}>
-                    the journey begins here... 🌱
-                  </p>
-                </div>
+                  {/* Journey start */}
+                  <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
+                    <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.1)' }} />
+                    <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: 'rgba(255,255,255,0.2)', transform: 'rotate(-1deg)' }}>
+                      the journey begins here... 🌱
+                    </p>
+                  </div>
+                </>
+                  );
+                })()}
               </div>
             </div>
 
