@@ -363,6 +363,64 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   exit={{ opacity: 0, height: 0, paddingBottom: 0 }}
                   transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
                 >
+                   {/* Instagram Notes-style speech bubble */}
+                   {(() => {
+                     const realCount = activities.filter(a => !a.isPlaceholder).length;
+                     const remaining = 12 - realCount;
+                     if (remaining > 0) {
+                       const bubbleText = isOwnProfile !== false
+                         ? `I am ${remaining} ${remaining === 1 ? 'activity' : 'activities'} away from becoming Ninja 🥷`
+                         : `${userProfile.displayName} is ${remaining} ${remaining === 1 ? 'activity' : 'activities'} away from becoming Ninja 🥷`;
+                       return (
+                         <motion.div
+                           className="relative mb-1.5"
+                           initial={{ opacity: 0, y: 6, scale: 0.9 }}
+                           animate={{ opacity: 1, y: 0, scale: 1 }}
+                           transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 20 }}
+                         >
+                           <div
+                             style={{
+                               background: 'rgba(255,255,255,0.12)',
+                               backdropFilter: 'blur(40px) saturate(180%)',
+                               WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                               border: '1px solid rgba(255,255,255,0.15)',
+                               borderRadius: 18,
+                               padding: '8px 14px',
+                               maxWidth: 220,
+                               boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.3)',
+                             }}
+                           >
+                             <p style={{
+                               fontFamily: "'Inter', -apple-system, sans-serif",
+                               fontSize: 12,
+                               fontWeight: 500,
+                               lineHeight: 1.4,
+                               color: 'rgba(255,255,255,0.85)',
+                               margin: 0,
+                               textAlign: 'center',
+                             }}>
+                               {bubbleText}
+                             </p>
+                           </div>
+                           {/* Bubble tail pointing down to avatar */}
+                           <div style={{
+                             position: 'absolute',
+                             left: '50%',
+                             bottom: -6,
+                             transform: 'translateX(-50%) rotate(45deg)',
+                             width: 12,
+                             height: 12,
+                             background: 'rgba(255,255,255,0.12)',
+                             border: '1px solid rgba(255,255,255,0.15)',
+                             borderTop: 'none',
+                             borderLeft: 'none',
+                             borderRadius: 2,
+                           }} />
+                         </motion.div>
+                       );
+                     }
+                     return null;
+                   })()}
                    <motion.div 
                      className="rounded-full overflow-hidden"
                      style={{ width: 56, height: 56, border: '2.5px solid rgba(255,255,255,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
