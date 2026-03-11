@@ -567,48 +567,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                   return (
                     <>
-                      {/* End goal — Cult Ninja quote */}
-                      <div style={{ padding: '20px 24px 24px', textAlign: 'center' }}>
-                        {realActivities.length >= 12 ? (
-                          <p style={{
-                            fontFamily: "'DM Serif Display', serif",
-                            fontSize: 20,
-                            lineHeight: 1.4,
-                            color: 'rgba(245,158,11,0.85)',
-                            margin: 0,
-                          }}>
-                            ❝ Journey complete! 🥷 ❞
-                          </p>
-                        ) : (
-                          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: 6 }}>
-                            <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: 32, lineHeight: 1, color: 'rgba(255,255,255,0.2)', marginTop: -4 }}>❝</span>
-                            <div>
-                              <p style={{
-                                fontFamily: "Inter, -apple-system, sans-serif",
-                                fontSize: 15,
-                                lineHeight: 1.5,
-                                color: 'rgba(255,255,255,0.5)',
-                                margin: 0,
-                              }}>
-                                {isOwnProfile !== false
-                                  ? <>You are <span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700 }}>{remainingDays} {remainingDays === 1 ? 'activity' : 'activities'}</span> away from becoming</>
-                                  : <><span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700 }}>{userProfile?.displayName || 'This user'}</span> is <span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700 }}>{remainingDays} {remainingDays === 1 ? 'activity' : 'activities'}</span> away from becoming</>
-                                }
-                              </p>
-                              <p style={{
-                                fontFamily: "'Caveat', cursive",
-                                fontSize: 28,
-                                color: 'rgba(255,255,255,0.25)',
-                                margin: '4px 0 0',
-                                letterSpacing: '0.02em',
-                              }}>
-                                Cult Ninja
-                              </p>
-                            </div>
-                            <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: 32, lineHeight: 1, color: 'rgba(255,255,255,0.2)', alignSelf: 'flex-end', marginBottom: -4 }}>❞</span>
-                          </div>
-                        )}
-                      </div>
 
                       {/* Activities with week separators */}
                       {(() => {
