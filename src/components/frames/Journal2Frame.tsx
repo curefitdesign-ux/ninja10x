@@ -39,7 +39,7 @@ const Journal2Frame = ({ imageUrl, activity, week, day, duration, pr, imagePosit
           height: 'calc(62cqw + 10px)',
           borderRadius: '5cqw',
           transform: 'rotate(2.5deg)',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
+          
           background: '#e8e8e8',
         }}
       >

@@ -99,7 +99,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
           className="absolute inset-0"
           style={{ background: 'rgba(0,0,0,0.3)', filter: 'blur(12px)', transform: 'translate(6px, 8px)', borderRadius: '4cqw' }}
         />
-        <div className="relative w-full h-full overflow-hidden bg-black" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.25)', borderRadius: '4cqw' }}>
+        <div className="relative w-full h-full overflow-hidden bg-black" style={{ borderRadius: '4cqw' }}>
           <div className="absolute inset-0 overflow-hidden">
             {isVideo ? (
               <video 

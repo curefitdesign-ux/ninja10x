@@ -77,7 +77,7 @@ const JournalFrame = ({
             height: '4.5cqw',
             background: '#1a1030',
             transform: 'translateX(-50%)',
-            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.3)',
+            
           }}
         />
       ))}
