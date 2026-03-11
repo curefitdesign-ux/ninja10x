@@ -695,9 +695,8 @@ const Reel = () => {
   }, [currentUserIndex, carouselApi]);
 
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    // If current card is the log-activity placeholder, open media source sheet (camera/gallery choice)
+    // Log-activity card: do nothing on general tap — only the plus icon opens the sheet
     if (currentActivity?.id === 'log-activity') {
-      setShowEditSheet(true);
       return;
     }
 
