@@ -128,10 +128,6 @@ const JournalFrame = ({
         </div>
       </div>
 
-      {/* Paperclip */}
-      <div className="absolute z-20" style={{ top: '0.6cqw', right: '46cqw', width: '11cqw' }}>
-        <img src={paperclipImg} alt="" className="w-full h-full object-contain pointer-events-none" />
-      </div>
 
       {/* Bottom content */}
       <div className="absolute left-0 right-0" style={{ bottom: '8cqw', padding: '0 3cqw', paddingLeft: '9cqw' }}>
