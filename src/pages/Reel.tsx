@@ -1800,13 +1800,13 @@ const Reel = () => {
                             height: isLogActivityCard ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
                             maxWidth: '100%',
                           }}>
-                            {/* Stacked strip 2 (deepest, narrowest) */}
+                            {/* Stacked strip 2 (deepest) */}
                             {showStackedCards && (
                               <div
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
-                                  width: '82%',
+                                  width: '88%',
                                   height: 8,
                                   bottom: -12,
                                   left: '50%',
@@ -1819,13 +1819,13 @@ const Reel = () => {
                                 }}
                               />
                             )}
-                            {/* Stacked strip 1 (closer, slightly narrower) */}
+                            {/* Stacked strip 1 (closer) */}
                             {showStackedCards && (
                               <div
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
-                                  width: '91%',
+                                  width: '94%',
                                   height: 8,
                                   bottom: -6,
                                   left: '50%',
