@@ -22,7 +22,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 import fireEmoji from '@/assets/reactions/fire-3d.png';
 import clapEmoji from '@/assets/reactions/clap-3d.png';
-import paperclipImg from '@/assets/frames/paperclip-silver.png';
+
 import deskBellImg from '@/assets/icons/desk-bell-3d.png';
 
 interface ReactorProfile {
@@ -390,11 +390,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               }}
             >
               <div className="relative" style={{ minHeight: '100%' }}>
-                {/* Notebook lines */}
-                <div className="absolute inset-0 pointer-events-none" style={{
-                  backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 38px, rgba(255,255,255,0.03) 38px, rgba(255,255,255,0.03) 39px)',
-                  backgroundPosition: '0 20px',
-                }} />
                 {/* Curved timeline SVG */}
                 <svg className="absolute pointer-events-none" style={{ left: 0, top: 0, width: 60, height: '100%', overflow: 'visible' }} preserveAspectRatio="none">
                   <path
@@ -416,7 +411,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     return { rotation: ((seed % 11) - 5) * 1.2, offsetX: ((seed * 3) % 7) - 2, decorType: seed % 5 };
                   };
                   const handDates = ['just now ✨','yesterday','a few days ago','last week','feeling strong 💪','what a session!','crushed it 🔥','new PR day','getting better','consistency > all','momentum building','unstoppable 🚀'];
-                  const handQuotes = ['→ keep showing up!','↓ the grind continues...','★ proud of this one','~ good vibes only','✓ done & dusted','♡ self care day'];
+                  
 
                   return (
                     <>
@@ -435,7 +430,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     const dw = ((act.dayNumber - 1) % 3) + 1;
                     const isSelected = act.id === current.id;
                     const handDate = handDates[act.dayNumber - 1] || handDates[idx % handDates.length];
-                    const handQuote = handQuotes[idx % handQuotes.length];
+                    
 
                     return (
                       <motion.div
@@ -481,31 +476,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                           
 
-                          {/* Paperclip */}
-                          {decorType === 0 && (
-                            <img src={paperclipImg} alt="" className="absolute pointer-events-none" style={{
-                              width: 32, height: 'auto', top: -8, right: 16,
-                              transform: `rotate(${15 + rotation}deg)`, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))', opacity: 0.85,
-                            }} />
-                          )}
-                          {/* Tape */}
-                          {decorType === 3 && (
-                            <div className="absolute pointer-events-none" style={{
-                              width: 52, height: 18, top: -6, left: '30%',
-                              background: 'rgba(255, 230, 180, 0.35)', transform: `rotate(${-3 + rotation * 0.5}deg)`, borderRadius: 2, backdropFilter: 'blur(2px)',
-                            }} />
-                          )}
-                          {/* Activity sticker */}
-                          {act.activity && decorType !== 4 && (
-                            <div className="absolute pointer-events-none" style={{
-                              bottom: -12, right: -8, background: 'rgba(255,255,255,0.1)',
-                              backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                              border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
-                              transform: `rotate(${-rotation * 0.5}deg)`,
-                            }}>
-                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
-                            </div>
-                          )}
                           {/* Like count badge + react button */}
                           {(() => {
                             const ar = localReactions[act.id];
@@ -543,16 +513,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           })()}
                         </motion.div>
 
-                        {/* Quote */}
-                        {(decorType === 2 || decorType === 1) && (
-                          <p style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.3)', marginTop: 6, marginLeft: idx % 2 === 0 ? '60%' : '5%', transform: `rotate(${-rotation * 0.8}deg)` }}>{handQuote}</p>
-                        )}
-                        {/* Arrow */}
-                        {idx < reversedActivities.length - 1 && decorType !== 4 && (
-                          <svg className="absolute pointer-events-none" style={{ left: 20 + offsetX, bottom: -20, width: 24, height: 28, opacity: 0.2 }} viewBox="0 0 24 28" fill="none">
-                            <path d="M12 2 C12 2 10 14 12 20 C13 14 15 18 12 20 M8 16 L12 24 L16 16" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                          </svg>
-                        )}
                       </motion.div>
                     );
                   })}
