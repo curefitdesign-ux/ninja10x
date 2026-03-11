@@ -360,28 +360,36 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   exit={{ opacity: 0, height: 0, paddingBottom: 0 }}
                   transition={{ duration: 0.25 }}
                 >
-                  <div className="rounded-full overflow-hidden" style={{ width: 56, height: 56, border: '2.5px solid rgba(255,255,255,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
-                    <ProfileAvatar src={userProfile.avatarUrl} name={userProfile.displayName} size={56} />
-                  </div>
-                  <h2 className="text-white font-bold text-center mt-1.5 px-6 truncate w-full" style={{ fontSize: 18, letterSpacing: '-0.02em' }}>{userProfile.displayName}</h2>
-                  {userDescription && (
-                    <p className="text-white/50 text-[13px] text-center mt-1.5 px-6 leading-relaxed" style={{ maxWidth: 300 }}>
-                      {userDescription.diary}{userDescription.varietyLine ? ` ${userDescription.varietyLine}` : ''}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-center gap-2 mt-2">
-                    <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                      <span className="text-white text-[11px] font-semibold">{totalActivities}/12 Days</span>
-                    </div>
-                    {totalDurationStr && (
-                      <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                        <span className="text-white text-[11px] font-semibold">{totalDurationStr} Total</span>
-                      </div>
-                    )}
-                    <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                      <span className="text-white text-[11px] font-semibold">W{week}</span>
-                    </div>
-                  </div>
+                   <div className="rounded-full overflow-hidden" style={{ width: 56, height: 56, border: '2.5px solid rgba(255,255,255,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
+                     <ProfileAvatar src={userProfile.avatarUrl} name={userProfile.displayName} size={56} />
+                   </div>
+                   <h2 className="text-white text-center mt-2 px-4 w-full" style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 22, fontWeight: 400, letterSpacing: '-0.01em', fontStyle: 'italic' }}>{userProfile.displayName}</h2>
+                   {userBioLine && (
+                     <p className="text-center mt-2 px-5 leading-[1.5]" style={{ 
+                       fontFamily: "'DM Serif Display', Georgia, serif", 
+                       fontSize: 16, 
+                       fontWeight: 400,
+                       fontStyle: 'italic',
+                       color: 'rgba(255,255,255,0.55)',
+                       maxWidth: 320,
+                       letterSpacing: '0.01em',
+                     }}>
+                       {userBioLine}
+                     </p>
+                   )}
+                   <div className="flex items-center justify-center gap-2 mt-3">
+                     <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                       <span className="text-white text-[11px] font-semibold">{totalActivities}/12 Days</span>
+                     </div>
+                     {totalDurationStr && (
+                       <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                         <span className="text-white text-[11px] font-semibold">{totalDurationStr} Total</span>
+                       </div>
+                     )}
+                     <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                       <span className="text-white text-[11px] font-semibold">W{week}</span>
+                     </div>
+                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
