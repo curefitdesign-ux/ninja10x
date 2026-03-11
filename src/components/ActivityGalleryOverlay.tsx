@@ -279,23 +279,34 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     <AnimatePresence>
       {isOpen && (
         <motion.div className="fixed inset-0" style={{ zIndex: 60 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-        <DynamicBlurBackground imageUrl={mediaUrl}>
+        {/* Journal-style warm background */}
+        <div className="absolute inset-0" style={{
+          background: 'linear-gradient(180deg, #F5F0E8 0%, #EDE7DA 40%, #E8E0D0 100%)',
+        }}>
+          {/* Subtle ruled lines */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 31px, rgba(180,160,130,0.12) 31px, rgba(180,160,130,0.12) 32px)',
+            backgroundPosition: '0 0',
+          }} />
+          {/* Left margin line */}
+          <div className="absolute top-0 bottom-0 pointer-events-none" style={{
+            left: 52,
+            width: 1.5,
+            background: 'rgba(210, 140, 130, 0.18)',
+          }} />
+        </div>
           <div className="absolute inset-0 flex flex-col" style={{ overflow: 'hidden' }}>
             {/* TOP HEADER — collapses on scroll */}
             <div
               className="shrink-0 z-50"
               style={{
                 paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)',
-                background: isScrolled ? 'rgba(255, 255, 255, 0.06)' : 'transparent',
-                backdropFilter: isScrolled ? 'blur(60px) saturate(200%)' : 'none',
-                WebkitBackdropFilter: isScrolled ? 'blur(60px) saturate(200%)' : 'none',
-                borderBottom: isScrolled ? '1px solid rgba(255,255,255,0.08)' : '1px solid transparent',
-                boxShadow: isScrolled ? '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 -1px 0 rgba(255,255,255,0.05)' : 'none',
+                background: isScrolled ? 'rgba(245, 240, 232, 0.92)' : 'transparent',
+                backdropFilter: isScrolled ? 'blur(20px)' : 'none',
+                WebkitBackdropFilter: isScrolled ? 'blur(20px)' : 'none',
+                borderBottom: isScrolled ? '1px solid rgba(180,160,130,0.2)' : '1px solid transparent',
+                boxShadow: isScrolled ? '0 4px 16px rgba(0, 0, 0, 0.06)' : 'none',
                 transition: 'all 0.3s ease',
-                ...(isScrolled ? {
-                  maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
-                  WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
-                } : {}),
               }}
             >
               {/* Compact header (scrolled) */}
@@ -310,24 +321,24 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     transition={{ duration: 0.2 }}
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="rounded-full overflow-hidden" style={{ width: 32, height: 32, border: '1.5px solid rgba(255,255,255,0.25)' }}>
+                      <div className="rounded-full overflow-hidden" style={{ width: 32, height: 32, border: '1.5px solid rgba(0,0,0,0.1)' }}>
                         <ProfileAvatar src={userProfile.avatarUrl} name={userProfile.displayName} size={32} />
                       </div>
                       <div>
-                        <h2 className="text-white font-bold truncate" style={{ fontSize: 14, letterSpacing: '-0.02em', maxWidth: 160 }}>{userProfile.displayName}</h2>
+                        <h2 className="font-bold truncate" style={{ fontSize: 14, letterSpacing: '-0.02em', maxWidth: 160, color: '#3A3028', fontFamily: "'Caveat', cursive" }}>{userProfile.displayName}</h2>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="text-white/40 text-[10px] font-medium">{totalActivities}/12 Days</span>
-                          {totalDurationStr && <span className="text-white/30 text-[10px]">·</span>}
-                          {totalDurationStr && <span className="text-white/40 text-[10px] font-medium">{totalDurationStr}</span>}
+                          <span style={{ fontSize: 10, fontWeight: 500, color: 'rgba(58,48,40,0.4)' }}>{totalActivities}/12 Days</span>
+                          {totalDurationStr && <span style={{ fontSize: 10, color: 'rgba(58,48,40,0.25)' }}>·</span>}
+                          {totalDurationStr && <span style={{ fontSize: 10, fontWeight: 500, color: 'rgba(58,48,40,0.4)' }}>{totalDurationStr}</span>}
                         </div>
                       </div>
                     </div>
                     <motion.button
                       className="w-8 h-8 flex items-center justify-center rounded-full active:scale-90"
-                      style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      style={{ background: 'rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.08)' }}
                       onClick={onClose} whileTap={{ scale: 0.85 }}
                     >
-                      <X className="w-4 h-4 text-white/80" />
+                      <X className="w-4 h-4" style={{ color: '#3A3028' }} />
                     </motion.button>
                   </motion.div>
                 ) : (
@@ -342,51 +353,57 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   >
                     <motion.button
                       className="w-9 h-9 flex items-center justify-center rounded-full active:scale-90"
-                      style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      style={{ background: 'rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.08)' }}
                       onClick={onClose} whileTap={{ scale: 0.85 }}
                     >
-                      <X className="w-5 h-5 text-white/80" />
+                      <X className="w-5 h-5" style={{ color: '#3A3028' }} />
                     </motion.button>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* FULL PROFILE — only when not scrolled */}
+            {/* FULL PROFILE — journal header style */}
             <AnimatePresence>
               {!isScrolled && userProfile && (
                 <motion.div
-                  className="shrink-0 flex flex-col items-center z-40 px-4 pb-2"
+                  className="shrink-0 flex flex-col items-center z-40 px-4 pb-3"
                   initial={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0, paddingBottom: 0 }}
                   transition={{ duration: 0.25 }}
                 >
-                   <div className="rounded-full overflow-hidden" style={{ width: 56, height: 56, border: '2.5px solid rgba(255,255,255,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
+                   <div className="rounded-full overflow-hidden" style={{ width: 56, height: 56, border: '2.5px solid rgba(58,48,40,0.15)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
                      <ProfileAvatar src={userProfile.avatarUrl} name={userProfile.displayName} size={56} />
                    </div>
-                   <h2 className="text-white text-center mt-2 px-4 w-full" style={{ fontFamily: "'Inter', -apple-system, system-ui, sans-serif", fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em' }}>{userProfile.displayName}</h2>
+                   <h2 className="text-center mt-2 px-4 w-full" style={{ fontFamily: "'Caveat', cursive", fontSize: 28, fontWeight: 700, letterSpacing: '-0.01em', color: '#3A3028' }}>{userProfile.displayName}</h2>
                    {userBioLine && (
-                     <p className="text-center mt-2 px-5 leading-[1.6]" style={{ 
+                     <p className="text-center mt-1 px-5 leading-[1.5]" style={{ 
                         fontFamily: "'Inter', -apple-system, system-ui, sans-serif", 
-                        fontSize: 14, 
+                        fontSize: 12, 
                         fontWeight: 400,
-                        color: '#FFFFFF',
-                        maxWidth: 300,
+                        color: 'rgba(58,48,40,0.55)',
+                        maxWidth: 280,
                         letterSpacing: '0.01em',
                         whiteSpace: 'pre-line',
                       }}>
                        {userBioLine}
                      </p>
                    )}
+                   {/* Decorative divider */}
+                   <div className="flex items-center gap-3 mt-3" style={{ width: '70%' }}>
+                     <div style={{ flex: 1, height: 1, background: 'rgba(58,48,40,0.12)' }} />
+                     <span style={{ fontSize: 10, color: 'rgba(58,48,40,0.3)', fontFamily: "'Caveat', cursive", fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>My Journal</span>
+                     <div style={{ flex: 1, height: 1, background: 'rgba(58,48,40,0.12)' }} />
+                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* SCRAPBOOK TIMELINE */}
+            {/* JOURNAL TIMELINE */}
             <div
               ref={scrollRef}
               className="flex-1 min-h-0 z-30 overflow-y-auto overflow-x-hidden"
-              style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', paddingBottom: 120, paddingTop: 28 }}
+              style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', paddingBottom: 120, paddingTop: 16 }}
               onScroll={(e) => {
                 const scrollTop = (e.target as HTMLDivElement).scrollTop;
                 setIsScrolled(scrollTop > 30);
