@@ -367,16 +367,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                    <h2 className="text-white text-center mt-2 px-4 w-full" style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 22, fontWeight: 400, letterSpacing: '-0.01em', fontStyle: 'italic' }}>{userProfile.displayName}</h2>
                    {userBioLine && (
                      <p className="text-center mt-2 px-5 leading-[1.5]" style={{ 
-                       fontFamily: "'DM Serif Display', Georgia, serif", 
-                       fontSize: 16, 
-                       fontWeight: 400,
-                       fontStyle: 'italic',
-                       color: 'rgba(255,255,255,0.55)',
-                       maxWidth: 320,
-                       letterSpacing: '0.01em',
-                     }}>
-                       {userBioLine}
-                     </p>
+                        fontFamily: "'Caveat', cursive", 
+                        fontSize: 18, 
+                        fontWeight: 700,
+                        color: 'rgba(255,255,255,0.5)',
+                        maxWidth: 320,
+                      }}>
+                        {userBioLine}
+                      </p>
                    )}
                 </motion.div>
               )}
