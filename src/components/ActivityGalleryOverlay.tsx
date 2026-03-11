@@ -82,6 +82,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [isScrolled, setIsScrolled] = useState(false);
   const [nudgeBellAnim, setNudgeBellAnim] = useState(false);
   const [nudgeCount, setNudgeCount] = useState(0);
+  const [nudgeRotation, setNudgeRotation] = useState(0);
   const [nudgeNumberBehind, setNudgeNumberBehind] = useState(false);
   const nudgeAudioRef = useRef<HTMLAudioElement | null>(null);
   const nudgeHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -562,43 +563,44 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               {!isOwnProfile && !current.isPlaceholder && (
                 <div className="relative">
                   {/* Counter — Bump-style pop animation */}
-                  <AnimatePresence>
-                    {nudgeCount > 0 && (
-                      <motion.span
-                        key={nudgeCount}
-                        initial={{ scale: 0, y: 20, opacity: 0 }}
-                        animate={nudgeNumberBehind
-                          ? { scale: 0.5, y: 10, opacity: 0, zIndex: 0 }
-                          : { scale: [0, 1.15, 1], y: [20, -5, 0], opacity: 1, zIndex: 60 }
-                        }
-                        transition={nudgeNumberBehind
-                          ? { duration: 0.3, ease: 'easeIn' }
-                          : { duration: 0.4, times: [0, 0.5, 1], ease: 'easeOut' }
-                        }
-                        className="absolute pointer-events-none"
-                        style={{
-                          top: -22,
-                          left: 14,
-                          fontSize: nudgeCount >= 10 ? 28 : 34,
-                          fontWeight: 900,
-                          fontStyle: 'normal',
-                          color: '#000',
-                          WebkitTextStroke: '4px #fff',
-                          paintOrder: 'stroke fill',
-                          textShadow: '0 3px 8px rgba(0,0,0,0.4)',
-                          lineHeight: 1,
-                          fontFamily: "'Lalezar', sans-serif",
-                        }}
-                      >
-                        x{nudgeCount}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
+                  {nudgeCount > 0 && (
+                    <motion.span
+                      key={nudgeCount}
+                      initial={{ scale: 0, y: 20, opacity: 0, rotate: nudgeRotation }}
+                      animate={nudgeNumberBehind
+                        ? { scale: 0.5, y: 10, opacity: 0 }
+                        : { scale: 1, y: 0, opacity: 1 }
+                      }
+                      transition={nudgeNumberBehind
+                        ? { duration: 0.3, ease: 'easeIn' }
+                        : { type: 'spring', stiffness: 400, damping: 12 }
+                      }
+                      className="absolute pointer-events-none"
+                      style={{
+                        top: -22,
+                        left: 14,
+                        zIndex: nudgeNumberBehind ? 0 : 60,
+                        fontSize: nudgeCount >= 10 ? 28 : 34,
+                        fontWeight: 900,
+                        fontStyle: 'normal',
+                        color: '#000',
+                        WebkitTextStroke: '4px #fff',
+                        paintOrder: 'stroke fill',
+                        textShadow: '0 3px 8px rgba(0,0,0,0.4)',
+                        lineHeight: 1,
+                        fontFamily: "'Lalezar', sans-serif",
+                        rotate: nudgeRotation,
+                      }}
+                    >
+                      x{nudgeCount}
+                    </motion.span>
+                  )}
                   <button
                     onClick={async (e) => {
                       e.stopPropagation();
                       setNudgeBellAnim(true);
                       setNudgeNumberBehind(false);
+                      setNudgeRotation(Math.floor(Math.random() * 31) - 15); // -15 to +15 degrees
                       setNudgeCount(prev => prev + 1);
                       // Play preloaded audio instantly
                       try {
