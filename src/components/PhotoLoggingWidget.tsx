@@ -831,45 +831,9 @@ const PhotoLoggingWidget = ({
     setPendingUpload(null);
   };
 
-  // Handle playing week recap - check cache first, auto-play if available
-  const handlePlayWeekRecap = async (weekPhotos: LoggedPhoto[], weekIndex: number) => {
-    const weekNumber = weekIndex + 1;
-    
-    // Try to load cached recap and auto-play it directly
-    try {
-      const cachedBlob = await getRecapFromCache(weekNumber, user?.id);
-      if (cachedBlob && cachedBlob.size > 0) {
-        const url = URL.createObjectURL(cachedBlob);
-        console.log('[PhotoLoggingWidget] Cache hit — auto-playing week', weekNumber);
-        navigate('/reel', {
-          state: {
-            weekRecapVideo: url,
-            weekNumber,
-          },
-        });
-        return;
-      }
-    } catch (err) {
-      console.warn('[PhotoLoggingWidget] Cache check failed, falling back to generation:', err);
-    }
-
-    // No cache — navigate to generation page
-    const mappedPhotos = weekPhotos.map(p => ({
-        id: p.id,
-        imageUrl: p.originalUrl || p.storageUrl,
-        activity: p.activity || 'Workout',
-        duration: p.duration,
-        pr: p.pr,
-        uploadDate: '',
-        dayNumber: p.dayNumber,
-        isVideo: p.isVideo,
-      }));
-      navigate('/reel-generation', {
-        state: {
-          weekPhotos: mappedPhotos,
-          weekNumber,
-        },
-    });
+  // Handle playing week recap - temporarily disabled
+  const handlePlayWeekRecap = async (_weekPhotos: LoggedPhoto[], _weekIndex: number) => {
+    // No-op: reel generation disabled
   };
   
   // 4 clusters representing 4 weeks (fixed order, no shuffling)
