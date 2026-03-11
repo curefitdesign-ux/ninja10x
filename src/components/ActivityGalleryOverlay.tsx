@@ -446,7 +446,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                         {/* Handwritten date */}
                         <p style={{ fontFamily: "'Caveat', cursive", fontSize: 18, color: 'rgba(255,255,255,0.45)', marginBottom: 6, transform: `rotate(${rotation * 0.3}deg)`, marginLeft: offsetX }}>
-                          W{wk} · Day {dw} — <span style={{ color: 'rgba(255,255,255,0.3)' }}>{handDate}</span>
+                          W{wk} · Activity {dw} — <span style={{ color: 'rgba(255,255,255,0.3)' }}>{handDate}</span>
                         </p>
 
                         {/* Card */}
