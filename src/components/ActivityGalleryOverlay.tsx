@@ -517,11 +517,11 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                           {/* Activity name tag */}
                           {act.activity && (
-                            <div className="absolute pointer-events-none" style={{
+                             <div className="absolute pointer-events-none" style={{
                               bottom: -12, right: -8, background: 'rgba(255,255,255,0.1)',
                               backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
                               border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
-                              transform: `rotate(${-rotation * 0.5}deg)`,
+                              transform: `rotate(${-activeRotation * 0.5}deg)`,
                             }}>
                               <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
                             </div>
