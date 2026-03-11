@@ -933,31 +933,7 @@ const PhotoLoggingWidget = ({
         </div>
       </div>
       
-      {/* Fixed Reel Progress Pill - positioned below cards, reduced spacing */}
-      <AnimatePresence>
-        {showReelPill && (
-          <div className="w-full flex justify-center -mt-1 px-6">
-            <ReelProgressPill
-              weekNumber={completedWeeks}
-              state={'creating'}
-              progress={0}
-              isActivelyGenerating={false}
-              onPlay={() => {
-                const weekIndex = completedWeeks - 1;
-                const startDay = weekIndex * 3 + 1;
-                const weekPhotos = photos.filter(p => 
-                  Number(p.dayNumber) >= startDay && Number(p.dayNumber) <= startDay + 2
-                );
-                
-                if (weekPhotos.length >= 3) {
-                  handlePlayWeekRecap(weekPhotos, weekIndex);
-                }
-              }}
-              className="py-1.5"
-            />
-          </div>
-        )}
-      </AnimatePresence>
+      {/* Reel Progress Pill - temporarily disabled */}
 
       {/* Upload Options Sheet */}
       <Sheet open={showUploadOptions} onOpenChange={setShowUploadOptions}>
