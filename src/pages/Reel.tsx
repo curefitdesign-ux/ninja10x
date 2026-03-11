@@ -1787,17 +1787,26 @@ const Reel = () => {
                             overflow: 'visible',
                           }}
                         >
-                          {/* Stacked cards behind — peek from bottom only */}
-                          <AnimatePresence>
-                          {showStackedCards && isCenter && (
+                          {/* Stacked cards behind — fan out when centered, collapse when not */}
+                          {showStackedCards && (
                             <>
-                              {/* Back card (deepest) — peeks furthest from bottom */}
+                              {/* Back card (deepest) — fans out left with rotation */}
                               <motion.div
                                 key={`stack-back-${group.userId}`}
-                                initial={{ scale: 0.82, opacity: 0, y: 0 }}
-                                animate={{ scale: 0.82, opacity: 0.5, y: 0 }}
-                                exit={{ scale: 0.82, opacity: 0, y: 0 }}
-                                transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.1 }}
+                                animate={isCenter ? {
+                                  scale: 0.88,
+                                  opacity: 0.5,
+                                  y: 18,
+                                  x: -12,
+                                  rotate: -3,
+                                } : {
+                                  scale: 0.92,
+                                  opacity: 0,
+                                  y: 8,
+                                  x: 0,
+                                  rotate: 0,
+                                }}
+                                transition={{ type: 'spring', stiffness: 200, damping: 22 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setShowHistoryGallery(true);
@@ -1806,7 +1815,7 @@ const Reel = () => {
                                 style={{
                                   aspectRatio: '9/16',
                                   height: 'calc(95% - 20px)',
-                                  bottom: '-36px',
+                                  marginTop: '-10px',
                                   overflow: 'hidden',
                                   zIndex: 1,
                                   borderRadius: '14px',
@@ -1815,6 +1824,8 @@ const Reel = () => {
                                   boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.08)',
                                   backdropFilter: 'blur(20px) saturate(1.6)',
                                   WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+                                  transformOrigin: 'bottom center',
+                                  pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
                               >
                                 <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(60,45,120,0.3) 0%, rgba(15,10,40,0.5) 100%)' }} />
@@ -1822,13 +1833,23 @@ const Reel = () => {
                                   background: 'linear-gradient(170deg, rgba(255,255,255,0.06) 0%, transparent 30%)',
                                 }} />
                               </motion.div>
-                              {/* Middle card — peeks slightly from bottom */}
+                              {/* Middle card — fans out right with rotation */}
                               <motion.div
                                 key={`stack-mid-${group.userId}`}
-                                initial={{ scale: 0.88, opacity: 0, y: 0 }}
-                                animate={{ scale: 0.88, opacity: 0.65, y: 0 }}
-                                exit={{ scale: 0.88, opacity: 0, y: 0 }}
-                                transition={{ type: 'spring', stiffness: 160, damping: 20, delay: 0.05 }}
+                                animate={isCenter ? {
+                                  scale: 0.93,
+                                  opacity: 0.65,
+                                  y: 10,
+                                  x: 8,
+                                  rotate: 2,
+                                } : {
+                                  scale: 0.95,
+                                  opacity: 0,
+                                  y: 4,
+                                  x: 0,
+                                  rotate: 0,
+                                }}
+                                transition={{ type: 'spring', stiffness: 200, damping: 22 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setShowHistoryGallery(true);
@@ -1837,7 +1858,7 @@ const Reel = () => {
                                 style={{
                                   aspectRatio: '9/16',
                                   height: 'calc(95% - 20px)',
-                                  bottom: '-20px',
+                                  marginTop: '-10px',
                                   overflow: 'hidden',
                                   zIndex: 2,
                                   borderRadius: '14px',
@@ -1846,6 +1867,8 @@ const Reel = () => {
                                   boxShadow: '0 8px 30px rgba(0,0,0,0.25), inset 0 0.5px 0 rgba(255,255,255,0.12)',
                                   backdropFilter: 'blur(24px) saturate(1.8)',
                                   WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+                                  transformOrigin: 'bottom center',
+                                  pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
                               >
                                 <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(70,50,130,0.25) 0%, rgba(15,10,40,0.45) 100%)' }} />
@@ -1855,7 +1878,6 @@ const Reel = () => {
                               </motion.div>
                             </>
                           )}
-                          </AnimatePresence>
                           {/* Main card — 9:16 aspect ratio */}
                           <div
                             className="relative overflow-hidden"
