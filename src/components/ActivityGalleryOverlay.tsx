@@ -405,10 +405,13 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
             </AnimatePresence>
 
             {/* SCRAPBOOK TIMELINE */}
-            <div
+            <motion.div
               ref={scrollRef}
               className="flex-1 min-h-0 z-30 overflow-y-auto overflow-x-hidden"
               style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', paddingBottom: 120, paddingTop: 28 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               onScroll={(e) => {
                 const scrollTop = (e.target as HTMLDivElement).scrollTop;
                 setIsScrolled(scrollTop > 30);
