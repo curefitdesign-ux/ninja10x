@@ -591,12 +591,18 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     onClick={async (e) => {
                       e.stopPropagation();
                       setNudgeBellAnim(true);
+                      setNudgeNumberBehind(false);
                       setNudgeCount(prev => prev + 1);
+                      // Play preloaded audio instantly
                       try {
-                        const audio = new Audio('/sounds/nudge-bell.mp3');
-                        audio.volume = 0.7;
-                        audio.play().catch(() => {});
+                        if (nudgeAudioRef.current) {
+                          nudgeAudioRef.current.currentTime = 0;
+                          nudgeAudioRef.current.play().catch(() => {});
+                        }
                       } catch {}
+                      // Hide number behind button after 0.75s
+                      if (nudgeHideTimerRef.current) clearTimeout(nudgeHideTimerRef.current);
+                      nudgeHideTimerRef.current = setTimeout(() => setNudgeNumberBehind(true), 750);
                       if (user && targetUserId) {
                         await supabase.from('nudges').insert({ from_user_id: user.id, to_user_id: targetUserId });
                       }
