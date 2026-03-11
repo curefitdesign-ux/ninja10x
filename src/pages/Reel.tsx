@@ -1846,10 +1846,10 @@ const Reel = () => {
                                 background: isLogActivityCard ? '#0a0a12' : 'transparent',
                                 border: isLogActivityCard
                                   ? '1px solid rgba(160, 120, 255, 0.25)'
-                                  : '1px solid rgba(255,255,255,0.08)',
+                                  : 'none',
                                 boxShadow: isLogActivityCard
                                   ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 0 20px rgba(140, 100, 240, 0.15), 0 0 40px rgba(140, 100, 240, 0.08)'
-                                  : '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
+                                  : 'none',
                                 zIndex: 3,
                               }}
                             >
