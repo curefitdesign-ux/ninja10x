@@ -82,6 +82,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 }, _ref) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [collapsedWeeks, setCollapsedWeeks] = useState<Record<number, boolean>>({});
   const [nudgeBellAnim, setNudgeBellAnim] = useState(false);
   const [nudgeCount, setNudgeCount] = useState(0);
   const [nudgeRotation, setNudgeRotation] = useState(0);
