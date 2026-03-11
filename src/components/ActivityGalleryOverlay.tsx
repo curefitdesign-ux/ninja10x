@@ -561,32 +561,39 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               {/* Nudge button — shown for other users' profiles */}
               {!isOwnProfile && !current.isPlaceholder && (
                 <div className="relative">
-                  {/* Counter sitting on top of button */}
-                  {nudgeCount > 0 && (
-                    <motion.span
-                      key={nudgeCount}
-                      initial={{ scale: 0, y: 10 }}
-                      animate={{ scale: 1, y: 0, zIndex: nudgeNumberBehind ? 0 : 60 }}
-                      transition={{ type: 'spring', stiffness: 500, damping: 15 }}
-                      className="absolute pointer-events-none"
-                      style={{
-                        top: -20,
-                        left: 16,
-                        zIndex: nudgeNumberBehind ? 0 : 60,
-                        fontSize: nudgeCount >= 10 ? 26 : 30,
-                        fontWeight: 900,
-                        fontStyle: 'italic',
-                        color: '#000',
-                        WebkitTextStroke: '3.5px #fff',
-                        paintOrder: 'stroke fill',
-                        textShadow: '0 2px 6px rgba(0,0,0,0.3)',
-                        lineHeight: 1,
-                        fontFamily: "'Lalezar', sans-serif",
-                      }}
-                    >
-                      x{nudgeCount}
-                    </motion.span>
-                  )}
+                  {/* Counter — Bump-style pop animation */}
+                  <AnimatePresence>
+                    {nudgeCount > 0 && (
+                      <motion.span
+                        key={nudgeCount}
+                        initial={{ scale: 0, y: 20, opacity: 0 }}
+                        animate={nudgeNumberBehind
+                          ? { scale: 0.5, y: 10, opacity: 0, zIndex: 0 }
+                          : { scale: [0, 1.6, 0.85, 1.15, 1], y: [20, -8, 2, -3, 0], opacity: 1, zIndex: 60 }
+                        }
+                        transition={nudgeNumberBehind
+                          ? { duration: 0.3, ease: 'easeIn' }
+                          : { duration: 0.5, times: [0, 0.35, 0.55, 0.75, 1], ease: 'easeOut' }
+                        }
+                        className="absolute pointer-events-none"
+                        style={{
+                          top: -22,
+                          left: 14,
+                          fontSize: nudgeCount >= 10 ? 28 : 34,
+                          fontWeight: 900,
+                          fontStyle: 'normal',
+                          color: '#000',
+                          WebkitTextStroke: '4px #fff',
+                          paintOrder: 'stroke fill',
+                          textShadow: '0 3px 8px rgba(0,0,0,0.4)',
+                          lineHeight: 1,
+                          fontFamily: "'Lalezar', sans-serif",
+                        }}
+                      >
+                        x{nudgeCount}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                   <button
                     onClick={async (e) => {
                       e.stopPropagation();
