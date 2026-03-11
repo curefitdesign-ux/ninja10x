@@ -272,14 +272,14 @@ const Reel = () => {
   const effectiveUserGroups = useMemo(() => {
     if (!user) return userGroups;
 
-    // Others: show their last 3 activities
+    // Others: only show their most recent activity
     const othersGroups = userGroups
       .filter(g => g.userId !== user.id)
       .map(g => {
         const sorted = [...g.activities].sort((a, b) => b.dayNumber - a.dayNumber);
         return {
           ...g,
-          activities: sorted.slice(0, 3),
+          activities: sorted.length > 0 ? [sorted[0]] : [],
         };
       });
 
@@ -1692,7 +1692,7 @@ const Reel = () => {
             }}
             className="h-full"
           >
-            <CarouselContent className="h-full -ml-3" viewportClassName="h-full px-[40px] !overflow-visible">
+            <CarouselContent className="h-full -ml-3" viewportClassName="h-full px-[40px]">
               {effectiveUserGroups.map((group, idx) => {
                 const isCenter = idx === currentUserIndex;
                 const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
@@ -1794,23 +1794,23 @@ const Reel = () => {
                           {/* Stacked cards behind — fan out when centered, collapse when not */}
                           {showStackedCards && (
                             <>
-                              {/* Back card (deepest) — fans out right with more rotation */}
+                              {/* Back card (deepest) — fans out left with rotation */}
                               <motion.div
                                 key={`stack-back-${group.userId}`}
                                 animate={isCenter ? {
-                                  scale: 0.92,
-                                  opacity: 0.7,
-                                  y: -8,
-                                  x: 14,
-                                  rotate: 6,
+                                  scale: 0.88,
+                                  opacity: 0.5,
+                                  y: 18,
+                                  x: -12,
+                                  rotate: -3,
                                 } : {
-                                  scale: 0.95,
+                                  scale: 0.92,
                                   opacity: 0,
-                                  y: 0,
+                                  y: 8,
                                   x: 0,
                                   rotate: 0,
                                 }}
-                                transition={{ type: 'spring', stiffness: 180, damping: 20 }}
+                                transition={{ type: 'spring', stiffness: 200, damping: 22 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setShowHistoryGallery(true);
@@ -1823,7 +1823,11 @@ const Reel = () => {
                                   overflow: 'hidden',
                                   zIndex: 1,
                                   borderRadius: '14px',
-                                  border: '1px solid rgba(255,255,255,0.08)',
+                                  background: 'rgba(255,255,255,0.03)',
+                                  border: '1px solid rgba(255,255,255,0.10)',
+                                  boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.08)',
+                                  backdropFilter: 'blur(20px) saturate(1.6)',
+                                  WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
                                   transformOrigin: 'bottom center',
                                   pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
@@ -1831,26 +1835,29 @@ const Reel = () => {
                                 {backCardThumb ? (
                                   <img src={backCardThumb} alt="" className="w-full h-full object-cover" loading="lazy" />
                                 ) : (
-                                  <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(60,45,120,0.4) 0%, rgba(15,10,40,0.6) 100%)' }} />
+                                  <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(60,45,120,0.3) 0%, rgba(15,10,40,0.5) 100%)' }} />
                                 )}
+                                <div className="absolute inset-0 pointer-events-none" style={{
+                                  background: 'linear-gradient(170deg, rgba(255,255,255,0.06) 0%, transparent 30%)',
+                                }} />
                               </motion.div>
-                              {/* Middle card — fans out left with slight rotation */}
+                              {/* Middle card — fans out right with rotation */}
                               <motion.div
                                 key={`stack-mid-${group.userId}`}
                                 animate={isCenter ? {
-                                  scale: 0.95,
-                                  opacity: 0.85,
-                                  y: -4,
-                                  x: -10,
-                                  rotate: -3,
+                                  scale: 0.93,
+                                  opacity: 0.65,
+                                  y: 10,
+                                  x: 8,
+                                  rotate: 2,
                                 } : {
-                                  scale: 0.97,
+                                  scale: 0.95,
                                   opacity: 0,
-                                  y: 0,
+                                  y: 4,
                                   x: 0,
                                   rotate: 0,
                                 }}
-                                transition={{ type: 'spring', stiffness: 180, damping: 20 }}
+                                transition={{ type: 'spring', stiffness: 200, damping: 22 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setShowHistoryGallery(true);
@@ -1863,7 +1870,11 @@ const Reel = () => {
                                   overflow: 'hidden',
                                   zIndex: 2,
                                   borderRadius: '14px',
-                                  border: '1px solid rgba(255,255,255,0.12)',
+                                  background: 'rgba(255,255,255,0.04)',
+                                  border: '1px solid rgba(255,255,255,0.14)',
+                                  boxShadow: '0 8px 30px rgba(0,0,0,0.25), inset 0 0.5px 0 rgba(255,255,255,0.12)',
+                                  backdropFilter: 'blur(24px) saturate(1.8)',
+                                  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
                                   transformOrigin: 'bottom center',
                                   pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
@@ -1871,8 +1882,11 @@ const Reel = () => {
                                 {midCardThumb ? (
                                   <img src={midCardThumb} alt="" className="w-full h-full object-cover" loading="lazy" />
                                 ) : (
-                                  <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(70,50,130,0.35) 0%, rgba(15,10,40,0.55) 100%)' }} />
+                                  <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(70,50,130,0.25) 0%, rgba(15,10,40,0.45) 100%)' }} />
                                 )}
+                                <div className="absolute inset-0 pointer-events-none" style={{
+                                  background: 'linear-gradient(165deg, rgba(255,255,255,0.08) 0%, transparent 35%)',
+                                }} />
                               </motion.div>
                             </>
                           )}
@@ -1889,10 +1903,12 @@ const Reel = () => {
                               marginTop: '-10px',
                               zIndex: 3,
                               ...(showStackedCards && isCenter && !isLogActivityCard ? {
+                                boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.08)',
                                 border: '1px solid rgba(255,255,255,0.10)',
                               } : {}),
                               ...(isLogActivityCard ? {
                                 border: '1.5px solid rgba(139, 92, 246, 0.35)',
+                                boxShadow: '0 0 30px rgba(139, 92, 246, 0.15), inset 0 1px 1px rgba(255,255,255,0.05)',
                               } : {}),
                             }}
                           >
