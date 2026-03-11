@@ -417,43 +417,51 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 <div className="absolute pointer-events-none" style={{ left: 28, top: 0, width: 2, height: '100%', background: 'transparent', backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.18) 0px, rgba(255,255,255,0.18) 4px, transparent 4px, transparent 10px)', borderRadius: 1 }} />
 
                 {(() => {
-                  const sortedActivities = [...activities].filter(a => !a.isPlaceholder);
-                  const reversedActivities = [...sortedActivities].reverse();
-                  const remainingDays = 12 - sortedActivities.length;
+                  const realActivities = [...activities].filter(a => !a.isPlaceholder);
+                  // Activities already come sorted newest-first from parent — do NOT reverse
+                  const remainingDays = 12 - realActivities.length;
                   const getCardStyle = (index: number, dayNumber: number) => {
                     const seed = dayNumber * 7 + index * 13;
                     return { rotation: ((seed % 11) - 5) * 1.2, offsetX: ((seed * 3) % 7) - 2 };
                   };
-                  // Most recent activity (highest day_number)
-                  const mostRecentActivity = sortedActivities.length > 0 ? sortedActivities[sortedActivities.length - 1] : null;
+                  // Most recent activity = highest day_number
+                  const mostRecentActivity = realActivities.length > 0
+                    ? realActivities.reduce((best, a) => a.dayNumber > best.dayNumber ? a : best, realActivities[0])
+                    : null;
                   const isWithin24h = (act: GalleryActivity) => {
                     if (!act || !mostRecentActivity || act.id !== mostRecentActivity.id) return false;
-                    if (!act.createdAt) return true; // fallback: show if no timestamp
+                    if (!act.createdAt) return true;
                     const created = new Date(act.createdAt).getTime();
                     return Date.now() - created < 24 * 60 * 60 * 1000;
                   };
+
+                  // Hand-drawn doodle texts — randomly assigned per card
+                  const doodleTexts = [
+                    'felt good ✨', 'today was amazing 🔥', "let's go! 💪", 'will stay active 🏃',
+                    'crushed it! 💥', 'no excuses 🎯', 'beast mode 🐾', 'one more rep! 🏋️',
+                    'feeling alive ⚡', 'sweat & smile 😊', 'keep going! 🚀', 'earned it 🏆',
+                  ];
 
                   return (
                     <>
                       {/* End goal — certificate */}
                       <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
-                        <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: sortedActivities.length >= 12 ? 'linear-gradient(135deg, #F59E0B, #EF4444)' : 'rgba(255,255,255,0.08)', border: `2px solid ${sortedActivities.length >= 12 ? 'rgba(245,158,11,0.4)' : 'rgba(255,255,255,0.1)'}` }} />
-                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: sortedActivities.length >= 12 ? 'rgba(245,158,11,0.7)' : 'rgba(255,255,255,0.2)', transform: 'rotate(1deg)' }}>
-                          {sortedActivities.length >= 12 ? '🏆 journey complete! you did it!' : `🏆 ${remainingDays} ${remainingDays === 1 ? 'day' : 'days'} to go... keep pushing!`}
+                        <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: realActivities.length >= 12 ? 'linear-gradient(135deg, #F59E0B, #EF4444)' : 'rgba(255,255,255,0.08)', border: `2px solid ${realActivities.length >= 12 ? 'rgba(245,158,11,0.4)' : 'rgba(255,255,255,0.1)'}` }} />
+                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: realActivities.length >= 12 ? 'rgba(245,158,11,0.7)' : 'rgba(255,255,255,0.2)', transform: 'rotate(1deg)' }}>
+                          {realActivities.length >= 12 ? '🏆 journey complete! you did it!' : `🏆 ${remainingDays} ${remainingDays === 1 ? 'day' : 'days'} to go... keep pushing!`}
                         </p>
                       </div>
 
-                      {/* Activities: recent → oldest */}
-                      {reversedActivities.map((act, idx) => {
+                      {/* Activities: latest → oldest (already sorted) */}
+                      {realActivities.map((act, idx) => {
                     const { rotation, offsetX } = getCardStyle(idx, act.dayNumber);
                     const wk = Math.ceil(act.dayNumber / 3);
                     const dw = ((act.dayNumber - 1) % 3) + 1;
                     const isAtTop = topCardId === act.id;
-                    // When at top of scroll, use a random-ish tilt based on dayNumber
-                    const topTiltSeed = (act.dayNumber * 17 + idx * 7) % 13;
-                    const topTilt = ((topTiltSeed - 6) * 1.5);
-                    const activeRotation = isAtTop ? topTilt : rotation;
+                    // No tilt change on scroll — cards stay static
                     const canEdit = isOwnProfile && isWithin24h(act);
+                    const doodleText = doodleTexts[(act.dayNumber * 3 + idx * 7) % doodleTexts.length];
+                    const doodleOnRight = idx % 2 !== 0; // alternate sides
 
                     return (
                       <div
