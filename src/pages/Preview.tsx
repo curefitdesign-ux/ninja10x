@@ -29,7 +29,7 @@ import { useJourneyActivities } from '@/hooks/use-journey-activities';
 
 import { toast } from 'sonner';
 
-const FRAMES = ['token', 'holographic', 'shaky', 'journal', 'scrapbook', 'arcade', 'bold', 'vogue', 'fitness', 'ticket'] as const;
+const FRAMES = ['token', 'holographic', 'shaky', 'arcade', 'bold', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
 
 // Activity options with minimal line icons
