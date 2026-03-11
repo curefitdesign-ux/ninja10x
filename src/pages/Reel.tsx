@@ -1716,13 +1716,12 @@ const Reel = () => {
                         style={cardStyle}
                       >
                         <div
-                          className="overflow-hidden w-full h-full"
+                          className="overflow-hidden"
                           style={{
                             aspectRatio: '9/16',
-                            maxHeight: 'calc(95% - 10px)',
+                            height: 'calc(95% - 10px)',
+                            maxWidth: '100%',
                             filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                            background: 'transparent',
-                            border: 'none',
                           }}
                         >
                           {activity?.id === 'log-activity' ? (
