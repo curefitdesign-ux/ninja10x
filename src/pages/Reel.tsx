@@ -1685,7 +1685,7 @@ const Reel = () => {
             <CarouselContent className="h-full -ml-3" viewportClassName="h-full px-[24px]">
               {effectiveUserGroups.map((group, idx) => {
                 const isCenter = idx === currentUserIndex;
-                const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
+                const activities = [...(group.activities || [])].reverse();
                 const activity = isCenter
                   ? currentActivity
                   : activities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
