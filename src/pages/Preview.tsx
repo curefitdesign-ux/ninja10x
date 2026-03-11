@@ -819,8 +819,6 @@ const Preview = () => {
           label1Name={activityLabels.secondaryMetric}
           label2Name={activityLabels.primaryMetric}
         />;
-      case 'scrapbook':
-        return <ScrapbookFrame {...frameProps} />;
       case 'arcade':
         return <ArcadeFrame {...frameProps} />;
       case 'bold':
