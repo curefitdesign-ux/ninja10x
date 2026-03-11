@@ -363,59 +363,56 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   exit={{ opacity: 0, height: 0, paddingBottom: 0 }}
                   transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
                 >
-                   {/* Instagram Notes-style speech bubble */}
+                   {/* Instagram Notes-style thought bubble */}
                    {(() => {
                      const realCount = activities.filter(a => !a.isPlaceholder).length;
                      const remaining = 12 - realCount;
                      if (remaining > 0) {
                        const bubbleText = isOwnProfile !== false
-                         ? `I am ${remaining} ${remaining === 1 ? 'activity' : 'activities'} away from becoming Ninja 🥷`
-                         : `${userProfile.displayName} is ${remaining} ${remaining === 1 ? 'activity' : 'activities'} away from becoming Ninja 🥷`;
+                         ? `${remaining} ${remaining === 1 ? 'activity' : 'activities'} away from becoming Ninja`
+                         : `${userProfile.displayName} is ${remaining} ${remaining === 1 ? 'activity' : 'activities'} away from becoming Ninja`;
                        return (
                          <motion.div
-                           className="relative mb-1.5"
+                           className="relative mb-2"
                            initial={{ opacity: 0, y: 6, scale: 0.9 }}
                            animate={{ opacity: 1, y: 0, scale: 1 }}
                            transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 20 }}
                          >
                            <div
                              style={{
-                               background: 'rgba(255,255,255,0.12)',
-                               backdropFilter: 'blur(40px) saturate(180%)',
-                               WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                               border: '1px solid rgba(255,255,255,0.15)',
-                               borderRadius: 18,
-                               padding: '8px 14px',
-                               maxWidth: 220,
-                               boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.3)',
+                               background: '#FFFFFF',
+                               borderRadius: 20,
+                               padding: '8px 16px',
+                               maxWidth: 210,
+                               boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
                              }}
                            >
                              <p style={{
                                fontFamily: "'Inter', -apple-system, sans-serif",
                                fontSize: 12,
                                fontWeight: 500,
-                               lineHeight: 1.4,
-                               color: 'rgba(255,255,255,0.85)',
+                               lineHeight: 1.35,
+                               color: '#1a1a1a',
                                margin: 0,
                                textAlign: 'center',
                              }}>
                                {bubbleText}
                              </p>
                            </div>
-                           {/* Bubble tail pointing down to avatar */}
+                           {/* Thought bubble dots */}
                            <div style={{
                              position: 'absolute',
                              left: '50%',
-                             bottom: -6,
-                             transform: 'translateX(-50%) rotate(45deg)',
-                             width: 12,
-                             height: 12,
-                             background: 'rgba(255,255,255,0.12)',
-                             border: '1px solid rgba(255,255,255,0.15)',
-                             borderTop: 'none',
-                             borderLeft: 'none',
-                             borderRadius: 2,
-                           }} />
+                             bottom: -8,
+                             transform: 'translateX(-50%)',
+                             display: 'flex',
+                             flexDirection: 'column',
+                             alignItems: 'center',
+                             gap: 2,
+                           }}>
+                             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }} />
+                             <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#FFFFFF', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }} />
+                           </div>
                          </motion.div>
                        );
                      }
