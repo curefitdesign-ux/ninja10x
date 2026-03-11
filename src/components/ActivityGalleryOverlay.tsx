@@ -84,6 +84,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [nudgeCount, setNudgeCount] = useState(0);
   const [nudgeRotation, setNudgeRotation] = useState(0);
   const [nudgeNumberBehind, setNudgeNumberBehind] = useState(false);
+  const [topCardId, setTopCardId] = useState<string | null>(null);
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const nudgeAudioRef = useRef<HTMLAudioElement | null>(null);
   const nudgeHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
