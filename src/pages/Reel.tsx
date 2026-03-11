@@ -1951,8 +1951,12 @@ const Reel = () => {
                                     />
                                   </motion.div>
 
-                                  {/* Glowing plus — simple zoom in/out */}
-                                  <div className="relative flex items-center justify-center mb-5" style={{ width: 90, height: 90 }}>
+                                  {/* Glowing plus — simple zoom in/out, tapping opens camera/gallery */}
+                                  <button
+                                    className="relative flex items-center justify-center mb-5 active:scale-95 transition-transform"
+                                    style={{ width: 90, height: 90 }}
+                                    onClick={(e) => { e.stopPropagation(); setShowEditSheet(true); }}
+                                  >
                                     <motion.div 
                                       className="absolute inset-0 rounded-full"
                                       style={{
@@ -1971,7 +1975,7 @@ const Reel = () => {
                                       <rect x="20" y="6" width="8" height="36" rx="4" fill="#C4A1FF" />
                                       <rect x="6" y="20" width="36" height="8" rx="4" fill="#C4A1FF" />
                                     </motion.svg>
-                                  </div>
+                                  </button>
 
                                   {/* Label */}
                                   <p className="text-white/40 text-xs font-medium uppercase tracking-widest">
