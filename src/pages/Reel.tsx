@@ -631,6 +631,24 @@ const Reel = () => {
   const prevUserIndexRef = useRef(currentUserIndex);
 
   
+  // Update connector X position to track active avatar
+  const updateConnectorPosition = useCallback(() => {
+    const topZone = topZoneRef.current;
+    if (!topZone) return;
+    
+    // Find the active avatar element (own or other)
+    const ownIdx = effectiveUserGroups.findIndex(g => user && g.userId === user.id);
+    const isOwnActive = ownIdx >= 0 && ownIdx === currentUserIndex;
+    const activeEl = isOwnActive ? ownAvatarRef.current : activeAvatarRef.current;
+    
+    if (activeEl) {
+      const topRect = topZone.getBoundingClientRect();
+      const avatarRect = activeEl.getBoundingClientRect();
+      const centerX = avatarRect.left + avatarRect.width / 2 - topRect.left;
+      setConnectorX(centerX);
+    }
+  }, [currentUserIndex, effectiveUserGroups, user]);
+
   // Flash highlight + center active avatar ONLY when user changes
   useEffect(() => {
     if (currentUserIndex !== prevUserIndexRef.current) {
@@ -651,7 +669,9 @@ const Reel = () => {
         });
       }
     }
-  }, [currentUserIndex]);
+    // Update connector position after any scroll/rerender
+    requestAnimationFrame(() => updateConnectorPosition());
+  }, [currentUserIndex, updateConnectorPosition]);
 
   // Mark the current user as viewed AFTER their story finishes (handled by cycleActivity)
   // Don't mark immediately — let the progress ring complete first
