@@ -81,6 +81,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isScrolled, setIsScrolled] = useState(false);
   const [nudgeBellAnim, setNudgeBellAnim] = useState(false);
+  const [nudgeCount, setNudgeCount] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const portalContainer = usePortalContainer();
   const { user } = useAuth();
