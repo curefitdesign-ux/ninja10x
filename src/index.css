@@ -181,7 +181,7 @@ body::after {
 
   /* Mobile-only viewport */
   html {
-    background: hsl(248 60% 7%);
+    background: hsl(215 60% 10%);
   }
 
   html, body, #root {
