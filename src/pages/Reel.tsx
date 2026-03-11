@@ -374,8 +374,10 @@ const Reel = () => {
       }],
     };
 
-    // Keep stable order — no reordering based on viewed status to prevent scroll jumps
-    const allGroups = [myGroup, ...othersGroups];
+    // Reorder: unviewed users first, then viewed users pushed to back
+    const unviewedOthers = othersGroups.filter(g => !viewedUsers.has(g.userId));
+    const viewedOthers = othersGroups.filter(g => viewedUsers.has(g.userId));
+    const allGroups = [myGroup, ...unviewedOthers, ...viewedOthers];
 
     // Insert deep-link group right after own group so navigation finds it
     if (deepLinkGroup) {
