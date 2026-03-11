@@ -25,7 +25,8 @@ const Progress = lazy(() => import("./pages/Progress"));
 const Camera = lazy(() => import("./pages/Camera"));
 const Gallery = lazy(() => import("./pages/Gallery"));
 const Reel = lazy(() => import("./pages/Reel"));
-const ReelGenerationBase = lazy(() => import("./pages/ReelGeneration"));
+// ReelGeneration temporarily disabled
+// const ReelGenerationBase = lazy(() => import("./pages/ReelGeneration"));
 const ProfileSetupPage = lazy(() => import("./pages/ProfileSetupPage"));
 const AvatarCrop = lazy(() => import("./pages/AvatarCrop"));
 const NotFound = lazy(() => import("./pages/NotFound"));
