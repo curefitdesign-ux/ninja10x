@@ -838,7 +838,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               )}
             </AnimatePresence>, document.body
           )}
-        </DynamicBlurBackground>
+        </div>
+        </div>
         </motion.div>
       )}
     </AnimatePresence>
