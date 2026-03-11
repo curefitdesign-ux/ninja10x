@@ -1647,28 +1647,6 @@ const Reel = () => {
         </div>{/* end top zone */}
 
 
-        {/* Share button row (Week/Day label hidden) */}
-        {currentGroup && currentActivity && (
-          <div className="z-40 flex items-center justify-end px-4 shrink-0" style={{ marginBottom: '2px' }}>
-            {isOwnStory && !isWeekRecapStory && !isLogActivityCard && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleShareStory();
-                }}
-                className="shrink-0 active:scale-95 transition-transform"
-                style={{
-                  width: 32, height: 32, borderRadius: 16,
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.06)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}
-              >
-                <Share2 className="w-[14px] h-[14px] text-white/60" strokeWidth={1.5} />
-              </button>
-            )}
-          </div>
-        )}
 
         {/* MIDDLE CONTAINER — flexes between profile strip and bottom nav */}
         <div
