@@ -374,8 +374,10 @@ const Reel = () => {
       }],
     };
 
-    // Keep stable order — no reordering based on viewed status to prevent scroll jumps
-    const allGroups = [myGroup, ...othersGroups];
+    // Reorder: unviewed users first, then viewed users pushed to back
+    const unviewedOthers = othersGroups.filter(g => !viewedUsers.has(g.userId));
+    const viewedOthers = othersGroups.filter(g => viewedUsers.has(g.userId));
+    const allGroups = [myGroup, ...unviewedOthers, ...viewedOthers];
 
     // Insert deep-link group right after own group so navigation finds it
     if (deepLinkGroup) {
@@ -1559,8 +1561,7 @@ const Reel = () => {
                         }}
                       >
                         <div className="relative" style={{ width: avatarSize, height: avatarSize }}>
-                        {/* Story ring: gradient if unviewed, white progress if viewed & active */}
-                        {(!isUserViewed || isActive) && (
+                        {/* Story ring: gradient if unviewed, white if viewed, progress if active */}
                         <svg
                           className="absolute inset-0"
                           style={{
@@ -1581,7 +1582,7 @@ const Reel = () => {
                           </defs>
                           {/* Background track */}
                           <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
-                            stroke={isStoryLocked ? 'rgba(255,255,255,0.15)' : (isActive ? 'rgba(255,255,255,0.15)' : `url(#storyGradient-${group.userId})`)}
+                            stroke={isStoryLocked ? 'rgba(255,255,255,0.15)' : (isActive ? 'rgba(255,255,255,0.15)' : (isUserViewed ? 'rgba(255,255,255,0.3)' : `url(#storyGradient-${group.userId})`))}
                             strokeLinecap="round"
                             style={{ filter: (!isStoryLocked && !isActive && !isUserViewed) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none' }}
                           />
@@ -1589,7 +1590,6 @@ const Reel = () => {
                           {isActive && !isStoryLocked && (() => {
                             const totalActivities = group.activities.length;
                             const circumference = 2 * Math.PI * 44;
-                            // Completed segments + current segment progress
                             const completedFraction = currentIdx / totalActivities;
                             const currentSegmentFraction = (autoAdvanceProgress > 0 ? 1 : 0) / totalActivities;
                             const totalFraction = completedFraction + currentSegmentFraction;
@@ -1609,7 +1609,6 @@ const Reel = () => {
                             );
                           })()}
                         </svg>
-                        )}
                         
                         {/* Avatar - ALWAYS visible and clear (never locked/blurred) */}
                         <div
