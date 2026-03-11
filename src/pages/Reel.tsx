@@ -1807,15 +1807,18 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   width: '78%',
-                                  height: 21,
+                                  height: 38,
                                   bottom: 36,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
                                   borderRadius: `0 0 ${cardRadius - 3}px ${cardRadius - 3}px`,
-                                  background: 'rgba(255,255,255,0.03)',
-                                  border: '1px solid rgba(255,255,255,0.06)',
+                                  background: 'rgba(255,255,255,0.04)',
+                                  backdropFilter: 'blur(16px) saturate(180%)',
+                                  WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                                  border: '1px solid rgba(255,255,255,0.10)',
                                   borderTop: 'none',
+                                  boxShadow: 'inset 0 -1px 1px rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.2)',
                                 }}
                               />
                             )}
@@ -1826,17 +1829,39 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   width: '84%',
-                                  height: 21,
+                                  height: 38,
                                   bottom: 43,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 2,
                                   borderRadius: `0 0 ${cardRadius - 2}px ${cardRadius - 2}px`,
-                                  background: 'rgba(255,255,255,0.06)',
-                                  border: '1px solid rgba(255,255,255,0.10)',
+                                  background: 'rgba(255,255,255,0.07)',
+                                  backdropFilter: 'blur(20px) saturate(200%)',
+                                  WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+                                  border: '1px solid rgba(255,255,255,0.15)',
                                   borderTop: 'none',
+                                  boxShadow: 'inset 0 -1px 1px rgba(255,255,255,0.08), 0 2px 8px rgba(0,0,0,0.15)',
                                 }}
                               />
+                            )}
+                            {/* "Tap to view journey" hint text below strips */}
+                            {showStackedCards && (
+                              <div
+                                onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
+                                className="absolute cursor-pointer flex flex-col items-center"
+                                style={{
+                                  bottom: 4,
+                                  left: '50%',
+                                  transform: 'translateX(-50%)',
+                                  zIndex: 1,
+                                }}
+                              >
+                                <svg width="28" height="18" viewBox="0 0 28 18" fill="none" style={{ marginBottom: -2 }}>
+                                  <path d="M14 2 C10 2, 6 8, 14 14 C22 8, 18 2, 14 2" stroke="rgba(255,255,255,0.35)" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+                                  <path d="M12 4 L14 1 L16 4" stroke="rgba(255,255,255,0.35)" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                <span style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: 'rgba(255,255,255,0.35)', letterSpacing: 0.5 }}>tap to view journey</span>
+                              </div>
                             )}
                             {/* Main card */}
                             <div
@@ -2256,30 +2281,8 @@ const Reel = () => {
                   )}
                   </button>
 
-                   {/* Sticker-style View Progress badge */}
                    <div className="flex items-center gap-2 shrink-0">
-                    {!isLogActivityCard && !isWeekRecapStory && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowHistoryGallery(true);
-                        }}
-                        className="shrink-0 active:scale-[0.93] transition-all duration-150 flex items-center gap-1.5 whitespace-nowrap"
-                        style={{
-                          height: 46,
-                          borderRadius: 23,
-                          paddingLeft: 14,
-                          paddingRight: 16,
-                          background: 'linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04))',
-                          border: '1.5px solid rgba(255,255,255,0.1)',
-                          boxShadow: '0 4px 16px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.08) inset, 0 -1px 0 rgba(0,0,0,0.2) inset',
-                        }}
-                      >
-                        <span className="text-sm">📈</span>
-                        <span className="text-white/75 text-xs font-bold uppercase tracking-wide" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>Journey</span>
-                      </button>
-                    )}
-                  </div>
+                   </div>
                 </div>
               </div>
             );
