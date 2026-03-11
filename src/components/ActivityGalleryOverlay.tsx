@@ -579,11 +579,12 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         realActivities.forEach((act, idx) => {
                           const wk = Math.ceil(act.dayNumber / 3);
 
-                          // Insert week separator when week changes (activities are newest-first, so week decreases)
-                          if (lastWeek !== null && wk !== lastWeek) {
-                            const separatorWeek = lastWeek; // the week that just ended above
+                          // Insert "Week X Reel Ready" above the last activity of each completed week
+                          // dayNumber 3 = end of W1, 6 = W2, 9 = W3, 12 = W4
+                          if (act.dayNumber % 3 === 0) {
+                            const reelWeek = act.dayNumber / 3;
                             elements.push(
-                              <div key={`week-sep-${separatorWeek}`} className="relative" style={{ padding: '20px 16px 20px 48px', margin: '12px 0' }}>
+                              <div key={`week-reel-${reelWeek}`} className="relative" style={{ padding: '20px 16px 20px 48px', margin: '12px 0' }}>
                                 {/* AI Star sparkle on the dotted line */}
                                 <div className="absolute" style={{ left: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 36, height: 36 }}>
                                   <img src={aiStarSparkle} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 8px rgba(147,130,220,0.5))' }} />
@@ -606,11 +607,16 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                     color: 'rgba(255,255,255,0.85)',
                                     textTransform: 'uppercase',
                                   }}>
-                                    Week {separatorWeek} Reel Generated
+                                    Week {reelWeek} Reel Ready
                                   </span>
                                 </div>
                               </div>
                             );
+                          }
+
+                          // Insert week header when week changes
+                          if (lastWeek !== null && wk !== lastWeek) {
+                            // week header handled elsewhere if needed
                           }
                           lastWeek = wk;
 
