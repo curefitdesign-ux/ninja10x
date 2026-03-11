@@ -512,37 +512,39 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       {/* Ninja milestone - above latest card */}
                       {(() => {
                         const remaining = 12 - realActivities.length;
+                        // Gather unique activities for context
+                        const uniqueActivities = [...new Set(realActivities.map(a => a.activity).filter(Boolean))];
+                        const activityList = uniqueActivities.length > 0 
+                          ? uniqueActivities.slice(0, 3).join(', ').toLowerCase()
+                          : 'workouts';
+                        
                         if (remaining > 0) {
-                          const ninjaText = isOwnProfile !== false
-                            ? `${remaining} ${remaining === 1 ? 'activity' : 'activities'} away from becoming Ninja`
-                            : `${userProfile?.displayName || 'They'} — ${remaining} away from Ninja`;
                           return (
-                            <div className="relative" style={{ padding: '8px 16px 4px 48px', marginBottom: 4 }}>
-                              {/* Timeline dot - goal marker */}
+                            <div className="relative" style={{ padding: '8px 16px 12px 48px', marginBottom: 8 }}>
+                              {/* Timeline dot - flag milestone */}
                               <div className="absolute" style={{
-                                left: 20, top: 14, width: 18, height: 18, borderRadius: '50%',
-                                background: 'linear-gradient(135deg, rgba(249,115,22,0.6), rgba(236,72,153,0.6))',
-                                border: '2px solid rgba(255,255,255,0.2)',
-                                boxShadow: '0 0 14px rgba(249,115,22,0.3)',
+                                left: 18, top: 12, width: 22, height: 22, borderRadius: '50%',
+                                background: 'linear-gradient(135deg, rgba(249,115,22,0.5), rgba(236,72,153,0.5))',
+                                border: '2px solid rgba(255,255,255,0.15)',
+                                boxShadow: '0 0 14px rgba(249,115,22,0.25)',
                                 zIndex: 5,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                               }}>
-                                <span style={{ fontSize: 9, lineHeight: 1 }}>🥷</span>
+                                <span style={{ fontSize: 11, lineHeight: 1 }}>🏁</span>
                               </div>
                               <p style={{
                                 fontFamily: "'Caveat', cursive",
-                                fontSize: 22,
+                                fontSize: 21,
                                 fontWeight: 700,
-                                color: 'rgba(255,255,255,0.5)',
+                                color: 'rgba(255,255,255,0.55)',
                                 transform: 'rotate(-1.5deg)',
-                                lineHeight: 1.3,
-                                marginBottom: 2,
+                                lineHeight: 1.35,
                               }}>
-                                {ninjaText}
+                                {remaining} more {activityList} sessions{'\n'}to become a <span style={{ color: 'rgba(249,115,22,0.75)', fontWeight: 800 }}>Cult Ninja</span>
                               </p>
-                              {/* Dashed connector to next card */}
+                              {/* Dashed connector */}
                               <div style={{
-                                position: 'absolute', left: 28, bottom: -8, width: 2, height: 16,
+                                position: 'absolute', left: 28, bottom: -6, width: 2, height: 14,
                                 backgroundImage: 'repeating-linear-gradient(to bottom, rgba(249,115,22,0.3) 0px, rgba(249,115,22,0.3) 3px, transparent 3px, transparent 7px)',
                               }} />
                             </div>
@@ -550,16 +552,16 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         }
                         if (realActivities.length >= 12) {
                           return (
-                            <div className="relative" style={{ padding: '8px 16px 4px 48px', marginBottom: 4 }}>
+                            <div className="relative" style={{ padding: '8px 16px 12px 48px', marginBottom: 8 }}>
                               <div className="absolute" style={{
-                                left: 20, top: 14, width: 18, height: 18, borderRadius: '50%',
+                                left: 18, top: 12, width: 22, height: 22, borderRadius: '50%',
                                 background: 'linear-gradient(135deg, #F97316, #EC4899)',
                                 border: '2px solid rgba(255,255,255,0.3)',
                                 boxShadow: '0 0 16px rgba(249,115,22,0.4)',
                                 zIndex: 5,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                               }}>
-                                <span style={{ fontSize: 9, lineHeight: 1 }}>🥷</span>
+                                <span style={{ fontSize: 11, lineHeight: 1 }}>🏁</span>
                               </div>
                               <p style={{
                                 fontFamily: "'Caveat', cursive",
@@ -569,7 +571,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 transform: 'rotate(-1deg)',
                                 lineHeight: 1.3,
                               }}>
-                                You are a Ninja! 🏆
+                                <span style={{ color: 'rgba(249,115,22,0.85)', fontWeight: 800 }}>Cult Ninja</span> unlocked! 🏆
                               </p>
                             </div>
                           );
