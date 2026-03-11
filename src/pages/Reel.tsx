@@ -1719,38 +1719,12 @@ const Reel = () => {
                         className="flex items-center justify-center w-full h-full pointer-events-none"
                         style={cardStyle}
                       >
-                        {/* Outer wrapper for stacked deck effect on peek cards */}
+                        {/* Simple peek card — no stacked strips */}
                         <div className="relative" style={{
                           aspectRatio: '9/16',
                           height: isLogCard ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
                           maxWidth: '100%',
                         }}>
-                          {/* Back pseudo-card strip */}
-                          <div style={{
-                            position: 'absolute',
-                            bottom: -16,
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            width: '82%',
-                            height: 14,
-                            borderRadius: `0 0 ${cardRadius - 2}px ${cardRadius - 2}px`,
-                            background: 'rgba(255,255,255,0.04)',
-                            border: '1px solid rgba(255,255,255,0.06)',
-                            borderTop: 'none',
-                          }} />
-                          {/* Mid pseudo-card strip */}
-                          <div style={{
-                            position: 'absolute',
-                            bottom: -8,
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            width: '91%',
-                            height: 14,
-                            borderRadius: `0 0 ${cardRadius - 1}px ${cardRadius - 1}px`,
-                            background: 'rgba(255,255,255,0.06)',
-                            border: '1px solid rgba(255,255,255,0.08)',
-                            borderTop: 'none',
-                          }} />
                           {/* Main peek card */}
                           <div
                             className="overflow-hidden w-full h-full"
