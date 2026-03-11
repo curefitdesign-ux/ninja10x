@@ -49,6 +49,7 @@ export interface GalleryActivity {
   reactions?: Partial<Record<ReactionType, ActivityReaction>>;
   reactorProfiles?: ReactorProfile[];
   isPlaceholder?: boolean;
+  createdAt?: string;
 }
 
 interface UserProfileInfo {
@@ -84,6 +85,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [nudgeCount, setNudgeCount] = useState(0);
   const [nudgeRotation, setNudgeRotation] = useState(0);
   const [nudgeNumberBehind, setNudgeNumberBehind] = useState(false);
+  const [topCardId, setTopCardId] = useState<string | null>(null);
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const nudgeAudioRef = useRef<HTMLAudioElement | null>(null);
   const nudgeHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -387,6 +390,21 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               onScroll={(e) => {
                 const scrollTop = (e.target as HTMLDivElement).scrollTop;
                 setIsScrolled(scrollTop > 30);
+                // Determine which card is at the top of the scroll viewport
+                const scrollEl = e.target as HTMLDivElement;
+                const scrollRect = scrollEl.getBoundingClientRect();
+                let closestId: string | null = null;
+                let closestDist = Infinity;
+                for (const [id, el] of Object.entries(cardRefs.current)) {
+                  if (!el) continue;
+                  const rect = el.getBoundingClientRect();
+                  const dist = Math.abs(rect.top - scrollRect.top - 60);
+                  if (dist < closestDist && rect.top < scrollRect.top + 200) {
+                    closestDist = dist;
+                    closestId = id;
+                  }
+                }
+                setTopCardId(closestId);
               }}
             >
               <div className="relative" style={{ minHeight: '100%' }}>
@@ -396,18 +414,24 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   backgroundPosition: '0 20px',
                 }} />
                 {/* Straight timeline line */}
-                <div className="absolute pointer-events-none" style={{ left: 28, top: 0, width: 2, height: '100%', background: 'rgba(255,255,255,0.1)', backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 6px, transparent 6px, transparent 12px)' }} />
+                <div className="absolute pointer-events-none" style={{ left: 28, top: 0, width: 2, height: '100%', background: 'transparent', backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.18) 0px, rgba(255,255,255,0.18) 4px, transparent 4px, transparent 10px)', borderRadius: 1 }} />
 
                 {(() => {
                   const sortedActivities = [...activities].filter(a => !a.isPlaceholder);
-                  // Reverse: show from end-goal down to oldest (most recent first, oldest last)
                   const reversedActivities = [...sortedActivities].reverse();
                   const remainingDays = 12 - sortedActivities.length;
                   const getCardStyle = (index: number, dayNumber: number) => {
                     const seed = dayNumber * 7 + index * 13;
-                    return { rotation: ((seed % 11) - 5) * 1.2, offsetX: ((seed * 3) % 7) - 2, decorType: seed % 5 };
+                    return { rotation: ((seed % 11) - 5) * 1.2, offsetX: ((seed * 3) % 7) - 2 };
                   };
-                  const handDates = ['just now ✨','yesterday','a few days ago','last week','feeling strong 💪','what a session!','crushed it 🔥','new PR day','getting better','consistency > all','momentum building','unstoppable 🚀'];
+                  // Most recent activity (highest day_number)
+                  const mostRecentActivity = sortedActivities.length > 0 ? sortedActivities[sortedActivities.length - 1] : null;
+                  const isWithin24h = (act: GalleryActivity) => {
+                    if (!act || !mostRecentActivity || act.id !== mostRecentActivity.id) return false;
+                    if (!act.createdAt) return true; // fallback: show if no timestamp
+                    const created = new Date(act.createdAt).getTime();
+                    return Date.now() - created < 24 * 60 * 60 * 1000;
+                  };
 
                   return (
                     <>
@@ -421,44 +445,54 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                       {/* Activities: recent → oldest */}
                       {reversedActivities.map((act, idx) => {
-                    const { rotation, offsetX, decorType } = getCardStyle(idx, act.dayNumber);
+                    const { rotation, offsetX } = getCardStyle(idx, act.dayNumber);
                     const wk = Math.ceil(act.dayNumber / 3);
                     const dw = ((act.dayNumber - 1) % 3) + 1;
-                    const isSelected = act.id === current.id;
-                    const handDate = handDates[act.dayNumber - 1] || handDates[idx % handDates.length];
-                    
+                    const isAtTop = topCardId === act.id;
+                    // When at top of scroll, use a random-ish tilt based on dayNumber
+                    const topTiltSeed = (act.dayNumber * 17 + idx * 7) % 13;
+                    const topTilt = ((topTiltSeed - 6) * 1.5);
+                    const activeRotation = isAtTop ? topTilt : rotation;
+                    const canEdit = isOwnProfile && isWithin24h(act);
 
                     return (
-                      <motion.div
-                        key={act.id} className="relative"
+                      <div
+                        key={act.id}
+                        ref={(el) => { cardRefs.current[act.id] = el; }}
+                        className="relative"
                         style={{ padding: '12px 16px 12px 48px', marginBottom: idx < reversedActivities.length - 1 ? 16 : 0 }}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.06, type: 'spring', stiffness: 200, damping: 20 }}
                       >
                         {/* Timeline dot */}
                         <div className="absolute rounded-full" style={{
                           left: 22, top: 28, width: 14, height: 14,
-                          background: isSelected ? 'linear-gradient(135deg, #34D399, #10B981)' : 'rgba(255,255,255,0.15)',
-                          border: `2px solid ${isSelected ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.1)'}`,
-                          boxShadow: isSelected ? '0 0 12px rgba(52,211,153,0.4)' : 'none', zIndex: 5,
+                          background: isAtTop ? 'linear-gradient(135deg, #34D399, #10B981)' : 'rgba(255,255,255,0.15)',
+                          border: `2px solid ${isAtTop ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                          boxShadow: isAtTop ? '0 0 12px rgba(52,211,153,0.4)' : 'none', zIndex: 5,
+                          transition: 'all 0.3s ease',
                         }} />
 
-                        {/* Handwritten date */}
-                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 18, color: 'rgba(255,255,255,0.45)', marginBottom: 6, transform: `rotate(${rotation * 0.3}deg)`, marginLeft: offsetX }}>
-                          W{wk} · Activity {dw} — <span style={{ color: 'rgba(255,255,255,0.3)' }}>{handDate}</span>
+                        {/* Handwritten date — highlighted when at top */}
+                        <p style={{
+                          fontFamily: "'Caveat', cursive", fontSize: 18,
+                          color: isAtTop ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.45)',
+                          marginBottom: 6,
+                          transform: `rotate(${activeRotation * 0.3}deg)`,
+                          marginLeft: offsetX,
+                          transition: 'color 0.3s ease',
+                          fontWeight: isAtTop ? 700 : 400,
+                        }}>
+                          W{wk} · Activity {dw}
                         </p>
 
-                        {/* Card */}
-                        <motion.div
-                          className="relative overflow-visible cursor-pointer"
+                        {/* Card — not tappable */}
+                        <div
+                          className="relative overflow-visible"
                           style={{
                             width: '62%', aspectRatio: '9/16', borderRadius: 4,
-                            transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
+                            transform: `rotate(${activeRotation}deg) translateX(${offsetX}px)`,
                             marginLeft: idx % 2 === 0 ? '0%' : '10%',
+                            transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
                           }}
-                          onClick={() => { const ri = activities.findIndex(a => a.id === act.id); if (ri >= 0) setCurrentIndex(ri); }}
-                          whileTap={{ scale: 0.97 }}
                         >
                           <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4, containerType: 'inline-size' }}>
                             {act.frame ? (
@@ -466,11 +500,77 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             ) : act.isVideo ? (
                               <video src={act.originalUrl || act.storageUrl} className="absolute inset-0 w-full h-full object-cover" muted playsInline />
                             ) : (
-                              <img src={act.originalUrl || act.storageUrl} alt={`Day ${act.dayNumber}`} className="absolute inset-0 w-full h-full object-cover" />
+                              <img src={act.originalUrl || act.storageUrl} alt={`Activity ${act.dayNumber}`} className="absolute inset-0 w-full h-full object-cover" />
                             )}
                           </div>
-                        </motion.div>
-                      </motion.div>
+
+                          {/* Activity name tag */}
+                          {act.activity && (
+                            <div className="absolute pointer-events-none" style={{
+                              bottom: -12, right: -8, background: 'rgba(255,255,255,0.1)',
+                              backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                              border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
+                              transform: `rotate(${-activeRotation * 0.5}deg)`,
+                            }}>
+                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
+                            </div>
+                          )}
+
+                          {/* Reaction count + react button */}
+                          {(() => {
+                            const ar = localReactions[act.id];
+                            const total = ar?.total || 0;
+                            return (
+                              <div className="absolute flex items-center gap-1" style={{
+                                bottom: -10, left: -6, zIndex: 30,
+                                transform: `rotate(${-activeRotation * 0.6}deg)`,
+                              }}>
+                                {total > 0 && (
+                                  <span style={{
+                                    fontFamily: "'Caveat', cursive", fontSize: 16,
+                                    color: 'rgba(255,255,255,0.55)',
+                                    textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                                  }}>
+                                    {total} ❤️
+                                  </span>
+                                )}
+                                {!isOwnProfile && (
+                                  <button
+                                    className="flex items-center gap-0.5 active:scale-90 transition-transform"
+                                    style={{
+                                      background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
+                                      borderRadius: 14, padding: '3px 8px',
+                                      border: '1px solid rgba(255,255,255,0.12)',
+                                    }}
+                                    onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}
+                                  >
+                                    <span style={{ fontSize: 12 }}>🔥</span>
+                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>React</span>
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })()}
+
+                          {/* Edit button — only on most recent, own profile */}
+                          {canEdit && (
+                            <button
+                              className="absolute flex items-center gap-1 active:scale-90 transition-transform"
+                              style={{
+                                top: -10, left: -6, zIndex: 30,
+                                background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)',
+                                borderRadius: 14, padding: '4px 10px',
+                                border: '1px solid rgba(255,255,255,0.15)',
+                                transform: `rotate(${-activeRotation * 0.5}deg)`,
+                              }}
+                              onClick={(e) => { e.stopPropagation(); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowEditSheet(true); }}
+                            >
+                              <Pencil className="w-3 h-3 text-white/60" />
+                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Edit</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     );
                   })}
 
