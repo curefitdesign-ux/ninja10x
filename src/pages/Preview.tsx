@@ -1087,7 +1087,7 @@ const Preview = () => {
       style={{ 
         height: '100dvh',
         minHeight: '-webkit-fill-available',
-        backgroundColor: '#252535',
+        backgroundColor: '#0a1628',
         overflow: 'hidden',
       }}
     >
