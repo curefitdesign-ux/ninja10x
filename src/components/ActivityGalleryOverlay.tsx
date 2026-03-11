@@ -428,9 +428,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   const mostRecentActivity = sortedActivities.length > 0 ? sortedActivities[sortedActivities.length - 1] : null;
                   const isWithin24h = (act: GalleryActivity) => {
                     if (!act || !mostRecentActivity || act.id !== mostRecentActivity.id) return false;
-                    // Check created_at from activities array — we use dayNumber as proxy; real check needs timestamp
-                    // For now, always show edit on most recent if own profile
-                    return true;
+                    if (!act.createdAt) return true; // fallback: show if no timestamp
+                    const created = new Date(act.createdAt).getTime();
+                    return Date.now() - created < 24 * 60 * 60 * 1000;
                   };
 
                   return (
