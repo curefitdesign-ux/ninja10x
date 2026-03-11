@@ -1453,7 +1453,7 @@ const Reel = () => {
                     }}
                   >
                     <div className="relative" style={{ width: avatarSize, height: avatarSize }}>
-                      {ownGroup && ownActivityCount > 0 && (!viewedUsers.has(user?.id || '') || isOwnActive) && (
+                      {ownGroup && ownActivityCount > 0 && (
                         <svg
                           className="absolute inset-0"
                           style={{ width: avatarSize, height: avatarSize, transform: 'rotate(-90deg)' }}
