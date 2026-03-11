@@ -1709,7 +1709,7 @@ const Reel = () => {
                 };
 
                 if (!isCenter) {
-                  // Peek cards: stacked deck look with rounded corners matching reference
+                  // Peek cards: simple card, no container or stacked strips
                   return (
                     <CarouselItem
                       key={`card-${group.userId}`}
@@ -1719,60 +1719,49 @@ const Reel = () => {
                         className="flex items-center justify-center w-full h-full pointer-events-none"
                         style={cardStyle}
                       >
-                        {/* Simple peek card — no stacked strips */}
-                        <div className="relative" style={{
-                          aspectRatio: '9/16',
-                          height: isLogCard ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
-                          maxWidth: '100%',
-                        }}>
-                          {/* Main peek card */}
-                          <div
-                            className="overflow-hidden w-full h-full"
-                            style={{
-                              borderRadius: `${cardRadius}px`,
-                              filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                              background: isLogCard ? '#0a0a12' : 'transparent',
-                              border: isLogCard
-                                ? '1px solid rgba(160, 120, 255, 0.25)'
-                                : '1px solid rgba(255,255,255,0.08)',
-                              boxShadow: isLogCard
-                                ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 0 20px rgba(140, 100, 240, 0.15)'
-                                : '0 8px 30px rgba(0,0,0,0.4)',
-                            }}
-                          >
-                            {isLogCard ? (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <div className="w-full h-full flex flex-col items-center justify-center gap-5 px-6 text-center">
-                                  <div style={{ width: 92, height: 92, borderRadius: '50%', overflow: 'hidden' }}>
-                                    <video src="/videos/curo-peeking.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                  </div>
-                                  <p className="text-white/80 font-semibold leading-tight" style={{ fontSize: 18 }}>Log your activity today</p>
-                                  <div className="flex items-center justify-center" style={{ width: 54, height: 54 }}>
-                                    <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
-                                      <rect x="20" y="6" width="8" height="36" rx="4" fill="rgba(196,161,255,0.95)" />
-                                      <rect x="6" y="20" width="36" height="8" rx="4" fill="rgba(196,161,255,0.95)" />
-                                    </svg>
-                                  </div>
+                        <div
+                          className="overflow-hidden"
+                          style={{
+                            aspectRatio: '9/16',
+                            height: isLogCard ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
+                            maxWidth: '100%',
+                            borderRadius: `${cardRadius}px`,
+                            filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
+                            background: isLogCard ? '#0a0a12' : 'transparent',
+                          }}
+                        >
+                          {isLogCard ? (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <div className="w-full h-full flex flex-col items-center justify-center gap-5 px-6 text-center">
+                                <div style={{ width: 92, height: 92, borderRadius: '50%', overflow: 'hidden' }}>
+                                  <video src="/videos/curo-peeking.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                </div>
+                                <p className="text-white/80 font-semibold leading-tight" style={{ fontSize: 18 }}>Log your activity today</p>
+                                <div className="flex items-center justify-center" style={{ width: 54, height: 54 }}>
+                                  <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+                                    <rect x="20" y="6" width="8" height="36" rx="4" fill="rgba(196,161,255,0.95)" />
+                                    <rect x="6" y="20" width="36" height="8" rx="4" fill="rgba(196,161,255,0.95)" />
+                                  </svg>
                                 </div>
                               </div>
-                            ) : hasFrame && activity ? (
-                              <StoryFrameRenderer
-                                imageUrl={media}
-                                isVideo={activity.isVideo}
-                                activity={activity.activity}
-                                frame={activity.frame}
-                                duration={activity.duration}
-                                pr={activity.pr}
-                                dayNumber={activity.dayNumber}
-                              />
-                            ) : media ? (
-                              <img src={media} alt="User story" className="w-full h-full object-cover" loading="eager" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)' }}>
-                                <ProfileAvatar src={group.avatarUrl} name={group.displayName} size={80} />
-                              </div>
-                            )}
-                          </div>
+                            </div>
+                          ) : hasFrame && activity ? (
+                            <StoryFrameRenderer
+                              imageUrl={media}
+                              isVideo={activity.isVideo}
+                              activity={activity.activity}
+                              frame={activity.frame}
+                              duration={activity.duration}
+                              pr={activity.pr}
+                              dayNumber={activity.dayNumber}
+                            />
+                          ) : media ? (
+                            <img src={media} alt="User story" className="w-full h-full object-cover" loading="eager" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)' }}>
+                              <ProfileAvatar src={group.avatarUrl} name={group.displayName} size={80} />
+                            </div>
+                          )}
                         </div>
                       </div>
                     </CarouselItem>
@@ -1805,75 +1794,65 @@ const Reel = () => {
                             overflow: 'visible',
                           }}
                         >
-                          {/* Stacked cards behind — only visible on center card */}
-                          {showStackedCards && (
-                            <>
-                              {/* Back card (deepest) */}
+                          {/* Main card wrapper — contains card + stacked strips */}
+                          <div className="relative" style={{
+                            aspectRatio: '9/16',
+                            height: isLogActivityCard ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
+                            maxWidth: '100%',
+                          }}>
+                            {/* Stacked strip 2 (deepest, narrowest) */}
+                            {showStackedCards && (
                               <div
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setShowHistoryGallery(true);
-                                }}
+                                onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
-                                  width: '80%',
-                                  height: 12,
-                                  bottom: -14,
+                                  width: '82%',
+                                  height: 8,
+                                  bottom: -12,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
-                                  borderRadius: `0 0 ${cardRadius - 2}px ${cardRadius - 2}px`,
-                                  background: 'rgba(255,255,255,0.04)',
-                                  border: '1px solid rgba(255,255,255,0.08)',
+                                  borderRadius: `0 0 ${cardRadius - 3}px ${cardRadius - 3}px`,
+                                  background: 'rgba(255,255,255,0.03)',
+                                  border: '1px solid rgba(255,255,255,0.06)',
                                   borderTop: 'none',
-                                  backdropFilter: 'blur(20px) saturate(1.6)',
-                                  WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
                                 }}
                               />
-                              {/* Middle card */}
+                            )}
+                            {/* Stacked strip 1 (closer, slightly narrower) */}
+                            {showStackedCards && (
                               <div
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setShowHistoryGallery(true);
-                                }}
+                                onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
-                                  width: '90%',
-                                  height: 12,
-                                  bottom: -7,
+                                  width: '91%',
+                                  height: 8,
+                                  bottom: -6,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 2,
-                                  borderRadius: `0 0 ${cardRadius - 1}px ${cardRadius - 1}px`,
-                                  background: 'rgba(255,255,255,0.07)',
-                                  border: '1px solid rgba(255,255,255,0.12)',
+                                  borderRadius: `0 0 ${cardRadius - 2}px ${cardRadius - 2}px`,
+                                  background: 'rgba(255,255,255,0.06)',
+                                  border: '1px solid rgba(255,255,255,0.10)',
                                   borderTop: 'none',
-                                  backdropFilter: 'blur(24px) saturate(1.8)',
-                                  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
                                 }}
                               />
-                            </>
-                          )}
-                          {/* Main card — 9:16 aspect ratio */}
-                          <div
-                            className="relative overflow-hidden"
-                            style={{
-                              aspectRatio: '9/16',
-                              height: isLogActivityCard ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
-                              maxWidth: '100%',
-                              borderRadius: `${cardRadius}px`,
-                              overflow: 'hidden',
-                              background: isLogActivityCard ? '#0a0a12' : 'transparent',
-                              border: isLogActivityCard
-                                ? '1px solid rgba(160, 120, 255, 0.25)'
-                                : '1px solid rgba(255,255,255,0.08)',
-                              boxShadow: isLogActivityCard
-                                ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 0 20px rgba(140, 100, 240, 0.15), 0 0 40px rgba(140, 100, 240, 0.08)'
-                                : '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
-                              marginTop: '-10px',
-                              zIndex: 3,
-                            }}
-                          >
+                            )}
+                            {/* Main card */}
+                            <div
+                              className="relative overflow-hidden w-full h-full"
+                              style={{
+                                borderRadius: `${cardRadius}px`,
+                                background: isLogActivityCard ? '#0a0a12' : 'transparent',
+                                border: isLogActivityCard
+                                  ? '1px solid rgba(160, 120, 255, 0.25)'
+                                  : '1px solid rgba(255,255,255,0.08)',
+                                boxShadow: isLogActivityCard
+                                  ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 0 20px rgba(140, 100, 240, 0.15), 0 0 40px rgba(140, 100, 240, 0.08)'
+                                  : '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
+                                zIndex: 3,
+                              }}
+                            >
                         {/* Progress bar removed — timing indicated via avatar ring */}
                         <div
                           key={contentKey}
@@ -2125,6 +2104,7 @@ const Reel = () => {
                       )}
                       
                       </div>{/* end 9:16 card */}
+                      </div>{/* end card wrapper with strips */}
 
 
                       {/* Floating 3D emoji reactions */}
