@@ -1800,15 +1800,16 @@ const Reel = () => {
                             height: isLogActivityCard ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
                             maxWidth: '100%',
                           }}>
-                            {/* Stacked strip 2 (deepest) */}
+                            {/* Stacked strip 2 (deepest) — sits below card */}
                             {showStackedCards && (
                               <div
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
-                                  width: '92%',
-                                  height: 18,
-                                  bottom: -10,
+                                  width: '78%',
+                                  height: '6%',
+                                  top: '100%',
+                                  marginTop: '-2.5%',
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
@@ -1822,15 +1823,16 @@ const Reel = () => {
                                 }}
                               />
                             )}
-                            {/* Stacked strip 1 (closer) */}
+                            {/* Stacked strip 1 (closer) — sits just below card */}
                             {showStackedCards && (
                               <div
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
-                                  width: '96%',
-                                  height: 18,
-                                  bottom: -4,
+                                  width: '84%',
+                                  height: '6%',
+                                  top: '100%',
+                                  marginTop: '-4%',
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 2,
@@ -1844,23 +1846,24 @@ const Reel = () => {
                                 }}
                               />
                             )}
-                            {/* "Tap to view journey" hint */}
+                            {/* "Tap to view journey" hint — below strips */}
                             {showStackedCards && (
                               <div
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer flex items-center gap-1"
                                 style={{
-                                  bottom: -38,
+                                  top: '100%',
+                                  marginTop: '2%',
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
                                 }}
                               >
-                                <svg width="24" height="22" viewBox="0 0 36 32" fill="none" style={{ flexShrink: 0, marginTop: -3 }}>
+                                <svg width="28" height="24" viewBox="0 0 36 32" fill="none" style={{ flexShrink: 0, marginTop: -4 }}>
                                   <path d="M18 30 Q12 26, 8 20 Q4 14, 7 8 Q9 4, 14 3 Q17 2.5, 18 3" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
                                   <path d="M15 6 L18 1.5 L20 7" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
-                                <span style={{ fontFamily: 'Caveat, cursive', fontSize: 17, color: 'rgba(255,255,255,0.4)', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>tap to view journey</span>
+                                <span style={{ fontFamily: 'Caveat, cursive', fontSize: 19, color: 'rgba(255,255,255,0.4)', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>tap to view journey</span>
                               </div>
                             )}
                             {/* Main card */}
