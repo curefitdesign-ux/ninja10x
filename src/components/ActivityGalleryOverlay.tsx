@@ -156,28 +156,29 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     const sorted = Object.entries(activityCounts).sort((a, b) => b[1] - a[1]);
     const variety = sorted.length;
 
-    // Build editorial bio line
-    const parts: string[] = [];
-    if (count >= 12) parts.push(`crushed all 12 days 🏆`);
-    else if (count >= 9) parts.push(`on fire, almost there 🔥`);
-    else if (count >= 6) parts.push(`halfway through the grind 💪`);
-    else if (count >= 3) parts.push(`building momentum ⚡`);
-    else parts.push(`just started the journey 🚀`);
+    // Build wholesome narrative bio
+    let progressPhrase = '';
+    if (count >= 12) progressPhrase = `crushed all 12 days`;
+    else if (count >= 9) progressPhrase = `is almost at the finish line`;
+    else if (count >= 6) progressPhrase = `is halfway through the grind`;
+    else if (count >= 3) progressPhrase = `is building serious momentum`;
+    else progressPhrase = `just kicked off the journey`;
 
+    let activityPhrase = '';
     if (variety >= 3) {
       const top3 = sorted.slice(0, 3).map(([k]) => k.toLowerCase());
-      parts.push(`loves ${top3[0]} 🎯 ${top3[1]} & ${top3[2]}`);
+      activityPhrase = `, loves ${top3[0]} 🏃, ${top3[1]} & ${top3[2]}`;
     } else if (variety === 2) {
-      parts.push(`into ${sorted[0][0].toLowerCase()} 🎯 & ${sorted[1][0].toLowerCase()}`);
-    } else if (count > 1) {
-      parts.push(`all-in on ${sorted[0][0].toLowerCase()} 🎯`);
+      activityPhrase = `, swears by ${sorted[0][0].toLowerCase()} & ${sorted[1][0].toLowerCase()} 🎯`;
+    } else if (variety === 1 && count > 1) {
+      activityPhrase = `, all-in on ${sorted[0][0].toLowerCase()} 🎯`;
     }
 
-    if (durationStr) {
-      parts.push(`${durationStr} of pure grind ⏱️`);
-    }
+    const durationPhrase = durationStr ? ` — ${durationStr} of pure grind ⏱️` : '';
+    const weekNum = Math.ceil(count / 3);
+    const weekPhrase = count >= 12 ? ', earned the ninja badge 🥷' : `, currently in week ${weekNum} 💪`;
 
-    return parts.join(', ');
+    return `${name} ${progressPhrase}${activityPhrase}${weekPhrase}${durationPhrase}`;
   }, [activities, userProfile]);
 
   useEffect(() => {
@@ -377,19 +378,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                        {userBioLine}
                      </p>
                    )}
-                   <div className="flex items-center justify-center gap-2 mt-3">
-                     <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                       <span className="text-white text-[11px] font-semibold">{totalActivities}/12 Days</span>
-                     </div>
-                     {totalDurationStr && (
-                       <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                         <span className="text-white text-[11px] font-semibold">{totalDurationStr} Total</span>
-                       </div>
-                     )}
-                     <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                       <span className="text-white text-[11px] font-semibold">W{week}</span>
-                     </div>
-                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
