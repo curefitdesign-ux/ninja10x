@@ -107,45 +107,10 @@ const Index = () => {
   const [weekTransitionAnimation, setWeekTransitionAnimation] = useState(false);
   const [previousPhotoCount, setPreviousPhotoCount] = useState(photos.length);
   
-  // Navigate to /reel-generation with properly mapped photo data
-  const handleGenerateReel = useCallback((photosToProcess: Photo[], forceRegenerate = true) => {
-    const latest3 = photosToProcess.slice(-3);
-    
-    // Check if all photos have storage URLs
-    const missingStorage = latest3.filter(p => !p.storageUrl);
-    if (missingStorage.length > 0) {
-      toast.error('Some photos are still uploading. Please wait...');
-      return;
-    }
-
-    if (latest3.length < 3) {
-      toast.error('Need at least 3 photos to generate a reel');
-      return;
-    }
-
-    // Map to the format expected by ReelGeneration page
-    const weekPhotos = latest3.map(photo => ({
-      id: photo.id,
-      imageUrl: photo.originalUrl || photo.storageUrl,
-      activity: photo.activity || 'Workout',
-      duration: photo.duration,
-      pr: photo.pr,
-      uploadDate: new Date().toISOString().split('T')[0],
-      dayNumber: photo.dayNumber,
-      isVideo: photo.isVideo,
-    }));
-
-    const weekNumber = Math.ceil(Math.max(...latest3.map(p => p.dayNumber)) / 3);
-
-    console.log('[Index] Navigating to reel-generation with', weekPhotos.length, 'photos, forceRegenerate:', forceRegenerate);
-    navigate('/reel-generation', {
-      state: {
-        weekPhotos,
-        weekNumber,
-        forceRegenerate, // Always bust cache so user's actual uploaded photos are used
-      },
-    });
-  }, [navigate]);
+  // Reel generation temporarily disabled
+  const handleGenerateReel = useCallback((_photosToProcess: Photo[], _forceRegenerate = true) => {
+    // No-op: reel generation disabled
+  }, []);
 
   // Track cached recap state for all completed weeks
   const [cachedWeeks, setCachedWeeks] = useState<Set<number>>(new Set());
