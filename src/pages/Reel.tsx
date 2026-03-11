@@ -1798,18 +1798,18 @@ const Reel = () => {
                             overflow: 'visible',
                           }}
                         >
-                          {/* Stacked cards behind — fan out when centered, collapse when not */}
+                          {/* Stacked cards behind — vertical deck style */}
                           {showStackedCards && (
                             <>
-                              {/* Back card (deepest) — fans out left with rotation */}
+                              {/* Back card (deepest) — offset down, scaled smallest */}
                               <motion.div
                                 key={`stack-back-${group.userId}`}
                                 animate={isCenter ? {
-                                  scale: 0.88,
-                                  opacity: 0.5,
-                                  y: 18,
-                                  x: -12,
-                                  rotate: -3,
+                                  scale: 0.90,
+                                  opacity: 0.45,
+                                  y: 24,
+                                  x: 0,
+                                  rotate: 0,
                                 } : {
                                   scale: 0.92,
                                   opacity: 0,
@@ -1829,13 +1829,13 @@ const Reel = () => {
                                   marginTop: '-10px',
                                   overflow: 'hidden',
                                   zIndex: 1,
-                                  borderRadius: '9px',
+                                  borderRadius: '12px',
                                   background: 'rgba(255,255,255,0.03)',
                                   border: '1px solid rgba(255,255,255,0.10)',
                                   boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.08)',
                                   backdropFilter: 'blur(20px) saturate(1.6)',
                                   WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
-                                  transformOrigin: 'bottom center',
+                                  transformOrigin: 'center center',
                                   pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
                               >
@@ -1848,15 +1848,15 @@ const Reel = () => {
                                   background: 'linear-gradient(170deg, rgba(255,255,255,0.06) 0%, transparent 30%)',
                                 }} />
                               </motion.div>
-                              {/* Middle card — fans out right with rotation */}
+                              {/* Middle card — offset down slightly, scaled medium */}
                               <motion.div
                                 key={`stack-mid-${group.userId}`}
                                 animate={isCenter ? {
-                                  scale: 0.93,
+                                  scale: 0.95,
                                   opacity: 0.65,
-                                  y: 10,
-                                  x: 8,
-                                  rotate: 2,
+                                  y: 12,
+                                  x: 0,
+                                  rotate: 0,
                                 } : {
                                   scale: 0.95,
                                   opacity: 0,
@@ -1876,13 +1876,13 @@ const Reel = () => {
                                   marginTop: '-10px',
                                   overflow: 'hidden',
                                   zIndex: 2,
-                                  borderRadius: '9px',
+                                  borderRadius: '12px',
                                   background: 'rgba(255,255,255,0.04)',
                                   border: '1px solid rgba(255,255,255,0.14)',
                                   boxShadow: '0 8px 30px rgba(0,0,0,0.25), inset 0 0.5px 0 rgba(255,255,255,0.12)',
                                   backdropFilter: 'blur(24px) saturate(1.8)',
                                   WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-                                  transformOrigin: 'bottom center',
+                                  transformOrigin: 'center center',
                                   pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
                               >
@@ -2165,55 +2165,6 @@ const Reel = () => {
                       
                       </div>{/* end 9:16 card */}
 
-                      {/* Bottom peek cards — indicate more stories */}
-                      {showStackedCards && isCenter && (
-                        <>
-                          {/* Second peek card — peeks below main */}
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.96 }}
-                            animate={{ opacity: 0.6, scale: 0.96 }}
-                            transition={{ type: 'spring', stiffness: 200, damping: 22, delay: 0.05 }}
-                            onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
-                            className="absolute cursor-pointer"
-                            style={{
-                              width: '82%',
-                              height: 20,
-                              bottom: -6,
-                              left: '50%',
-                              transform: 'translateX(-50%)',
-                              zIndex: -1,
-                              borderRadius: '0 0 9px 9px',
-                              background: 'rgba(255,255,255,0.08)',
-                              border: '1px solid rgba(255,255,255,0.12)',
-                              borderTop: 'none',
-                              backdropFilter: 'blur(16px) saturate(1.5)',
-                              WebkitBackdropFilter: 'blur(16px) saturate(1.5)',
-                            }}
-                          />
-                          {/* Third peek card (deepest) — peeks further below */}
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.92 }}
-                            animate={{ opacity: 0.4, scale: 0.92 }}
-                            transition={{ type: 'spring', stiffness: 200, damping: 22, delay: 0.1 }}
-                            onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
-                            className="absolute cursor-pointer"
-                            style={{
-                              width: '76%',
-                              height: 16,
-                              bottom: -16,
-                              left: '50%',
-                              transform: 'translateX(-50%)',
-                              zIndex: -2,
-                              borderRadius: '0 0 9px 9px',
-                              background: 'rgba(255,255,255,0.04)',
-                              border: '1px solid rgba(255,255,255,0.07)',
-                              borderTop: 'none',
-                              backdropFilter: 'blur(12px) saturate(1.3)',
-                              WebkitBackdropFilter: 'blur(12px) saturate(1.3)',
-                            }}
-                          />
-                        </>
-                      )}
 
                       {/* Floating 3D emoji reactions */}
                       {!shouldShowLocked && (
