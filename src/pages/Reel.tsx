@@ -695,6 +695,13 @@ const Reel = () => {
   }, [currentUserIndex, carouselApi]);
 
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    // If current card is the log-activity placeholder, navigate to gallery to add a photo
+    if (currentActivity?.id === 'log-activity') {
+      const nextDay = myActivities.length > 0 ? Math.max(...myActivities.map(a => a.dayNumber)) + 1 : 1;
+      navigate('/gallery', { state: { dayNumber: nextDay } });
+      return;
+    }
+
     // If story is locked (viewer hasn't shared + this isn't own story), open Make Public sheet
     const locked = !isOwnStory && !viewerCanSeeCommunity;
     if (locked) {
@@ -724,7 +731,7 @@ const Reel = () => {
       }
     }
     setLastTap(now);
-  }, [lastTap, cycleActivity, prevActivity, isOwnStory, viewerCanSeeCommunity]);
+  }, [lastTap, cycleActivity, prevActivity, isOwnStory, viewerCanSeeCommunity, currentActivity, myActivities, navigate]);
 
   // Progress navigation removed — now a standalone page via bottom nav
 
