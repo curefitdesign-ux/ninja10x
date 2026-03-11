@@ -1470,23 +1470,31 @@ const Reel = () => {
                           </defs>
                           {/* Background track */}
                           <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
-                            stroke={isOwnActive ? 'rgba(255,255,255,0.15)' : 'url(#storyGradientOwn)'}
+                            stroke={isOwnActive ? 'rgba(255,255,255,0.15)' : (viewedUsers.has(user?.id || '') ? 'rgba(255,255,255,0.3)' : 'url(#storyGradientOwn)')}
                             strokeLinecap="round"
                             style={{ filter: (!isOwnActive && !viewedUsers.has(user?.id || '')) ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none' }}
                           />
-                          {/* Progress fill — only when actively viewing */}
-                          {isOwnActive && (
-                            <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
-                              stroke={viewedUsers.has(user?.id || '') ? 'rgba(255,255,255,0.7)' : 'url(#storyGradientOwn)'}
-                              strokeLinecap="round"
-                              strokeDasharray={`${2 * Math.PI * 44}`}
-                              strokeDashoffset={ownRingProgress > 0 ? 0 : 2 * Math.PI * 44}
-                              style={{
-                                filter: !viewedUsers.has(user?.id || '') ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
-                                transition: ownRingProgress > 0 ? `stroke-dashoffset ${autoAdvanceDuration}ms linear` : 'none',
-                              }}
-                            />
-                          )}
+                          {/* Progress fill — proportional across all stories */}
+                          {isOwnActive && (() => {
+                            const circumference = 2 * Math.PI * 44;
+                            const completedFraction = ownCurrentIdx / ownActivityCount;
+                            const currentSegmentFraction = (ownRingProgress > 0 ? 1 : 0) / ownActivityCount;
+                            const totalFraction = completedFraction + currentSegmentFraction;
+                            const targetOffset = circumference * (1 - totalFraction);
+                            const startOffset = circumference * (1 - completedFraction);
+                            return (
+                              <circle cx="50" cy="50" r={44} fill="none" strokeWidth="6"
+                                stroke={viewedUsers.has(user?.id || '') ? 'rgba(255,255,255,0.7)' : 'url(#storyGradientOwn)'}
+                                strokeLinecap="round"
+                                strokeDasharray={`${circumference}`}
+                                strokeDashoffset={ownRingProgress > 0 ? targetOffset : startOffset}
+                                style={{
+                                  filter: !viewedUsers.has(user?.id || '') ? 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' : 'none',
+                                  transition: ownRingProgress > 0 ? `stroke-dashoffset ${autoAdvanceDuration}ms linear` : 'none',
+                                }}
+                              />
+                            );
+                          })()}
                         </svg>
                       )}
                       <div className="relative" style={{ width: avatarSize, height: avatarSize, padding: 4 }}>
