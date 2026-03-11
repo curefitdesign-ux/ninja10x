@@ -1808,7 +1808,7 @@ const Reel = () => {
                                 style={{
                                   width: '88%',
                                   height: 14,
-                                  bottom: -14,
+                                  bottom: 36,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
