@@ -517,16 +517,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           })()}
                         </motion.div>
 
-                        {/* Quote */}
-                        {(decorType === 2 || decorType === 1) && (
-                          <p style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.3)', marginTop: 6, marginLeft: idx % 2 === 0 ? '60%' : '5%', transform: `rotate(${-rotation * 0.8}deg)` }}>{handQuote}</p>
-                        )}
-                        {/* Arrow */}
-                        {idx < reversedActivities.length - 1 && decorType !== 4 && (
-                          <svg className="absolute pointer-events-none" style={{ left: 20 + offsetX, bottom: -20, width: 24, height: 28, opacity: 0.2 }} viewBox="0 0 24 28" fill="none">
-                            <path d="M12 2 C12 2 10 14 12 20 C13 14 15 18 12 20 M8 16 L12 24 L16 16" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                          </svg>
-                        )}
                       </motion.div>
                     );
                   })}
