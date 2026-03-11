@@ -22,7 +22,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 import fireEmoji from '@/assets/reactions/fire-3d.png';
 import clapEmoji from '@/assets/reactions/clap-3d.png';
-import paperclipImg from '@/assets/frames/paperclip-silver.png';
+
 import deskBellImg from '@/assets/icons/desk-bell-3d.png';
 
 interface ReactorProfile {
