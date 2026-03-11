@@ -704,6 +704,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           )}
                         </div>
                       </div>
+                      </div>
                     );
                   })}
 
