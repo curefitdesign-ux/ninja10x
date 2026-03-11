@@ -519,6 +519,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           : 'workouts';
                         
                         if (remaining > 0) {
+                          const displayName = userProfile?.displayName || 'This user';
+                          const firstName = displayName.split(' ')[0];
                           return (
                             <div className="relative" style={{ padding: '8px 16px 12px 48px', marginBottom: 8 }}>
                               {/* Timeline dot - flag milestone */}
@@ -530,7 +532,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 zIndex: 5,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                               }}>
-                                <span style={{ fontSize: 11, lineHeight: 1 }}>🏁</span>
+                                <Flag size={10} fill="white" color="white" strokeWidth={0} />
                               </div>
                               <p style={{
                                 fontFamily: "'Caveat', cursive",
@@ -540,7 +542,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 transform: 'rotate(-1.5deg)',
                                 lineHeight: 1.35,
                               }}>
-                                {remaining} more {activityList} sessions{'\n'}to become a <span style={{ color: 'rgba(249,115,22,0.75)', fontWeight: 800 }}>Cult Ninja</span>
+                                {isOwnProfile ? 'You are' : `${firstName} is`} just {remaining} {remaining === 1 ? 'session' : 'sessions'} away{'\n'}from becoming <span style={{ color: 'rgba(249,115,22,0.85)', fontWeight: 800 }}>Cult Ninja</span> 🥷
                               </p>
                               {/* Dashed connector */}
                               <div style={{
@@ -561,7 +563,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 zIndex: 5,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                               }}>
-                                <span style={{ fontSize: 11, lineHeight: 1 }}>🏁</span>
+                                <Flag size={10} fill="white" color="white" strokeWidth={0} />
                               </div>
                               <p style={{
                                 fontFamily: "'Caveat', cursive",
