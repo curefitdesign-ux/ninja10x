@@ -1699,7 +1699,7 @@ const Reel = () => {
             }}
             className="h-full"
           >
-            <CarouselContent className="h-full -ml-3" viewportClassName="h-full px-[40px]">
+            <CarouselContent className="h-full -ml-3" viewportClassName="h-full px-[25px]">
               {effectiveUserGroups.map((group, idx) => {
                 const isCenter = idx === currentUserIndex;
                 const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
