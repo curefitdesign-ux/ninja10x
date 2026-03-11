@@ -501,13 +501,32 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               </div>
                             </div>
 
-                            {/* ACTIVITIES — descending (12, 11, 10 etc.) */}
-                            {weekActsDesc.map((act, idx) => {
+                            {/* All 3 slots in descending order (slot 3, 2, 1) */}
+                            {[3, 2, 1].map((slot, idx) => {
+                              const dayNum = (weekNum - 1) * 3 + slot;
+                              const act = weekActsDesc.find(a => a.dayNumber === dayNum);
+
+                              if (!act) {
+                                return (
+                                  <div key={`slot-${weekNum}-${dayNum}`} className="relative flex items-center gap-3" style={{ padding: '10px 16px 10px 16px', marginBottom: 4 }}>
+                                    <img src={tileInactiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0, opacity: 0.5 }} />
+                                    <div>
+                                      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.02em' }}>
+                                        Activity {dayNum}
+                                      </p>
+                                      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.12)', marginTop: 1 }}>
+                                        Upcoming
+                                      </p>
+                                    </div>
+                                  </div>
+                                );
+                              }
+
                               const globalIdx = sortedActivities.findIndex(a => a.id === act.id);
                               const { rotation, offsetX } = getCardStyle(globalIdx, act.dayNumber);
-
                               const subtitle = act.activity || 'Workout';
                               const durationSubtitle = act.duration ? ` · ${act.duration}` : '';
+                              const useTileIcon = isWeekComplete ? tileActiveSvg : tileInactiveSvg;
 
                               return (
                                 <motion.div
@@ -517,9 +536,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ delay: globalIdx * 0.06, type: 'spring', stiffness: 200, damping: 20 }}
                                 >
-                                  {/* Tile icon + label row */}
                                   <div className="flex items-center gap-3" style={{ marginBottom: 8 }}>
-                                    <img src={tileActiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0 }} />
+                                    <img src={useTileIcon} alt="" style={{ width: 28, height: 28, flexShrink: 0 }} />
                                     <div>
                                       <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.02em' }}>
                                         Activity {act.dayNumber}
@@ -530,7 +548,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                     </div>
                                   </div>
 
-                                  {/* Card */}
                                   <motion.div
                                     className="relative overflow-visible cursor-pointer"
                                     style={{
@@ -551,7 +568,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                       )}
                                     </div>
 
-                                    {/* Like count badge + react button */}
                                     {(() => {
                                       const ar = localReactions[act.id];
                                       const total = ar?.total || 0;
@@ -588,24 +604,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                     })()}
                                   </motion.div>
                                 </motion.div>
-                              );
-                            })}
-
-                            {/* Remaining slots for incomplete weeks — descending */}
-                            {!isWeekComplete && Array.from({ length: 3 - weekActs.length }, (_, i) => {
-                              const slotDay = (weekNum - 1) * 3 + (weekActs.length + i + 1);
-                              return (
-                                <div key={`remaining-${weekNum}-${i}`} className="relative flex items-center gap-3" style={{ padding: '10px 16px 10px 16px', marginBottom: 4 }}>
-                                  <img src={tileInactiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0, opacity: 0.5 }} />
-                                  <div>
-                                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.02em' }}>
-                                      Activity {slotDay}
-                                    </p>
-                                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.12)', marginTop: 1 }}>
-                                      Upcoming
-                                    </p>
-                                  </div>
-                                </div>
                               );
                             })}
                           </div>
