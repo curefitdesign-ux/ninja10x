@@ -13,7 +13,7 @@ import MediaSourceSheet from "@/components/MediaSourceSheet";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 // Tab config for the reflective indicator
-const TAB_IDS = ["home", "discover", "progress", "bell", "menu"] as const;
+const TAB_IDS = ["home", "discover", "bell", "menu"] as const;
 
 const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
   const navigate = useNavigate();
