@@ -1698,6 +1698,9 @@ const Reel = () => {
                 const isLockedCard = !isOwnCard && !viewerCanSeeCommunity;
                 const hasFrame = activity?.frame && activity.frame !== 'none';
 
+                const isLogCard = activity?.id === 'log-activity';
+                const cardRadius = isLogCard ? 13 : 16;
+
                 const cardStyle: React.CSSProperties = {
                   transform: `scale(${isCenter ? 1.0 : 0.92})`,
                   transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease',
@@ -1706,6 +1709,7 @@ const Reel = () => {
                 };
 
                 if (!isCenter) {
+                  // Peek cards: stacked deck look with rounded corners matching reference
                   return (
                     <CarouselItem
                       key={`card-${group.userId}`}
@@ -1715,62 +1719,86 @@ const Reel = () => {
                         className="flex items-center justify-center w-full h-full pointer-events-none"
                         style={cardStyle}
                       >
-                        <div
-                          className="overflow-hidden"
-                          style={{
-                            aspectRatio: '9/16',
-                            height: activity?.id === 'log-activity' ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
-                            maxWidth: '100%',
-                            filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                            background: activity?.id === 'log-activity' ? '#0a0a12' : 'transparent',
-                            borderRadius: activity?.id === 'log-activity' ? '10px' : '0px',
-                            border: activity?.id === 'log-activity' ? '1px solid rgba(160, 120, 255, 0.25)' : 'none',
-                            boxShadow: activity?.id === 'log-activity'
-                              ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 0 20px rgba(140, 100, 240, 0.15)'
-                              : 'none',
-                          }}
-                        >
-                          {activity?.id === 'log-activity' ? (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <div
-                                className="w-full h-full flex flex-col items-center justify-center gap-5 px-6 text-center"
-                              >
-                                <div style={{ width: 92, height: 92, borderRadius: '50%', overflow: 'hidden' }}>
-                                  <video src="/videos/curo-peeking.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                </div>
-                                <p className="text-white/80 font-semibold leading-tight" style={{ fontSize: 18 }}>
-                                  Log your activity today
-                                </p>
-                                <div className="flex items-center justify-center" style={{ width: 54, height: 54 }}>
-                                  <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
-                                    <rect x="20" y="6" width="8" height="36" rx="4" fill="rgba(196,161,255,0.95)" />
-                                    <rect x="6" y="20" width="36" height="8" rx="4" fill="rgba(196,161,255,0.95)" />
-                                  </svg>
+                        {/* Outer wrapper for stacked deck effect on peek cards */}
+                        <div className="relative" style={{
+                          aspectRatio: '9/16',
+                          height: isLogCard ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
+                          maxWidth: '100%',
+                        }}>
+                          {/* Back pseudo-card strip */}
+                          <div style={{
+                            position: 'absolute',
+                            bottom: -16,
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: '82%',
+                            height: 14,
+                            borderRadius: `0 0 ${cardRadius - 2}px ${cardRadius - 2}px`,
+                            background: 'rgba(255,255,255,0.04)',
+                            border: '1px solid rgba(255,255,255,0.06)',
+                            borderTop: 'none',
+                          }} />
+                          {/* Mid pseudo-card strip */}
+                          <div style={{
+                            position: 'absolute',
+                            bottom: -8,
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: '91%',
+                            height: 14,
+                            borderRadius: `0 0 ${cardRadius - 1}px ${cardRadius - 1}px`,
+                            background: 'rgba(255,255,255,0.06)',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            borderTop: 'none',
+                          }} />
+                          {/* Main peek card */}
+                          <div
+                            className="overflow-hidden w-full h-full"
+                            style={{
+                              borderRadius: `${cardRadius}px`,
+                              filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
+                              background: isLogCard ? '#0a0a12' : 'transparent',
+                              border: isLogCard
+                                ? '1px solid rgba(160, 120, 255, 0.25)'
+                                : '1px solid rgba(255,255,255,0.08)',
+                              boxShadow: isLogCard
+                                ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 0 20px rgba(140, 100, 240, 0.15)'
+                                : '0 8px 30px rgba(0,0,0,0.4)',
+                            }}
+                          >
+                            {isLogCard ? (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <div className="w-full h-full flex flex-col items-center justify-center gap-5 px-6 text-center">
+                                  <div style={{ width: 92, height: 92, borderRadius: '50%', overflow: 'hidden' }}>
+                                    <video src="/videos/curo-peeking.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                  </div>
+                                  <p className="text-white/80 font-semibold leading-tight" style={{ fontSize: 18 }}>Log your activity today</p>
+                                  <div className="flex items-center justify-center" style={{ width: 54, height: 54 }}>
+                                    <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+                                      <rect x="20" y="6" width="8" height="36" rx="4" fill="rgba(196,161,255,0.95)" />
+                                      <rect x="6" y="20" width="36" height="8" rx="4" fill="rgba(196,161,255,0.95)" />
+                                    </svg>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ) : hasFrame && activity ? (
-                            <StoryFrameRenderer
-                              imageUrl={media}
-                              isVideo={activity.isVideo}
-                              activity={activity.activity}
-                              frame={activity.frame}
-                              duration={activity.duration}
-                              pr={activity.pr}
-                              dayNumber={activity.dayNumber}
-                            />
-                          ) : media ? (
-                            <img
-                              src={media}
-                              alt="User story"
-                              className="w-full h-full object-cover"
-                              loading="eager"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)' }}>
-                              <ProfileAvatar src={group.avatarUrl} name={group.displayName} size={80} />
-                            </div>
-                          )}
+                            ) : hasFrame && activity ? (
+                              <StoryFrameRenderer
+                                imageUrl={media}
+                                isVideo={activity.isVideo}
+                                activity={activity.activity}
+                                frame={activity.frame}
+                                duration={activity.duration}
+                                pr={activity.pr}
+                                dayNumber={activity.dayNumber}
+                              />
+                            ) : media ? (
+                              <img src={media} alt="User story" className="w-full h-full object-cover" loading="eager" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)' }}>
+                                <ProfileAvatar src={group.avatarUrl} name={group.displayName} size={80} />
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </CarouselItem>
