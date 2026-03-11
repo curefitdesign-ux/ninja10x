@@ -1723,12 +1723,71 @@ const Reel = () => {
                 };
 
                 if (!isCenter) {
+                  const peekMedia = media;
+                  const peekIsVideo = peekMedia ? isVideoUrl(peekMedia) : false;
                   return (
                     <CarouselItem
                       key={`card-${group.userId}`}
                       className="pl-3 flex items-center justify-center h-full basis-[85%]"
                     >
-                      <div className="w-full h-full" />
+                      <div
+                        className="w-full h-full flex items-center justify-center"
+                        style={cardStyle}
+                      >
+                        <div
+                          className="relative overflow-hidden"
+                          style={{
+                            aspectRatio: '9/16',
+                            height: 'calc(95% - 20px)',
+                            maxWidth: '100%',
+                            borderRadius: '14px',
+                            overflow: 'hidden',
+                            marginTop: '-10px',
+                            background: '#0a0720',
+                          }}
+                        >
+                          {isLockedCard ? (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
+                              <Lock className="w-6 h-6 text-white/40 mb-2" />
+                              <span className="text-white/40 text-xs">Private</span>
+                            </div>
+                          ) : hasFrame && activity ? (
+                            <div className="absolute inset-0 pointer-events-none" style={{ containerType: 'inline-size' }}>
+                              <StoryFrameRenderer
+                                frame={activity.frame!}
+                                mediaUrl={activity.originalUrl || activity.storageUrl || ''}
+                                isVideo={peekIsVideo}
+                                activity={activity.activity || ''}
+                                duration={activity.duration || ''}
+                                pr={activity.pr || ''}
+                                dayNumber={activity.dayNumber}
+                                displayName={group.displayName}
+                              />
+                            </div>
+                          ) : peekMedia ? (
+                            peekIsVideo ? (
+                              <video
+                                src={peekMedia}
+                                className="absolute inset-0 w-full h-full object-cover"
+                                muted
+                                playsInline
+                                loop
+                              />
+                            ) : (
+                              <img
+                                src={peekMedia}
+                                className="absolute inset-0 w-full h-full object-cover"
+                                alt=""
+                                loading="lazy"
+                              />
+                            )
+                          ) : (
+                            <div className="absolute inset-0 bg-gradient-to-b from-[#2a1b4e] to-[#0a0720] flex items-center justify-center">
+                              <ProfileAvatar avatarUrl={group.avatarUrl} displayName={group.displayName} size={48} />
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </CarouselItem>
                   );
                 }
