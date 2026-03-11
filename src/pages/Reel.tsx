@@ -2285,7 +2285,6 @@ const Reel = () => {
                           background: 'linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04))',
                           border: '1.5px solid rgba(255,255,255,0.1)',
                           boxShadow: '0 4px 16px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.08) inset, 0 -1px 0 rgba(0,0,0,0.2) inset',
-                          transform: 'rotate(1deg)',
                         }}
                       >
                         <span className="text-sm">📈</span>
