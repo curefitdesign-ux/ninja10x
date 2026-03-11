@@ -2225,14 +2225,15 @@ const Reel = () => {
                 }}
               >
                 {/* Reaction pill + Share icon row — hidden for log-activity placeholder */}
-                <div className="flex items-center justify-center gap-2.5 px-4" style={{ visibility: isLogActivityCard ? 'hidden' : 'visible' }}>
+                <div className="flex items-center justify-center px-4" style={{ visibility: isLogActivityCard ? 'hidden' : 'visible' }}>
                   {/* Sticker-style reaction badge */}
                   <button
                     onClick={() => { isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
-                    className="relative overflow-hidden active:scale-[0.93] transition-all duration-150 flex-1"
+                    className="relative overflow-hidden active:scale-[0.93] transition-all duration-150"
                     style={{
                       height: 46,
                       borderRadius: 23,
+                      minWidth: 200,
                       background: 'linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.05))',
                       border: '1.5px solid rgba(255,255,255,0.12)',
                       boxShadow: '0 4px 16px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.1) inset, 0 -1px 0 rgba(0,0,0,0.2) inset',
@@ -2280,9 +2281,6 @@ const Reel = () => {
                     </div>
                   )}
                   </button>
-
-                   <div className="flex items-center gap-2 shrink-0">
-                   </div>
                 </div>
               </div>
             );
