@@ -147,13 +147,13 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       <div className="absolute z-20 text-right" style={{ right: '4cqw', bottom: '6%' }}>
         <h3 
           className="font-black leading-[0.9] uppercase"
-          style={{ color: '#F4E14D', fontFamily: "'Bebas Neue', sans-serif", fontSize: '43px', letterSpacing: '0px', textShadow: '2px 3px 4px rgba(0,0,0,0.35)' }}
+          style={{ color: '#F4E14D', fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(24px, 14cqw, 50px)', letterSpacing: '0px', textShadow: '2px 3px 4px rgba(0,0,0,0.35)' }}
         >
           W{week}/D{((day - 1) % 3) + 1}
         </h3>
         <h4 
           className="font-black leading-[0.95] uppercase"
-          style={{ color: '#FFFFFF', fontFamily: "'Bebas Neue', sans-serif", fontSize: '59px', letterSpacing: '0px', textShadow: '3px 4px 8px rgba(0,0,0,0.5)', marginTop: '2px' }}
+          style={{ color: '#FFFFFF', fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(32px, 20cqw, 68px)', letterSpacing: '0px', textShadow: '3px 4px 8px rgba(0,0,0,0.5)', marginTop: '0.5cqw' }}
         >
           Journey
         </h4>
