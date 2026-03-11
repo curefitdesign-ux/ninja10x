@@ -363,56 +363,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   exit={{ opacity: 0, height: 0, paddingBottom: 0 }}
                   transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
                 >
-                   {/* Instagram Notes-style thought bubble */}
-                   {(() => {
-                     const realCount = activities.filter(a => !a.isPlaceholder).length;
-                     const remaining = 12 - realCount;
-                     if (remaining > 0) {
-                       const bubbleText = isOwnProfile !== false
-                         ? `${remaining} ${remaining === 1 ? 'activity' : 'activities'} away from becoming Ninja`
-                         : `${userProfile.displayName} is ${remaining} ${remaining === 1 ? 'activity' : 'activities'} away from becoming Ninja`;
-                       return (
-                         <motion.div
-                           className="relative mb-2"
-                           initial={{ opacity: 0, y: 6, scale: 0.9 }}
-                           animate={{ opacity: 1, y: 0, scale: 1 }}
-                           transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 20 }}
-                         >
-                            <div
-                              style={{
-                                background: '#E8E8E8',
-                                borderRadius: 18,
-                                padding: '8px 14px',
-                                maxWidth: 210,
-                              }}
-                            >
-                              <p style={{
-                                fontFamily: "'Inter', -apple-system, sans-serif",
-                                fontSize: 12,
-                                fontWeight: 500,
-                                lineHeight: 1.35,
-                                color: '#1a1a1a',
-                                margin: 0,
-                                textAlign: 'center',
-                              }}>
-                                {bubbleText}
-                              </p>
-                            </div>
-                            {/* Thought bubble dot - bottom left like iMessage */}
-                            <div style={{
-                              position: 'absolute',
-                              left: 16,
-                              bottom: -6,
-                              width: 10,
-                              height: 10,
-                              borderRadius: '50%',
-                              background: '#E8E8E8',
-                            }} />
-                         </motion.div>
-                       );
-                     }
-                     return null;
-                   })()}
                    <motion.div 
                      className="rounded-full overflow-hidden"
                      style={{ width: 56, height: 56, border: '2.5px solid rgba(255,255,255,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
@@ -559,6 +509,73 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                   return (
                     <>
+                      {/* Ninja milestone - above latest card */}
+                      {(() => {
+                        const remaining = 12 - realActivities.length;
+                        if (remaining > 0) {
+                          const ninjaText = isOwnProfile !== false
+                            ? `${remaining} ${remaining === 1 ? 'activity' : 'activities'} away from becoming Ninja`
+                            : `${userProfile?.displayName || 'They'} — ${remaining} away from Ninja`;
+                          return (
+                            <div className="relative" style={{ padding: '8px 16px 4px 48px', marginBottom: 4 }}>
+                              {/* Timeline dot - goal marker */}
+                              <div className="absolute" style={{
+                                left: 20, top: 14, width: 18, height: 18, borderRadius: '50%',
+                                background: 'linear-gradient(135deg, rgba(249,115,22,0.6), rgba(236,72,153,0.6))',
+                                border: '2px solid rgba(255,255,255,0.2)',
+                                boxShadow: '0 0 14px rgba(249,115,22,0.3)',
+                                zIndex: 5,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              }}>
+                                <span style={{ fontSize: 9, lineHeight: 1 }}>🥷</span>
+                              </div>
+                              <p style={{
+                                fontFamily: "'Caveat', cursive",
+                                fontSize: 22,
+                                fontWeight: 700,
+                                color: 'rgba(255,255,255,0.5)',
+                                transform: 'rotate(-1.5deg)',
+                                lineHeight: 1.3,
+                                marginBottom: 2,
+                              }}>
+                                {ninjaText}
+                              </p>
+                              {/* Dashed connector to next card */}
+                              <div style={{
+                                position: 'absolute', left: 28, bottom: -8, width: 2, height: 16,
+                                backgroundImage: 'repeating-linear-gradient(to bottom, rgba(249,115,22,0.3) 0px, rgba(249,115,22,0.3) 3px, transparent 3px, transparent 7px)',
+                              }} />
+                            </div>
+                          );
+                        }
+                        if (realActivities.length >= 12) {
+                          return (
+                            <div className="relative" style={{ padding: '8px 16px 4px 48px', marginBottom: 4 }}>
+                              <div className="absolute" style={{
+                                left: 20, top: 14, width: 18, height: 18, borderRadius: '50%',
+                                background: 'linear-gradient(135deg, #F97316, #EC4899)',
+                                border: '2px solid rgba(255,255,255,0.3)',
+                                boxShadow: '0 0 16px rgba(249,115,22,0.4)',
+                                zIndex: 5,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              }}>
+                                <span style={{ fontSize: 9, lineHeight: 1 }}>🥷</span>
+                              </div>
+                              <p style={{
+                                fontFamily: "'Caveat', cursive",
+                                fontSize: 22,
+                                fontWeight: 700,
+                                color: 'rgba(255,255,255,0.65)',
+                                transform: 'rotate(-1deg)',
+                                lineHeight: 1.3,
+                              }}>
+                                You are a Ninja! 🏆
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
 
                       {/* Activities with week separators */}
                       {(() => {
