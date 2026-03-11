@@ -548,23 +548,25 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           <p style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.3)', marginTop: 6, marginLeft: idx % 2 === 0 ? '60%' : '5%', transform: `rotate(${-rotation * 0.8}deg)` }}>{handQuote}</p>
                         )}
                         {/* Arrow */}
-                        {idx < sortedActivities.length - 1 && decorType !== 4 && (
+                        {idx < reversedActivities.length - 1 && decorType !== 4 && (
                           <svg className="absolute pointer-events-none" style={{ left: 20 + offsetX, bottom: -20, width: 24, height: 28, opacity: 0.2 }} viewBox="0 0 24 28" fill="none">
                             <path d="M12 2 C12 2 10 14 12 20 C13 14 15 18 12 20 M8 16 L12 24 L16 16" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                           </svg>
                         )}
                       </motion.div>
                     );
-                  });
-                })()}
+                  })}
 
-                {/* Journey start */}
-                <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
-                  <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.1)' }} />
-                  <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: 'rgba(255,255,255,0.2)', transform: 'rotate(-1deg)' }}>
-                    the journey begins here... 🌱
-                  </p>
-                </div>
+                  {/* Journey start */}
+                  <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
+                    <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.1)' }} />
+                    <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: 'rgba(255,255,255,0.2)', transform: 'rotate(-1deg)' }}>
+                      the journey begins here... 🌱
+                    </p>
+                  </div>
+                </>
+                  );
+                })()}
               </div>
             </div>
 
