@@ -1751,18 +1751,6 @@ const Reel = () => {
                               <Lock className="w-6 h-6 text-white/40 mb-2" />
                               <span className="text-white/40 text-xs">Private</span>
                             </div>
-                          ) : hasFrame && activity ? (
-                            <div className="absolute inset-0 pointer-events-none" style={{ containerType: 'inline-size' }}>
-                              <StoryFrameRenderer
-                                imageUrl={activity.originalUrl || activity.storageUrl || ''}
-                                isVideo={peekIsVideo}
-                                activity={activity.activity || ''}
-                                frame={activity.frame!}
-                                duration={activity.duration || ''}
-                                pr={activity.pr || ''}
-                                dayNumber={activity.dayNumber}
-                              />
-                            </div>
                           ) : peekMedia ? (
                             peekIsVideo ? (
                               <video
