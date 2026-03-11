@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
+import CommunityStoriesScroll from '@/components/CommunityStoriesScroll';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { useProfile } from '@/hooks/use-profile';
