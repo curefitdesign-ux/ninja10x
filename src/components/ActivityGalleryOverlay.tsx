@@ -378,41 +378,36 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                            animate={{ opacity: 1, y: 0, scale: 1 }}
                            transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 20 }}
                          >
-                           <div
-                             style={{
-                               background: '#FFFFFF',
-                               borderRadius: 20,
-                               padding: '8px 16px',
-                               maxWidth: 210,
-                               boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
-                             }}
-                           >
-                             <p style={{
-                               fontFamily: "'Inter', -apple-system, sans-serif",
-                               fontSize: 12,
-                               fontWeight: 500,
-                               lineHeight: 1.35,
-                               color: '#1a1a1a',
-                               margin: 0,
-                               textAlign: 'center',
-                             }}>
-                               {bubbleText}
-                             </p>
-                           </div>
-                           {/* Thought bubble dots */}
-                           <div style={{
-                             position: 'absolute',
-                             left: '50%',
-                             bottom: -8,
-                             transform: 'translateX(-50%)',
-                             display: 'flex',
-                             flexDirection: 'column',
-                             alignItems: 'center',
-                             gap: 2,
-                           }}>
-                             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }} />
-                             <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#FFFFFF', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }} />
-                           </div>
+                            <div
+                              style={{
+                                background: '#E8E8E8',
+                                borderRadius: 18,
+                                padding: '8px 14px',
+                                maxWidth: 210,
+                              }}
+                            >
+                              <p style={{
+                                fontFamily: "'Inter', -apple-system, sans-serif",
+                                fontSize: 12,
+                                fontWeight: 500,
+                                lineHeight: 1.35,
+                                color: '#1a1a1a',
+                                margin: 0,
+                                textAlign: 'center',
+                              }}>
+                                {bubbleText}
+                              </p>
+                            </div>
+                            {/* Thought bubble dot - bottom left like iMessage */}
+                            <div style={{
+                              position: 'absolute',
+                              left: 16,
+                              bottom: -6,
+                              width: 10,
+                              height: 10,
+                              borderRadius: '50%',
+                              background: '#E8E8E8',
+                            }} />
                          </motion.div>
                        );
                      }
