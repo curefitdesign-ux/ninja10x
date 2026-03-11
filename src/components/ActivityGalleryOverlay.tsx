@@ -22,7 +22,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 import fireEmoji from '@/assets/reactions/fire-3d.png';
 import clapEmoji from '@/assets/reactions/clap-3d.png';
-import paperclipImg from '@/assets/frames/paperclip-silver.png';
+
 import deskBellImg from '@/assets/icons/desk-bell-3d.png';
 
 interface ReactorProfile {
@@ -395,16 +395,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 38px, rgba(255,255,255,0.03) 38px, rgba(255,255,255,0.03) 39px)',
                   backgroundPosition: '0 20px',
                 }} />
-                {/* Curved timeline SVG */}
-                <svg className="absolute pointer-events-none" style={{ left: 0, top: 0, width: 60, height: '100%', overflow: 'visible' }} preserveAspectRatio="none">
-                  <path
-                    d="M 29 0 C 45 80, 12 160, 29 240 C 46 320, 12 400, 29 480 C 46 560, 12 640, 29 720 C 46 800, 12 880, 29 960 C 46 1040, 12 1120, 29 1200 C 46 1280, 12 1360, 29 1440 C 46 1520, 12 1600, 29 1680 C 46 1760, 12 1840, 29 1920 C 46 2000, 12 2080, 29 2160 C 46 2240, 12 2320, 29 2400 C 46 2480, 12 2560, 29 2640 C 46 2720, 12 2800, 29 2880 C 46 2960, 12 3040, 29 3120 C 46 3200, 12 3280, 29 3360 C 46 3440, 12 3520, 29 3600 C 46 3680, 12 3760, 29 3840 C 46 3920, 12 4000, 29 4080"
-                    stroke="rgba(255,255,255,0.1)"
-                    strokeWidth="2"
-                    strokeDasharray="6 6"
-                    fill="none"
-                  />
-                </svg>
+                {/* Straight timeline line */}
+                <div className="absolute pointer-events-none" style={{ left: 28, top: 0, width: 2, height: '100%', background: 'rgba(255,255,255,0.1)', backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 6px, transparent 6px, transparent 12px)' }} />
 
                 {(() => {
                   const sortedActivities = [...activities].filter(a => !a.isPlaceholder);
@@ -416,7 +408,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     return { rotation: ((seed % 11) - 5) * 1.2, offsetX: ((seed * 3) % 7) - 2, decorType: seed % 5 };
                   };
                   const handDates = ['just now ✨','yesterday','a few days ago','last week','feeling strong 💪','what a session!','crushed it 🔥','new PR day','getting better','consistency > all','momentum building','unstoppable 🚀'];
-                  const handQuotes = ['→ keep showing up!','↓ the grind continues...','★ proud of this one','~ good vibes only','✓ done & dusted','♡ self care day'];
 
                   return (
                     <>
@@ -435,7 +426,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     const dw = ((act.dayNumber - 1) % 3) + 1;
                     const isSelected = act.id === current.id;
                     const handDate = handDates[act.dayNumber - 1] || handDates[idx % handDates.length];
-                    const handQuote = handQuotes[idx % handQuotes.length];
+                    
 
                     return (
                       <motion.div
@@ -478,81 +469,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               <img src={act.originalUrl || act.storageUrl} alt={`Day ${act.dayNumber}`} className="absolute inset-0 w-full h-full object-cover" />
                             )}
                           </div>
-
-                          
-
-                          {/* Paperclip */}
-                          {decorType === 0 && (
-                            <img src={paperclipImg} alt="" className="absolute pointer-events-none" style={{
-                              width: 32, height: 'auto', top: -8, right: 16,
-                              transform: `rotate(${15 + rotation}deg)`, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))', opacity: 0.85,
-                            }} />
-                          )}
-                          {/* Tape */}
-                          {decorType === 3 && (
-                            <div className="absolute pointer-events-none" style={{
-                              width: 52, height: 18, top: -6, left: '30%',
-                              background: 'rgba(255, 230, 180, 0.35)', transform: `rotate(${-3 + rotation * 0.5}deg)`, borderRadius: 2, backdropFilter: 'blur(2px)',
-                            }} />
-                          )}
-                          {/* Activity sticker */}
-                          {act.activity && decorType !== 4 && (
-                            <div className="absolute pointer-events-none" style={{
-                              bottom: -12, right: -8, background: 'rgba(255,255,255,0.1)',
-                              backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                              border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
-                              transform: `rotate(${-rotation * 0.5}deg)`,
-                            }}>
-                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
-                            </div>
-                          )}
-                          {/* Like count badge + react button */}
-                          {(() => {
-                            const ar = localReactions[act.id];
-                            const total = ar?.total || 0;
-                            return (
-                              <div className="absolute flex items-center gap-1" style={{
-                                bottom: -10, left: -6, zIndex: 30,
-                                transform: `rotate(${-rotation * 0.6}deg)`,
-                              }}>
-                                {total > 0 && (
-                                  <span style={{
-                                    fontFamily: "'Caveat', cursive", fontSize: 16,
-                                    color: 'rgba(255,255,255,0.55)',
-                                    textShadow: '0 1px 4px rgba(0,0,0,0.5)',
-                                  }}>
-                                    {total} ❤️
-                                  </span>
-                                )}
-                                {!isOwnProfile && (
-                                  <button
-                                    className="flex items-center gap-0.5 active:scale-90 transition-transform"
-                                    style={{
-                                      background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
-                                      borderRadius: 14, padding: '3px 8px',
-                                      border: '1px solid rgba(255,255,255,0.12)',
-                                    }}
-                                    onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}
-                                  >
-                                    <span style={{ fontSize: 12 }}>🔥</span>
-                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>React</span>
-                                  </button>
-                                )}
-                              </div>
-                            );
-                          })()}
                         </motion.div>
-
-                        {/* Quote */}
-                        {(decorType === 2 || decorType === 1) && (
-                          <p style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.3)', marginTop: 6, marginLeft: idx % 2 === 0 ? '60%' : '5%', transform: `rotate(${-rotation * 0.8}deg)` }}>{handQuote}</p>
-                        )}
-                        {/* Arrow */}
-                        {idx < reversedActivities.length - 1 && decorType !== 4 && (
-                          <svg className="absolute pointer-events-none" style={{ left: 20 + offsetX, bottom: -20, width: 24, height: 28, opacity: 0.2 }} viewBox="0 0 24 28" fill="none">
-                            <path d="M12 2 C12 2 10 14 12 20 C13 14 15 18 12 20 M8 16 L12 24 L16 16" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                          </svg>
-                        )}
                       </motion.div>
                     );
                   })}
