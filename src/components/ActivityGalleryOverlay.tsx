@@ -24,6 +24,7 @@ import fireEmoji from '@/assets/reactions/fire-3d.png';
 import clapEmoji from '@/assets/reactions/clap-3d.png';
 
 import deskBellImg from '@/assets/icons/desk-bell-3d.png';
+import aiStarSparkle from '@/assets/icons/ai-star-sparkle.png';
 
 interface ReactorProfile {
   userId: string;
