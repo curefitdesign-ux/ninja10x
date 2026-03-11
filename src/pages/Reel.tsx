@@ -2212,102 +2212,85 @@ const Reel = () => {
                 }}
               >
                 {/* Reaction pill + Share icon row — hidden for log-activity placeholder */}
-                <div className="flex items-center justify-center gap-2 px-4" style={{ visibility: isLogActivityCard ? 'hidden' : 'visible' }}>
-                  {/* Liquid glass reaction pill */}
+                <div className="flex items-center justify-center gap-2.5 px-4" style={{ visibility: isLogActivityCard ? 'hidden' : 'visible' }}>
+                  {/* Sticker-style reaction badge */}
                   <button
                     onClick={() => { isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
-                    className="relative overflow-hidden active:scale-[0.97] transition-transform flex-1"
+                    className="relative overflow-hidden active:scale-[0.93] transition-all duration-150 flex-1"
                     style={{
-                      height: 42,
-                      borderRadius: 21,
-                      background: 'rgba(255, 255, 255, 0.08)',
-                      backdropFilter: 'blur(40px) saturate(180%)',
-                      WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                      border: '1px solid rgba(255, 255, 255, 0.06)',
-                      boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+                      height: 46,
+                      borderRadius: 23,
+                      background: 'linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.05))',
+                      border: '1.5px solid rgba(255,255,255,0.12)',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.1) inset, 0 -1px 0 rgba(0,0,0,0.2) inset',
+                      transform: 'rotate(-1deg)',
                     }}
                   >
                   {isOwnStory ? (
-                    <div
-                      className="flex items-center justify-center gap-3 h-full px-5"
-                    >
+                    <div className="flex items-center justify-center gap-2.5 h-full px-5">
                       {currentReactions.total > 0 ? (
                         <>
-                          <div className="flex -space-x-1">
-                            <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                            <img src={clapEmoji} alt="clap" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                          <div className="flex -space-x-1.5">
+                            <img src={fireEmoji} alt="fire" className="w-7 h-7 object-contain" style={{ filter: 'drop-shadow(0 2px 6px rgba(255,100,0,0.4))' }} />
+                            <img src={clapEmoji} alt="clap" className="w-7 h-7 object-contain" style={{ filter: 'drop-shadow(0 2px 6px rgba(255,200,0,0.3))' }} />
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-white font-bold text-base">{currentReactions.total}</span>
-                            <span className="text-white/50 text-sm">reacts</span>
-                          </div>
-                          <ChevronUp className="w-4 h-4 text-white/40" />
+                          <span className="text-white font-extrabold text-base tracking-tight" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>{currentReactions.total}</span>
+                          <span className="text-white/50 text-xs font-semibold uppercase tracking-wider">reacts</span>
+                          <ChevronUp className="w-4 h-4 text-white/30" />
                         </>
                       ) : (
                         <>
-                          <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain opacity-40" />
-                          <span className="text-white/50 text-sm font-medium">No reacts yet</span>
+                          <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain opacity-40" />
+                          <span className="text-white/45 text-sm font-bold italic">No reacts yet</span>
                         </>
                       )}
                     </div>
                   ) : (
-                    <div
-                      className="flex items-center justify-center gap-2 h-full px-4 whitespace-nowrap"
-                    >
+                    <div className="flex items-center justify-center gap-2 h-full px-4 whitespace-nowrap">
                       {currentReactions.total > 0 ? (
                         <>
-                          <div className="flex -space-x-1">
-                            <img src={fireEmoji} alt="fire" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                            <img src={clapEmoji} alt="clap" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                          <div className="flex -space-x-1.5">
+                            <img src={fireEmoji} alt="fire" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 6px rgba(255,100,0,0.4))' }} />
+                            <img src={clapEmoji} alt="clap" className="w-6 h-6 object-contain" style={{ filter: 'drop-shadow(0 2px 6px rgba(255,200,0,0.3))' }} />
                           </div>
-                          <span className="text-white font-bold text-xs">{currentReactions.total}</span>
-                          <div className="w-px h-3.5 bg-white/20" />
-                          <span className="text-white/70 text-xs">Tap to react</span>
+                          <span className="text-white font-extrabold text-sm" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>{currentReactions.total}</span>
+                          <div className="w-px h-3 bg-white/15" />
+                          <span className="text-white/70 text-xs font-bold uppercase tracking-wide">React</span>
+                          <span className="text-base">👆</span>
                         </>
                       ) : (
                         <>
-                          <ProfileAvatar
-                            src={profile?.avatar_url}
-                            name={profile?.display_name || 'You'}
-                            size={26}
-                            style={{
-                              border: '2px solid rgba(255, 255, 255, 0.25)',
-                            }}
-                          />
-                          <span className="text-white/80 text-sm font-medium">Be first to react!</span>
-                          <div className="flex -space-x-1">
-                            <img src={fireEmoji} alt="fire" className="w-4 h-4 object-contain opacity-60" />
-                          </div>
+                          <span className="text-base">🔥</span>
+                          <span className="text-white/80 text-sm font-bold">Drop a react!</span>
+                          <span className="text-xs">👆</span>
                         </>
                       )}
                     </div>
                   )}
                   </button>
 
-                   {/* History button — aligned with reaction pill */}
+                   {/* Sticker-style View Progress badge */}
                    <div className="flex items-center gap-2 shrink-0">
-                    {/* History button — view all past activities of this user */}
                     {!isLogActivityCard && !isWeekRecapStory && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setShowHistoryGallery(true);
                         }}
-                        className="shrink-0 active:scale-95 transition-transform flex items-center gap-1.5 whitespace-nowrap"
+                        className="shrink-0 active:scale-[0.93] transition-all duration-150 flex items-center gap-1.5 whitespace-nowrap"
                         style={{
-                          height: 42,
-                          borderRadius: 21,
+                          height: 46,
+                          borderRadius: 23,
                           paddingLeft: 14,
                           paddingRight: 16,
-                          background: 'rgba(255, 255, 255, 0.08)',
-                          backdropFilter: 'blur(40px) saturate(180%)',
-                          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                          border: '1px solid rgba(255, 255, 255, 0.06)',
-                          boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+                          background: 'linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04))',
+                          border: '1.5px solid rgba(255,255,255,0.1)',
+                          boxShadow: '0 4px 16px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.08) inset, 0 -1px 0 rgba(0,0,0,0.2) inset',
+                          transform: 'rotate(1deg)',
                         }}
                       >
-                        <History className="w-[14px] h-[14px] text-white/60" strokeWidth={1.5} />
-                        <span className="text-white/60 text-xs font-medium">View Progress</span>
+                        <span className="text-sm">📈</span>
+                        <span className="text-white/75 text-xs font-bold uppercase tracking-wide" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>Journey</span>
                       </button>
                     )}
                   </div>
