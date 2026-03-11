@@ -1722,15 +1722,13 @@ const Reel = () => {
                             height: 'calc(95% - 10px)',
                             maxWidth: '100%',
                             filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
+                            background: activity?.id === 'log-activity' ? 'hsl(var(--background))' : 'transparent',
                           }}
                         >
                           {activity?.id === 'log-activity' ? (
                             <div className="w-full h-full flex items-center justify-center">
                               <div
                                 className="w-full h-full flex flex-col items-center justify-center gap-5 px-6 text-center"
-                                style={{
-                                  background: 'hsl(var(--background))',
-                                }}
                               >
                                 <div style={{ width: 92, height: 92, borderRadius: '50%', overflow: 'hidden' }}>
                                   <video src="/videos/curo-peeking.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
