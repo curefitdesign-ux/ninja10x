@@ -1794,70 +1794,65 @@ const Reel = () => {
                             overflow: 'visible',
                           }}
                         >
-                          {/* Stacked cards behind — only visible on center card */}
-                          {showStackedCards && (
-                            <>
-                              {/* Back card (deepest) */}
+                          {/* Main card wrapper — contains card + stacked strips */}
+                          <div className="relative" style={{
+                            aspectRatio: '9/16',
+                            height: isLogActivityCard ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
+                            maxWidth: '100%',
+                          }}>
+                            {/* Stacked strip 2 (deepest, narrowest) */}
+                            {showStackedCards && (
                               <div
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setShowHistoryGallery(true);
-                                }}
+                                onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
-                                  width: '80%',
-                                  height: 12,
-                                  bottom: -14,
+                                  width: '82%',
+                                  height: 8,
+                                  bottom: -12,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
-                                  borderRadius: `0 0 ${cardRadius - 2}px ${cardRadius - 2}px`,
-                                  background: 'rgba(255,255,255,0.04)',
-                                  border: '1px solid rgba(255,255,255,0.08)',
+                                  borderRadius: `0 0 ${cardRadius - 3}px ${cardRadius - 3}px`,
+                                  background: 'rgba(255,255,255,0.03)',
+                                  border: '1px solid rgba(255,255,255,0.06)',
                                   borderTop: 'none',
-                                  backdropFilter: 'blur(20px) saturate(1.6)',
-                                  WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
                                 }}
                               />
-                              {/* Middle card */}
+                            )}
+                            {/* Stacked strip 1 (closer, slightly narrower) */}
+                            {showStackedCards && (
                               <div
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setShowHistoryGallery(true);
-                                }}
+                                onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
-                                  width: '90%',
-                                  height: 12,
-                                  bottom: -7,
+                                  width: '91%',
+                                  height: 8,
+                                  bottom: -6,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 2,
-                                  borderRadius: `0 0 ${cardRadius - 1}px ${cardRadius - 1}px`,
-                                  background: 'rgba(255,255,255,0.07)',
-                                  border: '1px solid rgba(255,255,255,0.12)',
+                                  borderRadius: `0 0 ${cardRadius - 2}px ${cardRadius - 2}px`,
+                                  background: 'rgba(255,255,255,0.06)',
+                                  border: '1px solid rgba(255,255,255,0.10)',
                                   borderTop: 'none',
-                                  backdropFilter: 'blur(24px) saturate(1.8)',
-                                  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
                                 }}
                               />
-                            </>
-                          )}
-                          {/* Main card — 9:16 aspect ratio */}
-                          <div
-                            className="relative overflow-hidden"
-                            style={{
-                              aspectRatio: '9/16',
-                              height: isLogActivityCard ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
-                              maxWidth: '100%',
-                              borderRadius: `${cardRadius}px`,
-                              overflow: 'hidden',
-                              background: isLogActivityCard ? '#0a0a12' : 'transparent',
-                              border: isLogActivityCard
-                                ? '1px solid rgba(160, 120, 255, 0.25)'
-                                : '1px solid rgba(255,255,255,0.08)',
-                              boxShadow: isLogActivityCard
-                                ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 0 20px rgba(140, 100, 240, 0.15), 0 0 40px rgba(140, 100, 240, 0.08)'
+                            )}
+                            {/* Main card */}
+                            <div
+                              className="relative overflow-hidden w-full h-full"
+                              style={{
+                                borderRadius: `${cardRadius}px`,
+                                background: isLogActivityCard ? '#0a0a12' : 'transparent',
+                                border: isLogActivityCard
+                                  ? '1px solid rgba(160, 120, 255, 0.25)'
+                                  : '1px solid rgba(255,255,255,0.08)',
+                                boxShadow: isLogActivityCard
+                                  ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 0 20px rgba(140, 100, 240, 0.15), 0 0 40px rgba(140, 100, 240, 0.08)'
+                                  : '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
+                                zIndex: 3,
+                              }}
+                            >
                                 : '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
                               marginTop: '-10px',
                               zIndex: 3,
