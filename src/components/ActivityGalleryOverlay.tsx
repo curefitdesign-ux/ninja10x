@@ -509,6 +509,73 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                   return (
                     <>
+                      {/* Ninja milestone - above latest card */}
+                      {(() => {
+                        const remaining = 12 - realActivities.length;
+                        if (remaining > 0) {
+                          const ninjaText = isOwnProfile !== false
+                            ? `${remaining} ${remaining === 1 ? 'activity' : 'activities'} away from becoming Ninja`
+                            : `${userProfile?.displayName || 'They'} — ${remaining} away from Ninja`;
+                          return (
+                            <div className="relative" style={{ padding: '8px 16px 4px 48px', marginBottom: 4 }}>
+                              {/* Timeline dot - goal marker */}
+                              <div className="absolute" style={{
+                                left: 20, top: 14, width: 18, height: 18, borderRadius: '50%',
+                                background: 'linear-gradient(135deg, rgba(249,115,22,0.6), rgba(236,72,153,0.6))',
+                                border: '2px solid rgba(255,255,255,0.2)',
+                                boxShadow: '0 0 14px rgba(249,115,22,0.3)',
+                                zIndex: 5,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              }}>
+                                <span style={{ fontSize: 9, lineHeight: 1 }}>🥷</span>
+                              </div>
+                              <p style={{
+                                fontFamily: "'Caveat', cursive",
+                                fontSize: 22,
+                                fontWeight: 700,
+                                color: 'rgba(255,255,255,0.5)',
+                                transform: 'rotate(-1.5deg)',
+                                lineHeight: 1.3,
+                                marginBottom: 2,
+                              }}>
+                                {ninjaText}
+                              </p>
+                              {/* Dashed connector to next card */}
+                              <div style={{
+                                position: 'absolute', left: 28, bottom: -8, width: 2, height: 16,
+                                backgroundImage: 'repeating-linear-gradient(to bottom, rgba(249,115,22,0.3) 0px, rgba(249,115,22,0.3) 3px, transparent 3px, transparent 7px)',
+                              }} />
+                            </div>
+                          );
+                        }
+                        if (realActivities.length >= 12) {
+                          return (
+                            <div className="relative" style={{ padding: '8px 16px 4px 48px', marginBottom: 4 }}>
+                              <div className="absolute" style={{
+                                left: 20, top: 14, width: 18, height: 18, borderRadius: '50%',
+                                background: 'linear-gradient(135deg, #F97316, #EC4899)',
+                                border: '2px solid rgba(255,255,255,0.3)',
+                                boxShadow: '0 0 16px rgba(249,115,22,0.4)',
+                                zIndex: 5,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              }}>
+                                <span style={{ fontSize: 9, lineHeight: 1 }}>🥷</span>
+                              </div>
+                              <p style={{
+                                fontFamily: "'Caveat', cursive",
+                                fontSize: 22,
+                                fontWeight: 700,
+                                color: 'rgba(255,255,255,0.65)',
+                                transform: 'rotate(-1deg)',
+                                lineHeight: 1.3,
+                              }}>
+                                You are a Ninja! 🏆
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
 
                       {/* Activities with week separators */}
                       {(() => {
