@@ -1850,7 +1850,7 @@ const Reel = () => {
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer flex items-center gap-1"
                                 style={{
-                                  bottom: -34,
+                                  bottom: -28,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
