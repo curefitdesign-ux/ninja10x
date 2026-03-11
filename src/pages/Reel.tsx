@@ -1808,7 +1808,7 @@ const Reel = () => {
                                 style={{
                                   width: '78%',
                                   height: 38,
-                                  bottom: 36,
+                                  bottom: 26,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
@@ -1830,7 +1830,7 @@ const Reel = () => {
                                 style={{
                                   width: '84%',
                                   height: 38,
-                                  bottom: 43,
+                                  bottom: 33,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 2,
@@ -1856,11 +1856,11 @@ const Reel = () => {
                                   zIndex: 1,
                                 }}
                               >
-                                <svg width="20" height="28" viewBox="0 0 20 28" fill="none" style={{ marginTop: -4 }}>
+                                <svg width="28" height="36" viewBox="0 0 20 28" fill="none" style={{ marginTop: -4 }}>
                                   <path d="M10 26 C6 20, 2 14, 6 8 C8 5, 10 4, 10 4" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
                                   <path d="M7 7 L10 3 L13 7" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
-                                <span style={{ fontFamily: 'Caveat, cursive', fontSize: 17, color: 'rgba(255,255,255,0.4)', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>tap to view journey</span>
+                                <span style={{ fontFamily: 'Caveat, cursive', fontSize: 21, color: 'rgba(255,255,255,0.4)', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>tap to view journey</span>
                               </div>
                             )}
                             {/* Main card */}
