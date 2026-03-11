@@ -1726,12 +1726,10 @@ const Reel = () => {
                           }}
                         >
                           {activity?.id === 'log-activity' ? (
-                            <div className="w-full h-full flex items-center justify-center px-3 py-2">
+                            <div className="w-full h-full flex items-center justify-center">
                               <div
-                                className="flex flex-col items-center justify-center gap-5 px-6 text-center"
+                                className="w-full h-full flex flex-col items-center justify-center gap-5 px-6 text-center"
                                 style={{
-                                  width: '86%',
-                                  height: 'calc(95% - 10px)',
                                   background: 'hsl(var(--background))',
                                 }}
                               >
@@ -1903,12 +1901,10 @@ const Reel = () => {
                               const glowHsl = isEvenDay ? 'hsl(280 80% 65%)' : 'hsl(25 95% 60%)';
                               const glowMid = isEvenDay ? 'hsl(280 80% 65% / 0.35)' : 'hsl(25 95% 60% / 0.35)';
                               return (
-                                <div className="w-full h-full flex items-center justify-center px-6 py-4">
+                                <div className="w-full h-full flex items-center justify-center">
                                   <div
-                                    className="w-full flex flex-col items-center justify-center relative"
+                                    className="w-full h-full flex flex-col items-center justify-center relative"
                                     style={{
-                                      width: '86%',
-                                      height: 'calc(95% - 10px)',
                                       background: 'hsl(var(--background))',
                                       maxWidth: '100%',
                                     }}
