@@ -152,7 +152,7 @@ const GradientMeshBackground = () => {
       <div 
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse at center, transparent 35%, rgba(20, 20, 35, 0.35) 100%)',
+          background: 'radial-gradient(ellipse at center, transparent 35%, rgba(10, 22, 40, 0.35) 100%)',
         }}
       />
     </div>
