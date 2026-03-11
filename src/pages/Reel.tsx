@@ -1801,22 +1801,11 @@ const Reel = () => {
                           {/* Stacked cards behind — vertical deck style */}
                           {showStackedCards && (
                             <>
-                              {/* Back card (deepest) — offset down, scaled smallest */}
+                              {/* Back card (deepest) — peeks below main card */}
                               <motion.div
                                 key={`stack-back-${group.userId}`}
-                                animate={isCenter ? {
-                                  scale: 0.90,
-                                  opacity: 0.45,
-                                  y: 24,
-                                  x: 0,
-                                  rotate: 0,
-                                } : {
-                                  scale: 0.92,
-                                  opacity: 0,
-                                  y: 8,
-                                  x: 0,
-                                  rotate: 0,
-                                }}
+                                initial={false}
+                                animate={isCenter ? { opacity: 0.5 } : { opacity: 0 }}
                                 transition={{ type: 'spring', stiffness: 200, damping: 22 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1824,46 +1813,31 @@ const Reel = () => {
                                 }}
                                 className="absolute cursor-pointer"
                                 style={{
-                                  aspectRatio: '9/16',
-                                  height: 'calc(95% - 20px)',
-                                  marginTop: '-10px',
-                                  overflow: 'hidden',
+                                  width: '82%',
+                                  height: 18,
+                                  bottom: -28,
+                                  left: '50%',
+                                  transform: 'translateX(-50%)',
                                   zIndex: 1,
-                                  borderRadius: '12px',
-                                  background: 'rgba(255,255,255,0.03)',
+                                  borderRadius: '0 0 10px 10px',
+                                  background: 'rgba(255,255,255,0.06)',
                                   border: '1px solid rgba(255,255,255,0.10)',
-                                  boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.08)',
+                                  borderTop: 'none',
+                                  boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
                                   backdropFilter: 'blur(20px) saturate(1.6)',
                                   WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
-                                  transformOrigin: 'center center',
                                   pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
                               >
-                                {backCardThumb ? (
-                                  <img src={backCardThumb} alt="" className="w-full h-full object-cover" loading="lazy" />
-                                ) : (
-                                  <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(60,45,120,0.3) 0%, rgba(15,10,40,0.5) 100%)' }} />
+                                {backCardThumb && (
+                                  <img src={backCardThumb} alt="" className="w-full h-full object-cover object-bottom" style={{ borderRadius: '0 0 10px 10px', opacity: 0.4 }} loading="lazy" />
                                 )}
-                                <div className="absolute inset-0 pointer-events-none" style={{
-                                  background: 'linear-gradient(170deg, rgba(255,255,255,0.06) 0%, transparent 30%)',
-                                }} />
                               </motion.div>
-                              {/* Middle card — offset down slightly, scaled medium */}
+                              {/* Middle card — peeks just below main card */}
                               <motion.div
                                 key={`stack-mid-${group.userId}`}
-                                animate={isCenter ? {
-                                  scale: 0.95,
-                                  opacity: 0.65,
-                                  y: 12,
-                                  x: 0,
-                                  rotate: 0,
-                                } : {
-                                  scale: 0.95,
-                                  opacity: 0,
-                                  y: 4,
-                                  x: 0,
-                                  rotate: 0,
-                                }}
+                                initial={false}
+                                animate={isCenter ? { opacity: 0.7 } : { opacity: 0 }}
                                 transition={{ type: 'spring', stiffness: 200, damping: 22 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1871,29 +1845,25 @@ const Reel = () => {
                                 }}
                                 className="absolute cursor-pointer"
                                 style={{
-                                  aspectRatio: '9/16',
-                                  height: 'calc(95% - 20px)',
-                                  marginTop: '-10px',
-                                  overflow: 'hidden',
+                                  width: '90%',
+                                  height: 18,
+                                  bottom: -14,
+                                  left: '50%',
+                                  transform: 'translateX(-50%)',
                                   zIndex: 2,
-                                  borderRadius: '12px',
-                                  background: 'rgba(255,255,255,0.04)',
+                                  borderRadius: '0 0 10px 10px',
+                                  background: 'rgba(255,255,255,0.08)',
                                   border: '1px solid rgba(255,255,255,0.14)',
-                                  boxShadow: '0 8px 30px rgba(0,0,0,0.25), inset 0 0.5px 0 rgba(255,255,255,0.12)',
+                                  borderTop: 'none',
+                                  boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
                                   backdropFilter: 'blur(24px) saturate(1.8)',
                                   WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-                                  transformOrigin: 'center center',
                                   pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
                               >
-                                {midCardThumb ? (
-                                  <img src={midCardThumb} alt="" className="w-full h-full object-cover" loading="lazy" />
-                                ) : (
-                                  <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(70,50,130,0.25) 0%, rgba(15,10,40,0.45) 100%)' }} />
+                                {midCardThumb && (
+                                  <img src={midCardThumb} alt="" className="w-full h-full object-cover object-bottom" style={{ borderRadius: '0 0 10px 10px', opacity: 0.5 }} loading="lazy" />
                                 )}
-                                <div className="absolute inset-0 pointer-events-none" style={{
-                                  background: 'linear-gradient(165deg, rgba(255,255,255,0.08) 0%, transparent 35%)',
-                                }} />
                               </motion.div>
                             </>
                           )}
