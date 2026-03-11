@@ -1793,12 +1793,8 @@ const Reel = () => {
                     {(() => {
                       const shouldShowLocked = !isOwnStory && !viewerCanSeeCommunity;
                       const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
-                      // Show stacked cards behind for all users with multiple activities (not log-activity)
-                      const showStackedCards = !isLogActivityCard && activities.length > 1;
-                      // Get previous activity thumbnails for stacked cards
-                      const stackActivities = activities.filter(a => a.id !== activity?.id && !a.id?.startsWith('log-'));
-                      const backCardThumb = stackActivities[1]?.originalUrl || stackActivities[1]?.storageUrl || stackActivities[0]?.originalUrl || stackActivities[0]?.storageUrl;
-                      const midCardThumb = stackActivities[0]?.originalUrl || stackActivities[0]?.storageUrl;
+                      // Show stacked cards only on center card (not log-activity)
+                      const showStackedCards = isCenter && !isLogActivityCard;
                       return (
                         <div
                           className="relative flex items-center justify-center"
@@ -1809,73 +1805,53 @@ const Reel = () => {
                             overflow: 'visible',
                           }}
                         >
-                          {/* Stacked cards behind — vertical deck style */}
+                          {/* Stacked cards behind — only visible on center card */}
                           {showStackedCards && (
                             <>
-                              {/* Back card (deepest) — peeks below main card */}
-                              <motion.div
-                                key={`stack-back-${group.userId}`}
-                                initial={false}
-                                animate={isCenter ? { opacity: 0.5 } : { opacity: 0 }}
-                                transition={{ type: 'spring', stiffness: 200, damping: 22 }}
+                              {/* Back card (deepest) */}
+                              <div
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setShowHistoryGallery(true);
                                 }}
                                 className="absolute cursor-pointer"
                                 style={{
-                                  width: '82%',
-                                  height: 18,
-                                  bottom: -28,
+                                  width: '80%',
+                                  height: 22,
+                                  bottom: -22,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
                                   borderRadius: `0 0 ${cardRadius - 2}px ${cardRadius - 2}px`,
-                                  background: 'rgba(255,255,255,0.06)',
-                                  border: '1px solid rgba(255,255,255,0.10)',
+                                  background: 'rgba(255,255,255,0.04)',
+                                  border: '1px solid rgba(255,255,255,0.08)',
                                   borderTop: 'none',
-                                  boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
                                   backdropFilter: 'blur(20px) saturate(1.6)',
                                   WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
-                                  pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
-                              >
-                                {backCardThumb && (
-                                  <img src={backCardThumb} alt="" className="w-full h-full object-cover object-bottom" style={{ borderRadius: `0 0 ${cardRadius - 2}px ${cardRadius - 2}px`, opacity: 0.4 }} loading="lazy" />
-                                )}
-                              </motion.div>
-                              {/* Middle card — peeks just below main card */}
-                              <motion.div
-                                key={`stack-mid-${group.userId}`}
-                                initial={false}
-                                animate={isCenter ? { opacity: 0.7 } : { opacity: 0 }}
-                                transition={{ type: 'spring', stiffness: 200, damping: 22 }}
+                              />
+                              {/* Middle card */}
+                              <div
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setShowHistoryGallery(true);
                                 }}
                                 className="absolute cursor-pointer"
                                 style={{
-                                  width: '91%',
-                                  height: 18,
-                                  bottom: -14,
+                                  width: '90%',
+                                  height: 22,
+                                  bottom: -12,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 2,
                                   borderRadius: `0 0 ${cardRadius - 1}px ${cardRadius - 1}px`,
-                                  background: 'rgba(255,255,255,0.08)',
-                                  border: '1px solid rgba(255,255,255,0.14)',
+                                  background: 'rgba(255,255,255,0.07)',
+                                  border: '1px solid rgba(255,255,255,0.12)',
                                   borderTop: 'none',
-                                  boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
                                   backdropFilter: 'blur(24px) saturate(1.8)',
                                   WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-                                  pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
-                              >
-                                {midCardThumb && (
-                                  <img src={midCardThumb} alt="" className="w-full h-full object-cover object-bottom" style={{ borderRadius: `0 0 ${cardRadius - 1}px ${cardRadius - 1}px`, opacity: 0.5 }} loading="lazy" />
-                                )}
-                              </motion.div>
+                              />
                             </>
                           )}
                           {/* Main card — 9:16 aspect ratio */}
