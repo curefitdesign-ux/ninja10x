@@ -413,78 +413,99 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     weekGroups[Number(wk)].sort((a, b) => a.dayNumber - b.dayNumber);
                   }
 
+                  const WEEK_THEMES: Record<number, string> = {
+                    1: 'CONQUER WILL POWER',
+                    2: 'BUILD ENERGY',
+                    3: 'INCREASE STAMINA',
+                    4: 'BUILD STRENGTH',
+                  };
+
                   // Determine which weeks exist (1-4), reversed order (latest first)
                   const allWeeks = [4, 3, 2, 1];
                   const highestCompletedWeek = Math.max(0, ...Object.keys(weekGroups).map(Number));
 
                   return (
                     <>
-                      {/* End goal — certificate */}
-                      <div className="relative flex items-center gap-3" style={{ padding: '16px 16px 24px 16px' }}>
+                      {/* CERTIFICATE — top of timeline */}
+                      <div className="relative flex items-center gap-3" style={{ padding: '16px 16px 20px 16px' }}>
                         <img src={sortedActivities.length >= 12 ? tileActiveSvg : tileInactiveSvg} alt="" style={{ width: 32, height: 32, flexShrink: 0 }} />
                         <div>
-                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: sortedActivities.length >= 12 ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.25)', letterSpacing: '0.02em' }}>
-                            🏆 {sortedActivities.length >= 12 ? 'Journey Complete!' : `${remainingDays} ${remainingDays === 1 ? 'day' : 'days'} to go`}
+                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, color: sortedActivities.length >= 12 ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.25)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                            🏆 Certificate
                           </p>
-                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
-                            {sortedActivities.length >= 12 ? 'You crushed it!' : 'Keep pushing, almost there'}
+                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: sortedActivities.length >= 12 ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.15)', marginTop: 2 }}>
+                            {sortedActivities.length >= 12 ? 'Journey Complete — You crushed it!' : `${remainingDays} ${remainingDays === 1 ? 'day' : 'days'} to go`}
                           </p>
                         </div>
                       </div>
 
-                      {/* Weeks: latest → earliest */}
+                      {/* Weeks: 4 → 3 → 2 → 1 */}
                       {allWeeks.map((weekNum) => {
                         const weekActs = weekGroups[weekNum] || [];
                         const isWeekComplete = weekActs.length >= 3;
                         const hasAnyActivity = weekActs.length > 0;
-                        // For weeks with no activities that are beyond the current progress, show upcoming slots
-                        const isUpcomingWeek = weekNum > highestCompletedWeek + 1 || (!hasAnyActivity && weekNum > highestCompletedWeek);
+                        const weekTheme = WEEK_THEMES[weekNum] || '';
 
-                        // If this week has no activities and is upcoming, show placeholder slots
-                        if (!hasAnyActivity) {
-                          return (
-                            <div key={`week-${weekNum}`}>
-                              {[1, 2, 3].map((slot) => (
-                                <div key={`upcoming-${weekNum}-${slot}`} className="relative flex items-center gap-3" style={{ padding: '10px 16px 10px 16px', marginBottom: 4 }}>
-                                  <img src={tileInactiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0, opacity: 0.5 }} />
-                                  <div>
-                                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.02em' }}>
-                                      W{weekNum} · Activity {slot}
-                                    </p>
-                                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.12)', marginTop: 1 }}>
-                                      Upcoming
-                                    </p>
-                                  </div>
-                                </div>
-                              ))}
-
-                              {/* Diamond separator */}
-                              <div className="relative flex flex-col items-center" style={{ padding: '8px 16px 20px 0', marginLeft: 48 }}>
-                                <div className="absolute" style={{
-                                  left: -20, top: 14, width: 14, height: 14,
-                                  background: 'rgba(255,255,255,0.08)',
-                                  border: '2px solid rgba(255,255,255,0.1)',
-                                  transform: 'rotate(45deg)',
-                                  zIndex: 5,
-                                }} />
-                                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.15)', letterSpacing: '0.02em' }}>
-                                  3 activities to unlock Week {weekNum} Reel
-                                </p>
-                              </div>
-                            </div>
-                          );
-                        }
+                        // Activities sorted descending within each week (Activity 3, 2, 1)
+                        const weekActsDesc = [...weekActs].sort((a, b) => b.dayNumber - a.dayNumber);
 
                         return (
                           <div key={`week-${weekNum}`}>
-                            {/* Activities in this week */}
-                            {weekActs.map((act, idx) => {
+                            {/* REEL GENERATION row */}
+                            <div className="flex flex-col items-center" style={{ padding: '4px 16px 12px 16px' }}>
+                              {isWeekComplete && isOwnProfile ? (
+                                <button
+                                  onClick={() => {
+                                    const weekActivities = weekActs.map(a => ({
+                                      id: a.id, storageUrl: a.storageUrl, originalUrl: a.originalUrl,
+                                      isVideo: a.isVideo, activity: a.activity, frame: a.frame,
+                                      duration: a.duration, pr: a.pr, dayNumber: a.dayNumber,
+                                    }));
+                                    window.dispatchEvent(new CustomEvent('navigate-reel-gen', { detail: { week: weekNum, activities: weekActivities } }));
+                                  }}
+                                  className="active:scale-95 transition-transform"
+                                  style={{
+                                    fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 600,
+                                    color: 'rgba(255,255,255,0.75)', background: 'rgba(255,255,255,0.06)',
+                                    backdropFilter: 'blur(30px) saturate(180%)', WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+                                    border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20,
+                                    padding: '7px 18px', letterSpacing: '0.02em',
+                                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+                                  }}
+                                >
+                                  ✨ Generate Week {weekNum} Reel
+                                </button>
+                              ) : (
+                                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.02em' }}>
+                                  {hasAnyActivity
+                                    ? `${3 - weekActs.length} more ${3 - weekActs.length === 1 ? 'activity' : 'activities'} to unlock Reel`
+                                    : '3 activities to unlock Reel'}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* WEEK HEADER */}
+                            <div className="flex items-center gap-3" style={{ padding: '4px 16px 12px 16px' }}>
+                              <img src={hasAnyActivity ? tileActiveSvg : tileInactiveSvg} alt="" style={{ width: 30, height: 30, flexShrink: 0, opacity: hasAnyActivity ? 1 : 0.5 }} />
+                              <div>
+                                <p style={{
+                                  fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700,
+                                  color: hasAnyActivity ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.2)',
+                                  letterSpacing: '0.04em', textTransform: 'uppercase',
+                                }}>
+                                  Week {weekNum} — {weekTheme}
+                                </p>
+                                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: hasAnyActivity ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.12)', marginTop: 2 }}>
+                                  {isWeekComplete ? 'Completed ✓' : hasAnyActivity ? `${weekActs.length}/3 activities` : 'Not started yet'}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* ACTIVITIES — descending (12, 11, 10 etc.) */}
+                            {weekActsDesc.map((act, idx) => {
                               const globalIdx = sortedActivities.findIndex(a => a.id === act.id);
                               const { rotation, offsetX } = getCardStyle(globalIdx, act.dayNumber);
-                              const dw = ((act.dayNumber - 1) % 3) + 1;
-                              const isSelected = act.id === current.id;
 
-                              // Subtitle based on activity
                               const subtitle = act.activity || 'Workout';
                               const durationSubtitle = act.duration ? ` · ${act.duration}` : '';
 
@@ -501,7 +522,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                     <img src={tileActiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0 }} />
                                     <div>
                                       <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.02em' }}>
-                                        W{weekNum} · Activity {dw}
+                                        Activity {act.dayNumber}
                                       </p>
                                       <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>
                                         {subtitle}{durationSubtitle}
@@ -570,86 +591,28 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               );
                             })}
 
-                            {/* Show remaining slots for incomplete weeks */}
-                            {!isWeekComplete && Array.from({ length: 3 - weekActs.length }, (_, i) => (
-                              <div key={`remaining-${weekNum}-${i}`} className="relative flex items-center gap-3" style={{ padding: '10px 16px 10px 16px', marginBottom: 4 }}>
-                                <img src={tileInactiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0, opacity: 0.5 }} />
-                                <div>
-                                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.02em' }}>
-                                    W{weekNum} · Activity {weekActs.length + i + 1}
-                                  </p>
-                                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.12)', marginTop: 1 }}>
-                                    Upcoming
-                                  </p>
+                            {/* Remaining slots for incomplete weeks — descending */}
+                            {!isWeekComplete && Array.from({ length: 3 - weekActs.length }, (_, i) => {
+                              const slotDay = (weekNum - 1) * 3 + (weekActs.length + i + 1);
+                              return (
+                                <div key={`remaining-${weekNum}-${i}`} className="relative flex items-center gap-3" style={{ padding: '10px 16px 10px 16px', marginBottom: 4 }}>
+                                  <img src={tileInactiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0, opacity: 0.5 }} />
+                                  <div>
+                                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.02em' }}>
+                                      Activity {slotDay}
+                                    </p>
+                                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.12)', marginTop: 1 }}>
+                                      Upcoming
+                                    </p>
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
-
-                            {/* Diamond separator + Generate Reel button */}
-                            <div className="relative flex flex-col items-center" style={{ padding: '8px 16px 20px 0', marginLeft: 48 }}>
-                              {/* Diamond on timeline */}
-                              <div className="absolute" style={{
-                                left: -20, top: 14, width: 14, height: 14,
-                                background: isWeekComplete ? 'linear-gradient(135deg, #F97316, #EC4899)' : 'rgba(255,255,255,0.08)',
-                                border: `2px solid ${isWeekComplete ? 'rgba(249,115,22,0.4)' : 'rgba(255,255,255,0.1)'}`,
-                                transform: 'rotate(45deg)',
-                                boxShadow: isWeekComplete ? '0 0 12px rgba(249,115,22,0.3)' : 'none',
-                                zIndex: 5,
-                              }} />
-
-                              {/* Generate Reel button */}
-                              {isWeekComplete && isOwnProfile && (
-                                <button
-                                  onClick={() => {
-                                    const weekActivities = weekActs.map(a => ({
-                                      id: a.id,
-                                      storageUrl: a.storageUrl,
-                                      originalUrl: a.originalUrl,
-                                      isVideo: a.isVideo,
-                                      activity: a.activity,
-                                      frame: a.frame,
-                                      duration: a.duration,
-                                      pr: a.pr,
-                                      dayNumber: a.dayNumber,
-                                    }));
-                                    window.dispatchEvent(new CustomEvent('navigate-reel-gen', { detail: { week: weekNum, activities: weekActivities } }));
-                                  }}
-                                  className="active:scale-95 transition-transform"
-                                  style={{
-                                    fontFamily: "'Inter', sans-serif",
-                                    fontSize: 13,
-                                    fontWeight: 600,
-                                    color: 'rgba(255,255,255,0.8)',
-                                    background: 'rgba(255,255,255,0.06)',
-                                    backdropFilter: 'blur(30px) saturate(180%)',
-                                    WebkitBackdropFilter: 'blur(30px) saturate(180%)',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    borderRadius: 20,
-                                    padding: '8px 20px',
-                                    letterSpacing: '0.02em',
-                                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
-                                  }}
-                                >
-                                  ✨ Generate Week {weekNum} Reel
-                                </button>
-                              )}
-                              {!isWeekComplete && (
-                                <p style={{
-                                  fontFamily: "'Inter', sans-serif",
-                                  fontSize: 12,
-                                  fontWeight: 500,
-                                  color: 'rgba(255,255,255,0.25)',
-                                  letterSpacing: '0.02em',
-                                }}>
-                                  {3 - weekActs.length} more {3 - weekActs.length === 1 ? 'activity' : 'activities'} to unlock Week {weekNum} Reel
-                                </p>
-                              )}
-                            </div>
+                              );
+                            })}
                           </div>
                         );
                       })}
 
-                      {/* Journey start */}
+                      {/* Journey start — bottom */}
                       <div className="relative flex items-center gap-3" style={{ padding: '16px 16px 24px 16px' }}>
                         <img src={tileActiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0, opacity: 0.6 }} />
                         <div>
