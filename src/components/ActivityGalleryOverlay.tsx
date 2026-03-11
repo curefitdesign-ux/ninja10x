@@ -489,159 +489,204 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         </p>
                       </div>
 
-                      {/* Activities */}
-                      {realActivities.map((act, idx) => {
-                    const { rotation, offsetX } = getCardStyle(idx, act.dayNumber);
-                    const wk = Math.ceil(act.dayNumber / 3);
-                    const dw = ((act.dayNumber - 1) % 3) + 1;
-                    const isAtTop = topCardId === act.id;
-                    const topTiltSeed = (act.dayNumber * 17 + idx * 7) % 13;
-                    const topTilt = ((topTiltSeed - 6) * 1.5);
-                    const activeRotation = isAtTop ? topTilt : rotation;
-                    const canEdit = isOwnProfile && isWithin24h(act);
-                    const doodles = getDoodleElements(act.dayNumber, idx);
+                      {/* Activities with week separators */}
+                      {(() => {
+                        const weekThemes: Record<number, string> = {
+                          1: 'CONQUER WILL POWER',
+                          2: 'BUILD ENERGY',
+                          3: 'INCREASE STAMINA',
+                          4: 'BUILD STRENGTH',
+                        };
+                        const elements: React.ReactNode[] = [];
+                        let lastWeek: number | null = null;
 
-                    return (
-                      <div
-                        key={act.id}
-                        ref={(el) => { cardRefs.current[act.id] = el; }}
-                        className="relative"
-                        style={{ padding: '12px 16px 12px 48px', marginBottom: idx < realActivities.length - 1 ? 16 : 0 }}
-                      >
-                        {/* Timeline dot */}
-                        <div className="absolute rounded-full" style={{
-                          left: 22, top: 28, width: 14, height: 14,
-                          background: isAtTop ? 'linear-gradient(135deg, #34D399, #10B981)' : 'rgba(255,255,255,0.15)',
-                          border: `2px solid ${isAtTop ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.1)'}`,
-                          boxShadow: isAtTop ? '0 0 12px rgba(52,211,153,0.4)' : 'none', zIndex: 5,
-                          transition: 'all 0.3s ease',
-                        }} />
+                        realActivities.forEach((act, idx) => {
+                          const wk = Math.ceil(act.dayNumber / 3);
 
-                        {/* Handwritten date */}
-                        <p style={{
-                          fontFamily: "'Caveat', cursive", fontSize: 18,
-                          color: isAtTop ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.45)',
-                          marginBottom: 6,
-                          transform: `rotate(${rotation * 0.3}deg)`,
-                          marginLeft: offsetX,
-                          transition: 'color 0.3s ease',
-                          fontWeight: isAtTop ? 700 : 400,
-                        }}>
-                          W{wk} · Activity {dw}
-                        </p>
-
-                        {/* Card */}
-                        <div
-                          className="relative overflow-visible"
-                          style={{
-                            width: '62%', aspectRatio: '9/16', borderRadius: 4,
-                            transform: `rotate(${activeRotation}deg) translateX(${offsetX}px)`,
-                            marginLeft: idx % 2 === 0 ? '0%' : '10%',
-                            transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
-                          }}
-                        >
-                          <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4, containerType: 'inline-size' }}>
-                            {act.frame ? (
-                              <StoryFrameRenderer imageUrl={act.originalUrl || act.storageUrl} isVideo={act.isVideo} activity={act.activity} frame={act.frame} duration={act.duration} pr={act.pr} dayNumber={act.dayNumber} />
-                            ) : act.isVideo ? (
-                              <video src={act.originalUrl || act.storageUrl} className="absolute inset-0 w-full h-full object-cover" muted playsInline />
-                            ) : (
-                              <img src={act.originalUrl || act.storageUrl} alt={`Activity ${act.dayNumber}`} className="absolute inset-0 w-full h-full object-cover" />
-                            )}
-                          </div>
-
-                          {/* Activity name tag */}
-                          {act.activity && (
-                            <div className="absolute pointer-events-none" style={{
-                              bottom: -12, right: -8, background: 'rgba(255,255,255,0.1)',
-                              backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                              border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
-                              transform: `rotate(${-activeRotation * 0.5}deg)`,
-                            }}>
-                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
-                            </div>
-                          )}
-
-                          {/* Reactions */}
-                          {(() => {
-                            const ar = localReactions[act.id];
-                            const total = ar?.total || 0;
-                            return (
-                              <div className="absolute flex items-center gap-1" style={{ bottom: -10, left: -6, zIndex: 30, transform: `rotate(${-activeRotation * 0.6}deg)` }}>
-                                {total > 0 && (
-                                  <span style={{ fontFamily: "'Caveat', cursive", fontSize: 16, color: 'rgba(255,255,255,0.55)', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
-                                    {total} ❤️
+                          // Insert week separator when week changes (activities are newest-first, so week decreases)
+                          if (lastWeek !== null && wk !== lastWeek) {
+                            const separatorWeek = lastWeek; // the week that just ended above
+                            elements.push(
+                              <div key={`week-sep-${separatorWeek}`} className="relative" style={{ padding: '20px 16px 20px 48px', margin: '12px 0' }}>
+                                {/* AI Star sparkle on the dotted line */}
+                                <div className="absolute" style={{ left: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 36, height: 36 }}>
+                                  <img src={aiStarSparkle} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 8px rgba(147,130,220,0.5))' }} />
+                                </div>
+                                {/* Glassmorphic widget */}
+                                <div className="flex items-center gap-2.5" style={{
+                                  background: 'linear-gradient(135deg, rgba(147,130,220,0.25) 0%, rgba(120,100,200,0.15) 50%, rgba(160,140,210,0.2) 100%)',
+                                  backdropFilter: 'blur(40px) saturate(180%)',
+                                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                                  border: '1px solid rgba(255,255,255,0.12)',
+                                  borderRadius: 9999,
+                                  padding: '10px 20px',
+                                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 20px rgba(0,0,0,0.2)',
+                                }}>
+                                  <span style={{
+                                    fontFamily: "'Bebas Neue', 'Inter', sans-serif",
+                                    fontSize: 15,
+                                    fontWeight: 400,
+                                    letterSpacing: '0.08em',
+                                    color: 'rgba(255,255,255,0.85)',
+                                    textTransform: 'uppercase',
+                                  }}>
+                                    Week {separatorWeek} Reel Generated
                                   </span>
+                                </div>
+                              </div>
+                            );
+                          }
+                          lastWeek = wk;
+
+                          const { rotation, offsetX } = getCardStyle(idx, act.dayNumber);
+                          const dw = ((act.dayNumber - 1) % 3) + 1;
+                          const isAtTop = topCardId === act.id;
+                          const topTiltSeed = (act.dayNumber * 17 + idx * 7) % 13;
+                          const topTilt = ((topTiltSeed - 6) * 1.5);
+                          const activeRotation = isAtTop ? topTilt : rotation;
+                          const canEdit = isOwnProfile && isWithin24h(act);
+                          const doodles = getDoodleElements(act.dayNumber, idx);
+
+                          elements.push(
+                            <div
+                              key={act.id}
+                              ref={(el) => { cardRefs.current[act.id] = el; }}
+                              className="relative"
+                              style={{ padding: '12px 16px 12px 48px', marginBottom: idx < realActivities.length - 1 ? 28 : 0 }}
+                            >
+                              {/* Timeline dot */}
+                              <div className="absolute rounded-full" style={{
+                                left: 22, top: 28, width: 14, height: 14,
+                                background: isAtTop ? 'linear-gradient(135deg, #34D399, #10B981)' : 'rgba(255,255,255,0.15)',
+                                border: `2px solid ${isAtTop ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                                boxShadow: isAtTop ? '0 0 12px rgba(52,211,153,0.4)' : 'none', zIndex: 5,
+                                transition: 'all 0.3s ease',
+                              }} />
+
+                              {/* Handwritten date */}
+                              <p style={{
+                                fontFamily: "'Caveat', cursive", fontSize: 18,
+                                color: isAtTop ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.45)',
+                                marginBottom: 6,
+                                transform: `rotate(${rotation * 0.3}deg)`,
+                                marginLeft: offsetX,
+                                transition: 'color 0.3s ease',
+                                fontWeight: isAtTop ? 700 : 400,
+                              }}>
+                                W{wk} · Activity {dw}
+                              </p>
+
+                              {/* Card */}
+                              <div
+                                className="relative overflow-visible"
+                                style={{
+                                  width: '62%', aspectRatio: '9/16', borderRadius: 4,
+                                  transform: `rotate(${activeRotation}deg) translateX(${offsetX}px)`,
+                                  marginLeft: idx % 2 === 0 ? '0%' : '10%',
+                                  transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+                                }}
+                              >
+                                <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4, containerType: 'inline-size' }}>
+                                  {act.frame ? (
+                                    <StoryFrameRenderer imageUrl={act.originalUrl || act.storageUrl} isVideo={act.isVideo} activity={act.activity} frame={act.frame} duration={act.duration} pr={act.pr} dayNumber={act.dayNumber} />
+                                  ) : act.isVideo ? (
+                                    <video src={act.originalUrl || act.storageUrl} className="absolute inset-0 w-full h-full object-cover" muted playsInline />
+                                  ) : (
+                                    <img src={act.originalUrl || act.storageUrl} alt={`Activity ${act.dayNumber}`} className="absolute inset-0 w-full h-full object-cover" />
+                                  )}
+                                </div>
+
+                                {/* Activity name tag */}
+                                {act.activity && (
+                                  <div className="absolute pointer-events-none" style={{
+                                    bottom: -12, right: -8, background: 'rgba(255,255,255,0.1)',
+                                    backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
+                                    transform: `rotate(${-activeRotation * 0.5}deg)`,
+                                  }}>
+                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
+                                  </div>
                                 )}
-                                {!isOwnProfile && (
-                                  <button className="flex items-center gap-0.5 active:scale-90 transition-transform" style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)', borderRadius: 14, padding: '3px 8px', border: '1px solid rgba(255,255,255,0.12)' }}
-                                    onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}>
-                                    <span style={{ fontSize: 12 }}>🔥</span>
-                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>React</span>
+
+                                {/* Reactions */}
+                                {(() => {
+                                  const ar = localReactions[act.id];
+                                  const total = ar?.total || 0;
+                                  return (
+                                    <div className="absolute flex items-center gap-1" style={{ bottom: -10, left: -6, zIndex: 30, transform: `rotate(${-activeRotation * 0.6}deg)` }}>
+                                      {total > 0 && (
+                                        <span style={{ fontFamily: "'Caveat', cursive", fontSize: 16, color: 'rgba(255,255,255,0.55)', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
+                                          {total} ❤️
+                                        </span>
+                                      )}
+                                      {!isOwnProfile && (
+                                        <button className="flex items-center gap-0.5 active:scale-90 transition-transform" style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)', borderRadius: 14, padding: '3px 8px', border: '1px solid rgba(255,255,255,0.12)' }}
+                                          onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}>
+                                          <span style={{ fontSize: 12 }}>🔥</span>
+                                          <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>React</span>
+                                        </button>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
+
+                                {/* Edit button — top right */}
+                                {canEdit && (
+                                  <button className="absolute flex items-center gap-1 active:scale-90 transition-transform"
+                                    style={{ top: -10, right: -6, zIndex: 30, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', borderRadius: 14, padding: '4px 10px', border: '1px solid rgba(255,255,255,0.15)', transform: `rotate(${-activeRotation * 0.5}deg)` }}
+                                    onClick={(e) => { e.stopPropagation(); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowEditSheet(true); }}>
+                                    <Pencil className="w-3 h-3 text-white/60" />
+                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Edit</span>
                                   </button>
                                 )}
                               </div>
-                            );
-                          })()}
 
-                          {/* Edit button — top right */}
-                          {canEdit && (
-                            <button className="absolute flex items-center gap-1 active:scale-90 transition-transform"
-                              style={{ top: -10, right: -6, zIndex: 30, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', borderRadius: 14, padding: '4px 10px', border: '1px solid rgba(255,255,255,0.15)', transform: `rotate(${-activeRotation * 0.5}deg)` }}
-                              onClick={(e) => { e.stopPropagation(); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowEditSheet(true); }}>
-                              <Pencil className="w-3 h-3 text-white/60" />
-                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Edit</span>
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Hand-drawn journal doodles: SVG drawings + handwritten texts */}
-                        <div className="pointer-events-none relative" style={{ minHeight: 36, marginTop: 10 }}>
-                          {/* Text doodle 1 */}
-                          <p style={{
-                            fontFamily: "'Caveat', cursive", fontSize: 17, fontWeight: 700,
-                            color: 'rgba(255,255,255,0.28)',
-                            position: 'absolute', top: 0,
-                            left: idx % 2 === 0 ? '52%' : '0%',
-                            transform: `rotate(${((act.dayNumber * 5 + idx * 11) % 9) - 4}deg)`,
-                            whiteSpace: 'nowrap',
-                          }}>
-                            {doodles.text1}
-                          </p>
-                          {/* SVG drawing 1 */}
-                          <div style={{
-                            position: 'absolute', top: idx % 3 === 0 ? -10 : 0,
-                            left: idx % 2 === 0 ? '32%' : '68%',
-                            transform: `rotate(${((act.dayNumber * 3) % 30) - 15}deg)`, opacity: 0.8,
-                          }}>
-                            {doodleSVGs[doodles.svg1]}
-                          </div>
-                          {/* Text doodle 2 */}
-                          {idx % 3 !== 1 && (
-                            <p style={{
-                              fontFamily: "'Caveat', cursive", fontSize: 14, fontWeight: 400, fontStyle: 'italic',
-                              color: 'rgba(255,255,255,0.2)',
-                              position: 'absolute', top: 22,
-                              left: idx % 2 === 0 ? '8%' : '45%',
-                              transform: `rotate(${((act.dayNumber * 9 + idx * 3) % 11) - 5}deg)`,
-                              whiteSpace: 'nowrap',
-                            }}>
-                              ~ {doodles.text2}
-                            </p>
-                          )}
-                          {/* SVG drawing 2 */}
-                          {idx % 2 === 0 && (
-                            <div style={{
-                              position: 'absolute', top: 18, right: '3%',
-                              transform: `rotate(${((act.dayNumber * 11) % 25) - 12}deg)`, opacity: 0.55,
-                            }}>
-                              {doodleSVGs[doodles.svg2]}
+                              {/* Hand-drawn journal doodles */}
+                              <div className="pointer-events-none relative" style={{ minHeight: 36, marginTop: 10 }}>
+                                <p style={{
+                                  fontFamily: "'Caveat', cursive", fontSize: 17, fontWeight: 700,
+                                  color: 'rgba(255,255,255,0.28)',
+                                  position: 'absolute', top: 0,
+                                  left: idx % 2 === 0 ? '52%' : '0%',
+                                  transform: `rotate(${((act.dayNumber * 5 + idx * 11) % 9) - 4}deg)`,
+                                  whiteSpace: 'nowrap',
+                                }}>
+                                  {doodles.text1}
+                                </p>
+                                <div style={{
+                                  position: 'absolute', top: idx % 3 === 0 ? -10 : 0,
+                                  left: idx % 2 === 0 ? '32%' : '68%',
+                                  transform: `rotate(${((act.dayNumber * 3) % 30) - 15}deg)`, opacity: 0.8,
+                                }}>
+                                  {doodleSVGs[doodles.svg1]}
+                                </div>
+                                {idx % 3 !== 1 && (
+                                  <p style={{
+                                    fontFamily: "'Caveat', cursive", fontSize: 14, fontWeight: 400, fontStyle: 'italic',
+                                    color: 'rgba(255,255,255,0.2)',
+                                    position: 'absolute', top: 22,
+                                    left: idx % 2 === 0 ? '8%' : '45%',
+                                    transform: `rotate(${((act.dayNumber * 9 + idx * 3) % 11) - 5}deg)`,
+                                    whiteSpace: 'nowrap',
+                                  }}>
+                                    ~ {doodles.text2}
+                                  </p>
+                                )}
+                                {idx % 2 === 0 && (
+                                  <div style={{
+                                    position: 'absolute', top: 18, right: '3%',
+                                    transform: `rotate(${((act.dayNumber * 11) % 25) - 12}deg)`, opacity: 0.55,
+                                  }}>
+                                    {doodleSVGs[doodles.svg2]}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                          );
+                        });
+
+                        return elements;
+                      })()}
 
                       {/* Journey start */}
                       <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
