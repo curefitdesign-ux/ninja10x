@@ -1848,17 +1848,17 @@ const Reel = () => {
                             {showStackedCards && (
                               <div
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
-                                className="absolute cursor-pointer flex items-center gap-1.5"
+                                className="absolute cursor-pointer flex flex-col items-center"
                                 style={{
-                                  bottom: -8,
+                                  bottom: -10,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
                                 }}
                               >
-                                <svg width="30" height="38" viewBox="0 0 30 38" fill="none" style={{ marginTop: -2 }}>
-                                  <path d="M15 36 C13 30, 8 24, 6 18 C4 12, 5 7, 10 4 C12 3, 14 2.5, 15 2.5" stroke="rgba(255,255,255,0.4)" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeDasharray="0"/>
-                                  <path d="M11 7 L9.5 2 L15 5" stroke="rgba(255,255,255,0.4)" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                                <svg width="36" height="32" viewBox="0 0 36 32" fill="none" style={{ marginBottom: -3 }}>
+                                  <path d="M18 30 Q12 26, 8 20 Q4 14, 7 8 Q9 4, 14 3 Q17 2.5, 18 3" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                                  <path d="M15 6 L18 1.5 L20 7" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                                 <span style={{ fontFamily: 'Caveat, cursive', fontSize: 21, color: 'rgba(255,255,255,0.4)', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>tap to view journey</span>
                               </div>
