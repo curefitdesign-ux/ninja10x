@@ -495,13 +495,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           W{wk} · Activity {dw}
                         </p>
 
-                        {/* Card — not tappable, no movement on scroll */}
+                        {/* Card — tilts when at top of scroll */}
                         <div
                           className="relative overflow-visible"
                           style={{
                             width: '62%', aspectRatio: '9/16', borderRadius: 4,
-                            transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
+                            transform: `rotate(${activeRotation}deg) translateX(${offsetX}px)`,
                             marginLeft: idx % 2 === 0 ? '0%' : '10%',
+                            transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
                           }}
                         >
                           <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4, containerType: 'inline-size' }}>
