@@ -1754,14 +1754,13 @@ const Reel = () => {
                           ) : hasFrame && activity ? (
                             <div className="absolute inset-0 pointer-events-none" style={{ containerType: 'inline-size' }}>
                               <StoryFrameRenderer
-                                frame={activity.frame!}
-                                mediaUrl={activity.originalUrl || activity.storageUrl || ''}
+                                imageUrl={activity.originalUrl || activity.storageUrl || ''}
                                 isVideo={peekIsVideo}
                                 activity={activity.activity || ''}
+                                frame={activity.frame!}
                                 duration={activity.duration || ''}
                                 pr={activity.pr || ''}
                                 dayNumber={activity.dayNumber}
-                                displayName={group.displayName}
                               />
                             </div>
                           ) : peekMedia ? (
