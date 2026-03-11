@@ -299,6 +299,7 @@ const Reel = () => {
 
 
     // Use myActivities count, but fallback to userGroups own activities count if myActivities hasn't loaded yet
+    const myGroup$ = userGroups.find(g => g.userId === user.id);
     const myGroupActivities = myGroup$?.activities.filter(a => a.dayNumber < 1001) || [];
     const effectiveCount = Math.max(allMyActivities.length, myGroupActivities.length);
     
