@@ -193,6 +193,9 @@ const Reel = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const avatarStripRef = useRef<HTMLDivElement>(null);
   const activeAvatarRef = useRef<HTMLButtonElement>(null);
+  const ownAvatarRef = useRef<HTMLButtonElement>(null);
+  const topZoneRef = useRef<HTMLDivElement>(null);
+  const [connectorX, setConnectorX] = useState<number | null>(null);
 
   // Bottom sheet states and transition animations
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -628,6 +631,24 @@ const Reel = () => {
   const prevUserIndexRef = useRef(currentUserIndex);
 
   
+  // Update connector X position to track active avatar
+  const updateConnectorPosition = useCallback(() => {
+    const topZone = topZoneRef.current;
+    if (!topZone) return;
+    
+    // Find the active avatar element (own or other)
+    const ownIdx = effectiveUserGroups.findIndex(g => user && g.userId === user.id);
+    const isOwnActive = ownIdx >= 0 && ownIdx === currentUserIndex;
+    const activeEl = isOwnActive ? ownAvatarRef.current : activeAvatarRef.current;
+    
+    if (activeEl) {
+      const topRect = topZone.getBoundingClientRect();
+      const avatarRect = activeEl.getBoundingClientRect();
+      const centerX = avatarRect.left + avatarRect.width / 2 - topRect.left;
+      setConnectorX(centerX);
+    }
+  }, [currentUserIndex, effectiveUserGroups, user]);
+
   // Flash highlight + center active avatar ONLY when user changes
   useEffect(() => {
     if (currentUserIndex !== prevUserIndexRef.current) {
@@ -648,7 +669,9 @@ const Reel = () => {
         });
       }
     }
-  }, [currentUserIndex]);
+    // Update connector position after any scroll/rerender
+    requestAnimationFrame(() => updateConnectorPosition());
+  }, [currentUserIndex, updateConnectorPosition]);
 
   // Mark the current user as viewed AFTER their story finishes (handled by cycleActivity)
   // Don't mark immediately — let the progress ring complete first
@@ -1417,7 +1440,8 @@ const Reel = () => {
 
         {/* TOP ZONE */}
         <div 
-          className="z-50 flex flex-col justify-end shrink-0"
+          ref={topZoneRef}
+          className="z-50 flex flex-col justify-end shrink-0 relative"
           style={{ 
             paddingTop: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 12px)',
           }}
@@ -1439,6 +1463,7 @@ const Reel = () => {
 
                 return (
                   <button
+                    ref={ownAvatarRef}
                     onClick={() => {
                       if (ownIdx >= 0) {
                         setCurrentUserIndex(ownIdx);
@@ -1651,35 +1676,55 @@ const Reel = () => {
         </div>{/* end top zone */}
 
         {/* Dotted connector line from active avatar to card */}
-        <div className="relative z-40 flex justify-center" style={{ height: 24, marginTop: -2 }}>
-          <motion.div
-            key={`connector-${currentUserIndex}`}
-            initial={{ scaleY: 0, opacity: 0 }}
-            animate={{ scaleY: 1, opacity: 1 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            style={{
-              width: 2,
-              height: '100%',
-              backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.4) 0px, rgba(255,255,255,0.4) 3px, transparent 3px, transparent 7px)',
-              transformOrigin: 'top center',
-              borderRadius: 1,
-            }}
-          />
-          {/* Glow dot at bottom of connector */}
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.15, type: 'spring', stiffness: 300, damping: 20 }}
-            className="absolute -bottom-1"
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: '50%',
-              background: 'rgba(255,255,255,0.5)',
-              boxShadow: '0 0 8px rgba(255,255,255,0.3)',
-            }}
-          />
-        </div>
+        {connectorX !== null && (
+          <div className="relative z-40" style={{ height: 28, marginTop: -4 }}>
+            <motion.div
+              key={`connector-${currentUserIndex}`}
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ 
+                scaleY: 1, 
+                opacity: 0.6,
+                x: connectorX,
+              }}
+              transition={{ 
+                scaleY: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+                opacity: { duration: 0.4, ease: 'easeOut' },
+                x: { type: 'spring', stiffness: 150, damping: 20 },
+              }}
+              style={{
+                position: 'absolute',
+                left: -1,
+                top: 0,
+                width: 2,
+                height: '100%',
+                backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 3px, transparent 3px, transparent 7px)',
+                transformOrigin: 'top center',
+                borderRadius: 1,
+              }}
+            />
+            {/* Glow dot at bottom of connector */}
+            <motion.div
+              key={`dot-${currentUserIndex}`}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 0.7, x: connectorX - 2 }}
+              transition={{ 
+                scale: { delay: 0.2, type: 'spring', stiffness: 250, damping: 18 },
+                opacity: { delay: 0.2, duration: 0.3 },
+                x: { type: 'spring', stiffness: 150, damping: 20 },
+              }}
+              style={{
+                position: 'absolute',
+                bottom: -1,
+                left: 0,
+                width: 5,
+                height: 5,
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.45)',
+                boxShadow: '0 0 6px rgba(255,255,255,0.2)',
+              }}
+            />
+          </div>
+        )}
 
         {/* MIDDLE CONTAINER — flexes between profile strip and bottom nav */}
         <div

@@ -279,7 +279,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const overlay = (
     <AnimatePresence>
       {isOpen && (
-        <motion.div className="fixed inset-0" style={{ zIndex: 60 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}>
+        <motion.div className="fixed inset-0" style={{ zIndex: 60 }} initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
         <DynamicBlurBackground imageUrl={mediaUrl}>
           <div className="absolute inset-0 flex flex-col" style={{ overflow: 'hidden' }}>
             {/* TOP HEADER — collapses on scroll */}
@@ -358,10 +358,10 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               {!isScrolled && userProfile && (
                 <motion.div
                   className="shrink-0 flex flex-col items-center z-40 px-4 pb-2"
-                  initial={{ opacity: 0, y: -30, scale: 0.95 }}
+                  initial={{ opacity: 0, y: -20, scale: 0.97 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, height: 0, paddingBottom: 0 }}
-                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+                  transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
                 >
                    <motion.div 
                      className="rounded-full overflow-hidden"
