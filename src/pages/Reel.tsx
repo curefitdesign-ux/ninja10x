@@ -2262,8 +2262,37 @@ const Reel = () => {
           )}
         </div>
 
+            {/* Activity dots indicator — shows total activities for current user */}
+            {currentGroup && !isLogActivityCard && (() => {
+              const realActivities = currentGroup.activities.filter(a => a.id !== 'log-activity' && !a.id?.startsWith('week-recap'));
+              if (realActivities.length <= 1) return null;
+              return (
+                <div className="shrink-0 flex items-center justify-center gap-[6px] py-2">
+                  {realActivities.map((act, i) => {
+                    const isActive = i === currentActivityIndex;
+                    return (
+                      <motion.div
+                        key={act.id}
+                        initial={false}
+                        animate={{
+                          width: isActive ? 20 : 6,
+                          opacity: isActive ? 1 : 0.35,
+                          background: isActive ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)',
+                        }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                        style={{
+                          height: 6,
+                          borderRadius: 3,
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              );
+            })()}
+
             {/* React row sits below the reel card with a fixed 10px gap */}
-            <div className="shrink-0 flex flex-col items-center justify-center pt-3 pb-2" style={{ minHeight: 56 }}>
+            <div className="shrink-0 flex flex-col items-center justify-center pt-1 pb-2" style={{ minHeight: 56 }}>
           {(() => {
             // Lock content if viewer hasn't shared publicly and this isn't own story
             const isContentLocked = !isOwnStory && !viewerCanSeeCommunity;
