@@ -1829,16 +1829,16 @@ const Reel = () => {
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
                                   borderRadius: '0 0 10px 10px',
-                                  background: 'rgba(255,255,255,0.06)',
+                                  background: 'rgba(255,255,255,0.05)',
                                   border: '1px solid rgba(255,255,255,0.10)',
                                   borderTop: 'none',
-                                  boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
-                                  backdropFilter: 'blur(20px) saturate(1.6)',
-                                  WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+                                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), 0 6px 20px rgba(0,0,0,0.3)',
+                                  backdropFilter: 'blur(24px) saturate(1.8)',
+                                  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
                                   pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
                               >
-                                {backCardThumb && (
+                                {!isLogActivityCard && backCardThumb && (
                                   <img src={backCardThumb} alt="" className="w-full h-full object-cover object-bottom" style={{ borderRadius: '0 0 10px 10px', opacity: 0.4 }} loading="lazy" />
                                 )}
                               </motion.div>
