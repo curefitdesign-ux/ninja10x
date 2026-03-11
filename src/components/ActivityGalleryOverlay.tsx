@@ -279,7 +279,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const overlay = (
     <AnimatePresence>
       {isOpen && (
-        <motion.div className="fixed inset-0" style={{ zIndex: 60 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+        <motion.div className="fixed inset-0" style={{ zIndex: 60 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}>
         <DynamicBlurBackground imageUrl={mediaUrl}>
           <div className="absolute inset-0 flex flex-col" style={{ overflow: 'hidden' }}>
             {/* TOP HEADER — collapses on scroll */}
@@ -358,36 +358,60 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               {!isScrolled && userProfile && (
                 <motion.div
                   className="shrink-0 flex flex-col items-center z-40 px-4 pb-2"
-                  initial={{ opacity: 1, height: 'auto' }}
+                  initial={{ opacity: 0, y: -30, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, height: 0, paddingBottom: 0 }}
-                  transition={{ duration: 0.25 }}
+                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
                 >
-                   <div className="rounded-full overflow-hidden" style={{ width: 56, height: 56, border: '2.5px solid rgba(255,255,255,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
+                   <motion.div 
+                     className="rounded-full overflow-hidden"
+                     style={{ width: 56, height: 56, border: '2.5px solid rgba(255,255,255,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
+                     initial={{ scale: 0.6, opacity: 0 }}
+                     animate={{ scale: 1, opacity: 1 }}
+                     transition={{ delay: 0.15, type: 'spring', stiffness: 200, damping: 18 }}
+                   >
                      <ProfileAvatar src={userProfile.avatarUrl} name={userProfile.displayName} size={56} />
-                   </div>
-                   <h2 className="text-white text-center mt-2 px-4 w-full" style={{ fontFamily: "'Inter', -apple-system, system-ui, sans-serif", fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em' }}>{userProfile.displayName}</h2>
+                   </motion.div>
+                   <motion.h2 
+                     className="text-white text-center mt-2 px-4 w-full"
+                     style={{ fontFamily: "'Inter', -apple-system, system-ui, sans-serif", fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em' }}
+                     initial={{ opacity: 0, y: -10 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     transition={{ delay: 0.2, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                   >
+                     {userProfile.displayName}
+                   </motion.h2>
                    {userBioLine && (
-                     <p className="text-center mt-2 px-5 leading-[1.6]" style={{ 
-                        fontFamily: "'Inter', -apple-system, system-ui, sans-serif", 
-                        fontSize: 14, 
-                        fontWeight: 400,
-                        color: '#FFFFFF',
-                        maxWidth: 300,
-                        letterSpacing: '0.01em',
-                        whiteSpace: 'pre-line',
-                      }}>
+                     <motion.p 
+                       className="text-center mt-2 px-5 leading-[1.6]"
+                       style={{ 
+                         fontFamily: "'Inter', -apple-system, system-ui, sans-serif", 
+                         fontSize: 14, 
+                         fontWeight: 400,
+                         color: '#FFFFFF',
+                         maxWidth: 300,
+                         letterSpacing: '0.01em',
+                         whiteSpace: 'pre-line',
+                       }}
+                       initial={{ opacity: 0, y: -8 }}
+                       animate={{ opacity: 1, y: 0 }}
+                       transition={{ delay: 0.25, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                     >
                        {userBioLine}
-                     </p>
+                     </motion.p>
                    )}
                 </motion.div>
               )}
             </AnimatePresence>
 
             {/* SCRAPBOOK TIMELINE */}
-            <div
+            <motion.div
               ref={scrollRef}
               className="flex-1 min-h-0 z-30 overflow-y-auto overflow-x-hidden"
               style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', paddingBottom: 120, paddingTop: 28 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               onScroll={(e) => {
                 const scrollTop = (e.target as HTMLDivElement).scrollTop;
                 setIsScrolled(scrollTop > 30);
@@ -700,7 +724,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   );
                 })()}
               </div>
-            </div>
+            </motion.div>
 
             {/* Bottom action row */}
             <div className="shrink-0 flex items-center justify-center gap-3 px-4 z-50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 12px)', paddingTop: 8 }}>
