@@ -392,7 +392,7 @@ const Reel = () => {
     }
 
     return allGroups.filter(g => g.activities.length > 0);
-  }, [userGroups, user, myActivities, profile, sourceUserId, deepLinkActivityId, viewedUsers]);
+  }, [userGroups, user, myActivities, profile, sourceUserId, deepLinkActivityId]);
 
   // Stabilize currentUserIndex when groups reorder due to viewedUsers change
   const currentUserIdRef = useRef<string>('');
