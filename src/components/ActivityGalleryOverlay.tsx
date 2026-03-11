@@ -49,6 +49,7 @@ export interface GalleryActivity {
   reactions?: Partial<Record<ReactionType, ActivityReaction>>;
   reactorProfiles?: ReactorProfile[];
   isPlaceholder?: boolean;
+  createdAt?: string;
 }
 
 interface UserProfileInfo {
