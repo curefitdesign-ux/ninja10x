@@ -413,7 +413,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   backgroundPosition: '0 20px',
                 }} />
                 {/* Straight timeline line */}
-                <div className="absolute pointer-events-none" style={{ left: 28, top: 0, width: 2, height: '100%', background: 'rgba(255,255,255,0.1)', backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 6px, transparent 6px, transparent 12px)' }} />
+                <div className="absolute pointer-events-none" style={{ left: 28, top: 0, width: 2, height: '100%', background: 'transparent', backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.18) 0px, rgba(255,255,255,0.18) 4px, transparent 4px, transparent 10px)', borderRadius: 1 }} />
 
                 {(() => {
                   const sortedActivities = [...activities].filter(a => !a.isPlaceholder);
