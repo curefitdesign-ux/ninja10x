@@ -556,7 +556,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             >
                               {/* Timeline dot */}
                               <div className="absolute rounded-full" style={{
-                                left: 22, top: 30, width: 14, height: 14,
+                                left: 22, top: 17, width: 14, height: 14,
                                 background: isAtTop ? 'linear-gradient(135deg, #9b87f5, #7c3aed)' : 'rgba(255,255,255,0.15)',
                                 border: `2px solid ${isAtTop ? 'rgba(155,135,245,0.4)' : 'rgba(255,255,255,0.1)'}`,
                                 boxShadow: isAtTop ? '0 0 12px rgba(155,135,245,0.4)' : 'none', zIndex: 5,
