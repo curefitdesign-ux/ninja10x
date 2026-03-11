@@ -1650,7 +1650,36 @@ const Reel = () => {
           </div>
         </div>{/* end top zone */}
 
-
+        {/* Dotted connector line from active avatar to card */}
+        <div className="relative z-40 flex justify-center" style={{ height: 24, marginTop: -2 }}>
+          <motion.div
+            key={`connector-${currentUserIndex}`}
+            initial={{ scaleY: 0, opacity: 0 }}
+            animate={{ scaleY: 1, opacity: 1 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              width: 2,
+              height: '100%',
+              backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.4) 0px, rgba(255,255,255,0.4) 3px, transparent 3px, transparent 7px)',
+              transformOrigin: 'top center',
+              borderRadius: 1,
+            }}
+          />
+          {/* Glow dot at bottom of connector */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.15, type: 'spring', stiffness: 300, damping: 20 }}
+            className="absolute -bottom-1"
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.5)',
+              boxShadow: '0 0 8px rgba(255,255,255,0.3)',
+            }}
+          />
+        </div>
 
         {/* MIDDLE CONTAINER — flexes between profile strip and bottom nav */}
         <div
