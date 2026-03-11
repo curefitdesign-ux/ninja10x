@@ -582,16 +582,26 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     {nudgeCount > 0 && (
                       <motion.span
                         key={nudgeCount}
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="absolute -top-2 -right-2 min-w-[22px] h-[22px] rounded-full flex items-center justify-center text-xs font-bold px-1"
+                        initial={{ scale: 0, y: 10 }}
+                        animate={{ scale: 1, y: 0 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+                        className="absolute flex items-center justify-center pointer-events-none"
                         style={{
-                          background: 'linear-gradient(135deg, #F97316, #EC4899)',
-                          color: '#fff',
-                          boxShadow: '0 2px 8px rgba(249, 115, 22, 0.4)',
+                          top: -14,
+                          left: 6,
+                          zIndex: 10,
+                          fontSize: nudgeCount >= 10 ? 22 : 26,
+                          fontWeight: 900,
+                          fontStyle: 'italic',
+                          color: '#000',
+                          WebkitTextStroke: '2.5px #fff',
+                          paintOrder: 'stroke fill',
+                          textShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                          lineHeight: 1,
+                          fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
                         }}
                       >
-                        {nudgeCount}x
+                        x{nudgeCount}
                       </motion.span>
                     )}
                   </div>
