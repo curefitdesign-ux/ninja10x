@@ -1777,6 +1777,10 @@ const Reel = () => {
                       const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
                       // Show stacked cards behind for all users with multiple activities (not log-activity)
                       const showStackedCards = !isLogActivityCard && activities.length > 1;
+                      // Get previous activity thumbnails for stacked cards
+                      const stackActivities = activities.filter(a => a.id !== activity?.id && !a.id?.startsWith('log-'));
+                      const backCardThumb = stackActivities[1]?.originalUrl || stackActivities[1]?.storageUrl || stackActivities[0]?.originalUrl || stackActivities[0]?.storageUrl;
+                      const midCardThumb = stackActivities[0]?.originalUrl || stackActivities[0]?.storageUrl;
                       return (
                         <div
                           className="relative flex items-center justify-center"
