@@ -1882,7 +1882,7 @@ const Reel = () => {
                               maxWidth: '100%',
                               borderRadius: '0px',
                               overflow: 'hidden',
-                              background: 'transparent',
+                              background: isLogActivityCard ? 'hsl(var(--background))' : 'transparent',
                               marginTop: '-10px',
                               zIndex: 3,
                             }}
