@@ -1853,11 +1853,6 @@ const Reel = () => {
                                 zIndex: 3,
                               }}
                             >
-                                : '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
-                              marginTop: '-10px',
-                              zIndex: 3,
-                            }}
-                          >
                         {/* Progress bar removed — timing indicated via avatar ring */}
                         <div
                           key={contentKey}
