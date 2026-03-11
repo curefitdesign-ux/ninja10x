@@ -1777,6 +1777,10 @@ const Reel = () => {
                       const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
                       // Show stacked cards behind for all users with multiple activities (not log-activity)
                       const showStackedCards = !isLogActivityCard && activities.length > 1;
+                      // Get previous activity thumbnails for stacked cards
+                      const stackActivities = activities.filter(a => a.id !== activity?.id && !a.id?.startsWith('log-'));
+                      const backCardThumb = stackActivities[1]?.originalUrl || stackActivities[1]?.storageUrl || stackActivities[0]?.originalUrl || stackActivities[0]?.storageUrl;
+                      const midCardThumb = stackActivities[0]?.originalUrl || stackActivities[0]?.storageUrl;
                       return (
                         <div
                           className="relative flex items-center justify-center"
@@ -1828,7 +1832,11 @@ const Reel = () => {
                                   pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
                               >
-                                <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(60,45,120,0.3) 0%, rgba(15,10,40,0.5) 100%)' }} />
+                                {backCardThumb ? (
+                                  <img src={backCardThumb} alt="" className="w-full h-full object-cover" loading="lazy" />
+                                ) : (
+                                  <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(60,45,120,0.3) 0%, rgba(15,10,40,0.5) 100%)' }} />
+                                )}
                                 <div className="absolute inset-0 pointer-events-none" style={{
                                   background: 'linear-gradient(170deg, rgba(255,255,255,0.06) 0%, transparent 30%)',
                                 }} />
@@ -1871,7 +1879,11 @@ const Reel = () => {
                                   pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
                               >
-                                <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(70,50,130,0.25) 0%, rgba(15,10,40,0.45) 100%)' }} />
+                                {midCardThumb ? (
+                                  <img src={midCardThumb} alt="" className="w-full h-full object-cover" loading="lazy" />
+                                ) : (
+                                  <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, rgba(70,50,130,0.25) 0%, rgba(15,10,40,0.45) 100%)' }} />
+                                )}
                                 <div className="absolute inset-0 pointer-events-none" style={{
                                   background: 'linear-gradient(165deg, rgba(255,255,255,0.08) 0%, transparent 35%)',
                                 }} />
