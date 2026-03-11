@@ -569,11 +569,11 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         initial={{ scale: 0, y: 20, opacity: 0 }}
                         animate={nudgeNumberBehind
                           ? { scale: 0.5, y: 10, opacity: 0, zIndex: 0 }
-                          : { scale: [0, 1.6, 0.85, 1.15, 1], y: [20, -8, 2, -3, 0], opacity: 1, zIndex: 60 }
+                          : { scale: [0, 1.6, 1.15, 1], y: [20, -8, -3, 0], opacity: 1, zIndex: 60 }
                         }
                         transition={nudgeNumberBehind
                           ? { duration: 0.3, ease: 'easeIn' }
-                          : { duration: 0.5, times: [0, 0.35, 0.55, 0.75, 1], ease: 'easeOut' }
+                          : { duration: 0.5, times: [0, 0.4, 0.7, 1], ease: 'easeOut' }
                         }
                         className="absolute pointer-events-none"
                         style={{
