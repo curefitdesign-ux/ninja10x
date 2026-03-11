@@ -374,10 +374,8 @@ const Reel = () => {
       }],
     };
 
-    // Reorder: unviewed users first, then viewed users pushed to back
-    const unviewedOthers = othersGroups.filter(g => !viewedUsers.has(g.userId));
-    const viewedOthers = othersGroups.filter(g => viewedUsers.has(g.userId));
-    const allGroups = [myGroup, ...unviewedOthers, ...viewedOthers];
+    // Instagram-style: maintain fixed order, viewed users just get grey ring
+    const allGroups = [myGroup, ...othersGroups];
 
     // Insert deep-link group right after own group so navigation finds it
     if (deepLinkGroup) {
