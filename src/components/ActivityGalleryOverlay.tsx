@@ -390,10 +390,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               }}
             >
               <div className="relative" style={{ minHeight: '100%' }}>
-                {/* Notebook lines removed for cleanliness */}
-                  backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 38px, rgba(255,255,255,0.03) 38px, rgba(255,255,255,0.03) 39px)',
-                  backgroundPosition: '0 20px',
-                }} />
                 {/* Curved timeline SVG */}
                 <svg className="absolute pointer-events-none" style={{ left: 0, top: 0, width: 60, height: '100%', overflow: 'visible' }} preserveAspectRatio="none">
                   <path
