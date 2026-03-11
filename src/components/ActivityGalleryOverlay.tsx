@@ -24,6 +24,8 @@ import fireEmoji from '@/assets/reactions/fire-3d.png';
 import clapEmoji from '@/assets/reactions/clap-3d.png';
 
 import deskBellImg from '@/assets/icons/desk-bell-3d.png';
+import tileActiveSvg from '@/assets/progress/tile-active-svg.svg';
+import tileInactiveSvg from '@/assets/progress/tile-inactive-svg.svg';
 
 interface ReactorProfile {
   userId: string;
@@ -390,16 +392,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               }}
             >
               <div className="relative" style={{ minHeight: '100%' }}>
-                {/* Curved timeline SVG */}
-                <svg className="absolute pointer-events-none" style={{ left: 0, top: 0, width: 60, height: '100%', overflow: 'visible' }} preserveAspectRatio="none">
-                  <path
-                    d="M 29 0 C 45 80, 12 160, 29 240 C 46 320, 12 400, 29 480 C 46 560, 12 640, 29 720 C 46 800, 12 880, 29 960 C 46 1040, 12 1120, 29 1200 C 46 1280, 12 1360, 29 1440 C 46 1520, 12 1600, 29 1680 C 46 1760, 12 1840, 29 1920 C 46 2000, 12 2080, 29 2160 C 46 2240, 12 2320, 29 2400 C 46 2480, 12 2560, 29 2640 C 46 2720, 12 2800, 29 2880 C 46 2960, 12 3040, 29 3120 C 46 3200, 12 3280, 29 3360 C 46 3440, 12 3520, 29 3600 C 46 3680, 12 3760, 29 3840 C 46 3920, 12 4000, 29 4080"
-                    stroke="rgba(255,255,255,0.1)"
-                    strokeWidth="2"
-                    strokeDasharray="6 6"
-                    fill="none"
-                  />
-                </svg>
 
                 {(() => {
                   const sortedActivities = [...activities].filter(a => !a.isPlaceholder);
@@ -428,18 +420,60 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   return (
                     <>
                       {/* End goal — certificate */}
-                      <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
-                        <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: sortedActivities.length >= 12 ? 'linear-gradient(135deg, #F59E0B, #EF4444)' : 'rgba(255,255,255,0.08)', border: `2px solid ${sortedActivities.length >= 12 ? 'rgba(245,158,11,0.4)' : 'rgba(255,255,255,0.1)'}` }} />
-                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: sortedActivities.length >= 12 ? 'rgba(245,158,11,0.7)' : 'rgba(255,255,255,0.2)', transform: 'rotate(1deg)' }}>
-                          {sortedActivities.length >= 12 ? '🏆 journey complete! you did it!' : `🏆 ${remainingDays} ${remainingDays === 1 ? 'day' : 'days'} to go... keep pushing!`}
-                        </p>
+                      <div className="relative flex items-center gap-3" style={{ padding: '16px 16px 24px 16px' }}>
+                        <img src={sortedActivities.length >= 12 ? tileActiveSvg : tileInactiveSvg} alt="" style={{ width: 32, height: 32, flexShrink: 0 }} />
+                        <div>
+                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: sortedActivities.length >= 12 ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.25)', letterSpacing: '0.02em' }}>
+                            🏆 {sortedActivities.length >= 12 ? 'Journey Complete!' : `${remainingDays} ${remainingDays === 1 ? 'day' : 'days'} to go`}
+                          </p>
+                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+                            {sortedActivities.length >= 12 ? 'You crushed it!' : 'Keep pushing, almost there'}
+                          </p>
+                        </div>
                       </div>
 
                       {/* Weeks: latest → earliest */}
                       {allWeeks.map((weekNum) => {
-                        const weekActs = weekGroups[weekNum];
-                        if (!weekActs || weekActs.length === 0) return null;
+                        const weekActs = weekGroups[weekNum] || [];
                         const isWeekComplete = weekActs.length >= 3;
+                        const hasAnyActivity = weekActs.length > 0;
+                        // For weeks with no activities that are beyond the current progress, show upcoming slots
+                        const isUpcomingWeek = weekNum > highestCompletedWeek + 1 || (!hasAnyActivity && weekNum > highestCompletedWeek);
+
+                        // If this week has no activities and is upcoming, show placeholder slots
+                        if (!hasAnyActivity) {
+                          return (
+                            <div key={`week-${weekNum}`}>
+                              {[1, 2, 3].map((slot) => (
+                                <div key={`upcoming-${weekNum}-${slot}`} className="relative flex items-center gap-3" style={{ padding: '10px 16px 10px 16px', marginBottom: 4 }}>
+                                  <img src={tileInactiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0, opacity: 0.5 }} />
+                                  <div>
+                                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.02em' }}>
+                                      W{weekNum} · Activity {slot}
+                                    </p>
+                                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.12)', marginTop: 1 }}>
+                                      Upcoming
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+
+                              {/* Diamond separator */}
+                              <div className="relative flex flex-col items-center" style={{ padding: '8px 16px 20px 0', marginLeft: 48 }}>
+                                <div className="absolute" style={{
+                                  left: -20, top: 14, width: 14, height: 14,
+                                  background: 'rgba(255,255,255,0.08)',
+                                  border: '2px solid rgba(255,255,255,0.1)',
+                                  transform: 'rotate(45deg)',
+                                  zIndex: 5,
+                                }} />
+                                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.15)', letterSpacing: '0.02em' }}>
+                                  3 activities to unlock Week {weekNum} Reel
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        }
 
                         return (
                           <div key={`week-${weekNum}`}>
@@ -450,26 +484,30 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               const dw = ((act.dayNumber - 1) % 3) + 1;
                               const isSelected = act.id === current.id;
 
+                              // Subtitle based on activity
+                              const subtitle = act.activity || 'Workout';
+                              const durationSubtitle = act.duration ? ` · ${act.duration}` : '';
+
                               return (
                                 <motion.div
                                   key={act.id} className="relative"
-                                  style={{ padding: '12px 16px 12px 48px', marginBottom: 16 }}
+                                  style={{ padding: '10px 16px 10px 16px', marginBottom: 16 }}
                                   initial={{ opacity: 0, y: 30 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ delay: globalIdx * 0.06, type: 'spring', stiffness: 200, damping: 20 }}
                                 >
-                                  {/* Timeline dot */}
-                                  <div className="absolute rounded-full" style={{
-                                    left: 22, top: 28, width: 14, height: 14,
-                                    background: isSelected ? 'linear-gradient(135deg, #34D399, #10B981)' : 'rgba(255,255,255,0.15)',
-                                    border: `2px solid ${isSelected ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.1)'}`,
-                                    boxShadow: isSelected ? '0 0 12px rgba(52,211,153,0.4)' : 'none', zIndex: 5,
-                                  }} />
-
-                                  {/* Week & day label */}
-                                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.45)', marginBottom: 6, letterSpacing: '0.02em' }}>
-                                    W{weekNum} · Activity {dw}
-                                  </p>
+                                  {/* Tile icon + label row */}
+                                  <div className="flex items-center gap-3" style={{ marginBottom: 8 }}>
+                                    <img src={tileActiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0 }} />
+                                    <div>
+                                      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.02em' }}>
+                                        W{weekNum} · Activity {dw}
+                                      </p>
+                                      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>
+                                        {subtitle}{durationSubtitle}
+                                      </p>
+                                    </div>
+                                  </div>
 
                                   {/* Card */}
                                   <motion.div
@@ -477,7 +515,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                     style={{
                                       width: '62%', aspectRatio: '9/16', borderRadius: 4,
                                       transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
-                                      marginLeft: idx % 2 === 0 ? '0%' : '10%',
+                                      marginLeft: idx % 2 === 0 ? '16%' : '22%',
                                     }}
                                     onClick={() => { const ri = activities.findIndex(a => a.id === act.id); if (ri >= 0) setCurrentIndex(ri); }}
                                     whileTap={{ scale: 0.97 }}
@@ -531,6 +569,21 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 </motion.div>
                               );
                             })}
+
+                            {/* Show remaining slots for incomplete weeks */}
+                            {!isWeekComplete && Array.from({ length: 3 - weekActs.length }, (_, i) => (
+                              <div key={`remaining-${weekNum}-${i}`} className="relative flex items-center gap-3" style={{ padding: '10px 16px 10px 16px', marginBottom: 4 }}>
+                                <img src={tileInactiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0, opacity: 0.5 }} />
+                                <div>
+                                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.02em' }}>
+                                    W{weekNum} · Activity {weekActs.length + i + 1}
+                                  </p>
+                                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.12)', marginTop: 1 }}>
+                                    Upcoming
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
 
                             {/* Diamond separator + Generate Reel button */}
                             <div className="relative flex flex-col items-center" style={{ padding: '8px 16px 20px 0', marginLeft: 48 }}>
@@ -597,11 +650,16 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       })}
 
                       {/* Journey start */}
-                      <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
-                        <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.1)' }} />
-                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: 'rgba(255,255,255,0.2)', transform: 'rotate(-1deg)' }}>
-                          the journey begins here... 🌱
-                        </p>
+                      <div className="relative flex items-center gap-3" style={{ padding: '16px 16px 24px 16px' }}>
+                        <img src={tileActiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0, opacity: 0.6 }} />
+                        <div>
+                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.02em' }}>
+                            🌱 Journey begins here
+                          </p>
+                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.15)', marginTop: 1 }}>
+                            Day 1 of your transformation
+                          </p>
+                        </div>
                       </div>
                     </>
                   );
