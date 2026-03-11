@@ -75,9 +75,16 @@ function StoryFrameRendererInner({
 
   return (
     <div
-      className="absolute inset-0 flex items-center justify-center"
+      className="absolute inset-0 flex items-center justify-center story-frame-fullbleed"
       style={{ background: 'transparent' }}
     >
+      <style>{`
+        .story-frame-fullbleed > div > div > div {
+          width: 100% !important;
+          max-width: 100% !important;
+          border-radius: 0px !important;
+        }
+      `}</style>
       <Suspense fallback={<div className="absolute inset-0" />}>
         {(() => {
           switch ((frame || 'shaky').toLowerCase()) {
