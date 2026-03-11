@@ -2104,6 +2104,7 @@ const Reel = () => {
                       )}
                       
                       </div>{/* end 9:16 card */}
+                      </div>{/* end card wrapper with strips */}
 
 
                       {/* Floating 3D emoji reactions */}
