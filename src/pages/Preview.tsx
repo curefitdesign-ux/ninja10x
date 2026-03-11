@@ -29,7 +29,7 @@ import { useJourneyActivities } from '@/hooks/use-journey-activities';
 
 import { toast } from 'sonner';
 
-const FRAMES = ['token', 'holographic', 'shaky', 'journal', 'scrapbook', 'arcade', 'bold', 'vogue', 'fitness', 'ticket'] as const;
+const FRAMES = ['token', 'holographic', 'shaky', 'arcade', 'bold', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
 
 // Activity options with minimal line icons
@@ -117,14 +117,6 @@ const FRAME_COLORS: Record<FrameType, { accent: string; gradient: string }> = {
     accent: 'rgba(80, 60, 160, 0.55)', 
     gradient: 'linear-gradient(160deg, rgba(90, 65, 180, 0.4) 0%, rgba(30, 20, 70, 0.6) 100%)'
   },
-  journal: { 
-    accent: 'rgba(20, 120, 90, 0.55)', 
-    gradient: 'linear-gradient(160deg, rgba(25, 140, 105, 0.4) 0%, rgba(10, 55, 40, 0.6) 100%)'
-  },
-  vogue: { 
-    accent: 'rgba(30, 30, 40, 0.65)', 
-    gradient: 'linear-gradient(160deg, rgba(50, 50, 65, 0.5) 0%, rgba(10, 10, 18, 0.7) 100%)'
-  },
   fitness: { 
     accent: 'rgba(200, 160, 20, 0.45)', 
     gradient: 'linear-gradient(160deg, rgba(220, 180, 25, 0.35) 0%, rgba(80, 65, 10, 0.6) 100%)'
@@ -140,10 +132,6 @@ const FRAME_COLORS: Record<FrameType, { accent: string; gradient: string }> = {
   holographic: {
     accent: 'rgba(120, 60, 200, 0.50)',
     gradient: 'linear-gradient(160deg, rgba(180, 60, 255, 0.35) 0%, rgba(0, 120, 255, 0.35) 50%, rgba(255, 60, 180, 0.3) 100%)',
-  },
-  scrapbook: {
-    accent: 'rgba(124, 92, 252, 0.45)',
-    gradient: 'linear-gradient(160deg, rgba(140, 110, 255, 0.35) 0%, rgba(60, 50, 40, 0.5) 100%)',
   },
   arcade: {
     accent: 'rgba(0, 0, 0, 0.65)',
@@ -803,10 +791,6 @@ const Preview = () => {
     switch (overrideFrame || currentFrame) {
       case 'shaky':
         return <ShakyFrame {...frameProps} />;
-      case 'journal':
-        return <JournalFrame {...frameProps} />;
-      case 'vogue':
-        return <VogueFrame {...frameProps} />;
       case 'fitness':
         return <FitnessFrame {...frameProps} />;
       case 'ticket':
@@ -835,8 +819,6 @@ const Preview = () => {
           label1Name={activityLabels.secondaryMetric}
           label2Name={activityLabels.primaryMetric}
         />;
-      case 'scrapbook':
-        return <ScrapbookFrame {...frameProps} />;
       case 'arcade':
         return <ArcadeFrame {...frameProps} />;
       case 'bold':
@@ -1201,8 +1183,6 @@ const Preview = () => {
                 }}
               >
                 {currentFrame === 'shaky' && <ShakyFrame {...frameProps} />}
-                {currentFrame === 'journal' && <JournalFrame {...frameProps} />}
-                {currentFrame === 'vogue' && <VogueFrame {...frameProps} />}
                 {currentFrame === 'fitness' && <FitnessFrame {...frameProps} />}
                 {currentFrame === 'ticket' && <TicketFrame {...frameProps} />}
                 {currentFrame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
@@ -1273,13 +1253,11 @@ const Preview = () => {
                         style={{ aspectRatio: '9/16', maxHeight: '100%' }}
                       >
                         {frame === 'shaky' && <ShakyFrame {...frameProps} />}
-                        {frame === 'journal' && <JournalFrame {...frameProps} />}
-                        {frame === 'vogue' && <VogueFrame {...frameProps} />}
                         {frame === 'fitness' && <FitnessFrame {...frameProps} />}
                         {frame === 'ticket' && <TicketFrame {...frameProps} />}
                         {frame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
                         {frame === 'holographic' && <HolographicFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
-                        {frame === 'scrapbook' && <ScrapbookFrame {...frameProps} />}
+                        {frame === 'arcade' && <ArcadeFrame {...frameProps} />}
                         {frame === 'arcade' && <ArcadeFrame {...frameProps} />}
                       </div>
                     </motion.div>
