@@ -403,15 +403,27 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                 {(() => {
                   const sortedActivities = [...activities].filter(a => !a.isPlaceholder);
-                  // Reverse: show from end-goal down to oldest (most recent first, oldest last)
-                  const reversedActivities = [...sortedActivities].reverse();
                   const remainingDays = 12 - sortedActivities.length;
                   const getCardStyle = (index: number, dayNumber: number) => {
                     const seed = dayNumber * 7 + index * 13;
                     return { rotation: ((seed % 11) - 5) * 1.2, offsetX: ((seed * 3) % 7) - 2, decorType: seed % 5 };
                   };
-                  const handDates = ['just now ✨','yesterday','a few days ago','last week','feeling strong 💪','what a session!','crushed it 🔥','new PR day','getting better','consistency > all','momentum building','unstoppable 🚀'];
-                  
+
+                  // Group activities by week (week 1 = days 1-3, week 2 = days 4-6, etc.)
+                  const weekGroups: Record<number, typeof sortedActivities> = {};
+                  for (const act of sortedActivities) {
+                    const wk = Math.ceil(act.dayNumber / 3);
+                    if (!weekGroups[wk]) weekGroups[wk] = [];
+                    weekGroups[wk].push(act);
+                  }
+                  // Sort each week's activities by dayNumber
+                  for (const wk of Object.keys(weekGroups)) {
+                    weekGroups[Number(wk)].sort((a, b) => a.dayNumber - b.dayNumber);
+                  }
+
+                  // Determine which weeks exist (1-4), reversed order (latest first)
+                  const allWeeks = [4, 3, 2, 1];
+                  const highestCompletedWeek = Math.max(0, ...Object.keys(weekGroups).map(Number));
 
                   return (
                     <>
@@ -423,108 +435,175 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         </p>
                       </div>
 
-                      {/* Activities: recent → oldest */}
-                      {reversedActivities.map((act, idx) => {
-                    const { rotation, offsetX, decorType } = getCardStyle(idx, act.dayNumber);
-                    const wk = Math.ceil(act.dayNumber / 3);
-                    const dw = ((act.dayNumber - 1) % 3) + 1;
-                    const isSelected = act.id === current.id;
-                    const handDate = handDates[act.dayNumber - 1] || handDates[idx % handDates.length];
-                    
+                      {/* Weeks: latest → earliest */}
+                      {allWeeks.map((weekNum) => {
+                        const weekActs = weekGroups[weekNum];
+                        if (!weekActs || weekActs.length === 0) return null;
+                        const isWeekComplete = weekActs.length >= 3;
 
-                    return (
-                      <motion.div
-                        key={act.id} className="relative"
-                        style={{ padding: '12px 16px 12px 48px', marginBottom: idx < reversedActivities.length - 1 ? 16 : 0 }}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.06, type: 'spring', stiffness: 200, damping: 20 }}
-                      >
-                        {/* Timeline dot */}
-                        <div className="absolute rounded-full" style={{
-                          left: 22, top: 28, width: 14, height: 14,
-                          background: isSelected ? 'linear-gradient(135deg, #34D399, #10B981)' : 'rgba(255,255,255,0.15)',
-                          border: `2px solid ${isSelected ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.1)'}`,
-                          boxShadow: isSelected ? '0 0 12px rgba(52,211,153,0.4)' : 'none', zIndex: 5,
-                        }} />
+                        return (
+                          <div key={`week-${weekNum}`}>
+                            {/* Activities in this week */}
+                            {weekActs.map((act, idx) => {
+                              const globalIdx = sortedActivities.findIndex(a => a.id === act.id);
+                              const { rotation, offsetX } = getCardStyle(globalIdx, act.dayNumber);
+                              const dw = ((act.dayNumber - 1) % 3) + 1;
+                              const isSelected = act.id === current.id;
 
-                        {/* Handwritten date */}
-                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 18, color: 'rgba(255,255,255,0.45)', marginBottom: 6, transform: `rotate(${rotation * 0.3}deg)`, marginLeft: offsetX }}>
-                          W{wk} · Day {dw} — <span style={{ color: 'rgba(255,255,255,0.3)' }}>{handDate}</span>
-                        </p>
+                              return (
+                                <motion.div
+                                  key={act.id} className="relative"
+                                  style={{ padding: '12px 16px 12px 48px', marginBottom: 16 }}
+                                  initial={{ opacity: 0, y: 30 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: globalIdx * 0.06, type: 'spring', stiffness: 200, damping: 20 }}
+                                >
+                                  {/* Timeline dot */}
+                                  <div className="absolute rounded-full" style={{
+                                    left: 22, top: 28, width: 14, height: 14,
+                                    background: isSelected ? 'linear-gradient(135deg, #34D399, #10B981)' : 'rgba(255,255,255,0.15)',
+                                    border: `2px solid ${isSelected ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                                    boxShadow: isSelected ? '0 0 12px rgba(52,211,153,0.4)' : 'none', zIndex: 5,
+                                  }} />
 
-                        {/* Card */}
-                        <motion.div
-                          className="relative overflow-visible cursor-pointer"
-                          style={{
-                            width: '62%', aspectRatio: '9/16', borderRadius: 4,
-                            transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
-                            marginLeft: idx % 2 === 0 ? '0%' : '10%',
-                          }}
-                          onClick={() => { const ri = activities.findIndex(a => a.id === act.id); if (ri >= 0) setCurrentIndex(ri); }}
-                          whileTap={{ scale: 0.97 }}
-                        >
-                          <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4, containerType: 'inline-size' }}>
-                            {act.frame ? (
-                              <StoryFrameRenderer imageUrl={act.originalUrl || act.storageUrl} isVideo={act.isVideo} activity={act.activity} frame={act.frame} duration={act.duration} pr={act.pr} dayNumber={act.dayNumber} />
-                            ) : act.isVideo ? (
-                              <video src={act.originalUrl || act.storageUrl} className="absolute inset-0 w-full h-full object-cover" muted playsInline />
-                            ) : (
-                              <img src={act.originalUrl || act.storageUrl} alt={`Day ${act.dayNumber}`} className="absolute inset-0 w-full h-full object-cover" />
-                            )}
-                          </div>
+                                  {/* Week & day label */}
+                                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.45)', marginBottom: 6, letterSpacing: '0.02em' }}>
+                                    W{weekNum} · Activity {dw}
+                                  </p>
 
-                          
-
-                          {/* Like count badge + react button */}
-                          {(() => {
-                            const ar = localReactions[act.id];
-                            const total = ar?.total || 0;
-                            return (
-                              <div className="absolute flex items-center gap-1" style={{
-                                bottom: -10, left: -6, zIndex: 30,
-                                transform: `rotate(${-rotation * 0.6}deg)`,
-                              }}>
-                                {total > 0 && (
-                                  <span style={{
-                                    fontFamily: "'Caveat', cursive", fontSize: 16,
-                                    color: 'rgba(255,255,255,0.55)',
-                                    textShadow: '0 1px 4px rgba(0,0,0,0.5)',
-                                  }}>
-                                    {total} ❤️
-                                  </span>
-                                )}
-                                {!isOwnProfile && (
-                                  <button
-                                    className="flex items-center gap-0.5 active:scale-90 transition-transform"
+                                  {/* Card */}
+                                  <motion.div
+                                    className="relative overflow-visible cursor-pointer"
                                     style={{
-                                      background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
-                                      borderRadius: 14, padding: '3px 8px',
-                                      border: '1px solid rgba(255,255,255,0.12)',
+                                      width: '62%', aspectRatio: '9/16', borderRadius: 4,
+                                      transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
+                                      marginLeft: idx % 2 === 0 ? '0%' : '10%',
                                     }}
-                                    onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}
+                                    onClick={() => { const ri = activities.findIndex(a => a.id === act.id); if (ri >= 0) setCurrentIndex(ri); }}
+                                    whileTap={{ scale: 0.97 }}
                                   >
-                                    <span style={{ fontSize: 12 }}>🔥</span>
-                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>React</span>
-                                  </button>
-                                )}
-                              </div>
-                            );
-                          })()}
-                        </motion.div>
+                                    <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4, containerType: 'inline-size' }}>
+                                      {act.frame ? (
+                                        <StoryFrameRenderer imageUrl={act.originalUrl || act.storageUrl} isVideo={act.isVideo} activity={act.activity} frame={act.frame} duration={act.duration} pr={act.pr} dayNumber={act.dayNumber} />
+                                      ) : act.isVideo ? (
+                                        <video src={act.originalUrl || act.storageUrl} className="absolute inset-0 w-full h-full object-cover" muted playsInline />
+                                      ) : (
+                                        <img src={act.originalUrl || act.storageUrl} alt={`Day ${act.dayNumber}`} className="absolute inset-0 w-full h-full object-cover" />
+                                      )}
+                                    </div>
 
-                      </motion.div>
-                    );
-                  })}
+                                    {/* Like count badge + react button */}
+                                    {(() => {
+                                      const ar = localReactions[act.id];
+                                      const total = ar?.total || 0;
+                                      return (
+                                        <div className="absolute flex items-center gap-1" style={{
+                                          bottom: -10, left: -6, zIndex: 30,
+                                          transform: `rotate(${-rotation * 0.6}deg)`,
+                                        }}>
+                                          {total > 0 && (
+                                            <span style={{
+                                              fontFamily: "'Caveat', cursive", fontSize: 16,
+                                              color: 'rgba(255,255,255,0.55)',
+                                              textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                                            }}>
+                                              {total} ❤️
+                                            </span>
+                                          )}
+                                          {!isOwnProfile && (
+                                            <button
+                                              className="flex items-center gap-0.5 active:scale-90 transition-transform"
+                                              style={{
+                                                background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
+                                                borderRadius: 14, padding: '3px 8px',
+                                                border: '1px solid rgba(255,255,255,0.12)',
+                                              }}
+                                              onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}
+                                            >
+                                              <span style={{ fontSize: 12 }}>🔥</span>
+                                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>React</span>
+                                            </button>
+                                          )}
+                                        </div>
+                                      );
+                                    })()}
+                                  </motion.div>
+                                </motion.div>
+                              );
+                            })}
 
-                  {/* Journey start */}
-                  <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
-                    <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.1)' }} />
-                    <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: 'rgba(255,255,255,0.2)', transform: 'rotate(-1deg)' }}>
-                      the journey begins here... 🌱
-                    </p>
-                  </div>
-                </>
+                            {/* Diamond separator + Generate Reel button */}
+                            <div className="relative flex flex-col items-center" style={{ padding: '8px 16px 20px 0', marginLeft: 48 }}>
+                              {/* Diamond on timeline */}
+                              <div className="absolute" style={{
+                                left: -20, top: 14, width: 14, height: 14,
+                                background: isWeekComplete ? 'linear-gradient(135deg, #F97316, #EC4899)' : 'rgba(255,255,255,0.08)',
+                                border: `2px solid ${isWeekComplete ? 'rgba(249,115,22,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                                transform: 'rotate(45deg)',
+                                boxShadow: isWeekComplete ? '0 0 12px rgba(249,115,22,0.3)' : 'none',
+                                zIndex: 5,
+                              }} />
+
+                              {/* Generate Reel button */}
+                              {isWeekComplete && isOwnProfile && (
+                                <button
+                                  onClick={() => {
+                                    const weekActivities = weekActs.map(a => ({
+                                      id: a.id,
+                                      storageUrl: a.storageUrl,
+                                      originalUrl: a.originalUrl,
+                                      isVideo: a.isVideo,
+                                      activity: a.activity,
+                                      frame: a.frame,
+                                      duration: a.duration,
+                                      pr: a.pr,
+                                      dayNumber: a.dayNumber,
+                                    }));
+                                    window.dispatchEvent(new CustomEvent('navigate-reel-gen', { detail: { week: weekNum, activities: weekActivities } }));
+                                  }}
+                                  className="active:scale-95 transition-transform"
+                                  style={{
+                                    fontFamily: "'Inter', sans-serif",
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    color: 'rgba(255,255,255,0.8)',
+                                    background: 'rgba(255,255,255,0.06)',
+                                    backdropFilter: 'blur(30px) saturate(180%)',
+                                    WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: 20,
+                                    padding: '8px 20px',
+                                    letterSpacing: '0.02em',
+                                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+                                  }}
+                                >
+                                  ✨ Generate Week {weekNum} Reel
+                                </button>
+                              )}
+                              {!isWeekComplete && (
+                                <p style={{
+                                  fontFamily: "'Inter', sans-serif",
+                                  fontSize: 12,
+                                  fontWeight: 500,
+                                  color: 'rgba(255,255,255,0.25)',
+                                  letterSpacing: '0.02em',
+                                }}>
+                                  {3 - weekActs.length} more {3 - weekActs.length === 1 ? 'activity' : 'activities'} to unlock Week {weekNum} Reel
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {/* Journey start */}
+                      <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
+                        <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.1)' }} />
+                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: 'rgba(255,255,255,0.2)', transform: 'rotate(-1deg)' }}>
+                          the journey begins here... 🌱
+                        </p>
+                      </div>
+                    </>
                   );
                 })()}
               </div>
