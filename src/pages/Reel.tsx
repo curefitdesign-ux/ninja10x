@@ -1879,9 +1879,6 @@ const Reel = () => {
                               background: isLogActivityCard ? '#0A0A0F' : 'transparent',
                               marginTop: '-10px',
                               zIndex: 3,
-                              ...(isLogActivityCard ? {
-                                border: '1px solid rgba(255,255,255,0.06)',
-                              } : {}),
                             }}
                           >
                         {/* Progress bar removed — timing indicated via avatar ring */}
