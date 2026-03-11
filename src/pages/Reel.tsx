@@ -1721,23 +1721,32 @@ const Reel = () => {
                             aspectRatio: '9/16',
                             maxHeight: 'calc(95% - 10px)',
                             filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                            background: activity?.id === 'log-activity' ? '#0A0A0F' : 'transparent',
-                            border: activity?.id === 'log-activity' ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                            background: 'transparent',
+                            border: 'none',
                           }}
                         >
                           {activity?.id === 'log-activity' ? (
-                            <div className="w-full h-full flex flex-col items-center justify-center gap-5 px-6 text-center" style={{ background: '#0A0A0F' }}>
-                              <div style={{ width: 92, height: 92, borderRadius: '50%', overflow: 'hidden' }}>
-                                <video src="/videos/curo-peeking.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                              </div>
-                              <p className="text-white/80 font-semibold leading-tight" style={{ fontSize: 18 }}>
-                                Log your activity today
-                              </p>
-                              <div className="flex items-center justify-center" style={{ width: 54, height: 54 }}>
-                                <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
-                                  <rect x="20" y="6" width="8" height="36" rx="4" fill="rgba(196,161,255,0.95)" />
-                                  <rect x="6" y="20" width="36" height="8" rx="4" fill="rgba(196,161,255,0.95)" />
-                                </svg>
+                            <div className="w-full h-full flex items-center justify-center px-3 py-2">
+                              <div
+                                className="flex flex-col items-center justify-center gap-5 px-6 text-center"
+                                style={{
+                                  width: '86%',
+                                  height: 'calc(95% - 10px)',
+                                  background: 'hsl(var(--background))',
+                                }}
+                              >
+                                <div style={{ width: 92, height: 92, borderRadius: '50%', overflow: 'hidden' }}>
+                                  <video src="/videos/curo-peeking.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                </div>
+                                <p className="text-white/80 font-semibold leading-tight" style={{ fontSize: 18 }}>
+                                  Log your activity today
+                                </p>
+                                <div className="flex items-center justify-center" style={{ width: 54, height: 54 }}>
+                                  <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+                                    <rect x="20" y="6" width="8" height="36" rx="4" fill="rgba(196,161,255,0.95)" />
+                                    <rect x="6" y="20" width="36" height="8" rx="4" fill="rgba(196,161,255,0.95)" />
+                                  </svg>
+                                </div>
                               </div>
                             </div>
                           ) : hasFrame && activity ? (
