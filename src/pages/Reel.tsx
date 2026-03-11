@@ -1935,7 +1935,7 @@ const Reel = () => {
                                       className="text-center z-10 mb-6"
                                     >
                                       <p
-                                        className="text-2xl font-bold leading-tight"
+                                        className="text-xl font-bold leading-tight"
                                         style={{
                                           background: 'linear-gradient(135deg, hsl(267 100% 82%), hsl(278 100% 92%), hsl(var(--foreground)))',
                                           WebkitBackgroundClip: 'text',
