@@ -272,14 +272,14 @@ const Reel = () => {
   const effectiveUserGroups = useMemo(() => {
     if (!user) return userGroups;
 
-    // Others: only show their most recent activity
+    // Others: show their last 3 activities
     const othersGroups = userGroups
       .filter(g => g.userId !== user.id)
       .map(g => {
         const sorted = [...g.activities].sort((a, b) => b.dayNumber - a.dayNumber);
         return {
           ...g,
-          activities: sorted.length > 0 ? [sorted[0]] : [],
+          activities: sorted.slice(0, 3),
         };
       });
 
