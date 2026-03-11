@@ -1782,7 +1782,7 @@ const Reel = () => {
                             )
                           ) : (
                             <div className="absolute inset-0 bg-gradient-to-b from-[#2a1b4e] to-[#0a0720] flex items-center justify-center">
-                              <ProfileAvatar avatarUrl={group.avatarUrl} displayName={group.displayName} size={48} />
+                              <ProfileAvatar src={group.avatarUrl} name={group.displayName} size={48} />
                             </div>
                           )}
                         </div>
