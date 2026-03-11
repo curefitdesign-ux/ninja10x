@@ -600,6 +600,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       e.stopPropagation();
                       setNudgeBellAnim(true);
                       setNudgeNumberBehind(false);
+                      setNudgeRotation(Math.floor(Math.random() * 31) - 15); // -15 to +15 degrees
                       setNudgeCount(prev => prev + 1);
                       // Play preloaded audio instantly
                       try {
