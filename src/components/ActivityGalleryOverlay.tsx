@@ -598,11 +598,24 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           // Insert "Week X Complete" acknowledgement above the last activity of each completed week
                           if (act.dayNumber % 3 === 0) {
                             const completedWeek = act.dayNumber / 3;
+                            // Varied icons per week milestone
+                            const weekIcons: Record<number, React.ReactNode> = {
+                              1: <Star size={10} fill="white" color="white" strokeWidth={0} />,
+                              2: <Flame size={10} fill="white" color="white" strokeWidth={0} />,
+                              3: <Zap size={10} fill="white" color="white" strokeWidth={0} />,
+                              4: <Trophy size={10} fill="white" color="white" strokeWidth={0} />,
+                            };
+                            const weekCopy: Record<number, string> = {
+                              1: 'Week 1 done ⭐',
+                              2: 'Week 2 crushed 🔥',
+                              3: 'Week 3 smashed ⚡',
+                              4: 'Week 4 conquered 🏆',
+                            };
                             elements.push(
                               <div key={`week-complete-${completedWeek}`} className="relative flex items-center" style={{ padding: '12px 16px 12px 48px', margin: '6px 0' }}>
-                                {/* Milestone flag dot on timeline */}
+                                {/* Milestone icon dot on timeline */}
                                 <div className="absolute" style={{ left: 19, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.12))', border: '1.5px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <Flag size={9} fill="white" color="white" strokeWidth={0} />
+                                  {weekIcons[completedWeek] || <Flag size={9} fill="white" color="white" strokeWidth={0} />}
                                 </div>
                                 {/* Handwritten milestone with underline flourish */}
                                 <div style={{ display: 'inline-flex', flexDirection: 'column', gap: 0 }}>
@@ -615,7 +628,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                     transform: 'rotate(-0.8deg)',
                                     lineHeight: 1.1,
                                   }}>
-                                    Week {completedWeek} crushed 🎯
+                                    {weekCopy[completedWeek] || `Week ${completedWeek} done ✓`}
                                   </p>
                                   {/* Hand-drawn underline */}
                                   <svg width="90" height="6" viewBox="0 0 90 6" fill="none" style={{ marginTop: -1, marginLeft: 2, opacity: 0.25 }}>
