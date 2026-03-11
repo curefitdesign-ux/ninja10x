@@ -599,21 +599,29 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           if (act.dayNumber % 3 === 0) {
                             const completedWeek = act.dayNumber / 3;
                             elements.push(
-                              <div key={`week-complete-${completedWeek}`} className="relative" style={{ padding: '14px 16px 14px 48px', margin: '4px 0' }}>
+                              <div key={`week-complete-${completedWeek}`} className="relative flex items-center" style={{ padding: '10px 16px 10px 48px', margin: '4px 0' }}>
                                 {/* Checkmark dot on timeline */}
-                                <div className="absolute" style={{ left: 22, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 14, height: 14, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(147,130,220,0.6), rgba(120,100,200,0.4))', border: '1.5px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <span style={{ fontSize: 7, lineHeight: 1 }}>✓</span>
+                                <div className="absolute" style={{ left: 21, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 16, height: 16, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(147,130,220,0.7), rgba(120,100,200,0.5))', border: '1.5px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <Check size={9} color="white" strokeWidth={3} />
                                 </div>
-                                <p style={{
-                                  fontFamily: "'Caveat', cursive",
-                                  fontSize: 19,
-                                  fontWeight: 600,
-                                  color: 'rgba(255,255,255,0.4)',
-                                  letterSpacing: '0.02em',
-                                  transform: 'rotate(-0.5deg)',
-                                }}>
-                                  Week {completedWeek} done ✓
-                                </p>
+                                {/* Handwritten week done with underline flourish */}
+                                <div style={{ display: 'inline-flex', flexDirection: 'column', gap: 0 }}>
+                                  <p style={{
+                                    fontFamily: "'Caveat', cursive",
+                                    fontSize: 20,
+                                    fontWeight: 700,
+                                    color: 'rgba(255,255,255,0.5)',
+                                    letterSpacing: '0.01em',
+                                    transform: 'rotate(-0.8deg)',
+                                    lineHeight: 1.1,
+                                  }}>
+                                    Week {completedWeek} done
+                                  </p>
+                                  {/* Hand-drawn underline */}
+                                  <svg width="80" height="6" viewBox="0 0 80 6" fill="none" style={{ marginTop: -1, marginLeft: 2, opacity: 0.3 }}>
+                                    <path d="M2 4c12-3 24 1 36-1s20 2 40-1" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                  </svg>
+                                </div>
                               </div>
                             );
                           }
