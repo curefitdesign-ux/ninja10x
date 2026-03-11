@@ -382,17 +382,21 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                      {userProfile.displayName}
                    </motion.h2>
                    {userBioLine && (
-                     <motion.p 
-                       className="text-center mt-2 px-5 leading-[1.6]"
-                       style={{ 
-                         fontFamily: "'Inter', -apple-system, system-ui, sans-serif", 
-                         fontSize: 14, 
-                         fontWeight: 400,
-                         color: '#FFFFFF',
-                         maxWidth: 300,
-                         letterSpacing: '0.01em',
-                         whiteSpace: 'pre-line',
-                       }}
+                      <motion.p 
+                        className="text-center mt-2 px-5 leading-[1.6] line-clamp-4"
+                        style={{ 
+                          fontFamily: "'Inter', -apple-system, system-ui, sans-serif", 
+                          fontSize: 14, 
+                          fontWeight: 400,
+                          color: '#FFFFFF',
+                          maxWidth: 300,
+                          letterSpacing: '0.01em',
+                          whiteSpace: 'normal',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 4,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
                        initial={{ opacity: 0, y: -8 }}
                        animate={{ opacity: 1, y: 0 }}
                        transition={{ delay: 0.25, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
