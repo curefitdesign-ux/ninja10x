@@ -2165,6 +2165,52 @@ const Reel = () => {
                       
                       </div>{/* end 9:16 card */}
 
+                      {/* Bottom peek cards — indicate more stories */}
+                      {showStackedCards && isCenter && (
+                        <>
+                          {/* Second peek card */}
+                          <motion.div
+                            initial={{ y: 0, opacity: 0 }}
+                            animate={{ y: 6, opacity: 0.55, scale: 0.94 }}
+                            transition={{ type: 'spring', stiffness: 200, damping: 22, delay: 0.05 }}
+                            onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
+                            className="absolute cursor-pointer"
+                            style={{
+                              aspectRatio: '9/16',
+                              height: 'calc(95% - 20px)',
+                              marginTop: '-10px',
+                              zIndex: 0,
+                              borderRadius: '9px',
+                              background: 'rgba(255,255,255,0.06)',
+                              border: '1px solid rgba(255,255,255,0.10)',
+                              backdropFilter: 'blur(16px) saturate(1.5)',
+                              WebkitBackdropFilter: 'blur(16px) saturate(1.5)',
+                              transformOrigin: 'top center',
+                            }}
+                          />
+                          {/* Third peek card (deepest) */}
+                          <motion.div
+                            initial={{ y: 0, opacity: 0 }}
+                            animate={{ y: 12, opacity: 0.35, scale: 0.88 }}
+                            transition={{ type: 'spring', stiffness: 200, damping: 22, delay: 0.1 }}
+                            onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
+                            className="absolute cursor-pointer"
+                            style={{
+                              aspectRatio: '9/16',
+                              height: 'calc(95% - 20px)',
+                              marginTop: '-10px',
+                              zIndex: -1,
+                              borderRadius: '9px',
+                              background: 'rgba(255,255,255,0.03)',
+                              border: '1px solid rgba(255,255,255,0.06)',
+                              backdropFilter: 'blur(12px) saturate(1.3)',
+                              WebkitBackdropFilter: 'blur(12px) saturate(1.3)',
+                              transformOrigin: 'top center',
+                            }}
+                          />
+                        </>
+                      )}
+
                       {/* Floating 3D emoji reactions */}
                       {!shouldShowLocked && (
                         <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 25, overflow: 'hidden', borderRadius: '0px' }}>
