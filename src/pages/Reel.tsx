@@ -1905,11 +1905,12 @@ const Reel = () => {
                               return (
                                 <div className="w-full h-full flex items-center justify-center px-6 py-4">
                                   <div
-                                    className="w-full h-full flex flex-col items-center justify-center relative"
+                                    className="w-full flex flex-col items-center justify-center relative"
                                     style={{
-                                      maxWidth: '100%',
+                                      width: '86%',
                                       height: 'calc(95% - 10px)',
-                                      marginTop: '-10px',
+                                      background: 'hsl(var(--background))',
+                                      maxWidth: '100%',
                                     }}
                                   >
                                     {/* Faint radial glow behind content */}
