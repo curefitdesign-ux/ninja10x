@@ -1889,12 +1889,10 @@ const Reel = () => {
                               marginTop: '-10px',
                               zIndex: 3,
                               ...(showStackedCards && isCenter && !isLogActivityCard ? {
-                                boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.08)',
                                 border: '1px solid rgba(255,255,255,0.10)',
                               } : {}),
                               ...(isLogActivityCard ? {
                                 border: '1.5px solid rgba(139, 92, 246, 0.35)',
-                                boxShadow: '0 0 30px rgba(139, 92, 246, 0.15), inset 0 1px 1px rgba(255,255,255,0.05)',
                               } : {}),
                             }}
                           >
