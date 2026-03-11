@@ -1897,15 +1897,11 @@ const Reel = () => {
                               aspectRatio: '9/16',
                               height: 'calc(95% - 20px)',
                               maxWidth: '100%',
-                              borderRadius: isLogActivityCard ? '18px' : (showStackedCards && isCenter ? '14px' : '0px'),
+                              borderRadius: isLogActivityCard ? '18px' : '0px',
                               overflow: 'hidden',
                               background: isLogActivityCard ? '#0A0A0F' : 'transparent',
                               marginTop: '-10px',
                               zIndex: 3,
-                              ...(showStackedCards && isCenter && !isLogActivityCard ? {
-                                boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.08)',
-                                border: '1px solid rgba(255,255,255,0.10)',
-                              } : {}),
                               ...(isLogActivityCard ? {
                                 border: '1.5px solid rgba(139, 92, 246, 0.35)',
                                 boxShadow: '0 0 30px rgba(139, 92, 246, 0.15), inset 0 1px 1px rgba(255,255,255,0.05)',
