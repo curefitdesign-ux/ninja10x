@@ -1463,6 +1463,7 @@ const Reel = () => {
 
                 return (
                   <button
+                    ref={ownAvatarRef}
                     onClick={() => {
                       if (ownIdx >= 0) {
                         setCurrentUserIndex(ownIdx);
