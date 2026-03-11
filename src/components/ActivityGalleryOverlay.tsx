@@ -390,8 +390,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               }}
             >
               <div className="relative" style={{ minHeight: '100%' }}>
-                {/* Notebook lines */}
-                <div className="absolute inset-0 pointer-events-none" style={{
+                {/* Notebook lines removed for cleanliness */}
                   backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 38px, rgba(255,255,255,0.03) 38px, rgba(255,255,255,0.03) 39px)',
                   backgroundPosition: '0 20px',
                 }} />
