@@ -133,10 +133,6 @@ const FRAME_COLORS: Record<FrameType, { accent: string; gradient: string }> = {
     accent: 'rgba(120, 60, 200, 0.50)',
     gradient: 'linear-gradient(160deg, rgba(180, 60, 255, 0.35) 0%, rgba(0, 120, 255, 0.35) 50%, rgba(255, 60, 180, 0.3) 100%)',
   },
-  scrapbook: {
-    accent: 'rgba(124, 92, 252, 0.45)',
-    gradient: 'linear-gradient(160deg, rgba(140, 110, 255, 0.35) 0%, rgba(60, 50, 40, 0.5) 100%)',
-  },
   arcade: {
     accent: 'rgba(0, 0, 0, 0.65)',
     gradient: 'linear-gradient(160deg, rgba(20, 20, 30, 0.5) 0%, rgba(0, 0, 0, 0.7) 100%)',
