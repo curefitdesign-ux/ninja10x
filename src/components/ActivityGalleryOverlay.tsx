@@ -364,12 +364,13 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                    <h2 className="text-white text-center mt-2 px-4 w-full" style={{ fontFamily: "'Inter', -apple-system, system-ui, sans-serif", fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em' }}>{userProfile.displayName}</h2>
                    {userBioLine && (
                      <p className="text-center mt-2 px-5 leading-[1.6]" style={{ 
-                        fontFamily: "'Special Elite', 'Courier New', monospace", 
+                        fontFamily: "'Inter', -apple-system, system-ui, sans-serif", 
                         fontSize: 14, 
                         fontWeight: 400,
                         color: '#FFFFFF',
                         maxWidth: 300,
-                        letterSpacing: '0.02em',
+                        letterSpacing: '0.01em',
+                        whiteSpace: 'pre-line',
                       }}>
                        {userBioLine}
                      </p>
