@@ -157,7 +157,25 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     const activityNames = Array.from(activitySet).join(', ') || 'fitness';
     const minsStr = totalDurationMins > 0 ? `${totalDurationMins}` : '0';
 
-    return `A ${title}. Spent ${minsStr} minutes sharpening skills in ${activityNames} 🎯 over ${weeksCompleted} ${weeksCompleted === 1 ? 'week' : 'weeks'} 🗓️`;
+    // Dynamic middle phrases
+    const midPhrases = [
+      `Spent ${minsStr} minutes sharpening skills`,
+      `Put in ${minsStr} minutes of pure effort`,
+      `Clocked ${minsStr} minutes of hustle`,
+      `Dedicated ${minsStr} minutes to the craft`,
+      `Grinded for ${minsStr} minutes straight`,
+    ];
+    const endPhrases = [
+      `in ${activityNames} 🎯 over ${weeksCompleted} ${weeksCompleted === 1 ? 'week' : 'weeks'} 🗓️`,
+      `across ${activityNames} 💥 spanning ${weeksCompleted} ${weeksCompleted === 1 ? 'week' : 'weeks'} 📈`,
+      `doing ${activityNames} 🏆 for ${weeksCompleted} ${weeksCompleted === 1 ? 'week' : 'weeks'} 🔥`,
+    ];
+    // Seed from name length for consistency per user
+    const seed = (userProfile?.displayName?.length || 3);
+    const mid = midPhrases[seed % midPhrases.length];
+    const end = endPhrases[seed % endPhrases.length];
+
+    return `A ${title}\n${mid} ${end}`;
   }, [activities, userProfile]);
 
   useEffect(() => {
