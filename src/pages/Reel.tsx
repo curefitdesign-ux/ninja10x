@@ -2281,30 +2281,8 @@ const Reel = () => {
                   )}
                   </button>
 
-                   {/* Sticker-style View Progress badge */}
                    <div className="flex items-center gap-2 shrink-0">
-                    {!isLogActivityCard && !isWeekRecapStory && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowHistoryGallery(true);
-                        }}
-                        className="shrink-0 active:scale-[0.93] transition-all duration-150 flex items-center gap-1.5 whitespace-nowrap"
-                        style={{
-                          height: 46,
-                          borderRadius: 23,
-                          paddingLeft: 14,
-                          paddingRight: 16,
-                          background: 'linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04))',
-                          border: '1.5px solid rgba(255,255,255,0.1)',
-                          boxShadow: '0 4px 16px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.08) inset, 0 -1px 0 rgba(0,0,0,0.2) inset',
-                        }}
-                      >
-                        <span className="text-sm">📈</span>
-                        <span className="text-white/75 text-xs font-bold uppercase tracking-wide" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>Journey</span>
-                      </button>
-                    )}
-                  </div>
+                   </div>
                 </div>
               </div>
             );
