@@ -343,17 +343,18 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                    <div className="rounded-full overflow-hidden" style={{ width: 56, height: 56, border: '2.5px solid rgba(255,255,255,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
                      <ProfileAvatar src={userProfile.avatarUrl} name={userProfile.displayName} size={56} />
                    </div>
-                   <h2 className="text-white text-center mt-2 px-4 w-full" style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 22, fontWeight: 400, letterSpacing: '-0.01em', fontStyle: 'italic' }}>{userProfile.displayName}</h2>
+                   <h2 className="text-white text-center mt-2 px-4 w-full" style={{ fontFamily: "'Inter', -apple-system, system-ui, sans-serif", fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em' }}>{userProfile.displayName}</h2>
                    {userBioLine && (
-                     <p className="text-center mt-2 px-5 leading-[1.5]" style={{ 
-                        fontFamily: "'Caveat', cursive", 
-                        fontSize: 18, 
-                        fontWeight: 700,
-                        color: 'rgba(255,255,255,0.5)',
-                        maxWidth: 320,
+                     <p className="text-center mt-2 px-5 leading-[1.6]" style={{ 
+                        fontFamily: "'Special Elite', 'Courier New', monospace", 
+                        fontSize: 14, 
+                        fontWeight: 400,
+                        color: '#FFFFFF',
+                        maxWidth: 300,
+                        letterSpacing: '0.02em',
                       }}>
-                        {userBioLine}
-                      </p>
+                       {userBioLine}
+                     </p>
                    )}
                 </motion.div>
               )}
