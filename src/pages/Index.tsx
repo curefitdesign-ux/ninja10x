@@ -9,7 +9,7 @@ import PullToRefresh from '@/components/PullToRefresh';
 
 import SharedImageTransition from '@/components/SharedImageTransition';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
-import type { PillState } from '@/components/ReelProgressPill';
+// import type { PillState } from '@/components/ReelProgressPill';
 
 import CameraUI from '@/components/CameraUI';
 
