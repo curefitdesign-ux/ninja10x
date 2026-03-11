@@ -1817,8 +1817,8 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   width: '80%',
-                                  height: 22,
-                                  bottom: -22,
+                                  height: 12,
+                                  bottom: -14,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
@@ -1839,8 +1839,8 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   width: '90%',
-                                  height: 22,
-                                  bottom: -12,
+                                  height: 12,
+                                  bottom: -7,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 2,
