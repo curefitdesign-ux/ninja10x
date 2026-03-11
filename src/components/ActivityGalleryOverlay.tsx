@@ -378,19 +378,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                        {userBioLine}
                      </p>
                    )}
-                   <div className="flex items-center justify-center gap-2 mt-3">
-                     <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                       <span className="text-white text-[11px] font-semibold">{totalActivities}/12 Days</span>
-                     </div>
-                     {totalDurationStr && (
-                       <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                         <span className="text-white text-[11px] font-semibold">{totalDurationStr} Total</span>
-                       </div>
-                     )}
-                     <div className="rounded-full px-3 py-1" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                       <span className="text-white text-[11px] font-semibold">W{week}</span>
-                     </div>
-                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
