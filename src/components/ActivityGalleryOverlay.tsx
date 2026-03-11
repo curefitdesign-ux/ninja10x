@@ -593,44 +593,34 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         realActivities.forEach((act, idx) => {
                           const wk = Math.ceil(act.dayNumber / 3);
 
-                          // Insert "Week X Reel Ready" above the last activity of each completed week
-                          // dayNumber 3 = end of W1, 6 = W2, 9 = W3, 12 = W4
+                          // Insert "Week X Complete" acknowledgement above the last activity of each completed week
                           if (act.dayNumber % 3 === 0) {
-                            const reelWeek = act.dayNumber / 3;
+                            const completedWeek = act.dayNumber / 3;
                             elements.push(
-                              <div key={`week-reel-${reelWeek}`} className="relative" style={{ padding: '20px 16px 20px 48px', margin: '12px 0' }}>
-                                {/* AI Star sparkle on the dotted line */}
-                                <div className="absolute" style={{ left: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 36, height: 36 }}>
-                                  <img src={aiStarSparkle} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 8px rgba(147,130,220,0.5))' }} />
+                              <div key={`week-complete-${completedWeek}`} className="relative" style={{ padding: '14px 16px 14px 48px', margin: '4px 0' }}>
+                                {/* Checkmark dot on timeline */}
+                                <div className="absolute" style={{ left: 22, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 14, height: 14, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(147,130,220,0.6), rgba(120,100,200,0.4))', border: '1.5px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <span style={{ fontSize: 7, lineHeight: 1 }}>✓</span>
                                 </div>
-                                {/* Glassmorphic widget */}
-                                <div className="flex items-center gap-2.5" style={{
-                                  background: 'linear-gradient(135deg, rgba(147,130,220,0.25) 0%, rgba(120,100,200,0.15) 50%, rgba(160,140,210,0.2) 100%)',
-                                  backdropFilter: 'blur(40px) saturate(180%)',
-                                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                                  border: '1px solid rgba(255,255,255,0.12)',
-                                  borderRadius: 9999,
-                                  padding: '10px 20px',
-                                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 20px rgba(0,0,0,0.2)',
+                                <p style={{
+                                  fontFamily: "'Caveat', cursive",
+                                  fontSize: 19,
+                                  fontWeight: 600,
+                                  color: 'rgba(255,255,255,0.4)',
+                                  letterSpacing: '0.02em',
+                                  transform: 'rotate(-0.5deg)',
                                 }}>
-                                  <span style={{
-                                    fontFamily: "'Bebas Neue', 'Inter', sans-serif",
-                                    fontSize: 15,
-                                    fontWeight: 400,
-                                    letterSpacing: '0.08em',
-                                    color: 'rgba(255,255,255,0.85)',
-                                    textTransform: 'uppercase',
-                                  }}>
-                                    Week {reelWeek} Reel Ready
-                                  </span>
-                                </div>
+                                  Week {completedWeek} done ✓
+                                </p>
                               </div>
                             );
                           }
 
-                          // Insert week header when week changes
+                          // Add spacing between weeks
                           if (lastWeek !== null && wk !== lastWeek) {
-                            // week header handled elsewhere if needed
+                            elements.push(
+                              <div key={`week-spacer-${wk}-${lastWeek}`} style={{ height: 20 }} />
+                            );
                           }
                           lastWeek = wk;
 
