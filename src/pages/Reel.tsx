@@ -1954,7 +1954,7 @@ const Reel = () => {
                               aspectRatio: '9/16',
                               height: 'calc(95% - 20px)',
                               maxWidth: '100%',
-                              borderRadius: isLogActivityCard ? '18px' : '0px',
+                              borderRadius: isLogActivityCard ? '13px' : '0px',
                               overflow: 'hidden',
                               background: isLogActivityCard ? '#0A0A0F' : 'transparent',
                               marginTop: '-10px',
