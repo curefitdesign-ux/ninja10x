@@ -1947,10 +1947,10 @@ const Reel = () => {
                                       initial={{ opacity: 0, y: 10 }}
                                       animate={{ opacity: 1, y: 0 }}
                                       transition={{ delay: 0.15, duration: 0.5 }}
-                                      className="text-center z-10 mb-6"
+                                      className="text-center z-10 mb-6 px-8"
                                     >
                                       <p
-                                        className="text-2xl font-bold leading-tight"
+                                        className="text-xl font-bold leading-snug"
                                         style={{
                                           background: 'linear-gradient(135deg, hsl(267 100% 82%), hsl(278 100% 92%), hsl(var(--foreground)))',
                                           WebkitBackgroundClip: 'text',
