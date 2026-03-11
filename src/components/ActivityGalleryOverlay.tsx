@@ -134,7 +134,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     const realActivities = activities.filter(a => !a.isPlaceholder && a.dayNumber < 1001);
     if (realActivities.length === 0) return null;
     let totalDurationMins = 0;
-    const activityCounts: Record<string, number> = {};
+    const activitySet = new Set<string>();
     for (const a of realActivities) {
       if (a.duration) {
         const minMatch = a.duration.match(/(\d+)\s*min/i);
@@ -142,43 +142,22 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
         if (minMatch) totalDurationMins += parseInt(minMatch[1]);
         if (hrMatch) totalDurationMins += parseInt(hrMatch[1]) * 60;
       }
-      const type = a.activity || 'workout';
-      activityCounts[type] = (activityCounts[type] || 0) + 1;
+      if (a.activity) activitySet.add(a.activity.toLowerCase());
     }
     const count = realActivities.length;
-    const name = userProfile.displayName?.split(' ')[0] || 'This one';
-    let durationStr = '';
-    if (totalDurationMins > 0) {
-      const hrs = Math.floor(totalDurationMins / 60);
-      const mins = totalDurationMins % 60;
-      durationStr = hrs > 0 ? (mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`) : `${mins} min`;
-    }
-    const sorted = Object.entries(activityCounts).sort((a, b) => b[1] - a[1]);
-    const variety = sorted.length;
+    const weeksCompleted = Math.ceil(count / 3);
 
-    // Build wholesome narrative bio
-    let progressPhrase = '';
-    if (count >= 12) progressPhrase = `crushed all 12 days`;
-    else if (count >= 9) progressPhrase = `is almost at the finish line`;
-    else if (count >= 6) progressPhrase = `is halfway through the grind`;
-    else if (count >= 3) progressPhrase = `is building serious momentum`;
-    else progressPhrase = `just kicked off the journey`;
+    // Title based on progress
+    let title = 'Fitness Rookie 🌱';
+    if (count >= 12) title = 'Cult Ninja 🥷';
+    else if (count >= 9) title = 'Fitness Beast 🔥';
+    else if (count >= 6) title = 'Grind Machine ⚡';
+    else if (count >= 3) title = 'Rising Warrior 💪';
 
-    let activityPhrase = '';
-    if (variety >= 3) {
-      const top3 = sorted.slice(0, 3).map(([k]) => k.toLowerCase());
-      activityPhrase = `, loves ${top3[0]} 🏃, ${top3[1]} & ${top3[2]}`;
-    } else if (variety === 2) {
-      activityPhrase = `, swears by ${sorted[0][0].toLowerCase()} & ${sorted[1][0].toLowerCase()} 🎯`;
-    } else if (variety === 1 && count > 1) {
-      activityPhrase = `, all-in on ${sorted[0][0].toLowerCase()} 🎯`;
-    }
+    const activityNames = Array.from(activitySet).join(', ') || 'fitness';
+    const minsStr = totalDurationMins > 0 ? `${totalDurationMins}` : '0';
 
-    const durationPhrase = durationStr ? ` — ${durationStr} of pure grind ⏱️` : '';
-    const weekNum = Math.ceil(count / 3);
-    const weekPhrase = count >= 12 ? ', earned the ninja badge 🥷' : `, currently in week ${weekNum} 💪`;
-
-    return `${name} ${progressPhrase}${activityPhrase}${weekPhrase}${durationPhrase}`;
+    return `A ${title}. Spent ${minsStr} minutes sharpening skills in ${activityNames} 🎯 over ${weeksCompleted} ${weeksCompleted === 1 ? 'week' : 'weeks'} 🗓️`;
   }, [activities, userProfile]);
 
   useEffect(() => {
@@ -364,17 +343,18 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                    <div className="rounded-full overflow-hidden" style={{ width: 56, height: 56, border: '2.5px solid rgba(255,255,255,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
                      <ProfileAvatar src={userProfile.avatarUrl} name={userProfile.displayName} size={56} />
                    </div>
-                   <h2 className="text-white text-center mt-2 px-4 w-full" style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 22, fontWeight: 400, letterSpacing: '-0.01em', fontStyle: 'italic' }}>{userProfile.displayName}</h2>
+                   <h2 className="text-white text-center mt-2 px-4 w-full" style={{ fontFamily: "'Inter', -apple-system, system-ui, sans-serif", fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em' }}>{userProfile.displayName}</h2>
                    {userBioLine && (
-                     <p className="text-center mt-2 px-5 leading-[1.5]" style={{ 
-                        fontFamily: "'Caveat', cursive", 
-                        fontSize: 18, 
-                        fontWeight: 700,
-                        color: 'rgba(255,255,255,0.5)',
-                        maxWidth: 320,
+                     <p className="text-center mt-2 px-5 leading-[1.6]" style={{ 
+                        fontFamily: "'Special Elite', 'Courier New', monospace", 
+                        fontSize: 14, 
+                        fontWeight: 400,
+                        color: '#FFFFFF',
+                        maxWidth: 300,
+                        letterSpacing: '0.02em',
                       }}>
-                        {userBioLine}
-                      </p>
+                       {userBioLine}
+                     </p>
                    )}
                 </motion.div>
               )}
