@@ -509,51 +509,22 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                   return (
                     <>
-                      {/* End goal — Ticket-style Cult Ninja banner */}
-                      <div className="relative" style={{ padding: '12px 16px 20px 16px' }}>
-                        <div
-                          style={{
-                            position: 'relative',
-                            width: '100%',
-                            borderRadius: 16,
-                            padding: '28px 20px 24px',
-                            background: realActivities.length >= 12
-                              ? 'linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(239,68,67,0.12) 100%)'
-                              : 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
-                            border: `1px solid ${realActivities.length >= 12 ? 'rgba(245,158,11,0.25)' : 'rgba(255,255,255,0.08)'}`,
-                            backdropFilter: 'blur(30px) saturate(180%)',
-                            WebkitBackdropFilter: 'blur(30px) saturate(180%)',
-                            boxShadow: realActivities.length >= 12
-                              ? '0 8px 32px rgba(245,158,11,0.15), inset 0 1px 0 rgba(255,255,255,0.1)'
-                              : 'inset 0 1px 0 rgba(255,255,255,0.08)',
-                            textAlign: 'center',
-                            overflow: 'hidden',
-                          }}
-                        >
-                          {/* Decorative scalloped edge dots */}
-                          <div className="absolute top-0 left-0 right-0 flex justify-between px-2 pointer-events-none" style={{ transform: 'translateY(-50%)' }}>
-                            {Array.from({ length: 12 }).map((_, i) => (
-                              <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: 'rgba(10,7,32,0.9)' }} />
-                            ))}
-                          </div>
-                          <div className="absolute bottom-0 left-0 right-0 flex justify-between px-2 pointer-events-none" style={{ transform: 'translateY(50%)' }}>
-                            {Array.from({ length: 12 }).map((_, i) => (
-                              <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: 'rgba(10,7,32,0.9)' }} />
-                            ))}
-                          </div>
-
-                          {realActivities.length >= 12 ? (
-                            <p style={{
-                              fontFamily: "'DM Serif Display', serif",
-                              fontSize: 20,
-                              lineHeight: 1.4,
-                              color: 'rgba(245,158,11,0.85)',
-                              margin: 0,
-                            }}>
-                              Journey complete! 🥷
-                            </p>
-                          ) : (
-                            <>
+                      {/* End goal — Cult Ninja quote */}
+                      <div style={{ padding: '20px 24px 24px', textAlign: 'center' }}>
+                        {realActivities.length >= 12 ? (
+                          <p style={{
+                            fontFamily: "'DM Serif Display', serif",
+                            fontSize: 20,
+                            lineHeight: 1.4,
+                            color: 'rgba(245,158,11,0.85)',
+                            margin: 0,
+                          }}>
+                            ❝ Journey complete! 🥷 ❞
+                          </p>
+                        ) : (
+                          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: 6 }}>
+                            <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: 32, lineHeight: 1, color: 'rgba(255,255,255,0.2)', marginTop: -4 }}>❝</span>
+                            <div>
                               <p style={{
                                 fontFamily: "Inter, -apple-system, sans-serif",
                                 fontSize: 15,
@@ -575,9 +546,10 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               }}>
                                 Cult Ninja
                               </p>
-                            </>
-                          )}
-                        </div>
+                            </div>
+                            <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: 32, lineHeight: 1, color: 'rgba(255,255,255,0.2)', alignSelf: 'flex-end', marginBottom: -4 }}>❞</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Activities with week separators */}
