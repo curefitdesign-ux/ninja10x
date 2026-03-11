@@ -668,11 +668,10 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
             </div>
 
             {/* Bottom action row */}
-            <div className="shrink-0 flex items-center justify-center gap-3 px-4 z-50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 12px)', paddingTop: 8 }}>
+            <div className="shrink-0 flex items-center justify-center gap-3 px-4 z-50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 12px)', paddingTop: 8, background: 'linear-gradient(to top, #EDE7DA 60%, transparent)' }}>
               {/* Nudge button — shown for other users' profiles */}
               {!isOwnProfile && !current.isPlaceholder && (
                 <div className="relative">
-                  {/* Counter — Bump-style pop animation */}
                   {nudgeCount > 0 && (
                     <motion.span
                       key={nudgeCount}
@@ -687,18 +686,16 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       }
                       className="absolute pointer-events-none"
                       style={{
-                        top: -22,
-                        left: 14,
+                        top: -22, left: 14,
                         zIndex: nudgeNumberBehind ? 0 : 60,
                         fontSize: nudgeCount >= 10 ? 28 : 34,
-                        fontWeight: 900,
-                        fontStyle: 'normal',
-                        color: '#000',
-                        WebkitTextStroke: '4px #fff',
+                        fontWeight: 900, fontStyle: 'normal',
+                        color: '#3A3028',
+                        WebkitTextStroke: '3px #F5F0E8',
                         paintOrder: 'stroke fill',
-                        textShadow: '0 3px 8px rgba(0,0,0,0.4)',
+                        textShadow: '0 2px 4px rgba(0,0,0,0.1)',
                         lineHeight: 1,
-                        fontFamily: "'Lalezar', sans-serif",
+                        fontFamily: "'Caveat', cursive",
                         rotate: nudgeRotation,
                       }}
                     >
@@ -710,16 +707,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       e.stopPropagation();
                       setNudgeBellAnim(true);
                       setNudgeNumberBehind(false);
-                      setNudgeRotation(Math.floor(Math.random() * 31) - 15); // -15 to +15 degrees
+                      setNudgeRotation(Math.floor(Math.random() * 31) - 15);
                       setNudgeCount(prev => prev + 1);
-                      // Play preloaded audio instantly
                       try {
                         if (nudgeAudioRef.current) {
                           nudgeAudioRef.current.currentTime = 0;
                           nudgeAudioRef.current.play().catch(() => {});
                         }
                       } catch {}
-                      // Hide number behind button after 0.75s
                       if (nudgeHideTimerRef.current) clearTimeout(nudgeHideTimerRef.current);
                       nudgeHideTimerRef.current = setTimeout(() => setNudgeNumberBehind(true), 750);
                       if (user && targetUserId) {
@@ -729,8 +724,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     className="active:scale-[0.95] transition-transform"
                     style={{
                       height: 52, borderRadius: 26, paddingLeft: 18, paddingRight: 24,
-                      background: 'rgba(255, 255, 255, 0.08)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+                      background: 'rgba(138,120,90,0.08)',
+                      border: '1px solid rgba(138,120,90,0.2)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                     }}
                   >
                     <div className="flex items-center gap-3 h-full">
@@ -738,26 +734,25 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         src={deskBellImg}
                         alt="bell"
                         className="w-9 h-9 object-contain"
-                        style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))', transformOrigin: 'bottom center' }}
+                        style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))', transformOrigin: 'bottom center' }}
                         animate={nudgeBellAnim ? { rotate: [0, -25, 20, -15, 10, -5, 0], scale: [1, 1.2, 1.15, 1.1, 1.05, 1] } : {}}
                         transition={{ duration: 0.6, ease: 'easeInOut' }}
                         onAnimationComplete={() => setNudgeBellAnim(false)}
                       />
-                      <span className="text-white/80 text-sm font-medium">Nudge to log activity</span>
+                      <span style={{ color: 'rgba(58,48,40,0.7)', fontSize: 14, fontWeight: 500 }}>Nudge to log activity</span>
                     </div>
                   </button>
                 </div>
               )}
 
-              {/* Log activity for own profile */}
               {isOwnProfile && !hasLoggedToday && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onClose(); onLogActivity?.(); }}
                   className="shrink-0 active:scale-95 transition-transform"
                   style={{
                     width: 42, height: 42, borderRadius: 21,
-                    background: 'rgba(255, 255, 255, 0.08)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                    border: '1px solid rgba(255, 255, 255, 0.06)', boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+                    background: 'rgba(138,120,90,0.08)',
+                    border: '1px solid rgba(138,120,90,0.2)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}
                 >
@@ -771,12 +766,12 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   className="shrink-0 active:scale-95 transition-transform"
                   style={{
                     width: 42, height: 42, borderRadius: 21,
-                    background: 'rgba(255, 255, 255, 0.08)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                    border: '1px solid rgba(255, 255, 255, 0.06)', boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+                    background: 'rgba(138,120,90,0.08)',
+                    border: '1px solid rgba(138,120,90,0.2)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}
                 >
-                  <Share2 className="w-[16px] h-[16px] text-white/70" strokeWidth={1.5} />
+                  <Share2 className="w-[16px] h-[16px]" style={{ color: 'rgba(58,48,40,0.6)' }} strokeWidth={1.5} />
                 </button>
               )}
             </div>
