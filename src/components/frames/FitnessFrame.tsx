@@ -29,7 +29,7 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
   }, [isVideo, imageUrl]);
 
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[0px] overflow-hidden shadow-2xl relative" style={{ background: '#6B6B2A', containerType: 'inline-size' }}>
+    <div className="w-[90%] mx-auto aspect-[9/16] rounded-[0px] overflow-hidden relative" style={{ background: '#6B6B2A', containerType: 'inline-size' }}>
       {/* Grid background */}
       <div className="absolute inset-0">
         <div 
@@ -95,11 +95,8 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
         className="absolute z-10"
         style={{ top: '22%', left: '50%', width: 'calc(58% + 40px)', height: 'calc(44% + 75px)', transform: 'translateX(-50%) rotate(-8deg)' }}
       >
-        <div 
-          className="absolute inset-0"
-          style={{ background: 'rgba(0,0,0,0.3)', filter: 'blur(12px)', transform: 'translate(6px, 8px)', borderRadius: '4cqw' }}
-        />
-        <div className="relative w-full h-full overflow-hidden bg-black" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.25)', borderRadius: '4cqw' }}>
+        {/* Image container */}
+        <div className="relative w-full h-full overflow-hidden bg-black" style={{ borderRadius: '4cqw' }}>
           <div className="absolute inset-0 overflow-hidden">
             {isVideo ? (
               <video 

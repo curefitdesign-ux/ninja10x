@@ -42,7 +42,7 @@ const ScrapbookFrame = ({
 
   return (
     <div
-      className="w-[90%] mx-auto aspect-[9/16] rounded-[4px] overflow-hidden shadow-2xl relative flex flex-col"
+      className="w-[90%] mx-auto aspect-[9/16] rounded-[4px] overflow-hidden relative flex flex-col"
       style={{
         containerType: 'inline-size',
         background: '#e8e2d6',

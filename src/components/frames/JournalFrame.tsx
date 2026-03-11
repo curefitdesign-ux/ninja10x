@@ -44,7 +44,7 @@ const JournalFrame = ({
 
   return (
     <div
-      className="w-[90%] mx-auto aspect-[9/16] rounded-[4px] overflow-hidden shadow-2xl relative"
+      className="w-[90%] mx-auto aspect-[9/16] rounded-[4px] overflow-hidden relative"
       style={{ containerType: 'inline-size', background: '#fff' }}
     >
       {/* Background image */}
@@ -77,7 +77,7 @@ const JournalFrame = ({
             height: '4.5cqw',
             background: '#1a1030',
             transform: 'translateX(-50%)',
-            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.3)',
+            
           }}
         />
       ))}
