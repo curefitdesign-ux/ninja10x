@@ -715,22 +715,11 @@ const Reel = () => {
         handleReact('heart');
       }
     } else {
-      // Single tap -> left side = prev, right side = next (Instagram-style)
-      const target = e.currentTarget as HTMLElement;
-      const rect = target.getBoundingClientRect();
-      const clientX = 'touches' in e ? e.touches[0]?.clientX ?? rect.width / 2 : (e as React.MouseEvent).clientX;
-      const tapX = clientX - rect.left;
-      
-      if (tapX < rect.width * 0.35) {
-        // Left 35% - go back
-        prevActivity();
-      } else {
-        // Right 65% - go forward
-        cycleActivity();
-      }
+      // Single tap -> open history gallery for this user (L2 page)
+      setShowHistoryGallery(true);
     }
     setLastTap(now);
-  }, [lastTap, cycleActivity, prevActivity, isOwnStory, viewerCanSeeCommunity, currentActivity, myActivities, navigate]);
+  }, [lastTap, isOwnStory, viewerCanSeeCommunity, currentActivity]);
 
   // Progress navigation removed — now a standalone page via bottom nav
 
