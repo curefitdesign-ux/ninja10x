@@ -1806,8 +1806,8 @@ const Reel = () => {
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
                                 style={{
-                                  width: '88%',
-                                  height: 14,
+                                  width: '78%',
+                                  height: 21,
                                   bottom: 36,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
