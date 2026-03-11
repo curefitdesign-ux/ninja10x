@@ -791,10 +791,6 @@ const Preview = () => {
     switch (overrideFrame || currentFrame) {
       case 'shaky':
         return <ShakyFrame {...frameProps} />;
-      case 'journal':
-        return <JournalFrame {...frameProps} />;
-      case 'vogue':
-        return <VogueFrame {...frameProps} />;
       case 'fitness':
         return <FitnessFrame {...frameProps} />;
       case 'ticket':
