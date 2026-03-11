@@ -1868,6 +1868,9 @@ const Reel = () => {
                               background: isLogActivityCard ? '#0A0A0F' : 'transparent',
                               marginTop: '-10px',
                               zIndex: 3,
+                              ...(isLogActivityCard ? {
+                                border: '1px solid rgba(255,255,255,0.06)',
+                              } : {}),
                             }}
                           >
                         {/* Progress bar removed — timing indicated via avatar ring */}
@@ -1884,7 +1887,7 @@ const Reel = () => {
                               const glowMid = isEvenDay ? 'rgba(167, 100, 255, 0.35)' : 'rgba(249, 115, 22, 0.35)';
                               return (
                                 <div
-                                  className="w-full h-full flex flex-col items-center justify-end pb-[18%] relative"
+                                  className="w-full h-full flex flex-col items-center justify-center relative"
                                 >
                                   {/* Faint radial glow behind content */}
                                   <div
@@ -1905,7 +1908,7 @@ const Reel = () => {
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ delay: 0.05, duration: 0.5 }}
                                     className="z-10 mb-4"
-                                    style={{ width: 160, height: 160, borderRadius: '50%', overflow: 'hidden' }}
+                                    style={{ width: 120, height: 120, borderRadius: '50%', overflow: 'hidden' }}
                                   >
                                     <video
                                       src="/videos/curo-peeking.mp4"
@@ -1938,7 +1941,7 @@ const Reel = () => {
                                   {/* Glowing plus — simple zoom in/out, tapping opens camera/gallery */}
                                   <button
                                     className="relative flex items-center justify-center mb-5 active:scale-95 transition-transform"
-                                    style={{ width: 90, height: 90 }}
+                                    style={{ width: 70, height: 70 }}
                                     onClick={(e) => { e.stopPropagation(); setShowEditSheet(true); }}
                                   >
                                     <motion.div 
