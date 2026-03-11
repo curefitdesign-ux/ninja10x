@@ -547,65 +547,68 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
             <div className="shrink-0 flex items-center justify-center gap-3 px-4 z-50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 12px)', paddingTop: 8 }}>
               {/* Nudge button — shown for other users' profiles */}
               {!isOwnProfile && !current.isPlaceholder && (
-                <button
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    setNudgeBellAnim(true);
-                    setNudgeCount(prev => prev + 1);
-                    try {
-                      const audio = new Audio('/sounds/nudge-bell.mp3');
-                      audio.volume = 0.7;
-                      audio.play().catch(() => {});
-                    } catch {}
-                    if (user && targetUserId) {
-                      await supabase.from('nudges').insert({ from_user_id: user.id, to_user_id: targetUserId });
-                    }
-                  }}
-                  className="relative overflow-hidden active:scale-[0.95] transition-transform"
-                   style={{
-                    height: 52, borderRadius: 26, paddingLeft: 18, paddingRight: 24,
-                    background: 'rgba(255, 255, 255, 0.08)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-                  }}
-                >
-                  <div className="flex items-center gap-3 h-full relative">
-                    <motion.img
-                      src={deskBellImg}
-                      alt="bell"
-                      className="w-9 h-9 object-contain"
-                      style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))', transformOrigin: 'bottom center' }}
-                      animate={nudgeBellAnim ? { rotate: [0, -25, 20, -15, 10, -5, 0], scale: [1, 1.2, 1.15, 1.1, 1.05, 1] } : {}}
-                      transition={{ duration: 0.6, ease: 'easeInOut' }}
-                      onAnimationComplete={() => setNudgeBellAnim(false)}
-                    />
-                    <span className="text-white/80 text-sm font-medium">Nudge to log activity</span>
-                    {nudgeCount > 0 && (
-                      <motion.span
-                        key={nudgeCount}
-                        initial={{ scale: 0, y: 10 }}
-                        animate={{ scale: 1, y: 0 }}
-                        transition={{ type: 'spring', stiffness: 500, damping: 15 }}
-                        className="absolute flex items-center justify-center pointer-events-none"
-                        style={{
-                          top: -14,
-                          left: 6,
-                          zIndex: 10,
-                          fontSize: nudgeCount >= 10 ? 22 : 26,
-                          fontWeight: 900,
-                          fontStyle: 'italic',
-                          color: '#000',
-                          WebkitTextStroke: '2.5px #fff',
-                          paintOrder: 'stroke fill',
-                          textShadow: '0 2px 6px rgba(0,0,0,0.25)',
-                          lineHeight: 1,
-                          fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
-                        }}
-                      >
-                        x{nudgeCount}
-                      </motion.span>
-                    )}
-                  </div>
-                </button>
+                <div className="relative">
+                  {/* Counter sitting on top of button */}
+                  {nudgeCount > 0 && (
+                    <motion.span
+                      key={nudgeCount}
+                      initial={{ scale: 0, y: 10 }}
+                      animate={{ scale: 1, y: 0 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+                      className="absolute pointer-events-none"
+                      style={{
+                        top: -20,
+                        left: 16,
+                        zIndex: 60,
+                        fontSize: nudgeCount >= 10 ? 24 : 28,
+                        fontWeight: 900,
+                        fontStyle: 'italic',
+                        color: '#000',
+                        WebkitTextStroke: '2.5px #fff',
+                        paintOrder: 'stroke fill',
+                        textShadow: '0 2px 6px rgba(0,0,0,0.3)',
+                        lineHeight: 1,
+                        fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
+                      }}
+                    >
+                      x{nudgeCount}
+                    </motion.span>
+                  )}
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      setNudgeBellAnim(true);
+                      setNudgeCount(prev => prev + 1);
+                      try {
+                        const audio = new Audio('/sounds/nudge-bell.mp3');
+                        audio.volume = 0.7;
+                        audio.play().catch(() => {});
+                      } catch {}
+                      if (user && targetUserId) {
+                        await supabase.from('nudges').insert({ from_user_id: user.id, to_user_id: targetUserId });
+                      }
+                    }}
+                    className="active:scale-[0.95] transition-transform"
+                    style={{
+                      height: 52, borderRadius: 26, paddingLeft: 18, paddingRight: 24,
+                      background: 'rgba(255, 255, 255, 0.08)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+                    }}
+                  >
+                    <div className="flex items-center gap-3 h-full">
+                      <motion.img
+                        src={deskBellImg}
+                        alt="bell"
+                        className="w-9 h-9 object-contain"
+                        style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))', transformOrigin: 'bottom center' }}
+                        animate={nudgeBellAnim ? { rotate: [0, -25, 20, -15, 10, -5, 0], scale: [1, 1.2, 1.15, 1.1, 1.05, 1] } : {}}
+                        transition={{ duration: 0.6, ease: 'easeInOut' }}
+                        onAnimationComplete={() => setNudgeBellAnim(false)}
+                      />
+                      <span className="text-white/80 text-sm font-medium">Nudge to log activity</span>
+                    </div>
+                  </button>
+                </div>
               )}
 
               {/* Log activity for own profile */}
