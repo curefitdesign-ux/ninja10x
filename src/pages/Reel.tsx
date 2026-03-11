@@ -1792,7 +1792,7 @@ const Reel = () => {
                       const shouldShowLocked = !isOwnStory && !viewerCanSeeCommunity;
                       const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
                       // Show stacked cards behind for all users with multiple activities (not log-activity)
-                      const showStackedCards = !isLogActivityCard && activities.length > 1;
+                      const showStackedCards = activities.length > 1 || isLogActivityCard;
                       // Get previous activity thumbnails for stacked cards
                       const stackActivities = activities.filter(a => a.id !== activity?.id && !a.id?.startsWith('log-'));
                       const backCardThumb = stackActivities[1]?.originalUrl || stackActivities[1]?.storageUrl || stackActivities[0]?.originalUrl || stackActivities[0]?.storageUrl;
@@ -1829,16 +1829,16 @@ const Reel = () => {
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
                                   borderRadius: '0 0 10px 10px',
-                                  background: 'rgba(255,255,255,0.06)',
+                                  background: 'rgba(255,255,255,0.05)',
                                   border: '1px solid rgba(255,255,255,0.10)',
                                   borderTop: 'none',
-                                  boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
-                                  backdropFilter: 'blur(20px) saturate(1.6)',
-                                  WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+                                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), 0 6px 20px rgba(0,0,0,0.3)',
+                                  backdropFilter: 'blur(24px) saturate(1.8)',
+                                  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
                                   pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
                               >
-                                {backCardThumb && (
+                                {!isLogActivityCard && backCardThumb && (
                                   <img src={backCardThumb} alt="" className="w-full h-full object-cover object-bottom" style={{ borderRadius: '0 0 10px 10px', opacity: 0.4 }} loading="lazy" />
                                 )}
                               </motion.div>
@@ -1861,16 +1861,16 @@ const Reel = () => {
                                   transform: 'translateX(-50%)',
                                   zIndex: 2,
                                   borderRadius: '0 0 10px 10px',
-                                  background: 'rgba(255,255,255,0.08)',
+                                  background: 'rgba(255,255,255,0.07)',
                                   border: '1px solid rgba(255,255,255,0.14)',
                                   borderTop: 'none',
-                                  boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
-                                  backdropFilter: 'blur(24px) saturate(1.8)',
-                                  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+                                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 16px rgba(0,0,0,0.25)',
+                                  backdropFilter: 'blur(28px) saturate(2.0)',
+                                  WebkitBackdropFilter: 'blur(28px) saturate(2.0)',
                                   pointerEvents: isCenter ? 'auto' : 'none',
                                 }}
                               >
-                                {midCardThumb && (
+                                {!isLogActivityCard && midCardThumb && (
                                   <img src={midCardThumb} alt="" className="w-full h-full object-cover object-bottom" style={{ borderRadius: '0 0 10px 10px', opacity: 0.5 }} loading="lazy" />
                                 )}
                               </motion.div>
