@@ -279,7 +279,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const overlay = (
     <AnimatePresence>
       {isOpen && (
-        <motion.div className="fixed inset-0" style={{ zIndex: 60 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+        <motion.div className="fixed inset-0" style={{ zIndex: 60 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}>
         <DynamicBlurBackground imageUrl={mediaUrl}>
           <div className="absolute inset-0 flex flex-col" style={{ overflow: 'hidden' }}>
             {/* TOP HEADER — collapses on scroll */}
