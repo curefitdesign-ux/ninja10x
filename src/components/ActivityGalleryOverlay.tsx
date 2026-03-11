@@ -82,6 +82,19 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [isScrolled, setIsScrolled] = useState(false);
   const [nudgeBellAnim, setNudgeBellAnim] = useState(false);
   const [nudgeCount, setNudgeCount] = useState(0);
+  const [nudgeNumberBehind, setNudgeNumberBehind] = useState(false);
+  const nudgeAudioRef = useRef<HTMLAudioElement | null>(null);
+  const nudgeHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Preload nudge sound for instant playback
+  useEffect(() => {
+    const audio = new Audio('/sounds/nudge-bell.mp3');
+    audio.volume = 0.7;
+    audio.preload = 'auto';
+    audio.load();
+    nudgeAudioRef.current = audio;
+    return () => { nudgeAudioRef.current = null; };
+  }, []);
   const scrollRef = useRef<HTMLDivElement>(null);
   const portalContainer = usePortalContainer();
   const { user } = useAuth();
