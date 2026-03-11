@@ -1750,7 +1750,7 @@ const Reel = () => {
                             <div className="absolute inset-0">
                               <StoryFrameRenderer
                                 frame={activity.frame!}
-                                mediaUrl={peekMedia}
+                                imageUrl={peekMedia}
                                 isVideo={peekIsVideo}
                                 activity={activity.activity || ''}
                                 duration={activity.duration || ''}
