@@ -512,37 +512,39 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       {/* Ninja milestone - above latest card */}
                       {(() => {
                         const remaining = 12 - realActivities.length;
+                        // Gather unique activities for context
+                        const uniqueActivities = [...new Set(realActivities.map(a => a.activity).filter(Boolean))];
+                        const activityList = uniqueActivities.length > 0 
+                          ? uniqueActivities.slice(0, 3).join(', ').toLowerCase()
+                          : 'workouts';
+                        
                         if (remaining > 0) {
-                          const ninjaText = isOwnProfile !== false
-                            ? `${remaining} ${remaining === 1 ? 'activity' : 'activities'} away from becoming Ninja`
-                            : `${userProfile?.displayName || 'They'} — ${remaining} away from Ninja`;
                           return (
-                            <div className="relative" style={{ padding: '8px 16px 4px 48px', marginBottom: 4 }}>
-                              {/* Timeline dot - goal marker */}
+                            <div className="relative" style={{ padding: '8px 16px 12px 48px', marginBottom: 8 }}>
+                              {/* Timeline dot - flag milestone */}
                               <div className="absolute" style={{
-                                left: 20, top: 14, width: 18, height: 18, borderRadius: '50%',
-                                background: 'linear-gradient(135deg, rgba(249,115,22,0.6), rgba(236,72,153,0.6))',
-                                border: '2px solid rgba(255,255,255,0.2)',
-                                boxShadow: '0 0 14px rgba(249,115,22,0.3)',
+                                left: 18, top: 12, width: 22, height: 22, borderRadius: '50%',
+                                background: 'linear-gradient(135deg, rgba(249,115,22,0.5), rgba(236,72,153,0.5))',
+                                border: '2px solid rgba(255,255,255,0.15)',
+                                boxShadow: '0 0 14px rgba(249,115,22,0.25)',
                                 zIndex: 5,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                               }}>
-                                <span style={{ fontSize: 9, lineHeight: 1 }}>🥷</span>
+                                <span style={{ fontSize: 11, lineHeight: 1 }}>🏁</span>
                               </div>
                               <p style={{
                                 fontFamily: "'Caveat', cursive",
-                                fontSize: 22,
+                                fontSize: 21,
                                 fontWeight: 700,
-                                color: 'rgba(255,255,255,0.5)',
+                                color: 'rgba(255,255,255,0.55)',
                                 transform: 'rotate(-1.5deg)',
-                                lineHeight: 1.3,
-                                marginBottom: 2,
+                                lineHeight: 1.35,
                               }}>
-                                {ninjaText}
+                                {remaining} more {activityList} sessions{'\n'}to become a <span style={{ color: 'rgba(249,115,22,0.75)', fontWeight: 800 }}>Cult Ninja</span>
                               </p>
-                              {/* Dashed connector to next card */}
+                              {/* Dashed connector */}
                               <div style={{
-                                position: 'absolute', left: 28, bottom: -8, width: 2, height: 16,
+                                position: 'absolute', left: 28, bottom: -6, width: 2, height: 14,
                                 backgroundImage: 'repeating-linear-gradient(to bottom, rgba(249,115,22,0.3) 0px, rgba(249,115,22,0.3) 3px, transparent 3px, transparent 7px)',
                               }} />
                             </div>
@@ -550,16 +552,16 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         }
                         if (realActivities.length >= 12) {
                           return (
-                            <div className="relative" style={{ padding: '8px 16px 4px 48px', marginBottom: 4 }}>
+                            <div className="relative" style={{ padding: '8px 16px 12px 48px', marginBottom: 8 }}>
                               <div className="absolute" style={{
-                                left: 20, top: 14, width: 18, height: 18, borderRadius: '50%',
+                                left: 18, top: 12, width: 22, height: 22, borderRadius: '50%',
                                 background: 'linear-gradient(135deg, #F97316, #EC4899)',
                                 border: '2px solid rgba(255,255,255,0.3)',
                                 boxShadow: '0 0 16px rgba(249,115,22,0.4)',
                                 zIndex: 5,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                               }}>
-                                <span style={{ fontSize: 9, lineHeight: 1 }}>🥷</span>
+                                <span style={{ fontSize: 11, lineHeight: 1 }}>🏁</span>
                               </div>
                               <p style={{
                                 fontFamily: "'Caveat', cursive",
@@ -569,7 +571,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 transform: 'rotate(-1deg)',
                                 lineHeight: 1.3,
                               }}>
-                                You are a Ninja! 🏆
+                                <span style={{ color: 'rgba(249,115,22,0.85)', fontWeight: 800 }}>Cult Ninja</span> unlocked! 🏆
                               </p>
                             </div>
                           );
@@ -591,44 +593,34 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         realActivities.forEach((act, idx) => {
                           const wk = Math.ceil(act.dayNumber / 3);
 
-                          // Insert "Week X Reel Ready" above the last activity of each completed week
-                          // dayNumber 3 = end of W1, 6 = W2, 9 = W3, 12 = W4
+                          // Insert "Week X Complete" acknowledgement above the last activity of each completed week
                           if (act.dayNumber % 3 === 0) {
-                            const reelWeek = act.dayNumber / 3;
+                            const completedWeek = act.dayNumber / 3;
                             elements.push(
-                              <div key={`week-reel-${reelWeek}`} className="relative" style={{ padding: '20px 16px 20px 48px', margin: '12px 0' }}>
-                                {/* AI Star sparkle on the dotted line */}
-                                <div className="absolute" style={{ left: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 36, height: 36 }}>
-                                  <img src={aiStarSparkle} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 8px rgba(147,130,220,0.5))' }} />
+                              <div key={`week-complete-${completedWeek}`} className="relative" style={{ padding: '14px 16px 14px 48px', margin: '4px 0' }}>
+                                {/* Checkmark dot on timeline */}
+                                <div className="absolute" style={{ left: 22, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 14, height: 14, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(147,130,220,0.6), rgba(120,100,200,0.4))', border: '1.5px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <span style={{ fontSize: 7, lineHeight: 1 }}>✓</span>
                                 </div>
-                                {/* Glassmorphic widget */}
-                                <div className="flex items-center gap-2.5" style={{
-                                  background: 'linear-gradient(135deg, rgba(147,130,220,0.25) 0%, rgba(120,100,200,0.15) 50%, rgba(160,140,210,0.2) 100%)',
-                                  backdropFilter: 'blur(40px) saturate(180%)',
-                                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                                  border: '1px solid rgba(255,255,255,0.12)',
-                                  borderRadius: 9999,
-                                  padding: '10px 20px',
-                                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 20px rgba(0,0,0,0.2)',
+                                <p style={{
+                                  fontFamily: "'Caveat', cursive",
+                                  fontSize: 19,
+                                  fontWeight: 600,
+                                  color: 'rgba(255,255,255,0.4)',
+                                  letterSpacing: '0.02em',
+                                  transform: 'rotate(-0.5deg)',
                                 }}>
-                                  <span style={{
-                                    fontFamily: "'Bebas Neue', 'Inter', sans-serif",
-                                    fontSize: 15,
-                                    fontWeight: 400,
-                                    letterSpacing: '0.08em',
-                                    color: 'rgba(255,255,255,0.85)',
-                                    textTransform: 'uppercase',
-                                  }}>
-                                    Week {reelWeek} Reel Ready
-                                  </span>
-                                </div>
+                                  Week {completedWeek} done ✓
+                                </p>
                               </div>
                             );
                           }
 
-                          // Insert week header when week changes
+                          // Add spacing between weeks
                           if (lastWeek !== null && wk !== lastWeek) {
-                            // week header handled elsewhere if needed
+                            elements.push(
+                              <div key={`week-spacer-${wk}-${lastWeek}`} style={{ height: 20 }} />
+                            );
                           }
                           lastWeek = wk;
 
