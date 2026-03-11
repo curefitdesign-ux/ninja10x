@@ -1253,13 +1253,11 @@ const Preview = () => {
                         style={{ aspectRatio: '9/16', maxHeight: '100%' }}
                       >
                         {frame === 'shaky' && <ShakyFrame {...frameProps} />}
-                        {frame === 'journal' && <JournalFrame {...frameProps} />}
-                        {frame === 'vogue' && <VogueFrame {...frameProps} />}
                         {frame === 'fitness' && <FitnessFrame {...frameProps} />}
                         {frame === 'ticket' && <TicketFrame {...frameProps} />}
                         {frame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
                         {frame === 'holographic' && <HolographicFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
-                        {frame === 'scrapbook' && <ScrapbookFrame {...frameProps} />}
+                        {frame === 'arcade' && <ArcadeFrame {...frameProps} />}
                         {frame === 'arcade' && <ArcadeFrame {...frameProps} />}
                       </div>
                     </motion.div>
