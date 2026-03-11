@@ -25,7 +25,8 @@ const Progress = lazy(() => import("./pages/Progress"));
 const Camera = lazy(() => import("./pages/Camera"));
 const Gallery = lazy(() => import("./pages/Gallery"));
 const Reel = lazy(() => import("./pages/Reel"));
-const ReelGenerationBase = lazy(() => import("./pages/ReelGeneration"));
+// ReelGeneration temporarily disabled
+// const ReelGenerationBase = lazy(() => import("./pages/ReelGeneration"));
 const ProfileSetupPage = lazy(() => import("./pages/ProfileSetupPage"));
 const AvatarCrop = lazy(() => import("./pages/AvatarCrop"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -115,11 +116,11 @@ const ProfileSetupRouteWrapper = ({ children }: { children: React.ReactNode }) =
   return <>{children}</>;
 };
 
-// Force ReelGeneration to fully remount on every navigation (location.key changes per navigate call)
-const ReelGeneration = () => {
-  const location = useLocation();
-  return <ReelGenerationBase key={location.key} />;
-};
+// ReelGeneration temporarily disabled
+// const ReelGeneration = () => {
+//   const location = useLocation();
+//   return <ReelGenerationBase key={location.key} />;
+// };
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -139,7 +140,7 @@ const AnimatedRoutes = () => {
           <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
           
           <Route path="/reel" element={<ProtectedRoute><Reel /></ProtectedRoute>} />
-          <Route path="/reel-generation" element={<ProtectedRoute><ReelGeneration /></ProtectedRoute>} />
+          {/* <Route path="/reel-generation" element={<ProtectedRoute><ReelGeneration /></ProtectedRoute>} /> */}
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

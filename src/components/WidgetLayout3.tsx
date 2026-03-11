@@ -479,21 +479,7 @@ const WidgetLayout3 = ({
         </button>
       </div>
       
-      {/* Reel Progress Pill - Show below widget when a week is complete */}
-      <AnimatePresence>
-        {!!reelPill && (
-          <div className="mt-4 px-2">
-            <ReelProgressPill
-              weekNumber={reelPill.weekNumber}
-              state={reelPill.state}
-              progress={reelPill.progress}
-              totalReactions={reelPill.totalReactions}
-              onPlay={reelPill.onPlay}
-              isActivelyGenerating={reelPill.isActivelyGenerating}
-            />
-          </div>
-        )}
-      </AnimatePresence>
+      {/* Reel Progress Pill - temporarily disabled */}
 
       {/* Media Source Sheet */}
       <MediaSourceSheet

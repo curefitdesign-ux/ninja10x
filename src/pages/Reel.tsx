@@ -287,7 +287,6 @@ const Reel = () => {
       });
 
     // Own user: show today's logged activity OR just the log placeholder (no past activities)
-    // PLUS any published/virtual week recaps
     const allMyActivities = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
     const latestActivity = allMyActivities[0];
     const loggedToday = latestActivity && new Date(latestActivity.createdAt).toDateString() === new Date().toDateString();
@@ -298,19 +297,9 @@ const Reel = () => {
       ownActivities.push(latestActivity);
     }
 
-    // Add published recap entries from userGroups for own user
-    const myGroup$ = userGroups.find(g => g.userId === user.id);
-    if (myGroup$) {
-      const recapsFromDb = myGroup$.activities.filter(a => a.dayNumber >= 1001);
-      for (const recap of recapsFromDb) {
-        if (!ownActivities.some(a => a.id === recap.id)) {
-          ownActivities.push(recap);
-        }
-      }
-    }
-
 
     // Use myActivities count, but fallback to userGroups own activities count if myActivities hasn't loaded yet
+    const myGroup$ = userGroups.find(g => g.userId === user.id);
     const myGroupActivities = myGroup$?.activities.filter(a => a.dayNumber < 1001) || [];
     const effectiveCount = Math.max(allMyActivities.length, myGroupActivities.length);
     
@@ -330,14 +319,8 @@ const Reel = () => {
       } as any);
     }
 
-    // Sort own activities: recaps first (desc by dayNumber), then regular
+    // Sort own activities: log-activity always last
     ownActivities.sort((a: any, b: any) => {
-      const aIsRecap = a.dayNumber >= 1001;
-      const bIsRecap = b.dayNumber >= 1001;
-      if (aIsRecap && !bIsRecap) return -1;
-      if (!aIsRecap && bIsRecap) return 1;
-      if (aIsRecap && bIsRecap) return b.dayNumber - a.dayNumber;
-      // log-activity always last
       if (a.id === 'log-activity') return 1;
       if (b.id === 'log-activity') return -1;
       return b.dayNumber - a.dayNumber;

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, forwardRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
-import { X, Share2, Pencil, ChevronUp, Flag, Check } from 'lucide-react';
+import { X, Share2, Pencil, ChevronUp, Flag, Check, Trophy, Star, Flame, Zap } from 'lucide-react';
 import SendReactionSheet from '@/components/SendReactionSheet';
 import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
@@ -522,58 +522,58 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           const displayName = userProfile?.displayName || 'This user';
                           const firstName = displayName.split(' ')[0];
                           return (
-                            <div className="relative" style={{ padding: '8px 16px 12px 48px', marginBottom: 8 }}>
+                            <div className="relative" style={{ padding: '10px 16px 16px 48px', marginBottom: 10 }}>
                               {/* Timeline dot - flag milestone */}
                               <div className="absolute" style={{
-                                left: 18, top: 12, width: 22, height: 22, borderRadius: '50%',
-                                background: 'linear-gradient(135deg, rgba(249,115,22,0.5), rgba(236,72,153,0.5))',
-                                border: '2px solid rgba(255,255,255,0.15)',
-                                boxShadow: '0 0 14px rgba(249,115,22,0.25)',
+                                left: 16, top: 14, width: 26, height: 26, borderRadius: '50%',
+                                background: 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.08))',
+                                border: '2px solid rgba(255,255,255,0.2)',
+                                boxShadow: '0 0 16px rgba(255,255,255,0.1)',
                                 zIndex: 5,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                               }}>
-                                <Flag size={10} fill="white" color="white" strokeWidth={0} />
+                                <Flag size={12} fill="white" color="white" strokeWidth={0} />
                               </div>
                               <p style={{
                                 fontFamily: "'Caveat', cursive",
-                                fontSize: 21,
+                                fontSize: 24,
                                 fontWeight: 700,
-                                color: 'rgba(255,255,255,0.55)',
+                                color: 'rgba(255,255,255,0.6)',
                                 transform: 'rotate(-1.5deg)',
-                                lineHeight: 1.35,
+                                lineHeight: 1.3,
                               }}>
-                                {isOwnProfile ? 'You are' : `${firstName} is`} just {remaining} {remaining === 1 ? 'session' : 'sessions'} away{'\n'}from becoming <span style={{ color: 'rgba(249,115,22,0.85)', fontWeight: 800 }}>Cult Ninja</span> 🥷
+                                {isOwnProfile ? 'You are' : `${firstName} is`} just {remaining} {remaining === 1 ? 'session' : 'sessions'} away from becoming <span style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 800 }}>Cult Ninja</span> 🥷
                               </p>
                               {/* Dashed connector */}
                               <div style={{
-                                position: 'absolute', left: 28, bottom: -6, width: 2, height: 14,
-                                backgroundImage: 'repeating-linear-gradient(to bottom, rgba(249,115,22,0.3) 0px, rgba(249,115,22,0.3) 3px, transparent 3px, transparent 7px)',
+                                position: 'absolute', left: 28, bottom: -8, width: 2, height: 16,
+                                backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.2) 0px, rgba(255,255,255,0.2) 3px, transparent 3px, transparent 7px)',
                               }} />
                             </div>
                           );
                         }
                         if (realActivities.length >= 12) {
                           return (
-                            <div className="relative" style={{ padding: '8px 16px 12px 48px', marginBottom: 8 }}>
+                            <div className="relative" style={{ padding: '10px 16px 16px 48px', marginBottom: 10 }}>
                               <div className="absolute" style={{
-                                left: 18, top: 12, width: 22, height: 22, borderRadius: '50%',
-                                background: 'linear-gradient(135deg, #F97316, #EC4899)',
+                                left: 16, top: 14, width: 26, height: 26, borderRadius: '50%',
+                                background: 'linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.15))',
                                 border: '2px solid rgba(255,255,255,0.3)',
-                                boxShadow: '0 0 16px rgba(249,115,22,0.4)',
+                                boxShadow: '0 0 18px rgba(255,255,255,0.15)',
                                 zIndex: 5,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                               }}>
-                                <Flag size={10} fill="white" color="white" strokeWidth={0} />
+                                <Trophy size={12} fill="white" color="white" strokeWidth={0} />
                               </div>
                               <p style={{
                                 fontFamily: "'Caveat', cursive",
-                                fontSize: 22,
+                                fontSize: 25,
                                 fontWeight: 700,
-                                color: 'rgba(255,255,255,0.65)',
+                                color: 'rgba(255,255,255,0.7)',
                                 transform: 'rotate(-1deg)',
                                 lineHeight: 1.3,
                               }}>
-                                <span style={{ color: 'rgba(249,115,22,0.85)', fontWeight: 800 }}>Cult Ninja</span> unlocked! 🏆
+                                <span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 800 }}>Cult Ninja</span> unlocked! 🏆
                               </p>
                             </div>
                           );
@@ -598,11 +598,24 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           // Insert "Week X Complete" acknowledgement above the last activity of each completed week
                           if (act.dayNumber % 3 === 0) {
                             const completedWeek = act.dayNumber / 3;
+                            // Varied icons per week milestone
+                            const weekIcons: Record<number, React.ReactNode> = {
+                              1: <Star size={10} fill="white" color="white" strokeWidth={0} />,
+                              2: <Flame size={10} fill="white" color="white" strokeWidth={0} />,
+                              3: <Zap size={10} fill="white" color="white" strokeWidth={0} />,
+                              4: <Trophy size={10} fill="white" color="white" strokeWidth={0} />,
+                            };
+                            const weekCopy: Record<number, string> = {
+                              1: 'Week 1 done ⭐',
+                              2: 'Week 2 crushed 🔥',
+                              3: 'Week 3 smashed ⚡',
+                              4: 'Week 4 conquered 🏆',
+                            };
                             elements.push(
                               <div key={`week-complete-${completedWeek}`} className="relative flex items-center" style={{ padding: '12px 16px 12px 48px', margin: '6px 0' }}>
-                                {/* Milestone flag dot on timeline */}
+                                {/* Milestone icon dot on timeline */}
                                 <div className="absolute" style={{ left: 19, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.12))', border: '1.5px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <Flag size={9} fill="white" color="white" strokeWidth={0} />
+                                  {weekIcons[completedWeek] || <Flag size={9} fill="white" color="white" strokeWidth={0} />}
                                 </div>
                                 {/* Handwritten milestone with underline flourish */}
                                 <div style={{ display: 'inline-flex', flexDirection: 'column', gap: 0 }}>
@@ -615,7 +628,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                     transform: 'rotate(-0.8deg)',
                                     lineHeight: 1.1,
                                   }}>
-                                    Week {completedWeek} crushed 🎯
+                                    {weekCopy[completedWeek] || `Week ${completedWeek} done ✓`}
                                   </p>
                                   {/* Hand-drawn underline */}
                                   <svg width="90" height="6" viewBox="0 0 90 6" fill="none" style={{ marginTop: -1, marginLeft: 2, opacity: 0.25 }}>

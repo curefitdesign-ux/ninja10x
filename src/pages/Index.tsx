@@ -2,14 +2,14 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
-import { hasRecapCached, getRecapFromCache } from '@/hooks/use-recap-cache';
+// import { hasRecapCached, getRecapFromCache } from '@/hooks/use-recap-cache';
 import { toast } from 'sonner';
 import ImmersiveHomeLayout from '@/components/ImmersiveHomeLayout';
 import PullToRefresh from '@/components/PullToRefresh';
 
 import SharedImageTransition from '@/components/SharedImageTransition';
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
-import type { PillState } from '@/components/ReelProgressPill';
+// import type { PillState } from '@/components/ReelProgressPill';
 
 import CameraUI from '@/components/CameraUI';
 
@@ -107,120 +107,17 @@ const Index = () => {
   const [weekTransitionAnimation, setWeekTransitionAnimation] = useState(false);
   const [previousPhotoCount, setPreviousPhotoCount] = useState(photos.length);
   
-  // Navigate to /reel-generation with properly mapped photo data
-  const handleGenerateReel = useCallback((photosToProcess: Photo[], forceRegenerate = true) => {
-    const latest3 = photosToProcess.slice(-3);
-    
-    // Check if all photos have storage URLs
-    const missingStorage = latest3.filter(p => !p.storageUrl);
-    if (missingStorage.length > 0) {
-      toast.error('Some photos are still uploading. Please wait...');
-      return;
-    }
+  // Reel generation temporarily disabled
+  const handleGenerateReel = useCallback((_photosToProcess: Photo[], _forceRegenerate = true) => {
+    // No-op: reel generation disabled
+  }, []);
 
-    if (latest3.length < 3) {
-      toast.error('Need at least 3 photos to generate a reel');
-      return;
-    }
-
-    // Map to the format expected by ReelGeneration page
-    const weekPhotos = latest3.map(photo => ({
-      id: photo.id,
-      imageUrl: photo.originalUrl || photo.storageUrl,
-      activity: photo.activity || 'Workout',
-      duration: photo.duration,
-      pr: photo.pr,
-      uploadDate: new Date().toISOString().split('T')[0],
-      dayNumber: photo.dayNumber,
-      isVideo: photo.isVideo,
-    }));
-
-    const weekNumber = Math.ceil(Math.max(...latest3.map(p => p.dayNumber)) / 3);
-
-    console.log('[Index] Navigating to reel-generation with', weekPhotos.length, 'photos, forceRegenerate:', forceRegenerate);
-    navigate('/reel-generation', {
-      state: {
-        weekPhotos,
-        weekNumber,
-        forceRegenerate, // Always bust cache so user's actual uploaded photos are used
-      },
-    });
-  }, [navigate]);
-
-  // Track cached recap state for all completed weeks
-  const [cachedWeeks, setCachedWeeks] = useState<Set<number>>(new Set());
-  const cacheCheckRef = useRef(false);
-
-  // Check cache for ALL completed weeks
-  useEffect(() => {
-    const completedWeeks = Math.floor(photos.length / 3);
-    if (completedWeeks <= 0 || cacheCheckRef.current) return;
-    cacheCheckRef.current = true;
-    
-    const checkAll = async () => {
-      const cached = new Set<number>();
-      for (let w = 1; w <= completedWeeks; w++) {
-        const isCached = await hasRecapCached(w, userId || undefined);
-        if (isCached) cached.add(w);
-      }
-      setCachedWeeks(cached);
-    };
-    checkAll();
-  }, [photos.length, userId]);
-
-  // Play cached recap directly
-  const playCachedRecap = useCallback(async (weekNumber: number) => {
-    const blob = await getRecapFromCache(weekNumber, userId || undefined);
-    if (blob) {
-      const url = URL.createObjectURL(blob);
-      navigate('/reel', {
-        state: { weekRecapVideo: url, weekNumber },
-      });
-    } else {
-      // Cache miss - fall back to generation
-      const weekStart = (weekNumber - 1) * 3;
-      const weekPhotos = photos.slice(weekStart, weekStart + 3);
-      if (weekPhotos.length === 3) {
-        handleGenerateReel(weekPhotos);
-      }
-    }
-  }, [navigate, handleGenerateReel, photos, userId]);
-
-  // Handler: week-specific reel tap from ImmersiveHomeLayout
-  const handleWeekReelTap = useCallback((weekNumber: number) => {
-    const isCached = cachedWeeks.has(weekNumber);
-    if (isCached) {
-      console.log('[WeekReelTap] Playing cached recap for week', weekNumber);
-      playCachedRecap(weekNumber);
-    } else {
-      console.log('[WeekReelTap] Generating recap for week', weekNumber);
-      const weekStart = (weekNumber - 1) * 3;
-      const weekPhotos = photos.slice(weekStart, weekStart + 3);
-      if (weekPhotos.length === 3) {
-        handleGenerateReel(weekPhotos);
-      }
-    }
-  }, [cachedWeeks, playCachedRecap, photos, handleGenerateReel]);
-
-  // Reel pill for WidgetLayout3 — show latest completed week with correct CTA
-  const reelPill = (() => {
-    const completedWeeks = Math.floor(photos.length / 3);
-    if (completedWeeks <= 0) return null;
-
-    const targetWeek = completedWeeks;
-    const isCached = cachedWeeks.has(targetWeek);
-    const state: PillState = isCached ? 'complete' : 'idle';
-
-    return {
-      weekNumber: targetWeek,
-      state,
-      progress: 0,
-      totalReactions: 0,
-      onPlay: () => handleWeekReelTap(targetWeek),
-      isActivelyGenerating: false,
-    };
-  })();
-
+  // Reel cache/pill temporarily disabled
+  const cachedWeeks = new Set<number>();
+  const handleWeekReelTap = useCallback((_weekNumber: number) => {
+    // No-op: reel generation disabled
+  }, []);
+  const reelPill = null;
   // Handle retake from preview
   const [instantCamera, setInstantCamera] = useState(() => {
     return !!(location.state?.openCameraWithActivity && location.state?.instantCamera);
@@ -247,19 +144,14 @@ const Index = () => {
     }
   }, [location.state?.openCameraWithActivity, location.state?.captureMode, location.state?.instantCamera, navigate]);
 
-  // Detect week completion and auto-trigger recap generation
+  // Week completion detection (reel auto-trigger disabled)
   useEffect(() => {
     if (photos.length > previousPhotoCount && photos.length % 3 === 0 && photos.length > 0) {
       setWeekTransitionAnimation(true);
       setTimeout(() => setWeekTransitionAnimation(false), 2000);
-      
-      // Auto-trigger recap generation after brief celebration
-      setTimeout(() => {
-        handleGenerateReel(photos);
-      }, 2200);
     }
     setPreviousPhotoCount(photos.length);
-  }, [photos.length, previousPhotoCount, handleGenerateReel, photos]);
+  }, [photos.length, previousPhotoCount]);
 
   // Get current date (or simulated date for testing)
   const getCurrentDate = () => {

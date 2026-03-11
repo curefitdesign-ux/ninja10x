@@ -149,57 +149,7 @@ const Progress = () => {
         </div>
       )}
 
-      {/* Week-complete snackbar */}
-      <AnimatePresence>
-        {showWeekSnackbar && (
-          <motion.div
-            key="week-snackbar"
-            className="absolute left-0 right-0 z-[60] flex justify-center"
-            style={{ bottom: 'calc(env(safe-area-inset-bottom, 12px) + 104px)' }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ type: 'spring', stiffness: 180, damping: 20 }}
-          >
-            <button
-              onClick={() => {
-                setShowWeekSnackbar(false);
-                navigate('/reel-generation', { state: { week: completedWeekNum } });
-              }}
-              className="relative flex items-center active:scale-[0.97] transition-transform"
-              style={{ height: 52 }}
-            >
-              {/* Background pill */}
-              <img
-                src={snackbarBg}
-                alt=""
-                className="absolute inset-0 w-full h-full"
-                style={{ objectFit: 'fill' }}
-              />
-              {/* Crystal — overlapping left edge */}
-              <img
-                src={snackbarCrystal}
-                alt=""
-                className="relative z-10 flex-shrink-0"
-                style={{ width: 64, height: 64, marginLeft: -6, marginRight: 4, marginTop: -8, objectFit: 'contain' }}
-              />
-              {/* Text */}
-              <span
-                className="relative z-10 font-semibold tracking-tight whitespace-nowrap"
-                style={{ fontSize: 13, color: '#ffffff', marginRight: 6, marginLeft: -10 }}
-              >
-                Week {completedWeekNum} reel is ready, Click here to view
-              </span>
-              {/* Chevron */}
-              <ChevronRight
-                className="relative z-10 flex-shrink-0"
-                style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.6)', marginRight: 12 }}
-                strokeWidth={2}
-              />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Week-complete snackbar - reel generation temporarily disabled */}
 
       <AnimatePresence>
         {showTransitionIn && transitionImage && (
