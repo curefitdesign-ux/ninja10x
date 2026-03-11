@@ -550,18 +550,15 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 <button
                   onClick={async (e) => {
                     e.stopPropagation();
-                    // Play nudge bell sound + animate
                     setNudgeBellAnim(true);
+                    setNudgeCount(prev => prev + 1);
                     try {
                       const audio = new Audio('/sounds/nudge-bell.mp3');
                       audio.volume = 0.7;
                       audio.play().catch(() => {});
                     } catch {}
                     if (user && targetUserId) {
-                      const { error } = await supabase.from('nudges').insert({ from_user_id: user.id, to_user_id: targetUserId });
-                      const name = userProfile?.displayName?.split(' ')[0] || 'them';
-                      if (!error) toast.success(`🔔 Nudge sent to ${name}!`, { description: `Keep pushing, ${name} will love the motivation!`, position: 'top-center', duration: 3000, style: { zIndex: 99999, marginTop: '60px' } });
-                      else toast.error('Could not send nudge');
+                      await supabase.from('nudges').insert({ from_user_id: user.id, to_user_id: targetUserId });
                     }
                   }}
                   className="relative overflow-hidden active:scale-[0.95] transition-transform"
@@ -571,7 +568,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     border: '1px solid rgba(255, 255, 255, 0.12)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
                   }}
                 >
-                  <div className="flex items-center gap-3 h-full">
+                  <div className="flex items-center gap-3 h-full relative">
                     <motion.img
                       src={deskBellImg}
                       alt="bell"
@@ -582,6 +579,21 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       onAnimationComplete={() => setNudgeBellAnim(false)}
                     />
                     <span className="text-white/80 text-sm font-medium">Nudge to log activity</span>
+                    {nudgeCount > 0 && (
+                      <motion.span
+                        key={nudgeCount}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="absolute -top-2 -right-2 min-w-[22px] h-[22px] rounded-full flex items-center justify-center text-xs font-bold px-1"
+                        style={{
+                          background: 'linear-gradient(135deg, hsl(var(--accent-gradient-start)), hsl(var(--accent-gradient-end, 330 81% 60%)))',
+                          color: '#fff',
+                          boxShadow: '0 2px 8px rgba(249, 115, 22, 0.4)',
+                        }}
+                      >
+                        {nudgeCount}x
+                      </motion.span>
+                    )}
                   </div>
                 </button>
               )}
