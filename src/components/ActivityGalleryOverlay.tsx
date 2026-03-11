@@ -417,50 +417,58 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 <div className="absolute pointer-events-none" style={{ left: 28, top: 0, width: 2, height: '100%', background: 'transparent', backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.18) 0px, rgba(255,255,255,0.18) 4px, transparent 4px, transparent 10px)', borderRadius: 1 }} />
 
                 {(() => {
-                  const sortedActivities = [...activities].filter(a => !a.isPlaceholder);
-                  const reversedActivities = [...sortedActivities].reverse();
-                  const remainingDays = 12 - sortedActivities.length;
+                  const realActivities = [...activities].filter(a => !a.isPlaceholder);
+                  // Activities already come sorted newest-first from parent — do NOT reverse
+                  const remainingDays = 12 - realActivities.length;
                   const getCardStyle = (index: number, dayNumber: number) => {
                     const seed = dayNumber * 7 + index * 13;
                     return { rotation: ((seed % 11) - 5) * 1.2, offsetX: ((seed * 3) % 7) - 2 };
                   };
-                  // Most recent activity (highest day_number)
-                  const mostRecentActivity = sortedActivities.length > 0 ? sortedActivities[sortedActivities.length - 1] : null;
+                  // Most recent activity = highest day_number
+                  const mostRecentActivity = realActivities.length > 0
+                    ? realActivities.reduce((best, a) => a.dayNumber > best.dayNumber ? a : best, realActivities[0])
+                    : null;
                   const isWithin24h = (act: GalleryActivity) => {
                     if (!act || !mostRecentActivity || act.id !== mostRecentActivity.id) return false;
-                    if (!act.createdAt) return true; // fallback: show if no timestamp
+                    if (!act.createdAt) return true;
                     const created = new Date(act.createdAt).getTime();
                     return Date.now() - created < 24 * 60 * 60 * 1000;
                   };
+
+                  // Hand-drawn doodle texts — randomly assigned per card
+                  const doodleTexts = [
+                    'felt good ✨', 'today was amazing 🔥', "let's go! 💪", 'will stay active 🏃',
+                    'crushed it! 💥', 'no excuses 🎯', 'beast mode 🐾', 'one more rep! 🏋️',
+                    'feeling alive ⚡', 'sweat & smile 😊', 'keep going! 🚀', 'earned it 🏆',
+                  ];
 
                   return (
                     <>
                       {/* End goal — certificate */}
                       <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
-                        <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: sortedActivities.length >= 12 ? 'linear-gradient(135deg, #F59E0B, #EF4444)' : 'rgba(255,255,255,0.08)', border: `2px solid ${sortedActivities.length >= 12 ? 'rgba(245,158,11,0.4)' : 'rgba(255,255,255,0.1)'}` }} />
-                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: sortedActivities.length >= 12 ? 'rgba(245,158,11,0.7)' : 'rgba(255,255,255,0.2)', transform: 'rotate(1deg)' }}>
-                          {sortedActivities.length >= 12 ? '🏆 journey complete! you did it!' : `🏆 ${remainingDays} ${remainingDays === 1 ? 'day' : 'days'} to go... keep pushing!`}
+                        <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: realActivities.length >= 12 ? 'linear-gradient(135deg, #F59E0B, #EF4444)' : 'rgba(255,255,255,0.08)', border: `2px solid ${realActivities.length >= 12 ? 'rgba(245,158,11,0.4)' : 'rgba(255,255,255,0.1)'}` }} />
+                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: realActivities.length >= 12 ? 'rgba(245,158,11,0.7)' : 'rgba(255,255,255,0.2)', transform: 'rotate(1deg)' }}>
+                          {realActivities.length >= 12 ? '🏆 journey complete! you did it!' : `🏆 ${remainingDays} ${remainingDays === 1 ? 'day' : 'days'} to go... keep pushing!`}
                         </p>
                       </div>
 
-                      {/* Activities: recent → oldest */}
-                      {reversedActivities.map((act, idx) => {
+                      {/* Activities: latest → oldest (already sorted) */}
+                      {realActivities.map((act, idx) => {
                     const { rotation, offsetX } = getCardStyle(idx, act.dayNumber);
                     const wk = Math.ceil(act.dayNumber / 3);
                     const dw = ((act.dayNumber - 1) % 3) + 1;
                     const isAtTop = topCardId === act.id;
-                    // When at top of scroll, use a random-ish tilt based on dayNumber
-                    const topTiltSeed = (act.dayNumber * 17 + idx * 7) % 13;
-                    const topTilt = ((topTiltSeed - 6) * 1.5);
-                    const activeRotation = isAtTop ? topTilt : rotation;
+                    // No tilt change on scroll — cards stay static
                     const canEdit = isOwnProfile && isWithin24h(act);
+                    const doodleText = doodleTexts[(act.dayNumber * 3 + idx * 7) % doodleTexts.length];
+                    const doodleOnRight = idx % 2 !== 0; // alternate sides
 
                     return (
                       <div
                         key={act.id}
                         ref={(el) => { cardRefs.current[act.id] = el; }}
                         className="relative"
-                        style={{ padding: '12px 16px 12px 48px', marginBottom: idx < reversedActivities.length - 1 ? 16 : 0 }}
+                        style={{ padding: '12px 16px 12px 48px', marginBottom: idx < realActivities.length - 1 ? 16 : 0 }}
                       >
                         {/* Timeline dot */}
                         <div className="absolute rounded-full" style={{
@@ -476,7 +484,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           fontFamily: "'Caveat', cursive", fontSize: 18,
                           color: isAtTop ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.45)',
                           marginBottom: 6,
-                          transform: `rotate(${activeRotation * 0.3}deg)`,
+                          transform: `rotate(${rotation * 0.3}deg)`,
                           marginLeft: offsetX,
                           transition: 'color 0.3s ease',
                           fontWeight: isAtTop ? 700 : 400,
@@ -484,14 +492,13 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           W{wk} · Activity {dw}
                         </p>
 
-                        {/* Card — not tappable */}
+                        {/* Card — not tappable, no movement on scroll */}
                         <div
                           className="relative overflow-visible"
                           style={{
                             width: '62%', aspectRatio: '9/16', borderRadius: 4,
-                            transform: `rotate(${activeRotation}deg) translateX(${offsetX}px)`,
+                            transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
                             marginLeft: idx % 2 === 0 ? '0%' : '10%',
-                            transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
                           }}
                         >
                           <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4, containerType: 'inline-size' }}>
@@ -510,7 +517,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               bottom: -12, right: -8, background: 'rgba(255,255,255,0.1)',
                               backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
                               border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
-                              transform: `rotate(${-activeRotation * 0.5}deg)`,
+                              transform: `rotate(${-rotation * 0.5}deg)`,
                             }}>
                               <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
                             </div>
@@ -523,7 +530,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             return (
                               <div className="absolute flex items-center gap-1" style={{
                                 bottom: -10, left: -6, zIndex: 30,
-                                transform: `rotate(${-activeRotation * 0.6}deg)`,
+                                transform: `rotate(${-rotation * 0.6}deg)`,
                               }}>
                                 {total > 0 && (
                                   <span style={{
@@ -552,7 +559,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             );
                           })()}
 
-                          {/* Edit button — only on most recent, own profile */}
+                          {/* Edit button — only on most recent, own profile, within 24h */}
                           {canEdit && (
                             <button
                               className="absolute flex items-center gap-1 active:scale-90 transition-transform"
@@ -561,7 +568,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)',
                                 borderRadius: 14, padding: '4px 10px',
                                 border: '1px solid rgba(255,255,255,0.15)',
-                                transform: `rotate(${-activeRotation * 0.5}deg)`,
+                                transform: `rotate(${-rotation * 0.5}deg)`,
                               }}
                               onClick={(e) => { e.stopPropagation(); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowEditSheet(true); }}
                             >
@@ -570,6 +577,19 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             </button>
                           )}
                         </div>
+
+                        {/* Hand-drawn doodle text */}
+                        <p className="pointer-events-none" style={{
+                          fontFamily: "'Caveat', cursive",
+                          fontSize: 14,
+                          color: 'rgba(255,255,255,0.18)',
+                          marginTop: 18,
+                          marginLeft: doodleOnRight ? '45%' : '5%',
+                          transform: `rotate(${((act.dayNumber * 5 + idx * 11) % 9) - 4}deg)`,
+                          letterSpacing: '0.03em',
+                        }}>
+                          {doodleText}
+                        </p>
                       </div>
                     );
                   })}
