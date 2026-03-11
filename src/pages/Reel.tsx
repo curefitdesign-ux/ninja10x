@@ -1807,8 +1807,8 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   width: '78%',
-                                  height: 12,
-                                  bottom: -6,
+                                  height: 18,
+                                  bottom: -18,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
@@ -1829,8 +1829,8 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   width: '84%',
-                                  height: 12,
-                                  bottom: 0,
+                                  height: 18,
+                                  bottom: -10,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 2,
@@ -1850,7 +1850,7 @@ const Reel = () => {
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer flex items-center gap-1"
                                 style={{
-                                  bottom: -28,
+                                  bottom: -46,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
