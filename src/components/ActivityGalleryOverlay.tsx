@@ -82,6 +82,19 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [isScrolled, setIsScrolled] = useState(false);
   const [nudgeBellAnim, setNudgeBellAnim] = useState(false);
   const [nudgeCount, setNudgeCount] = useState(0);
+  const [nudgeNumberBehind, setNudgeNumberBehind] = useState(false);
+  const nudgeAudioRef = useRef<HTMLAudioElement | null>(null);
+  const nudgeHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Preload nudge sound for instant playback
+  useEffect(() => {
+    const audio = new Audio('/sounds/nudge-bell.mp3');
+    audio.volume = 0.7;
+    audio.preload = 'auto';
+    audio.load();
+    nudgeAudioRef.current = audio;
+    return () => { nudgeAudioRef.current = null; };
+  }, []);
   const scrollRef = useRef<HTMLDivElement>(null);
   const portalContainer = usePortalContainer();
   const { user } = useAuth();
@@ -553,22 +566,22 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     <motion.span
                       key={nudgeCount}
                       initial={{ scale: 0, y: 10 }}
-                      animate={{ scale: 1, y: 0 }}
+                      animate={{ scale: 1, y: 0, zIndex: nudgeNumberBehind ? 0 : 60 }}
                       transition={{ type: 'spring', stiffness: 500, damping: 15 }}
                       className="absolute pointer-events-none"
                       style={{
                         top: -20,
                         left: 16,
-                        zIndex: 60,
-                        fontSize: nudgeCount >= 10 ? 24 : 28,
+                        zIndex: nudgeNumberBehind ? 0 : 60,
+                        fontSize: nudgeCount >= 10 ? 26 : 30,
                         fontWeight: 900,
                         fontStyle: 'italic',
                         color: '#000',
-                        WebkitTextStroke: '2.5px #fff',
+                        WebkitTextStroke: '3.5px #fff',
                         paintOrder: 'stroke fill',
                         textShadow: '0 2px 6px rgba(0,0,0,0.3)',
                         lineHeight: 1,
-                        fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
+                        fontFamily: "'Lalezar', sans-serif",
                       }}
                     >
                       x{nudgeCount}
@@ -578,12 +591,18 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     onClick={async (e) => {
                       e.stopPropagation();
                       setNudgeBellAnim(true);
+                      setNudgeNumberBehind(false);
                       setNudgeCount(prev => prev + 1);
+                      // Play preloaded audio instantly
                       try {
-                        const audio = new Audio('/sounds/nudge-bell.mp3');
-                        audio.volume = 0.7;
-                        audio.play().catch(() => {});
+                        if (nudgeAudioRef.current) {
+                          nudgeAudioRef.current.currentTime = 0;
+                          nudgeAudioRef.current.play().catch(() => {});
+                        }
                       } catch {}
+                      // Hide number behind button after 0.75s
+                      if (nudgeHideTimerRef.current) clearTimeout(nudgeHideTimerRef.current);
+                      nudgeHideTimerRef.current = setTimeout(() => setNudgeNumberBehind(true), 750);
                       if (user && targetUserId) {
                         await supabase.from('nudges').insert({ from_user_id: user.id, to_user_id: targetUserId });
                       }
