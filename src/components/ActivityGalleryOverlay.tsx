@@ -650,6 +650,10 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         </p>
                       </div>
                     </>
+                  );
+                })()}
+              </div>
+            </div>
 
             {/* Bottom action row */}
             <div className="shrink-0 flex items-center justify-center gap-3 px-4 z-50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 12px)', paddingTop: 8 }}>
