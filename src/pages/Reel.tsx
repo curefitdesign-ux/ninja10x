@@ -1728,42 +1728,7 @@ const Reel = () => {
                       key={`card-${group.userId}`}
                       className="pl-3 flex items-center justify-center h-full basis-[85%]"
                     >
-                      <div
-                        className="flex items-center justify-center w-full h-full pointer-events-none"
-                        style={cardStyle}
-                      >
-                        <div
-                          className="overflow-hidden w-full h-full"
-                          style={{
-                            aspectRatio: '9/16',
-                            maxHeight: 'calc(95% - 20px)',
-                            filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                          }}
-                        >
-                          {hasFrame && activity ? (
-                            <StoryFrameRenderer
-                              imageUrl={media}
-                              isVideo={activity.isVideo}
-                              activity={activity.activity}
-                              frame={activity.frame}
-                              duration={activity.duration}
-                              pr={activity.pr}
-                              dayNumber={activity.dayNumber}
-                            />
-                          ) : media ? (
-                            <img
-                              src={media}
-                              alt="User story"
-                              className="w-full h-full object-cover"
-                              loading="eager"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)' }}>
-                              <ProfileAvatar src={group.avatarUrl} name={group.displayName} size={80} />
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                      <div className="w-full h-full" />
                     </CarouselItem>
                   );
                 }
