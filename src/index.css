@@ -99,7 +99,7 @@ body::after {
 @layer base {
   :root {
     /* Deep Blue-Violet Aurora Theme */
-    --background: 248 60% 7%;
+    --background: 215 60% 10%;
     --foreground: 0 0% 100%;
 
     --card: 252 50% 10%;
