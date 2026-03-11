@@ -566,22 +566,22 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     <motion.span
                       key={nudgeCount}
                       initial={{ scale: 0, y: 10 }}
-                      animate={{ scale: 1, y: 0 }}
+                      animate={{ scale: 1, y: 0, zIndex: nudgeNumberBehind ? 0 : 60 }}
                       transition={{ type: 'spring', stiffness: 500, damping: 15 }}
                       className="absolute pointer-events-none"
                       style={{
                         top: -20,
                         left: 16,
-                        zIndex: 60,
-                        fontSize: nudgeCount >= 10 ? 24 : 28,
+                        zIndex: nudgeNumberBehind ? 0 : 60,
+                        fontSize: nudgeCount >= 10 ? 26 : 30,
                         fontWeight: 900,
                         fontStyle: 'italic',
                         color: '#000',
-                        WebkitTextStroke: '2.5px #fff',
+                        WebkitTextStroke: '3.5px #fff',
                         paintOrder: 'stroke fill',
                         textShadow: '0 2px 6px rgba(0,0,0,0.3)',
                         lineHeight: 1,
-                        fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
+                        fontFamily: "'Lalezar', sans-serif",
                       }}
                     >
                       x{nudgeCount}
