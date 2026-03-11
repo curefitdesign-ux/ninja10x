@@ -435,36 +435,70 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     return Date.now() - created < 24 * 60 * 60 * 1000;
                   };
 
-                  // Hand-drawn doodle texts — randomly assigned per card
+                  // Hand-drawn doodle texts — no emojis, journal style
                   const doodleTexts = [
-                    'felt good ✨', 'today was amazing 🔥', "let's go! 💪", 'will stay active 🏃',
-                    'crushed it! 💥', 'no excuses 🎯', 'beast mode 🐾', 'one more rep! 🏋️',
-                    'feeling alive ⚡', 'sweat & smile 😊', 'keep going! 🚀', 'earned it 🏆',
+                    'felt good', 'today was amazing', "let's go!", 'will stay active',
+                    'crushed it', 'no excuses', 'beast mode on', 'one more rep',
+                    'feeling alive', 'sweat & smile', 'keep going', 'earned it',
+                    'strong day', 'pure focus', 'grind time', 'new personal best',
+                    'body in motion', 'discipline > motivation', 'did the work',
                   ];
+
+                  // SVG doodle drawings (stars, arrows, squiggles, hearts, lightning, circles)
+                  const doodleSVGs = [
+                    // star
+                    <svg key="star" width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3l3.5 7 7.5 1.5-5.5 5 1.5 7.5L14 20l-7 4 1.5-7.5L3 11.5l7.5-1.5z"/></svg>,
+                    // arrow curving right
+                    <svg key="arrow" width="32" height="20" viewBox="0 0 32 20" fill="none" stroke="rgba(255,255,255,0.13)" strokeWidth="1.5" strokeLinecap="round"><path d="M2 16c6-12 18-12 24-2"/><path d="M22 8l4 6 6-3"/></svg>,
+                    // squiggle
+                    <svg key="squig" width="40" height="14" viewBox="0 0 40 14" fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="1.5" strokeLinecap="round"><path d="M2 7c4-6 8 6 12 0s8 6 12 0 8 6 12 0"/></svg>,
+                    // heart
+                    <svg key="heart" width="22" height="20" viewBox="0 0 22 20" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 18S2 12 2 7a4.5 4.5 0 019 0 4.5 4.5 0 019 0c0 5-9 11-9 11z"/></svg>,
+                    // lightning bolt
+                    <svg key="bolt" width="18" height="28" viewBox="0 0 18 28" fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10 2L3 15h6l-2 11 9-14h-6z"/></svg>,
+                    // circle doodle
+                    <svg key="circ" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" strokeLinecap="round"><ellipse cx="12" cy="12" rx="10" ry="9" transform="rotate(-5 12 12)"/></svg>,
+                    // checkmark
+                    <svg key="check" width="22" height="18" viewBox="0 0 22 18" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 10l6 6L20 2"/></svg>,
+                    // flame
+                    <svg key="flame" width="20" height="26" viewBox="0 0 20 26" fill="none" stroke="rgba(255,255,255,0.13)" strokeWidth="1.5" strokeLinecap="round"><path d="M10 2c0 6-7 8-7 15a7 7 0 0014 0c0-7-7-9-7-15z"/><path d="M10 26c-2 0-3-2-3-4s3-5 3-5 3 3 3 5-1 4-3 4z"/></svg>,
+                    // cross/x
+                    <svg key="x" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.8" strokeLinecap="round"><path d="M3 3l12 12M15 3L3 15"/></svg>,
+                    // underline scribble
+                    <svg key="underline" width="48" height="10" viewBox="0 0 48 10" fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="1.5" strokeLinecap="round"><path d="M2 7c8-4 14 2 22-1s12 2 22-1"/></svg>,
+                  ];
+
+                  // Pick doodle elements for each card
+                  const getDoodleElements = (dayNum: number, index: number) => {
+                    const seed = dayNum * 13 + index * 7;
+                    const textIdx1 = seed % doodleTexts.length;
+                    const textIdx2 = (seed * 3 + 5) % doodleTexts.length;
+                    const svgIdx1 = seed % doodleSVGs.length;
+                    const svgIdx2 = (seed + 4) % doodleSVGs.length;
+                    return { text1: doodleTexts[textIdx1], text2: doodleTexts[textIdx2], svg1: svgIdx1, svg2: svgIdx2 };
+                  };
 
                   return (
                     <>
-                      {/* End goal — certificate */}
+                      {/* End goal */}
                       <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
                         <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: realActivities.length >= 12 ? 'linear-gradient(135deg, #F59E0B, #EF4444)' : 'rgba(255,255,255,0.08)', border: `2px solid ${realActivities.length >= 12 ? 'rgba(245,158,11,0.4)' : 'rgba(255,255,255,0.1)'}` }} />
                         <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: realActivities.length >= 12 ? 'rgba(245,158,11,0.7)' : 'rgba(255,255,255,0.2)', transform: 'rotate(1deg)' }}>
-                          {realActivities.length >= 12 ? '🏆 journey complete! you did it!' : `🏆 ${remainingDays} ${remainingDays === 1 ? 'day' : 'days'} to go... keep pushing!`}
+                          {realActivities.length >= 12 ? 'journey complete! you did it!' : `${remainingDays} ${remainingDays === 1 ? 'day' : 'days'} to go... keep pushing!`}
                         </p>
                       </div>
 
-                      {/* Activities: latest → oldest (already sorted) */}
+                      {/* Activities */}
                       {realActivities.map((act, idx) => {
                     const { rotation, offsetX } = getCardStyle(idx, act.dayNumber);
                     const wk = Math.ceil(act.dayNumber / 3);
                     const dw = ((act.dayNumber - 1) % 3) + 1;
                     const isAtTop = topCardId === act.id;
-                    // Dynamic tilt when card reaches top of scroll
                     const topTiltSeed = (act.dayNumber * 17 + idx * 7) % 13;
                     const topTilt = ((topTiltSeed - 6) * 1.5);
                     const activeRotation = isAtTop ? topTilt : rotation;
                     const canEdit = isOwnProfile && isWithin24h(act);
-                    const doodleText = doodleTexts[(act.dayNumber * 3 + idx * 7) % doodleTexts.length];
-                    const doodleOnRight = idx % 2 !== 0; // alternate sides
+                    const doodles = getDoodleElements(act.dayNumber, idx);
 
                     return (
                       <div
@@ -482,7 +516,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           transition: 'all 0.3s ease',
                         }} />
 
-                        {/* Handwritten date — highlighted when at top */}
+                        {/* Handwritten date */}
                         <p style={{
                           fontFamily: "'Caveat', cursive", fontSize: 18,
                           color: isAtTop ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.45)',
@@ -495,7 +529,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           W{wk} · Activity {dw}
                         </p>
 
-                        {/* Card — tilts when at top of scroll */}
+                        {/* Card */}
                         <div
                           className="relative overflow-visible"
                           style={{
@@ -517,7 +551,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                           {/* Activity name tag */}
                           {act.activity && (
-                             <div className="absolute pointer-events-none" style={{
+                            <div className="absolute pointer-events-none" style={{
                               bottom: -12, right: -8, background: 'rgba(255,255,255,0.1)',
                               backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
                               border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
@@ -527,34 +561,20 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             </div>
                           )}
 
-                          {/* Reaction count + react button */}
+                          {/* Reactions */}
                           {(() => {
                             const ar = localReactions[act.id];
                             const total = ar?.total || 0;
                             return (
-                              <div className="absolute flex items-center gap-1" style={{
-                                bottom: -10, left: -6, zIndex: 30,
-                                transform: `rotate(${-activeRotation * 0.6}deg)`,
-                              }}>
+                              <div className="absolute flex items-center gap-1" style={{ bottom: -10, left: -6, zIndex: 30, transform: `rotate(${-activeRotation * 0.6}deg)` }}>
                                 {total > 0 && (
-                                  <span style={{
-                                    fontFamily: "'Caveat', cursive", fontSize: 16,
-                                    color: 'rgba(255,255,255,0.55)',
-                                    textShadow: '0 1px 4px rgba(0,0,0,0.5)',
-                                  }}>
+                                  <span style={{ fontFamily: "'Caveat', cursive", fontSize: 16, color: 'rgba(255,255,255,0.55)', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
                                     {total} ❤️
                                   </span>
                                 )}
                                 {!isOwnProfile && (
-                                  <button
-                                    className="flex items-center gap-0.5 active:scale-90 transition-transform"
-                                    style={{
-                                      background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
-                                      borderRadius: 14, padding: '3px 8px',
-                                      border: '1px solid rgba(255,255,255,0.12)',
-                                    }}
-                                    onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}
-                                  >
+                                  <button className="flex items-center gap-0.5 active:scale-90 transition-transform" style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)', borderRadius: 14, padding: '3px 8px', border: '1px solid rgba(255,255,255,0.12)' }}
+                                    onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}>
                                     <span style={{ fontSize: 12 }}>🔥</span>
                                     <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>React</span>
                                   </button>
@@ -563,49 +583,73 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             );
                           })()}
 
-                          {/* Edit button — only on most recent, own profile, within 24h */}
+                          {/* Edit button — top right */}
                           {canEdit && (
-                            <button
-                              className="absolute flex items-center gap-1 active:scale-90 transition-transform"
-                              style={{
-                                top: -10, right: -6, zIndex: 30,
-                                background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)',
-                                borderRadius: 14, padding: '4px 10px',
-                                border: '1px solid rgba(255,255,255,0.15)',
-                                transform: `rotate(${-activeRotation * 0.5}deg)`,
-                              }}
-                              onClick={(e) => { e.stopPropagation(); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowEditSheet(true); }}
-                            >
+                            <button className="absolute flex items-center gap-1 active:scale-90 transition-transform"
+                              style={{ top: -10, right: -6, zIndex: 30, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', borderRadius: 14, padding: '4px 10px', border: '1px solid rgba(255,255,255,0.15)', transform: `rotate(${-activeRotation * 0.5}deg)` }}
+                              onClick={(e) => { e.stopPropagation(); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowEditSheet(true); }}>
                               <Pencil className="w-3 h-3 text-white/60" />
                               <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Edit</span>
                             </button>
                           )}
                         </div>
 
-                        {/* Hand-drawn doodle text */}
-                        <p className="pointer-events-none" style={{
-                          fontFamily: "'Caveat', cursive",
-                          fontSize: 14,
-                          color: 'rgba(255,255,255,0.18)',
-                          marginTop: 18,
-                          marginLeft: doodleOnRight ? '45%' : '5%',
-                          transform: `rotate(${((act.dayNumber * 5 + idx * 11) % 9) - 4}deg)`,
-                          letterSpacing: '0.03em',
-                        }}>
-                          {doodleText}
-                        </p>
+                        {/* Hand-drawn journal doodles: SVG drawings + handwritten texts */}
+                        <div className="pointer-events-none relative" style={{ minHeight: 36, marginTop: 10 }}>
+                          {/* Text doodle 1 */}
+                          <p style={{
+                            fontFamily: "'Caveat', cursive", fontSize: 17, fontWeight: 700,
+                            color: 'rgba(255,255,255,0.28)',
+                            position: 'absolute', top: 0,
+                            left: idx % 2 === 0 ? '52%' : '0%',
+                            transform: `rotate(${((act.dayNumber * 5 + idx * 11) % 9) - 4}deg)`,
+                            whiteSpace: 'nowrap',
+                          }}>
+                            {doodles.text1}
+                          </p>
+                          {/* SVG drawing 1 */}
+                          <div style={{
+                            position: 'absolute', top: idx % 3 === 0 ? -10 : 0,
+                            left: idx % 2 === 0 ? '32%' : '68%',
+                            transform: `rotate(${((act.dayNumber * 3) % 30) - 15}deg)`, opacity: 0.8,
+                          }}>
+                            {doodleSVGs[doodles.svg1]}
+                          </div>
+                          {/* Text doodle 2 */}
+                          {idx % 3 !== 1 && (
+                            <p style={{
+                              fontFamily: "'Caveat', cursive", fontSize: 14, fontWeight: 400, fontStyle: 'italic',
+                              color: 'rgba(255,255,255,0.2)',
+                              position: 'absolute', top: 22,
+                              left: idx % 2 === 0 ? '8%' : '45%',
+                              transform: `rotate(${((act.dayNumber * 9 + idx * 3) % 11) - 5}deg)`,
+                              whiteSpace: 'nowrap',
+                            }}>
+                              ~ {doodles.text2}
+                            </p>
+                          )}
+                          {/* SVG drawing 2 */}
+                          {idx % 2 === 0 && (
+                            <div style={{
+                              position: 'absolute', top: 18, right: '3%',
+                              transform: `rotate(${((act.dayNumber * 11) % 25) - 12}deg)`, opacity: 0.55,
+                            }}>
+                              {doodleSVGs[doodles.svg2]}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
 
-                  {/* Journey start */}
-                  <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
-                    <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.1)' }} />
-                    <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: 'rgba(255,255,255,0.2)', transform: 'rotate(-1deg)' }}>
-                      the journey begins here... 🌱
-                    </p>
-                  </div>
-                </>
+                      {/* Journey start */}
+                      <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
+                        <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.1)' }} />
+                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: 'rgba(255,255,255,0.2)', transform: 'rotate(-1deg)' }}>
+                          the journey begins here...
+                        </p>
+                      </div>
+                    </>
                   );
                 })()}
               </div>
