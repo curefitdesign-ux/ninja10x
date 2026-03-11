@@ -1848,19 +1848,19 @@ const Reel = () => {
                             {showStackedCards && (
                               <div
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
-                                className="absolute cursor-pointer flex flex-col items-center"
+                                className="absolute cursor-pointer flex items-center gap-1.5"
                                 style={{
-                                  bottom: 4,
+                                  bottom: 2,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
                                 }}
                               >
-                                <svg width="28" height="18" viewBox="0 0 28 18" fill="none" style={{ marginBottom: -2 }}>
-                                  <path d="M14 2 C10 2, 6 8, 14 14 C22 8, 18 2, 14 2" stroke="rgba(255,255,255,0.35)" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
-                                  <path d="M12 4 L14 1 L16 4" stroke="rgba(255,255,255,0.35)" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                                <svg width="20" height="28" viewBox="0 0 20 28" fill="none" style={{ marginTop: -4 }}>
+                                  <path d="M10 26 C6 20, 2 14, 6 8 C8 5, 10 4, 10 4" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                                  <path d="M7 7 L10 3 L13 7" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
-                                <span style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: 'rgba(255,255,255,0.35)', letterSpacing: 0.5 }}>tap to view journey</span>
+                                <span style={{ fontFamily: 'Caveat, cursive', fontSize: 17, color: 'rgba(255,255,255,0.4)', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>tap to view journey</span>
                               </div>
                             )}
                             {/* Main card */}
@@ -2225,14 +2225,15 @@ const Reel = () => {
                 }}
               >
                 {/* Reaction pill + Share icon row — hidden for log-activity placeholder */}
-                <div className="flex items-center justify-center gap-2.5 px-4" style={{ visibility: isLogActivityCard ? 'hidden' : 'visible' }}>
+                <div className="flex items-center justify-center px-4" style={{ visibility: isLogActivityCard ? 'hidden' : 'visible' }}>
                   {/* Sticker-style reaction badge */}
                   <button
                     onClick={() => { isOwnStory ? setShowReactsSheet(true) : setShowSendReactionSheet(true); }}
-                    className="relative overflow-hidden active:scale-[0.93] transition-all duration-150 flex-1"
+                    className="relative overflow-hidden active:scale-[0.93] transition-all duration-150"
                     style={{
                       height: 46,
                       borderRadius: 23,
+                      minWidth: 200,
                       background: 'linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.05))',
                       border: '1.5px solid rgba(255,255,255,0.12)',
                       boxShadow: '0 4px 16px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.1) inset, 0 -1px 0 rgba(0,0,0,0.2) inset',
@@ -2280,9 +2281,6 @@ const Reel = () => {
                     </div>
                   )}
                   </button>
-
-                   <div className="flex items-center gap-2 shrink-0">
-                   </div>
                 </div>
               </div>
             );
