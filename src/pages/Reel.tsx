@@ -1756,8 +1756,6 @@ const Reel = () => {
                                 duration={activity.duration || ''}
                                 pr={activity.pr || ''}
                                 dayNumber={activity.dayNumber}
-                                displayName={group.displayName || ''}
-                                avatarUrl={group.avatarUrl || ''}
                               />
                             </div>
                           ) : peekMedia ? (
