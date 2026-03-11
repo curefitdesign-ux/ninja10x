@@ -568,11 +568,11 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             <button
                               className="absolute flex items-center gap-1 active:scale-90 transition-transform"
                               style={{
-                                top: -10, left: -6, zIndex: 30,
+                                top: -10, right: -6, zIndex: 30,
                                 background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)',
                                 borderRadius: 14, padding: '4px 10px',
                                 border: '1px solid rgba(255,255,255,0.15)',
-                                transform: `rotate(${-rotation * 0.5}deg)`,
+                                transform: `rotate(${-activeRotation * 0.5}deg)`,
                               }}
                               onClick={(e) => { e.stopPropagation(); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowEditSheet(true); }}
                             >
