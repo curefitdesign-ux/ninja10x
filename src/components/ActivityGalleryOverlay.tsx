@@ -478,6 +478,28 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     return { text1: doodleTexts[textIdx1], text2: doodleTexts[textIdx2], svg1: svgIdx1, svg2: svgIdx2 };
                   };
 
+                  return (
+                    <>
+                      {/* End goal */}
+                      <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
+                        <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: realActivities.length >= 12 ? 'linear-gradient(135deg, #F59E0B, #EF4444)' : 'rgba(255,255,255,0.08)', border: `2px solid ${realActivities.length >= 12 ? 'rgba(245,158,11,0.4)' : 'rgba(255,255,255,0.1)'}` }} />
+                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: realActivities.length >= 12 ? 'rgba(245,158,11,0.7)' : 'rgba(255,255,255,0.2)', transform: 'rotate(1deg)' }}>
+                          {realActivities.length >= 12 ? 'journey complete! you did it!' : `${remainingDays} ${remainingDays === 1 ? 'day' : 'days'} to go... keep pushing!`}
+                        </p>
+                      </div>
+
+                      {/* Activities */}
+                      {realActivities.map((act, idx) => {
+                    const { rotation, offsetX } = getCardStyle(idx, act.dayNumber);
+                    const wk = Math.ceil(act.dayNumber / 3);
+                    const dw = ((act.dayNumber - 1) % 3) + 1;
+                    const isAtTop = topCardId === act.id;
+                    const topTiltSeed = (act.dayNumber * 17 + idx * 7) % 13;
+                    const topTilt = ((topTiltSeed - 6) * 1.5);
+                    const activeRotation = isAtTop ? topTilt : rotation;
+                    const canEdit = isOwnProfile && isWithin24h(act);
+                    const doodles = getDoodleElements(act.dayNumber, idx);
+
                     return (
                       <div
                         key={act.id}
@@ -494,7 +516,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           transition: 'all 0.3s ease',
                         }} />
 
-                        {/* Handwritten date — highlighted when at top */}
+                        {/* Handwritten date */}
                         <p style={{
                           fontFamily: "'Caveat', cursive", fontSize: 18,
                           color: isAtTop ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.45)',
@@ -507,7 +529,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           W{wk} · Activity {dw}
                         </p>
 
-                        {/* Card — tilts when at top of scroll */}
+                        {/* Card */}
                         <div
                           className="relative overflow-visible"
                           style={{
@@ -529,7 +551,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                           {/* Activity name tag */}
                           {act.activity && (
-                             <div className="absolute pointer-events-none" style={{
+                            <div className="absolute pointer-events-none" style={{
                               bottom: -12, right: -8, background: 'rgba(255,255,255,0.1)',
                               backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
                               border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
@@ -539,34 +561,20 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             </div>
                           )}
 
-                          {/* Reaction count + react button */}
+                          {/* Reactions */}
                           {(() => {
                             const ar = localReactions[act.id];
                             const total = ar?.total || 0;
                             return (
-                              <div className="absolute flex items-center gap-1" style={{
-                                bottom: -10, left: -6, zIndex: 30,
-                                transform: `rotate(${-activeRotation * 0.6}deg)`,
-                              }}>
+                              <div className="absolute flex items-center gap-1" style={{ bottom: -10, left: -6, zIndex: 30, transform: `rotate(${-activeRotation * 0.6}deg)` }}>
                                 {total > 0 && (
-                                  <span style={{
-                                    fontFamily: "'Caveat', cursive", fontSize: 16,
-                                    color: 'rgba(255,255,255,0.55)',
-                                    textShadow: '0 1px 4px rgba(0,0,0,0.5)',
-                                  }}>
+                                  <span style={{ fontFamily: "'Caveat', cursive", fontSize: 16, color: 'rgba(255,255,255,0.55)', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
                                     {total} ❤️
                                   </span>
                                 )}
                                 {!isOwnProfile && (
-                                  <button
-                                    className="flex items-center gap-0.5 active:scale-90 transition-transform"
-                                    style={{
-                                      background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
-                                      borderRadius: 14, padding: '3px 8px',
-                                      border: '1px solid rgba(255,255,255,0.12)',
-                                    }}
-                                    onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}
-                                  >
+                                  <button className="flex items-center gap-0.5 active:scale-90 transition-transform" style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)', borderRadius: 14, padding: '3px 8px', border: '1px solid rgba(255,255,255,0.12)' }}
+                                    onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}>
                                     <span style={{ fontSize: 12 }}>🔥</span>
                                     <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>React</span>
                                   </button>
@@ -575,53 +583,73 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             );
                           })()}
 
-                          {/* Edit button — only on most recent, own profile, within 24h */}
+                          {/* Edit button — top right */}
                           {canEdit && (
-                            <button
-                              className="absolute flex items-center gap-1 active:scale-90 transition-transform"
-                              style={{
-                                top: -10, right: -6, zIndex: 30,
-                                background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)',
-                                borderRadius: 14, padding: '4px 10px',
-                                border: '1px solid rgba(255,255,255,0.15)',
-                                transform: `rotate(${-activeRotation * 0.5}deg)`,
-                              }}
-                              onClick={(e) => { e.stopPropagation(); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowEditSheet(true); }}
-                            >
+                            <button className="absolute flex items-center gap-1 active:scale-90 transition-transform"
+                              style={{ top: -10, right: -6, zIndex: 30, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', borderRadius: 14, padding: '4px 10px', border: '1px solid rgba(255,255,255,0.15)', transform: `rotate(${-activeRotation * 0.5}deg)` }}
+                              onClick={(e) => { e.stopPropagation(); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowEditSheet(true); }}>
                               <Pencil className="w-3 h-3 text-white/60" />
                               <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Edit</span>
                             </button>
                           )}
                         </div>
 
-                        {/* Hand-drawn doodle text */}
-                        <p className="pointer-events-none" style={{
-                          fontFamily: "'Caveat', cursive",
-                          fontSize: 14,
-                          color: 'rgba(255,255,255,0.18)',
-                          marginTop: 18,
-                          marginLeft: doodleOnRight ? '45%' : '5%',
-                          transform: `rotate(${((act.dayNumber * 5 + idx * 11) % 9) - 4}deg)`,
-                          letterSpacing: '0.03em',
-                        }}>
-                          {doodleText}
-                        </p>
+                        {/* Hand-drawn journal doodles: SVG drawings + handwritten texts */}
+                        <div className="pointer-events-none relative" style={{ minHeight: 36, marginTop: 10 }}>
+                          {/* Text doodle 1 */}
+                          <p style={{
+                            fontFamily: "'Caveat', cursive", fontSize: 17, fontWeight: 700,
+                            color: 'rgba(255,255,255,0.28)',
+                            position: 'absolute', top: 0,
+                            left: idx % 2 === 0 ? '52%' : '0%',
+                            transform: `rotate(${((act.dayNumber * 5 + idx * 11) % 9) - 4}deg)`,
+                            whiteSpace: 'nowrap',
+                          }}>
+                            {doodles.text1}
+                          </p>
+                          {/* SVG drawing 1 */}
+                          <div style={{
+                            position: 'absolute', top: idx % 3 === 0 ? -10 : 0,
+                            left: idx % 2 === 0 ? '32%' : '68%',
+                            transform: `rotate(${((act.dayNumber * 3) % 30) - 15}deg)`, opacity: 0.8,
+                          }}>
+                            {doodleSVGs[doodles.svg1]}
+                          </div>
+                          {/* Text doodle 2 */}
+                          {idx % 3 !== 1 && (
+                            <p style={{
+                              fontFamily: "'Caveat', cursive", fontSize: 14, fontWeight: 400, fontStyle: 'italic',
+                              color: 'rgba(255,255,255,0.2)',
+                              position: 'absolute', top: 22,
+                              left: idx % 2 === 0 ? '8%' : '45%',
+                              transform: `rotate(${((act.dayNumber * 9 + idx * 3) % 11) - 5}deg)`,
+                              whiteSpace: 'nowrap',
+                            }}>
+                              ~ {doodles.text2}
+                            </p>
+                          )}
+                          {/* SVG drawing 2 */}
+                          {idx % 2 === 0 && (
+                            <div style={{
+                              position: 'absolute', top: 18, right: '3%',
+                              transform: `rotate(${((act.dayNumber * 11) % 25) - 12}deg)`, opacity: 0.55,
+                            }}>
+                              {doodleSVGs[doodles.svg2]}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
 
-                  {/* Journey start */}
-                  <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
-                    <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.1)' }} />
-                    <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: 'rgba(255,255,255,0.2)', transform: 'rotate(-1deg)' }}>
-                      the journey begins here... 🌱
-                    </p>
-                  </div>
-                </>
-                  );
-                })()}
-              </div>
-            </div>
+                      {/* Journey start */}
+                      <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
+                        <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.1)' }} />
+                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: 'rgba(255,255,255,0.2)', transform: 'rotate(-1deg)' }}>
+                          the journey begins here...
+                        </p>
+                      </div>
+                    </>
 
             {/* Bottom action row */}
             <div className="shrink-0 flex items-center justify-center gap-3 px-4 z-50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 12px), 12px)', paddingTop: 8 }}>
