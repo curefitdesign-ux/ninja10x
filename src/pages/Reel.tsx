@@ -319,14 +319,8 @@ const Reel = () => {
       } as any);
     }
 
-    // Sort own activities: recaps first (desc by dayNumber), then regular
+    // Sort own activities: log-activity always last
     ownActivities.sort((a: any, b: any) => {
-      const aIsRecap = a.dayNumber >= 1001;
-      const bIsRecap = b.dayNumber >= 1001;
-      if (aIsRecap && !bIsRecap) return -1;
-      if (!aIsRecap && bIsRecap) return 1;
-      if (aIsRecap && bIsRecap) return b.dayNumber - a.dayNumber;
-      // log-activity always last
       if (a.id === 'log-activity') return 1;
       if (b.id === 'log-activity') return -1;
       return b.dayNumber - a.dayNumber;
