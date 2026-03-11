@@ -947,7 +947,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
             </div>, document.body
           )}
 
-          )}
         </DynamicBlurBackground>
         </motion.div>
       )}
