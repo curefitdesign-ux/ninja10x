@@ -1719,10 +1719,15 @@ const Reel = () => {
                           className="overflow-hidden"
                           style={{
                             aspectRatio: '9/16',
-                            height: 'calc(95% - 10px)',
+                            height: activity?.id === 'log-activity' ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
                             maxWidth: '100%',
                             filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                            background: activity?.id === 'log-activity' ? 'hsl(var(--background))' : 'transparent',
+                            background: activity?.id === 'log-activity' ? '#0a0a12' : 'transparent',
+                            borderRadius: activity?.id === 'log-activity' ? '10px' : '0px',
+                            border: activity?.id === 'log-activity' ? '1px solid rgba(160, 120, 255, 0.25)' : 'none',
+                            boxShadow: activity?.id === 'log-activity'
+                              ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 0 20px rgba(140, 100, 240, 0.15)'
+                              : 'none',
                           }}
                         >
                           {activity?.id === 'log-activity' ? (
@@ -1876,11 +1881,15 @@ const Reel = () => {
                             className="relative overflow-hidden"
                             style={{
                               aspectRatio: '9/16',
-                              height: 'calc(95% - 10px)',
+                              height: isLogActivityCard ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
                               maxWidth: '100%',
-                              borderRadius: '0px',
+                              borderRadius: isLogActivityCard ? '10px' : '0px',
                               overflow: 'hidden',
-                              background: isLogActivityCard ? 'hsl(var(--background))' : 'transparent',
+                              background: isLogActivityCard ? '#0a0a12' : 'transparent',
+                              border: isLogActivityCard ? '1px solid rgba(160, 120, 255, 0.25)' : 'none',
+                              boxShadow: isLogActivityCard
+                                ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 0 20px rgba(140, 100, 240, 0.15), 0 0 40px rgba(140, 100, 240, 0.08)'
+                                : 'none',
                               marginTop: '-10px',
                               zIndex: 3,
                             }}
