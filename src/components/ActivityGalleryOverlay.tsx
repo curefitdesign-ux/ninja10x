@@ -534,7 +534,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             return (
                               <div className="absolute flex items-center gap-1" style={{
                                 bottom: -10, left: -6, zIndex: 30,
-                                transform: `rotate(${-rotation * 0.6}deg)`,
+                                transform: `rotate(${-activeRotation * 0.6}deg)`,
                               }}>
                                 {total > 0 && (
                                   <span style={{
