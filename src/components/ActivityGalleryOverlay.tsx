@@ -82,6 +82,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 }, _ref) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [collapsedWeeks, setCollapsedWeeks] = useState<Record<number, boolean>>({});
   const [nudgeBellAnim, setNudgeBellAnim] = useState(false);
   const [nudgeCount, setNudgeCount] = useState(0);
   const [nudgeRotation, setNudgeRotation] = useState(0);
@@ -445,15 +446,16 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         const isWeekComplete = weekActs.length >= 3;
                         const hasAnyActivity = weekActs.length > 0;
                         const weekTheme = WEEK_THEMES[weekNum] || '';
+                        const isCollapsed = !!collapsedWeeks[weekNum];
 
                         // Activities sorted descending within each week (Activity 3, 2, 1)
                         const weekActsDesc = [...weekActs].sort((a, b) => b.dayNumber - a.dayNumber);
 
                         return (
                           <div key={`week-${weekNum}`}>
-                            {/* REEL GENERATION row */}
-                            <div className="flex flex-col items-center" style={{ padding: '4px 16px 12px 16px' }}>
-                              {isWeekComplete && isOwnProfile ? (
+                            {/* REEL GENERATION row — only show button for complete weeks */}
+                            {isWeekComplete && isOwnProfile && (
+                              <div className="flex flex-col items-center" style={{ padding: '4px 16px 12px 16px' }}>
                                 <button
                                   onClick={() => {
                                     const weekActivities = weekActs.map(a => ({
@@ -475,137 +477,155 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 >
                                   ✨ Generate Week {weekNum} Reel
                                 </button>
-                              ) : (
-                                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.02em' }}>
-                                  {hasAnyActivity
-                                    ? `${3 - weekActs.length} more ${3 - weekActs.length === 1 ? 'activity' : 'activities'} to unlock Reel`
-                                    : '3 activities to unlock Reel'}
-                                </p>
-                              )}
-                            </div>
+                              </div>
+                            )}
 
-                            {/* WEEK HEADER */}
-                            <div className="flex items-center gap-3" style={{ padding: '4px 16px 12px 16px' }}>
-                              <img src={hasAnyActivity ? tileActiveSvg : tileInactiveSvg} alt="" style={{ width: 30, height: 30, flexShrink: 0, opacity: hasAnyActivity ? 1 : 0.5 }} />
-                              <div>
+                            {/* WEEK HEADER — tappable to collapse/expand */}
+                            <div
+                              className="flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform"
+                              style={{ padding: '4px 16px 12px 16px' }}
+                              onClick={() => setCollapsedWeeks(prev => ({ ...prev, [weekNum]: !prev[weekNum] }))}
+                            >
+                              <img src={isWeekComplete ? tileActiveSvg : tileInactiveSvg} alt="" style={{ width: 30, height: 30, flexShrink: 0, opacity: isWeekComplete ? 1 : 0.5 }} />
+                              <div style={{ flex: 1 }}>
                                 <p style={{
                                   fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700,
-                                  color: hasAnyActivity ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.2)',
+                                  color: isWeekComplete ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.2)',
                                   letterSpacing: '0.04em', textTransform: 'uppercase',
                                 }}>
                                   Week {weekNum} — {weekTheme}
                                 </p>
-                                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: hasAnyActivity ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.12)', marginTop: 2 }}>
+                                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: isWeekComplete ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.12)', marginTop: 2 }}>
                                   {isWeekComplete ? 'Completed ✓' : hasAnyActivity ? `${weekActs.length}/3 activities` : 'Not started yet'}
                                 </p>
                               </div>
+                              {/* Chevron */}
+                              <motion.div
+                                animate={{ rotate: isCollapsed ? 0 : 180 }}
+                                transition={{ duration: 0.2 }}
+                                style={{ opacity: 0.3 }}
+                              >
+                                <ChevronUp className="w-4 h-4 text-white" />
+                              </motion.div>
                             </div>
 
-                            {/* All 3 slots in descending order (slot 3, 2, 1) */}
-                            {[3, 2, 1].map((slot, idx) => {
-                              const dayNum = (weekNum - 1) * 3 + slot;
-                              const act = weekActsDesc.find(a => a.dayNumber === dayNum);
-
-                              if (!act) {
-                                return (
-                                  <div key={`slot-${weekNum}-${dayNum}`} className="relative flex items-center gap-3" style={{ padding: '10px 16px 10px 16px', marginBottom: 4 }}>
-                                    <img src={tileInactiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0, opacity: 0.5 }} />
-                                    <div>
-                                      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.02em' }}>
-                                        Activity {dayNum}
-                                      </p>
-                                      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.12)', marginTop: 1 }}>
-                                        Upcoming
-                                      </p>
-                                    </div>
-                                  </div>
-                                );
-                              }
-
-                              const globalIdx = sortedActivities.findIndex(a => a.id === act.id);
-                              const { rotation, offsetX } = getCardStyle(globalIdx, act.dayNumber);
-                              const subtitle = act.activity || 'Workout';
-                              const durationSubtitle = act.duration ? ` · ${act.duration}` : '';
-                              const useTileIcon = isWeekComplete ? tileActiveSvg : tileInactiveSvg;
-
-                              return (
+                            {/* COLLAPSIBLE CONTENT */}
+                            <AnimatePresence initial={false}>
+                              {!isCollapsed && (
                                 <motion.div
-                                  key={act.id} className="relative"
-                                  style={{ padding: '10px 16px 10px 16px', marginBottom: 16 }}
-                                  initial={{ opacity: 0, y: 30 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ delay: globalIdx * 0.06, type: 'spring', stiffness: 200, damping: 20 }}
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: 'auto', opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                                  style={{ overflow: 'hidden' }}
                                 >
-                                  <div className="flex items-center gap-3" style={{ marginBottom: 8 }}>
-                                    <img src={useTileIcon} alt="" style={{ width: 28, height: 28, flexShrink: 0 }} />
-                                    <div>
-                                      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.02em' }}>
-                                        Activity {act.dayNumber}
-                                      </p>
-                                      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>
-                                        {subtitle}{durationSubtitle}
-                                      </p>
-                                    </div>
-                                  </div>
+                                  {/* All 3 slots in descending order (slot 3, 2, 1) */}
+                                  {[3, 2, 1].map((slot, idx) => {
+                                    const dayNum = (weekNum - 1) * 3 + slot;
+                                    const act = weekActsDesc.find(a => a.dayNumber === dayNum);
 
-                                  <motion.div
-                                    className="relative overflow-visible cursor-pointer"
-                                    style={{
-                                      width: '62%', aspectRatio: '9/16', borderRadius: 4,
-                                      transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
-                                      marginLeft: idx % 2 === 0 ? '16%' : '22%',
-                                    }}
-                                    onClick={() => { const ri = activities.findIndex(a => a.id === act.id); if (ri >= 0) setCurrentIndex(ri); }}
-                                    whileTap={{ scale: 0.97 }}
-                                  >
-                                    <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4, containerType: 'inline-size' }}>
-                                      {act.frame ? (
-                                        <StoryFrameRenderer imageUrl={act.originalUrl || act.storageUrl} isVideo={act.isVideo} activity={act.activity} frame={act.frame} duration={act.duration} pr={act.pr} dayNumber={act.dayNumber} />
-                                      ) : act.isVideo ? (
-                                        <video src={act.originalUrl || act.storageUrl} className="absolute inset-0 w-full h-full object-cover" muted playsInline />
-                                      ) : (
-                                        <img src={act.originalUrl || act.storageUrl} alt={`Day ${act.dayNumber}`} className="absolute inset-0 w-full h-full object-cover" />
-                                      )}
-                                    </div>
-
-                                    {(() => {
-                                      const ar = localReactions[act.id];
-                                      const total = ar?.total || 0;
+                                    if (!act) {
                                       return (
-                                        <div className="absolute flex items-center gap-1" style={{
-                                          bottom: -10, left: -6, zIndex: 30,
-                                          transform: `rotate(${-rotation * 0.6}deg)`,
-                                        }}>
-                                          {total > 0 && (
-                                            <span style={{
-                                              fontFamily: "'Caveat', cursive", fontSize: 16,
-                                              color: 'rgba(255,255,255,0.55)',
-                                              textShadow: '0 1px 4px rgba(0,0,0,0.5)',
-                                            }}>
-                                              {total} ❤️
-                                            </span>
-                                          )}
-                                          {!isOwnProfile && (
-                                            <button
-                                              className="flex items-center gap-0.5 active:scale-90 transition-transform"
-                                              style={{
-                                                background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
-                                                borderRadius: 14, padding: '3px 8px',
-                                                border: '1px solid rgba(255,255,255,0.12)',
-                                              }}
-                                              onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}
-                                            >
-                                              <span style={{ fontSize: 12 }}>🔥</span>
-                                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>React</span>
-                                            </button>
-                                          )}
+                                        <div key={`slot-${weekNum}-${dayNum}`} className="relative flex items-center gap-3" style={{ padding: '10px 16px 10px 16px', marginBottom: 4 }}>
+                                          <img src={tileInactiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0, opacity: 0.5 }} />
+                                          <div>
+                                            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.02em' }}>
+                                              Activity {dayNum}
+                                            </p>
+                                            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.12)', marginTop: 1 }}>
+                                              Upcoming
+                                            </p>
+                                          </div>
                                         </div>
                                       );
-                                    })()}
-                                  </motion.div>
+                                    }
+
+                                    const globalIdx = sortedActivities.findIndex(a => a.id === act.id);
+                                    const { rotation, offsetX } = getCardStyle(globalIdx, act.dayNumber);
+                                    const subtitle = act.activity || 'Workout';
+                                    const durationSubtitle = act.duration ? ` · ${act.duration}` : '';
+
+                                    return (
+                                      <motion.div
+                                        key={act.id} className="relative"
+                                        style={{ padding: '10px 16px 10px 16px', marginBottom: 16 }}
+                                        initial={{ opacity: 0, y: 30 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: globalIdx * 0.06, type: 'spring', stiffness: 200, damping: 20 }}
+                                      >
+                                        <div className="flex items-center gap-3" style={{ marginBottom: 8 }}>
+                                          <img src={tileActiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0 }} />
+                                          <div>
+                                            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.02em' }}>
+                                              Activity {act.dayNumber}
+                                            </p>
+                                            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.45)', marginTop: 1 }}>
+                                              {subtitle}{durationSubtitle}
+                                            </p>
+                                          </div>
+                                        </div>
+
+                                        <motion.div
+                                          className="relative overflow-visible cursor-pointer"
+                                          style={{
+                                            width: '62%', aspectRatio: '9/16', borderRadius: 4,
+                                            transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
+                                            marginLeft: idx % 2 === 0 ? '16%' : '22%',
+                                          }}
+                                          onClick={() => { const ri = activities.findIndex(a => a.id === act.id); if (ri >= 0) setCurrentIndex(ri); }}
+                                          whileTap={{ scale: 0.97 }}
+                                        >
+                                          <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4, containerType: 'inline-size' }}>
+                                            {act.frame ? (
+                                              <StoryFrameRenderer imageUrl={act.originalUrl || act.storageUrl} isVideo={act.isVideo} activity={act.activity} frame={act.frame} duration={act.duration} pr={act.pr} dayNumber={act.dayNumber} />
+                                            ) : act.isVideo ? (
+                                              <video src={act.originalUrl || act.storageUrl} className="absolute inset-0 w-full h-full object-cover" muted playsInline />
+                                            ) : (
+                                              <img src={act.originalUrl || act.storageUrl} alt={`Day ${act.dayNumber}`} className="absolute inset-0 w-full h-full object-cover" />
+                                            )}
+                                          </div>
+
+                                          {(() => {
+                                            const ar = localReactions[act.id];
+                                            const total = ar?.total || 0;
+                                            return (
+                                              <div className="absolute flex items-center gap-1" style={{
+                                                bottom: -10, left: -6, zIndex: 30,
+                                                transform: `rotate(${-rotation * 0.6}deg)`,
+                                              }}>
+                                                {total > 0 && (
+                                                  <span style={{
+                                                    fontFamily: "'Caveat', cursive", fontSize: 16,
+                                                    color: 'rgba(255,255,255,0.55)',
+                                                    textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                                                  }}>
+                                                    {total} ❤️
+                                                  </span>
+                                                )}
+                                                {!isOwnProfile && (
+                                                  <button
+                                                    className="flex items-center gap-0.5 active:scale-90 transition-transform"
+                                                    style={{
+                                                      background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
+                                                      borderRadius: 14, padding: '3px 8px',
+                                                      border: '1px solid rgba(255,255,255,0.12)',
+                                                    }}
+                                                    onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}
+                                                  >
+                                                    <span style={{ fontSize: 12 }}>🔥</span>
+                                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>React</span>
+                                                  </button>
+                                                )}
+                                              </div>
+                                            );
+                                          })()}
+                                        </motion.div>
+                                      </motion.div>
+                                    );
+                                  })}
                                 </motion.div>
-                              );
-                            })}
+                              )}
+                            </AnimatePresence>
                           </div>
                         );
                       })}
