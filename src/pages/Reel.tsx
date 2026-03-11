@@ -287,7 +287,6 @@ const Reel = () => {
       });
 
     // Own user: show today's logged activity OR just the log placeholder (no past activities)
-    // PLUS any published/virtual week recaps
     const allMyActivities = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
     const latestActivity = allMyActivities[0];
     const loggedToday = latestActivity && new Date(latestActivity.createdAt).toDateString() === new Date().toDateString();
@@ -296,17 +295,6 @@ const Reel = () => {
     
     if (loggedToday) {
       ownActivities.push(latestActivity);
-    }
-
-    // Add published recap entries from userGroups for own user
-    const myGroup$ = userGroups.find(g => g.userId === user.id);
-    if (myGroup$) {
-      const recapsFromDb = myGroup$.activities.filter(a => a.dayNumber >= 1001);
-      for (const recap of recapsFromDb) {
-        if (!ownActivities.some(a => a.id === recap.id)) {
-          ownActivities.push(recap);
-        }
-      }
     }
 
 
