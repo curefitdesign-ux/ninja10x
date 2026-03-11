@@ -65,13 +65,13 @@ const FitnessFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, im
       <div className="absolute z-20" style={{ top: '13cqw', left: '4cqw' }}>
         <h1 
           className="font-black leading-[0.9] uppercase"
-          style={{ color: '#F4E14D', fontFamily: "'Bebas Neue', sans-serif", fontSize: '51px', letterSpacing: '0px', textShadow: '2px 3px 4px rgba(0,0,0,0.35)' }}
+          style={{ color: '#F4E14D', fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(28px, 17cqw, 60px)', letterSpacing: '0px', textShadow: '2px 3px 4px rgba(0,0,0,0.35)' }}
         >
           CULT
         </h1>
         <h2 
           className="font-black leading-[0.95] uppercase"
-          style={{ color: '#FFFFFF', fontFamily: "'Bebas Neue', sans-serif", fontSize: '59px', letterSpacing: '0px', textShadow: '3px 4px 8px rgba(0,0,0,0.5)', marginTop: '2px' }}
+          style={{ color: '#FFFFFF', fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(32px, 20cqw, 68px)', letterSpacing: '0px', textShadow: '3px 4px 8px rgba(0,0,0,0.5)', marginTop: '0.5cqw' }}
         >
           NINJA
         </h2>
