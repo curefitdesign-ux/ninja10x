@@ -586,7 +586,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         animate={{ scale: 1, opacity: 1 }}
                         className="absolute -top-2 -right-2 min-w-[22px] h-[22px] rounded-full flex items-center justify-center text-xs font-bold px-1"
                         style={{
-                          background: 'linear-gradient(135deg, hsl(var(--accent-gradient-start)), hsl(var(--accent-gradient-end, 330 81% 60%)))',
+                          background: 'linear-gradient(135deg, #F97316, #EC4899)',
                           color: '#fff',
                           boxShadow: '0 2px 8px rgba(249, 115, 22, 0.4)',
                         }}
