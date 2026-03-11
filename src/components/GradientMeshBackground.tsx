@@ -12,7 +12,7 @@ const GradientMeshBackground = () => {
       }}
     >
       {/* Deep muted base - extends into safe area */}
-      <div className="absolute inset-0 bg-[#252535]" />
+      <div className="absolute inset-0 bg-[#0a1628]" />
       
       {/* Top-left warm taupe/brown glow - more visible */}
       <motion.div
@@ -152,7 +152,7 @@ const GradientMeshBackground = () => {
       <div 
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse at center, transparent 35%, rgba(20, 20, 35, 0.35) 100%)',
+          background: 'radial-gradient(ellipse at center, transparent 35%, rgba(10, 22, 40, 0.35) 100%)',
         }}
       />
     </div>
