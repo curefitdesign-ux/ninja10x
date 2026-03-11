@@ -12,7 +12,7 @@ const GradientMeshBackground = () => {
       }}
     >
       {/* Deep muted base - extends into safe area */}
-      <div className="absolute inset-0 bg-[#252535]" />
+      <div className="absolute inset-0 bg-[#0a1628]" />
       
       {/* Top-left warm taupe/brown glow - more visible */}
       <motion.div
