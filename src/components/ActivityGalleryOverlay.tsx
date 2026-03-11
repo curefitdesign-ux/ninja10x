@@ -383,7 +383,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
             <div
               ref={scrollRef}
               className="flex-1 min-h-0 z-30 overflow-y-auto overflow-x-hidden"
-              style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', paddingBottom: 120, paddingTop: 8 }}
+              style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', paddingBottom: 120, paddingTop: 28 }}
               onScroll={(e) => {
                 const scrollTop = (e.target as HTMLDivElement).scrollTop;
                 setIsScrolled(scrollTop > 30);
