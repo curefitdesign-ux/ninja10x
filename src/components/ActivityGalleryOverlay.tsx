@@ -656,7 +656,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 fontWeight: isAtTop ? 700 : 400,
                                 lineHeight: 1,
                               }}>
-                                W{wk} · Activity {dw}
+                                W{wk} · Activity {act.dayNumber}
                               </p>
 
                               {/* Card */}
