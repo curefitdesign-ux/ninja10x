@@ -1663,10 +1663,10 @@ const Reel = () => {
             opts={{
               align: 'center',
               loop: effectiveUserGroups.length > 1,
-              skipSnaps: true,
+              skipSnaps: false,
               containScroll: false,
               slidesToScroll: 1,
-              dragFree: true,
+              dragFree: false,
             }}
             className="h-full"
           >
