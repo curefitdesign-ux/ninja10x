@@ -1440,7 +1440,8 @@ const Reel = () => {
 
         {/* TOP ZONE */}
         <div 
-          className="z-50 flex flex-col justify-end shrink-0"
+          ref={topZoneRef}
+          className="z-50 flex flex-col justify-end shrink-0 relative"
           style={{ 
             paddingTop: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 12px)',
           }}
