@@ -1908,7 +1908,7 @@ const Reel = () => {
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ delay: 0.05, duration: 0.5 }}
                                     className="z-10 mb-4"
-                                    style={{ width: 160, height: 160, borderRadius: '50%', overflow: 'hidden' }}
+                                    style={{ width: 120, height: 120, borderRadius: '50%', overflow: 'hidden' }}
                                   >
                                     <video
                                       src="/videos/curo-peeking.mp4"
