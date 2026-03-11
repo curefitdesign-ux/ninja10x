@@ -116,11 +116,11 @@ const ProfileSetupRouteWrapper = ({ children }: { children: React.ReactNode }) =
   return <>{children}</>;
 };
 
-// Force ReelGeneration to fully remount on every navigation (location.key changes per navigate call)
-const ReelGeneration = () => {
-  const location = useLocation();
-  return <ReelGenerationBase key={location.key} />;
-};
+// ReelGeneration temporarily disabled
+// const ReelGeneration = () => {
+//   const location = useLocation();
+//   return <ReelGenerationBase key={location.key} />;
+// };
 
 const AnimatedRoutes = () => {
   const location = useLocation();
