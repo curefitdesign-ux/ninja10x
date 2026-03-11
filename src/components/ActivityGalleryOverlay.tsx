@@ -500,7 +500,72 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     const canEdit = isOwnProfile && isWithin24h(act);
                     const doodles = getDoodleElements(act.dayNumber, idx);
 
+                    // Washi tape separator between weeks
+                    const prevWk = idx > 0 ? Math.ceil(realActivities[idx - 1].dayNumber / 3) : wk;
+                    const showWashiTape = idx > 0 && wk !== prevWk;
+
+                    // Washi tape colors per week boundary
+                    const washiColors = [
+                      { bg: 'rgba(249,115,22,0.18)', border: 'rgba(249,115,22,0.25)', text: 'rgba(249,115,22,0.6)' },
+                      { bg: 'rgba(168,85,247,0.18)', border: 'rgba(168,85,247,0.25)', text: 'rgba(168,85,247,0.6)' },
+                      { bg: 'rgba(52,211,153,0.18)', border: 'rgba(52,211,153,0.25)', text: 'rgba(52,211,153,0.6)' },
+                      { bg: 'rgba(236,72,153,0.18)', border: 'rgba(236,72,153,0.25)', text: 'rgba(236,72,153,0.6)' },
+                    ];
+                    const washiColor = washiColors[(wk - 1) % washiColors.length];
+                    const washiRotation = ((wk * 7 + idx * 3) % 5) - 2.5;
+
                     return (
+                      <div key={act.id}>
+                      {/* Washi tape separator */}
+                      {showWashiTape && (
+                        <div className="relative" style={{ margin: '8px 0 16px 0', padding: '0 16px 0 36px' }}>
+                          <div style={{
+                            position: 'relative',
+                            width: '85%',
+                            margin: '0 auto',
+                            transform: `rotate(${washiRotation}deg)`,
+                          }}>
+                            {/* Tape strip */}
+                            <div style={{
+                              background: washiColor.bg,
+                              backdropFilter: 'blur(8px)',
+                              WebkitBackdropFilter: 'blur(8px)',
+                              borderTop: `1px solid ${washiColor.border}`,
+                              borderBottom: `1px solid ${washiColor.border}`,
+                              padding: '8px 16px',
+                              position: 'relative',
+                              overflow: 'hidden',
+                            }}>
+                              {/* Torn edge effect - top */}
+                              <div style={{
+                                position: 'absolute', top: -1, left: 0, right: 0, height: 4,
+                                backgroundImage: `repeating-linear-gradient(90deg, transparent 0px, transparent 6px, ${washiColor.bg} 6px, ${washiColor.bg} 8px, transparent 8px, transparent 12px)`,
+                              }} />
+                              {/* Torn edge effect - bottom */}
+                              <div style={{
+                                position: 'absolute', bottom: -1, left: 0, right: 0, height: 4,
+                                backgroundImage: `repeating-linear-gradient(90deg, transparent 0px, transparent 5px, ${washiColor.bg} 5px, ${washiColor.bg} 7px, transparent 7px, transparent 11px)`,
+                              }} />
+                              {/* Diagonal stripe pattern */}
+                              <div className="absolute inset-0 pointer-events-none" style={{
+                                backgroundImage: `repeating-linear-gradient(135deg, transparent, transparent 8px, rgba(255,255,255,0.04) 8px, rgba(255,255,255,0.04) 9px)`,
+                              }} />
+                              <p style={{
+                                fontFamily: "'Caveat', cursive",
+                                fontSize: 16,
+                                fontWeight: 700,
+                                color: washiColor.text,
+                                textAlign: 'center',
+                                letterSpacing: '0.05em',
+                                position: 'relative',
+                                zIndex: 1,
+                              }}>
+                                Week {Math.min(prevWk, wk)} complete
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       <div
                         key={act.id}
                         ref={(el) => { cardRefs.current[act.id] = el; }}
