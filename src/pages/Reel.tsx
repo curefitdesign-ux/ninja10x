@@ -1856,7 +1856,7 @@ const Reel = () => {
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
-                                  borderRadius: '0 0 10px 10px',
+                                  borderRadius: `0 0 ${cardRadius - 2}px ${cardRadius - 2}px`,
                                   background: 'rgba(255,255,255,0.06)',
                                   border: '1px solid rgba(255,255,255,0.10)',
                                   borderTop: 'none',
@@ -1867,7 +1867,7 @@ const Reel = () => {
                                 }}
                               >
                                 {backCardThumb && (
-                                  <img src={backCardThumb} alt="" className="w-full h-full object-cover object-bottom" style={{ borderRadius: '0 0 10px 10px', opacity: 0.4 }} loading="lazy" />
+                                  <img src={backCardThumb} alt="" className="w-full h-full object-cover object-bottom" style={{ borderRadius: `0 0 ${cardRadius - 2}px ${cardRadius - 2}px`, opacity: 0.4 }} loading="lazy" />
                                 )}
                               </motion.div>
                               {/* Middle card — peeks just below main card */}
@@ -1882,13 +1882,13 @@ const Reel = () => {
                                 }}
                                 className="absolute cursor-pointer"
                                 style={{
-                                  width: '90%',
+                                  width: '91%',
                                   height: 18,
                                   bottom: -14,
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 2,
-                                  borderRadius: '0 0 10px 10px',
+                                  borderRadius: `0 0 ${cardRadius - 1}px ${cardRadius - 1}px`,
                                   background: 'rgba(255,255,255,0.08)',
                                   border: '1px solid rgba(255,255,255,0.14)',
                                   borderTop: 'none',
@@ -1899,7 +1899,7 @@ const Reel = () => {
                                 }}
                               >
                                 {midCardThumb && (
-                                  <img src={midCardThumb} alt="" className="w-full h-full object-cover object-bottom" style={{ borderRadius: '0 0 10px 10px', opacity: 0.5 }} loading="lazy" />
+                                  <img src={midCardThumb} alt="" className="w-full h-full object-cover object-bottom" style={{ borderRadius: `0 0 ${cardRadius - 1}px ${cardRadius - 1}px`, opacity: 0.5 }} loading="lazy" />
                                 )}
                               </motion.div>
                             </>
@@ -1911,13 +1911,15 @@ const Reel = () => {
                               aspectRatio: '9/16',
                               height: isLogActivityCard ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
                               maxWidth: '100%',
-                              borderRadius: isLogActivityCard ? '10px' : '0px',
+                              borderRadius: `${cardRadius}px`,
                               overflow: 'hidden',
                               background: isLogActivityCard ? '#0a0a12' : 'transparent',
-                              border: isLogActivityCard ? '1px solid rgba(160, 120, 255, 0.25)' : 'none',
+                              border: isLogActivityCard
+                                ? '1px solid rgba(160, 120, 255, 0.25)'
+                                : '1px solid rgba(255,255,255,0.08)',
                               boxShadow: isLogActivityCard
                                 ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 0 20px rgba(140, 100, 240, 0.15), 0 0 40px rgba(140, 100, 240, 0.08)'
-                                : 'none',
+                                : '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)',
                               marginTop: '-10px',
                               zIndex: 3,
                             }}
