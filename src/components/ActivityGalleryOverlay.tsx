@@ -573,7 +573,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         }
                         transition={nudgeNumberBehind
                           ? { duration: 0.3, ease: 'easeIn' }
-                          : { duration: 0.5, times: [0, 0.35, 0.55, 0.75, 1], ease: 'easeOut' }
+                          : { duration: 0.5, times: [0, 0.4, 0.7, 1], ease: 'easeOut' }
                         }
                         className="absolute pointer-events-none"
                         style={{
