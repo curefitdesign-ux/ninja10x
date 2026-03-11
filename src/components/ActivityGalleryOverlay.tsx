@@ -458,7 +458,10 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     const wk = Math.ceil(act.dayNumber / 3);
                     const dw = ((act.dayNumber - 1) % 3) + 1;
                     const isAtTop = topCardId === act.id;
-                    // No tilt change on scroll — cards stay static
+                    // Dynamic tilt when card reaches top of scroll
+                    const topTiltSeed = (act.dayNumber * 17 + idx * 7) % 13;
+                    const topTilt = ((topTiltSeed - 6) * 1.5);
+                    const activeRotation = isAtTop ? topTilt : rotation;
                     const canEdit = isOwnProfile && isWithin24h(act);
                     const doodleText = doodleTexts[(act.dayNumber * 3 + idx * 7) % doodleTexts.length];
                     const doodleOnRight = idx % 2 !== 0; // alternate sides
