@@ -1794,11 +1794,12 @@ const Reel = () => {
                             overflow: 'visible',
                           }}
                         >
-                          {/* Main card wrapper — contains card + stacked strips */}
+                          {/* Main card wrapper — contains card + stacked strips + hint */}
                           <div className="relative" style={{
                             aspectRatio: '9/16',
                             height: isLogActivityCard ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
                             maxWidth: '100%',
+                            containerType: 'size',
                           }}>
                             {/* Stacked strip 2 (deepest) */}
                             {showStackedCards && (
@@ -1807,8 +1808,8 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   width: '78%',
-                                  height: 38,
-                                  bottom: 26,
+                                  height: '5.5cqh',
+                                  bottom: '4cqh',
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
@@ -1829,8 +1830,8 @@ const Reel = () => {
                                 className="absolute cursor-pointer"
                                 style={{
                                   width: '84%',
-                                  height: 38,
-                                  bottom: 38,
+                                  height: '5.5cqh',
+                                  bottom: '6cqh',
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 2,
@@ -1850,17 +1851,17 @@ const Reel = () => {
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer flex items-center gap-1"
                                 style={{
-                                  bottom: -10,
+                                  bottom: '-1.5cqh',
                                   left: '50%',
                                   transform: 'translateX(-50%)',
                                   zIndex: 1,
                                 }}
                               >
-                                <svg width="36" height="32" viewBox="0 0 36 32" fill="none" style={{ marginTop: -6 }}>
+                                <svg width="2.5cqh" height="2.2cqh" viewBox="0 0 36 32" fill="none" style={{ width: 'clamp(24px, 2.5cqh, 36px)', height: 'clamp(20px, 2.2cqh, 32px)', marginTop: '-0.5cqh' }}>
                                   <path d="M18 30 Q12 26, 8 20 Q4 14, 7 8 Q9 4, 14 3 Q17 2.5, 18 3" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
                                   <path d="M15 6 L18 1.5 L20 7" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
-                                <span style={{ fontFamily: 'Caveat, cursive', fontSize: 21, color: 'rgba(255,255,255,0.4)', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>tap to view journey</span>
+                                <span style={{ fontFamily: 'Caveat, cursive', fontSize: 'clamp(16px, 3.2cqh, 22px)', color: 'rgba(255,255,255,0.4)', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>tap to view journey</span>
                               </div>
                             )}
                             {/* Main card */}
