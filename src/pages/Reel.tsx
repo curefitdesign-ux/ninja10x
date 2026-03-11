@@ -2168,44 +2168,48 @@ const Reel = () => {
                       {/* Bottom peek cards — indicate more stories */}
                       {showStackedCards && isCenter && (
                         <>
-                          {/* Second peek card */}
+                          {/* Second peek card — peeks below main */}
                           <motion.div
-                            initial={{ y: 0, opacity: 0 }}
-                            animate={{ y: 6, opacity: 0.55, scale: 0.94 }}
+                            initial={{ opacity: 0, scale: 0.96 }}
+                            animate={{ opacity: 0.6, scale: 0.96 }}
                             transition={{ type: 'spring', stiffness: 200, damping: 22, delay: 0.05 }}
                             onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                             className="absolute cursor-pointer"
                             style={{
-                              aspectRatio: '9/16',
-                              height: 'calc(95% - 20px)',
-                              marginTop: '-10px',
-                              zIndex: 0,
-                              borderRadius: '9px',
-                              background: 'rgba(255,255,255,0.06)',
-                              border: '1px solid rgba(255,255,255,0.10)',
+                              width: '82%',
+                              height: 20,
+                              bottom: -6,
+                              left: '50%',
+                              transform: 'translateX(-50%)',
+                              zIndex: -1,
+                              borderRadius: '0 0 9px 9px',
+                              background: 'rgba(255,255,255,0.08)',
+                              border: '1px solid rgba(255,255,255,0.12)',
+                              borderTop: 'none',
                               backdropFilter: 'blur(16px) saturate(1.5)',
                               WebkitBackdropFilter: 'blur(16px) saturate(1.5)',
-                              transformOrigin: 'top center',
                             }}
                           />
-                          {/* Third peek card (deepest) */}
+                          {/* Third peek card (deepest) — peeks further below */}
                           <motion.div
-                            initial={{ y: 0, opacity: 0 }}
-                            animate={{ y: 12, opacity: 0.35, scale: 0.88 }}
+                            initial={{ opacity: 0, scale: 0.92 }}
+                            animate={{ opacity: 0.4, scale: 0.92 }}
                             transition={{ type: 'spring', stiffness: 200, damping: 22, delay: 0.1 }}
                             onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                             className="absolute cursor-pointer"
                             style={{
-                              aspectRatio: '9/16',
-                              height: 'calc(95% - 20px)',
-                              marginTop: '-10px',
-                              zIndex: -1,
-                              borderRadius: '9px',
-                              background: 'rgba(255,255,255,0.03)',
-                              border: '1px solid rgba(255,255,255,0.06)',
+                              width: '76%',
+                              height: 16,
+                              bottom: -16,
+                              left: '50%',
+                              transform: 'translateX(-50%)',
+                              zIndex: -2,
+                              borderRadius: '0 0 9px 9px',
+                              background: 'rgba(255,255,255,0.04)',
+                              border: '1px solid rgba(255,255,255,0.07)',
+                              borderTop: 'none',
                               backdropFilter: 'blur(12px) saturate(1.3)',
                               WebkitBackdropFilter: 'blur(12px) saturate(1.3)',
-                              transformOrigin: 'top center',
                             }}
                           />
                         </>
