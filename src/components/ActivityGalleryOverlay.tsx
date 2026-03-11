@@ -82,6 +82,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [isScrolled, setIsScrolled] = useState(false);
   const [nudgeBellAnim, setNudgeBellAnim] = useState(false);
   const [nudgeCount, setNudgeCount] = useState(0);
+  const [nudgeRotation, setNudgeRotation] = useState(0);
   const [nudgeNumberBehind, setNudgeNumberBehind] = useState(false);
   const nudgeAudioRef = useRef<HTMLAudioElement | null>(null);
   const nudgeHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
