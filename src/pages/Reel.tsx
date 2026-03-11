@@ -1848,7 +1848,7 @@ const Reel = () => {
                             {showStackedCards && (
                               <div
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
-                                className="absolute cursor-pointer flex flex-col items-center"
+                                className="absolute cursor-pointer flex items-center gap-1"
                                 style={{
                                   bottom: -10,
                                   left: '50%',
@@ -1856,7 +1856,7 @@ const Reel = () => {
                                   zIndex: 1,
                                 }}
                               >
-                                <svg width="36" height="32" viewBox="0 0 36 32" fill="none" style={{ marginBottom: -3 }}>
+                                <svg width="36" height="32" viewBox="0 0 36 32" fill="none" style={{ marginTop: -6 }}>
                                   <path d="M18 30 Q12 26, 8 20 Q4 14, 7 8 Q9 4, 14 3 Q17 2.5, 18 3" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
                                   <path d="M15 6 L18 1.5 L20 7" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
