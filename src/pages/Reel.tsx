@@ -695,10 +695,9 @@ const Reel = () => {
   }, [currentUserIndex, carouselApi]);
 
   const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    // If current card is the log-activity placeholder, navigate to gallery to add a photo
+    // If current card is the log-activity placeholder, open media source sheet (camera/gallery choice)
     if (currentActivity?.id === 'log-activity') {
-      const nextDay = myActivities.length > 0 ? Math.max(...myActivities.map(a => a.dayNumber)) + 1 : 1;
-      navigate('/gallery', { state: { dayNumber: nextDay } });
+      setShowEditSheet(true);
       return;
     }
 
