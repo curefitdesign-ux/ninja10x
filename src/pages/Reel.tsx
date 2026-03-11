@@ -193,6 +193,9 @@ const Reel = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const avatarStripRef = useRef<HTMLDivElement>(null);
   const activeAvatarRef = useRef<HTMLButtonElement>(null);
+  const ownAvatarRef = useRef<HTMLButtonElement>(null);
+  const topZoneRef = useRef<HTMLDivElement>(null);
+  const [connectorX, setConnectorX] = useState<number | null>(null);
 
   // Bottom sheet states and transition animations
   const [isTransitioning, setIsTransitioning] = useState(false);
