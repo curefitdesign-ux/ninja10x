@@ -129,7 +129,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     return !activities.some(a => a.isPlaceholder);
   }, [activities, isOwnProfile]);
 
-  const userDescription = useMemo((): { diary: string; varietyLine: string; durationLine: string; count: number } | null => {
+  const userBioLine = useMemo((): string | null => {
     if (!userProfile || activities.length === 0) return null;
     const realActivities = activities.filter(a => !a.isPlaceholder && a.dayNumber < 1001);
     if (realActivities.length === 0) return null;
@@ -154,26 +154,30 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
       durationStr = hrs > 0 ? (mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`) : `${mins} min`;
     }
     const sorted = Object.entries(activityCounts).sort((a, b) => b[1] - a[1]);
-    const topActivity = sorted[0]?.[0]?.toLowerCase() || 'working out';
     const variety = sorted.length;
+
+    // Build editorial bio line
     const parts: string[] = [];
-    if (count >= 12) parts.push(`🏆 ${name} crushed all 12 days!`);
-    else if (count >= 9) parts.push(`🔥 ${name}'s on fire, almost there!`);
-    else if (count >= 6) parts.push(`💪 Halfway beast mode.`);
-    else if (count >= 3) parts.push(`⚡ ${name}'s building momentum.`);
-    else parts.push(`🚀 ${name} just started the journey!`);
-    let varietyLine = '';
+    if (count >= 12) parts.push(`crushed all 12 days 🏆`);
+    else if (count >= 9) parts.push(`on fire, almost there 🔥`);
+    else if (count >= 6) parts.push(`halfway through the grind 💪`);
+    else if (count >= 3) parts.push(`building momentum ⚡`);
+    else parts.push(`just started the journey 🚀`);
+
     if (variety >= 3) {
       const top3 = sorted.slice(0, 3).map(([k]) => k.toLowerCase());
-      varietyLine = `Mixing it up with ${top3.join(', ')} & more ✨`;
+      parts.push(`loves ${top3[0]} 🎯 ${top3[1]} & ${top3[2]}`);
     } else if (variety === 2) {
-      varietyLine = `Loves ${sorted[0][0].toLowerCase()} & ${sorted[1][0].toLowerCase()} 🎯`;
+      parts.push(`into ${sorted[0][0].toLowerCase()} 🎯 & ${sorted[1][0].toLowerCase()}`);
     } else if (count > 1) {
-      varietyLine = `All-in on ${topActivity} 🎯`;
+      parts.push(`all-in on ${sorted[0][0].toLowerCase()} 🎯`);
     }
-    const mainLine = parts.join(' · ');
-    const durationLine = durationStr ? `⏱️ ${durationStr} of pure grind so far` : '';
-    return { diary: mainLine, varietyLine, durationLine, count };
+
+    if (durationStr) {
+      parts.push(`${durationStr} of pure grind ⏱️`);
+    }
+
+    return parts.join(', ');
   }, [activities, userProfile]);
 
   useEffect(() => {
