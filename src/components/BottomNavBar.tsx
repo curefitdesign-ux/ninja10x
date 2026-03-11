@@ -13,7 +13,7 @@ import MediaSourceSheet from "@/components/MediaSourceSheet";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 // Tab config for the reflective indicator
-const TAB_IDS = ["home", "discover", "progress", "bell", "menu"] as const;
+const TAB_IDS = ["home", "discover", "bell", "menu"] as const;
 
 const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
 
   if (shouldHide) return null;
 
-  const activeTab = showNotificationSheet ? "bell" : location.pathname === "/progress" ? "progress" : "discover";
+  const activeTab = showNotificationSheet ? "bell" : "discover";
   const activeIndex = TAB_IDS.indexOf(activeTab as typeof TAB_IDS[number]);
 
   const handleTabClick = (tabId: string) => {
@@ -199,20 +199,6 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
             }}>Discover</span>
           </button>
 
-          {/* My Progress */}
-          <button onClick={() => handleTabClick("progress")} className={btnClass}>
-            <div className="transition-all duration-300" style={{
-              color: activeTab === "progress" ? "#ffffff" : "rgba(200, 210, 230, 0.6)",
-              opacity: activeTab === "progress" ? 1 : 0.3,
-              transform: activeTab === "progress" ? "scale(1.1)" : "scale(1)",
-            }}>
-              <img src={progressIcon} alt="My Progress" className="w-5 h-5 object-contain" />
-            </div>
-            <span className="text-[10px] mt-0.5 tracking-wide whitespace-nowrap transition-all duration-300" style={{
-              color: activeTab === "progress" ? "#ffffff" : "rgba(200, 210, 230, 0.5)",
-              fontWeight: activeTab === "progress" ? 700 : 400,
-            }}>My Progress</span>
-          </button>
 
           {/* Alerts */}
           <button onClick={() => handleTabClick("bell")} className={btnClass}>
