@@ -522,6 +522,39 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         const elements: React.ReactNode[] = [];
                         let lastWeek: number | null = null;
 
+                        // Handwritten ninja progress text above the latest card
+                        const remaining = 12 - realActivities.length;
+                        if (remaining > 0 && realActivities.length > 0) {
+                          const displayName = userProfile?.displayName || 'You';
+                          const firstName = displayName.split(' ')[0];
+                          elements.push(
+                            <motion.div
+                              key="ninja-progress-text"
+                              className="relative"
+                              style={{ padding: '4px 16px 12px 52px' }}
+                              initial={{ opacity: 0, y: 10, rotate: -1 }}
+                              animate={{ opacity: 1, y: 0, rotate: -1.5 }}
+                              transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                            >
+                              <p style={{
+                                fontFamily: "'Caveat', cursive",
+                                fontSize: 18,
+                                fontWeight: 600,
+                                color: 'rgba(255,255,255,0.55)',
+                                margin: 0,
+                                lineHeight: 1.3,
+                                letterSpacing: '0.02em',
+                              }}>
+                                {firstName} is {remaining} {remaining === 1 ? 'activity' : 'activities'} away from becoming Ninja 🥷
+                              </p>
+                              {/* Hand-drawn underline */}
+                              <svg width="140" height="8" viewBox="0 0 140 8" fill="none" style={{ marginTop: 2, opacity: 0.3 }}>
+                                <path d="M2 5c20-4 40 2 60-1s40 3 76-1" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round" />
+                              </svg>
+                            </motion.div>
+                          );
+                        }
+
                         realActivities.forEach((act, idx) => {
                           const wk = Math.ceil(act.dayNumber / 3);
 
