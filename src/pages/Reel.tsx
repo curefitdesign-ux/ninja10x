@@ -1723,7 +1723,13 @@ const Reel = () => {
                             filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
                           }}
                         >
-                          {hasFrame && activity ? (
+                          {activity?.id === 'log-activity' ? (
+                            <div className="w-full h-full flex flex-col items-center justify-center" style={{ background: '#0A0A0F' }}>
+                              <div style={{ width: 80, height: 80, borderRadius: '50%', overflow: 'hidden' }}>
+                                <video src="/videos/curo-peeking.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              </div>
+                            </div>
+                          ) : hasFrame && activity ? (
                             <StoryFrameRenderer
                               imageUrl={media}
                               isVideo={activity.isVideo}
