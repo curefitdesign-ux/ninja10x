@@ -408,7 +408,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     return { rotation: ((seed % 11) - 5) * 1.2, offsetX: ((seed * 3) % 7) - 2, decorType: seed % 5 };
                   };
                   const handDates = ['just now ✨','yesterday','a few days ago','last week','feeling strong 💪','what a session!','crushed it 🔥','new PR day','getting better','consistency > all','momentum building','unstoppable 🚀'];
-                  const handQuotes = ['→ keep showing up!','↓ the grind continues...','★ proud of this one','~ good vibes only','✓ done & dusted','♡ self care day'];
 
                   return (
                     <>
