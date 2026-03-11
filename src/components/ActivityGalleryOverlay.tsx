@@ -363,56 +363,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   exit={{ opacity: 0, height: 0, paddingBottom: 0 }}
                   transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
                 >
-                   {/* Instagram Notes-style thought bubble */}
-                   {(() => {
-                     const realCount = activities.filter(a => !a.isPlaceholder).length;
-                     const remaining = 12 - realCount;
-                     if (remaining > 0) {
-                       const bubbleText = isOwnProfile !== false
-                         ? `${remaining} ${remaining === 1 ? 'activity' : 'activities'} away from becoming Ninja`
-                         : `${userProfile.displayName} is ${remaining} ${remaining === 1 ? 'activity' : 'activities'} away from becoming Ninja`;
-                       return (
-                         <motion.div
-                           className="relative mb-2"
-                           initial={{ opacity: 0, y: 6, scale: 0.9 }}
-                           animate={{ opacity: 1, y: 0, scale: 1 }}
-                           transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 20 }}
-                         >
-                            <div
-                              style={{
-                                background: '#E8E8E8',
-                                borderRadius: 18,
-                                padding: '8px 14px',
-                                maxWidth: 210,
-                              }}
-                            >
-                              <p style={{
-                                fontFamily: "'Inter', -apple-system, sans-serif",
-                                fontSize: 12,
-                                fontWeight: 500,
-                                lineHeight: 1.35,
-                                color: '#1a1a1a',
-                                margin: 0,
-                                textAlign: 'center',
-                              }}>
-                                {bubbleText}
-                              </p>
-                            </div>
-                            {/* Thought bubble dot - bottom left like iMessage */}
-                            <div style={{
-                              position: 'absolute',
-                              left: 16,
-                              bottom: -6,
-                              width: 10,
-                              height: 10,
-                              borderRadius: '50%',
-                              background: '#E8E8E8',
-                            }} />
-                         </motion.div>
-                       );
-                     }
-                     return null;
-                   })()}
                    <motion.div 
                      className="rounded-full overflow-hidden"
                      style={{ width: 56, height: 56, border: '2.5px solid rgba(255,255,255,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
