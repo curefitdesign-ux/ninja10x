@@ -1685,7 +1685,7 @@ const Reel = () => {
             <CarouselContent className="h-full -ml-3" viewportClassName="h-full px-[24px]">
               {effectiveUserGroups.map((group, idx) => {
                 const isCenter = idx === currentUserIndex;
-                const activities = [...(group.activities || [])].reverse().filter(a => a.id !== 'log-activity');
+                const activities = [...(group.activities || [])].reverse();
                 const activity = isCenter
                   ? currentActivity
                   : activities.find(a => !!(a.originalUrl || a.storageUrl) && !isVideoUrl((a.originalUrl || a.storageUrl || '')))
@@ -1723,7 +1723,13 @@ const Reel = () => {
                             filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
                           }}
                         >
-                          {hasFrame && activity ? (
+                          {activity?.id === 'log-activity' ? (
+                            <div className="w-full h-full flex flex-col items-center justify-center" style={{ background: '#0A0A0F' }}>
+                              <div style={{ width: 80, height: 80, borderRadius: '50%', overflow: 'hidden' }}>
+                                <video src="/videos/curo-peeking.mp4" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              </div>
+                            </div>
+                          ) : hasFrame && activity ? (
                             <StoryFrameRenderer
                               imageUrl={media}
                               isVideo={activity.isVideo}
@@ -1857,15 +1863,11 @@ const Reel = () => {
                               aspectRatio: '9/16',
                               height: 'calc(95% - 10px)',
                               maxWidth: '100%',
-                              borderRadius: isLogActivityCard ? '13px' : '0px',
+                              borderRadius: '0px',
                               overflow: 'hidden',
                               background: isLogActivityCard ? '#0A0A0F' : 'transparent',
                               marginTop: '-10px',
                               zIndex: 3,
-                              ...(isLogActivityCard ? {
-                                border: '1.5px solid rgba(139, 92, 246, 0.35)',
-                                boxShadow: '0 0 30px rgba(139, 92, 246, 0.15), inset 0 1px 1px rgba(255,255,255,0.05)',
-                              } : {}),
                             }}
                           >
                         {/* Progress bar removed — timing indicated via avatar ring */}
