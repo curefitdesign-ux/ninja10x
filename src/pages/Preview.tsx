@@ -807,14 +807,6 @@ const Preview = () => {
           label1Name={activityLabels.secondaryMetric}
           label2Name={activityLabels.primaryMetric}
         />;
-      case 'holographic':
-        return <HolographicFrame 
-          {...frameProps} 
-          label1={activityLabels.secondaryUnit}
-          label2={activityLabels.primaryUnit}
-          label1Name={activityLabels.secondaryMetric}
-          label2Name={activityLabels.primaryMetric}
-        />;
       case 'arcade':
         return <ArcadeFrame {...frameProps} />;
       case 'bold':
