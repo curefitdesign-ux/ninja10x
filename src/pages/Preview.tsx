@@ -1258,6 +1258,7 @@ const Preview = () => {
                         {frame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
                         {frame === 'holographic' && <HolographicFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
                         {frame === 'arcade' && <ArcadeFrame {...frameProps} />}
+                        {frame === 'bold' && <BoldFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
                       </div>
                     </motion.div>
                 );
