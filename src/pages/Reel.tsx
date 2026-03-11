@@ -1775,8 +1775,8 @@ const Reel = () => {
                     {(() => {
                       const shouldShowLocked = !isOwnStory && !viewerCanSeeCommunity;
                       const contentKey = `${currentUserIndex}-${currentActivityIndex}`;
-                      // Show stacked cards behind for other users' stories (not own, not log-activity)
-                      const showStackedCards = !isOwnCard && !isLogActivityCard && activities.length > 1;
+                      // Show stacked cards behind for all users with multiple activities (not log-activity)
+                      const showStackedCards = !isLogActivityCard && activities.length > 1;
                       return (
                         <div
                           className="relative flex items-center justify-center"
