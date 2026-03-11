@@ -896,7 +896,17 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
               {canShare && (
                 <button
-                  onClick={(e) => { e.stopPropagation(); setShowShareOptions(true); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const payload = buildSharePayload();
+                    if (navigator.share) {
+                      navigator.share(payload).catch(() => {});
+                    } else {
+                      navigator.clipboard.writeText(`${payload.text}\n\n${payload.url}`)
+                        .then(() => toast.success('Link copied!'))
+                        .catch(() => toast.error('Unable to copy'));
+                    }
+                  }}
                   className="shrink-0 active:scale-95 transition-transform"
                   style={{
                     width: 42, height: 42, borderRadius: 21,
