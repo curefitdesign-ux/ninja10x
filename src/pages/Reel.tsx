@@ -374,10 +374,8 @@ const Reel = () => {
       }],
     };
 
-    // Reorder: unviewed users first, then viewed users pushed to back
-    const unviewedOthers = othersGroups.filter(g => !viewedUsers.has(g.userId));
-    const viewedOthers = othersGroups.filter(g => viewedUsers.has(g.userId));
-    const allGroups = [myGroup, ...unviewedOthers, ...viewedOthers];
+    // Instagram-style: maintain fixed order, viewed users just get grey ring
+    const allGroups = [myGroup, ...othersGroups];
 
     // Insert deep-link group right after own group so navigation finds it
     if (deepLinkGroup) {
@@ -394,7 +392,7 @@ const Reel = () => {
     }
 
     return allGroups.filter(g => g.activities.length > 0);
-  }, [userGroups, user, myActivities, profile, sourceUserId, deepLinkActivityId, viewedUsers]);
+  }, [userGroups, user, myActivities, profile, sourceUserId, deepLinkActivityId]);
 
   // Stabilize currentUserIndex when groups reorder due to viewedUsers change
   const currentUserIdRef = useRef<string>('');
@@ -1455,7 +1453,7 @@ const Reel = () => {
                     }}
                   >
                     <div className="relative" style={{ width: avatarSize, height: avatarSize }}>
-                      {ownGroup && ownActivityCount > 0 && (!viewedUsers.has(user?.id || '') || isOwnActive) && (
+                      {ownGroup && ownActivityCount > 0 && (
                         <svg
                           className="absolute inset-0"
                           style={{ width: avatarSize, height: avatarSize, transform: 'rotate(-90deg)' }}
