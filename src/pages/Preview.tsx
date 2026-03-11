@@ -129,10 +129,6 @@ const FRAME_COLORS: Record<FrameType, { accent: string; gradient: string }> = {
     accent: 'rgba(10, 82, 120, 0.45)',
     gradient: 'linear-gradient(160deg, rgba(15, 100, 145, 0.35) 0%, rgba(5, 40, 60, 0.6) 100%)'
   },
-  holographic: {
-    accent: 'rgba(120, 60, 200, 0.50)',
-    gradient: 'linear-gradient(160deg, rgba(180, 60, 255, 0.35) 0%, rgba(0, 120, 255, 0.35) 50%, rgba(255, 60, 180, 0.3) 100%)',
-  },
   arcade: {
     accent: 'rgba(0, 0, 0, 0.65)',
     gradient: 'linear-gradient(160deg, rgba(20, 20, 30, 0.5) 0%, rgba(0, 0, 0, 0.7) 100%)',
