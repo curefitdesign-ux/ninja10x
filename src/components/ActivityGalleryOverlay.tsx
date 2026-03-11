@@ -642,7 +642,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           // Add spacing between weeks
                           if (lastWeek !== null && wk !== lastWeek) {
                             elements.push(
-                              <div key={`week-spacer-${wk}-${lastWeek}`} style={{ height: 20 }} />
+                              <div key={`week-spacer-${wk}-${lastWeek}`} style={{ height: 36 }} />
                             );
                           }
                           lastWeek = wk;
