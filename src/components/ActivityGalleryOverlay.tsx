@@ -11,7 +11,7 @@ import { ReactionType, ActivityReaction, sendReaction } from '@/services/journey
 import { useJourneyActivities } from '@/hooks/use-journey-activities';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
 import StoryFrameRenderer from '@/components/StoryFrameRenderer';
-import DynamicBlurBackground from '@/components/DynamicBlurBackground';
+
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import Floating3DEmojis from '@/components/Floating3DEmojis';
