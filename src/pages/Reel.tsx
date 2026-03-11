@@ -311,7 +311,7 @@ const Reel = () => {
     const myGroupActivities = myGroup$?.activities.filter(a => a.dayNumber < 1001) || [];
     const effectiveCount = Math.max(allMyActivities.length, myGroupActivities.length);
     
-    if (effectiveCount < 12) {
+    if (effectiveCount < 12 && !loggedToday) {
       ownActivities.push({
         id: 'log-activity',
         dayNumber: effectiveCount + 1,
