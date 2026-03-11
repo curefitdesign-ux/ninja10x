@@ -1879,7 +1879,7 @@ const Reel = () => {
                                   marginTop: '-10px',
                                   overflow: 'hidden',
                                   zIndex: 1,
-                                  borderRadius: '14px',
+                                  borderRadius: '9px',
                                   background: 'rgba(255,255,255,0.03)',
                                   border: '1px solid rgba(255,255,255,0.10)',
                                   boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 0.5px 0 rgba(255,255,255,0.08)',
