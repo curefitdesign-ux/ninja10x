@@ -468,7 +468,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         key={act.id}
                         ref={(el) => { cardRefs.current[act.id] = el; }}
                         className="relative"
-                        style={{ padding: '12px 16px 12px 48px', marginBottom: idx < reversedActivities.length - 1 ? 16 : 0 }}
+                        style={{ padding: '12px 16px 12px 48px', marginBottom: idx < realActivities.length - 1 ? 16 : 0 }}
                       >
                         {/* Timeline dot */}
                         <div className="absolute rounded-full" style={{
@@ -484,7 +484,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           fontFamily: "'Caveat', cursive", fontSize: 18,
                           color: isAtTop ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.45)',
                           marginBottom: 6,
-                          transform: `rotate(${activeRotation * 0.3}deg)`,
+                          transform: `rotate(${rotation * 0.3}deg)`,
                           marginLeft: offsetX,
                           transition: 'color 0.3s ease',
                           fontWeight: isAtTop ? 700 : 400,
@@ -492,14 +492,13 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           W{wk} · Activity {dw}
                         </p>
 
-                        {/* Card — not tappable */}
+                        {/* Card — not tappable, no movement on scroll */}
                         <div
                           className="relative overflow-visible"
                           style={{
                             width: '62%', aspectRatio: '9/16', borderRadius: 4,
-                            transform: `rotate(${activeRotation}deg) translateX(${offsetX}px)`,
+                            transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
                             marginLeft: idx % 2 === 0 ? '0%' : '10%',
-                            transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
                           }}
                         >
                           <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4, containerType: 'inline-size' }}>
@@ -518,7 +517,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               bottom: -12, right: -8, background: 'rgba(255,255,255,0.1)',
                               backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
                               border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
-                              transform: `rotate(${-activeRotation * 0.5}deg)`,
+                              transform: `rotate(${-rotation * 0.5}deg)`,
                             }}>
                               <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
                             </div>
@@ -531,7 +530,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             return (
                               <div className="absolute flex items-center gap-1" style={{
                                 bottom: -10, left: -6, zIndex: 30,
-                                transform: `rotate(${-activeRotation * 0.6}deg)`,
+                                transform: `rotate(${-rotation * 0.6}deg)`,
                               }}>
                                 {total > 0 && (
                                   <span style={{
@@ -560,7 +559,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             );
                           })()}
 
-                          {/* Edit button — only on most recent, own profile */}
+                          {/* Edit button — only on most recent, own profile, within 24h */}
                           {canEdit && (
                             <button
                               className="absolute flex items-center gap-1 active:scale-90 transition-transform"
@@ -569,7 +568,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)',
                                 borderRadius: 14, padding: '4px 10px',
                                 border: '1px solid rgba(255,255,255,0.15)',
-                                transform: `rotate(${-activeRotation * 0.5}deg)`,
+                                transform: `rotate(${-rotation * 0.5}deg)`,
                               }}
                               onClick={(e) => { e.stopPropagation(); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowEditSheet(true); }}
                             >
@@ -578,6 +577,19 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             </button>
                           )}
                         </div>
+
+                        {/* Hand-drawn doodle text */}
+                        <p className="pointer-events-none" style={{
+                          fontFamily: "'Caveat', cursive",
+                          fontSize: 14,
+                          color: 'rgba(255,255,255,0.18)',
+                          marginTop: 18,
+                          marginLeft: doodleOnRight ? '45%' : '5%',
+                          transform: `rotate(${((act.dayNumber * 5 + idx * 11) % 9) - 4}deg)`,
+                          letterSpacing: '0.03em',
+                        }}>
+                          {doodleText}
+                        </p>
                       </div>
                     );
                   })}
