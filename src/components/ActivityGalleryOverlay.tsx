@@ -453,7 +453,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     const topTiltSeed = (act.dayNumber * 17 + idx * 7) % 13;
                     const topTilt = ((topTiltSeed - 6) * 1.5);
                     const activeRotation = isAtTop ? topTilt : rotation;
-                    const canEdit = isOwnProfile && mostRecentActivity?.id === act.id;
+                    const canEdit = isOwnProfile && isWithin24h(act);
 
                     return (
                       <div
