@@ -408,6 +408,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                 {(() => {
                   const sortedActivities = [...activities].filter(a => !a.isPlaceholder);
+                  // Reverse: show from end-goal down to oldest (most recent first, oldest last)
+                  const reversedActivities = [...sortedActivities].reverse();
+                  const remainingDays = 12 - sortedActivities.length;
                   const getCardStyle = (index: number, dayNumber: number) => {
                     const seed = dayNumber * 7 + index * 13;
                     return { rotation: ((seed % 11) - 5) * 1.2, offsetX: ((seed * 3) % 7) - 2, decorType: seed % 5 };
@@ -415,7 +418,18 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   const handDates = ['just now ✨','yesterday','a few days ago','last week','feeling strong 💪','what a session!','crushed it 🔥','new PR day','getting better','consistency > all','momentum building','unstoppable 🚀'];
                   const handQuotes = ['→ keep showing up!','↓ the grind continues...','★ proud of this one','~ good vibes only','✓ done & dusted','♡ self care day'];
 
-                  return sortedActivities.map((act, idx) => {
+                  return (
+                    <>
+                      {/* End goal — certificate */}
+                      <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
+                        <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: sortedActivities.length >= 12 ? 'linear-gradient(135deg, #F59E0B, #EF4444)' : 'rgba(255,255,255,0.08)', border: `2px solid ${sortedActivities.length >= 12 ? 'rgba(245,158,11,0.4)' : 'rgba(255,255,255,0.1)'}` }} />
+                        <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: sortedActivities.length >= 12 ? 'rgba(245,158,11,0.7)' : 'rgba(255,255,255,0.2)', transform: 'rotate(1deg)' }}>
+                          {sortedActivities.length >= 12 ? '🏆 journey complete! you did it!' : `🏆 ${remainingDays} ${remainingDays === 1 ? 'day' : 'days'} to go... keep pushing!`}
+                        </p>
+                      </div>
+
+                      {/* Activities: recent → oldest */}
+                      {reversedActivities.map((act, idx) => {
                     const { rotation, offsetX, decorType } = getCardStyle(idx, act.dayNumber);
                     const wk = Math.ceil(act.dayNumber / 3);
                     const dw = ((act.dayNumber - 1) % 3) + 1;
