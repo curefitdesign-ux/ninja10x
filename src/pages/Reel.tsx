@@ -1726,12 +1726,10 @@ const Reel = () => {
                           }}
                         >
                           {activity?.id === 'log-activity' ? (
-                            <div className="w-full h-full flex items-center justify-center px-3 py-2">
+                            <div className="w-full h-full flex items-center justify-center">
                               <div
-                                className="flex flex-col items-center justify-center gap-5 px-6 text-center"
+                                className="w-full h-full flex flex-col items-center justify-center gap-5 px-6 text-center"
                                 style={{
-                                  width: '86%',
-                                  height: 'calc(95% - 10px)',
                                   background: 'hsl(var(--background))',
                                 }}
                               >
