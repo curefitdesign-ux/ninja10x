@@ -458,7 +458,10 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     const wk = Math.ceil(act.dayNumber / 3);
                     const dw = ((act.dayNumber - 1) % 3) + 1;
                     const isAtTop = topCardId === act.id;
-                    // No tilt change on scroll — cards stay static
+                    // Dynamic tilt when card reaches top of scroll
+                    const topTiltSeed = (act.dayNumber * 17 + idx * 7) % 13;
+                    const topTilt = ((topTiltSeed - 6) * 1.5);
+                    const activeRotation = isAtTop ? topTilt : rotation;
                     const canEdit = isOwnProfile && isWithin24h(act);
                     const doodleText = doodleTexts[(act.dayNumber * 3 + idx * 7) % doodleTexts.length];
                     const doodleOnRight = idx % 2 !== 0; // alternate sides
@@ -492,13 +495,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           W{wk} · Activity {dw}
                         </p>
 
-                        {/* Card — not tappable, no movement on scroll */}
+                        {/* Card — tilts when at top of scroll */}
                         <div
                           className="relative overflow-visible"
                           style={{
                             width: '62%', aspectRatio: '9/16', borderRadius: 4,
-                            transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
+                            transform: `rotate(${activeRotation}deg) translateX(${offsetX}px)`,
                             marginLeft: idx % 2 === 0 ? '0%' : '10%',
+                            transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
                           }}
                         >
                           <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4, containerType: 'inline-size' }}>
@@ -513,11 +517,11 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                           {/* Activity name tag */}
                           {act.activity && (
-                            <div className="absolute pointer-events-none" style={{
+                             <div className="absolute pointer-events-none" style={{
                               bottom: -12, right: -8, background: 'rgba(255,255,255,0.1)',
                               backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
                               border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
-                              transform: `rotate(${-rotation * 0.5}deg)`,
+                              transform: `rotate(${-activeRotation * 0.5}deg)`,
                             }}>
                               <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
                             </div>
@@ -530,7 +534,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             return (
                               <div className="absolute flex items-center gap-1" style={{
                                 bottom: -10, left: -6, zIndex: 30,
-                                transform: `rotate(${-rotation * 0.6}deg)`,
+                                transform: `rotate(${-activeRotation * 0.6}deg)`,
                               }}>
                                 {total > 0 && (
                                   <span style={{
@@ -564,11 +568,11 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             <button
                               className="absolute flex items-center gap-1 active:scale-90 transition-transform"
                               style={{
-                                top: -10, left: -6, zIndex: 30,
+                                top: -10, right: -6, zIndex: 30,
                                 background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)',
                                 borderRadius: 14, padding: '4px 10px',
                                 border: '1px solid rgba(255,255,255,0.15)',
-                                transform: `rotate(${-rotation * 0.5}deg)`,
+                                transform: `rotate(${-activeRotation * 0.5}deg)`,
                               }}
                               onClick={(e) => { e.stopPropagation(); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowEditSheet(true); }}
                             >
