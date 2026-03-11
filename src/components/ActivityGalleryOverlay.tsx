@@ -445,13 +445,13 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   return (
                     <>
                       {/* CERTIFICATE — top of timeline */}
-                      <div className="relative flex items-center gap-3" style={{ padding: '16px 16px 20px 16px' }}>
-                        <img src={sortedActivities.length >= 12 ? tileActiveSvg : tileInactiveSvg} alt="" style={{ width: 32, height: 32, flexShrink: 0 }} />
+                      <div className="relative flex items-center gap-3" style={{ padding: '16px 20px 20px 20px' }}>
+                        <div style={{ width: 28, height: 28, borderRadius: '50%', background: sortedActivities.length >= 12 ? '#8B7355' : 'rgba(138,120,90,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 14 }}>🏆</div>
                         <div>
-                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, color: sortedActivities.length >= 12 ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.25)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                            🏆 Certificate
+                          <p style={{ fontFamily: "'Caveat', cursive", fontSize: 16, fontWeight: 700, color: sortedActivities.length >= 12 ? '#3A3028' : 'rgba(58,48,40,0.3)', letterSpacing: '0.02em' }}>
+                            Certificate
                           </p>
-                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: sortedActivities.length >= 12 ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.15)', marginTop: 2 }}>
+                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: sortedActivities.length >= 12 ? 'rgba(58,48,40,0.5)' : 'rgba(58,48,40,0.2)', marginTop: 1 }}>
                             {sortedActivities.length >= 12 ? 'Journey Complete — You crushed it!' : `${remainingDays} ${remainingDays === 1 ? 'day' : 'days'} to go`}
                           </p>
                         </div>
@@ -464,15 +464,13 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         const hasAnyActivity = weekActs.length > 0;
                         const weekTheme = WEEK_THEMES[weekNum] || '';
                         const isCollapsed = !!collapsedWeeks[weekNum];
-
-                        // Activities sorted descending within each week (Activity 3, 2, 1)
                         const weekActsDesc = [...weekActs].sort((a, b) => b.dayNumber - a.dayNumber);
 
                         return (
                           <div key={`week-${weekNum}`}>
-                            {/* REEL GENERATION row — only show button for complete weeks */}
+                            {/* REEL GENERATION row */}
                             {isWeekComplete && isOwnProfile && (
-                              <div className="flex flex-col items-center" style={{ padding: '4px 16px 12px 16px' }}>
+                              <div className="flex flex-col items-center" style={{ padding: '4px 20px 12px 20px' }}>
                                 <button
                                   onClick={() => {
                                     const weekActivities = weekActs.map(a => ({
@@ -484,12 +482,10 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                   }}
                                   className="active:scale-95 transition-transform"
                                   style={{
-                                    fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 600,
-                                    color: 'rgba(255,255,255,0.75)', background: 'rgba(255,255,255,0.06)',
-                                    backdropFilter: 'blur(30px) saturate(180%)', WebkitBackdropFilter: 'blur(30px) saturate(180%)',
-                                    border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20,
+                                    fontFamily: "'Caveat', cursive", fontSize: 14, fontWeight: 700,
+                                    color: '#6B5B45', background: 'rgba(138,120,90,0.08)',
+                                    border: '1px dashed rgba(138,120,90,0.25)', borderRadius: 20,
                                     padding: '7px 18px', letterSpacing: '0.02em',
-                                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
                                   }}
                                 >
                                   ✨ Generate Week {weekNum} Reel
@@ -497,32 +493,38 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               </div>
                             )}
 
-                            {/* WEEK HEADER — tappable to collapse/expand */}
+                            {/* WEEK HEADER */}
                             <div
                               className="flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform"
-                              style={{ padding: '4px 16px 12px 16px' }}
+                              style={{ padding: '8px 20px 12px 20px' }}
                               onClick={() => setCollapsedWeeks(prev => ({ ...prev, [weekNum]: !prev[weekNum] }))}
                             >
-                              <img src={isWeekComplete ? tileActiveSvg : tileInactiveSvg} alt="" style={{ width: 30, height: 30, flexShrink: 0, opacity: isWeekComplete ? 1 : 0.5 }} />
+                              <div style={{
+                                width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                                background: isWeekComplete ? '#8B7355' : 'rgba(138,120,90,0.12)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: 12, fontWeight: 800, color: isWeekComplete ? '#F5F0E8' : 'rgba(58,48,40,0.25)',
+                                fontFamily: "'Inter', sans-serif",
+                              }}>
+                                W{weekNum}
+                              </div>
                               <div style={{ flex: 1 }}>
                                 <p style={{
-                                  fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700,
-                                  color: isWeekComplete ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.2)',
-                                  letterSpacing: '0.04em', textTransform: 'uppercase',
+                                  fontFamily: "'Caveat', cursive", fontSize: 16, fontWeight: 700,
+                                  color: isWeekComplete ? '#3A3028' : 'rgba(58,48,40,0.3)',
                                 }}>
                                   Week {weekNum} — {weekTheme}
                                 </p>
-                                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: isWeekComplete ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.12)', marginTop: 2 }}>
-                                  {isWeekComplete ? 'Completed ✓' : hasAnyActivity ? `${weekActs.length}/3 activities` : 'Not started yet'}
+                                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: isWeekComplete ? 'rgba(58,48,40,0.45)' : 'rgba(58,48,40,0.18)', marginTop: 1 }}>
+                                  {isWeekComplete ? 'Completed ✓' : hasAnyActivity ? `${weekActs.length}/3 entries` : 'Not started yet'}
                                 </p>
                               </div>
-                              {/* Chevron */}
                               <motion.div
                                 animate={{ rotate: isCollapsed ? 0 : 180 }}
                                 transition={{ duration: 0.2 }}
-                                style={{ opacity: 0.3 }}
+                                style={{ opacity: 0.35 }}
                               >
-                                <ChevronUp className="w-4 h-4 text-white" />
+                                <ChevronUp className="w-4 h-4" style={{ color: '#3A3028' }} />
                               </motion.div>
                             </div>
 
@@ -536,21 +538,20 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                   transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                                   style={{ overflow: 'hidden' }}
                                 >
-                                  {/* All 3 slots in descending order (slot 3, 2, 1) */}
                                   {[3, 2, 1].map((slot, idx) => {
                                     const dayNum = (weekNum - 1) * 3 + slot;
                                     const act = weekActsDesc.find(a => a.dayNumber === dayNum);
 
                                     if (!act) {
                                       return (
-                                        <div key={`slot-${weekNum}-${dayNum}`} className="relative flex items-center gap-3" style={{ padding: '10px 16px 10px 16px', marginBottom: 4 }}>
-                                          <img src={tileInactiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0, opacity: 0.5 }} />
+                                        <div key={`slot-${weekNum}-${dayNum}`} className="relative flex items-center gap-3" style={{ padding: '8px 20px 8px 28px', marginBottom: 4 }}>
+                                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'rgba(138,120,90,0.15)', flexShrink: 0 }} />
                                           <div>
-                                            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.02em' }}>
+                                            <p style={{ fontFamily: "'Caveat', cursive", fontSize: 15, fontWeight: 600, color: 'rgba(58,48,40,0.22)' }}>
                                               Activity {dayNum}
                                             </p>
-                                            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.12)', marginTop: 1 }}>
-                                              Upcoming
+                                            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 400, color: 'rgba(58,48,40,0.15)', marginTop: 1 }}>
+                                              Coming soon
                                             </p>
                                           </div>
                                         </div>
@@ -565,18 +566,18 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                     return (
                                       <motion.div
                                         key={act.id} className="relative"
-                                        style={{ padding: '10px 16px 10px 16px', marginBottom: 16 }}
+                                        style={{ padding: '8px 20px 8px 20px', marginBottom: 16 }}
                                         initial={{ opacity: 0, y: 30 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: globalIdx * 0.06, type: 'spring', stiffness: 200, damping: 20 }}
                                       >
-                                        <div className="flex items-center gap-3" style={{ marginBottom: 8 }}>
-                                          <img src={tileActiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0 }} />
+                                        <div className="flex items-center gap-3" style={{ marginBottom: 8, paddingLeft: 8 }}>
+                                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#8B7355', flexShrink: 0 }} />
                                           <div>
-                                            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.02em' }}>
+                                            <p style={{ fontFamily: "'Caveat', cursive", fontSize: 15, fontWeight: 700, color: '#3A3028' }}>
                                               Activity {act.dayNumber}
                                             </p>
-                                            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.45)', marginTop: 1 }}>
+                                            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 400, color: 'rgba(58,48,40,0.45)', marginTop: 1 }}>
                                               {subtitle}{durationSubtitle}
                                             </p>
                                           </div>
@@ -588,6 +589,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                             width: '62%', aspectRatio: '9/16', borderRadius: 4,
                                             transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
                                             marginLeft: idx % 2 === 0 ? '16%' : '22%',
+                                            boxShadow: '0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.06)',
                                           }}
                                           onClick={() => { const ri = activities.findIndex(a => a.id === act.id); if (ri >= 0) setCurrentIndex(ri); }}
                                           whileTap={{ scale: 0.97 }}
@@ -613,8 +615,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                                 {total > 0 && (
                                                   <span style={{
                                                     fontFamily: "'Caveat', cursive", fontSize: 16,
-                                                    color: 'rgba(255,255,255,0.55)',
-                                                    textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                                                    color: 'rgba(58,48,40,0.55)',
+                                                    textShadow: '0 1px 2px rgba(0,0,0,0.1)',
                                                   }}>
                                                     {total} ❤️
                                                   </span>
@@ -623,14 +625,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                                   <button
                                                     className="flex items-center gap-0.5 active:scale-90 transition-transform"
                                                     style={{
-                                                      background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
+                                                      background: 'rgba(58,48,40,0.08)', backdropFilter: 'blur(10px)',
                                                       borderRadius: 14, padding: '3px 8px',
-                                                      border: '1px solid rgba(255,255,255,0.12)',
+                                                      border: '1px solid rgba(58,48,40,0.1)',
                                                     }}
                                                     onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}
                                                   >
                                                     <span style={{ fontSize: 12 }}>🔥</span>
-                                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>React</span>
+                                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(58,48,40,0.5)' }}>React</span>
                                                   </button>
                                                 )}
                                               </div>
@@ -648,13 +650,13 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       })}
 
                       {/* Journey start — bottom */}
-                      <div className="relative flex items-center gap-3" style={{ padding: '16px 16px 24px 16px' }}>
-                        <img src={tileActiveSvg} alt="" style={{ width: 28, height: 28, flexShrink: 0, opacity: 0.6 }} />
+                      <div className="relative flex items-center gap-3" style={{ padding: '16px 20px 24px 20px' }}>
+                        <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(138,120,90,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 14 }}>🌱</div>
                         <div>
-                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.02em' }}>
-                            🌱 Journey begins here
+                          <p style={{ fontFamily: "'Caveat', cursive", fontSize: 16, fontWeight: 700, color: 'rgba(58,48,40,0.35)' }}>
+                            Journey begins here
                           </p>
-                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(255,255,255,0.15)', marginTop: 1 }}>
+                          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, color: 'rgba(58,48,40,0.2)', marginTop: 1 }}>
                             Day 1 of your transformation
                           </p>
                         </div>
