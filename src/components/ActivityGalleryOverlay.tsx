@@ -449,14 +449,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         <motion.div
                           className="relative overflow-visible cursor-pointer"
                           style={{
-                            width: '55%', aspectRatio: '9/16', borderRadius: 6,
+                            width: '62%', aspectRatio: '9/16', borderRadius: 4,
                             transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
-                            marginLeft: idx % 2 === 0 ? '0%' : '12%',
+                            marginLeft: idx % 2 === 0 ? '0%' : '10%',
                           }}
                           onClick={() => { const ri = activities.findIndex(a => a.id === act.id); if (ri >= 0) setCurrentIndex(ri); }}
                           whileTap={{ scale: 0.97 }}
                         >
-                          <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 6 }}>
+                          <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4, containerType: 'inline-size' }}>
                             {act.frame ? (
                               <StoryFrameRenderer imageUrl={act.originalUrl || act.storageUrl} isVideo={act.isVideo} activity={act.activity} frame={act.frame} duration={act.duration} pr={act.pr} dayNumber={act.dayNumber} />
                             ) : act.isVideo ? (
