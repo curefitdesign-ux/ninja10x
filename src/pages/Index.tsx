@@ -112,80 +112,12 @@ const Index = () => {
     // No-op: reel generation disabled
   }, []);
 
-  // Track cached recap state for all completed weeks
-  const [cachedWeeks, setCachedWeeks] = useState<Set<number>>(new Set());
-  const cacheCheckRef = useRef(false);
-
-  // Check cache for ALL completed weeks
-  useEffect(() => {
-    const completedWeeks = Math.floor(photos.length / 3);
-    if (completedWeeks <= 0 || cacheCheckRef.current) return;
-    cacheCheckRef.current = true;
-    
-    const checkAll = async () => {
-      const cached = new Set<number>();
-      for (let w = 1; w <= completedWeeks; w++) {
-        const isCached = await hasRecapCached(w, userId || undefined);
-        if (isCached) cached.add(w);
-      }
-      setCachedWeeks(cached);
-    };
-    checkAll();
-  }, [photos.length, userId]);
-
-  // Play cached recap directly
-  const playCachedRecap = useCallback(async (weekNumber: number) => {
-    const blob = await getRecapFromCache(weekNumber, userId || undefined);
-    if (blob) {
-      const url = URL.createObjectURL(blob);
-      navigate('/reel', {
-        state: { weekRecapVideo: url, weekNumber },
-      });
-    } else {
-      // Cache miss - fall back to generation
-      const weekStart = (weekNumber - 1) * 3;
-      const weekPhotos = photos.slice(weekStart, weekStart + 3);
-      if (weekPhotos.length === 3) {
-        handleGenerateReel(weekPhotos);
-      }
-    }
-  }, [navigate, handleGenerateReel, photos, userId]);
-
-  // Handler: week-specific reel tap from ImmersiveHomeLayout
-  const handleWeekReelTap = useCallback((weekNumber: number) => {
-    const isCached = cachedWeeks.has(weekNumber);
-    if (isCached) {
-      console.log('[WeekReelTap] Playing cached recap for week', weekNumber);
-      playCachedRecap(weekNumber);
-    } else {
-      console.log('[WeekReelTap] Generating recap for week', weekNumber);
-      const weekStart = (weekNumber - 1) * 3;
-      const weekPhotos = photos.slice(weekStart, weekStart + 3);
-      if (weekPhotos.length === 3) {
-        handleGenerateReel(weekPhotos);
-      }
-    }
-  }, [cachedWeeks, playCachedRecap, photos, handleGenerateReel]);
-
-  // Reel pill for WidgetLayout3 — show latest completed week with correct CTA
-  const reelPill = (() => {
-    const completedWeeks = Math.floor(photos.length / 3);
-    if (completedWeeks <= 0) return null;
-
-    const targetWeek = completedWeeks;
-    const isCached = cachedWeeks.has(targetWeek);
-    const state: PillState = isCached ? 'complete' : 'idle';
-
-    return {
-      weekNumber: targetWeek,
-      state,
-      progress: 0,
-      totalReactions: 0,
-      onPlay: () => handleWeekReelTap(targetWeek),
-      isActivelyGenerating: false,
-    };
-  })();
-
+  // Reel cache/pill temporarily disabled
+  const cachedWeeks = new Set<number>();
+  const handleWeekReelTap = useCallback((_weekNumber: number) => {
+    // No-op: reel generation disabled
+  }, []);
+  const reelPill = null;
   // Handle retake from preview
   const [instantCamera, setInstantCamera] = useState(() => {
     return !!(location.state?.openCameraWithActivity && location.state?.instantCamera);
