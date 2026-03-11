@@ -629,7 +629,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               key={act.id}
                               ref={(el) => { cardRefs.current[act.id] = el; }}
                               className="relative"
-                              style={{ padding: '12px 16px 12px 48px', marginBottom: idx < realActivities.length - 1 ? 28 : 0 }}
+                              style={{ padding: '12px 16px 12px 48px', marginBottom: idx < realActivities.length - 1 ? 8 : 0 }}
                             >
                               {/* Timeline dot */}
                               <div className="absolute rounded-full" style={{
