@@ -1941,7 +1941,7 @@ const Reel = () => {
                                   {/* Glowing plus — simple zoom in/out, tapping opens camera/gallery */}
                                   <button
                                     className="relative flex items-center justify-center mb-5 active:scale-95 transition-transform"
-                                    style={{ width: 90, height: 90 }}
+                                    style={{ width: 70, height: 70 }}
                                     onClick={(e) => { e.stopPropagation(); setShowEditSheet(true); }}
                                   >
                                     <motion.div 
