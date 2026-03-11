@@ -426,7 +426,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     const dw = ((act.dayNumber - 1) % 3) + 1;
                     const isSelected = act.id === current.id;
                     const handDate = handDates[act.dayNumber - 1] || handDates[idx % handDates.length];
-                    const handQuote = handQuotes[idx % handQuotes.length];
+                    
 
                     return (
                       <motion.div
