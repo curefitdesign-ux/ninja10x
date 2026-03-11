@@ -2388,6 +2388,7 @@ const Reel = () => {
             reactionCount: localReactions[a.id]?.total || a.reactionCount || 0,
             reactions: localReactions[a.id]?.reactions || a.reactions || {},
             reactorProfiles: localReactions[a.id]?.reactorProfiles || a.reactorProfiles || [],
+            createdAt: (a as any).createdAt || undefined,
           }));
         
         // Find earliest activity date for start date
