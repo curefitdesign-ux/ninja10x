@@ -29,7 +29,7 @@ import { useJourneyActivities } from '@/hooks/use-journey-activities';
 
 import { toast } from 'sonner';
 
-const FRAMES = ['token', 'holographic', 'shaky', 'arcade', 'bold', 'fitness', 'ticket'] as const;
+const FRAMES = ['token', 'shaky', 'arcade', 'bold', 'fitness', 'ticket'] as const;
 type FrameType = typeof FRAMES[number];
 
 // Activity options with minimal line icons
@@ -128,10 +128,6 @@ const FRAME_COLORS: Record<FrameType, { accent: string; gradient: string }> = {
   token: {
     accent: 'rgba(10, 82, 120, 0.45)',
     gradient: 'linear-gradient(160deg, rgba(15, 100, 145, 0.35) 0%, rgba(5, 40, 60, 0.6) 100%)'
-  },
-  holographic: {
-    accent: 'rgba(120, 60, 200, 0.50)',
-    gradient: 'linear-gradient(160deg, rgba(180, 60, 255, 0.35) 0%, rgba(0, 120, 255, 0.35) 50%, rgba(255, 60, 180, 0.3) 100%)',
   },
   arcade: {
     accent: 'rgba(0, 0, 0, 0.65)',
@@ -811,14 +807,6 @@ const Preview = () => {
           label1Name={activityLabels.secondaryMetric}
           label2Name={activityLabels.primaryMetric}
         />;
-      case 'holographic':
-        return <HolographicFrame 
-          {...frameProps} 
-          label1={activityLabels.secondaryUnit}
-          label2={activityLabels.primaryUnit}
-          label1Name={activityLabels.secondaryMetric}
-          label2Name={activityLabels.primaryMetric}
-        />;
       case 'arcade':
         return <ArcadeFrame {...frameProps} />;
       case 'bold':
@@ -1186,7 +1174,7 @@ const Preview = () => {
                 {currentFrame === 'fitness' && <FitnessFrame {...frameProps} />}
                 {currentFrame === 'ticket' && <TicketFrame {...frameProps} />}
                 {currentFrame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
-                {currentFrame === 'holographic' && <HolographicFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
+                
               </div>
             </div>
           ) : (
@@ -1256,7 +1244,7 @@ const Preview = () => {
                         {frame === 'fitness' && <FitnessFrame {...frameProps} />}
                         {frame === 'ticket' && <TicketFrame {...frameProps} />}
                         {frame === 'token' && <TokenFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
-                        {frame === 'holographic' && <HolographicFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
+                        
                         {frame === 'arcade' && <ArcadeFrame {...frameProps} />}
                         {frame === 'bold' && <BoldFrame {...frameProps} label1={activityLabels.secondaryUnit} label2={activityLabels.primaryUnit} label1Name={activityLabels.secondaryMetric} label2Name={activityLabels.primaryMetric} />}
                       </div>
