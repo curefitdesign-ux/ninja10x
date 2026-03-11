@@ -556,22 +556,23 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             >
                               {/* Timeline dot */}
                               <div className="absolute rounded-full" style={{
-                                left: 22, top: 28, width: 14, height: 14,
-                                background: isAtTop ? 'linear-gradient(135deg, #34D399, #10B981)' : 'rgba(255,255,255,0.15)',
-                                border: `2px solid ${isAtTop ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.1)'}`,
-                                boxShadow: isAtTop ? '0 0 12px rgba(52,211,153,0.4)' : 'none', zIndex: 5,
+                                left: 22, top: 30, width: 14, height: 14,
+                                background: isAtTop ? 'linear-gradient(135deg, #9b87f5, #7c3aed)' : 'rgba(255,255,255,0.15)',
+                                border: `2px solid ${isAtTop ? 'rgba(155,135,245,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                                boxShadow: isAtTop ? '0 0 12px rgba(155,135,245,0.4)' : 'none', zIndex: 5,
                                 transition: 'all 0.3s ease',
                               }} />
 
                               {/* Handwritten date */}
                               <p style={{
-                                fontFamily: "'Caveat', cursive", fontSize: 18,
+                                fontFamily: "'Caveat', cursive", fontSize: 23,
                                 color: isAtTop ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.45)',
                                 marginBottom: 6,
                                 transform: `rotate(${rotation * 0.3}deg)`,
                                 marginLeft: offsetX,
                                 transition: 'color 0.3s ease',
                                 fontWeight: isAtTop ? 700 : 400,
+                                lineHeight: 1,
                               }}>
                                 W{wk} · Activity {dw}
                               </p>
