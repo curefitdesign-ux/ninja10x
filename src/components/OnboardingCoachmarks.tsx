@@ -242,9 +242,9 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
                     style={{ color: textColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="Log 3 times a week." delay={0.3} />
+                    {renderRevealLine('Log 3 times a week.', 0.3)}
                     <br />
-                    <RevealLine text="Do it for 4 weeks." delay={2.4} />
+                    {renderRevealLine('Do it for 4 weeks.', 2.4)}
                   </h2>
 
                   <motion.div
@@ -309,15 +309,15 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
                     style={{ color: textColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="You won't walk alone." delay={1.0} />
+                    {renderRevealLine("You won't walk alone.", 1.0)}
                   </h2>
                   <p
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-6"
                     style={{ color: mutedColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="Cheer each other." delay={2.8} />
+                    {renderRevealLine('Cheer each other.', 2.8)}
                     <br />
-                    <RevealLine text="Move together." delay={4.4} />
+                    {renderRevealLine('Move together.', 4.4)}
                   </p>
 
                   {/* GOT IT CTA */}
