@@ -85,12 +85,10 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
 
   const getCurrentAvatarPreview = () => {
     if (customAvatarPreview) return customAvatarPreview;
-    if (selectedAvatar) {
-      const preset = PRESET_AVATARS.find(a => a.id === selectedAvatar);
-      return preset?.src;
-    }
     return null;
   };
+
+  const handleCropCancel = () => setCropImageSrc(null);
 
   const currentAvatar = getCurrentAvatarPreview();
   const heroImage = heroPhotoPreview || currentAvatar;
