@@ -65,8 +65,11 @@ const Index = () => {
   // Load photos from backend (single source of truth)
   const { activities, loading: activitiesLoading, refresh: refreshActivities, userId } = useJourneyActivities();
   
+  // Filter out recap entries — only real activities (day_number 1-12)
+  const realActivities = useMemo(() => getRealActivities(activities), [activities]);
+  
   // Convert backend activities to Photo shape for compatibility
-  const photos: Photo[] = activities.map(a => ({
+  const photos: Photo[] = realActivities.map(a => ({
     id: a.id,
     storageUrl: a.storageUrl,
     originalUrl: a.originalUrl,
