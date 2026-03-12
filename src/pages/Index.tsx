@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
 // import { hasRecapCached, getRecapFromCache } from '@/hooks/use-recap-cache';
+import { getNextDayNumber as getNextDay, getRealActivities, canLogActivity, getCurrentWeek, hasLoggedToday } from '@/lib/journey-rules';
 import { toast } from 'sonner';
 import ImmersiveHomeLayout from '@/components/ImmersiveHomeLayout';
 import PullToRefresh from '@/components/PullToRefresh';
