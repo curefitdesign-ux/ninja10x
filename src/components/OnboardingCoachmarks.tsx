@@ -209,7 +209,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 className="relative z-10 flex flex-col items-center justify-center px-8 text-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0, transition: { duration: 1.0 } }}
+                exit={{ opacity: 0, y: -40, transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } }}
               >
                 <h2
                   className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
