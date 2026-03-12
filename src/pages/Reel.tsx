@@ -1134,7 +1134,6 @@ const Reel = () => {
     };
 
     return (
-      <PullToRefresh onRefresh={handleRecapPullRefresh}>
       <div 
         className="flex flex-col"
         style={{ 
