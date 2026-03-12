@@ -55,15 +55,11 @@ const MediaSourceSheet = forwardRef<HTMLDivElement, MediaSourceSheetProps>(funct
       const isVideo = file.type.startsWith('video/');
       const url = URL.createObjectURL(file);
       onClose();
-      navigate('/preview', {
+      navigate('/gallery', {
         state: {
-          imageUrl: url,
-          originalUrl: url,
-          isVideo,
           dayNumber,
           activity: preserveActivity ? activity : undefined,
-          fromGallery: true,
-          file,
+          directFile: { url, isVideo },
         },
       });
     }
