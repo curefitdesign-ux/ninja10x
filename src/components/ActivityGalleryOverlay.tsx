@@ -127,7 +127,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     reactorProfiles: ReactorProfile[];
   }>>({});
 
-  const isPaused = showReactsSheet || showSendReactionSheet || showEditSheet;
+  const isPaused = showReactsSheet || showSendReactionSheet || showEditSheet || showShareSheet;
 
   const hasLoggedToday = useMemo(() => {
     if (!isOwnProfile) return true;
