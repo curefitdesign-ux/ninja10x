@@ -593,8 +593,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         let lastWeek: number | null = null;
 
                         realActivities.forEach((act, idx) => {
-                          // Sequential position: newest-first list, so position = total - idx
-                          const seqNum = realActivities.length - idx;
+                          // Use actual dayNumber for correct week/activity mapping
+                          const seqNum = act.dayNumber;
                           const wk = Math.ceil(seqNum / 3);
 
                           // Insert "Week X Complete" acknowledgement above the last activity of each completed week
