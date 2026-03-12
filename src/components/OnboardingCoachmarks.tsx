@@ -1,11 +1,26 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Avatar imports for community phase
+import avatarBlue from '@/assets/avatars/avatar-blue.png';
+import avatarGreen from '@/assets/avatars/avatar-green.png';
+import avatarOrange from '@/assets/avatars/avatar-orange.png';
+import avatarPink from '@/assets/avatars/avatar-pink.png';
+import avatarPurple from '@/assets/avatars/avatar-purple.png';
+import avatarRed from '@/assets/avatars/avatar-red.png';
+import avatarTeal from '@/assets/avatars/avatar-teal.png';
+import avatarYellow from '@/assets/avatars/avatar-yellow.png';
+
 interface OnboardingCoachmarksProps {
   onComplete: () => void;
 }
 
 const STORAGE_KEY = 'ninja10x_onboarding_seen';
+
+const COMMUNITY_AVATARS = [
+  avatarOrange, avatarPink, avatarBlue, avatarGreen,
+  avatarPurple, avatarRed, avatarTeal, avatarYellow,
+];
 
 function RevealWord({
   children,
@@ -43,7 +58,7 @@ function RevealLine({ text, delay = 0 }: { text: string; delay?: number }) {
   );
 }
 
-type Phase = 0 | 1 | 2;
+type Phase = 0 | 1 | 2 | 3;
 
 export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmarksProps) {
   const [phase, setPhase] = useState<Phase>(0);
@@ -60,20 +75,23 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     }
   }, [onComplete]);
 
-  // Auto-advance phase 0 → 1
+  // Auto-advance phases
   useEffect(() => {
     if (!visible) return;
     if (phase === 0) {
       timerRef.current = setTimeout(() => setPhase(1), 9500);
     }
-    // Auto-advance phase 1 → 2 after text reveals
     if (phase === 1) {
       timerRef.current = setTimeout(() => setPhase(2), 8500);
+    }
+    // Phase 2 (community) auto-advances to phase 3
+    if (phase === 2) {
+      timerRef.current = setTimeout(() => setPhase(3), 9000);
     }
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [phase, visible]);
 
-  // Elevate the log card above the overlay in phase 2
+  // Elevate the log card above the overlay in phase 3
   useEffect(() => {
     const targetIds = ['reel-log-activity-card', 'log-activity-card'];
 
@@ -87,7 +105,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
       });
     };
 
-    if (phase !== 2) {
+    if (phase !== 3) {
       resetCard();
       return;
     }
@@ -123,6 +141,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
   const textColor = 'rgba(255, 255, 255, 0.80)';
   const mutedColor = 'rgba(255, 255, 255, 0.35)';
   const fontStack = '-apple-system, SF Pro Display, system-ui, sans-serif';
+  const isTextPhase = phase === 0 || phase === 1 || phase === 2;
 
   return (
     <AnimatePresence>
@@ -135,8 +154,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6 }}
         >
-          {/* Background blur for text phases */}
-          {phase !== 2 && (
+          {/* Background blur for text phases (0, 1, 2) */}
+          {isTextPhase && (
             <motion.div
               className="absolute inset-0"
               style={{
@@ -147,8 +166,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             />
           )}
 
-          {/* Phase 2: Vignette blur — heavy at edges, clear in center */}
-          {phase === 2 && (
+          {/* Phase 3: Vignette blur — heavy at edges, clear in center */}
+          {phase === 3 && (
             <motion.div
               className="absolute inset-0 pointer-events-none"
               initial={{ opacity: 0 }}
@@ -231,7 +250,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             )}
           </AnimatePresence>
 
-          {/* ═══ PHASE 1 — auto-advances to phase 2 ═══ */}
+          {/* ═══ PHASE 1 ═══ */}
           <AnimatePresence mode="wait">
             {phase === 1 && (
               <motion.div
@@ -272,11 +291,103 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             )}
           </AnimatePresence>
 
-          {/* ═══ PHASE 2: Highlight log card — no text, just CTA ═══ */}
-          <AnimatePresence>
+          {/* ═══ PHASE 2: Community — blur bg + profiles + text ═══ */}
+          <AnimatePresence mode="wait">
             {phase === 2 && (
               <motion.div
-                key="phase2"
+                key="phase2-community"
+                className="relative z-10 flex flex-col items-center justify-center px-8 text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, y: -40, transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } }}
+              >
+                {/* Stacked profile avatars */}
+                <motion.div
+                  className="flex items-center justify-center mb-8"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 1.0, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  {COMMUNITY_AVATARS.slice(0, 5).map((avatar, i) => (
+                    <motion.div
+                      key={i}
+                      className="rounded-full overflow-hidden border-2"
+                      style={{
+                        width: 48,
+                        height: 48,
+                        marginLeft: i === 0 ? 0 : -14,
+                        borderColor: 'rgba(255, 255, 255, 0.15)',
+                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+                        zIndex: COMMUNITY_AVATARS.length - i,
+                        position: 'relative',
+                      }}
+                      initial={{ opacity: 0, y: 20, scale: 0.7 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{
+                        duration: 0.8,
+                        delay: 0.5 + i * 0.12,
+                        ease: [0.16, 1, 0.3, 1],
+                      }}
+                    >
+                      <img
+                        src={avatar}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    </motion.div>
+                  ))}
+                  {/* "+99" counter */}
+                  <motion.div
+                    className="rounded-full flex items-center justify-center"
+                    style={{
+                      width: 48,
+                      height: 48,
+                      marginLeft: -14,
+                      background: 'rgba(255, 255, 255, 0.08)',
+                      backdropFilter: 'blur(20px)',
+                      WebkitBackdropFilter: 'blur(20px)',
+                      border: '2px solid rgba(255, 255, 255, 0.15)',
+                      color: 'rgba(255, 255, 255, 0.70)',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      fontFamily: fontStack,
+                    }}
+                    initial={{ opacity: 0, y: 20, scale: 0.7 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{
+                      duration: 0.8,
+                      delay: 1.1,
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
+                  >
+                    +99
+                  </motion.div>
+                </motion.div>
+
+                {/* Community text */}
+                <h2
+                  className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
+                  style={{ color: textColor, fontFamily: fontStack }}
+                >
+                  <RevealLine text="You won't walk alone." delay={1.2} />
+                </h2>
+                <p
+                  className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-6"
+                  style={{ color: mutedColor, fontFamily: fontStack }}
+                >
+                  <RevealLine text="Cheer each other." delay={3.2} />
+                  <br />
+                  <RevealLine text="Move together." delay={5.0} />
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* ═══ PHASE 3: Highlight log card — vignette + CTA ═══ */}
+          <AnimatePresence>
+            {phase === 3 && (
+              <motion.div
+                key="phase3"
                 className="fixed left-0 right-0 z-[10001] flex justify-center"
                 style={{ bottom: 'calc(env(safe-area-inset-bottom, 16px) + 80px)' }}
                 initial={{ opacity: 0 }}
@@ -284,7 +395,6 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                {/* Glassmorphic "NEXT" CTA */}
                 <motion.button
                   className="w-[calc(100%-48px)] rounded-2xl uppercase active:scale-[0.97]"
                   style={{
@@ -314,9 +424,9 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           </AnimatePresence>
 
           {/* Progress dots — text phases only */}
-          {(phase === 0 || phase === 1) && (
+          {isTextPhase && (
             <div className="absolute bottom-12 z-20 flex items-center gap-1.5">
-              {[0, 1].map((i) => (
+              {[0, 1, 2].map((i) => (
                 <div
                   key={i}
                   className="rounded-full transition-all duration-700"
