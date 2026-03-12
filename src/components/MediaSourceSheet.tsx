@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { notifyBottomSheet } from '@/lib/bottom-sheet-events';
 import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
 import { useRef, forwardRef } from 'react';

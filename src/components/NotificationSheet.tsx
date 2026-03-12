@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { notifyBottomSheet } from '@/lib/bottom-sheet-events';
 import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
 import { useNavigate } from 'react-router-dom';

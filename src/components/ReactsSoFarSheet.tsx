@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { notifyBottomSheet } from '@/lib/bottom-sheet-events';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { ReactionType, ActivityReaction, removeReaction } from '@/services/journey-service';
