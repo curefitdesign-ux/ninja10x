@@ -1,16 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CircularProgressRing from '@/components/CircularProgressRing';
-
-// Avatar imports for community phase
-import avatarBlue from '@/assets/avatars/avatar-blue.png';
-import avatarGreen from '@/assets/avatars/avatar-green.png';
-import avatarOrange from '@/assets/avatars/avatar-orange.png';
-import avatarPink from '@/assets/avatars/avatar-pink.png';
-import avatarPurple from '@/assets/avatars/avatar-purple.png';
-import avatarRed from '@/assets/avatars/avatar-red.png';
-import avatarTeal from '@/assets/avatars/avatar-teal.png';
-import avatarYellow from '@/assets/avatars/avatar-yellow.png';
 
 interface OnboardingCoachmarksProps {
   onComplete: () => void;
@@ -18,12 +8,7 @@ interface OnboardingCoachmarksProps {
 
 const STORAGE_KEY = 'ninja10x_onboarding_seen';
 
-const COMMUNITY_AVATARS = [
-  avatarOrange, avatarPink, avatarBlue, avatarGreen,
-  avatarPurple, avatarRed, avatarTeal, avatarYellow,
-];
-
-function RevealWord({
+const RevealWord = memo(function RevealWord({
   children,
   delay = 0,
 }: {
@@ -33,10 +18,11 @@ function RevealWord({
   return (
     <motion.span
       className="inline-block mr-[0.3em]"
-      initial={{ filter: 'blur(24px)', opacity: 0, scale: 1.08 }}
-      animate={{ filter: 'blur(0px)', opacity: 1, scale: 1 }}
+      style={{ willChange: 'opacity, transform, filter' }}
+      initial={{ filter: 'blur(18px)', opacity: 0, transform: 'scale(1.06)' }}
+      animate={{ filter: 'blur(0px)', opacity: 1, transform: 'scale(1)' }}
       transition={{
-        duration: 1.8,
+        duration: 1.4,
         delay,
         ease: [0.16, 1, 0.3, 1],
       }}
@@ -44,14 +30,14 @@ function RevealWord({
       {children}
     </motion.span>
   );
-}
+});
 
 function RevealLine({ text, delay = 0 }: { text: string; delay?: number }) {
   const words = text.split(' ');
   return (
     <>
       {words.map((word, i) => (
-        <RevealWord key={i} delay={delay + i * 0.45}>
+        <RevealWord key={`${text}-${i}`} delay={delay + i * 0.4}>
           {word}
         </RevealWord>
       ))}
@@ -84,13 +70,11 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     setTimeout(onComplete, 400);
   }, [onComplete]);
 
-  // Auto-advance only phase 0 → 1. Phase 1 waits for NEXT tap. Phase 2 auto-finishes.
   useEffect(() => {
     if (!visible) return;
     if (phase === 0) {
       timerRef.current = setTimeout(() => setPhase(1), 9500);
     }
-    // Phase 1: no auto-advance — user taps NEXT
     if (phase === 2) {
       timerRef.current = setTimeout(() => finish(), 8000);
     }
@@ -105,23 +89,19 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
       ringTimersRef.current = [];
       return;
     }
-    // "Log 3 times a week." words start at 0.3s, stagger 0.45s → word timings: 0.3, 0.75, 1.2, 1.65, 2.1
-    // Bars 1-3 sync with "3 times a week" 
-    // "Do it for 4 weeks." words start at 2.6s → 2.6, 3.05, 3.5, 3.95, 4.4
-    // Bars 4-12 sync with "4 weeks" spread
     const schedule = [
-      { day: 1, ms: 1000 },   // syncs with "3" word (~0.75s + render)
-      { day: 2, ms: 1500 },   // syncs with "times"
-      { day: 3, ms: 2000 },   // syncs with "a week"
-      { day: 4, ms: 3100 },   // syncs with "for" in line 2
-      { day: 5, ms: 3400 },
-      { day: 6, ms: 3700 },
-      { day: 7, ms: 4000 },   // "4" word
-      { day: 8, ms: 4300 },
-      { day: 9, ms: 4600 },
-      { day: 10, ms: 4900 },  // "weeks" word
-      { day: 11, ms: 5200 },
-      { day: 12, ms: 5500 },
+      { day: 1, ms: 1000 },
+      { day: 2, ms: 1450 },
+      { day: 3, ms: 1900 },
+      { day: 4, ms: 3000 },
+      { day: 5, ms: 3300 },
+      { day: 6, ms: 3600 },
+      { day: 7, ms: 3900 },
+      { day: 8, ms: 4200 },
+      { day: 9, ms: 4500 },
+      { day: 10, ms: 4800 },
+      { day: 11, ms: 5100 },
+      { day: 12, ms: 5400 },
     ];
     const timers = schedule.map(({ day, ms }) =>
       setTimeout(() => setRingDay(day), ms)
@@ -136,27 +116,32 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
   const mutedColor = 'rgba(255, 255, 255, 0.35)';
   const fontStack = '-apple-system, SF Pro Display, system-ui, sans-serif';
 
+  // Shared cross-fade variants — no mode="wait" so no gap
+  const fadeVariants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
+    exit: { opacity: 0, transition: { duration: 0.6, ease: 'easeOut' as const } },
+  };
+
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center"
+          className="fixed inset-0 z-[10000]"
           style={{ touchAction: 'none' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
         >
-          {/* Persistent blur background for phases 0, 1 */}
-          <motion.div
+          {/* Static blur background — never re-renders */}
+          <div
             className="absolute inset-0"
             style={{
-              backdropFilter: (phase === 0 || phase === 1) ? 'blur(60px) saturate(200%)' : 'blur(50px) saturate(200%)',
-              WebkitBackdropFilter: (phase === 0 || phase === 1) ? 'blur(60px) saturate(200%)' : 'blur(50px) saturate(200%)',
+              backdropFilter: 'blur(60px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(60px) saturate(200%)',
               background: 'rgba(0, 0, 0, 0.15)',
             }}
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
           />
 
           {/* Skip */}
@@ -174,52 +159,56 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             Skip
           </motion.button>
 
-          {/* ═══ PHASE 0 ═══ */}
-          <AnimatePresence mode="wait">
+          {/* Content — crossfade (no mode="wait") */}
+          <AnimatePresence>
+            {/* ═══ PHASE 0 ═══ */}
             {phase === 0 && (
               <motion.div
                 key="phase0"
-                className="relative z-10 flex flex-col items-center justify-center px-8 text-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, y: -40, transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } }}
+                className="absolute inset-0 z-10 flex items-center justify-center px-8 text-center"
+                variants={fadeVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
               >
-                <h2
-                  className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
-                  style={{ color: textColor, fontFamily: fontStack }}
-                >
-                  <RevealLine text="Every habit starts" delay={0.4} />
-                  <br />
-                  <RevealLine text="with a single move." delay={2.4} />
-                </h2>
-                <p
-                  className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-8"
-                  style={{ color: mutedColor, fontFamily: fontStack }}
-                >
-                  <RevealLine text="Running. Cricket. Yoga." delay={4.2} />
-                  <br />
-                  <RevealLine text="Pick yours. Show up." delay={6.2} />
-                </p>
+                <div>
+                  <h2
+                    className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
+                    style={{ color: textColor, fontFamily: fontStack }}
+                  >
+                    <RevealLine text="Every habit starts" delay={0.4} />
+                    <br />
+                    <RevealLine text="with a single move." delay={2.2} />
+                  </h2>
+                  <p
+                    className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-8"
+                    style={{ color: mutedColor, fontFamily: fontStack }}
+                  >
+                    <RevealLine text="Running. Cricket. Yoga." delay={4.0} />
+                    <br />
+                    <RevealLine text="Pick yours. Show up." delay={5.8} />
+                  </p>
+                </div>
               </motion.div>
             )}
 
-            {/* ═══ PHASE 1 — ring + text + NEXT, stays until user taps ═══ */}
+            {/* ═══ PHASE 1 ═══ */}
             {phase === 1 && (
               <motion.div
                 key="phase1"
-                className="relative z-10 flex flex-col items-center justify-center px-8 text-center"
-                style={{ minHeight: '100%' }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeOut' } }}
+                className="absolute inset-0 z-10 flex flex-col items-center"
+                variants={fadeVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
               >
-                <div className="flex-1 flex flex-col items-center justify-center">
-                  {/* Animated CircularProgressRing */}
+                {/* Centered content */}
+                <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
                   <motion.div
-                    className="mb-6"
-                    initial={{ opacity: 0, scale: 0.85 }}
+                    className="mb-4"
+                    initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 1.2, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 1.0, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <CircularProgressRing
                       currentDay={ringDay}
@@ -234,13 +223,14 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                   >
                     <RevealLine text="Log 3 times a week." delay={0.3} />
                     <br />
-                    <RevealLine text="Do it for 4 weeks." delay={2.6} />
+                    <RevealLine text="Do it for 4 weeks." delay={2.4} />
                   </h2>
+
                   <motion.div
-                    className="mt-6"
-                    initial={{ filter: 'blur(24px)', opacity: 0, scale: 1.05 }}
-                    animate={{ filter: 'blur(0px)', opacity: 1, scale: 1 }}
-                    transition={{ duration: 2.0, delay: 4.8, ease: [0.16, 1, 0.3, 1] }}
+                    className="mt-5"
+                    initial={{ opacity: 0, transform: 'scale(1.04)' }}
+                    animate={{ opacity: 1, transform: 'scale(1)' }}
+                    transition={{ duration: 1.6, delay: 4.6, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <span
                       className="text-[32px] font-semibold tracking-[-0.03em]"
@@ -255,29 +245,25 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                       Become a Ninja. 🥷
                     </span>
                   </motion.div>
-                </div>
 
-                {/* NEXT CTA on blur background */}
-                <div className="flex justify-center w-full pb-12">
+                  {/* NEXT CTA — directly below content */}
                   <motion.button
-                    className="w-[calc(100%-48px)] rounded-2xl uppercase active:scale-[0.97]"
+                    className="mt-10 w-[260px] rounded-2xl uppercase"
                     style={{
-                      height: 40,
+                      height: 44,
                       fontSize: 12,
                       fontWeight: 600,
                       letterSpacing: '0.1em',
                       fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
                       background: 'rgba(255, 255, 255, 0.08)',
-                      backdropFilter: 'blur(40px) saturate(180%)',
-                      WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                      border: '1px solid rgba(255, 255, 255, 0.18)',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
                       boxShadow:
-                        'inset 0 1px 1px rgba(255, 255, 255, 0.15), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.2)',
+                        'inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 4px 20px rgba(0, 0, 0, 0.15)',
                       color: 'rgba(255, 255, 255, 0.90)',
                     }}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 5.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ delay: 5.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                     onClick={(e) => { e.stopPropagation(); setPhase(2); }}
                     whileTap={{ scale: 0.97 }}
                   >
@@ -287,38 +273,35 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
               </motion.div>
             )}
 
-            {/* ═══ PHASE 2: Community — text centered, GOT IT CTA ═══ */}
+            {/* ═══ PHASE 2: Community ═══ */}
             {phase === 2 && (
               <motion.div
-                key="phase2-community"
-                className="relative z-10 flex flex-col items-center justify-center"
-                style={{ minHeight: '100%' }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, transition: { duration: 0.8 } }}
+                key="phase2"
+                className="absolute inset-0 z-10 flex flex-col items-center"
+                variants={fadeVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
               >
-                {/* Centered community text */}
                 <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
                   <h2
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
                     style={{ color: textColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="You won't walk alone." delay={1.2} />
+                    <RevealLine text="You won't walk alone." delay={1.0} />
                   </h2>
                   <p
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-6"
                     style={{ color: mutedColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="Cheer each other." delay={3.2} />
+                    <RevealLine text="Cheer each other." delay={2.8} />
                     <br />
-                    <RevealLine text="Move together." delay={5.0} />
+                    <RevealLine text="Move together." delay={4.4} />
                   </p>
-                </div>
 
-                {/* GOT IT CTA */}
-                <div className="flex justify-center w-full pb-12">
+                  {/* GOT IT CTA */}
                   <motion.button
-                    className="w-[calc(100%-48px)] rounded-2xl uppercase active:scale-[0.97] flex items-center justify-center"
+                    className="mt-10 w-[260px] rounded-2xl uppercase flex items-center justify-center"
                     style={{
                       height: 44,
                       fontSize: 13,
@@ -329,9 +312,9 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                       border: 'none',
                       boxShadow: '0 8px 32px rgba(255, 255, 255, 0.15)',
                     }}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 6.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ delay: 5.8, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                     onClick={(e) => { e.stopPropagation(); finish(); }}
                     whileTap={{ scale: 0.97 }}
                   >
@@ -349,9 +332,9 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             )}
           </AnimatePresence>
 
-          {/* Progress dots — phases 0 & 1 only */}
+          {/* Progress dots */}
           {(phase === 0 || phase === 1) && (
-            <div className="absolute bottom-12 z-20 flex items-center gap-1.5">
+            <div className="absolute bottom-12 left-0 right-0 z-20 flex items-center justify-center gap-1.5">
               {[0, 1].map((i) => (
                 <div
                   key={i}
