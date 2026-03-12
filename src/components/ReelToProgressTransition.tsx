@@ -453,6 +453,7 @@ export default function ReelToProgressTransition({
           activities={[
             ...myActivities
               .filter(a => a.storageUrl)
+              .sort((a, b) => b.dayNumber - a.dayNumber)
               .map(a => ({
                 id: a.id || `day-${a.dayNumber}`,
                 storageUrl: a.storageUrl!,
