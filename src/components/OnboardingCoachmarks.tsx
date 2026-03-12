@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import CircularProgressRing from '@/components/CircularProgressRing';
 
 // Avatar imports for community phase
 import avatarBlue from '@/assets/avatars/avatar-blue.png';
