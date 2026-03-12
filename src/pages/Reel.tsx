@@ -1398,7 +1398,6 @@ const Reel = () => {
 
 
   return (
-    <PullToRefresh onRefresh={handlePullRefresh}>
     <DynamicBlurBackground imageUrl={mediaUrl}>
       {/* Purple gradient background for log-activity empty state (matches Progress page) */}
       {isLogActivityCard && (
