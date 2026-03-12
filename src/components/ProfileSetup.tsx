@@ -120,7 +120,7 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
     }
   };
 
-  const hasAvatarSelected = selectedAvatar !== null || customAvatarFile !== null || customAvatarPreview !== null;
+  const hasAvatarSelected = customAvatarFile !== null || customAvatarPreview !== null;
 
   const getCurrentAvatarPreview = () => {
     if (customAvatarPreview) return customAvatarPreview;
