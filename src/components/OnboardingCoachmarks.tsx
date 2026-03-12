@@ -81,12 +81,9 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     if (phase === 0) {
       timerRef.current = setTimeout(() => setPhase(1), 9500);
     }
+    // Phase 1 → Phase 3 (vignette log card)
     if (phase === 1) {
       timerRef.current = setTimeout(() => setPhase(3), 8500);
-    }
-    // Phase 2 (community) auto-finishes
-    if (phase === 2) {
-      timerRef.current = setTimeout(() => finish(), 9000);
     }
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [phase, visible]);
@@ -141,7 +138,6 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
   const textColor = 'rgba(255, 255, 255, 0.80)';
   const mutedColor = 'rgba(255, 255, 255, 0.35)';
   const fontStack = '-apple-system, SF Pro Display, system-ui, sans-serif';
-  const isTextPhase = phase === 0 || phase === 1 || phase === 2;
 
   return (
     <AnimatePresence>
@@ -154,8 +150,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6 }}
         >
-          {/* Background blur for text phases (0, 1, 2) */}
-          {isTextPhase && (
+          {/* Background blur for phases 0 & 1 — full uniform blur */}
+          {(phase === 0 || phase === 1) && (
             <motion.div
               className="absolute inset-0"
               style={{
@@ -164,6 +160,24 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 background: 'rgba(0, 0, 0, 0.15)',
               }}
             />
+          )}
+
+          {/* Phase 2: Full blur masked from top — clear at top for profiles, blurred rest */}
+          {phase === 2 && (
+            <motion.div
+              className="absolute inset-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+            >
+              <div className="absolute inset-0" style={{
+                backdropFilter: 'blur(50px) saturate(200%)',
+                WebkitBackdropFilter: 'blur(50px) saturate(200%)',
+                background: 'rgba(0, 0, 0, 0.15)',
+                maskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 12%, black 22%)',
+                WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 12%, black 22%)',
+              }} />
+            </motion.div>
           )}
 
           {/* Phase 3: Vignette blur — heavy at edges, clear in center */}
@@ -250,7 +264,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             )}
           </AnimatePresence>
 
-          {/* ═══ PHASE 1 ═══ */}
+          {/* ═══ PHASE 1 — fade in place, no move ═══ */}
           <AnimatePresence mode="wait">
             {phase === 1 && (
               <motion.div
@@ -258,7 +272,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 className="relative z-10 flex flex-col items-center justify-center px-8 text-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0, y: -40, transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } }}
+                exit={{ opacity: 0, transition: { duration: 1.0, ease: 'easeOut' } }}
               >
                 <h2
                   className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
@@ -291,99 +305,120 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             )}
           </AnimatePresence>
 
-          {/* ═══ PHASE 2: Community — blur bg + profiles + text ═══ */}
+          {/* ═══ PHASE 2: Community — profiles at top, text centered, LOG NOW CTA ═══ */}
           <AnimatePresence mode="wait">
             {phase === 2 && (
               <motion.div
                 key="phase2-community"
-                className="relative z-10 flex flex-col items-center justify-center px-8 text-center"
+                className="absolute inset-0 z-10 flex flex-col"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0, y: -40, transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } }}
+                exit={{ opacity: 0, transition: { duration: 0.8 } }}
               >
-                {/* Stacked profile avatars */}
-                <motion.div
-                  className="flex items-center justify-center mb-8"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 1.0, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  {COMMUNITY_AVATARS.slice(0, 5).map((avatar, i) => (
+                {/* Profiles pinned at top */}
+                <div className="flex flex-col items-center pt-16 pb-4">
+                  <motion.div
+                    className="flex items-center justify-center"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 1.0, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    {COMMUNITY_AVATARS.slice(0, 5).map((avatar, i) => (
+                      <motion.div
+                        key={i}
+                        className="rounded-full overflow-hidden border-2"
+                        style={{
+                          width: 48,
+                          height: 48,
+                          marginLeft: i === 0 ? 0 : -14,
+                          borderColor: 'rgba(255, 255, 255, 0.15)',
+                          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+                          zIndex: COMMUNITY_AVATARS.length - i,
+                          position: 'relative',
+                        }}
+                        initial={{ opacity: 0, y: 20, scale: 0.7 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{
+                          duration: 0.8,
+                          delay: 0.5 + i * 0.12,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                      >
+                        <img src={avatar} alt="" className="w-full h-full object-cover" />
+                      </motion.div>
+                    ))}
+                    {/* "+99" counter */}
                     <motion.div
-                      key={i}
-                      className="rounded-full overflow-hidden border-2"
+                      className="rounded-full flex items-center justify-center"
                       style={{
                         width: 48,
                         height: 48,
-                        marginLeft: i === 0 ? 0 : -14,
-                        borderColor: 'rgba(255, 255, 255, 0.15)',
-                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
-                        zIndex: COMMUNITY_AVATARS.length - i,
-                        position: 'relative',
+                        marginLeft: -14,
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        backdropFilter: 'blur(20px)',
+                        WebkitBackdropFilter: 'blur(20px)',
+                        border: '2px solid rgba(255, 255, 255, 0.15)',
+                        color: 'rgba(255, 255, 255, 0.70)',
+                        fontSize: 13,
+                        fontWeight: 600,
+                        fontFamily: fontStack,
                       }}
                       initial={{ opacity: 0, y: 20, scale: 0.7 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{
-                        duration: 0.8,
-                        delay: 0.5 + i * 0.12,
-                        ease: [0.16, 1, 0.3, 1],
-                      }}
+                      transition={{ duration: 0.8, delay: 1.1, ease: [0.16, 1, 0.3, 1] }}
                     >
-                      <img
-                        src={avatar}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
+                      +99
                     </motion.div>
-                  ))}
-                  {/* "+99" counter */}
-                  <motion.div
-                    className="rounded-full flex items-center justify-center"
-                    style={{
-                      width: 48,
-                      height: 48,
-                      marginLeft: -14,
-                      background: 'rgba(255, 255, 255, 0.08)',
-                      backdropFilter: 'blur(20px)',
-                      WebkitBackdropFilter: 'blur(20px)',
-                      border: '2px solid rgba(255, 255, 255, 0.15)',
-                      color: 'rgba(255, 255, 255, 0.70)',
-                      fontSize: 13,
-                      fontWeight: 600,
-                      fontFamily: fontStack,
-                    }}
-                    initial={{ opacity: 0, y: 20, scale: 0.7 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{
-                      duration: 0.8,
-                      delay: 1.1,
-                      ease: [0.16, 1, 0.3, 1],
-                    }}
-                  >
-                    +99
                   </motion.div>
-                </motion.div>
+                </div>
 
-                {/* Community text */}
-                <h2
-                  className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
-                  style={{ color: textColor, fontFamily: fontStack }}
-                >
-                  <RevealLine text="You won't walk alone." delay={1.2} />
-                </h2>
-                <p
-                  className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-6"
-                  style={{ color: mutedColor, fontFamily: fontStack }}
-                >
-                  <RevealLine text="Cheer each other." delay={3.2} />
-                  <br />
-                  <RevealLine text="Move together." delay={5.0} />
-                </p>
+                {/* Centered community text */}
+                <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
+                  <h2
+                    className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
+                    style={{ color: textColor, fontFamily: fontStack }}
+                  >
+                    <RevealLine text="You won't walk alone." delay={1.2} />
+                  </h2>
+                  <p
+                    className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-6"
+                    style={{ color: mutedColor, fontFamily: fontStack }}
+                  >
+                    <RevealLine text="Cheer each other." delay={3.2} />
+                    <br />
+                    <RevealLine text="Move together." delay={5.0} />
+                  </p>
+                </div>
+
+                {/* LOG NOW CTA */}
+                <div className="flex justify-center pb-12">
+                  <motion.button
+                    className="w-[calc(100%-48px)] rounded-2xl uppercase active:scale-[0.97]"
+                    style={{
+                      height: 44,
+                      fontSize: 13,
+                      fontWeight: 700,
+                      letterSpacing: '0.12em',
+                      fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
+                      background: 'linear-gradient(135deg, #F97316, #EC4899)',
+                      border: 'none',
+                      boxShadow: '0 8px 32px rgba(249, 115, 22, 0.3)',
+                      color: '#FFFFFF',
+                    }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 6.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    onClick={(e) => { e.stopPropagation(); finish(); }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    LOG NOW
+                  </motion.button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* ═══ PHASE 3: Highlight log card — vignette + CTA ═══ */}
+          {/* ═══ PHASE 3: Highlight log card — vignette + NEXT CTA ═══ */}
           <AnimatePresence>
             {phase === 3 && (
               <motion.div
@@ -423,10 +458,10 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             )}
           </AnimatePresence>
 
-          {/* Progress dots — text phases only */}
-          {isTextPhase && (
+          {/* Progress dots — phases 0 & 1 only */}
+          {(phase === 0 || phase === 1) && (
             <div className="absolute bottom-12 z-20 flex items-center gap-1.5">
-              {[0, 1, 2].map((i) => (
+              {[0, 1].map((i) => (
                 <div
                   key={i}
                   className="rounded-full transition-all duration-700"
