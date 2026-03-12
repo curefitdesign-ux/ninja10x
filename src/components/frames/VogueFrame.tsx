@@ -27,7 +27,7 @@ const VogueFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
   }, [isVideo, imageUrl]);
 
   return (
-    <div className="w-full h-full aspect-[9/16] overflow-hidden bg-black relative" style={{ containerType: 'inline-size' }}>
+    <div className="w-full h-full overflow-hidden bg-black relative" style={{ containerType: 'inline-size' }}>
       {/* Background image or video */}
       <div className="absolute inset-0 overflow-hidden">
         {isVideo ? (
