@@ -85,8 +85,12 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     if (phase === 1) {
       timerRef.current = setTimeout(() => setPhase(3), 8500);
     }
+    // Phase 2 → auto-finish after text reveals
+    if (phase === 2) {
+      timerRef.current = setTimeout(() => finish(), 8000);
+    }
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, [phase, visible]);
+  }, [phase, visible, finish]);
 
   // Elevate the log card above the overlay in phase 3
   useEffect(() => {
