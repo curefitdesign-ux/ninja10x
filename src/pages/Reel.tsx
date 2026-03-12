@@ -1917,37 +1917,46 @@ const Reel = () => {
                                       style={{ width: 140, height: 140 }}
                                     >
                                       {/* SVG arc progress ring */}
-                                      <svg
-                                        width="140" height="140"
-                                        viewBox="0 0 140 140"
-                                        className="absolute inset-0 z-20"
-                                        style={{ transform: 'rotate(-90deg)' }}
-                                      >
-                                        {/* Background track */}
-                                        <circle
-                                          cx="70" cy="70" r="64"
-                                          fill="none"
-                                          stroke="rgba(255,255,255,0.08)"
-                                          strokeWidth="4"
-                                        />
-                                        {/* Progress arc */}
-                                        <circle
-                                          cx="70" cy="70" r="64"
-                                          fill="none"
-                                          stroke="url(#logCardProgressGrad)"
-                                          strokeWidth="4"
-                                          strokeLinecap="round"
-                                          strokeDasharray={`${2 * Math.PI * 64}`}
-                                          strokeDashoffset={`${2 * Math.PI * 64 * (1 - progressPercent / 100)}`}
-                                          style={{ transition: 'stroke-dashoffset 0.8s ease' }}
-                                        />
-                                        <defs>
-                                          <linearGradient id="logCardProgressGrad" x1="0" y1="0" x2="1" y2="1">
-                                            <stop offset="0%" stopColor="#F97316" />
-                                            <stop offset="100%" stopColor="#EC4899" />
-                                          </linearGradient>
-                                        </defs>
-                                      </svg>
+                                      {(() => {
+                                        const circumference = 2 * Math.PI * 64;
+                                        const minProgress = 8; // always show at least 8%
+                                        const effectivePercent = Math.max(progressPercent, minProgress);
+                                        const targetOffset = circumference * (1 - effectivePercent / 100);
+                                        return (
+                                          <svg
+                                            width="140" height="140"
+                                            viewBox="0 0 140 140"
+                                            className="absolute inset-0"
+                                            style={{ transform: 'rotate(-90deg)', zIndex: 30 }}
+                                          >
+                                            {/* Background track */}
+                                            <circle
+                                              cx="70" cy="70" r="64"
+                                              fill="none"
+                                              stroke="rgba(255,255,255,0.15)"
+                                              strokeWidth="3.5"
+                                            />
+                                            {/* Animated progress arc */}
+                                            <motion.circle
+                                              cx="70" cy="70" r="64"
+                                              fill="none"
+                                              stroke="url(#logCardProgressGrad)"
+                                              strokeWidth="3.5"
+                                              strokeLinecap="round"
+                                              strokeDasharray={circumference}
+                                              initial={{ strokeDashoffset: circumference }}
+                                              animate={{ strokeDashoffset: targetOffset }}
+                                              transition={{ delay: 0.3, duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
+                                            />
+                                            <defs>
+                                              <linearGradient id="logCardProgressGrad" x1="0" y1="0" x2="1" y2="1">
+                                                <stop offset="0%" stopColor="#F97316" />
+                                                <stop offset="100%" stopColor="#EC4899" />
+                                              </linearGradient>
+                                            </defs>
+                                          </svg>
+                                        );
+                                      })()}
                                       {/* Video circle */}
                                       <div style={{ width: 112, height: 112, borderRadius: '50%', overflow: 'hidden' }}>
                                         <video
