@@ -2500,7 +2500,7 @@ const Reel = () => {
               }}
               className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 bg-white/10 hover:bg-white/15 transition-colors"
             >
-              WhatsApp
+              WhatsApp Status
             </button>
             <button
               onClick={() => {
@@ -2509,7 +2509,7 @@ const Reel = () => {
               }}
               className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 bg-white/10 hover:bg-white/15 transition-colors"
             >
-              Instagram
+              Instagram Stories
             </button>
             <button
               onClick={() => {
