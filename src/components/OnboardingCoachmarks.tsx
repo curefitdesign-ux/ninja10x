@@ -99,6 +99,37 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [phase, visible, finish]);
 
+  // Animate ring bars in sync with Phase 1 text
+  useEffect(() => {
+    if (phase !== 1) {
+      setRingDay(0);
+      ringTimersRef.current.forEach(clearTimeout);
+      ringTimersRef.current = [];
+      return;
+    }
+    // "Log 3 times a week." starts at delay 0.3s — bars 1,2,3 appear during this
+    // "Do it for 4 weeks." starts at delay 2.6s — bars 4-12 appear during this
+    const schedule = [
+      { day: 1, ms: 1200 },
+      { day: 2, ms: 1700 },
+      { day: 3, ms: 2200 },
+      { day: 4, ms: 3200 },
+      { day: 5, ms: 3500 },
+      { day: 6, ms: 3800 },
+      { day: 7, ms: 4200 },
+      { day: 8, ms: 4500 },
+      { day: 9, ms: 4800 },
+      { day: 10, ms: 5200 },
+      { day: 11, ms: 5500 },
+      { day: 12, ms: 5800 },
+    ];
+    const timers = schedule.map(({ day, ms }) =>
+      setTimeout(() => setRingDay(day), ms)
+    );
+    ringTimersRef.current = timers;
+    return () => timers.forEach(clearTimeout);
+  }, [phase]);
+
   // Elevate the log card above the overlay in phase 3
   useEffect(() => {
     const targetIds = ['reel-log-activity-card', 'log-activity-card'];
