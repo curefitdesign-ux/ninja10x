@@ -143,8 +143,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     <AnimatePresence>
       {visible && (
         <motion.div
-          className={`fixed inset-0 z-[10000] flex flex-col items-center justify-center ${phase === 3 ? 'pointer-events-none' : ''}`}
-          style={{ touchAction: phase === 3 ? 'auto' : 'none' }}
+          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center"
+          style={{ touchAction: 'none' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -180,7 +180,44 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             </motion.div>
           )}
 
-          {/* Phase 3: No blur — log card fully visible */}
+          {/* Phase 3: Vignette blur — heavy at edges, clear in center */}
+          {phase === 3 && (
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+            >
+              <div className="absolute top-0 left-0 right-0 h-[35%]" style={{
+                backdropFilter: 'blur(24px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+                background: 'rgba(0, 0, 0, 0.18)',
+                maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
+              }} />
+              <div className="absolute bottom-0 left-0 right-0 h-[35%]" style={{
+                backdropFilter: 'blur(24px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+                background: 'rgba(0, 0, 0, 0.18)',
+                maskImage: 'linear-gradient(to top, black 40%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to top, black 40%, transparent 100%)',
+              }} />
+              <div className="absolute top-0 bottom-0 left-0 w-[25%]" style={{
+                backdropFilter: 'blur(20px) saturate(150%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(150%)',
+                background: 'rgba(0, 0, 0, 0.12)',
+                maskImage: 'linear-gradient(to right, black 30%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to right, black 30%, transparent 100%)',
+              }} />
+              <div className="absolute top-0 bottom-0 right-0 w-[25%]" style={{
+                backdropFilter: 'blur(20px) saturate(150%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(150%)',
+                background: 'rgba(0, 0, 0, 0.12)',
+                maskImage: 'linear-gradient(to left, black 30%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to left, black 30%, transparent 100%)',
+              }} />
+            </motion.div>
+          )}
 
           {/* Skip */}
           <motion.button
@@ -386,7 +423,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             {phase === 3 && (
               <motion.div
                 key="phase3"
-                className="fixed left-0 right-0 z-[10001] flex justify-center pointer-events-auto"
+                className="fixed left-0 right-0 z-[10001] flex justify-center"
                 style={{ bottom: 'calc(env(safe-area-inset-bottom, 16px) + 80px)' }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
