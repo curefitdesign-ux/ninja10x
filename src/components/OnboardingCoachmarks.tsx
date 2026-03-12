@@ -133,14 +133,20 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Liquid glass background — opaque enough to hide content, translucent for depth */}
-          <div
+          {/* Liquid glass background — slides down 7% on phase 2 to reveal top */}
+          <motion.div
             className="absolute inset-0"
             style={{
               background: 'rgba(255, 255, 255, 0.01)',
               backdropFilter: 'blur(60px) saturate(180%)',
               WebkitBackdropFilter: 'blur(60px) saturate(180%)',
             }}
+            initial={{ top: 0, borderRadius: '0px' }}
+            animate={{
+              top: phase === 2 ? '7%' : 0,
+              borderRadius: phase === 2 ? '24px 24px 0px 0px' : '0px',
+            }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           />
 
           {/* Skip */}
