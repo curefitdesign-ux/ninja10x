@@ -614,7 +614,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             elements.push(
                               <div key={`week-complete-${completedWeek}`} className="relative flex items-center" style={{ padding: '12px 16px 12px 58px', margin: '6px 0' }}>
                                 {/* Milestone icon dot on timeline */}
-                                <div className="absolute" style={{ left: 29, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.12))', border: '1.5px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div className="absolute" style={{ left: 19, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.12))', border: '1.5px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                   {weekIcons[completedWeek] || <Flag size={9} fill="white" color="white" strokeWidth={0} />}
                                 </div>
                                 {/* Handwritten milestone with underline flourish */}
