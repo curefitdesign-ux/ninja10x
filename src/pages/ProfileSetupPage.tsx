@@ -75,7 +75,6 @@ const ProfileSetupPage = () => {
     const reader = new FileReader();
     reader.onload = (ev) => {
       setCustomAvatarPreview(ev.target?.result as string);
-      setSelectedAvatar(null);
     };
     reader.readAsDataURL(file);
     if (e.target) e.target.value = '';
