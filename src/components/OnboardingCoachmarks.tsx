@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import CircularProgressRing from '@/components/CircularProgressRing';
 
 // Avatar imports for community phase
 import avatarBlue from '@/assets/avatars/avatar-blue.png';
@@ -64,6 +65,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
   const [phase, setPhase] = useState<Phase>(0);
   const [visible, setVisible] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [ringDay, setRingDay] = useState(0);
+  const ringTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     const seen = localStorage.getItem(STORAGE_KEY);
@@ -95,6 +98,37 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     }
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [phase, visible, finish]);
+
+  // Animate ring bars in sync with Phase 1 text
+  useEffect(() => {
+    if (phase !== 1) {
+      setRingDay(0);
+      ringTimersRef.current.forEach(clearTimeout);
+      ringTimersRef.current = [];
+      return;
+    }
+    // "Log 3 times a week." starts at delay 0.3s — bars 1,2,3 appear during this
+    // "Do it for 4 weeks." starts at delay 2.6s — bars 4-12 appear during this
+    const schedule = [
+      { day: 1, ms: 1200 },
+      { day: 2, ms: 1700 },
+      { day: 3, ms: 2200 },
+      { day: 4, ms: 3200 },
+      { day: 5, ms: 3500 },
+      { day: 6, ms: 3800 },
+      { day: 7, ms: 4200 },
+      { day: 8, ms: 4500 },
+      { day: 9, ms: 4800 },
+      { day: 10, ms: 5200 },
+      { day: 11, ms: 5500 },
+      { day: 12, ms: 5800 },
+    ];
+    const timers = schedule.map(({ day, ms }) =>
+      setTimeout(() => setRingDay(day), ms)
+    );
+    ringTimersRef.current = timers;
+    return () => timers.forEach(clearTimeout);
+  }, [phase]);
 
   // Elevate the log card above the overlay in phase 3
   useEffect(() => {
@@ -276,6 +310,20 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0, transition: { duration: 1.0, ease: 'easeOut' } }}
               >
+                {/* Animated CircularProgressRing */}
+                <motion.div
+                  className="mb-8"
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 1.2, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <CircularProgressRing
+                    currentDay={ringDay}
+                    currentWeek={Math.min(Math.floor((ringDay > 0 ? ringDay - 1 : 0) / 3) + 1, 4)}
+                    hideDecorations
+                  />
+                </motion.div>
+
                 <h2
                   className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
                   style={{ color: textColor, fontFamily: fontStack }}
