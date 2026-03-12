@@ -257,24 +257,44 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     return { title: 'My Fitness Story', text: shareText, url };
   };
 
-  const shareToChannel = (channel: 'whatsapp' | 'instagram' | 'messages') => {
+  const shareToChannel = (channel: 'whatsapp' | 'instagram') => {
     const payload = buildSharePayload();
     const shareText = `${payload.text}\n\n${payload.url}`;
-    setTimeout(() => {
-      if (channel === 'whatsapp') {
-        const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(shareText)}`;
-        const webFallback = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
-        const link = document.createElement('a'); link.href = whatsappUrl; link.style.display = 'none';
-        document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        setTimeout(() => { window.location.href = webFallback; }, 1500);
-        return;
-      }
-      if (channel === 'messages') { window.location.href = `sms:&body=${encodeURIComponent(shareText)}`; return; }
-      if (channel === 'instagram') {
-        if (navigator.share) { navigator.share(payload).catch(() => {}); }
-        else { navigator.clipboard.writeText(shareText).then(() => toast.success('Link copied! Paste it in Instagram.')).catch(() => toast.error('Unable to copy link')); }
-      }
-    }, 100);
+    const encodedText = encodeURIComponent(shareText);
+
+    const openDeepLink = (appUrl: string, fallbackUrl: string) => {
+      const fallbackTimer = window.setTimeout(() => {
+        window.location.href = fallbackUrl;
+      }, 1200);
+
+      const clearFallback = () => window.clearTimeout(fallbackTimer);
+      const clearOnVisibility = () => {
+        if (document.hidden) clearFallback();
+      };
+
+      window.addEventListener('blur', clearFallback, { once: true });
+      document.addEventListener('visibilitychange', clearOnVisibility, { once: true });
+      window.location.href = appUrl;
+    };
+
+    if (channel === 'whatsapp') {
+      openDeepLink(
+        `whatsapp://send?text=${encodedText}`,
+        `https://wa.me/?text=${encodedText}`
+      );
+      return;
+    }
+
+    const isAndroid = /android/i.test(navigator.userAgent);
+    const instagramAppUrl = isAndroid
+      ? 'intent://story-camera#Intent;package=com.instagram.android;scheme=instagram;end'
+      : 'instagram://story-camera';
+
+    openDeepLink(instagramAppUrl, 'https://www.instagram.com/stories/');
+
+    navigator.clipboard.writeText(payload.url)
+      .then(() => toast.success('Opened Instagram Stories. Link copied.'))
+      .catch(() => toast.success('Opened Instagram Stories.'));
   };
 
   const overlay = (
