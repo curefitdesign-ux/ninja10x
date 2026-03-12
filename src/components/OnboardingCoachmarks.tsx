@@ -287,7 +287,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 animate="animate"
                 exit="exit"
               >
-                <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
+                <div className="flex-1 flex flex-col items-center justify-start pt-[18%] px-8 text-center">
                   {/* Hand-drawn animated arrow pointing up */}
                   <motion.div
                     className="mb-6"
