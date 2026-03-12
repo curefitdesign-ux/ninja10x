@@ -2202,7 +2202,7 @@ const Reel = () => {
 
             {/* Activity dots indicator — shows total activities for current user */}
             {currentGroup && !isLogActivityCard && (() => {
-              const realActivities = currentGroup.activities.filter(a => a.id !== 'log-activity' && !a.id?.startsWith('week-recap'));
+              const realActivities = currentGroup.activities.filter(a => a.id !== 'log-activity' && a.id !== 'week-complete' && !a.id?.startsWith('week-recap'));
               if (realActivities.length <= 1) return null;
               return (
                 <div className="shrink-0 flex items-center justify-center gap-[6px] py-2">
