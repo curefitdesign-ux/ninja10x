@@ -707,6 +707,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                               {/* Card */}
                               <div
+                                ref={idx === 0 ? galleryCardMeasureRef : undefined}
                                 className="relative overflow-visible"
                                 style={{
                                   width: '48%', aspectRatio: '9/16', borderRadius: 4,
@@ -716,9 +717,21 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                   transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
                                 }}
                               >
-                                <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4, containerType: 'inline-size' }}>
+                                <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4 }}>
                                   {act.frame ? (
-                                    <StoryFrameRenderer imageUrl={act.originalUrl || act.storageUrl} isVideo={act.isVideo} activity={act.activity} frame={act.frame} duration={act.duration} pr={act.pr} dayNumber={act.dayNumber} />
+                                    /* Render frame at full reference size, then scale down for pixel-perfect proportional rendering */
+                                    <div style={{
+                                      width: FRAME_REFERENCE_WIDTH,
+                                      height: FRAME_REFERENCE_WIDTH * 16 / 9,
+                                      transformOrigin: 'top left',
+                                      transform: `scale(${galleryCardScale})`,
+                                      containerType: 'inline-size',
+                                      position: 'absolute',
+                                      top: 0,
+                                      left: 0,
+                                    }}>
+                                      <StoryFrameRenderer imageUrl={act.originalUrl || act.storageUrl} isVideo={act.isVideo} activity={act.activity} frame={act.frame} duration={act.duration} pr={act.pr} dayNumber={act.dayNumber} />
+                                    </div>
                                   ) : act.isVideo ? (
                                     <video src={act.originalUrl || act.storageUrl} className="absolute inset-0 w-full h-full object-cover" muted playsInline />
                                   ) : (
