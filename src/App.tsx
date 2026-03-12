@@ -102,7 +102,7 @@ const ProfileSetupRouteWrapper = ({ children }: { children: React.ReactNode }) =
   }
   
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // If profile exists and not in edit mode, redirect to home
