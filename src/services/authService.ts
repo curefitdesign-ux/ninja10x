@@ -3,8 +3,6 @@ import { cultClient, setSSOToken } from "@/lib/cult-client";
 interface CultAuthResult {
   cultUserId: string;
   name: string;
-  email: string | null;
-  phone: string | null;
   supabaseTokens: {
     access_token: string;
     refresh_token: string;
@@ -17,10 +15,8 @@ export const validateSSOToken = async (ssoToken: string | null, ignoreAuth?: boo
     throw new Error("No SSO token provided");
   }
 
-  // Set token globally so cultClient attaches it as header (null is fine in ignoreAuth mode)
   setSSOToken(ssoToken);
 
-  // Validate token against Cult API
   const cultData = await cultClient.post("/v2/user/ninja-10x/details");
   console.log("[SSO] Cult API response received", cultData);
 
@@ -30,11 +26,8 @@ export const validateSSOToken = async (ssoToken: string | null, ignoreAuth?: boo
   }
 
   const name = [cultData.firstName, cultData.lastName].filter(Boolean).join(" ") || "";
-  const email = cultData.email || null;
-  const phone = cultData.phoneNumber || null;
   const profileImageUrl = cultData.profileImageUrl || null;
 
-  // Bridge to Supabase via edge function
   const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/auth-cult-user`;
 
   const bridgeResponse = await fetch(edgeFunctionUrl, {
@@ -43,7 +36,7 @@ export const validateSSOToken = async (ssoToken: string | null, ignoreAuth?: boo
       "Content-Type": "application/json",
       apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
     },
-    body: JSON.stringify({ cultUserId, name, email, phone, profileImageUrl }),
+    body: JSON.stringify({ cultUserId, name, profileImageUrl }),
   });
 
   if (!bridgeResponse.ok) {
@@ -56,8 +49,6 @@ export const validateSSOToken = async (ssoToken: string | null, ignoreAuth?: boo
   return {
     cultUserId: data.cult_user_id,
     name: data.name,
-    email,
-    phone,
     supabaseTokens: {
       access_token: data.access_token,
       refresh_token: data.refresh_token,
