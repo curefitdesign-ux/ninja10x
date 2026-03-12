@@ -130,11 +130,14 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
     }
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const handleTouchMoveRaw = useCallback((e: TouchEvent) => {
     e.preventDefault();
     
     if (e.touches.length === 2 && initialDistance !== null) {
-      const distance = getDistance(e.touches[0], e.touches[1]);
+      const distance = Math.sqrt(
+        (e.touches[0].clientX - e.touches[1].clientX) ** 2 +
+        (e.touches[0].clientY - e.touches[1].clientY) ** 2
+      );
       const newScale = initialScale * (distance / initialDistance);
       setTransform(prev => constrainTransform({ ...prev, scale: newScale }));
       showZoomIndicatorWithTimeout();
@@ -143,7 +146,15 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
       const newY = e.touches[0].clientY - dragStart.y;
       setTransform(prev => constrainTransform({ ...prev, x: newX, y: newY }));
     }
-  };
+  }, [initialDistance, initialScale, isDragging, dragStart, constrainTransform, showZoomIndicatorWithTimeout]);
+
+  // Attach touchmove with { passive: false } so preventDefault() works on mobile
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.addEventListener('touchmove', handleTouchMoveRaw, { passive: false });
+    return () => el.removeEventListener('touchmove', handleTouchMoveRaw);
+  }, [handleTouchMoveRaw]);
 
   const handleTouchEnd = () => {
     setIsDragging(false);
