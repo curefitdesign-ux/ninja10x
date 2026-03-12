@@ -77,7 +77,7 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
         setCustomAvatarPreview(croppedDataUrl);
         setHeroPhotoPreview(croppedDataUrl);
         setHeroPhotoFile(file);
-        setSelectedAvatar(null);
+        
         setCropImageSrc(null);
       });
   };
