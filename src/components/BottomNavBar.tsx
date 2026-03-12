@@ -185,7 +185,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
           </motion.div>
 
           {/* Home */}
-          <button onClick={() => { window.history.length > 1 ? navigate(-1) : navigate("/"); }} className={btnClass}>
+          <button onClick={() => { window.location.href = "curefit://hometab"; }} className={btnClass}>
             <div style={{ color: "rgba(200, 210, 230, 0.6)", opacity: 0.5 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="11" stroke="currentColor" strokeWidth="1.5" />
