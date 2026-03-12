@@ -144,11 +144,34 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             }}
             initial={{ top: 0, borderRadius: '0px' }}
             animate={{
-              top: phase === 2 ? '7%' : 0,
+              top: phase === 2 ? '11%' : 0,
               borderRadius: phase === 2 ? '24px 24px 0px 0px' : '0px',
             }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           />
+
+          {/* Arrow pointing up when phase 2 */}
+          <AnimatePresence>
+            {phase === 2 && (
+              <motion.div
+                className="absolute left-1/2 z-20 flex flex-col items-center"
+                style={{ top: '9%', transform: 'translateX(-50%)' }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <motion.div
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 5L6 13H18L12 5Z" fill="rgba(255,255,255,0.35)" />
+                  </svg>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Skip */}
           <motion.button
