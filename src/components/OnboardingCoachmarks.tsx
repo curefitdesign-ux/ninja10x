@@ -136,7 +136,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
         >
           {/* Liquid glass background — slides down 7% on phase 2 to reveal top */}
           <motion.div
-            className="absolute inset-0"
+            className="absolute inset-0 z-[1]"
             style={{
               background: 'rgba(255, 255, 255, 0.01)',
               backdropFilter: 'blur(60px) saturate(180%)',
@@ -287,7 +287,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 animate="animate"
                 exit="exit"
               >
-                <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
+                <div className="flex-1 flex flex-col items-center justify-start pt-[18%] px-8 text-center">
                   {/* Hand-drawn animated arrow pointing up */}
                   <motion.div
                     className="mb-6"
