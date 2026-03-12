@@ -73,6 +73,25 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [phase, visible]);
 
+  // Elevate the log card above the overlay in phase 2
+  useEffect(() => {
+    const card = document.getElementById('log-activity-card');
+    if (!card) return;
+    if (phase === 2) {
+      card.style.position = 'relative';
+      card.style.zIndex = '10001';
+    } else {
+      card.style.position = '';
+      card.style.zIndex = '';
+    }
+    return () => {
+      if (card) {
+        card.style.position = '';
+        card.style.zIndex = '';
+      }
+    };
+  }, [phase]);
+
   const finish = useCallback(() => {
     localStorage.setItem(STORAGE_KEY, 'true');
     setVisible(false);
