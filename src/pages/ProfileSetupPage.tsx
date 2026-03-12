@@ -83,10 +83,10 @@ const ProfileSetupPage = () => {
 
 
 
-  // What to show in the hero and blurred bg
+  const hasAvatarSelected = customAvatarFile !== null || customAvatarPreview !== null;
+
   const getCurrentAvatarSrc = () => {
     if (customAvatarPreview) return customAvatarPreview;
-    if (selectedAvatar) return PRESET_AVATARS.find(a => a.id === selectedAvatar)?.hd ?? null;
     return null;
   };
   const heroImage = getCurrentAvatarSrc();
