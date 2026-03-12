@@ -1816,7 +1816,7 @@ const Reel = () => {
                                 style={{
                                   width: '78%',
                                   height: '5.5cqh',
-                                  bottom: '4cqh',
+                                  bottom: 'calc(4cqh - 45px)',
                                   left: '11%',
                                   zIndex: 1,
                                   borderRadius: `0 0 ${cardRadius - 3}px ${cardRadius - 3}px`,
@@ -1840,7 +1840,7 @@ const Reel = () => {
                                 style={{
                                   width: '84%',
                                   height: '5.5cqh',
-                                  bottom: '6cqh',
+                                  bottom: 'calc(6cqh - 45px)',
                                   left: '8%',
                                   zIndex: 2,
                                   borderRadius: `0 0 ${cardRadius - 2}px ${cardRadius - 2}px`,
@@ -1862,16 +1862,16 @@ const Reel = () => {
                                 animate={{ opacity: [0, 1, 0.4, 1], y: 0 }}
                                 transition={{ delay: 0.7, duration: 2, ease: 'easeInOut', repeat: Infinity, repeatDelay: 3 }}
                                 style={{
-                                  bottom: '-1.5cqh',
-                                  left: 0,
-                                  zIndex: 1,
-                                }}
-                              >
-                                <svg width="2.5cqh" height="2.2cqh" viewBox="0 0 36 32" fill="none" style={{ width: 'clamp(24px, 2.5cqh, 36px)', height: 'clamp(20px, 2.2cqh, 32px)', marginTop: '-0.5cqh' }}>
-                                  <path d="M18 30 Q12 26, 8 20 Q4 14, 7 8 Q9 4, 14 3 Q17 2.5, 18 3" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-                                  <path d="M15 6 L18 1.5 L20 7" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                                <span style={{ fontFamily: 'Caveat, cursive', fontSize: 'clamp(16px, 3.2cqh, 22px)', color: 'rgba(255,255,255,0.55)', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>tap to view journey</span>
+                                   bottom: 'calc(-1.5cqh - 45px)',
+                                   left: 0,
+                                   zIndex: 1,
+                                 }}
+                               >
+                                 <svg width="2.5cqh" height="2.2cqh" viewBox="0 0 36 32" fill="none" style={{ width: 'clamp(24px, 2.5cqh, 36px)', height: 'clamp(20px, 2.2cqh, 32px)', marginTop: '-0.5cqh' }}>
+                                   <path d="M18 30 Q12 26, 8 20 Q4 14, 7 8 Q9 4, 14 3 Q17 2.5, 18 3" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                                   <path d="M15 6 L18 1.5 L20 7" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                                 </svg>
+                                 <span style={{ fontFamily: 'Caveat, cursive', fontSize: 'clamp(16px, 3.2cqh, 22px)', color: 'rgba(255,255,255,0.55)', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>tap to view journey</span>
                               </motion.div>
                             )}
                             {/* "View my Journey" hint for log-activity / week-complete cards */}
@@ -1883,16 +1883,16 @@ const Reel = () => {
                                 animate={{ opacity: [0, 1, 0.4, 1], y: 0 }}
                                 transition={{ delay: 0.7, duration: 2, ease: 'easeInOut', repeat: Infinity, repeatDelay: 3 }}
                                 style={{
-                                  bottom: '-1.5cqh',
-                                  left: 0,
-                                  zIndex: 1,
-                                }}
-                              >
-                                <svg width="2.5cqh" height="2.2cqh" viewBox="0 0 36 32" fill="none" style={{ width: 'clamp(24px, 2.5cqh, 36px)', height: 'clamp(20px, 2.2cqh, 32px)', marginTop: '-0.5cqh' }}>
-                                  <path d="M18 30 Q12 26, 8 20 Q4 14, 7 8 Q9 4, 14 3 Q17 2.5, 18 3" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-                                  <path d="M15 6 L18 1.5 L20 7" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                                <span style={{ fontFamily: 'Caveat, cursive', fontSize: 'clamp(16px, 3.2cqh, 22px)', color: 'rgba(255,255,255,0.55)', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>view my journey</span>
+                                   bottom: 'calc(-1.5cqh - 45px)',
+                                   left: 0,
+                                   zIndex: 1,
+                                 }}
+                               >
+                                 <svg width="2.5cqh" height="2.2cqh" viewBox="0 0 36 32" fill="none" style={{ width: 'clamp(24px, 2.5cqh, 36px)', height: 'clamp(20px, 2.2cqh, 32px)', marginTop: '-0.5cqh' }}>
+                                   <path d="M18 30 Q12 26, 8 20 Q4 14, 7 8 Q9 4, 14 3 Q17 2.5, 18 3" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                                   <path d="M15 6 L18 1.5 L20 7" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                                 </svg>
+                                 <span style={{ fontFamily: 'Caveat, cursive', fontSize: 'clamp(16px, 3.2cqh, 22px)', color: 'rgba(255,255,255,0.55)', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>view my journey</span>
                               </motion.div>
                             )}
                             {/* Main card */}
