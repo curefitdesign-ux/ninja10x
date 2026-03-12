@@ -1816,7 +1816,7 @@ const Reel = () => {
                                 style={{
                                   width: '78%',
                                   height: '5.5cqh',
-                                  bottom: '4cqh',
+                                  bottom: 'calc(4cqh - 45px)',
                                   left: '11%',
                                   zIndex: 1,
                                   borderRadius: `0 0 ${cardRadius - 3}px ${cardRadius - 3}px`,
