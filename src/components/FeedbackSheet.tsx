@@ -278,11 +278,13 @@ export default function FeedbackSheet({ isOpen, onClose }: FeedbackSheetProps) {
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
         side="bottom"
-        className="px-0 pt-3 pb-6 rounded-t-3xl max-h-[90vh] overflow-y-auto border-t border-white/10"
+        className="px-0 pt-3 rounded-t-3xl max-h-[85vh] overflow-y-auto border-t border-white/10"
         style={{
-          background: 'rgba(18, 10, 40, 0.95)',
-          backdropFilter: 'blur(60px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(60px) saturate(180%)',
+          background: 'rgba(255, 255, 255, 0.06)',
+          backdropFilter: 'blur(60px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(60px) saturate(200%)',
+          boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 -8px 40px rgba(0,0,0,0.4)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)',
         }}
         data-feedback-sheet="true"
       >
