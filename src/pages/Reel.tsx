@@ -1800,7 +1800,7 @@ const Reel = () => {
                           }}
                         >
                           {/* Main card wrapper — contains card + stacked strips + hint */}
-                          <div className="relative" style={{
+                          <div id="reel-log-activity-card" className="relative" style={{
                             aspectRatio: '9/16',
                             height: 'calc(82% - 10px)',
                             maxWidth: '100%',
