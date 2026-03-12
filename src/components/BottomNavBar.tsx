@@ -11,6 +11,7 @@ import progressIcon from "@/assets/nav/progress-icon.png";
 import NotificationSheet from "@/components/NotificationSheet";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import FeedbackSheet from "@/components/FeedbackSheet";
 
 // Tab config for the reflective indicator
 const TAB_IDS = ["home", "discover", "progress", "bell", "menu"] as const;
