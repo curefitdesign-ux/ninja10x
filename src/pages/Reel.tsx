@@ -1922,6 +1922,7 @@ const Reel = () => {
                                         <CircularProgressRing
                                           currentDay={totalActivities}
                                           currentWeek={Math.min(Math.floor(totalActivities / 3) + 1, 4)}
+                                          hideDecorations
                                         />
                                       </div>
                                       {/* Video circle overlaid on the mascot area */}
