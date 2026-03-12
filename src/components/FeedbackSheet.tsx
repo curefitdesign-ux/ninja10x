@@ -278,7 +278,12 @@ export default function FeedbackSheet({ isOpen, onClose }: FeedbackSheetProps) {
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
         side="bottom"
-        className="px-0 pt-3 pb-6 rounded-t-3xl max-h-[90vh] overflow-y-auto"
+        className="px-0 pt-3 pb-6 rounded-t-3xl max-h-[90vh] overflow-y-auto border-t border-white/10"
+        style={{
+          background: 'rgba(18, 10, 40, 0.95)',
+          backdropFilter: 'blur(60px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(60px) saturate(180%)',
+        }}
         data-feedback-sheet="true"
       >
         <SheetTitle className="sr-only">Send Feedback</SheetTitle>
