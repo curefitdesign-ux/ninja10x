@@ -715,7 +715,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                   const total = ar?.total || 0;
                                   return (
                                     <div className="absolute flex items-center gap-1.5" style={{ bottom: -12, left: -6, zIndex: 30, transform: `rotate(${-activeRotation * 0.6}deg)` }}>
-                                      {total > 0 && (
+                                      {(total > 0 || isOwnProfile) && (
                                         <button
                                           className="active:scale-90 transition-transform"
                                           onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowReactsSheet(true); }}
