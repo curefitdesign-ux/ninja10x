@@ -75,12 +75,12 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
       timerRef.current = setTimeout(() => setPhase(1), 9500);
     }
     if (phase === 2) {
-      timerRef.current = setTimeout(() => finish(), 8000);
+      timerRef.current = setTimeout(() => finish(), 12000);
     }
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [phase, visible, finish]);
 
-  // Animate ring bars in sync with Phase 1 text
+  // Animate ring bars starting immediately with phase 1 (parallel with text)
   useEffect(() => {
     if (phase !== 1) {
       setRingDay(0);
@@ -88,19 +88,20 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
       ringTimersRef.current = [];
       return;
     }
+    // Start ring immediately (delay 0 for first bar) so it loads in parallel with text
     const schedule = [
-      { day: 1, ms: 1000 },
-      { day: 2, ms: 1450 },
-      { day: 3, ms: 1900 },
-      { day: 4, ms: 3000 },
-      { day: 5, ms: 3300 },
-      { day: 6, ms: 3600 },
-      { day: 7, ms: 3900 },
-      { day: 8, ms: 4200 },
-      { day: 9, ms: 4500 },
-      { day: 10, ms: 4800 },
-      { day: 11, ms: 5100 },
-      { day: 12, ms: 5400 },
+      { day: 1, ms: 200 },
+      { day: 2, ms: 600 },
+      { day: 3, ms: 1000 },
+      { day: 4, ms: 1800 },
+      { day: 5, ms: 2100 },
+      { day: 6, ms: 2400 },
+      { day: 7, ms: 2700 },
+      { day: 8, ms: 3000 },
+      { day: 9, ms: 3300 },
+      { day: 10, ms: 3600 },
+      { day: 11, ms: 3900 },
+      { day: 12, ms: 4200 },
     ];
     const timers = schedule.map(({ day, ms }) =>
       setTimeout(() => setRingDay(day), ms)
@@ -143,11 +144,34 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             }}
             initial={{ top: 0, borderRadius: '0px' }}
             animate={{
-              top: phase === 2 ? '7%' : 0,
+              top: phase === 2 ? '11%' : 0,
               borderRadius: phase === 2 ? '24px 24px 0px 0px' : '0px',
             }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           />
+
+          {/* Arrow pointing up when phase 2 */}
+          <AnimatePresence>
+            {phase === 2 && (
+              <motion.div
+                className="absolute left-1/2 z-20 flex flex-col items-center"
+                style={{ top: '9%', transform: 'translateX(-50%)' }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <motion.div
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 5L6 13H18L12 5Z" fill="rgba(255,255,255,0.35)" />
+                  </svg>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Skip */}
           <motion.button
