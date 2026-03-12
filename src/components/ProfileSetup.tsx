@@ -218,7 +218,6 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
           ref={cameraInputRef}
           type="file"
           accept="image/*"
-          capture="user"
           onChange={handleHeroFileSelect}
           className="hidden"
         />
