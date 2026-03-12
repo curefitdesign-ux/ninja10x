@@ -1918,7 +1918,7 @@ const Reel = () => {
                                       style={{ width: 180, height: 180 }}
                                     >
                                       {/* Reuse the CircularProgressRing from Activity page */}
-                                      <div className="absolute inset-0 flex items-center justify-center" style={{ transform: 'scale(0.75)' }}>
+                                      <div className="absolute flex items-center justify-center" style={{ width: 240, height: 240, transform: 'scale(0.75)', transformOrigin: 'center center' }}>
                                         <CircularProgressRing
                                           currentDay={totalActivities}
                                           currentWeek={Math.min(Math.floor(totalActivities / 3) + 1, 4)}
