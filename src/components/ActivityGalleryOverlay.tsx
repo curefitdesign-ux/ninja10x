@@ -678,7 +678,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               <p style={{
                                 fontFamily: "'Caveat', cursive", fontSize: 23,
                                 color: isAtTop ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.45)',
-                                marginBottom: 6,
+                                marginBottom: 21,
                                 transform: `rotate(${rotation * 0.3}deg)`,
                                 marginLeft: offsetX,
                                 transition: 'color 0.3s ease',
@@ -720,7 +720,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                           className="active:scale-90 transition-transform"
                                           onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowReactsSheet(true); }}
                                           style={{
-                                            fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)',
+                                            fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(0,0,0,0.7)',
                                             background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
                                             border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
                                             cursor: 'pointer',
@@ -737,7 +737,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                           }}
                                           onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}>
                                           <span style={{ fontSize: 12 }}>🔥</span>
-                                          <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>React</span>
+                                          <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(0,0,0,0.7)' }}>React</span>
                                         </button>
                                       )}
                                     </div>
