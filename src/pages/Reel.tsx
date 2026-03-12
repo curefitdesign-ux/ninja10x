@@ -1862,7 +1862,7 @@ const Reel = () => {
                                 animate={{ opacity: [0, 1, 0.4, 1], y: 0 }}
                                 transition={{ delay: 0.7, duration: 2, ease: 'easeInOut', repeat: Infinity, repeatDelay: 3 }}
                                 style={{
-                                  bottom: 'calc(-1.5cqh - 30px)',
+                                  bottom: 'calc(-1.5cqh - 20px)',
                                   left: 0,
                                   zIndex: 1,
                                 }}
