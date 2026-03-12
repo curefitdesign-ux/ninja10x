@@ -475,7 +475,13 @@ async function _fetchPublicFeedImpl(includeAll: boolean): Promise<LocalActivity[
     totalMap[r.activity_id]++;
   }
 
-  const result = activities.map(row => {
+  // Filter out activities from users who have no public content (unless it's the current user)
+  const publicActivities = activities.filter(row => {
+    if (user && row.user_id === user.id) return true;
+    return row.is_public;
+  });
+
+  const result = publicActivities.map(row => {
     const profile = profileMap.get(row.user_id);
     return {
       ...toLocal(row),
@@ -644,8 +650,12 @@ async function _fetchAllActivitiesGroupedImpl(): Promise<UserStoryGroup[]> {
     userActivitiesMap.delete(user.id);
   }
 
-  // Add other users - include ALL users (private ones will be shown blurred/locked in UI)
+  // Add other users - only include users who have at least one public activity
   for (const [userId, userActivities] of userActivitiesMap) {
+    const profile = profileMap.get(userId);
+    const hasPublicActivity = userActivities.some(a => a.is_public);
+    // Skip users with no public activities (fully private profiles)
+    if (!hasPublicActivity) continue;
     groups.push(processUserActivities(userId, userActivities));
   }
 
