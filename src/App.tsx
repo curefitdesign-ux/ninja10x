@@ -54,7 +54,7 @@ const RouteFallback = () => (
 
 // Protected route wrapper that also checks for profile
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading: authLoading, isAuthenticated } = useSSOAuth();
+  const { user, loading: authLoading, session } = useAuth();
   const { needsSetup, loading: profileLoading } = useProfile();
   
   // Wait for auth to fully initialize before making any decisions
