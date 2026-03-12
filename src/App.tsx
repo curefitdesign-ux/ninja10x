@@ -88,7 +88,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Route for profile setup (handles both new setup and edit mode)
 const ProfileSetupRouteWrapper = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useSSOAuth();
   const { needsSetup, loading: profileLoading } = useProfile();
   const location = useLocation();
   const isEditMode = new URLSearchParams(location.search).get('edit') === 'true';
