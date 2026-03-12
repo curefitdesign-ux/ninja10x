@@ -3,35 +3,35 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/use-auth';
 import cultLogo from '@/assets/cult-logo.svg';
 
 const Logout = () => {
   const navigate = useNavigate();
-  const [signingOut, setSigningOut] = useState(true);
-  const [checked, setChecked] = useState(false);
+  const { user, loading } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
+  const [signedOut, setSignedOut] = useState(false);
 
   useEffect(() => {
-    const performLogout = async () => {
-      // Check if user is already logged in
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        // User is logged in — redirect to /reel instead of logging out
-        navigate('/reel', { replace: true });
-        return;
-      }
-      setChecked(true);
-      try {
-        await supabase.auth.signOut();
-      } catch (e) {
-        console.error('[Logout] signOut error:', e);
-      } finally {
-        setSigningOut(false);
-      }
-    };
-    performLogout();
-  }, [navigate]);
+    if (loading) return; // Wait for AuthContext to finish
 
-  if (!checked) return null;
+    if (user) {
+      // User is logged in — redirect to /reel
+      navigate('/reel', { replace: true });
+      return;
+    }
+
+    // No user — perform sign out cleanup
+    setSigningOut(true);
+    supabase.auth.signOut()
+      .catch((e) => console.error('[Logout] signOut error:', e))
+      .finally(() => {
+        setSigningOut(false);
+        setSignedOut(true);
+      });
+  }, [loading, user, navigate]);
+
+  if (loading || (!signedOut && !signingOut)) return null;
 
   return (
     <div
