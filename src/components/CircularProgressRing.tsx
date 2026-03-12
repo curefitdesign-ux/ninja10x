@@ -227,74 +227,75 @@ const CircularProgressRing = ({
         style={{ width: size, height: size }}
       />
       
-      {/* Curved text - contextual journey progress */}
-      <svg 
-        className="absolute inset-0 pointer-events-none"
-        viewBox={`0 0 ${size} ${size}`}
-        style={{ width: size, height: size, overflow: 'visible' }}
-      >
-        <defs>
-          {/* Curve path that follows the ring - positioned at the bottom arc */}
-          <path
-            id="curvedTextPath"
-            d={`M ${centerX - 75} ${centerY + 60}
-                A ${ringRadius - 10} ${ringRadius - 10} 0 0 0 ${centerX + 75} ${centerY + 60}`}
-            fill="none"
-          />
-        </defs>
-        
-        {/* Contextual journey text */}
-        <text
-          fill="rgba(255, 255, 255, 0.6)"
-          fontSize="8"
-          fontFamily="Inter, sans-serif"
-          fontWeight="600"
-          letterSpacing="1.5px"
-        >
-          <textPath
-            href="#curvedTextPath"
-            startOffset="50%"
-            textAnchor="middle"
+      {!hideDecorations && (
+        <>
+          {/* Curved text - contextual journey progress */}
+          <svg 
+            className="absolute inset-0 pointer-events-none"
+            viewBox={`0 0 ${size} ${size}`}
+            style={{ width: size, height: size, overflow: 'visible' }}
           >
-            {journeyText}
-          </textPath>
-        </text>
-      </svg>
-      
-      {/* Confetti */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute w-2.5 h-1.5 rounded-sm bg-cyan-400/80" style={{ top: '28%', left: '40%', transform: 'rotate(45deg)' }} />
-        <div className="absolute w-1.5 h-2.5 rounded-sm bg-cyan-300/70" style={{ top: '32%', right: '38%', transform: 'rotate(-30deg)' }} />
-        <div className="absolute w-2 h-1 rounded-sm bg-teal-400/75" style={{ top: '26%', left: '50%', transform: 'rotate(15deg)' }} />
-        <div className="absolute w-1 h-2 rounded-sm bg-cyan-400/65" style={{ top: '40%', left: '35%', transform: 'rotate(-60deg)' }} />
-        <div className="absolute w-1.5 h-1 rounded-sm bg-teal-300/70" style={{ top: '44%', right: '34%', transform: 'rotate(75deg)' }} />
-        <div className="absolute w-1 h-1.5 rounded-sm bg-cyan-400/60" style={{ top: '55%', left: '33%', transform: 'rotate(20deg)' }} />
-        <div className="absolute w-1.5 h-1 rounded-sm bg-teal-400/65" style={{ top: '54%', right: '35%', transform: 'rotate(-45deg)' }} />
-      </div>
-      
-      {/* Inner circle - fully tappable to open gallery */}
-      <motion.button
-        className="absolute flex items-center justify-center cursor-pointer rounded-full"
-        style={{
-          top: '50%',
-          left: '50%',
-          width: ringRadius * 2 - strokeWidth * 2 - 8,
-          height: ringRadius * 2 - strokeWidth * 2 - 8,
-          transform: 'translate(-50%, -50%)',
-        }}
-        onClick={onMascotTap}
-        whileTap={{ scale: 0.95 }}
-      >
-        <img 
-          src={mascotSrc || curoMascot} 
-          alt={mascotAlt || "Curo mascot"} 
-          className="w-36 h-36 object-contain pointer-events-none"
-          style={{ 
-            marginTop: '-6px',
-            filter: 'drop-shadow(0 6px 16px rgba(139, 92, 246, 0.25))'
-          }}
-        />
-      </motion.button>
+            <defs>
+              <path
+                id="curvedTextPath"
+                d={`M ${centerX - 75} ${centerY + 60}
+                    A ${ringRadius - 10} ${ringRadius - 10} 0 0 0 ${centerX + 75} ${centerY + 60}`}
+                fill="none"
+              />
+            </defs>
+            <text
+              fill="rgba(255, 255, 255, 0.6)"
+              fontSize="8"
+              fontFamily="Inter, sans-serif"
+              fontWeight="600"
+              letterSpacing="1.5px"
+            >
+              <textPath
+                href="#curvedTextPath"
+                startOffset="50%"
+                textAnchor="middle"
+              >
+                {journeyText}
+              </textPath>
+            </text>
+          </svg>
+          
+          {/* Confetti */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <div className="absolute w-2.5 h-1.5 rounded-sm bg-cyan-400/80" style={{ top: '28%', left: '40%', transform: 'rotate(45deg)' }} />
+            <div className="absolute w-1.5 h-2.5 rounded-sm bg-cyan-300/70" style={{ top: '32%', right: '38%', transform: 'rotate(-30deg)' }} />
+            <div className="absolute w-2 h-1 rounded-sm bg-teal-400/75" style={{ top: '26%', left: '50%', transform: 'rotate(15deg)' }} />
+            <div className="absolute w-1 h-2 rounded-sm bg-cyan-400/65" style={{ top: '40%', left: '35%', transform: 'rotate(-60deg)' }} />
+            <div className="absolute w-1.5 h-1 rounded-sm bg-teal-300/70" style={{ top: '44%', right: '34%', transform: 'rotate(75deg)' }} />
+            <div className="absolute w-1 h-1.5 rounded-sm bg-cyan-400/60" style={{ top: '55%', left: '33%', transform: 'rotate(20deg)' }} />
+            <div className="absolute w-1.5 h-1 rounded-sm bg-teal-400/65" style={{ top: '54%', right: '35%', transform: 'rotate(-45deg)' }} />
+          </div>
+          
+          {/* Inner circle - fully tappable to open gallery */}
+          <motion.button
+            className="absolute flex items-center justify-center cursor-pointer rounded-full"
+            style={{
+              top: '50%',
+              left: '50%',
+              width: ringRadius * 2 - strokeWidth * 2 - 8,
+              height: ringRadius * 2 - strokeWidth * 2 - 8,
+              transform: 'translate(-50%, -50%)',
+            }}
+            onClick={onMascotTap}
+            whileTap={{ scale: 0.95 }}
+          >
+            <img 
+              src={mascotSrc || curoMascot} 
+              alt={mascotAlt || "Curo mascot"} 
+              className="w-36 h-36 object-contain pointer-events-none"
+              style={{ 
+                marginTop: '-6px',
+                filter: 'drop-shadow(0 6px 16px rgba(139, 92, 246, 0.25))'
+              }}
+            />
+          </motion.button>
+        </>
+      )}
     </motion.div>
   );
 };
