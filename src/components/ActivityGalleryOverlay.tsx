@@ -189,6 +189,21 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     setCurrentIndex(initialIndex);
   }, [isOpen, initialIndex]);
 
+  // Measure gallery card width once to compute scale for pixel-perfect frame rendering
+  const FRAME_REFERENCE_WIDTH = 340;
+  useEffect(() => {
+    if (!isOpen) return;
+    const measure = () => {
+      if (galleryCardMeasureRef.current) {
+        const w = galleryCardMeasureRef.current.getBoundingClientRect().width;
+        if (w > 0) setGalleryCardScale(w / FRAME_REFERENCE_WIDTH);
+      }
+    };
+    // Measure after layout settles
+    const raf = requestAnimationFrame(() => { requestAnimationFrame(measure); });
+    return () => cancelAnimationFrame(raf);
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen) return;
     const map: Record<string, { total: number; reactions: Partial<Record<ReactionType, ActivityReaction>>; reactorProfiles: ReactorProfile[] }> = {};
