@@ -292,6 +292,20 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
               </div>
               <span className="text-[15px] font-medium">Edit Profile</span>
             </button>
+            <button
+              onClick={() => {
+                setShowEllipsisMenu(false);
+                localStorage.removeItem('ninja10x_onboarding_seen');
+                window.location.reload();
+              }}
+              className="flex items-center gap-4 px-6 py-4 text-left transition-colors active:scale-[0.97]"
+              style={{ color: "rgba(255,255,255,0.85)" }}
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(245, 158, 11, 0.15)" }}>
+                <Sparkles className="w-5 h-5 text-amber-400" />
+              </div>
+              <span className="text-[15px] font-medium">Replay Intro</span>
+            </button>
             <div className="mx-6 my-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
             <button
               onClick={async () => {
