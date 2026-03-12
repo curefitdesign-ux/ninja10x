@@ -940,14 +940,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    const payload = buildSharePayload();
-                    if (navigator.share) {
-                      navigator.share(payload).catch(() => {});
-                    } else {
-                      navigator.clipboard.writeText(`${payload.text}\n\n${payload.url}`)
-                        .then(() => toast.success('Link copied!'))
-                        .catch(() => toast.error('Unable to copy'));
-                    }
+                    setShowShareSheet(true);
                   }}
                   className="shrink-0 active:scale-95 transition-transform"
                   style={{
