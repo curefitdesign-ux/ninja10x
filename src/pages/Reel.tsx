@@ -1727,7 +1727,7 @@ const Reel = () => {
                           className="overflow-hidden"
                           style={{
                             aspectRatio: '9/16',
-                            height: 'calc(82% - 10px)',
+                            height: 'calc(82% + 20px)',
                             maxWidth: '100%',
                             borderRadius: `${cardRadius}px`,
                             filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
@@ -1801,7 +1801,7 @@ const Reel = () => {
                           {/* Main card wrapper — contains card + stacked strips + hint */}
                           <div className="relative" style={{
                             aspectRatio: '9/16',
-                            height: 'calc(82% - 10px)',
+                            height: 'calc(82% + 20px)',
                             maxWidth: '100%',
                             containerType: 'size',
                           }}>
@@ -1816,7 +1816,7 @@ const Reel = () => {
                                 style={{
                   width: '78%',
                                   height: '5.5cqh',
-                                  bottom: 'calc(4cqh - 30px)',
+                                  bottom: 'calc(4cqh - 80px)',
                                   left: '11%',
                                   zIndex: 1,
                                   borderRadius: `0 0 ${cardRadius - 3}px ${cardRadius - 3}px`,
@@ -1840,7 +1840,7 @@ const Reel = () => {
                                 style={{
                   width: '84%',
                                   height: '5.5cqh',
-                                  bottom: 'calc(6cqh - 30px)',
+                                  bottom: 'calc(6cqh - 80px)',
                                   left: '8%',
                                   zIndex: 2,
                                   borderRadius: `0 0 ${cardRadius - 2}px ${cardRadius - 2}px`,
@@ -1862,7 +1862,7 @@ const Reel = () => {
                                 animate={{ opacity: [0, 1, 0.4, 1], y: 0 }}
                                 transition={{ delay: 0.7, duration: 2, ease: 'easeInOut', repeat: Infinity, repeatDelay: 3 }}
                                 style={{
-                                  bottom: 'calc(-1.5cqh - 30px)',
+                                  bottom: 'calc(-1.5cqh - 80px)',
                                   left: 0,
                                   zIndex: 1,
                                 }}
@@ -1883,7 +1883,7 @@ const Reel = () => {
                                 animate={{ opacity: [0, 1, 0.4, 1], y: 0 }}
                                 transition={{ delay: 0.7, duration: 2, ease: 'easeInOut', repeat: Infinity, repeatDelay: 3 }}
                                 style={{
-                                  bottom: 'calc(-1.5cqh - 30px)',
+                                  bottom: 'calc(-1.5cqh - 80px)',
                                   left: 0,
                                   zIndex: 1,
                                 }}
