@@ -179,7 +179,6 @@ const ProfileSetupPage = () => {
         ref={cameraInputRef}
         type="file"
         accept="image/*"
-        capture="user"
         onChange={handleHeroFileSelect}
         className="hidden"
       />
