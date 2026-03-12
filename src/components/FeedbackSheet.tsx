@@ -260,6 +260,24 @@ export default function FeedbackSheet({ isOpen, onClose }: FeedbackSheetProps) {
 
       if (error) throw error;
 
+      // Send email notification
+      try {
+        await supabase.functions.invoke('send-feedback', {
+          body: {
+            message: message.trim(),
+            screenshotUrl,
+            videoUrl,
+            audioUrl,
+            currentRoute: window.location.pathname,
+            deviceInfo: navigator.userAgent,
+            userEmail: user.email,
+            userName: user.user_metadata?.display_name || user.email,
+          },
+        });
+      } catch (emailErr) {
+        console.warn('Email notification failed (feedback still saved):', emailErr);
+      }
+
       setSubmitted(true);
       setTimeout(() => onClose(), 2000);
     } catch (err) {
