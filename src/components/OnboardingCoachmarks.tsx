@@ -176,9 +176,9 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                   className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
                   style={{ color: textColor, fontFamily: fontStack }}
                 >
-                  <RevealLine text="Your body moves." delay={0.4} />
+                  <RevealLine text="Every habit starts" delay={0.4} />
                   <br />
-                  <RevealLine text="Capture it." delay={2.4} />
+                  <RevealLine text="with a single move." delay={2.4} />
                 </h2>
                 <p
                   className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-8"
@@ -186,7 +186,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 >
                   <RevealLine text="Running. Cricket. Yoga." delay={4.2} />
                   <br />
-                  <RevealLine text="Whatever moves you." delay={6.2} />
+                  <RevealLine text="Pick yours. Show up." delay={6.2} />
                 </p>
               </motion.div>
             )}
@@ -206,9 +206,9 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                   className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
                   style={{ color: textColor, fontFamily: fontStack }}
                 >
-                  <RevealLine text="3 workouts a week." delay={0.3} />
+                  <RevealLine text="Log 3 times a week." delay={0.3} />
                   <br />
-                  <RevealLine text="4 weeks straight." delay={2.6} />
+                  <RevealLine text="Do it for 4 weeks." delay={2.6} />
                 </h2>
                 <motion.div
                   className="mt-6"
