@@ -692,7 +692,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               <div
                                 className="relative overflow-visible"
                                 style={{
-                                  width: '62%', aspectRatio: '9/16', borderRadius: 4,
+                                  width: '48%', aspectRatio: '9/16', borderRadius: 4,
                                   transform: `rotate(${activeRotation}deg) translateX(${offsetX}px)`,
                                   marginLeft: idx % 2 === 0 ? '0%' : '10%',
                                   transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
