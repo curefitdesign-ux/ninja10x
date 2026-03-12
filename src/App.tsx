@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 
-import { useAuth } from "@/hooks/use-auth";
+import { AuthProvider, useSSOAuth } from "@/context/AuthContext";
 import { useProfile } from "@/hooks/use-profile";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PortalContainerProvider } from "@/hooks/use-portal-container";
@@ -13,9 +13,6 @@ import { enableAutoMotion } from "@/lib/motion";
 import { useGlobalHaptics } from "@/hooks/use-global-haptics";
 import { MorphTransitionProvider } from "@/hooks/use-morph-transition";
 import MorphTransitionOverlay from "@/components/MorphTransitionOverlay";
-
-// Eagerly load Auth (initial landing page)
-import Auth from "./pages/Auth";
 
 // Lazy-load all other routes
 const Index = lazy(() => import("./pages/Index"));
