@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             ? "[SSO Auth] ignoreAuth mode — using 'at' header..."
             : "[SSO Auth] Validating SSO token..."
         );
-        const result = await validateSSOToken(ssoToken);
+        const result = await validateSSOToken(ssoToken, _ignoreAuth);
 
         // Set Supabase session from edge function tokens
         const { data: sessionData, error: sessionError } =
