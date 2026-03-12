@@ -797,38 +797,7 @@ const Reel = () => {
     }
   }, [autoAdvanceProgress]);
   
-  // Auto-advance: only fire a SINGLE timeout to cycle, no interval for progress
-  useEffect(() => {
-    if (autoAdvanceTimerRef.current) {
-      clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
-    
-    if (hasWeekRecap) return;
-    
-    const activityHasLiveFrame = !!(currentActivity?.frame && currentActivity.frame !== 'recap' && currentActivity?.originalUrl);
-    const currentMediaUrl = activityHasLiveFrame
-      ? (currentActivity?.originalUrl || currentActivity?.storageUrl || '')
-      : (currentActivity?.storageUrl || currentActivity?.originalUrl || '');
-    if (isPaused || loading || !currentActivity || loadedMediaUrl !== currentMediaUrl || !currentMediaUrl) {
-      setAutoAdvanceProgress(0);
-      return;
-    }
-    
-    // Signal CSS animation to start
-    setAutoAdvanceProgress(1);
-    autoAdvanceStartRef.current = Date.now();
-    
-    autoAdvanceTimerRef.current = setTimeout(() => {
-      cycleActivity();
-    }, autoAdvanceDuration);
-    
-    return () => {
-      if (autoAdvanceTimerRef.current) {
-        clearTimeout(autoAdvanceTimerRef.current);
-      }
-    };
-  }, [currentUserIndex, currentActivityIndex, isPaused, loading, currentActivity, loadedMediaUrl, cycleActivity, hasWeekRecap, autoAdvanceDuration]);
+  // Auto-advance disabled — user navigates manually via tap/swipe
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
