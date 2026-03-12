@@ -1838,10 +1838,10 @@ const Reel = () => {
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.35, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                                 style={{
-                                  width: '84%',
+                                  width: '90%',
                                   height: '5.5cqh',
-                                  bottom: 'calc(6cqh - 45px)',
-                                  left: '8%',
+                                  bottom: 'calc(6cqh - 43px)',
+                                  left: '5%',
                                   zIndex: 2,
                                   borderRadius: `0 0 ${cardRadius - 2}px ${cardRadius - 2}px`,
                                   background: 'rgba(255,255,255,0.07)',
