@@ -1727,7 +1727,7 @@ const Reel = () => {
                           className="overflow-hidden"
                           style={{
                             aspectRatio: '9/16',
-                            height: isLogCard ? 'calc(82% - 10px)' : 'calc(95% - 10px)',
+                            height: isLogCard ? 'calc(72% - 10px)' : 'calc(78% - 10px)',
                             maxWidth: '100%',
                             borderRadius: `${cardRadius}px`,
                             filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
