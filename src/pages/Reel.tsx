@@ -1816,7 +1816,7 @@ const Reel = () => {
                                 style={{
                                   width: '78%',
                                   height: '5.5cqh',
-                                  bottom: '4cqh',
+                                  bottom: 'calc(4cqh - 50px)',
                                   left: '11%',
                                   zIndex: 1,
                                   borderRadius: `0 0 ${cardRadius - 3}px ${cardRadius - 3}px`,
@@ -1840,7 +1840,7 @@ const Reel = () => {
                                 style={{
                                   width: '84%',
                                   height: '5.5cqh',
-                                  bottom: '6cqh',
+                                  bottom: 'calc(6cqh - 50px)',
                                   left: '8%',
                                   zIndex: 2,
                                   borderRadius: `0 0 ${cardRadius - 2}px ${cardRadius - 2}px`,
@@ -1862,7 +1862,7 @@ const Reel = () => {
                                 animate={{ opacity: [0, 1, 0.4, 1], y: 0 }}
                                 transition={{ delay: 0.7, duration: 2, ease: 'easeInOut', repeat: Infinity, repeatDelay: 3 }}
                                 style={{
-                                  bottom: '-1.5cqh',
+                  bottom: 'calc(-1.5cqh - 50px)',
                                   left: 0,
                                   zIndex: 1,
                                 }}
