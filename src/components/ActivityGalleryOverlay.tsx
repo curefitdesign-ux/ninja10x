@@ -117,7 +117,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [showReactsSheet, setShowReactsSheet] = useState(false);
   const [showSendReactionSheet, setShowSendReactionSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
-  const [showShareSheet, setShowShareSheet] = useState(false);
   
   const [cardReactId, setCardReactId] = useState<string | null>(null);
 
@@ -127,7 +126,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     reactorProfiles: ReactorProfile[];
   }>>({});
 
-  const isPaused = showReactsSheet || showSendReactionSheet || showEditSheet || showShareSheet;
+  const isPaused = showReactsSheet || showSendReactionSheet || showEditSheet;
 
   const hasLoggedToday = useMemo(() => {
     if (!isOwnProfile) return true;

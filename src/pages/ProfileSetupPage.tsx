@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, X, Eye, EyeOff, LogOut } from 'lucide-react';
+import { Check, Camera, X, Eye, EyeOff, LogOut } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 
@@ -11,8 +11,39 @@ import { useProfile } from '@/hooks/use-profile';
 import { z } from 'zod';
 
 
-// HD hero image for default state
+// Curo mascot preset avatars (thumbnails)
+import curoBoxing from '@/assets/avatars/curo-boxing.png';
+import curoCool from '@/assets/avatars/curo-cool.png';
+import curoHappy from '@/assets/avatars/curo-happy.png';
+import curoFire from '@/assets/avatars/curo-fire.png';
+import curoFierce from '@/assets/avatars/curo-fierce.png';
+import curoShy from '@/assets/avatars/curo-shy.png';
+import curoZen from '@/assets/avatars/curo-zen.png';
+import curoShocked from '@/assets/avatars/curo-shocked.png';
+import curoMusic from '@/assets/avatars/curo-music.png';
+
+// HD versions for hero display
 import curoBoxingHd from '@/assets/avatars/curo-boxing-hd.png';
+import curoCoolHd from '@/assets/avatars/curo-cool-hd.png';
+import curoHappyHd from '@/assets/avatars/curo-happy-hd.png';
+import curoFireHd from '@/assets/avatars/curo-fire-hd.png';
+import curoFierceHd from '@/assets/avatars/curo-fierce-hd.png';
+import curoShyHd from '@/assets/avatars/curo-shy-hd.png';
+import curoZenHd from '@/assets/avatars/curo-zen-hd.png';
+import curoShockedHd from '@/assets/avatars/curo-shocked-hd.png';
+import curoMusicHd from '@/assets/avatars/curo-music-hd.png';
+
+const PRESET_AVATARS = [
+  { id: 'curo-boxing', src: curoBoxing, hd: curoBoxingHd },
+  { id: 'curo-cool', src: curoCool, hd: curoCoolHd },
+  { id: 'curo-happy', src: curoHappy, hd: curoHappyHd },
+  { id: 'curo-fire', src: curoFire, hd: curoFireHd },
+  { id: 'curo-fierce', src: curoFierce, hd: curoFierceHd },
+  { id: 'curo-shy', src: curoShy, hd: curoShyHd },
+  { id: 'curo-zen', src: curoZen, hd: curoZenHd },
+  { id: 'curo-shocked', src: curoShocked, hd: curoShockedHd },
+  { id: 'curo-music', src: curoMusic, hd: curoMusicHd },
+];
 
 const nameSchema = z.string().trim().min(2, 'Name must be at least 2 characters').max(50, 'Name too long');
 
@@ -25,7 +56,7 @@ const ProfileSetupPage = () => {
   const { profile, updateProfile, needsSetup, loading: profileLoading } = useProfile();
 
   const [displayName, setDisplayName] = useState('');
-  
+  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [customAvatarFile, setCustomAvatarFile] = useState<File | null>(null);
   const [customAvatarPreview, setCustomAvatarPreview] = useState<string | null>(null);
   const [storiesPublic, setStoriesPublic] = useState(true);
@@ -34,7 +65,14 @@ const ProfileSetupPage = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  // Preload all HD avatar images on mount so switching is instant
+  useEffect(() => {
+    PRESET_AVATARS.forEach(({ hd }) => {
+      const img = new Image();
+      img.src = hd;
+    });
+  }, []);
 
   // Redirect if profile already exists and not in edit mode
   useEffect(() => {
@@ -51,7 +89,12 @@ const ProfileSetupPage = () => {
       setDisplayName(profile.display_name);
       setStoriesPublic(profile.stories_public ?? false);
       const storedUrl = profile.avatar_url;
-      if (storedUrl) {
+      const presetMatch = PRESET_AVATARS.find(a =>
+        storedUrl === a.id || storedUrl.includes(a.id)
+      );
+      if (presetMatch) {
+        setSelectedAvatar(presetMatch.id);
+      } else if (storedUrl) {
         setCustomAvatarPreview(storedUrl);
       }
       setIsInitialized(true);
@@ -73,34 +116,32 @@ const ProfileSetupPage = () => {
     const reader = new FileReader();
     reader.onload = (ev) => {
       setCustomAvatarPreview(ev.target?.result as string);
+      setSelectedAvatar(null);
     };
     reader.readAsDataURL(file);
     if (e.target) e.target.value = '';
   };
 
-  const handleGallerySelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return; }
-    if (file.size > 20 * 1024 * 1024) { toast.error('Image must be less than 20MB'); return; }
-    setCustomAvatarFile(file);
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setCustomAvatarPreview(ev.target?.result as string);
-      
-    };
-    reader.readAsDataURL(file);
-    if (e.target) e.target.value = '';
+  const selectPresetAvatar = (avatarId: string) => {
+    setSelectedAvatar(avatarId);
+    setCustomAvatarFile(null);
+    setCustomAvatarPreview(null);
   };
 
-  const hasAvatarSelected = customAvatarFile !== null || customAvatarPreview !== null;
+  const hasAvatarSelected = selectedAvatar !== null || customAvatarFile !== null || customAvatarPreview !== null;
 
-  const heroImage = customAvatarPreview;
+  // What to show in the hero and blurred bg
+  const getCurrentAvatarSrc = () => {
+    if (customAvatarPreview) return customAvatarPreview;
+    if (selectedAvatar) return PRESET_AVATARS.find(a => a.id === selectedAvatar)?.hd ?? null;
+    return null;
+  };
+  const heroImage = getCurrentAvatarSrc();
 
   const handleSubmit = async () => {
     const nameResult = nameSchema.safeParse(displayName);
     if (!nameResult.success) { setNameError(nameResult.error.errors[0].message); return; }
-    if (!hasAvatarSelected) { toast.error('Please add your photo'); return; }
+    if (!hasAvatarSelected) { toast.error('Please select an avatar'); return; }
     if (!user) { toast.error('No user logged in'); return; }
 
     setLoading(true);
@@ -116,6 +157,8 @@ const ProfileSetupPage = () => {
         if (uploadError) throw uploadError;
         const { data: urlData } = supabase.storage.from('journey-uploads').getPublicUrl(fileName);
         avatarUrl = urlData.publicUrl;
+      } else if (selectedAvatar) {
+        avatarUrl = selectedAvatar;
       } else {
         avatarUrl = customAvatarPreview || '';
       }
@@ -290,50 +333,85 @@ const ProfileSetupPage = () => {
           {nameError && <p className="text-red-400 text-xs mt-1.5">{nameError}</p>}
         </div>
 
-        {/* Add Photo section */}
-        <div className="px-6 mb-4">
-          <div className="flex gap-3">
-            {/* Camera button */}
+        {/* Divider */}
+        <div className="flex items-center gap-3 px-6 mb-3">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-white/30 text-xs tracking-wide uppercase">Choose avatar</span>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
+
+        {/* Preset Avatars — horizontal scroll, square tiles */}
+        <div className="px-4 mb-4">
+          <div className="flex gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+            {/* Camera tile — first in row */}
             <motion.button
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.92 }}
               onClick={() => cameraInputRef.current?.click()}
               disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl"
+              className="relative flex-shrink-0 flex items-center justify-center"
               style={{
+                width: 60,
+                height: 60,
+                borderRadius: 12,
                 background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(20px)',
+                border: customAvatarPreview
+                  ? '2.5px solid #34d399'
+                  : '2px dashed rgba(255,255,255,0.25)',
+                boxShadow: customAvatarPreview
+                  ? '0 0 14px rgba(52,211,153,0.45)'
+                  : 'none',
               }}
             >
-              <Camera className="w-5 h-5 text-white/60" />
-              <span className="text-white/70 text-sm font-medium">Camera</span>
+              {customAvatarPreview ? (
+                <>
+                  <img src={customAvatarPreview} alt="Custom" className="w-full h-full object-cover" style={{ borderRadius: 10 }} />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/35" style={{ borderRadius: 10 }}>
+                    <Camera className="w-4 h-4 text-white" />
+                  </div>
+                </>
+              ) : (
+                <Camera className="w-5 h-5 text-white/50" />
+              )}
             </motion.button>
-            {/* Gallery button */}
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => galleryInputRef.current?.click()}
-              disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl"
-              style={{
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(20px)',
-              }}
-            >
-              <svg className="w-5 h-5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-              </svg>
-              <span className="text-white/70 text-sm font-medium">Gallery</span>
-            </motion.button>
+            {PRESET_AVATARS.map((avatar) => (
+              <motion.button
+                key={avatar.id}
+                whileTap={{ scale: 0.92 }}
+                onClick={() => selectPresetAvatar(avatar.id)}
+                disabled={loading}
+                className="relative flex-shrink-0"
+                style={{ width: 60, height: 60 }}
+              >
+                <div
+                  className="w-full h-full overflow-hidden"
+                  style={{
+                    borderRadius: 12,
+                    border: selectedAvatar === avatar.id
+                      ? '2.5px solid #34d399'
+                      : '2px solid rgba(255,255,255,0.1)',
+                    boxShadow: selectedAvatar === avatar.id
+                      ? '0 0 14px rgba(52,211,153,0.45)'
+                      : 'none',
+                  }}
+                >
+                  <img src={avatar.src} alt={avatar.id} className="w-full h-full object-cover" />
+                </div>
+                <AnimatePresence>
+                  {selectedAvatar === avatar.id && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0 }}
+                      className="absolute inset-0 flex items-center justify-center bg-black/35"
+                      style={{ borderRadius: 12 }}
+                    >
+                      <Check className="w-4 h-4 text-emerald-400" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            ))}
           </div>
-          {/* Hidden gallery input (no capture attribute) */}
-          <input
-            ref={galleryInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleGallerySelect}
-            className="hidden"
-          />
         </div>
 
         {/* Stories toggle — edit mode only */}
