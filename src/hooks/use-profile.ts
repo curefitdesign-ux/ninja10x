@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './use-auth';
+import { useSSOAuth } from '@/context/AuthContext';
 
 export interface Profile {
   id: string;

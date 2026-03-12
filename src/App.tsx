@@ -210,21 +210,23 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <MorphTransitionProvider>
-            <MobileFrame>
-              <Suspense fallback={null}>
-                <NotificationCenter />
-                <ReactionNotificationPill />
-              </Suspense>
-              <MorphTransitionOverlay />
-              <AnimatedRoutes />
-              <Suspense fallback={null}>
-                <BottomNavBar />
-              </Suspense>
-            </MobileFrame>
-          </MorphTransitionProvider>
-        </BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter>
+            <MorphTransitionProvider>
+              <MobileFrame>
+                <Suspense fallback={null}>
+                  <NotificationCenter />
+                  <ReactionNotificationPill />
+                </Suspense>
+                <MorphTransitionOverlay />
+                <AnimatedRoutes />
+                <Suspense fallback={null}>
+                  <BottomNavBar />
+                </Suspense>
+              </MobileFrame>
+            </MorphTransitionProvider>
+          </BrowserRouter>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
