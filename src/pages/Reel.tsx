@@ -1796,6 +1796,7 @@ const Reel = () => {
                             height: '100%',
                             background: 'transparent',
                             overflow: 'visible',
+                            marginTop: '-20px',
                           }}
                         >
                           {/* Main card wrapper — contains card + stacked strips + hint */}
