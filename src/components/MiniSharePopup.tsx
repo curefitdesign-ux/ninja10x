@@ -73,28 +73,19 @@ const MiniSharePopup = ({ imageUrl, isVideo, onClose, onDone }: MiniSharePopupPr
   const handleShare = async (app: typeof socialApps[0]) => {
     triggerHaptic('medium');
     
-    // Try native share if available
-    if (navigator.share) {
-      try {
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
-        const file = new File([blob], `activity.${isVideo ? 'mp4' : 'png'}`, { type: blob.type });
-        
-        await navigator.share({
-          title: 'My Activity',
-          text: 'Check out my activity!',
-          files: [file],
-        });
-        onClose();
-        return;
-      } catch (err) {
-        console.log('Native share failed, falling back to URL');
-      }
-    }
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
-    const shareUrl = app.share(window.location.href);
-    if (shareUrl) {
-      window.open(shareUrl, '_blank', 'noopener,noreferrer');
+    if (isMobile) {
+      const start = Date.now();
+      window.location.href = app.deep;
+      
+      setTimeout(() => {
+        if (Date.now() - start < 2000) {
+          window.open(app.web, '_blank', 'noopener,noreferrer');
+        }
+      }, 1500);
+    } else {
+      window.open(app.web, '_blank', 'noopener,noreferrer');
     }
   };
 
