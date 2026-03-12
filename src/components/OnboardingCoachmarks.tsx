@@ -133,13 +133,11 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Static blur background — never re-renders */}
+          {/* Opaque background — blocks all content behind to prevent flicker */}
           <div
             className="absolute inset-0"
             style={{
-              backdropFilter: 'blur(60px) saturate(200%)',
-              WebkitBackdropFilter: 'blur(60px) saturate(200%)',
-              background: 'rgba(0, 0, 0, 0.15)',
+              background: 'linear-gradient(180deg, #2a1b4e 0%, #0a0720 100%)',
             }}
           />
 
