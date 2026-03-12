@@ -27,6 +27,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
   const [showEllipsisMenu, setShowEllipsisMenu] = useState(false);
   const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [showFeedbackSheet, setShowFeedbackSheet] = useState(false);
 
   // Listen for gallery overlay open/close
   useEffect(() => {
