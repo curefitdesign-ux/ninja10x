@@ -82,11 +82,11 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
       timerRef.current = setTimeout(() => setPhase(1), 9500);
     }
     if (phase === 1) {
-      timerRef.current = setTimeout(() => setPhase(2), 8500);
+      timerRef.current = setTimeout(() => setPhase(3), 8500);
     }
-    // Phase 2 (community) auto-advances to phase 3
+    // Phase 2 (community) auto-finishes
     if (phase === 2) {
-      timerRef.current = setTimeout(() => setPhase(3), 9000);
+      timerRef.current = setTimeout(() => finish(), 9000);
     }
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [phase, visible]);
@@ -414,7 +414,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  onClick={(e) => { e.stopPropagation(); finish(); }}
+                  onClick={(e) => { e.stopPropagation(); setPhase(2); }}
                   whileTap={{ scale: 0.97 }}
                 >
                   NEXT
