@@ -143,8 +143,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center"
-          style={{ touchAction: 'none' }}
+          className={`fixed inset-0 z-[10000] flex flex-col items-center justify-center ${phase === 3 ? 'pointer-events-none' : ''}`}
+          style={{ touchAction: phase === 3 ? 'auto' : 'none' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
