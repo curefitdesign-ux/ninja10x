@@ -1668,7 +1668,7 @@ const Reel = () => {
           className="relative z-30 flex-1 min-h-0 flex flex-col"
           style={{
             paddingTop: '0px',
-            marginTop: '-4px',
+            marginTop: '-19px',
             paddingBottom: 'calc(max(env(safe-area-inset-bottom, 6px), 6px) + 80px)',
           }}
         >
