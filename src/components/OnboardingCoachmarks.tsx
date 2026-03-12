@@ -7,13 +7,6 @@ interface OnboardingCoachmarksProps {
 
 const STORAGE_KEY = 'ninja10x_onboarding_seen';
 
-/**
- * Cinematic onboarding — large text, slow blur-to-sharp reveal
- * Phase 0: "Your body moves. Capture it." + subtext
- * Phase 1: "3 activities. 4 weeks. Become a Cult Ninja." — pauses
- * Phase 2: Glassmorphic highlight of log card
- */
-
 function RevealWord({
   children,
   delay = 0,
@@ -67,12 +60,15 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     }
   }, [onComplete]);
 
-  // Auto-advance only phase 0 → 1
+  // Auto-advance phase 0 → 1
   useEffect(() => {
     if (!visible) return;
     if (phase === 0) {
-      // Total reveal time ~8s, then hold 1.5s before advancing
       timerRef.current = setTimeout(() => setPhase(1), 9500);
+    }
+    // Auto-advance phase 1 → 2 after text reveals
+    if (phase === 1) {
+      timerRef.current = setTimeout(() => setPhase(2), 8500);
     }
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [phase, visible]);
@@ -85,7 +81,9 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
 
   if (!visible) return null;
 
-  const isTextPhase = phase === 0 || phase === 1;
+  const textColor = 'rgba(255, 255, 255, 0.80)';
+  const mutedColor = 'rgba(255, 255, 255, 0.35)';
+  const fontStack = '-apple-system, SF Pro Display, system-ui, sans-serif';
 
   return (
     <AnimatePresence>
@@ -98,22 +96,14 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6 }}
         >
-          {/* Background: 10% white, fully blurred — NOT blue */}
+          {/* Background: translucent blur — no white tint */}
           <motion.div
             className="absolute inset-0"
             style={{
               backdropFilter: 'blur(60px) saturate(200%)',
               WebkitBackdropFilter: 'blur(60px) saturate(200%)',
-              background: isTextPhase
-                ? 'rgba(255, 255, 255, 0.10)'
-                : 'rgba(255, 255, 255, 0.08)',
+              background: 'rgba(0, 0, 0, 0.15)',
             }}
-            animate={{
-              background: isTextPhase
-                ? 'rgba(255, 255, 255, 0.10)'
-                : 'rgba(255, 255, 255, 0.08)',
-            }}
-            transition={{ duration: 1.2, ease: 'easeInOut' }}
           />
 
           {/* Skip */}
@@ -142,8 +132,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 exit={{ opacity: 0, transition: { duration: 1.0 } }}
               >
                 <h2
-                  className="text-[32px] font-semibold text-white tracking-[-0.03em] leading-[1.3]"
-                  style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
+                  className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
+                  style={{ color: textColor, fontFamily: fontStack }}
                 >
                   <RevealLine text="Your body moves." delay={0.4} />
                   <br />
@@ -151,10 +141,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 </h2>
                 <p
                   className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-8"
-                  style={{
-                    color: 'rgba(255, 255, 255, 0.30)',
-                    fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif',
-                  }}
+                  style={{ color: mutedColor, fontFamily: fontStack }}
                 >
                   <RevealLine text="Running. Cricket. Yoga." delay={4.2} />
                   <br />
@@ -164,7 +151,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             )}
           </AnimatePresence>
 
-          {/* ═══ PHASE 1 — pauses here ═══ */}
+          {/* ═══ PHASE 1 — auto-advances to phase 2 ═══ */}
           <AnimatePresence mode="wait">
             {phase === 1 && (
               <motion.div
@@ -175,18 +162,18 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 exit={{ opacity: 0, transition: { duration: 1.0 } }}
               >
                 <h2
-                  className="text-[32px] font-semibold text-white tracking-[-0.03em] leading-[1.3]"
-                  style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
+                  className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
+                  style={{ color: textColor, fontFamily: fontStack }}
                 >
-                  <RevealLine text="Log 3 activities" delay={0.3} />
+                  <RevealLine text="3 workouts a week." delay={0.3} />
                   <br />
-                  <RevealLine text="every week, for 4 weeks." delay={2.2} />
+                  <RevealLine text="4 weeks straight." delay={2.6} />
                 </h2>
                 <motion.div
                   className="mt-6"
                   initial={{ filter: 'blur(24px)', opacity: 0, scale: 1.05 }}
                   animate={{ filter: 'blur(0px)', opacity: 1, scale: 1 }}
-                  transition={{ duration: 2.0, delay: 3.6, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 2.0, delay: 4.8, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <span
                     className="text-[32px] font-semibold tracking-[-0.03em]"
@@ -195,90 +182,55 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       backgroundClip: 'text',
-                      fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif',
+                      fontFamily: fontStack,
                     }}
                   >
-                    Become a Cult Ninja. 🥷
+                    Become a Ninja. 🥷
                   </span>
                 </motion.div>
-
-                {/* CTA — appears after full reveal */}
-                <motion.button
-                  className="mt-14 px-10 py-3.5 rounded-2xl text-[15px] font-semibold tracking-wide active:scale-[0.97]"
-                  style={{ background: 'rgba(255, 255, 255, 0.95)' }}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 6.0, duration: 0.8 }}
-                  onClick={(e) => { e.stopPropagation(); setPhase(2); }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <span
-                    style={{
-                      backgroundImage: 'linear-gradient(90deg, #F97316, #EC4899)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}
-                  >
-                    Let's Go
-                  </span>
-                </motion.button>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* ═══ PHASE 2: Highlight log card ═══ */}
+          {/* ═══ PHASE 2: Highlight log card — no text, just card + CTA ═══ */}
           <AnimatePresence>
             {phase === 2 && (
               <motion.div
                 key="phase2"
-                className="absolute inset-0 z-10 flex flex-col items-center justify-end pb-20"
+                className="absolute inset-0 z-10 flex flex-col items-center justify-end"
+                style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 16px) + 24px)' }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <motion.p
-                  className="text-[32px] font-semibold text-center px-8 mb-8 tracking-[-0.03em] leading-[1.3]"
-                  style={{
-                    color: 'rgba(255, 255, 255, 0.35)',
-                    fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif',
-                  }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3, duration: 1.0 }}
-                >
-                  This is your canvas.
-                  <br />
-                  Every workout, framed.
-                </motion.p>
-
+                {/* Glassmorphic "Next" CTA at bottom */}
                 <motion.button
-                  className="px-10 py-3.5 rounded-2xl text-[15px] font-semibold tracking-wide active:scale-[0.97]"
-                  style={{ background: 'rgba(255, 255, 255, 0.95)' }}
-                  initial={{ opacity: 0, y: 12 }}
+                  className="w-[calc(100%-48px)] py-4 rounded-2xl text-[16px] font-semibold tracking-wide active:scale-[0.97]"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    backdropFilter: 'blur(40px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                    border: '1px solid rgba(255, 255, 255, 0.18)',
+                    boxShadow:
+                      'inset 0 1px 1px rgba(255, 255, 255, 0.15), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.2)',
+                    color: 'rgba(255, 255, 255, 0.90)',
+                    fontFamily: fontStack,
+                  }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8, duration: 0.6 }}
+                  transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                   onClick={(e) => { e.stopPropagation(); finish(); }}
                   whileTap={{ scale: 0.97 }}
                 >
-                  <span
-                    style={{
-                      backgroundImage: 'linear-gradient(90deg, #F97316, #EC4899)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}
-                  >
-                    Log Now
-                  </span>
+                  Next
                 </motion.button>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Progress dots */}
-          {isTextPhase && (
+          {/* Progress dots — text phases only */}
+          {(phase === 0 || phase === 1) && (
             <div className="absolute bottom-12 z-20 flex items-center gap-1.5">
               {[0, 1].map((i) => (
                 <div
