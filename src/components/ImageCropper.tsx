@@ -328,7 +328,6 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
 
   return (
     <div 
-      ref={containerRef}
       className="fixed inset-0 z-50 bg-black flex flex-col overflow-hidden"
       style={{ 
         height: '100dvh', 
@@ -360,6 +359,7 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
       
       {/* Main editing area */}
       <div
+        ref={containerRef}
         className="absolute inset-0 overflow-hidden touch-none flex items-center justify-center"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
