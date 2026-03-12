@@ -75,12 +75,12 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
       timerRef.current = setTimeout(() => setPhase(1), 9500);
     }
     if (phase === 2) {
-      timerRef.current = setTimeout(() => finish(), 8000);
+      timerRef.current = setTimeout(() => finish(), 12000);
     }
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [phase, visible, finish]);
 
-  // Animate ring bars in sync with Phase 1 text
+  // Animate ring bars starting immediately with phase 1 (parallel with text)
   useEffect(() => {
     if (phase !== 1) {
       setRingDay(0);
@@ -88,19 +88,20 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
       ringTimersRef.current = [];
       return;
     }
+    // Start ring immediately (delay 0 for first bar) so it loads in parallel with text
     const schedule = [
-      { day: 1, ms: 1000 },
-      { day: 2, ms: 1450 },
-      { day: 3, ms: 1900 },
-      { day: 4, ms: 3000 },
-      { day: 5, ms: 3300 },
-      { day: 6, ms: 3600 },
-      { day: 7, ms: 3900 },
-      { day: 8, ms: 4200 },
-      { day: 9, ms: 4500 },
-      { day: 10, ms: 4800 },
-      { day: 11, ms: 5100 },
-      { day: 12, ms: 5400 },
+      { day: 1, ms: 200 },
+      { day: 2, ms: 600 },
+      { day: 3, ms: 1000 },
+      { day: 4, ms: 1800 },
+      { day: 5, ms: 2100 },
+      { day: 6, ms: 2400 },
+      { day: 7, ms: 2700 },
+      { day: 8, ms: 3000 },
+      { day: 9, ms: 3300 },
+      { day: 10, ms: 3600 },
+      { day: 11, ms: 3900 },
+      { day: 12, ms: 4200 },
     ];
     const timers = schedule.map(({ day, ms }) =>
       setTimeout(() => setRingDay(day), ms)
