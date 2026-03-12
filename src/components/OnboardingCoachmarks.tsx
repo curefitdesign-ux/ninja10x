@@ -154,8 +154,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           <AnimatePresence>
             {phase === 2 && (
               <motion.div
-                className="absolute left-1/2 z-20 flex flex-col items-center"
-                style={{ top: '9%', transform: 'translateX(-50%)' }}
+                className="absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center"
+                style={{ top: '8%' }}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
