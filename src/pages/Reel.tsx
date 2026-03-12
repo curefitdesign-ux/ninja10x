@@ -306,7 +306,7 @@ const Reel = () => {
     if (effectiveCount < 12 && !loggedToday) {
       ownActivities.push({
         id: 'log-activity',
-        dayNumber: (() => { const maxDay = allMyActivities.reduce((m, a) => Math.max(m, a.dayNumber), 0); return maxDay + 1; })(),
+        dayNumber: allMyActivities.length + 1,
         storageUrl: '',
         originalUrl: '',
         activity: undefined,
