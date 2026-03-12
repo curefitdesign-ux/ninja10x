@@ -303,7 +303,7 @@ const Progress = () => {
       <MediaSourceSheet
         isOpen={showMediaSourceSheet}
         onClose={() => setShowMediaSourceSheet(false)}
-        dayNumber={myActivities.length + 1}
+        dayNumber={(() => { const real = myActivities.filter(a => a.dayNumber > 0 && a.dayNumber <= 12); const max = real.reduce((m, a) => Math.max(m, a.dayNumber), 0); return max + 1; })()}
       />
     </motion.div>
   );

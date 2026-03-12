@@ -318,7 +318,7 @@ const ImmersiveHomeLayout = ({
       <MediaSourceSheet
         isOpen={showMediaSheet}
         onClose={() => setShowMediaSheet(false)}
-        dayNumber={photos.length + 1}
+        dayNumber={(() => { const real = photos.filter(p => p.dayNumber > 0 && p.dayNumber <= 12); const max = real.reduce((m, p) => Math.max(m, p.dayNumber), 0); return max + 1; })()}
       />
 
       {/* Day Card → Bottom Sheet morph */}
