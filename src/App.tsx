@@ -66,7 +66,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   // Only redirect if we're certain there's no session (auth is done loading)
-  if (!session && !user) {
+  if (!isAuthenticated && !user) {
     return <Navigate to="/auth" replace />;
   }
 
