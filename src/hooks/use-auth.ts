@@ -9,8 +9,7 @@ export const useAuth = () => {
   const { user, isAuthenticated, isLoading, error } = useSSOAuth();
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/';
+    window.location.href = '/logout';
   };
 
   return {
