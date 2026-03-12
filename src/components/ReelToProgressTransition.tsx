@@ -217,8 +217,8 @@ export default function ReelToProgressTransition({
                               onClick={() => {
                                 const hasPhotos = ws.activitiesInWeek.some(a => a?.storageUrl);
                                 if (hasPhotos) {
-                                  // Find index of first activity in this week within all uploaded activities
-                                  const uploaded = myActivities.filter(a => a.storageUrl);
+                                  // Find index in the sorted (newest-first) gallery list
+                                  const uploaded = myActivities.filter(a => a.storageUrl).sort((a, b) => b.dayNumber - a.dayNumber);
                                   const firstInWeek = ws.activitiesInWeek.find(a => a?.storageUrl);
                                   const idx = firstInWeek ? uploaded.findIndex(a => a.dayNumber === firstInWeek.dayNumber) : 0;
                                   setGalleryInitialIndex(Math.max(0, idx));
