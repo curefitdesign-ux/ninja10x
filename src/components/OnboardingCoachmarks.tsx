@@ -108,8 +108,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
 
   if (!visible) return null;
 
-  const textColor = 'rgba(255, 255, 255, 0.80)';
-  const mutedColor = 'rgba(255, 255, 255, 0.35)';
+  const textColor = 'hsl(var(--foreground) / 0.92)';
+  const mutedColor = 'hsl(var(--foreground) / 0.72)';
   const fontStack = '-apple-system, SF Pro Display, system-ui, sans-serif';
 
   // Shared cross-fade variants — no mode="wait" so no gap
@@ -120,7 +120,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
   };
 
   return (
-    <AnimatePresence>
+    <AnimatePresence initial={false}>
       {visible && (
         <motion.div
           className="fixed inset-0 z-[10000]"
@@ -130,24 +130,28 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Liquid glass background — slides down 7% on phase 2 to reveal top */}
+          {/* Base layer to prevent visual flashing under blur */}
+          <div className="absolute inset-0 bg-background/70" />
+
+          {/* Liquid glass background — smooth transform to avoid flicker */}
           <motion.div
             className="absolute inset-0"
             style={{
-              background: 'rgba(255, 255, 255, 0.01)',
-              backdropFilter: 'blur(60px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(60px) saturate(180%)',
+              background: 'hsl(var(--background) / 0.08)',
+              backdropFilter: 'blur(56px) saturate(170%)',
+              WebkitBackdropFilter: 'blur(56px) saturate(170%)',
+              willChange: 'transform, border-radius, backdrop-filter',
             }}
-            initial={{ top: 0, borderRadius: '0px' }}
+            initial={{ y: '0%', borderRadius: '0px' }}
             animate={{
-              top: phase === 2 ? '11%' : 0,
+              y: phase === 2 ? '11%' : '0%',
               borderRadius: phase === 2 ? '24px 24px 0px 0px' : '0px',
             }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           />
 
           {/* Arrow pointing up when phase 2 */}
-          <AnimatePresence>
+          <AnimatePresence initial={false}>
             {phase === 2 && (
               <motion.div
                 className="absolute left-1/2 z-20 flex flex-col items-center"
@@ -162,7 +166,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                   transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
                 >
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 5L6 13H18L12 5Z" fill="rgba(255,255,255,0.35)" />
+                    <path d="M12 5L6 13H18L12 5Z" fill="hsl(var(--foreground) / 0.45)" />
                   </svg>
                 </motion.div>
               </motion.div>
@@ -185,7 +189,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           </motion.button>
 
           {/* Content — crossfade (no mode="wait") */}
-          <AnimatePresence>
+          <AnimatePresence initial={false}>
             {/* ═══ PHASE 0 ═══ */}
             {phase === 0 && (
               <motion.div
