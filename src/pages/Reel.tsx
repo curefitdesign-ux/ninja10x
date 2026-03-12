@@ -25,6 +25,7 @@ import ProfileAvatar from '@/components/ProfileAvatar';
 import ActivityGalleryOverlay, { GalleryActivity } from '@/components/ActivityGalleryOverlay';
 
 import MakePublicSheet from '@/components/MakePublicSheet';
+import OnboardingCoachmarks from '@/components/OnboardingCoachmarks';
 import MediaSourceSheet from '@/components/MediaSourceSheet';
 import StoryHint, { useStoryNudgeAnimation } from '@/components/StoryHint';
 import { ReelViewerSkeleton } from '@/components/SkeletonLoaders';
