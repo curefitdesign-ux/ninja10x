@@ -733,7 +733,33 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 )}
                               </div>
 
-                              {/* Hand-drawn journal doodles */}
+                              {/* Reaction buttons — right side */}
+                              {(() => {
+                                const ar = localReactions[act.id];
+                                const total = ar?.total || 0;
+                                return (
+                                  <div className="absolute flex flex-col items-center gap-2" style={{ right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 30 }}>
+                                    {total > 0 && (
+                                      <button
+                                        className="active:scale-90 transition-transform flex flex-col items-center"
+                                        onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowReactsSheet(true); }}
+                                        style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: 16, padding: '6px 10px', border: '1px solid rgba(255,255,255,0.1)' }}
+                                      >
+                                        <span style={{ fontSize: 18 }}>❤️</span>
+                                        <span style={{ fontFamily: "'Caveat', cursive", fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 1 }}>{total}</span>
+                                      </button>
+                                    )}
+                                    {!isOwnProfile && (
+                                      <button className="flex flex-col items-center active:scale-90 transition-transform" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: 16, padding: '6px 10px', border: '1px solid rgba(255,255,255,0.1)' }}
+                                        onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}>
+                                        <span style={{ fontSize: 18 }}>🔥</span>
+                                        <span style={{ fontFamily: "'Caveat', cursive", fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>React</span>
+                                      </button>
+                                    )}
+                                  </div>
+                                );
+                              })()}
+
                               <div className="pointer-events-none relative" style={{ minHeight: 36, marginTop: 10 }}>
                                 <p style={{
                                   fontFamily: "'Caveat', cursive", fontSize: 17, fontWeight: 700,
