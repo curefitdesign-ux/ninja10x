@@ -150,28 +150,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           />
 
-          {/* Arrow pointing up when phase 2 */}
-          <AnimatePresence>
-            {phase === 2 && (
-              <motion.div
-                className="absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center"
-                style={{ top: '8%' }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <motion.div
-                  animate={{ y: [0, -6, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 5L6 13H18L12 5Z" fill="rgba(255,255,255,0.35)" />
-                  </svg>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Hand-drawn arrow now inside phase 2 content below */}
 
           {/* Skip */}
           <motion.button
@@ -309,6 +288,46 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 exit="exit"
               >
                 <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
+                  {/* Hand-drawn animated arrow pointing up */}
+                  <motion.div
+                    className="mb-6"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <motion.svg
+                      width="48"
+                      height="64"
+                      viewBox="0 0 48 64"
+                      fill="none"
+                      animate={{ y: [0, -8, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                    >
+                      {/* Hand-drawn wobbly arrow shaft */}
+                      <motion.path
+                        d="M24 58 C23 50, 25 42, 24 34 C23 26, 25 18, 24 12"
+                        stroke="rgba(255,255,255,0.5)"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        fill="none"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                      />
+                      {/* Hand-drawn arrowhead */}
+                      <motion.path
+                        d="M16 20 C18 16, 21 10, 24 6 C27 10, 30 16, 32 20"
+                        stroke="rgba(255,255,255,0.5)"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        fill="none"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ delay: 1.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                      />
+                    </motion.svg>
+                  </motion.div>
                   <h2
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
                     style={{ color: textColor, fontFamily: fontStack }}
