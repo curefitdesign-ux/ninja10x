@@ -46,6 +46,45 @@ export type Database = {
           },
         ]
       }
+      feedback: {
+        Row: {
+          audio_url: string | null
+          created_at: string
+          current_route: string | null
+          device_info: string | null
+          id: string
+          message: string
+          screenshot_url: string | null
+          status: string
+          user_id: string
+          video_url: string | null
+        }
+        Insert: {
+          audio_url?: string | null
+          created_at?: string
+          current_route?: string | null
+          device_info?: string | null
+          id?: string
+          message?: string
+          screenshot_url?: string | null
+          status?: string
+          user_id: string
+          video_url?: string | null
+        }
+        Update: {
+          audio_url?: string | null
+          created_at?: string
+          current_route?: string | null
+          device_info?: string | null
+          id?: string
+          message?: string
+          screenshot_url?: string | null
+          status?: string
+          user_id?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       journey_activities: {
         Row: {
           activity: string | null
