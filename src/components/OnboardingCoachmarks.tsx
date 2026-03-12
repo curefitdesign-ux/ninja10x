@@ -75,21 +75,40 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
 
   // Elevate the log card above the overlay in phase 2
   useEffect(() => {
-    // Try both home and reel page card IDs
-    const card = document.getElementById('reel-log-activity-card') || document.getElementById('log-activity-card');
-    if (!card) return;
-    if (phase === 2) {
-      card.style.position = 'relative';
-      card.style.zIndex = '10001';
-    } else {
-      card.style.position = '';
-      card.style.zIndex = '';
+    const targetIds = ['reel-log-activity-card', 'log-activity-card'];
+
+    const resetCard = () => {
+      targetIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.style.position = '';
+          el.style.zIndex = '';
+        }
+      });
+    };
+
+    if (phase !== 2) {
+      resetCard();
+      return;
     }
-    return () => {
+
+    const applyElevation = () => {
+      const card = targetIds
+        .map((id) => document.getElementById(id))
+        .find(Boolean) as HTMLElement | null;
+
       if (card) {
-        card.style.position = '';
-        card.style.zIndex = '';
+        card.style.position = 'relative';
+        card.style.zIndex = '10001';
       }
+    };
+
+    applyElevation();
+    const interval = window.setInterval(applyElevation, 120);
+
+    return () => {
+      window.clearInterval(interval);
+      resetCard();
     };
   }, [phase]);
 
