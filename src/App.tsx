@@ -69,7 +69,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   // Only redirect if we're certain there's no session (auth is done loading)
   if (!session && !user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/logout" replace />;
   }
 
   // Wait for profile check if we have a user
