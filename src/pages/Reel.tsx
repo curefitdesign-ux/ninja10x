@@ -1853,14 +1853,13 @@ const Reel = () => {
                             {showStackedCards && (
                               <motion.div
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
-                                className="absolute cursor-pointer flex items-center gap-1"
+                                className="absolute cursor-pointer flex items-center justify-center gap-1 w-full"
                                 initial={{ opacity: 0, y: 6 }}
                                 animate={{ opacity: [0, 1, 0.4, 1], y: 0 }}
                                 transition={{ delay: 0.7, duration: 2, ease: 'easeInOut', repeat: Infinity, repeatDelay: 3 }}
                                 style={{
                                   bottom: '-1.5cqh',
-                                  left: '50%',
-                                  transform: 'translateX(-50%)',
+                                  left: 0,
                                   zIndex: 1,
                                 }}
                               >
