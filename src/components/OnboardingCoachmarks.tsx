@@ -315,62 +315,6 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0, transition: { duration: 0.8 } }}
               >
-                {/* Profiles pinned at top */}
-                <div className="flex flex-col items-center pt-16 pb-4">
-                  <motion.div
-                    className="flex items-center justify-center"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 1.0, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  >
-                    {COMMUNITY_AVATARS.slice(0, 5).map((avatar, i) => (
-                      <motion.div
-                        key={i}
-                        className="rounded-full overflow-hidden border-2"
-                        style={{
-                          width: 48,
-                          height: 48,
-                          marginLeft: i === 0 ? 0 : -14,
-                          borderColor: 'rgba(255, 255, 255, 0.15)',
-                          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
-                          zIndex: COMMUNITY_AVATARS.length - i,
-                          position: 'relative',
-                        }}
-                        initial={{ opacity: 0, y: 20, scale: 0.7 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{
-                          duration: 0.8,
-                          delay: 0.5 + i * 0.12,
-                          ease: [0.16, 1, 0.3, 1],
-                        }}
-                      >
-                        <img src={avatar} alt="" className="w-full h-full object-cover" />
-                      </motion.div>
-                    ))}
-                    {/* "+99" counter */}
-                    <motion.div
-                      className="rounded-full flex items-center justify-center"
-                      style={{
-                        width: 48,
-                        height: 48,
-                        marginLeft: -14,
-                        background: 'rgba(255, 255, 255, 0.08)',
-                        backdropFilter: 'blur(20px)',
-                        WebkitBackdropFilter: 'blur(20px)',
-                        border: '2px solid rgba(255, 255, 255, 0.15)',
-                        color: 'rgba(255, 255, 255, 0.70)',
-                        fontSize: 13,
-                        fontWeight: 600,
-                        fontFamily: fontStack,
-                      }}
-                      initial={{ opacity: 0, y: 20, scale: 0.7 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ duration: 0.8, delay: 1.1, ease: [0.16, 1, 0.3, 1] }}
-                    >
-                      +99
-                    </motion.div>
-                  </motion.div>
-                </div>
 
                 {/* Centered community text */}
                 <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
