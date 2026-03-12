@@ -678,7 +678,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               <p style={{
                                 fontFamily: "'Caveat', cursive", fontSize: 23,
                                 color: isAtTop ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.45)',
-                                marginBottom: 6,
+                                marginBottom: 21,
                                 transform: `rotate(${rotation * 0.3}deg)`,
                                 marginLeft: offsetX,
                                 transition: 'color 0.3s ease',
