@@ -27,6 +27,7 @@ const Reel = lazy(() => import("./pages/Reel"));
 // const ReelGenerationBase = lazy(() => import("./pages/ReelGeneration"));
 const ProfileSetupPage = lazy(() => import("./pages/ProfileSetupPage"));
 const AvatarCrop = lazy(() => import("./pages/AvatarCrop"));
+const Logout = lazy(() => import("./pages/Logout"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Lazy-load non-critical global components
