@@ -8,14 +8,14 @@ interface OnboardingCoachmarksProps {
 const STORAGE_KEY = 'ninja10x_onboarding_seen';
 
 /**
- * Cinematic onboarding: 4-phase flow
- * Phase 0: Inspiring fitness text (auto-advance)
- * Phase 1: Journey challenge text (auto-advance)  
+ * Cinematic onboarding — 5-phase flow, Tobias van Schneider × Apple tone
+ * Phase 0: "Your body moves. Capture it." (auto-advance, slow)
+ * Phase 1: "3 activities. 4 weeks. Cult Ninja." (auto-advance, slow)
  * Phase 2: Blur fades → highlight first card → NEXT CTA
- * Phase 3: Blur returns → community text → blur fades → highlight avatars → LOG NOW CTA
+ * Phase 3: Community text (auto-advance, slow)
+ * Phase 4: Blur dims everything except top profile strip → LOG NOW CTA
  */
 
-// Word-by-word blur→clear reveal
 function RevealLine({
   text,
   delay = 0,
@@ -31,12 +31,12 @@ function RevealLine({
       {words.map((word, i) => (
         <motion.span
           key={i}
-          className="inline-block mr-[0.32em]"
-          initial={{ filter: 'blur(12px)', opacity: 0, y: 6 }}
+          className="inline-block mr-[0.34em]"
+          initial={{ filter: 'blur(14px)', opacity: 0, y: 8 }}
           animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
           transition={{
-            duration: 0.6,
-            delay: delay + i * 0.14,
+            duration: 0.75,
+            delay: delay + i * 0.22,
             ease: [0.22, 1, 0.36, 1],
           }}
         >
@@ -47,7 +47,7 @@ function RevealLine({
   );
 }
 
-type Phase = 0 | 1 | 2 | 3 | 4 | 5;
+type Phase = 0 | 1 | 2 | 3 | 4;
 
 export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmarksProps) {
   const [phase, setPhase] = useState<Phase>(0);
@@ -57,22 +57,22 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
   useEffect(() => {
     const seen = localStorage.getItem(STORAGE_KEY);
     if (!seen) {
-      const t = setTimeout(() => setVisible(true), 600);
+      const t = setTimeout(() => setVisible(true), 700);
       return () => clearTimeout(t);
     } else {
       onComplete();
     }
   }, [onComplete]);
 
-  // Auto-advance from phase 0 → 1 after text reveals
+  // Auto-advance — slower, more breathing room
   useEffect(() => {
     if (!visible) return;
     if (phase === 0) {
-      timerRef.current = setTimeout(() => setPhase(1), 3200);
+      timerRef.current = setTimeout(() => setPhase(1), 5000);
     } else if (phase === 1) {
-      timerRef.current = setTimeout(() => setPhase(2), 3800);
+      timerRef.current = setTimeout(() => setPhase(2), 5500);
     } else if (phase === 3) {
-      timerRef.current = setTimeout(() => setPhase(4), 3500);
+      timerRef.current = setTimeout(() => setPhase(4), 5000);
     }
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [phase, visible]);
@@ -80,20 +80,14 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
   const finish = useCallback(() => {
     localStorage.setItem(STORAGE_KEY, 'true');
     setVisible(false);
-    setTimeout(onComplete, 350);
+    setTimeout(onComplete, 400);
   }, [onComplete]);
 
   if (!visible) return null;
 
-  // Phase 0: Inspiring fitness text (full blur bg, auto-advance)
-  // Phase 1: Journey "3 × 4 = Ninja" text (full blur bg, auto-advance)
-  // Phase 2: Blur fades → reveal card beneath → NEXT CTA
-  // Phase 3: Blur returns → community text (auto-advance)
-  // Phase 4: Blur fades → reveal top avatar strip → LOG NOW CTA
-  // Phase 5: dismissed
-
   const showBlur = phase === 0 || phase === 1 || phase === 3;
-  const showDimOverlay = phase === 2 || phase === 4; // dim but semi-transparent
+  // Phase 4: only dim below the top profile strip area
+  const showDimOverlay = phase === 2 || phase === 4;
 
   return (
     <AnimatePresence>
@@ -104,37 +98,48 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.4 }}
+          transition={{ duration: 0.5 }}
         >
-          {/* Blur background layer */}
+          {/* Blur / dim background layer */}
           <motion.div
             className="absolute inset-0"
-            style={{ background: 'rgba(0, 0, 0, 0.92)' }}
-            animate={{ opacity: showBlur ? 1 : showDimOverlay ? 0.55 : 0 }}
-            transition={{ duration: 0.8, ease: 'easeInOut' }}
+            style={{ background: 'rgba(0, 0, 0, 0.93)' }}
+            animate={{ opacity: showBlur ? 1 : showDimOverlay ? 0.6 : 0 }}
+            transition={{ duration: 1.0, ease: 'easeInOut' }}
           />
 
-          {/* Skip button */}
-          {phase < 5 && (
-            <motion.button
-              className="absolute right-5 z-50 text-[11px] font-medium tracking-wider uppercase"
-              style={{
-                top: 'calc(max(env(safe-area-inset-top, 12px), 12px) + 8px)',
-                color: 'rgba(255, 255, 255, 0.25)',
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                finish();
-              }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.2 }}
-            >
-              Skip
-            </motion.button>
+          {/* Phase 4: cutout — keep top profile strip visible, blur everything else */}
+          {phase === 4 && (
+            <>
+              {/* Dark overlay below the profile strip */}
+              <motion.div
+                className="absolute inset-0"
+                style={{
+                  background: 'linear-gradient(to bottom, transparent 0px, transparent 120px, rgba(0,0,0,0.88) 160px, rgba(0,0,0,0.88) 100%)',
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+              />
+            </>
           )}
 
-          {/* ═══ PHASE 0: Inspiring fitness text ═══ */}
+          {/* Skip */}
+          <motion.button
+            className="absolute right-5 z-50 text-[11px] font-medium tracking-[0.12em] uppercase"
+            style={{
+              top: 'calc(max(env(safe-area-inset-top, 12px), 12px) + 8px)',
+              color: 'rgba(255, 255, 255, 0.2)',
+            }}
+            onClick={(e) => { e.stopPropagation(); finish(); }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2 }}
+          >
+            Skip
+          </motion.button>
+
+          {/* ═══ PHASE 0: The hook — van Schneider minimalism ═══ */}
           <AnimatePresence mode="wait">
             {phase === 0 && (
               <motion.div
@@ -142,32 +147,32 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 className="relative z-10 flex flex-col items-center justify-center px-10 text-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0, scale: 0.97 }}
-                transition={{ duration: 0.4 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.6 }}
               >
                 <h2
-                  className="text-[28px] font-semibold text-white tracking-tight leading-[1.3] mb-2"
+                  className="text-[30px] font-semibold text-white tracking-[-0.02em] leading-[1.28]"
                   style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
                 >
-                  <RevealLine text="Capture every workout." delay={0.2} />
+                  <RevealLine text="Your body moves." delay={0.3} />
                 </h2>
                 <h2
-                  className="text-[28px] font-semibold text-white tracking-tight leading-[1.3] mb-2"
+                  className="text-[30px] font-semibold text-white tracking-[-0.02em] leading-[1.28] mt-1"
                   style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
                 >
-                  <RevealLine text="Every run. Every game." delay={0.9} />
+                  <RevealLine text="Capture it." delay={1.6} />
                 </h2>
-                <h2
-                  className="text-[22px] font-medium tracking-tight leading-[1.3]"
-                  style={{ color: 'rgba(255, 255, 255, 0.45)', fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
+                <p
+                  className="text-[17px] font-normal tracking-[-0.01em] leading-[1.5] mt-5 max-w-[280px]"
+                  style={{ color: 'rgba(255, 255, 255, 0.4)', fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
                 >
-                  <RevealLine text="Cricket. Swimming. Yoga. Anything." delay={1.6} />
-                </h2>
+                  <RevealLine text="Running. Cricket. Swimming. Yoga. Whatever makes you feel alive." delay={2.4} />
+                </p>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* ═══ PHASE 1: Journey challenge text ═══ */}
+          {/* ═══ PHASE 1: The challenge ═══ */}
           <AnimatePresence mode="wait">
             {phase === 1 && (
               <motion.div
@@ -175,48 +180,45 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 className="relative z-10 flex flex-col items-center justify-center px-10 text-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0, scale: 0.97 }}
-                transition={{ duration: 0.4 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.6 }}
               >
                 <h2
-                  className="text-[32px] font-bold text-white tracking-tight leading-[1.25] mb-2"
+                  className="text-[34px] font-bold text-white tracking-[-0.025em] leading-[1.2]"
                   style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
                 >
-                  <RevealLine text="3 activities." delay={0.15} />
+                  <RevealLine text="3 activities." delay={0.2} />
                 </h2>
                 <h2
-                  className="text-[32px] font-bold text-white tracking-tight leading-[1.25] mb-2"
+                  className="text-[34px] font-bold text-white tracking-[-0.025em] leading-[1.2] mt-1"
                   style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
                 >
-                  <RevealLine text="4 weeks." delay={0.7} />
+                  <RevealLine text="4 weeks." delay={1.2} />
                 </h2>
-                <h2
-                  className="text-[26px] font-semibold tracking-tight leading-[1.3]"
-                  style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
+                <motion.div
+                  className="mt-4"
+                  initial={{ filter: 'blur(16px)', opacity: 0, scale: 0.92 }}
+                  animate={{ filter: 'blur(0px)', opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.9, delay: 2.4, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <motion.span
-                    className="inline-block"
-                    initial={{ filter: 'blur(12px)', opacity: 0, scale: 0.9 }}
-                    animate={{ filter: 'blur(0px)', opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.8, delay: 1.4, ease: [0.22, 1, 0.36, 1] }}
+                  <span
+                    className="text-[28px] font-semibold tracking-[-0.02em]"
+                    style={{
+                      backgroundImage: 'linear-gradient(135deg, #F97316, #EC4899)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                      fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif',
+                    }}
                   >
-                    <span
-                      style={{
-                        backgroundImage: 'linear-gradient(90deg, #F97316, #EC4899)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
-                      }}
-                    >
-                      Become a Cult Ninja.
-                    </span>
-                  </motion.span>
-                </h2>
+                    Become a Cult Ninja.
+                  </span>
+                </motion.div>
                 <motion.span
-                  className="text-[48px] mt-4 block"
-                  initial={{ scale: 0, rotate: -20 }}
+                  className="text-[52px] mt-3 block"
+                  initial={{ scale: 0, rotate: -25 }}
                   animate={{ scale: 1, rotate: 0 }}
-                  transition={{ delay: 2.0, type: 'spring', stiffness: 200, damping: 12 }}
+                  transition={{ delay: 3.2, type: 'spring', stiffness: 160, damping: 14 }}
                 >
                   🥷
                 </motion.span>
@@ -224,7 +226,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             )}
           </AnimatePresence>
 
-          {/* ═══ PHASE 2: Blur faded, highlight card, NEXT CTA ═══ */}
+          {/* ═══ PHASE 2: Card reveal — NEXT CTA ═══ */}
           <AnimatePresence>
             {phase === 2 && (
               <motion.div
@@ -233,16 +235,16 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
               >
-                {/* Pointing text */}
                 <motion.p
-                  className="text-[15px] font-medium text-white/70 mb-5 text-center px-8"
+                  className="text-[15px] font-medium mb-5 text-center px-8"
+                  style={{ color: 'rgba(255, 255, 255, 0.6)' }}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
+                  transition={{ delay: 0.8 }}
                 >
-                  Your journey lives here — every photo tells a story
+                  This is your canvas. Every workout, framed.
                 </motion.p>
 
                 <motion.button
@@ -250,11 +252,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                   style={{ background: 'rgba(255, 255, 255, 0.95)' }}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8, duration: 0.5 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setPhase(3);
-                  }}
+                  transition={{ delay: 1.0, duration: 0.5 }}
+                  onClick={(e) => { e.stopPropagation(); setPhase(3); }}
                   whileTap={{ scale: 0.97 }}
                 >
                   <span
@@ -272,7 +271,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             )}
           </AnimatePresence>
 
-          {/* ═══ PHASE 3: Community text (blur bg returns) ═══ */}
+          {/* ═══ PHASE 3: Community — van Schneider warmth ═══ */}
           <AnimatePresence mode="wait">
             {phase === 3 && (
               <motion.div
@@ -280,99 +279,101 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 className="relative z-10 flex flex-col items-center justify-center px-10 text-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0, scale: 0.97 }}
-                transition={{ duration: 0.4 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.6 }}
               >
                 <h2
-                  className="text-[28px] font-semibold text-white tracking-tight leading-[1.3] mb-2"
+                  className="text-[30px] font-semibold text-white tracking-[-0.02em] leading-[1.28]"
                   style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
                 >
-                  <RevealLine text="You're not alone." delay={0.2} />
+                  <RevealLine text="You don't train alone." delay={0.3} />
                 </h2>
-                <h2
-                  className="text-[22px] font-medium tracking-tight leading-[1.3]"
-                  style={{ color: 'rgba(255, 255, 255, 0.5)', fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
+                <p
+                  className="text-[17px] font-normal tracking-[-0.01em] leading-[1.5] mt-4 max-w-[260px]"
+                  style={{ color: 'rgba(255, 255, 255, 0.45)', fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
                 >
-                  <RevealLine text="React. Cheer. Get inspired." delay={0.9} />
-                </h2>
-                <h2
-                  className="text-[18px] font-normal tracking-tight leading-[1.4] mt-2"
-                  style={{ color: 'rgba(255, 255, 255, 0.35)', fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
-                >
-                  <RevealLine text="Swipe through your crew's stories." delay={1.6} />
-                </h2>
+                  <RevealLine text="React to friends. Cheer them on. Get inspired by their sweat." delay={1.4} />
+                </p>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* ═══ PHASE 4: Blur faded, highlight top profiles, LOG NOW CTA ═══ */}
+          {/* ═══ PHASE 4: Profile strip highlight — LOG NOW CTA ═══ */}
           <AnimatePresence>
             {phase === 4 && (
               <motion.div
                 key="phase4"
-                className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center pb-16"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
+                className="absolute inset-x-0 z-10 flex flex-col items-center"
+                style={{ bottom: 0, top: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
               >
-                {/* Pointing to top profiles */}
+                {/* Arrow pointing up to profiles */}
                 <motion.div
-                  className="absolute top-0 left-0 right-0 flex justify-center"
-                  style={{ top: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 90px)' }}
-                  initial={{ opacity: 0, y: -10 }}
+                  className="flex flex-col items-center"
+                  style={{ marginTop: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 110px)' }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
+                  transition={{ delay: 0.5, duration: 0.6 }}
                 >
-                  <p className="text-[14px] font-medium text-white/60 text-center px-6">
-                    ↑ Your crew's stories live here
+                  <span className="text-[20px] mb-1">↑</span>
+                  <p
+                    className="text-[14px] font-medium text-center px-6"
+                    style={{ color: 'rgba(255, 255, 255, 0.55)' }}
+                  >
+                    Your crew's stories live here
                   </p>
                 </motion.div>
 
-                <motion.button
-                  className="px-10 py-3.5 rounded-2xl text-[15px] font-semibold tracking-wide active:scale-[0.97]"
-                  style={{ background: 'rgba(255, 255, 255, 0.95)' }}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8, duration: 0.5 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    finish();
-                  }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <span
-                    style={{
-                      backgroundImage: 'linear-gradient(90deg, #F97316, #EC4899)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}
+                {/* LOG NOW at bottom */}
+                <div className="absolute bottom-16 inset-x-0 flex justify-center">
+                  <motion.button
+                    className="px-10 py-3.5 rounded-2xl text-[15px] font-semibold tracking-wide active:scale-[0.97]"
+                    style={{ background: 'rgba(255, 255, 255, 0.95)' }}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.9, duration: 0.5 }}
+                    onClick={(e) => { e.stopPropagation(); finish(); }}
+                    whileTap={{ scale: 0.97 }}
                   >
-                    Log Now
-                  </span>
-                </motion.button>
+                    <span
+                      style={{
+                        backgroundImage: 'linear-gradient(90deg, #F97316, #EC4899)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                      }}
+                    >
+                      Log Now
+                    </span>
+                  </motion.button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
 
           {/* Progress dots */}
-          {(phase <= 3) && (
+          {phase <= 3 && (
             <div className="absolute bottom-12 z-20 flex items-center gap-1.5">
-              {[0, 1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="rounded-full transition-all duration-300"
-                  style={{
-                    width: i === (phase <= 1 ? phase : phase - 1 + 1) ? 20 : 5,
-                    height: 5,
-                    background:
-                      i === (phase <= 1 ? phase : phase - 1 + 1)
-                        ? 'linear-gradient(90deg, #F97316, #EC4899)'
-                        : 'rgba(255, 255, 255, 0.15)',
-                  }}
-                />
-              ))}
+              {[0, 1, 2, 3].map((i) => {
+                const activeIndex = phase <= 1 ? phase : phase === 2 ? 2 : 3;
+                return (
+                  <div
+                    key={i}
+                    className="rounded-full transition-all duration-500"
+                    style={{
+                      width: i === activeIndex ? 22 : 5,
+                      height: 5,
+                      background:
+                        i === activeIndex
+                          ? 'linear-gradient(90deg, #F97316, #EC4899)'
+                          : 'rgba(255, 255, 255, 0.12)',
+                    }}
+                  />
+                );
+              })}
             </div>
           )}
         </motion.div>
