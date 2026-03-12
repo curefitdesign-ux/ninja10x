@@ -41,7 +41,7 @@ const ArcadeFrame = ({
 
   return (
     <div
-      className="w-[90%] mx-auto aspect-[9/16] rounded-[4px] overflow-hidden relative flex flex-col"
+      className="w-full h-full aspect-[9/16] overflow-hidden relative flex flex-col"
       style={{
         containerType: 'inline-size',
         background: '#000000',

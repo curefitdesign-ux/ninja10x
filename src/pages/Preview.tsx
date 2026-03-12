@@ -1168,6 +1168,7 @@ const Preview = () => {
                 style={{ 
                   maxWidth: 'min(70vw, 300px)',
                   aspectRatio: '9/16',
+                  containerType: 'inline-size',
                 }}
               >
                 {currentFrame === 'shaky' && <ShakyFrame {...frameProps} />}
@@ -1237,8 +1238,8 @@ const Preview = () => {
                     }}
                     >
                       <div 
-                        className="w-full h-full flex items-center justify-center relative"
-                        style={{ aspectRatio: '9/16', maxHeight: '100%' }}
+                        className="w-full h-full relative"
+                        style={{ aspectRatio: '9/16', maxHeight: '100%', containerType: 'inline-size' }}
                       >
                         {frame === 'shaky' && <ShakyFrame {...frameProps} />}
                         {frame === 'fitness' && <FitnessFrame {...frameProps} />}
