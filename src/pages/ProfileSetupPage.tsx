@@ -25,7 +25,7 @@ const ProfileSetupPage = () => {
   const { profile, updateProfile, needsSetup, loading: profileLoading } = useProfile();
 
   const [displayName, setDisplayName] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
+  
   const [customAvatarFile, setCustomAvatarFile] = useState<File | null>(null);
   const [customAvatarPreview, setCustomAvatarPreview] = useState<string | null>(null);
   const [storiesPublic, setStoriesPublic] = useState(true);
