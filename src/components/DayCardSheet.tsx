@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { notifyBottomSheet } from '@/lib/bottom-sheet-events';
 import { X, Camera, Image as ImageIcon, Play } from 'lucide-react';

@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { notifyBottomSheet } from '@/lib/bottom-sheet-events';
 import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
-import { useRef, forwardRef } from 'react';
+import { useRef, useEffect, forwardRef } from 'react';
 import { Camera, Image, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
