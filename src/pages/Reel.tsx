@@ -1908,61 +1908,22 @@ const Reel = () => {
                                       }}
                                     />
 
-                                    {/* Curo mascot looping video with arc progress */}
+                                    {/* Curo mascot looping video */}
                                     <motion.div
                                       initial={{ opacity: 0, scale: 0.9 }}
                                       animate={{ opacity: 1, scale: 1 }}
                                       transition={{ delay: 0.05, duration: 0.5 }}
-                                      className="z-10 mb-4 relative"
-                                      style={{ width: 150, height: 150 }}
+                                      className="z-10 mb-4"
+                                      style={{ width: 120, height: 120, borderRadius: '50%', overflow: 'hidden' }}
                                     >
-                                      {/* Arc progress ring SVG */}
-                                      <svg
-                                        className="absolute inset-0"
-                                        width="150" height="150" viewBox="0 0 150 150"
-                                        style={{ transform: 'rotate(-90deg)' }}
-                                      >
-                                        <defs>
-                                          <linearGradient id="reelArcGrad" x1="0" y1="0" x2="1" y2="1">
-                                            <stop offset="0%" stopColor="#0FE498" />
-                                            <stop offset="100%" stopColor="#00BEFF" />
-                                          </linearGradient>
-                                        </defs>
-                                        {/* Background track */}
-                                        <circle
-                                          cx="75" cy="75" r="70"
-                                          fill="none"
-                                          stroke="rgba(255,255,255,0.15)"
-                                          strokeWidth="4.5"
-                                        />
-                                        {/* Progress arc */}
-                                        {totalActivities > 0 && (
-                                          <circle
-                                            cx="75" cy="75" r="70"
-                                            fill="none"
-                                            stroke="url(#reelArcGrad)"
-                                            strokeWidth="4.5"
-                                            strokeLinecap="round"
-                                            strokeDasharray={`${2 * Math.PI * 70}`}
-                                            strokeDashoffset={`${2 * Math.PI * 70 * (1 - totalActivities / 12)}`}
-                                            style={{ filter: 'drop-shadow(0 0 6px rgba(15, 228, 152, 0.5))' }}
-                                          />
-                                        )}
-                                      </svg>
-                                      {/* Video circle */}
-                                      <div
-                                        className="absolute rounded-full overflow-hidden"
-                                        style={{ top: 13, left: 13, width: 124, height: 124 }}
-                                      >
-                                        <video
-                                          src="/videos/curo-peeking.mp4"
-                                          autoPlay
-                                          loop
-                                          muted
-                                          playsInline
-                                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                        />
-                                      </div>
+                                      <video
+                                        src="/videos/curo-peeking.mp4"
+                                        autoPlay
+                                        loop
+                                        muted
+                                        playsInline
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                      />
                                     </motion.div>
 
                                     {/* Greeting — changes based on week-complete vs log-activity */}
