@@ -7,7 +7,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel';
 import { X, ChevronLeft, ChevronUp, Pencil, Lock, ChevronRight, Volume2, VolumeX, RefreshCw, Share2, RotateCcw, Sparkles, Download, Play, Pause, History } from 'lucide-react';
-import PullToRefresh from '@/components/PullToRefresh';
+
 import ProfileMenu from '@/components/ProfileMenu';
 import { ReactionType, toggleReaction, sendReaction, ActivityReaction } from '@/services/journey-service';
 import { isVideoUrl } from '@/lib/media';
@@ -797,38 +797,7 @@ const Reel = () => {
     }
   }, [autoAdvanceProgress]);
   
-  // Auto-advance: only fire a SINGLE timeout to cycle, no interval for progress
-  useEffect(() => {
-    if (autoAdvanceTimerRef.current) {
-      clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
-    
-    if (hasWeekRecap) return;
-    
-    const activityHasLiveFrame = !!(currentActivity?.frame && currentActivity.frame !== 'recap' && currentActivity?.originalUrl);
-    const currentMediaUrl = activityHasLiveFrame
-      ? (currentActivity?.originalUrl || currentActivity?.storageUrl || '')
-      : (currentActivity?.storageUrl || currentActivity?.originalUrl || '');
-    if (isPaused || loading || !currentActivity || loadedMediaUrl !== currentMediaUrl || !currentMediaUrl) {
-      setAutoAdvanceProgress(0);
-      return;
-    }
-    
-    // Signal CSS animation to start
-    setAutoAdvanceProgress(1);
-    autoAdvanceStartRef.current = Date.now();
-    
-    autoAdvanceTimerRef.current = setTimeout(() => {
-      cycleActivity();
-    }, autoAdvanceDuration);
-    
-    return () => {
-      if (autoAdvanceTimerRef.current) {
-        clearTimeout(autoAdvanceTimerRef.current);
-      }
-    };
-  }, [currentUserIndex, currentActivityIndex, isPaused, loading, currentActivity, loadedMediaUrl, cycleActivity, hasWeekRecap, autoAdvanceDuration]);
+  // Auto-advance disabled — user navigates manually via tap/swipe
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -1134,7 +1103,6 @@ const Reel = () => {
     };
 
     return (
-      <PullToRefresh onRefresh={handleRecapPullRefresh}>
       <div 
         className="flex flex-col"
         style={{ 
@@ -1348,7 +1316,6 @@ const Reel = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-      </PullToRefresh>
     );
   }
 
@@ -1399,7 +1366,6 @@ const Reel = () => {
 
 
   return (
-    <PullToRefresh onRefresh={handlePullRefresh}>
     <DynamicBlurBackground imageUrl={mediaUrl}>
       {/* Purple gradient background for log-activity empty state (matches Progress page) */}
       {isLogActivityCard && (
@@ -2544,7 +2510,6 @@ const Reel = () => {
       {/* Onboarding coachmarks — first-time user tutorial */}
       <OnboardingCoachmarks onComplete={() => {}} />
     </DynamicBlurBackground>
-    </PullToRefresh>
   );
 };
 
