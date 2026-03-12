@@ -26,7 +26,7 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
   const { updateProfile } = useProfile();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState('');
-  const [selectedAvatar] = useState<string | null>(null);
+  
   const [customAvatarFile, setCustomAvatarFile] = useState<File | null>(null);
   const [customAvatarPreview, setCustomAvatarPreview] = useState<string | null>(null);
   const [heroPhotoFile, setHeroPhotoFile] = useState<File | null>(null);
