@@ -1,4 +1,5 @@
 import { X, Download, Copy, Check, Pencil, Loader2 } from 'lucide-react';
+import { notifyBottomSheet } from '@/lib/bottom-sheet-events';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -138,6 +139,11 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
   const [dominantColor, setDominantColor] = useState('rgba(0,0,0,0.95)');
   const [isExiting, setIsExiting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    notifyBottomSheet(true);
+    return () => notifyBottomSheet(false);
+  }, []);
   
   // Get activities for week pill
   const { activities } = useJourneyActivities();

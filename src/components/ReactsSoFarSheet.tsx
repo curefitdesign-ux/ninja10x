@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { notifyBottomSheet } from '@/lib/bottom-sheet-events';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { ReactionType, ActivityReaction, removeReaction } from '@/services/journey-service';
@@ -66,6 +67,11 @@ export default function ReactsSoFarSheet({
   const [localReactors, setLocalReactors] = useState(reactorProfiles);
 
   useEffect(() => {
+    notifyBottomSheet(true);
+    return () => notifyBottomSheet(false);
+  }, []);
+
+  useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setCurrentUserId(data.user?.id || null);
     });
@@ -119,7 +125,7 @@ export default function ReactsSoFarSheet({
           backdropFilter: 'blur(40px)',
           WebkitBackdropFilter: 'blur(40px)',
           maxHeight: '60vh',
-          paddingBottom: 'calc(max(env(safe-area-inset-bottom, 16px), 16px) + 72px)',
+          paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)',
           bottom: 0,
         }}
         initial={{ y: '100%' }}

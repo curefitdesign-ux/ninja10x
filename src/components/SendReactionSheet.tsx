@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { notifyBottomSheet } from '@/lib/bottom-sheet-events';
 
 import { motion } from 'framer-motion';
 import { ChevronRight, X } from 'lucide-react';
@@ -42,6 +43,11 @@ export default function SendReactionSheet({
   
   const [isRemoving, setIsRemoving] = useState(false);
   const [localReactorProfiles, setLocalReactorProfiles] = useState(reactorProfiles);
+
+  useEffect(() => {
+    notifyBottomSheet(true);
+    return () => notifyBottomSheet(false);
+  }, []);
   
   const actualReactionCount = localReactorProfiles.length;
   const userReaction = localReactorProfiles.find(r => r.userId === currentUserId);
@@ -111,7 +117,7 @@ export default function SendReactionSheet({
           border: '1px solid rgba(255, 255, 255, 0.15)',
           borderBottom: 'none',
           boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
-          paddingBottom: 'calc(max(env(safe-area-inset-bottom, 24px), 24px) + 72px)',
+          paddingBottom: 'max(env(safe-area-inset-bottom, 24px), 24px)',
           maxHeight: '80vh',
         }}
         initial={{ y: '100%' }}

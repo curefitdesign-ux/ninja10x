@@ -1,6 +1,7 @@
 import { Download, Link, Check, MessageCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
+import { notifyBottomSheet } from '@/lib/bottom-sheet-events';
 
 interface MiniSharePopupProps {
   imageUrl: string;
@@ -116,6 +117,11 @@ const MiniSharePopup = ({ imageUrl, isVideo, onClose, onDone }: MiniSharePopupPr
       console.error('Copy failed:', err);
     }
   };
+
+  useEffect(() => {
+    notifyBottomSheet(true);
+    return () => notifyBottomSheet(false);
+  }, []);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom duration-400">

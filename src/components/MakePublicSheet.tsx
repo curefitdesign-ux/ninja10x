@@ -1,4 +1,5 @@
-import { useState, forwardRef } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
+import { notifyBottomSheet } from '@/lib/bottom-sheet-events';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
@@ -39,6 +40,11 @@ const MakePublicSheet = forwardRef<HTMLDivElement, MakePublicSheetProps>(functio
   const portalContainer = usePortalContainer();
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);
+
+  useEffect(() => {
+    notifyBottomSheet(isOpen);
+    return () => notifyBottomSheet(false);
+  }, [isOpen]);
 
   const handleMakePublic = async () => {
     setIsPublishing(true);

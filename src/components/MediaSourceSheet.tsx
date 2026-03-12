@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { notifyBottomSheet } from '@/lib/bottom-sheet-events';
 import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
-import { useRef, forwardRef } from 'react';
+import { useRef, useEffect, forwardRef } from 'react';
 import { Camera, Image, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
@@ -22,6 +23,11 @@ const MediaSourceSheet = forwardRef<HTMLDivElement, MediaSourceSheetProps>(funct
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const portalContainer = usePortalContainer();
+
+  useEffect(() => {
+    notifyBottomSheet(isOpen);
+    return () => notifyBottomSheet(false);
+  }, [isOpen]);
 
   const handleCameraSelect = () => {
     triggerHaptic('medium');

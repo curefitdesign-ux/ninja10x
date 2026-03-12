@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { notifyBottomSheet } from '@/lib/bottom-sheet-events';
 import { createPortal } from 'react-dom';
 import { usePortalContainer } from '@/hooks/use-portal-container';
 import { useNavigate } from 'react-router-dom';
@@ -52,6 +53,11 @@ interface NotificationSheetProps {
 
 export default function NotificationSheet({ isOpen, onClose, onNotificationCountChange, onLatestNotificationChange }: NotificationSheetProps) {
   const { user } = useAuth();
+
+  useEffect(() => {
+    notifyBottomSheet(isOpen);
+    return () => notifyBottomSheet(false);
+  }, [isOpen]);
   const navigate = useNavigate();
   const portalContainer = usePortalContainer();
   const [notifications, setNotifications] = useState<Notification[]>([]);
