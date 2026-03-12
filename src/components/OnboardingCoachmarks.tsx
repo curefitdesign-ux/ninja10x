@@ -143,8 +143,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center"
-          style={{ touchAction: 'none' }}
+          className={`fixed inset-0 z-[10000] flex flex-col items-center justify-center ${phase === 3 ? 'pointer-events-none' : ''}`}
+          style={{ touchAction: phase === 3 ? 'auto' : 'none' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -386,7 +386,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             {phase === 3 && (
               <motion.div
                 key="phase3"
-                className="fixed left-0 right-0 z-[10001] flex justify-center"
+                className="fixed left-0 right-0 z-[10001] flex justify-center pointer-events-auto"
                 style={{ bottom: 'calc(env(safe-area-inset-bottom, 16px) + 80px)' }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
