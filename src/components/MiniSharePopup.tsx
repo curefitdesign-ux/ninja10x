@@ -2,7 +2,6 @@ import { Download, Link, Check, MessageCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { notifyBottomSheet } from '@/lib/bottom-sheet-events';
-import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 
 interface MiniSharePopupProps {
   imageUrl: string;
