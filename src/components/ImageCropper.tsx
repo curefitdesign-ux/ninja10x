@@ -130,7 +130,10 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
     }
   };
 
-  const handleTouchMoveRaw = useCallback((e: TouchEvent) => {
+  const handleTouchMoveRef = useRef<((e: TouchEvent) => void) | null>(null);
+
+  // Keep the ref updated with latest closure values
+  handleTouchMoveRef.current = (e: TouchEvent) => {
     e.preventDefault();
     
     if (e.touches.length === 2 && initialDistance !== null) {
@@ -140,21 +143,21 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
       );
       const newScale = initialScale * (distance / initialDistance);
       setTransform(prev => constrainTransform({ ...prev, scale: newScale }));
-      showZoomIndicatorWithTimeout();
     } else if (e.touches.length === 1 && isDragging) {
       const newX = e.touches[0].clientX - dragStart.x;
       const newY = e.touches[0].clientY - dragStart.y;
       setTransform(prev => constrainTransform({ ...prev, x: newX, y: newY }));
     }
-  }, [initialDistance, initialScale, isDragging, dragStart, constrainTransform, showZoomIndicatorWithTimeout]);
+  };
 
   // Attach touchmove with { passive: false } so preventDefault() works on mobile
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    el.addEventListener('touchmove', handleTouchMoveRaw, { passive: false });
-    return () => el.removeEventListener('touchmove', handleTouchMoveRaw);
-  }, [handleTouchMoveRaw]);
+    const handler = (e: TouchEvent) => handleTouchMoveRef.current?.(e);
+    el.addEventListener('touchmove', handler, { passive: false });
+    return () => el.removeEventListener('touchmove', handler);
+  }, []);
 
   const handleTouchEnd = () => {
     setIsDragging(false);
