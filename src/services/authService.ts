@@ -12,10 +12,7 @@ interface CultAuthResult {
   };
 }
 
-export const validateSSOToken = async (ssoToken: string | null): Promise<CultAuthResult> => {
-  // When ignoreAuth=true, the cult-client uses the "at" header so no ssoToken is needed
-  const ignoreAuth = new URLSearchParams(window.location.search).get("ignoreAuth") === "true";
-
+export const validateSSOToken = async (ssoToken: string | null, ignoreAuth?: boolean): Promise<CultAuthResult> => {
   if (!ssoToken && !ignoreAuth) {
     throw new Error("No SSO token provided");
   }

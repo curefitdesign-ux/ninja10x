@@ -25,7 +25,6 @@ const _initialSearch = window.location.search;
 const _initialParams = new URLSearchParams(_initialSearch);
 const _capturedSSOToken = _initialParams.get("sso_token") || _initialParams.get("ssoToken");
 const _ignoreAuth = _initialParams.get("ignoreAuth") === "true";
-const _initialPathIsRoot = window.location.pathname === "/" || window.location.pathname === "";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -45,8 +44,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Check for existing session first
         const { data: { session: existingSession } } = await supabase.auth.getSession();
 
-        // If landing on '/', always re-validate even with an existing session
-        if (existingSession?.user && !ssoToken && !_ignoreAuth && !_initialPathIsRoot) {
+        // If we have an existing session and NO sso token to re-validate, use it
+        if (existingSession?.user && !ssoToken && !_ignoreAuth) {
           setUser(existingSession.user);
           setIsLoading(false);
           return;
@@ -70,7 +69,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             ? "[SSO Auth] ignoreAuth mode — using 'at' header..."
             : "[SSO Auth] Validating SSO token..."
         );
-        const result = await validateSSOToken(ssoToken);
+        const result = await validateSSOToken(ssoToken, _ignoreAuth);
 
         // Set Supabase session from edge function tokens
         const { data: sessionData, error: sessionError } =
