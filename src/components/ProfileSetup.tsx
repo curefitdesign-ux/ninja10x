@@ -84,30 +84,9 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
 
   const handleCropCancel = () => setCropImageSrc(null);
 
-  const selectPresetAvatar = (avatarId: string) => {
-    setSelectedAvatar(avatarId);
-    setCustomAvatarFile(null);
-    setCustomAvatarPreview(null);
-    const preset = PRESET_AVATARS.find(a => a.id === avatarId);
-    if (preset) {
-      setHeroPhotoPreview(preset.src);
-      setHeroPhotoFile(null);
-    }
-  };
+  const hasAvatarSelected = customAvatarFile !== null || customAvatarPreview !== null;
 
-  const hasAvatarSelected = selectedAvatar !== null || customAvatarFile !== null || customAvatarPreview !== null;
-
-  const getCurrentAvatarPreview = () => {
-    if (customAvatarPreview) return customAvatarPreview;
-    if (selectedAvatar) {
-      const preset = PRESET_AVATARS.find(a => a.id === selectedAvatar);
-      return preset?.src;
-    }
-    return null;
-  };
-
-  const currentAvatar = getCurrentAvatarPreview();
-  const heroImage = heroPhotoPreview || currentAvatar;
+  const heroImage = heroPhotoPreview || customAvatarPreview;
 
   const handleSubmit = async () => {
     const nameResult = nameSchema.safeParse(displayName);
