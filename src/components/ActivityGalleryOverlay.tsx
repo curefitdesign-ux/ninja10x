@@ -727,9 +727,13 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                   return (
                                     <div className="absolute flex items-center gap-1" style={{ bottom: -10, left: -6, zIndex: 30, transform: `rotate(${-activeRotation * 0.6}deg)` }}>
                                       {total > 0 && (
-                                        <span style={{ fontFamily: "'Caveat', cursive", fontSize: 16, color: 'rgba(255,255,255,0.55)', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
+                                        <button
+                                          className="active:scale-90 transition-transform"
+                                          onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowReactsSheet(true); }}
+                                          style={{ fontFamily: "'Caveat', cursive", fontSize: 16, color: 'rgba(255,255,255,0.55)', textShadow: '0 1px 4px rgba(0,0,0,0.5)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                                        >
                                           {total} ❤️
-                                        </span>
+                                        </button>
                                       )}
                                       {!isOwnProfile && (
                                         <button className="flex items-center gap-0.5 active:scale-90 transition-transform" style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)', borderRadius: 14, padding: '3px 8px', border: '1px solid rgba(255,255,255,0.12)' }}
