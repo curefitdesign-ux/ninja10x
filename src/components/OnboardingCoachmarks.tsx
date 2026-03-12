@@ -31,17 +31,13 @@ const RevealWord = memo(function RevealWord({
   );
 });
 
-function RevealLine({ text, delay = 0 }: { text: string; delay?: number }) {
+function renderRevealLine(text: string, delay = 0) {
   const words = text.split(' ');
-  return (
-    <>
-      {words.map((word, i) => (
-        <RevealWord key={`${text}-${i}`} delay={delay + i * 0.4}>
-          {word}
-        </RevealWord>
-      ))}
-    </>
-  );
+  return words.map((word, i) => (
+    <RevealWord key={`${text}-${i}`} delay={delay + i * 0.4}>
+      {word}
+    </RevealWord>
+  ));
 }
 
 type Phase = 0 | 1 | 2;
@@ -112,8 +108,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
 
   if (!visible) return null;
 
-  const textColor = 'rgba(255, 255, 255, 0.80)';
-  const mutedColor = 'rgba(255, 255, 255, 0.35)';
+  const textColor = 'hsl(var(--foreground) / 0.92)';
+  const mutedColor = 'hsl(var(--foreground) / 0.72)';
   const fontStack = '-apple-system, SF Pro Display, system-ui, sans-serif';
 
   // Shared cross-fade variants — no mode="wait" so no gap
@@ -124,7 +120,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
   };
 
   return (
-    <AnimatePresence>
+    <AnimatePresence initial={false}>
       {visible && (
         <motion.div
           className="fixed inset-0 z-[10000]"
@@ -134,24 +130,28 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Liquid glass background — slides down 7% on phase 2 to reveal top */}
+          {/* Base layer to prevent visual flashing under blur */}
+          <div className="absolute inset-0 bg-background/70" />
+
+          {/* Liquid glass background — smooth transform to avoid flicker */}
           <motion.div
             className="absolute inset-0"
             style={{
-              background: 'rgba(255, 255, 255, 0.01)',
-              backdropFilter: 'blur(60px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(60px) saturate(180%)',
+              background: 'hsl(var(--background) / 0.08)',
+              backdropFilter: 'blur(56px) saturate(170%)',
+              WebkitBackdropFilter: 'blur(56px) saturate(170%)',
+              willChange: 'transform, border-radius, backdrop-filter',
             }}
-            initial={{ top: 0, borderRadius: '0px' }}
+            initial={{ y: '0%', borderRadius: '0px' }}
             animate={{
-              top: phase === 2 ? '11%' : 0,
+              y: phase === 2 ? '11%' : '0%',
               borderRadius: phase === 2 ? '24px 24px 0px 0px' : '0px',
             }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           />
 
           {/* Arrow pointing up when phase 2 */}
-          <AnimatePresence>
+          <AnimatePresence initial={false}>
             {phase === 2 && (
               <motion.div
                 className="absolute left-1/2 z-20 flex flex-col items-center"
@@ -166,7 +166,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                   transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
                 >
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 5L6 13H18L12 5Z" fill="rgba(255,255,255,0.35)" />
+                    <path d="M12 5L6 13H18L12 5Z" fill="hsl(var(--foreground) / 0.45)" />
                   </svg>
                 </motion.div>
               </motion.div>
@@ -189,7 +189,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           </motion.button>
 
           {/* Content — crossfade (no mode="wait") */}
-          <AnimatePresence>
+          <AnimatePresence initial={false}>
             {/* ═══ PHASE 0 ═══ */}
             {phase === 0 && (
               <motion.div
@@ -205,17 +205,17 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
                     style={{ color: textColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="Every habit starts" delay={0.4} />
+                    {renderRevealLine('Every habit starts', 0.4)}
                     <br />
-                    <RevealLine text="with a single move." delay={2.2} />
+                    {renderRevealLine('with a single move.', 2.2)}
                   </h2>
                   <p
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-8"
                     style={{ color: mutedColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="Running. Cricket. Yoga." delay={4.0} />
+                    {renderRevealLine('Running. Cricket. Yoga.', 4.0)}
                     <br />
-                    <RevealLine text="Pick yours. Show up." delay={5.8} />
+                    {renderRevealLine('Pick yours. Show up.', 5.8)}
                   </p>
                 </div>
               </motion.div>
@@ -246,9 +246,9 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
                     style={{ color: textColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="Log 3 times a week." delay={0.3} />
+                    {renderRevealLine('Log 3 times a week.', 0.3)}
                     <br />
-                    <RevealLine text="Do it for 4 weeks." delay={2.4} />
+                    {renderRevealLine('Do it for 4 weeks.', 2.4)}
                   </h2>
 
                   <motion.div
@@ -313,15 +313,15 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
                     style={{ color: textColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="You won't walk alone." delay={1.0} />
+                    {renderRevealLine("You won't walk alone.", 1.0)}
                   </h2>
                   <p
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-6"
                     style={{ color: mutedColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="Cheer each other." delay={2.8} />
+                    {renderRevealLine('Cheer each other.', 2.8)}
                     <br />
-                    <RevealLine text="Move together." delay={4.4} />
+                    {renderRevealLine('Move together.', 4.4)}
                   </p>
 
                   {/* GOT IT CTA */}
