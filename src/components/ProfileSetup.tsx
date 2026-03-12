@@ -326,63 +326,23 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
           {nameError && <p className="text-red-400 text-xs mt-1">{nameError}</p>}
         </div>
 
-        {/* Divider */}
-        <div className="flex items-center gap-3 px-6 mt-5 mb-3">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="text-white/30 text-xs tracking-wide uppercase">Choose avatar</span>
-          <div className="flex-1 h-px bg-white/10" />
-        </div>
-
-        {/* Preset Avatars — horizontal scrollable row, square tiles */}
-        <div className="px-4 mb-5">
-          <div
-            className="flex gap-2.5 overflow-x-auto pb-1"
-            style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
-          >
-            {PRESET_AVATARS.map((avatar) => (
-              <motion.button
-                key={avatar.id}
-                whileTap={{ scale: 0.92 }}
-                onClick={() => selectPresetAvatar(avatar.id)}
-                disabled={loading}
-                className="relative flex-shrink-0"
-                style={{ width: 60, height: 60 }}
-              >
-                <div
-                  className="w-full h-full overflow-hidden"
-                  style={{
-                    borderRadius: 12,
-                    border: selectedAvatar === avatar.id
-                      ? '2.5px solid #34d399'
-                      : '2px solid rgba(255,255,255,0.1)',
-                    boxShadow: selectedAvatar === avatar.id
-                      ? '0 0 14px rgba(52,211,153,0.45)'
-                      : 'none',
-                  }}
-                >
-                  <img
-                    src={avatar.src}
-                    alt={`Avatar ${avatar.id}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <AnimatePresence>
-                  {selectedAvatar === avatar.id && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0 }}
-                      className="absolute inset-0 flex items-center justify-center bg-black/35"
-                      style={{ borderRadius: 12 }}
-                    >
-                      <Check className="w-4 h-4 text-emerald-400" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-            ))}
+        {/* Upload photo prompt when no photo selected */}
+        {!heroImage && (
+          <div className="flex items-center justify-center px-6 mt-4 mb-5">
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              onClick={handleHeroTap}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full"
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px dashed rgba(255,255,255,0.2)',
+              }}
+            >
+              <Camera className="w-4 h-4 text-white/50" />
+              <span className="text-white/50 text-sm">Upload your photo</span>
+            </motion.button>
           </div>
-        </div>
+        )}
 
         {/* Submit CTA */}
         <div className="px-6 pb-10">
