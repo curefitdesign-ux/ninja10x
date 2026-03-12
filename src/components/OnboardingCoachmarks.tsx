@@ -203,18 +203,14 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
               >
                 {/* Centered content */}
                 <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
-                  <motion.div
-                    className="mb-4"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 1.0, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  >
+                  {/* Ring — no separate animation, inherits parent fade */}
+                  <div className="mb-4">
                     <CircularProgressRing
                       currentDay={ringDay}
                       currentWeek={Math.min(Math.floor((ringDay > 0 ? ringDay - 1 : 0) / 3) + 1, 4)}
                       hideDecorations
                     />
-                  </motion.div>
+                  </div>
 
                   <h2
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
