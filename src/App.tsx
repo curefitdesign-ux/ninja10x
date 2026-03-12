@@ -27,6 +27,7 @@ const Reel = lazy(() => import("./pages/Reel"));
 // const ReelGenerationBase = lazy(() => import("./pages/ReelGeneration"));
 const ProfileSetupPage = lazy(() => import("./pages/ProfileSetupPage"));
 const AvatarCrop = lazy(() => import("./pages/AvatarCrop"));
+const Logout = lazy(() => import("./pages/Logout"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Lazy-load non-critical global components
@@ -128,6 +129,7 @@ const AnimatedRoutes = () => {
       <PageTransition key={location.pathname}>
         <Routes location={location}>
           <Route path="/auth" element={<Navigate to="/reel" replace />} />
+          <Route path="/logout" element={<Logout />} />
           <Route path="/profile-setup" element={<ProfileSetupRouteWrapper><ProfileSetupPage /></ProfileSetupRouteWrapper>} />
           <Route path="/avatar-crop" element={<ProtectedRoute><AvatarCrop /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/reel" replace />} />
