@@ -1727,7 +1727,7 @@ const Reel = () => {
                           className="overflow-hidden"
                           style={{
                             aspectRatio: '9/16',
-                            height: 'calc(82% + 30px)',
+                            height: 'calc(82% + 20px)',
                             maxWidth: '100%',
                             borderRadius: `${cardRadius}px`,
                             filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
@@ -1801,7 +1801,7 @@ const Reel = () => {
                           {/* Main card wrapper — contains card + stacked strips + hint */}
                           <div className="relative" style={{
                             aspectRatio: '9/16',
-                            height: 'calc(82% + 30px)',
+                            height: 'calc(82% + 20px)',
                             maxWidth: '100%',
                             containerType: 'size',
                           }}>
