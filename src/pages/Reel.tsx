@@ -303,9 +303,12 @@ const Reel = () => {
     const myGroupActivities = myGroup$?.activities.filter(a => a.dayNumber < 1001) || [];
     const effectiveCount = Math.max(allMyActivities.length, myGroupActivities.length);
     
+    // Check if current week is complete (3 activities done, but journey not finished)
+    const isWeekComplete = effectiveCount > 0 && effectiveCount < 12 && effectiveCount % 3 === 0;
+    
     if (effectiveCount < 12 && !loggedToday) {
       ownActivities.push({
-        id: 'log-activity',
+        id: isWeekComplete ? 'week-complete' : 'log-activity',
         dayNumber: allMyActivities.length + 1,
         storageUrl: '',
         originalUrl: '',
