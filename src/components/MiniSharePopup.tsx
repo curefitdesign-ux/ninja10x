@@ -118,6 +118,11 @@ const MiniSharePopup = ({ imageUrl, isVideo, onClose, onDone }: MiniSharePopupPr
     }
   };
 
+  useEffect(() => {
+    notifyBottomSheet(true);
+    return () => notifyBottomSheet(false);
+  }, []);
+
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom duration-400">
       {/* iOS Liquid Glass Container */}

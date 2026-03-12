@@ -67,6 +67,11 @@ export default function ReactsSoFarSheet({
   const [localReactors, setLocalReactors] = useState(reactorProfiles);
 
   useEffect(() => {
+    notifyBottomSheet(true);
+    return () => notifyBottomSheet(false);
+  }, []);
+
+  useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setCurrentUserId(data.user?.id || null);
     });

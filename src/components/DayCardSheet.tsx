@@ -37,6 +37,12 @@ const DayCardSheet = ({
   layoutId,
 }: DayCardSheetProps) => {
   const portalContainer = usePortalContainer();
+
+  useEffect(() => {
+    notifyBottomSheet(isOpen);
+    return () => notifyBottomSheet(false);
+  }, [isOpen]);
+
   const content = (
     <AnimatePresence>
       {isOpen && (

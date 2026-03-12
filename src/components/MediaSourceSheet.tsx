@@ -24,6 +24,11 @@ const MediaSourceSheet = forwardRef<HTMLDivElement, MediaSourceSheetProps>(funct
   const fileInputRef = useRef<HTMLInputElement>(null);
   const portalContainer = usePortalContainer();
 
+  useEffect(() => {
+    notifyBottomSheet(isOpen);
+    return () => notifyBottomSheet(false);
+  }, [isOpen]);
+
   const handleCameraSelect = () => {
     triggerHaptic('medium');
     onClose();

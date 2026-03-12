@@ -43,6 +43,11 @@ export default function SendReactionSheet({
   
   const [isRemoving, setIsRemoving] = useState(false);
   const [localReactorProfiles, setLocalReactorProfiles] = useState(reactorProfiles);
+
+  useEffect(() => {
+    notifyBottomSheet(true);
+    return () => notifyBottomSheet(false);
+  }, []);
   
   const actualReactionCount = localReactorProfiles.length;
   const userReaction = localReactorProfiles.find(r => r.userId === currentUserId);

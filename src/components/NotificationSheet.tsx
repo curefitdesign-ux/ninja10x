@@ -53,6 +53,11 @@ interface NotificationSheetProps {
 
 export default function NotificationSheet({ isOpen, onClose, onNotificationCountChange, onLatestNotificationChange }: NotificationSheetProps) {
   const { user } = useAuth();
+
+  useEffect(() => {
+    notifyBottomSheet(isOpen);
+    return () => notifyBottomSheet(false);
+  }, [isOpen]);
   const navigate = useNavigate();
   const portalContainer = usePortalContainer();
   const [notifications, setNotifications] = useState<Notification[]>([]);

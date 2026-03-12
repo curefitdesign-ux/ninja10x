@@ -139,6 +139,11 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
   const [dominantColor, setDominantColor] = useState('rgba(0,0,0,0.95)');
   const [isExiting, setIsExiting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    notifyBottomSheet(true);
+    return () => notifyBottomSheet(false);
+  }, []);
   
   // Get activities for week pill
   const { activities } = useJourneyActivities();

@@ -41,6 +41,11 @@ const MakePublicSheet = forwardRef<HTMLDivElement, MakePublicSheetProps>(functio
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);
 
+  useEffect(() => {
+    notifyBottomSheet(isOpen);
+    return () => notifyBottomSheet(false);
+  }, [isOpen]);
+
   const handleMakePublic = async () => {
     setIsPublishing(true);
     triggerHaptic('success');
