@@ -31,17 +31,13 @@ const RevealWord = memo(function RevealWord({
   );
 });
 
-function RevealLine({ text, delay = 0 }: { text: string; delay?: number }) {
+function renderRevealLine(text: string, delay = 0) {
   const words = text.split(' ');
-  return (
-    <>
-      {words.map((word, i) => (
-        <RevealWord key={`${text}-${i}`} delay={delay + i * 0.4}>
-          {word}
-        </RevealWord>
-      ))}
-    </>
-  );
+  return words.map((word, i) => (
+    <RevealWord key={`${text}-${i}`} delay={delay + i * 0.4}>
+      {word}
+    </RevealWord>
+  ));
 }
 
 type Phase = 0 | 1 | 2;
