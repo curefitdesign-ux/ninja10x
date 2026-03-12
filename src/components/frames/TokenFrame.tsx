@@ -56,7 +56,7 @@ const TokenFrame = ({
 
   return (
     <div
-      className="w-[90%] mx-auto relative"
+      className="w-full h-full relative"
       style={{
         aspectRatio: '9 / 16',
         containerType: 'inline-size',

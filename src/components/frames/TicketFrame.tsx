@@ -30,7 +30,7 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
   }, [isVideo, imageUrl]);
   
   return (
-    <div className="w-[90%] mx-auto aspect-[9/16] overflow-hidden relative rounded-3xl bg-black" style={{ containerType: 'inline-size' }}>
+    <div className="w-full h-full aspect-[9/16] overflow-hidden relative bg-black" style={{ containerType: 'inline-size' }}>
       {/* Layer 1: Background Image or Video (full-bleed) */}
       <div className="absolute inset-0 overflow-hidden z-0">
         {isVideo ? (

@@ -44,7 +44,7 @@ const JournalFrame = ({
 
   return (
     <div
-      className="w-[90%] mx-auto aspect-[9/16] rounded-[4px] overflow-hidden relative"
+      className="w-full h-full aspect-[9/16] overflow-hidden relative"
       style={{ containerType: 'inline-size', background: '#fff' }}
     >
       {/* Background image */}
