@@ -53,12 +53,7 @@ const ProfileSetupPage = () => {
       setDisplayName(profile.display_name);
       setStoriesPublic(profile.stories_public ?? false);
       const storedUrl = profile.avatar_url;
-      const presetMatch = PRESET_AVATARS.find(a =>
-        storedUrl === a.id || storedUrl.includes(a.id)
-      );
-      if (presetMatch) {
-        setSelectedAvatar(presetMatch.id);
-      } else if (storedUrl) {
+      if (storedUrl) {
         setCustomAvatarPreview(storedUrl);
       }
       setIsInitialized(true);
