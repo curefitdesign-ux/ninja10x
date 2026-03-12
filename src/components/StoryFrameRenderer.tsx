@@ -113,7 +113,15 @@ function StoryFrameRendererInner({
             );
             case 'scrapbook':   return <ScrapbookFrame {...sharedProps} />;
             case 'arcade':      return <ArcadeFrame {...sharedProps} />;
-            case 'bold':        return <BoldFrame {...sharedProps} />;
+            case 'bold':        return (
+              <BoldFrame
+                {...sharedProps}
+                label1={config.secondaryUnit}
+                label2={config.primaryUnit}
+                label1Name={config.secondaryMetric}
+                label2Name={config.primaryMetric}
+              />
+            );
             default:            return <ShakyFrame {...sharedProps} />;
           }
         })()}
