@@ -75,7 +75,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
 
   // Elevate the log card above the overlay in phase 2
   useEffect(() => {
-    const card = document.getElementById('log-activity-card');
+    // Try both home and reel page card IDs
+    const card = document.getElementById('reel-log-activity-card') || document.getElementById('log-activity-card');
     if (!card) return;
     if (phase === 2) {
       card.style.position = 'relative';
