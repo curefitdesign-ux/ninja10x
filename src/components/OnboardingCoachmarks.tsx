@@ -18,11 +18,10 @@ const RevealWord = memo(function RevealWord({
   return (
     <motion.span
       className="inline-block mr-[0.3em]"
-      style={{ willChange: 'opacity, transform, filter' }}
-      initial={{ filter: 'blur(18px)', opacity: 0, transform: 'scale(1.06)' }}
-      animate={{ filter: 'blur(0px)', opacity: 1, transform: 'scale(1)' }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{
-        duration: 1.4,
+        duration: 0.8,
         delay,
         ease: [0.16, 1, 0.3, 1],
       }}
