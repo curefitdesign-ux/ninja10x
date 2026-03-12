@@ -65,6 +65,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
   const [phase, setPhase] = useState<Phase>(0);
   const [visible, setVisible] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [ringDay, setRingDay] = useState(0);
+  const ringTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     const seen = localStorage.getItem(STORAGE_KEY);
