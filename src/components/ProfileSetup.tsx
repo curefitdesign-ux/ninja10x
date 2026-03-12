@@ -10,28 +10,8 @@ import { useNavigate } from 'react-router-dom';
 import AvatarCropper from '@/components/AvatarCropper';
 
 
-// Curo mascot preset avatars
-import curoBoxing from '@/assets/avatars/curo-boxing.png';
-import curoCool from '@/assets/avatars/curo-cool.png';
+// Default avatar for users who don't upload a photo
 import curoHappy from '@/assets/avatars/curo-happy.png';
-import curoFire from '@/assets/avatars/curo-fire.png';
-import curoFierce from '@/assets/avatars/curo-fierce.png';
-import curoShy from '@/assets/avatars/curo-shy.png';
-import curoZen from '@/assets/avatars/curo-zen.png';
-import curoShocked from '@/assets/avatars/curo-shocked.png';
-import curoMusic from '@/assets/avatars/curo-music.png';
-
-const PRESET_AVATARS = [
-  { id: 'curo-boxing', src: curoBoxing },
-  { id: 'curo-cool', src: curoCool },
-  { id: 'curo-happy', src: curoHappy },
-  { id: 'curo-fire', src: curoFire },
-  { id: 'curo-fierce', src: curoFierce },
-  { id: 'curo-shy', src: curoShy },
-  { id: 'curo-zen', src: curoZen },
-  { id: 'curo-shocked', src: curoShocked },
-  { id: 'curo-music', src: curoMusic },
-];
 
 const nameSchema = z.string().trim().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters');
 
