@@ -110,10 +110,8 @@ const ProfileSetupPage = () => {
         if (uploadError) throw uploadError;
         const { data: urlData } = supabase.storage.from('journey-uploads').getPublicUrl(fileName);
         avatarUrl = urlData.publicUrl;
-      } else if (selectedAvatar) {
-        avatarUrl = selectedAvatar;
       } else {
-        avatarUrl = customAvatarPreview || '';
+        avatarUrl = customAvatarPreview || 'curo-happy';
       }
 
       if (editMode) {
