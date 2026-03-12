@@ -982,6 +982,60 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
             </div>, document.body
           )}
 
+          {showShareSheet && createPortal(
+            <div className="fixed inset-0" style={{ zIndex: 75 }}>
+              <button
+                type="button"
+                aria-label="Close share options"
+                onClick={() => setShowShareSheet(false)}
+                className="absolute inset-0"
+                style={{ background: 'rgba(0,0,0,0.45)' }}
+              />
+              <motion.div
+                initial={{ y: 24, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 24, opacity: 0 }}
+                className="absolute inset-x-4 rounded-3xl p-4"
+                style={{
+                  bottom: 'max(env(safe-area-inset-bottom, 12px), 12px)',
+                  background: 'rgba(20, 20, 30, 0.95)',
+                  backdropFilter: 'blur(40px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                }}
+              >
+                <p className="text-white text-sm font-medium text-center mb-3">Share to</p>
+                <div className="grid gap-2">
+                  <button
+                    onClick={() => {
+                      setShowShareSheet(false);
+                      shareToChannel('whatsapp');
+                    }}
+                    className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 bg-white/10"
+                  >
+                    WhatsApp Status
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowShareSheet(false);
+                      shareToChannel('instagram');
+                    }}
+                    className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 bg-white/10"
+                  >
+                    Instagram Stories
+                  </button>
+                  <button
+                    onClick={() => setShowShareSheet(false)}
+                    className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/70"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </motion.div>
+            </div>,
+            document.body
+          )}
+
         </DynamicBlurBackground>
         </motion.div>
       )}
