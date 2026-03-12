@@ -8,9 +8,18 @@ import cultLogo from '@/assets/cult-logo.svg';
 const Logout = () => {
   const navigate = useNavigate();
   const [signingOut, setSigningOut] = useState(true);
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
     const performLogout = async () => {
+      // Check if user is already logged in
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        // User is logged in — redirect to /reel instead of logging out
+        navigate('/reel', { replace: true });
+        return;
+      }
+      setChecked(true);
       try {
         await supabase.auth.signOut();
       } catch (e) {
@@ -20,7 +29,9 @@ const Logout = () => {
       }
     };
     performLogout();
-  }, []);
+  }, [navigate]);
+
+  if (!checked) return null;
 
   return (
     <div
