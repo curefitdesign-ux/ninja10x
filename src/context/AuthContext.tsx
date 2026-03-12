@@ -45,8 +45,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Check for existing session first
         const { data: { session: existingSession } } = await supabase.auth.getSession();
 
-        // If landing on '/', always re-validate even with an existing session
-        if (existingSession?.user && !ssoToken && !_ignoreAuth && !_initialPathIsRoot) {
+        // If we have an existing session and NO sso token to re-validate, use it
+        if (existingSession?.user && !ssoToken && !_ignoreAuth) {
           setUser(existingSession.user);
           setIsLoading(false);
           return;
