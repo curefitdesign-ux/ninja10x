@@ -25,7 +25,6 @@ const _initialSearch = window.location.search;
 const _initialParams = new URLSearchParams(_initialSearch);
 const _capturedSSOToken = _initialParams.get("sso_token") || _initialParams.get("ssoToken");
 const _ignoreAuth = _initialParams.get("ignoreAuth") === "true";
-const _initialPathIsRoot = window.location.pathname === "/" || window.location.pathname === "";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
