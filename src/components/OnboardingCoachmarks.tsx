@@ -206,9 +206,9 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                   className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
                   style={{ color: textColor, fontFamily: fontStack }}
                 >
-                  <RevealLine text="3 workouts a week." delay={0.3} />
+                  <RevealLine text="Log 3 times a week." delay={0.3} />
                   <br />
-                  <RevealLine text="4 weeks straight." delay={2.6} />
+                  <RevealLine text="Do it for 4 weeks." delay={2.6} />
                 </h2>
                 <motion.div
                   className="mt-6"
