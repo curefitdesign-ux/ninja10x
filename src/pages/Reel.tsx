@@ -1792,8 +1792,9 @@ const Reel = () => {
                         <div
                           className="relative flex items-center justify-center"
                           style={{ 
-                            width: '100%',
-                            height: '100%',
+                            aspectRatio: '9/16',
+                            height: 'calc(82% - 10px)',
+                            maxWidth: '100%',
                             background: 'transparent',
                             overflow: 'visible',
                           }}
