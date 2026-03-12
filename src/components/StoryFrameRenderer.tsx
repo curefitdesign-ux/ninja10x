@@ -79,14 +79,7 @@ function StoryFrameRendererInner({
       style={{ background: 'transparent' }}
     >
       <style>{`
-        .story-frame-fullbleed > div {
-          width: 100% !important;
-          max-width: 100% !important;
-          height: 100% !important;
-          border-radius: 0px !important;
-          margin: 0 !important;
-        }
-        .story-frame-fullbleed > div > div {
+        .story-frame-fullbleed > div > div > div {
           width: 100% !important;
           max-width: 100% !important;
           border-radius: 0px !important;
