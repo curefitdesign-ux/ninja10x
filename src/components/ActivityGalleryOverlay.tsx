@@ -257,44 +257,24 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     return { title: 'My Fitness Story', text: shareText, url };
   };
 
-  const shareToChannel = (channel: 'whatsapp' | 'instagram') => {
+  const shareToChannel = (channel: 'whatsapp' | 'instagram' | 'messages') => {
     const payload = buildSharePayload();
     const shareText = `${payload.text}\n\n${payload.url}`;
-    const encodedText = encodeURIComponent(shareText);
-
-    const openDeepLink = (appUrl: string, fallbackUrl: string) => {
-      const fallbackTimer = window.setTimeout(() => {
-        window.location.href = fallbackUrl;
-      }, 1200);
-
-      const clearFallback = () => window.clearTimeout(fallbackTimer);
-      const clearOnVisibility = () => {
-        if (document.hidden) clearFallback();
-      };
-
-      window.addEventListener('blur', clearFallback, { once: true });
-      document.addEventListener('visibilitychange', clearOnVisibility, { once: true });
-      window.location.href = appUrl;
-    };
-
-    if (channel === 'whatsapp') {
-      openDeepLink(
-        'whatsapp://status',
-        `https://wa.me/?text=${encodedText}`
-      );
-      return;
-    }
-
-    const isAndroid = /android/i.test(navigator.userAgent);
-    const instagramAppUrl = isAndroid
-      ? 'intent://story-camera#Intent;package=com.instagram.android;scheme=instagram;end'
-      : 'instagram://story-camera';
-
-    openDeepLink(instagramAppUrl, 'https://www.instagram.com/stories/');
-
-    navigator.clipboard.writeText(payload.url)
-      .then(() => toast.success('Opened Instagram Stories. Link copied.'))
-      .catch(() => toast.success('Opened Instagram Stories.'));
+    setTimeout(() => {
+      if (channel === 'whatsapp') {
+        const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(shareText)}`;
+        const webFallback = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+        const link = document.createElement('a'); link.href = whatsappUrl; link.style.display = 'none';
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        setTimeout(() => { window.location.href = webFallback; }, 1500);
+        return;
+      }
+      if (channel === 'messages') { window.location.href = `sms:&body=${encodeURIComponent(shareText)}`; return; }
+      if (channel === 'instagram') {
+        if (navigator.share) { navigator.share(payload).catch(() => {}); }
+        else { navigator.clipboard.writeText(shareText).then(() => toast.success('Link copied! Paste it in Instagram.')).catch(() => toast.error('Unable to copy link')); }
+      }
+    }, 100);
   };
 
   const overlay = (
@@ -940,7 +920,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setShowShareSheet(true);
+                    const payload = buildSharePayload();
+                    if (navigator.share) {
+                      navigator.share(payload).catch(() => {});
+                    } else {
+                      navigator.clipboard.writeText(`${payload.text}\n\n${payload.url}`)
+                        .then(() => toast.success('Link copied!'))
+                        .catch(() => toast.error('Unable to copy'));
+                    }
                   }}
                   className="shrink-0 active:scale-95 transition-transform"
                   style={{
@@ -980,60 +967,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                 totalReactions={currentReactions.total} reactorProfiles={currentReactions.reactorProfiles}
               />
             </div>, document.body
-          )}
-
-          {showShareSheet && createPortal(
-            <div className="fixed inset-0" style={{ zIndex: 75 }}>
-              <button
-                type="button"
-                aria-label="Close share options"
-                onClick={() => setShowShareSheet(false)}
-                className="absolute inset-0"
-                style={{ background: 'rgba(0,0,0,0.45)' }}
-              />
-              <motion.div
-                initial={{ y: 24, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 24, opacity: 0 }}
-                className="absolute inset-x-4 rounded-3xl p-4"
-                style={{
-                  bottom: 'max(env(safe-area-inset-bottom, 12px), 12px)',
-                  background: 'rgba(20, 20, 30, 0.95)',
-                  backdropFilter: 'blur(40px) saturate(180%)',
-                  WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                }}
-              >
-                <p className="text-white text-sm font-medium text-center mb-3">Share to</p>
-                <div className="grid gap-2">
-                  <button
-                    onClick={() => {
-                      setShowShareSheet(false);
-                      shareToChannel('whatsapp');
-                    }}
-                    className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 bg-white/10"
-                  >
-                    WhatsApp Status
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowShareSheet(false);
-                      shareToChannel('instagram');
-                    }}
-                    className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/90 bg-white/10"
-                  >
-                    Instagram Stories
-                  </button>
-                  <button
-                    onClick={() => setShowShareSheet(false)}
-                    className="w-full rounded-xl px-4 py-3 text-sm font-medium text-white/70"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </motion.div>
-            </div>,
-            document.body
           )}
 
         </DynamicBlurBackground>
