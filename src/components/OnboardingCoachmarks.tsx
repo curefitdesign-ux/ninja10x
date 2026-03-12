@@ -137,9 +137,9 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           <div
             className="absolute inset-0"
             style={{
-              background: 'linear-gradient(180deg, rgba(42, 27, 78, 0.92) 0%, rgba(10, 7, 32, 0.95) 100%)',
-              backdropFilter: 'blur(80px) saturate(200%)',
-              WebkitBackdropFilter: 'blur(80px) saturate(200%)',
+              background: 'rgba(255, 255, 255, 0.01)',
+              backdropFilter: 'blur(60px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(60px) saturate(180%)',
             }}
           />
 
