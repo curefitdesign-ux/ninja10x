@@ -119,8 +119,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
   // Shared cross-fade variants — no mode="wait" so no gap
   const fadeVariants = {
     initial: { opacity: 0 },
-    animate: { opacity: 1, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
-    exit: { opacity: 0, transition: { duration: 0.6, ease: 'easeOut' } },
+    animate: { opacity: 1, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
+    exit: { opacity: 0, transition: { duration: 0.6, ease: 'easeOut' as const } },
   };
 
   return (
