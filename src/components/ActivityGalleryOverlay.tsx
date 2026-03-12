@@ -556,7 +556,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           return (
                             <div className="relative" style={{ padding: '10px 16px 16px 58px', marginBottom: 10 }}>
                               <div className="absolute" style={{
-                                left: 16, top: 14, width: 26, height: 26, borderRadius: '50%',
+                                left: 26, top: 14, width: 26, height: 26, borderRadius: '50%',
                                 background: 'linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.15))',
                                 border: '2px solid rgba(255,255,255,0.3)',
                                 boxShadow: '0 0 18px rgba(255,255,255,0.15)',
