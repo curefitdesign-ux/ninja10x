@@ -1,7 +1,7 @@
 // Floating glass tab bar — Home | Discover | My Progress | Alerts | ⋮ Menu
 import { useState, useEffect, memo, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { Map, Bell, MoreVertical, Plus, UserPen, LogOut, Sparkles } from "lucide-react";
+import { Map, Bell, MoreVertical, Plus, UserPen, LogOut, Sparkles, MessageSquareText } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ import progressIcon from "@/assets/nav/progress-icon.png";
 import NotificationSheet from "@/components/NotificationSheet";
 import MediaSourceSheet from "@/components/MediaSourceSheet";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import FeedbackSheet from "@/components/FeedbackSheet";
 
 // Tab config for the reflective indicator
 const TAB_IDS = ["home", "discover", "progress", "bell", "menu"] as const;
@@ -26,6 +27,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
   const [showEllipsisMenu, setShowEllipsisMenu] = useState(false);
   const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [showFeedbackSheet, setShowFeedbackSheet] = useState(false);
 
   // Listen for gallery overlay open/close
   useEffect(() => {
@@ -306,6 +308,19 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
               </div>
               <span className="text-[15px] font-medium">Replay Intro</span>
             </button>
+            <button
+              onClick={() => {
+                setShowEllipsisMenu(false);
+                setTimeout(() => setShowFeedbackSheet(true), 300);
+              }}
+              className="flex items-center gap-4 px-6 py-4 text-left transition-colors active:scale-[0.97]"
+              style={{ color: "rgba(255,255,255,0.85)" }}
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(59, 130, 246, 0.15)" }}>
+                <MessageSquareText className="w-5 h-5 text-blue-400" />
+              </div>
+              <span className="text-[15px] font-medium">Send Feedback</span>
+            </button>
             <div className="mx-6 my-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
             <button
               onClick={async () => {
@@ -324,6 +339,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
           </div>
         </SheetContent>
       </Sheet>
+      <FeedbackSheet isOpen={showFeedbackSheet} onClose={() => setShowFeedbackSheet(false)} />
     </>
   );
 });
