@@ -692,7 +692,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               <div
                                 className="relative overflow-visible"
                                 style={{
-                                  width: '48%', aspectRatio: '9/16', borderRadius: 4, marginTop: 10,
+                                  width: '48%', aspectRatio: '9/16', borderRadius: 4,
                                   transform: `rotate(${activeRotation}deg) translateX(${offsetX}px)`,
                                   marginLeft: idx % 2 === 0 ? '0%' : '10%',
                                   transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
@@ -720,7 +720,31 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                   </div>
                                 )}
 
-                                {/* Reactions — moved outside card, positioned right */}
+                                {/* Reactions */}
+                                {(() => {
+                                  const ar = localReactions[act.id];
+                                  const total = ar?.total || 0;
+                                  return (
+                                    <div className="absolute flex items-center gap-1" style={{ bottom: -10, left: -6, zIndex: 30, transform: `rotate(${-activeRotation * 0.6}deg)` }}>
+                                      {total > 0 && (
+                                        <button
+                                          className="active:scale-90 transition-transform"
+                                          onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowReactsSheet(true); }}
+                                          style={{ fontFamily: "'Caveat', cursive", fontSize: 16, color: 'rgba(255,255,255,0.55)', textShadow: '0 1px 4px rgba(0,0,0,0.5)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                                        >
+                                          {total} ❤️
+                                        </button>
+                                      )}
+                                      {!isOwnProfile && (
+                                        <button className="flex items-center gap-0.5 active:scale-90 transition-transform" style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)', borderRadius: 14, padding: '3px 8px', border: '1px solid rgba(255,255,255,0.12)' }}
+                                          onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}>
+                                          <span style={{ fontSize: 12 }}>🔥</span>
+                                          <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>React</span>
+                                        </button>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
 
                                 {/* Edit button — top right */}
                                 {canEdit && (
@@ -733,33 +757,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 )}
                               </div>
 
-                              {/* Reaction buttons — right side */}
-                              {(() => {
-                                const ar = localReactions[act.id];
-                                const total = ar?.total || 0;
-                                return (
-                                  <div className="absolute flex flex-col items-center gap-2" style={{ right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 30 }}>
-                                    {total > 0 && (
-                                      <button
-                                        className="active:scale-90 transition-transform flex flex-col items-center"
-                                        onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowReactsSheet(true); }}
-                                        style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: 16, padding: '6px 10px', border: '1px solid rgba(255,255,255,0.1)' }}
-                                      >
-                                        <span style={{ fontSize: 18 }}>❤️</span>
-                                        <span style={{ fontFamily: "'Caveat', cursive", fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 1 }}>{total}</span>
-                                      </button>
-                                    )}
-                                    {!isOwnProfile && (
-                                      <button className="flex flex-col items-center active:scale-90 transition-transform" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderRadius: 16, padding: '6px 10px', border: '1px solid rgba(255,255,255,0.1)' }}
-                                        onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}>
-                                        <span style={{ fontSize: 18 }}>🔥</span>
-                                        <span style={{ fontFamily: "'Caveat', cursive", fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>React</span>
-                                      </button>
-                                    )}
-                                  </div>
-                                );
-                              })()}
-
+                              {/* Hand-drawn journal doodles */}
                               <div className="pointer-events-none relative" style={{ minHeight: 36, marginTop: 10 }}>
                                 <p style={{
                                   fontFamily: "'Caveat', cursive", fontSize: 17, fontWeight: 700,
