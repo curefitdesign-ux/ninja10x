@@ -475,7 +475,13 @@ async function _fetchPublicFeedImpl(includeAll: boolean): Promise<LocalActivity[
     totalMap[r.activity_id]++;
   }
 
-  const result = activities.map(row => {
+  // Filter out activities from users who have no public content (unless it's the current user)
+  const publicActivities = activities.filter(row => {
+    if (user && row.user_id === user.id) return true;
+    return row.is_public;
+  });
+
+  const result = publicActivities.map(row => {
     const profile = profileMap.get(row.user_id);
     return {
       ...toLocal(row),
