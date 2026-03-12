@@ -303,6 +303,45 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                     <RevealLine text="Move together." delay={4.4} />
                   </p>
 
+                  {/* Small hand-drawn arrow pointing up */}
+                  <motion.div
+                    className="mt-5"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 5.0, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <motion.svg
+                      width="24"
+                      height="32"
+                      viewBox="0 0 48 64"
+                      fill="none"
+                      animate={{ y: [0, -5, 0] }}
+                      transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                    >
+                      <motion.path
+                        d="M24 58 C23 50, 25 42, 24 34 C23 26, 25 18, 24 12"
+                        stroke="rgba(255,255,255,0.4)"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        fill="none"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ delay: 5.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                      />
+                      <motion.path
+                        d="M16 20 C18 16, 21 10, 24 6 C27 10, 30 16, 32 20"
+                        stroke="rgba(255,255,255,0.4)"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        fill="none"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ delay: 5.6, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                      />
+                    </motion.svg>
+                  </motion.div>
+
                   {/* GOT IT CTA */}
                   <motion.button
                     className="mt-10 w-[260px] rounded-2xl uppercase flex items-center justify-center"
