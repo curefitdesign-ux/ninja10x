@@ -75,17 +75,21 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     }
   }, [onComplete]);
 
+  const finish = useCallback(() => {
+    localStorage.setItem(STORAGE_KEY, 'true');
+    setVisible(false);
+    setTimeout(onComplete, 400);
+  }, [onComplete]);
+
   // Auto-advance phases
   useEffect(() => {
     if (!visible) return;
     if (phase === 0) {
       timerRef.current = setTimeout(() => setPhase(1), 9500);
     }
-    // Phase 1 → Phase 3 (vignette log card)
     if (phase === 1) {
       timerRef.current = setTimeout(() => setPhase(3), 8500);
     }
-    // Phase 2 → auto-finish after text reveals
     if (phase === 2) {
       timerRef.current = setTimeout(() => finish(), 8000);
     }
@@ -130,12 +134,6 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
       resetCard();
     };
   }, [phase]);
-
-  const finish = useCallback(() => {
-    localStorage.setItem(STORAGE_KEY, 'true');
-    setVisible(false);
-    setTimeout(onComplete, 400);
-  }, [onComplete]);
 
   if (!visible) return null;
 
