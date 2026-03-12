@@ -149,8 +149,7 @@ const Activity = () => {
   useEffect(() => {
     if (location.state?.triggerLog) {
       const real = photos.filter(p => p.dayNumber > 0 && p.dayNumber <= 12);
-      const maxDay = real.reduce((m, p) => Math.max(m, p.dayNumber), 0);
-      setPendingDayNumber(maxDay + 1);
+      setPendingDayNumber(real.length + 1);
       setShowMediaSourceSheet(true);
       navigate('/', { replace: true, state: null });
     }
