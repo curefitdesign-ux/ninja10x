@@ -91,7 +91,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
+          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center"
           style={{ touchAction: 'none' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -178,9 +178,9 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                   className="text-[32px] font-semibold text-white tracking-[-0.03em] leading-[1.3]"
                   style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
                 >
-                  <RevealLine text="3 activities." delay={0.3} />
+                  <RevealLine text="Log 3 activities" delay={0.3} />
                   <br />
-                  <RevealLine text="4 weeks." delay={1.8} />
+                  <RevealLine text="every week, for 4 weeks." delay={2.2} />
                 </h2>
                 <motion.div
                   className="mt-6"
