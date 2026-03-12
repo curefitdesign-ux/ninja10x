@@ -11,6 +11,8 @@ interface MiniSharePopupProps {
 }
 
 // Compact social apps for mini popup
+const shareText = '🏃 Check out my fitness activity! #FitnessJourney';
+
 const socialApps = [
   { 
     name: 'WhatsApp', 
@@ -20,7 +22,8 @@ const socialApps = [
       </svg>
     ),
     color: '#25D366',
-    share: (url: string) => `https://wa.me/?text=${encodeURIComponent('Check out my activity! ' + url)}`
+    deep: `whatsapp://send?text=${encodeURIComponent(shareText + '\n' + window.location.href)}`,
+    web: `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + '\n' + window.location.href)}`,
   },
   { 
     name: 'Instagram', 
@@ -30,7 +33,8 @@ const socialApps = [
       </svg>
     ),
     color: '#E4405F',
-    share: () => null
+    deep: `instagram://story-camera`,
+    web: `https://www.instagram.com/create/story/`,
   },
   { 
     name: 'X', 
@@ -40,7 +44,8 @@ const socialApps = [
       </svg>
     ),
     color: '#000000',
-    share: (url: string) => `https://twitter.com/intent/tweet?text=${encodeURIComponent('Check out my activity!')}&url=${encodeURIComponent(url)}`
+    deep: `twitter://post?message=${encodeURIComponent(shareText)}`,
+    web: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(window.location.href)}`,
   },
   { 
     name: 'Telegram', 
@@ -50,13 +55,15 @@ const socialApps = [
       </svg>
     ),
     color: '#0088cc',
-    share: (url: string) => `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('Check out my activity!')}`
+    deep: `tg://msg?text=${encodeURIComponent(shareText + '\n' + window.location.href)}`,
+    web: `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(shareText)}`,
   },
   { 
     name: 'Messages', 
     icon: <MessageCircle className="w-5 h-5" />,
     color: '#34C759',
-    share: (url: string) => `sms:?body=${encodeURIComponent('Check out my activity! ' + url)}`
+    deep: `sms:?body=${encodeURIComponent(shareText + '\n' + window.location.href)}`,
+    web: `sms:?body=${encodeURIComponent(shareText + '\n' + window.location.href)}`,
   },
 ];
 
