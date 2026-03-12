@@ -1908,57 +1908,23 @@ const Reel = () => {
                                       }}
                                     />
 
-                                    {/* Curo mascot looping video with arc progress */}
+                                    {/* Curo mascot with CircularProgressRing */}
                                     <motion.div
                                       initial={{ opacity: 0, scale: 0.9 }}
                                       animate={{ opacity: 1, scale: 1 }}
                                       transition={{ delay: 0.05, duration: 0.5 }}
                                       className="z-10 mb-4 relative flex items-center justify-center"
-                                      style={{ width: 140, height: 140 }}
+                                      style={{ width: 180, height: 180 }}
                                     >
-                                      {/* SVG arc progress ring */}
-                                      {(() => {
-                                        const circumference = 2 * Math.PI * 64;
-                                        const minProgress = 8; // always show at least 8%
-                                        const effectivePercent = Math.max(progressPercent, minProgress);
-                                        const targetOffset = circumference * (1 - effectivePercent / 100);
-                                        return (
-                                          <svg
-                                            width="140" height="140"
-                                            viewBox="0 0 140 140"
-                                            className="absolute inset-0"
-                                            style={{ transform: 'rotate(-90deg)', zIndex: 30 }}
-                                          >
-                                            {/* Background track */}
-                                            <circle
-                                              cx="70" cy="70" r="64"
-                                              fill="none"
-                                              stroke="rgba(255,255,255,0.15)"
-                                              strokeWidth="3.5"
-                                            />
-                                            {/* Animated progress arc */}
-                                            <motion.circle
-                                              cx="70" cy="70" r="64"
-                                              fill="none"
-                                              stroke="url(#logCardProgressGrad)"
-                                              strokeWidth="3.5"
-                                              strokeLinecap="round"
-                                              strokeDasharray={circumference}
-                                              initial={{ strokeDashoffset: circumference }}
-                                              animate={{ strokeDashoffset: targetOffset }}
-                                              transition={{ delay: 0.3, duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
-                                            />
-                                            <defs>
-                                              <linearGradient id="logCardProgressGrad" x1="0" y1="0" x2="1" y2="1">
-                                                <stop offset="0%" stopColor="#F97316" />
-                                                <stop offset="100%" stopColor="#EC4899" />
-                                              </linearGradient>
-                                            </defs>
-                                          </svg>
-                                        );
-                                      })()}
-                                      {/* Video circle */}
-                                      <div style={{ width: 112, height: 112, borderRadius: '50%', overflow: 'hidden' }}>
+                                      {/* Reuse the CircularProgressRing from Activity page */}
+                                      <div className="absolute inset-0 flex items-center justify-center" style={{ transform: 'scale(0.75)' }}>
+                                        <CircularProgressRing
+                                          currentDay={totalActivities}
+                                          currentWeek={Math.min(Math.floor(totalActivities / 3) + 1, 4)}
+                                        />
+                                      </div>
+                                      {/* Video circle overlaid on the mascot area */}
+                                      <div className="relative z-10" style={{ width: 112, height: 112, borderRadius: '50%', overflow: 'hidden' }}>
                                         <video
                                           src="/videos/curo-peeking.mp4"
                                           autoPlay
