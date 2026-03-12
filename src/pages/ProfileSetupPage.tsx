@@ -34,8 +34,6 @@ const ProfileSetupPage = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
-
-  const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
   // Redirect if profile already exists and not in edit mode
