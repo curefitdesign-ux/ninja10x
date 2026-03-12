@@ -2542,7 +2542,6 @@ const Reel = () => {
       {/* Onboarding coachmarks — first-time user tutorial */}
       <OnboardingCoachmarks onComplete={() => {}} />
     </DynamicBlurBackground>
-    </PullToRefresh>
   );
 };
 
