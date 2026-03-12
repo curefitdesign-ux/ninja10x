@@ -218,67 +218,63 @@ const ScrapbookFrame = ({
             minHeight: '8cqw',
           }}
         >
-          {duration ? (
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
-              <span
-                style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
-                  fontWeight: 400,
-                  fontSize: '4.1cqw',
-                  color: '#2e2a25',
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {durationLabel} :
-              </span>
-              <span
-                style={{
-                  fontFamily: "'Caveat', cursive",
-                  fontWeight: 700,
-                  fontStyle: 'italic',
-                  fontSize: '6.5cqw',
-                  color: '#7C5CFC',
-                  lineHeight: 1,
-                  marginLeft: '2px',
-                }}
-              >
-                {duration}
-              </span>
-            </div>
-          ) : null}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', visibility: duration ? 'visible' : 'hidden' }}>
+            <span
+              style={{
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontWeight: 400,
+                fontSize: '4.1cqw',
+                color: '#2e2a25',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {durationLabel} :
+            </span>
+            <span
+              style={{
+                fontFamily: "'Caveat', cursive",
+                fontWeight: 700,
+                fontStyle: 'italic',
+                fontSize: '6.5cqw',
+                color: '#7C5CFC',
+                lineHeight: 1,
+                marginLeft: '2px',
+              }}
+            >
+              {duration || '—'}
+            </span>
+          </div>
 
-          {pr ? (
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
-              <span
-                style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
-                  fontWeight: 400,
-                  fontSize: '4.1cqw',
-                  color: '#2e2a25',
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {metricLabel} :
-              </span>
-              <span
-                style={{
-                  fontFamily: "'Caveat', cursive",
-                  fontWeight: 700,
-                  fontStyle: 'italic',
-                  fontSize: '6.5cqw',
-                  color: '#7C5CFC',
-                  lineHeight: 1,
-                  marginLeft: '2px',
-                }}
-              >
-                {pr}
-              </span>
-            </div>
-          ) : null}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', visibility: pr ? 'visible' : 'hidden' }}>
+            <span
+              style={{
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontWeight: 400,
+                fontSize: '4.1cqw',
+                color: '#2e2a25',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {metricLabel} :
+            </span>
+            <span
+              style={{
+                fontFamily: "'Caveat', cursive",
+                fontWeight: 700,
+                fontStyle: 'italic',
+                fontSize: '6.5cqw',
+                color: '#7C5CFC',
+                lineHeight: 1,
+                marginLeft: '2px',
+              }}
+            >
+              {pr || '—'}
+            </span>
+          </div>
         </div>
       </div>
     </div>
