@@ -178,9 +178,9 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                   className="text-[32px] font-semibold text-white tracking-[-0.03em] leading-[1.3]"
                   style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
                 >
-                  <RevealLine text="3 activities." delay={0.3} />
+                  <RevealLine text="Log 3 activities" delay={0.3} />
                   <br />
-                  <RevealLine text="4 weeks." delay={1.8} />
+                  <RevealLine text="every week, for 4 weeks." delay={2.2} />
                 </h2>
                 <motion.div
                   className="mt-6"
