@@ -1,23 +1,22 @@
-import { useState, useEffect } from 'react';
-import { subscribeAuth, signOutAuth } from '@/lib/auth-singleton';
-import type { User, Session } from '@supabase/supabase-js';
+/**
+ * Backward-compatible useAuth hook.
+ * Wraps the new SSO AuthContext so all existing components keep working.
+ */
+import { useSSOAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useAuth = () => {
-  const [state, setState] = useState<{ user: User | null; session: Session | null; loading: boolean }>({
-    user: null,
-    session: null,
-    loading: true,
-  });
+  const { user, isAuthenticated, isLoading, error } = useSSOAuth();
 
-  useEffect(() => {
-    return subscribeAuth((user, session, loading) => {
-      setState(prev => {
-        // Skip if identical to avoid re-renders
-        if (prev.user === user && prev.session === session && prev.loading === loading) return prev;
-        return { user, session, loading };
-      });
-    });
-  }, []);
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/';
+  };
 
-  return { ...state, signOut: signOutAuth };
+  return {
+    user,
+    session: isAuthenticated ? {} as any : null, // backwards compat for truthy checks
+    loading: isLoading,
+    signOut,
+  };
 };

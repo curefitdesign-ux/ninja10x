@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 
+import { AuthProvider, useSSOAuth } from "@/context/AuthContext";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -13,9 +14,6 @@ import { enableAutoMotion } from "@/lib/motion";
 import { useGlobalHaptics } from "@/hooks/use-global-haptics";
 import { MorphTransitionProvider } from "@/hooks/use-morph-transition";
 import MorphTransitionOverlay from "@/components/MorphTransitionOverlay";
-
-// Eagerly load Auth (initial landing page)
-import Auth from "./pages/Auth";
 
 // Lazy-load all other routes
 const Index = lazy(() => import("./pages/Index"));
@@ -70,7 +68,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   // Only redirect if we're certain there's no session (auth is done loading)
   if (!session && !user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // Wait for profile check if we have a user
@@ -105,7 +103,7 @@ const ProfileSetupRouteWrapper = ({ children }: { children: React.ReactNode }) =
   }
   
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // If profile exists and not in edit mode, redirect to home
@@ -129,7 +127,7 @@ const AnimatedRoutes = () => {
     <Suspense fallback={<RouteFallback />}>
       <PageTransition key={location.pathname}>
         <Routes location={location}>
-          <Route path="/auth" element={<Auth />} />
+          <Route path="/auth" element={<Navigate to="/reel" replace />} />
           <Route path="/profile-setup" element={<ProfileSetupRouteWrapper><ProfileSetupPage /></ProfileSetupRouteWrapper>} />
           <Route path="/avatar-crop" element={<ProtectedRoute><AvatarCrop /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/reel" replace />} />
@@ -213,21 +211,23 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <MorphTransitionProvider>
-            <MobileFrame>
-              <Suspense fallback={null}>
-                <NotificationCenter />
-                <ReactionNotificationPill />
-              </Suspense>
-              <MorphTransitionOverlay />
-              <AnimatedRoutes />
-              <Suspense fallback={null}>
-                <BottomNavBar />
-              </Suspense>
-            </MobileFrame>
-          </MorphTransitionProvider>
-        </BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter>
+            <MorphTransitionProvider>
+              <MobileFrame>
+                <Suspense fallback={null}>
+                  <NotificationCenter />
+                  <ReactionNotificationPill />
+                </Suspense>
+                <MorphTransitionOverlay />
+                <AnimatedRoutes />
+                <Suspense fallback={null}>
+                  <BottomNavBar />
+                </Suspense>
+              </MobileFrame>
+            </MorphTransitionProvider>
+          </BrowserRouter>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

@@ -119,8 +119,11 @@ export type Database = {
         Row: {
           avatar_url: string
           created_at: string
+          cult_user_id: string | null
           display_name: string
+          email: string | null
           id: string
+          phone: string | null
           stories_public: boolean
           updated_at: string
           user_id: string
@@ -128,8 +131,11 @@ export type Database = {
         Insert: {
           avatar_url: string
           created_at?: string
+          cult_user_id?: string | null
           display_name: string
+          email?: string | null
           id?: string
+          phone?: string | null
           stories_public?: boolean
           updated_at?: string
           user_id: string
@@ -137,8 +143,11 @@ export type Database = {
         Update: {
           avatar_url?: string
           created_at?: string
+          cult_user_id?: string | null
           display_name?: string
+          email?: string | null
           id?: string
+          phone?: string | null
           stories_public?: boolean
           updated_at?: string
           user_id?: string
