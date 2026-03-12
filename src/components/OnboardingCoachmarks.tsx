@@ -75,18 +75,26 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     }
   }, [onComplete]);
 
+  const finish = useCallback(() => {
+    localStorage.setItem(STORAGE_KEY, 'true');
+    setVisible(false);
+    setTimeout(onComplete, 400);
+  }, [onComplete]);
+
   // Auto-advance phases
   useEffect(() => {
     if (!visible) return;
     if (phase === 0) {
       timerRef.current = setTimeout(() => setPhase(1), 9500);
     }
-    // Phase 1 → Phase 3 (vignette log card)
     if (phase === 1) {
       timerRef.current = setTimeout(() => setPhase(3), 8500);
     }
+    if (phase === 2) {
+      timerRef.current = setTimeout(() => finish(), 8000);
+    }
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, [phase, visible]);
+  }, [phase, visible, finish]);
 
   // Elevate the log card above the overlay in phase 3
   useEffect(() => {
@@ -126,12 +134,6 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
       resetCard();
     };
   }, [phase]);
-
-  const finish = useCallback(() => {
-    localStorage.setItem(STORAGE_KEY, 'true');
-    setVisible(false);
-    setTimeout(onComplete, 400);
-  }, [onComplete]);
 
   if (!visible) return null;
 
@@ -174,8 +176,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 backdropFilter: 'blur(50px) saturate(200%)',
                 WebkitBackdropFilter: 'blur(50px) saturate(200%)',
                 background: 'rgba(0, 0, 0, 0.15)',
-                maskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 6%, black 12%)',
-                WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 6%, black 12%)',
+                maskImage: 'linear-gradient(to bottom, transparent 0%, transparent 16%, rgba(0,0,0,0.15) 20%, black 28%)',
+                WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, transparent 16%, rgba(0,0,0,0.15) 20%, black 28%)',
               }} />
             </motion.div>
           )}
