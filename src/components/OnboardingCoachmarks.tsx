@@ -334,20 +334,19 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                   </p>
                 </div>
 
-                {/* LOG NOW CTA */}
-                <div className="flex justify-center pb-12">
+                {/* GOT IT CTA — white with gradient text, moved up */}
+                <div className="flex justify-center pb-32">
                   <motion.button
-                    className="w-[calc(100%-48px)] rounded-2xl uppercase active:scale-[0.97]"
+                    className="w-[calc(100%-48px)] rounded-2xl uppercase active:scale-[0.97] flex items-center justify-center"
                     style={{
                       height: 44,
                       fontSize: 13,
                       fontWeight: 700,
                       letterSpacing: '0.12em',
                       fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
-                      background: 'linear-gradient(135deg, #F97316, #EC4899)',
+                      background: '#FFFFFF',
                       border: 'none',
-                      boxShadow: '0 8px 32px rgba(249, 115, 22, 0.3)',
-                      color: '#FFFFFF',
+                      boxShadow: '0 8px 32px rgba(255, 255, 255, 0.15)',
                     }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -355,7 +354,14 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                     onClick={(e) => { e.stopPropagation(); finish(); }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    LOG NOW
+                    <span style={{
+                      backgroundImage: 'linear-gradient(135deg, #F97316, #EC4899)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}>
+                      GOT IT
+                    </span>
                   </motion.button>
                 </div>
               </motion.div>
