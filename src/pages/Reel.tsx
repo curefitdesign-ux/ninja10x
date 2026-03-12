@@ -22,6 +22,7 @@ import StoryEmojiRain from '@/components/StoryEmojiRain';
 import ReactsSoFarSheet from '@/components/ReactsSoFarSheet';
 import SendReactionSheet from '@/components/SendReactionSheet';
 import ProfileAvatar from '@/components/ProfileAvatar';
+import CircularProgressRing from '@/components/CircularProgressRing';
 import ActivityGalleryOverlay, { GalleryActivity } from '@/components/ActivityGalleryOverlay';
 
 import MakePublicSheet from '@/components/MakePublicSheet';
