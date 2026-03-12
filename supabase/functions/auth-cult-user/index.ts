@@ -19,12 +19,9 @@ Deno.serve(async (req) => {
 
     let cultUserId: string;
     let name: string;
-    let email: string | null;
-    let phone: string | null;
     let profileImageUrl: string | null = null;
 
     if (body.ssoToken) {
-      // Server-side Cult API validation (alternative path)
       const cultResponse = await fetch(`${CULT_API_BASE}/user/ninja-10x/details`, {
         method: "POST",
         headers: {
@@ -55,15 +52,10 @@ Deno.serve(async (req) => {
       }
 
       name = [cultData.firstName, cultData.lastName].filter(Boolean).join(" ") || "";
-      email = cultData.email || null;
-      phone = cultData.phoneNumber || null;
       profileImageUrl = cultData.profileImageUrl || null;
     } else if (body.cultUserId) {
-      // Client already validated — just bridge to Supabase
       cultUserId = body.cultUserId;
       name = body.name || "";
-      email = body.email || null;
-      phone = body.phone || null;
       profileImageUrl = body.profileImageUrl || null;
     } else {
       return new Response(
@@ -119,14 +111,11 @@ Deno.serve(async (req) => {
 
     if (!session) throw new Error("No session returned");
 
-    // Upsert profile — only set avatar_url if profileImageUrl is present
-    // and profile has no avatar yet
+    // Upsert profile — no email/phone stored for security
     const profileUpsertData: Record<string, any> = {
       user_id: session.user.id,
       cult_user_id: cultUserId,
       display_name: name || "Athlete",
-      email: email || null,
-      phone: phone || null,
     };
 
     // Check if profile already has an avatar set
@@ -136,7 +125,6 @@ Deno.serve(async (req) => {
       .eq("user_id", session.user.id)
       .maybeSingle();
 
-    // Set avatar_url from profileImageUrl if profile doesn't have one yet
     if (!existingProfile?.avatar_url && profileImageUrl) {
       profileUpsertData.avatar_url = profileImageUrl;
     } else if (!existingProfile) {
