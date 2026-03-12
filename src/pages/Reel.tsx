@@ -1316,7 +1316,6 @@ const Reel = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-      </PullToRefresh>
     );
   }
 
