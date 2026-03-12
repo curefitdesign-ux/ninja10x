@@ -1,0 +1,1 @@
+DELETE FROM journey_activities WHERE id = '31ecbe39-b194-4e4a-87a4-5c0e245cfec0';
