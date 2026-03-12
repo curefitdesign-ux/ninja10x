@@ -295,85 +295,50 @@ const ProfileSetupPage = () => {
           {nameError && <p className="text-red-400 text-xs mt-1.5">{nameError}</p>}
         </div>
 
-        {/* Divider */}
-        <div className="flex items-center gap-3 px-6 mb-3">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="text-white/30 text-xs tracking-wide uppercase">Choose avatar</span>
-          <div className="flex-1 h-px bg-white/10" />
-        </div>
-
-        {/* Preset Avatars — horizontal scroll, square tiles */}
-        <div className="px-4 mb-4">
-          <div className="flex gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-            {/* Camera tile — first in row */}
+        {/* Add Photo section */}
+        <div className="px-6 mb-4">
+          <div className="flex gap-3">
+            {/* Camera button */}
             <motion.button
-              whileTap={{ scale: 0.92 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => cameraInputRef.current?.click()}
               disabled={loading}
-              className="relative flex-shrink-0 flex items-center justify-center"
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl"
               style={{
-                width: 60,
-                height: 60,
-                borderRadius: 12,
                 background: 'rgba(255,255,255,0.08)',
-                border: customAvatarPreview
-                  ? '2.5px solid #34d399'
-                  : '2px dashed rgba(255,255,255,0.25)',
-                boxShadow: customAvatarPreview
-                  ? '0 0 14px rgba(52,211,153,0.45)'
-                  : 'none',
+                border: '1px solid rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(20px)',
               }}
             >
-              {customAvatarPreview ? (
-                <>
-                  <img src={customAvatarPreview} alt="Custom" className="w-full h-full object-cover" style={{ borderRadius: 10 }} />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/35" style={{ borderRadius: 10 }}>
-                    <Camera className="w-4 h-4 text-white" />
-                  </div>
-                </>
-              ) : (
-                <Camera className="w-5 h-5 text-white/50" />
-              )}
+              <Camera className="w-5 h-5 text-white/60" />
+              <span className="text-white/70 text-sm font-medium">Camera</span>
             </motion.button>
-            {PRESET_AVATARS.map((avatar) => (
-              <motion.button
-                key={avatar.id}
-                whileTap={{ scale: 0.92 }}
-                onClick={() => selectPresetAvatar(avatar.id)}
-                disabled={loading}
-                className="relative flex-shrink-0"
-                style={{ width: 60, height: 60 }}
-              >
-                <div
-                  className="w-full h-full overflow-hidden"
-                  style={{
-                    borderRadius: 12,
-                    border: selectedAvatar === avatar.id
-                      ? '2.5px solid #34d399'
-                      : '2px solid rgba(255,255,255,0.1)',
-                    boxShadow: selectedAvatar === avatar.id
-                      ? '0 0 14px rgba(52,211,153,0.45)'
-                      : 'none',
-                  }}
-                >
-                  <img src={avatar.src} alt={avatar.id} className="w-full h-full object-cover" />
-                </div>
-                <AnimatePresence>
-                  {selectedAvatar === avatar.id && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0 }}
-                      className="absolute inset-0 flex items-center justify-center bg-black/35"
-                      style={{ borderRadius: 12 }}
-                    >
-                      <Check className="w-4 h-4 text-emerald-400" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-            ))}
+            {/* Gallery button */}
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => galleryInputRef.current?.click()}
+              disabled={loading}
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl"
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(20px)',
+              }}
+            >
+              <svg className="w-5 h-5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+              </svg>
+              <span className="text-white/70 text-sm font-medium">Gallery</span>
+            </motion.button>
           </div>
+          {/* Hidden gallery input (no capture attribute) */}
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleGallerySelect}
+            className="hidden"
+          />
         </div>
 
         {/* Stories toggle — edit mode only */}
