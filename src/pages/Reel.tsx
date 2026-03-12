@@ -1908,22 +1908,57 @@ const Reel = () => {
                                       }}
                                     />
 
-                                    {/* Curo mascot looping video */}
+                                    {/* Curo mascot looping video with arc progress */}
                                     <motion.div
                                       initial={{ opacity: 0, scale: 0.9 }}
                                       animate={{ opacity: 1, scale: 1 }}
                                       transition={{ delay: 0.05, duration: 0.5 }}
-                                      className="z-10 mb-4"
-                                      style={{ width: 120, height: 120, borderRadius: '50%', overflow: 'hidden' }}
+                                      className="z-10 mb-4 relative flex items-center justify-center"
+                                      style={{ width: 140, height: 140 }}
                                     >
-                                      <video
-                                        src="/videos/curo-peeking.mp4"
-                                        autoPlay
-                                        loop
-                                        muted
-                                        playsInline
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                      />
+                                      {/* SVG arc progress ring */}
+                                      <svg
+                                        width="140" height="140"
+                                        viewBox="0 0 140 140"
+                                        className="absolute inset-0"
+                                        style={{ transform: 'rotate(-90deg)' }}
+                                      >
+                                        {/* Background track */}
+                                        <circle
+                                          cx="70" cy="70" r="64"
+                                          fill="none"
+                                          stroke="rgba(255,255,255,0.08)"
+                                          strokeWidth="4"
+                                        />
+                                        {/* Progress arc */}
+                                        <circle
+                                          cx="70" cy="70" r="64"
+                                          fill="none"
+                                          stroke="url(#logCardProgressGrad)"
+                                          strokeWidth="4"
+                                          strokeLinecap="round"
+                                          strokeDasharray={`${2 * Math.PI * 64}`}
+                                          strokeDashoffset={`${2 * Math.PI * 64 * (1 - progressPercent / 100)}`}
+                                          style={{ transition: 'stroke-dashoffset 0.8s ease' }}
+                                        />
+                                        <defs>
+                                          <linearGradient id="logCardProgressGrad" x1="0" y1="0" x2="1" y2="1">
+                                            <stop offset="0%" stopColor="#F97316" />
+                                            <stop offset="100%" stopColor="#EC4899" />
+                                          </linearGradient>
+                                        </defs>
+                                      </svg>
+                                      {/* Video circle */}
+                                      <div style={{ width: 112, height: 112, borderRadius: '50%', overflow: 'hidden' }}>
+                                        <video
+                                          src="/videos/curo-peeking.mp4"
+                                          autoPlay
+                                          loop
+                                          muted
+                                          playsInline
+                                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        />
+                                      </div>
                                     </motion.div>
 
                                     {/* Greeting — changes based on week-complete vs log-activity */}
@@ -1932,6 +1967,7 @@ const Reel = () => {
                                       animate={{ opacity: 1, y: 0 }}
                                       transition={{ delay: 0.15, duration: 0.5 }}
                                       className="text-center z-10 mb-6 px-6"
+                                      style={{ marginTop: '5%' }}
                                     >
                                       <p
                                         className="text-xl font-bold leading-tight"
