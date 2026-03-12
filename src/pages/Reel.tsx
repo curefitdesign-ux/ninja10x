@@ -675,7 +675,7 @@ const Reel = () => {
     
     // Preload all activities in current user
     for (const act of currentGroup.activities) {
-      if (act && !act.id?.startsWith('week-recap') && act.id !== 'log-activity') {
+      if (act && !act.id?.startsWith('week-recap') && act.id !== 'log-activity' && act.id !== 'week-complete') {
         preloadUrl(act.originalUrl || act.storageUrl);
       }
     }
