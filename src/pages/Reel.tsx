@@ -1920,7 +1920,7 @@ const Reel = () => {
                                       <svg
                                         width="140" height="140"
                                         viewBox="0 0 140 140"
-                                        className="absolute inset-0"
+                                        className="absolute inset-0 z-20"
                                         style={{ transform: 'rotate(-90deg)' }}
                                       >
                                         {/* Background track */}
