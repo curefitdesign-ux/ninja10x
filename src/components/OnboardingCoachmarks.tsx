@@ -59,7 +59,7 @@ function RevealLine({ text, delay = 0 }: { text: string; delay?: number }) {
   );
 }
 
-type Phase = 0 | 1 | 2 | 3;
+type Phase = 0 | 1 | 2;
 
 export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmarksProps) {
   const [phase, setPhase] = useState<Phase>(0);
@@ -84,15 +84,13 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     setTimeout(onComplete, 400);
   }, [onComplete]);
 
-  // Auto-advance phases
+  // Auto-advance only phase 0 → 1. Phase 1 waits for NEXT tap. Phase 2 auto-finishes.
   useEffect(() => {
     if (!visible) return;
     if (phase === 0) {
       timerRef.current = setTimeout(() => setPhase(1), 9500);
     }
-    if (phase === 1) {
-      timerRef.current = setTimeout(() => setPhase(3), 8500);
-    }
+    // Phase 1: no auto-advance — user taps NEXT
     if (phase === 2) {
       timerRef.current = setTimeout(() => finish(), 8000);
     }
@@ -107,66 +105,29 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
       ringTimersRef.current = [];
       return;
     }
-    // "Log 3 times a week." starts at delay 0.3s — bars 1,2,3 appear during this
-    // "Do it for 4 weeks." starts at delay 2.6s — bars 4-12 appear during this
+    // "Log 3 times a week." words start at 0.3s, stagger 0.45s → word timings: 0.3, 0.75, 1.2, 1.65, 2.1
+    // Bars 1-3 sync with "3 times a week" 
+    // "Do it for 4 weeks." words start at 2.6s → 2.6, 3.05, 3.5, 3.95, 4.4
+    // Bars 4-12 sync with "4 weeks" spread
     const schedule = [
-      { day: 1, ms: 1200 },
-      { day: 2, ms: 1700 },
-      { day: 3, ms: 2200 },
-      { day: 4, ms: 3200 },
-      { day: 5, ms: 3500 },
-      { day: 6, ms: 3800 },
-      { day: 7, ms: 4200 },
-      { day: 8, ms: 4500 },
-      { day: 9, ms: 4800 },
-      { day: 10, ms: 5200 },
-      { day: 11, ms: 5500 },
-      { day: 12, ms: 5800 },
+      { day: 1, ms: 1000 },   // syncs with "3" word (~0.75s + render)
+      { day: 2, ms: 1500 },   // syncs with "times"
+      { day: 3, ms: 2000 },   // syncs with "a week"
+      { day: 4, ms: 3100 },   // syncs with "for" in line 2
+      { day: 5, ms: 3400 },
+      { day: 6, ms: 3700 },
+      { day: 7, ms: 4000 },   // "4" word
+      { day: 8, ms: 4300 },
+      { day: 9, ms: 4600 },
+      { day: 10, ms: 4900 },  // "weeks" word
+      { day: 11, ms: 5200 },
+      { day: 12, ms: 5500 },
     ];
     const timers = schedule.map(({ day, ms }) =>
       setTimeout(() => setRingDay(day), ms)
     );
     ringTimersRef.current = timers;
     return () => timers.forEach(clearTimeout);
-  }, [phase]);
-
-  // Elevate the log card above the overlay in phase 3
-  useEffect(() => {
-    const targetIds = ['reel-log-activity-card', 'log-activity-card'];
-
-    const resetCard = () => {
-      targetIds.forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.style.position = '';
-          el.style.zIndex = '';
-        }
-      });
-    };
-
-    if (phase !== 3) {
-      resetCard();
-      return;
-    }
-
-    const applyElevation = () => {
-      const card = targetIds
-        .map((id) => document.getElementById(id))
-        .find(Boolean) as HTMLElement | null;
-
-      if (card) {
-        card.style.position = 'relative';
-        card.style.zIndex = '10001';
-      }
-    };
-
-    applyElevation();
-    const interval = window.setInterval(applyElevation, 120);
-
-    return () => {
-      window.clearInterval(interval);
-      resetCard();
-    };
   }, [phase]);
 
   if (!visible) return null;
@@ -186,74 +147,17 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6 }}
         >
-          {/* Background blur for phases 0 & 1 — full uniform blur */}
-          {(phase === 0 || phase === 1) && (
-            <motion.div
-              className="absolute inset-0"
-              style={{
-                backdropFilter: 'blur(60px) saturate(200%)',
-                WebkitBackdropFilter: 'blur(60px) saturate(200%)',
-                background: 'rgba(0, 0, 0, 0.15)',
-              }}
-            />
-          )}
-
-          {/* Phase 2: Full blur masked from top — clear at top for profiles, blurred rest */}
-          {phase === 2 && (
-            <motion.div
-              className="absolute inset-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, ease: 'easeOut' }}
-            >
-              <div className="absolute inset-0" style={{
-                backdropFilter: 'blur(50px) saturate(200%)',
-                WebkitBackdropFilter: 'blur(50px) saturate(200%)',
-                background: 'rgba(0, 0, 0, 0.15)',
-                maskImage: 'linear-gradient(to bottom, transparent 0%, transparent 7%, rgba(0,0,0,0.15) 12%, black 20%)',
-                WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, transparent 7%, rgba(0,0,0,0.15) 12%, black 20%)',
-              }} />
-            </motion.div>
-          )}
-
-          {/* Phase 3: Vignette blur — heavy at edges, clear in center */}
-          {phase === 3 && (
-            <motion.div
-              className="absolute inset-0 pointer-events-none"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-            >
-              <div className="absolute top-0 left-0 right-0 h-[35%]" style={{
-                backdropFilter: 'blur(24px) saturate(160%)',
-                WebkitBackdropFilter: 'blur(24px) saturate(160%)',
-                background: 'rgba(0, 0, 0, 0.18)',
-                maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
-                WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
-              }} />
-              <div className="absolute bottom-0 left-0 right-0 h-[35%]" style={{
-                backdropFilter: 'blur(24px) saturate(160%)',
-                WebkitBackdropFilter: 'blur(24px) saturate(160%)',
-                background: 'rgba(0, 0, 0, 0.18)',
-                maskImage: 'linear-gradient(to top, black 40%, transparent 100%)',
-                WebkitMaskImage: 'linear-gradient(to top, black 40%, transparent 100%)',
-              }} />
-              <div className="absolute top-0 bottom-0 left-0 w-[25%]" style={{
-                backdropFilter: 'blur(20px) saturate(150%)',
-                WebkitBackdropFilter: 'blur(20px) saturate(150%)',
-                background: 'rgba(0, 0, 0, 0.12)',
-                maskImage: 'linear-gradient(to right, black 30%, transparent 100%)',
-                WebkitMaskImage: 'linear-gradient(to right, black 30%, transparent 100%)',
-              }} />
-              <div className="absolute top-0 bottom-0 right-0 w-[25%]" style={{
-                backdropFilter: 'blur(20px) saturate(150%)',
-                WebkitBackdropFilter: 'blur(20px) saturate(150%)',
-                background: 'rgba(0, 0, 0, 0.12)',
-                maskImage: 'linear-gradient(to left, black 30%, transparent 100%)',
-                WebkitMaskImage: 'linear-gradient(to left, black 30%, transparent 100%)',
-              }} />
-            </motion.div>
-          )}
+          {/* Persistent blur background for phases 0, 1 */}
+          <motion.div
+            className="absolute inset-0"
+            style={{
+              backdropFilter: (phase === 0 || phase === 1) ? 'blur(60px) saturate(200%)' : 'blur(50px) saturate(200%)',
+              WebkitBackdropFilter: (phase === 0 || phase === 1) ? 'blur(60px) saturate(200%)' : 'blur(50px) saturate(200%)',
+              background: 'rgba(0, 0, 0, 0.15)',
+            }}
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+          />
 
           {/* Skip */}
           <motion.button
@@ -298,74 +202,101 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 </p>
               </motion.div>
             )}
-          </AnimatePresence>
 
-          {/* ═══ PHASE 1 — fade in place, no move ═══ */}
-          <AnimatePresence mode="wait">
+            {/* ═══ PHASE 1 — ring + text + NEXT, stays until user taps ═══ */}
             {phase === 1 && (
               <motion.div
                 key="phase1"
                 className="relative z-10 flex flex-col items-center justify-center px-8 text-center"
+                style={{ minHeight: '100%' }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0, transition: { duration: 1.0, ease: 'easeOut' } }}
+                exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeOut' } }}
               >
-                {/* Animated CircularProgressRing */}
-                <motion.div
-                  className="mb-8"
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 1.2, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <CircularProgressRing
-                    currentDay={ringDay}
-                    currentWeek={Math.min(Math.floor((ringDay > 0 ? ringDay - 1 : 0) / 3) + 1, 4)}
-                    hideDecorations
-                  />
-                </motion.div>
-
-                <h2
-                  className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
-                  style={{ color: textColor, fontFamily: fontStack }}
-                >
-                  <RevealLine text="Log 3 times a week." delay={0.3} />
-                  <br />
-                  <RevealLine text="Do it for 4 weeks." delay={2.6} />
-                </h2>
-                <motion.div
-                  className="mt-6"
-                  initial={{ filter: 'blur(24px)', opacity: 0, scale: 1.05 }}
-                  animate={{ filter: 'blur(0px)', opacity: 1, scale: 1 }}
-                  transition={{ duration: 2.0, delay: 4.8, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <span
-                    className="text-[32px] font-semibold tracking-[-0.03em]"
-                    style={{
-                      backgroundImage: 'linear-gradient(135deg, #F97316, #EC4899)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                      fontFamily: fontStack,
-                    }}
+                <div className="flex-1 flex flex-col items-center justify-center">
+                  {/* Animated CircularProgressRing */}
+                  <motion.div
+                    className="mb-6"
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 1.2, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    Become a Ninja. 🥷
-                  </span>
-                </motion.div>
+                    <CircularProgressRing
+                      currentDay={ringDay}
+                      currentWeek={Math.min(Math.floor((ringDay > 0 ? ringDay - 1 : 0) / 3) + 1, 4)}
+                      hideDecorations
+                    />
+                  </motion.div>
+
+                  <h2
+                    className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
+                    style={{ color: textColor, fontFamily: fontStack }}
+                  >
+                    <RevealLine text="Log 3 times a week." delay={0.3} />
+                    <br />
+                    <RevealLine text="Do it for 4 weeks." delay={2.6} />
+                  </h2>
+                  <motion.div
+                    className="mt-6"
+                    initial={{ filter: 'blur(24px)', opacity: 0, scale: 1.05 }}
+                    animate={{ filter: 'blur(0px)', opacity: 1, scale: 1 }}
+                    transition={{ duration: 2.0, delay: 4.8, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <span
+                      className="text-[32px] font-semibold tracking-[-0.03em]"
+                      style={{
+                        backgroundImage: 'linear-gradient(135deg, #F97316, #EC4899)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        fontFamily: fontStack,
+                      }}
+                    >
+                      Become a Ninja. 🥷
+                    </span>
+                  </motion.div>
+                </div>
+
+                {/* NEXT CTA on blur background */}
+                <div className="flex justify-center w-full pb-12">
+                  <motion.button
+                    className="w-[calc(100%-48px)] rounded-2xl uppercase active:scale-[0.97]"
+                    style={{
+                      height: 40,
+                      fontSize: 12,
+                      fontWeight: 600,
+                      letterSpacing: '0.1em',
+                      fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
+                      background: 'rgba(255, 255, 255, 0.08)',
+                      backdropFilter: 'blur(40px) saturate(180%)',
+                      WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                      border: '1px solid rgba(255, 255, 255, 0.18)',
+                      boxShadow:
+                        'inset 0 1px 1px rgba(255, 255, 255, 0.15), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.2)',
+                      color: 'rgba(255, 255, 255, 0.90)',
+                    }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 5.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    onClick={(e) => { e.stopPropagation(); setPhase(2); }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    NEXT
+                  </motion.button>
+                </div>
               </motion.div>
             )}
-          </AnimatePresence>
 
-          {/* ═══ PHASE 2: Community — profiles at top, text centered, LOG NOW CTA ═══ */}
-          <AnimatePresence mode="wait">
+            {/* ═══ PHASE 2: Community — text centered, GOT IT CTA ═══ */}
             {phase === 2 && (
               <motion.div
                 key="phase2-community"
-                className="absolute inset-0 z-10 flex flex-col"
+                className="relative z-10 flex flex-col items-center justify-center"
+                style={{ minHeight: '100%' }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0, transition: { duration: 0.8 } }}
               >
-
                 {/* Centered community text */}
                 <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
                   <h2
@@ -384,8 +315,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                   </p>
                 </div>
 
-                {/* GOT IT CTA — white with gradient text, moved up */}
-                <div className="flex justify-center pb-32">
+                {/* GOT IT CTA */}
+                <div className="flex justify-center w-full pb-12">
                   <motion.button
                     className="w-[calc(100%-48px)] rounded-2xl uppercase active:scale-[0.97] flex items-center justify-center"
                     style={{
@@ -414,46 +345,6 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                     </span>
                   </motion.button>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* ═══ PHASE 3: Highlight log card — vignette + NEXT CTA ═══ */}
-          <AnimatePresence>
-            {phase === 3 && (
-              <motion.div
-                key="phase3"
-                className="fixed left-0 right-0 z-[10001] flex justify-center"
-                style={{ bottom: 'calc(env(safe-area-inset-bottom, 16px) + 80px)' }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <motion.button
-                  className="w-[calc(100%-48px)] rounded-2xl uppercase active:scale-[0.97]"
-                  style={{
-                    height: 40,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    letterSpacing: '0.1em',
-                    fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    backdropFilter: 'blur(40px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                    border: '1px solid rgba(255, 255, 255, 0.18)',
-                    boxShadow:
-                      'inset 0 1px 1px rgba(255, 255, 255, 0.15), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.2)',
-                    color: 'rgba(255, 255, 255, 0.90)',
-                  }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  onClick={(e) => { e.stopPropagation(); setPhase(2); }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  NEXT
-                </motion.button>
               </motion.div>
             )}
           </AnimatePresence>
