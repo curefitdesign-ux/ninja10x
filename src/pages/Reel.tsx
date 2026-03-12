@@ -1058,47 +1058,46 @@ const Reel = () => {
   const shareToChannel = useCallback((channel: 'whatsapp' | 'instagram' | 'messages') => {
     const payload = buildSharePayload();
     const shareText = `${payload.text}\n\n${payload.url}`;
+    const encodedText = encodeURIComponent(shareText);
 
-    // Use setTimeout to ensure the dialog has closed and the user gesture context is preserved
-    setTimeout(() => {
-      if (channel === 'whatsapp') {
-        // Use whatsapp:// deep link for mobile, fallback to web
-        const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(shareText)}`;
-        const webFallback = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
-        
-        const link = document.createElement('a');
-        link.href = whatsappUrl;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Fallback: if deep link doesn't work, open web version after a short delay
-        setTimeout(() => {
-          window.location.href = webFallback;
-        }, 1500);
-        return;
-      }
+    const openDeepLink = (appUrl: string, fallbackUrl: string) => {
+      const fallbackTimer = window.setTimeout(() => {
+        window.location.href = fallbackUrl;
+      }, 1200);
 
-      if (channel === 'messages') {
-        window.location.href = `sms:&body=${encodeURIComponent(shareText)}`;
-        return;
-      }
+      const clearFallback = () => window.clearTimeout(fallbackTimer);
+      const clearOnVisibility = () => {
+        if (document.hidden) clearFallback();
+      };
 
-      if (channel === 'instagram') {
-        // Instagram doesn't have a direct share URL; use native share or copy
-        if (navigator.share) {
-          navigator.share(payload).catch(() => {});
-        } else {
-          navigator.clipboard.writeText(shareText).then(() => {
-            toast.success('Link copied! Paste it in Instagram.');
-          }).catch(() => {
-            toast.error('Unable to copy link');
-          });
-        }
-        return;
-      }
-    }, 100);
+      window.addEventListener('blur', clearFallback, { once: true });
+      document.addEventListener('visibilitychange', clearOnVisibility, { once: true });
+      window.location.href = appUrl;
+    };
+
+    if (channel === 'whatsapp') {
+      openDeepLink(
+        `whatsapp://send?text=${encodedText}`,
+        `https://wa.me/?text=${encodedText}`
+      );
+      return;
+    }
+
+    if (channel === 'messages') {
+      window.location.href = `sms:&body=${encodedText}`;
+      return;
+    }
+
+    const isAndroid = /android/i.test(navigator.userAgent);
+    const instagramAppUrl = isAndroid
+      ? 'intent://story-camera#Intent;package=com.instagram.android;scheme=instagram;end'
+      : 'instagram://story-camera';
+
+    openDeepLink(instagramAppUrl, 'https://www.instagram.com/stories/');
+
+    navigator.clipboard.writeText(payload.url)
+      .then(() => toast.success('Opened Instagram Stories. Link copied.'))
+      .catch(() => toast.success('Opened Instagram Stories.'));
   }, [buildSharePayload]);
 
   // Handler: open share options picker
