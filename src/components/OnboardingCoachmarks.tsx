@@ -201,17 +201,17 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
                     style={{ color: textColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="Every habit starts" delay={0.4} />
+                    {renderRevealLine('Every habit starts', 0.4)}
                     <br />
-                    <RevealLine text="with a single move." delay={2.2} />
+                    {renderRevealLine('with a single move.', 2.2)}
                   </h2>
                   <p
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-8"
                     style={{ color: mutedColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="Running. Cricket. Yoga." delay={4.0} />
+                    {renderRevealLine('Running. Cricket. Yoga.', 4.0)}
                     <br />
-                    <RevealLine text="Pick yours. Show up." delay={5.8} />
+                    {renderRevealLine('Pick yours. Show up.', 5.8)}
                   </p>
                 </div>
               </motion.div>
