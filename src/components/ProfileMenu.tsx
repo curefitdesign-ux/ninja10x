@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, UserPen, ChevronDown, Mail, User } from 'lucide-react';
+import { LogOut, UserPen, ChevronDown, Mail, User, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
 import ProfileAvatar from '@/components/ProfileAvatar';
