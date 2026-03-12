@@ -35,13 +35,8 @@ const ProfileSetupPage = () => {
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  // Preload all HD avatar images on mount so switching is instant
-  useEffect(() => {
-    PRESET_AVATARS.forEach(({ hd }) => {
-      const img = new Image();
-      img.src = hd;
-    });
-  }, []);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   // Redirect if profile already exists and not in edit mode
   useEffect(() => {
