@@ -109,25 +109,7 @@ const Logout = () => {
           )}
         </div>
 
-        {/* Sign in again button */}
-        {!signingOut && (
-          <motion.button
-            onClick={() => navigate('/', { replace: true })}
-            className="w-full h-14 rounded-xl font-semibold text-teal-950 relative overflow-hidden"
-            style={{
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,253,250,0.9) 100%)',
-              boxShadow: '0 4px 20px rgba(20, 184, 166, 0.25)',
-            }}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            Sign In Again
-          </motion.button>
-        )}
-      </motion.div>
+      </div>
     </div>
   );
 };
