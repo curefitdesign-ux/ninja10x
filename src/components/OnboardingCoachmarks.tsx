@@ -135,17 +135,56 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6 }}
         >
-          {/* Background: strong blur for text phases, reduced in phase 2 so card is visible */}
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              backdropFilter: phase === 2 ? 'blur(8px) saturate(140%)' : 'blur(60px) saturate(200%)',
-              WebkitBackdropFilter: phase === 2 ? 'blur(8px) saturate(140%)' : 'blur(60px) saturate(200%)',
-              background: phase === 2 ? 'rgba(0, 0, 0, 0.02)' : 'rgba(0, 0, 0, 0.15)',
-            }}
-            animate={{ opacity: phase === 2 ? 0.35 : 1 }}
-            transition={{ duration: 0.45, ease: 'easeOut' }}
-          />
+          {/* Background blur for text phases */}
+          {phase !== 2 && (
+            <motion.div
+              className="absolute inset-0"
+              style={{
+                backdropFilter: 'blur(60px) saturate(200%)',
+                WebkitBackdropFilter: 'blur(60px) saturate(200%)',
+                background: 'rgba(0, 0, 0, 0.15)',
+              }}
+            />
+          )}
+
+          {/* Phase 2: Vignette blur — heavy at edges, clear in center */}
+          {phase === 2 && (
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+            >
+              <div className="absolute top-0 left-0 right-0 h-[35%]" style={{
+                backdropFilter: 'blur(24px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+                background: 'rgba(0, 0, 0, 0.18)',
+                maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
+              }} />
+              <div className="absolute bottom-0 left-0 right-0 h-[35%]" style={{
+                backdropFilter: 'blur(24px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+                background: 'rgba(0, 0, 0, 0.18)',
+                maskImage: 'linear-gradient(to top, black 40%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to top, black 40%, transparent 100%)',
+              }} />
+              <div className="absolute top-0 bottom-0 left-0 w-[25%]" style={{
+                backdropFilter: 'blur(20px) saturate(150%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(150%)',
+                background: 'rgba(0, 0, 0, 0.12)',
+                maskImage: 'linear-gradient(to right, black 30%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to right, black 30%, transparent 100%)',
+              }} />
+              <div className="absolute top-0 bottom-0 right-0 w-[25%]" style={{
+                backdropFilter: 'blur(20px) saturate(150%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(150%)',
+                background: 'rgba(0, 0, 0, 0.12)',
+                maskImage: 'linear-gradient(to left, black 30%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to left, black 30%, transparent 100%)',
+              }} />
+            </motion.div>
+          )}
 
           {/* Skip */}
           <motion.button
@@ -170,7 +209,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 className="relative z-10 flex flex-col items-center justify-center px-8 text-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0, transition: { duration: 1.0 } }}
+                exit={{ opacity: 0, y: -40, transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } }}
               >
                 <h2
                   className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
@@ -200,7 +239,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 className="relative z-10 flex flex-col items-center justify-center px-8 text-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0, transition: { duration: 1.0 } }}
+                exit={{ opacity: 0, y: -40, transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } }}
               >
                 <h2
                   className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
