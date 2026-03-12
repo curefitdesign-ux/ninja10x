@@ -2540,6 +2540,9 @@ const Reel = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Onboarding coachmarks — first-time user tutorial */}
+      <OnboardingCoachmarks onComplete={() => {}} />
     </DynamicBlurBackground>
     </PullToRefresh>
   );
