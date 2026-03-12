@@ -71,8 +71,8 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
             backdropFilter: 'blur(10px)',
             border: '1px solid rgba(255,255,255,0.25)',
             padding: '1cqw 2.5cqw',
-            marginTop: '20px',
-            marginLeft: '10px',
+            marginTop: '4cqw',
+            marginLeft: '2cqw',
           }}
         >
           <span className="text-white font-semibold tracking-wider" style={{ fontSize: 'calc(2.5cqw + 2px)', fontFamily }}>CULT NINJA JOURNEY · WEEK {week} | DAY {day}</span>
@@ -83,8 +83,8 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
           className="text-white font-bold leading-[0.95]"
           style={{
             fontSize: 'calc(13cqw + 5px)',
-            marginTop: 'calc(2cqw + 5px)',
-            marginLeft: '10px',
+            marginTop: '2cqw',
+            marginLeft: '2cqw',
             fontFamily,
             fontStyle: 'normal',
             textShadow: '0 2px 8px rgba(0,0,0,0.4)',
@@ -98,7 +98,7 @@ const ShakyFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imag
         
         {/* Stats at bottom */}
         {(duration || pr) && (
-          <div className="flex" style={{ gap: '6cqw', marginLeft: '10px', marginBottom: '10px' }}>
+          <div className="flex" style={{ gap: '6cqw', marginLeft: '2cqw', marginBottom: '2cqw' }}>
             {duration && (
               <div className="flex-1">
                 <p className="text-white/60 font-medium tracking-wide" style={{ fontSize: 'calc(2.5cqw + 5px)', marginBottom: '0.5cqw', fontFamily }}>{durationLabel}</p>
