@@ -127,6 +127,19 @@ const ProfileMenu = ({ onEditProfile }: ProfileMenuProps) => {
                   </motion.button>
 
                   <motion.button
+                    onClick={() => {
+                      setIsOpen(false);
+                      localStorage.removeItem('ninja10x_onboarding_seen');
+                      window.location.reload();
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
+                    whileHover={{ x: 2 }}
+                  >
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span className="text-sm">Replay Intro</span>
+                  </motion.button>
+
+                  <motion.button
                     onClick={handleLogout}
                     className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-red-400 hover:bg-red-500/5 transition-colors"
                     whileHover={{ x: 2 }}
