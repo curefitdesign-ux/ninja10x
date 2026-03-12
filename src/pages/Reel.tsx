@@ -1801,11 +1801,14 @@ const Reel = () => {
                             maxWidth: '100%',
                             containerType: 'size',
                           }}>
-                            {/* Stacked strip 2 (deepest) */}
+                            {/* Stacked strip 2 (deepest) — slides down on mount */}
                             {showStackedCards && (
-                              <div
+                              <motion.div
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
+                                initial={{ y: -20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.5, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                                 style={{
                                   width: '78%',
                                   height: '5.5cqh',
@@ -1823,11 +1826,14 @@ const Reel = () => {
                                 }}
                               />
                             )}
-                            {/* Stacked strip 1 (closer) */}
+                            {/* Stacked strip 1 (closer) — slides down on mount */}
                             {showStackedCards && (
-                              <div
+                              <motion.div
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer"
+                                initial={{ y: -14, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.35, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                                 style={{
                                   width: '84%',
                                   height: '5.5cqh',
@@ -1845,11 +1851,14 @@ const Reel = () => {
                                 }}
                               />
                             )}
-                            {/* "Tap to view journey" hint text below strips */}
+                            {/* "Tap to view journey" hint — blinks to attract attention */}
                             {showStackedCards && (
-                              <div
+                              <motion.div
                                 onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer flex items-center gap-1"
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: [0, 1, 0.4, 1], y: 0 }}
+                                transition={{ delay: 0.7, duration: 2, ease: 'easeInOut', repeat: Infinity, repeatDelay: 3 }}
                                 style={{
                                   bottom: '-1.5cqh',
                                   left: '50%',
@@ -1858,11 +1867,11 @@ const Reel = () => {
                                 }}
                               >
                                 <svg width="2.5cqh" height="2.2cqh" viewBox="0 0 36 32" fill="none" style={{ width: 'clamp(24px, 2.5cqh, 36px)', height: 'clamp(20px, 2.2cqh, 32px)', marginTop: '-0.5cqh' }}>
-                                  <path d="M18 30 Q12 26, 8 20 Q4 14, 7 8 Q9 4, 14 3 Q17 2.5, 18 3" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-                                  <path d="M15 6 L18 1.5 L20 7" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M18 30 Q12 26, 8 20 Q4 14, 7 8 Q9 4, 14 3 Q17 2.5, 18 3" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                                  <path d="M15 6 L18 1.5 L20 7" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
-                                <span style={{ fontFamily: 'Caveat, cursive', fontSize: 'clamp(16px, 3.2cqh, 22px)', color: 'rgba(255,255,255,0.4)', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>tap to view journey</span>
-                              </div>
+                                <span style={{ fontFamily: 'Caveat, cursive', fontSize: 'clamp(16px, 3.2cqh, 22px)', color: 'rgba(255,255,255,0.55)', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>tap to view journey</span>
+                              </motion.div>
                             )}
                             {/* Main card */}
                             <div
