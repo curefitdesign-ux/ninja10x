@@ -386,7 +386,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             {phase === 3 && (
               <motion.div
                 key="phase3"
-                className="fixed left-0 right-0 z-[10001] flex justify-center"
+                className="fixed left-0 right-0 z-[10001] flex justify-center pointer-events-auto"
                 style={{ bottom: 'calc(env(safe-area-inset-bottom, 16px) + 80px)' }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
