@@ -360,6 +360,7 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
       
       {/* Main editing area */}
       <div
+        ref={containerRef}
         className="absolute inset-0 overflow-hidden touch-none flex items-center justify-center"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
