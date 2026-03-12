@@ -695,6 +695,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                   width: '48%', aspectRatio: '9/16', borderRadius: 4,
                                   transform: `rotate(${activeRotation}deg) translateX(${offsetX}px)`,
                                   marginLeft: idx % 2 === 0 ? '0%' : '10%',
+                                  marginTop: 10,
                                   transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
                                 }}
                               >
@@ -708,38 +709,35 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                   )}
                                 </div>
 
-                                {/* Activity name tag */}
-                                {act.activity && (
-                                  <div className="absolute pointer-events-none" style={{
-                                    bottom: -12, right: -8, background: 'rgba(255,255,255,0.1)',
-                                    backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
-                                    transform: `rotate(${-activeRotation * 0.5}deg)`,
-                                  }}>
-                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>{act.activity}</span>
-                                  </div>
-                                )}
-
                                 {/* Reactions */}
                                 {(() => {
                                   const ar = localReactions[act.id];
                                   const total = ar?.total || 0;
                                   return (
-                                    <div className="absolute flex items-center gap-1" style={{ bottom: -10, left: -6, zIndex: 30, transform: `rotate(${-activeRotation * 0.6}deg)` }}>
+                                    <div className="absolute flex items-center gap-1.5" style={{ bottom: -12, left: -6, zIndex: 30, transform: `rotate(${-activeRotation * 0.6}deg)` }}>
                                       {total > 0 && (
                                         <button
                                           className="active:scale-90 transition-transform"
                                           onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowReactsSheet(true); }}
-                                          style={{ fontFamily: "'Caveat', cursive", fontSize: 16, color: 'rgba(255,255,255,0.55)', textShadow: '0 1px 4px rgba(0,0,0,0.5)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                                          style={{
+                                            fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)',
+                                            background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                                            border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
+                                            cursor: 'pointer',
+                                          }}
                                         >
                                           {total} ❤️
                                         </button>
                                       )}
                                       {!isOwnProfile && (
-                                        <button className="flex items-center gap-0.5 active:scale-90 transition-transform" style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)', borderRadius: 14, padding: '3px 8px', border: '1px solid rgba(255,255,255,0.12)' }}
+                                        <button className="flex items-center gap-0.5 active:scale-90 transition-transform"
+                                          style={{
+                                            background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                                            borderRadius: 12, padding: '4px 10px', border: '1px solid rgba(255,255,255,0.12)',
+                                          }}
                                           onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}>
                                           <span style={{ fontSize: 12 }}>🔥</span>
-                                          <span style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>React</span>
+                                          <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>React</span>
                                         </button>
                                       )}
                                     </div>
