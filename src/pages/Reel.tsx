@@ -1686,7 +1686,7 @@ const Reel = () => {
             }}
             className="h-full"
           >
-            <CarouselContent className="h-full -ml-3" viewportClassName="h-full px-[24px]">
+            <CarouselContent className="h-full -ml-3" viewportClassName="h-full px-[32px]">
               {effectiveUserGroups.map((group, idx) => {
                 const isCenter = idx === currentUserIndex;
                 const activities = [...(group.activities || [])].reverse();
