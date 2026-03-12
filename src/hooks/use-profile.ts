@@ -13,7 +13,7 @@ export interface Profile {
 }
 
 export const useProfile = () => {
-  const { user, isLoading: authLoading } = useSSOAuth();
+  const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [needsSetup, setNeedsSetup] = useState(false);
