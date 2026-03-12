@@ -163,12 +163,9 @@ const Index = () => {
     return new Date().toISOString().split('T')[0];
   };
 
-  const getNextDayNumber = () => {
-    if (photos.length >= MAX_DAYS) return MAX_DAYS;
-    return photos.length + 1;
-  };
+  const getNextDayNumber = () => getNextDay(photos);
 
-  const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
+  const currentWeek = getCurrentWeek(photos);
   const currentDay = (photos.length % 3) + 1;
 
   const handleCardClick = () => {
