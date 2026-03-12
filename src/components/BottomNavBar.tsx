@@ -37,6 +37,17 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
     return () => window.removeEventListener('gallery-overlay', handler);
   }, []);
 
+  // Listen for any bottom sheet open/close
+  const [sheetOpen, setSheetOpen] = useState(false);
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      setSheetOpen(detail?.visible ?? false);
+    };
+    window.addEventListener('bottom-sheet-visibility', handler);
+    return () => window.removeEventListener('bottom-sheet-visibility', handler);
+  }, []);
+
   const [activityCount, setActivityCount] = useState(0);
   useEffect(() => {
     if (!user) return;
