@@ -6,7 +6,7 @@ const API_KEY = "f09dc9b7-70af-4d4b-b241-0288755352c3";
 let ssoToken: string | null = null;
 
 // Test override: only active when ?ignoreAuth=true is in the URL
-const _testAt = "CFAPP:7137e98d-15fa-4ef5-90c4-4de2d80eb155";
+const _testAt = "CFAPP:456d3cf3-bd41-48b1-a2a0-326590a4a6f9";
 const _ignoreAuth = new URLSearchParams(window.location.search).get("ignoreAuth") === "true";
 const at = _ignoreAuth ? _testAt : null;
 
