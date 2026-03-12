@@ -130,20 +130,34 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
     }
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const handleTouchMoveRef = useRef<((e: TouchEvent) => void) | null>(null);
+
+  // Keep the ref updated with latest closure values
+  handleTouchMoveRef.current = (e: TouchEvent) => {
     e.preventDefault();
     
     if (e.touches.length === 2 && initialDistance !== null) {
-      const distance = getDistance(e.touches[0], e.touches[1]);
+      const distance = Math.sqrt(
+        (e.touches[0].clientX - e.touches[1].clientX) ** 2 +
+        (e.touches[0].clientY - e.touches[1].clientY) ** 2
+      );
       const newScale = initialScale * (distance / initialDistance);
       setTransform(prev => constrainTransform({ ...prev, scale: newScale }));
-      showZoomIndicatorWithTimeout();
     } else if (e.touches.length === 1 && isDragging) {
       const newX = e.touches[0].clientX - dragStart.x;
       const newY = e.touches[0].clientY - dragStart.y;
       setTransform(prev => constrainTransform({ ...prev, x: newX, y: newY }));
     }
   };
+
+  // Attach touchmove with { passive: false } so preventDefault() works on mobile
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const handler = (e: TouchEvent) => handleTouchMoveRef.current?.(e);
+    el.addEventListener('touchmove', handler, { passive: false });
+    return () => el.removeEventListener('touchmove', handler);
+  }, []);
 
   const handleTouchEnd = () => {
     setIsDragging(false);
@@ -348,7 +362,6 @@ const ImageCropper = ({ mediaSrc, isVideo, onConfirm, onCancel, onRetake }: Imag
       <div
         className="absolute inset-0 overflow-hidden touch-none flex items-center justify-center"
         onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
