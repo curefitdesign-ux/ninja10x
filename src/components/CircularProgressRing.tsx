@@ -16,7 +16,7 @@ interface CircularProgressRingProps {
 const CircularProgressRing = ({
   currentDay = 0,
   currentWeek = 1,
-  className = "",
+  hideDecorations = false,
   highlight = false,
   mascotSrc,
   mascotAlt,
