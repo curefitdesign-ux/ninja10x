@@ -280,61 +280,51 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
           {nameError && <p className="text-red-400 text-xs mt-1">{nameError}</p>}
         </div>
 
-        {/* Divider */}
-        <div className="flex items-center gap-3 px-6 mt-5 mb-3">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="text-white/30 text-xs tracking-wide uppercase">Choose avatar</span>
-          <div className="flex-1 h-px bg-white/10" />
-        </div>
-
-        {/* Preset Avatars — horizontal scrollable row, square tiles */}
-        <div className="px-4 mb-5">
-          <div
-            className="flex gap-2.5 overflow-x-auto pb-1"
-            style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
-          >
-            {PRESET_AVATARS.map((avatar) => (
-              <motion.button
-                key={avatar.id}
-                whileTap={{ scale: 0.92 }}
-                onClick={() => selectPresetAvatar(avatar.id)}
-                disabled={loading}
-                className="relative flex-shrink-0"
-                style={{ width: 60, height: 60 }}
-              >
-                <div
-                  className="w-full h-full overflow-hidden"
-                  style={{
-                    borderRadius: 12,
-                    border: selectedAvatar === avatar.id
-                      ? '2.5px solid #34d399'
-                      : '2px solid rgba(255,255,255,0.1)',
-                    boxShadow: selectedAvatar === avatar.id
-                      ? '0 0 14px rgba(52,211,153,0.45)'
-                      : 'none',
-                  }}
-                >
-                  <img
-                    src={avatar.src}
-                    alt={`Avatar ${avatar.id}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <AnimatePresence>
-                  {selectedAvatar === avatar.id && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0 }}
-                      className="absolute inset-0 flex items-center justify-center bg-black/35"
-                      style={{ borderRadius: 12 }}
-                    >
-                      <Check className="w-4 h-4 text-emerald-400" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-            ))}
+        {/* Add Photo buttons */}
+        <div className="px-6 mt-5 mb-5">
+          <div className="flex gap-3">
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => cameraInputRef.current?.click()}
+              disabled={loading}
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl"
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.1)',
+              }}
+            >
+              <Camera className="w-5 h-5 text-white/60" />
+              <span className="text-white/70 text-sm font-medium">Camera</span>
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0];
+                  if (!file) return;
+                  if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return; }
+                  if (file.size > 20 * 1024 * 1024) { toast.error('Image must be less than 20MB'); return; }
+                  const reader = new FileReader();
+                  reader.onload = (ev) => setCropImageSrc(ev.target?.result as string);
+                  reader.readAsDataURL(file);
+                };
+                input.click();
+              }}
+              disabled={loading}
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl"
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.1)',
+              }}
+            >
+              <svg className="w-5 h-5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+              </svg>
+              <span className="text-white/70 text-sm font-medium">Gallery</span>
+            </motion.button>
           </div>
         </div>
 
