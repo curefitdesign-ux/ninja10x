@@ -116,7 +116,7 @@ export default function ReelToProgressTransition({
     if (!openGalleryAtDay || myActivities.length === 0) return;
     if (openGalleryHandledRef.current) return;
     openGalleryHandledRef.current = true;
-    const uploaded = myActivities.filter(a => a.storageUrl);
+    const uploaded = myActivities.filter(a => a.storageUrl).sort((a, b) => b.dayNumber - a.dayNumber);
     const idx = uploaded.findIndex(a => a.dayNumber === openGalleryAtDay);
     const targetIndex = Math.max(0, idx);
     setGalleryInitialIndex(targetIndex);
