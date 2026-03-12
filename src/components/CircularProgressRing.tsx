@@ -10,6 +10,7 @@ interface CircularProgressRingProps {
   mascotSrc?: string;
   mascotAlt?: string;
   onMascotTap?: () => void;
+  hideDecorations?: boolean; // Hide curved text, confetti, and inner mascot
 }
 
 const CircularProgressRing = ({
