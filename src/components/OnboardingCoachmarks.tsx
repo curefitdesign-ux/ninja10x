@@ -136,7 +136,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
         >
           {/* Liquid glass background — slides down 7% on phase 2 to reveal top */}
           <motion.div
-            className="absolute inset-0"
+            className="absolute inset-0 z-[1]"
             style={{
               background: 'rgba(255, 255, 255, 0.01)',
               backdropFilter: 'blur(60px) saturate(180%)',
