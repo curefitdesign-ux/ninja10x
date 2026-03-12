@@ -91,7 +91,7 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
   const handleSubmit = async () => {
     const nameResult = nameSchema.safeParse(displayName);
     if (!nameResult.success) { setNameError(nameResult.error.errors[0].message); return; }
-    if (!hasAvatarSelected) { toast.error('Please select an avatar'); return; }
+    if (!hasAvatarSelected) { toast.error('Please add your photo'); return; }
     if (!user) { toast.error('No user logged in'); return; }
 
     setLoading(true);
