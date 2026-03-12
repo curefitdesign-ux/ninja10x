@@ -15,12 +15,22 @@ const Gallery = () => {
   // Guard: once a file is selected, never auto-navigate back
   const fileSelectedRef = useRef(false);
 
-  const dayNumber = (location.state as { dayNumber?: number })?.dayNumber || 1;
+  const stateData = location.state as { dayNumber?: number; directFile?: { url: string; isVideo: boolean } } | null;
+  const dayNumber = stateData?.dayNumber || 1;
+  const directFile = stateData?.directFile;
 
   // Crop state
-  const [selectedMedia, setSelectedMedia] = useState<{ url: string; isVideo: boolean } | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<{ url: string; isVideo: boolean } | null>(
+    directFile || null
+  );
 
   useEffect(() => {
+    // If we already have a file from MediaSourceSheet, skip the picker
+    if (directFile) {
+      fileSelectedRef.current = true;
+      return;
+    }
+
     if (!hasTriggeredRef.current && fileInputRef.current) {
       hasTriggeredRef.current = true;
       requestAnimationFrame(() => {
