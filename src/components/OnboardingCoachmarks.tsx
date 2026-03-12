@@ -211,22 +211,27 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             )}
           </AnimatePresence>
 
-          {/* ═══ PHASE 2: Highlight log card — no text, just card + CTA ═══ */}
+          {/* ═══ PHASE 2: Highlight log card — no text, just CTA ═══ */}
           <AnimatePresence>
             {phase === 2 && (
               <motion.div
                 key="phase2"
-                className="absolute inset-0 z-10 flex flex-col items-center justify-end"
-                style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 16px) + 24px)' }}
+                className="fixed left-0 right-0 z-[10001] flex justify-center"
+                style={{ bottom: 'calc(env(safe-area-inset-bottom, 16px) + 80px)' }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                {/* Glassmorphic "Next" CTA at bottom */}
+                {/* Glassmorphic "NEXT" CTA */}
                 <motion.button
-                  className="w-[calc(100%-48px)] py-4 rounded-2xl text-[16px] font-semibold tracking-wide active:scale-[0.97]"
+                  className="w-[calc(100%-48px)] rounded-2xl uppercase active:scale-[0.97]"
                   style={{
+                    height: 40,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    letterSpacing: '0.1em',
+                    fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
                     background: 'rgba(255, 255, 255, 0.08)',
                     backdropFilter: 'blur(40px) saturate(180%)',
                     WebkitBackdropFilter: 'blur(40px) saturate(180%)',
@@ -234,7 +239,6 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                     boxShadow:
                       'inset 0 1px 1px rgba(255, 255, 255, 0.15), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.2)',
                     color: 'rgba(255, 255, 255, 0.90)',
-                    fontFamily: fontStack,
                   }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -242,7 +246,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                   onClick={(e) => { e.stopPropagation(); finish(); }}
                   whileTap={{ scale: 0.97 }}
                 >
-                  Next
+                  NEXT
                 </motion.button>
               </motion.div>
             )}
