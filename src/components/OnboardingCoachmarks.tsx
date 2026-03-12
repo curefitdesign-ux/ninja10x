@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface OnboardingCoachmarksProps {
@@ -8,25 +8,12 @@ interface OnboardingCoachmarksProps {
 const STORAGE_KEY = 'ninja10x_onboarding_seen';
 
 /**
- * Cinematic Apple-keynote-style onboarding.
- * Full-screen text reveals → final card swoops in.
+ * Cinematic onboarding: 4-phase flow
+ * Phase 0: Inspiring fitness text (auto-advance)
+ * Phase 1: Journey challenge text (auto-advance)  
+ * Phase 2: Blur fades → highlight first card → NEXT CTA
+ * Phase 3: Blur returns → community text → blur fades → highlight avatars → LOG NOW CTA
  */
-
-// Each "slide" is a full-screen text moment
-const slides = [
-  {
-    id: 'hero',
-    lines: ['Every rep counts.', 'Every step matters.'],
-  },
-  {
-    id: 'challenge',
-    lines: ['12 activities.', '4 weeks.', 'One transformation.'],
-  },
-  {
-    id: 'community',
-    lines: ['You\'re not doing this alone.'],
-  },
-];
 
 // Word-by-word blur→clear reveal
 function RevealLine({
@@ -60,11 +47,12 @@ function RevealLine({
   );
 }
 
-export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmarksProps) {
-  const [step, setStep] = useState(0);
-  const [visible, setVisible] = useState(false);
+type Phase = 0 | 1 | 2 | 3 | 4 | 5;
 
-  const totalSteps = slides.length + 1; // slides + final CTA card
+export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmarksProps) {
+  const [phase, setPhase] = useState<Phase>(0);
+  const [visible, setVisible] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     const seen = localStorage.getItem(STORAGE_KEY);
@@ -76,17 +64,20 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
     }
   }, [onComplete]);
 
-  const advance = useCallback(() => {
-    if (step < totalSteps - 1) {
-      setStep((s) => s + 1);
-    } else {
-      localStorage.setItem(STORAGE_KEY, 'true');
-      setVisible(false);
-      setTimeout(onComplete, 350);
+  // Auto-advance from phase 0 → 1 after text reveals
+  useEffect(() => {
+    if (!visible) return;
+    if (phase === 0) {
+      timerRef.current = setTimeout(() => setPhase(1), 3200);
+    } else if (phase === 1) {
+      timerRef.current = setTimeout(() => setPhase(2), 3800);
+    } else if (phase === 3) {
+      timerRef.current = setTimeout(() => setPhase(4), 3500);
     }
-  }, [step, totalSteps, onComplete]);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [phase, visible]);
 
-  const skip = useCallback(() => {
+  const finish = useCallback(() => {
     localStorage.setItem(STORAGE_KEY, 'true');
     setVisible(false);
     setTimeout(onComplete, 350);
@@ -94,32 +85,46 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
 
   if (!visible) return null;
 
-  const isTextSlide = step < slides.length;
-  const isFinalCard = step === slides.length;
+  // Phase 0: Inspiring fitness text (full blur bg, auto-advance)
+  // Phase 1: Journey "3 × 4 = Ninja" text (full blur bg, auto-advance)
+  // Phase 2: Blur fades → reveal card beneath → NEXT CTA
+  // Phase 3: Blur returns → community text (auto-advance)
+  // Phase 4: Blur fades → reveal top avatar strip → LOG NOW CTA
+  // Phase 5: dismissed
+
+  const showBlur = phase === 0 || phase === 1 || phase === 3;
+  const showDimOverlay = phase === 2 || phase === 4; // dim but semi-transparent
 
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
-          style={{ background: 'rgba(0, 0, 0, 0.92)', touchAction: 'none' }}
+          style={{ touchAction: 'none' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4 }}
-          onClick={advance}
         >
-          {/* Skip */}
-          {step < totalSteps - 1 && (
+          {/* Blur background layer */}
+          <motion.div
+            className="absolute inset-0"
+            style={{ background: 'rgba(0, 0, 0, 0.92)' }}
+            animate={{ opacity: showBlur ? 1 : showDimOverlay ? 0.55 : 0 }}
+            transition={{ duration: 0.8, ease: 'easeInOut' }}
+          />
+
+          {/* Skip button */}
+          {phase < 5 && (
             <motion.button
-              className="absolute right-5 text-[11px] font-medium tracking-wider uppercase"
+              className="absolute right-5 z-50 text-[11px] font-medium tracking-wider uppercase"
               style={{
                 top: 'calc(max(env(safe-area-inset-top, 12px), 12px) + 8px)',
                 color: 'rgba(255, 255, 255, 0.25)',
               }}
               onClick={(e) => {
                 e.stopPropagation();
-                skip();
+                finish();
               }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -129,109 +134,71 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             </motion.button>
           )}
 
-          {/* Text slides */}
+          {/* ═══ PHASE 0: Inspiring fitness text ═══ */}
           <AnimatePresence mode="wait">
-            {isTextSlide && (
+            {phase === 0 && (
               <motion.div
-                key={slides[step].id}
-                className="flex flex-col items-center justify-center px-10 text-center"
+                key="phase0"
+                className="relative z-10 flex flex-col items-center justify-center px-10 text-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0, scale: 0.97 }}
-                transition={{ duration: 0.35 }}
+                transition={{ duration: 0.4 }}
               >
-                {slides[step].lines.map((line, lineIdx) => (
-                  <h2
-                    key={lineIdx}
-                    className="text-[28px] font-semibold text-white tracking-tight leading-[1.3] mb-1"
-                    style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
-                  >
-                    <RevealLine
-                      text={line}
-                      delay={0.15 + lineIdx * 0.55}
-                    />
-                  </h2>
-                ))}
-
-                {/* Subtle tap hint */}
-                <motion.p
-                  className="mt-10 text-[11px] tracking-widest uppercase"
-                  style={{ color: 'rgba(255, 255, 255, 0.15)' }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 2.2 }}
+                <h2
+                  className="text-[28px] font-semibold text-white tracking-tight leading-[1.3] mb-2"
+                  style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
                 >
-                  Tap to continue
-                </motion.p>
+                  <RevealLine text="Capture every workout." delay={0.2} />
+                </h2>
+                <h2
+                  className="text-[28px] font-semibold text-white tracking-tight leading-[1.3] mb-2"
+                  style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
+                >
+                  <RevealLine text="Every run. Every game." delay={0.9} />
+                </h2>
+                <h2
+                  className="text-[22px] font-medium tracking-tight leading-[1.3]"
+                  style={{ color: 'rgba(255, 255, 255, 0.45)', fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
+                >
+                  <RevealLine text="Cricket. Swimming. Yoga. Anything." delay={1.6} />
+                </h2>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Final CTA card */}
-          <AnimatePresence>
-            {isFinalCard && (
+          {/* ═══ PHASE 1: Journey challenge text ═══ */}
+          <AnimatePresence mode="wait">
+            {phase === 1 && (
               <motion.div
-                key="final-card"
-                className="flex flex-col items-center justify-center px-8 text-center"
-                initial={{ opacity: 0, y: 80, scale: 0.92 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 40 }}
-                transition={{
-                  duration: 0.7,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
+                key="phase1"
+                className="relative z-10 flex flex-col items-center justify-center px-10 text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, scale: 0.97 }}
+                transition={{ duration: 0.4 }}
               >
-                {/* Glass card */}
-                <motion.div
-                  className="w-full max-w-[320px] rounded-3xl p-8 flex flex-col items-center"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.06)',
-                    backdropFilter: 'blur(40px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    boxShadow:
-                      'inset 0 1px 1px rgba(255,255,255,0.08), 0 20px 60px rgba(0,0,0,0.4)',
-                  }}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                <h2
+                  className="text-[32px] font-bold text-white tracking-tight leading-[1.25] mb-2"
+                  style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
                 >
-                  {/* Emoji */}
+                  <RevealLine text="3 activities." delay={0.15} />
+                </h2>
+                <h2
+                  className="text-[32px] font-bold text-white tracking-tight leading-[1.25] mb-2"
+                  style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
+                >
+                  <RevealLine text="4 weeks." delay={0.7} />
+                </h2>
+                <h2
+                  className="text-[26px] font-semibold tracking-tight leading-[1.3]"
+                  style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
+                >
                   <motion.span
-                    className="text-[48px] mb-4"
-                    initial={{ scale: 0, rotate: -20 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ delay: 0.4, type: 'spring', stiffness: 200, damping: 12 }}
-                  >
-                    🥷
-                  </motion.span>
-
-                  <h2
-                    className="text-[22px] font-semibold text-white tracking-tight mb-2"
-                    style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
-                  >
-                    <RevealLine text="Become a Ninja." delay={0.5} />
-                  </h2>
-
-                  <p
-                    className="text-[14px] leading-relaxed mb-7"
-                    style={{ color: 'rgba(255, 255, 255, 0.4)' }}
-                  >
-                    <RevealLine text="Log your first activity to begin." delay={0.9} />
-                  </p>
-
-                  {/* CTA button */}
-                  <motion.button
-                    className="w-full py-3.5 rounded-2xl text-[15px] font-semibold tracking-wide active:scale-[0.97]"
-                    style={{ background: 'rgba(255, 255, 255, 0.95)' }}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1.3, duration: 0.5 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      advance();
-                    }}
-                    whileTap={{ scale: 0.97 }}
+                    className="inline-block"
+                    initial={{ filter: 'blur(12px)', opacity: 0, scale: 0.9 }}
+                    animate={{ filter: 'blur(0px)', opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.8, delay: 1.4, ease: [0.22, 1, 0.36, 1] }}
                   >
                     <span
                       style={{
@@ -241,44 +208,166 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                         backgroundClip: 'text',
                       }}
                     >
-                      Let's Go
+                      Become a Cult Ninja.
                     </span>
-                  </motion.button>
-                </motion.div>
-
-                {/* Progress dots */}
-                <div className="flex items-center gap-1.5 mt-8">
-                  {Array.from({ length: totalSteps }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="rounded-full transition-all duration-300"
-                      style={{
-                        width: i === step ? 20 : 5,
-                        height: 5,
-                        background:
-                          i === step
-                            ? 'linear-gradient(90deg, #F97316, #EC4899)'
-                            : 'rgba(255, 255, 255, 0.15)',
-                      }}
-                    />
-                  ))}
-                </div>
+                  </motion.span>
+                </h2>
+                <motion.span
+                  className="text-[48px] mt-4 block"
+                  initial={{ scale: 0, rotate: -20 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: 2.0, type: 'spring', stiffness: 200, damping: 12 }}
+                >
+                  🥷
+                </motion.span>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Progress dots for text slides */}
-          {isTextSlide && (
-            <div className="absolute bottom-12 flex items-center gap-1.5">
-              {Array.from({ length: totalSteps }).map((_, i) => (
+          {/* ═══ PHASE 2: Blur faded, highlight card, NEXT CTA ═══ */}
+          <AnimatePresence>
+            {phase === 2 && (
+              <motion.div
+                key="phase2"
+                className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center pb-16"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
+                {/* Pointing text */}
+                <motion.p
+                  className="text-[15px] font-medium text-white/70 mb-5 text-center px-8"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                >
+                  Your journey lives here — every photo tells a story
+                </motion.p>
+
+                <motion.button
+                  className="px-10 py-3.5 rounded-2xl text-[15px] font-semibold tracking-wide active:scale-[0.97]"
+                  style={{ background: 'rgba(255, 255, 255, 0.95)' }}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPhase(3);
+                  }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <span
+                    style={{
+                      backgroundImage: 'linear-gradient(90deg, #F97316, #EC4899)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}
+                  >
+                    Next
+                  </span>
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* ═══ PHASE 3: Community text (blur bg returns) ═══ */}
+          <AnimatePresence mode="wait">
+            {phase === 3 && (
+              <motion.div
+                key="phase3"
+                className="relative z-10 flex flex-col items-center justify-center px-10 text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, scale: 0.97 }}
+                transition={{ duration: 0.4 }}
+              >
+                <h2
+                  className="text-[28px] font-semibold text-white tracking-tight leading-[1.3] mb-2"
+                  style={{ fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
+                >
+                  <RevealLine text="You're not alone." delay={0.2} />
+                </h2>
+                <h2
+                  className="text-[22px] font-medium tracking-tight leading-[1.3]"
+                  style={{ color: 'rgba(255, 255, 255, 0.5)', fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
+                >
+                  <RevealLine text="React. Cheer. Get inspired." delay={0.9} />
+                </h2>
+                <h2
+                  className="text-[18px] font-normal tracking-tight leading-[1.4] mt-2"
+                  style={{ color: 'rgba(255, 255, 255, 0.35)', fontFamily: '-apple-system, SF Pro Display, system-ui, sans-serif' }}
+                >
+                  <RevealLine text="Swipe through your crew's stories." delay={1.6} />
+                </h2>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* ═══ PHASE 4: Blur faded, highlight top profiles, LOG NOW CTA ═══ */}
+          <AnimatePresence>
+            {phase === 4 && (
+              <motion.div
+                key="phase4"
+                className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center pb-16"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
+                {/* Pointing to top profiles */}
+                <motion.div
+                  className="absolute top-0 left-0 right-0 flex justify-center"
+                  style={{ top: 'calc(max(env(safe-area-inset-top, 8px), 8px) + 90px)' }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <p className="text-[14px] font-medium text-white/60 text-center px-6">
+                    ↑ Your crew's stories live here
+                  </p>
+                </motion.div>
+
+                <motion.button
+                  className="px-10 py-3.5 rounded-2xl text-[15px] font-semibold tracking-wide active:scale-[0.97]"
+                  style={{ background: 'rgba(255, 255, 255, 0.95)' }}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    finish();
+                  }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <span
+                    style={{
+                      backgroundImage: 'linear-gradient(90deg, #F97316, #EC4899)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}
+                  >
+                    Log Now
+                  </span>
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Progress dots */}
+          {(phase <= 3) && (
+            <div className="absolute bottom-12 z-20 flex items-center gap-1.5">
+              {[0, 1, 2, 3].map((i) => (
                 <div
                   key={i}
                   className="rounded-full transition-all duration-300"
                   style={{
-                    width: i === step ? 20 : 5,
+                    width: i === (phase <= 1 ? phase : phase - 1 + 1) ? 20 : 5,
                     height: 5,
                     background:
-                      i === step
+                      i === (phase <= 1 ? phase : phase - 1 + 1)
                         ? 'linear-gradient(90deg, #F97316, #EC4899)'
                         : 'rgba(255, 255, 255, 0.15)',
                   }}
