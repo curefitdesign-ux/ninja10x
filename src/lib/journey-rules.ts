@@ -19,14 +19,12 @@ export function getRealActivities<T extends { dayNumber: number }>(activities: T
   return activities.filter(a => a.dayNumber > 0 && a.dayNumber <= MAX_ACTIVITIES);
 }
 
-/** Get the next sequential day_number (1-12) based on existing real activities */
+/** Get the next sequential day_number (1-12) based on count of real activities */
 export function getNextDayNumber<T extends { dayNumber: number }>(activities: T[]): number {
   const real = getRealActivities(activities);
   if (real.length >= MAX_ACTIVITIES) return MAX_ACTIVITIES;
-  
-  // Find the highest day_number among real activities, next is +1
-  const maxDay = real.reduce((max, a) => Math.max(max, a.dayNumber), 0);
-  return maxDay + 1;
+  // Next day = count of existing real activities + 1 (strictly sequential)
+  return real.length + 1;
 }
 
 /** Check if the user has already logged an activity today */
