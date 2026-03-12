@@ -81,21 +81,24 @@ const ProfileSetupPage = () => {
     if (e.target) e.target.value = '';
   };
 
-  const selectPresetAvatar = (avatarId: string) => {
-    setSelectedAvatar(avatarId);
-    setCustomAvatarFile(null);
-    setCustomAvatarPreview(null);
+  const handleGallerySelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return; }
+    if (file.size > 20 * 1024 * 1024) { toast.error('Image must be less than 20MB'); return; }
+    setCustomAvatarFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setCustomAvatarPreview(ev.target?.result as string);
+      setSelectedAvatar(null);
+    };
+    reader.readAsDataURL(file);
+    if (e.target) e.target.value = '';
   };
 
-  const hasAvatarSelected = selectedAvatar !== null || customAvatarFile !== null || customAvatarPreview !== null;
+  const hasAvatarSelected = customAvatarFile !== null || customAvatarPreview !== null;
 
-  // What to show in the hero and blurred bg
-  const getCurrentAvatarSrc = () => {
-    if (customAvatarPreview) return customAvatarPreview;
-    if (selectedAvatar) return PRESET_AVATARS.find(a => a.id === selectedAvatar)?.hd ?? null;
-    return null;
-  };
-  const heroImage = getCurrentAvatarSrc();
+  const heroImage = customAvatarPreview;
 
   const handleSubmit = async () => {
     const nameResult = nameSchema.safeParse(displayName);
