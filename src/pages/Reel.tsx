@@ -1901,6 +1901,7 @@ const Reel = () => {
                               const isEvenDay = totalActivities % 2 === 0;
                               const glowHsl = isEvenDay ? 'hsl(280 80% 65%)' : 'hsl(25 95% 60%)';
                               const glowMid = isEvenDay ? 'hsl(280 80% 65% / 0.35)' : 'hsl(25 95% 60% / 0.35)';
+                              const completedWeek = Math.floor(totalActivities / 3);
                               return (
                                 <div className="w-full h-full flex items-center justify-center">
                                   <div
@@ -1937,12 +1938,12 @@ const Reel = () => {
                                       />
                                     </motion.div>
 
-                                    {/* Greeting — warm tones inspired by video */}
+                                    {/* Greeting — changes based on week-complete vs log-activity */}
                                     <motion.div
                                       initial={{ opacity: 0, y: 10 }}
                                       animate={{ opacity: 1, y: 0 }}
                                       transition={{ delay: 0.15, duration: 0.5 }}
-                                      className="text-center z-10 mb-6"
+                                      className="text-center z-10 mb-6 px-6"
                                     >
                                       <p
                                         className="text-xl font-bold leading-tight"
@@ -1951,39 +1952,48 @@ const Reel = () => {
                                           WebkitBackgroundClip: 'text',
                                           WebkitTextFillColor: 'transparent',
                                         }}
-                                        dangerouslySetInnerHTML={{ __html: getContextualNudge(profile?.display_name?.split(' ')[0] || 'Hey', myActivities) }}
+                                        dangerouslySetInnerHTML={{
+                                          __html: isWeekCompleteCard
+                                            ? `Your consistency is<br/>incredible. Come next<br/>week to log again`
+                                            : getContextualNudge(profile?.display_name?.split(' ')[0] || 'Hey', myActivities)
+                                        }}
                                       />
                                     </motion.div>
 
-                                    {/* Glowing plus — simple zoom in/out, tapping opens camera/gallery */}
-                                    <button
-                                      className="relative flex items-center justify-center mb-5 active:scale-95 transition-transform"
-                                      style={{ width: 70, height: 70 }}
-                                      onClick={(e) => { e.stopPropagation(); setShowEditSheet(true); }}
-                                    >
-                                      <motion.div 
-                                        className="absolute inset-0 rounded-full"
-                                        style={{
-                                          background: `radial-gradient(circle, hsl(280 80% 65% / 0.3) 0%, transparent 60%)`,
-                                          filter: 'blur(20px)',
-                                          transform: 'scale(3)',
-                                        }}
-                                        animate={{ opacity: [0.4, 0.8, 0.4] }}
-                                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                                      />
-                                      <motion.svg 
-                                        width="56" height="56" viewBox="0 0 48 48" fill="none"
-                                        animate={{ scale: [1, 1.15, 1] }}
-                                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                                    {/* Glowing plus — hidden when week is complete */}
+                                    {!isWeekCompleteCard && (
+                                      <button
+                                        className="relative flex items-center justify-center mb-5 active:scale-95 transition-transform"
+                                        style={{ width: 70, height: 70 }}
+                                        onClick={(e) => { e.stopPropagation(); setShowEditSheet(true); }}
                                       >
-                                        <rect x="20" y="6" width="8" height="36" rx="4" fill="hsl(267 100% 82%)" />
-                                        <rect x="6" y="20" width="36" height="8" rx="4" fill="hsl(267 100% 82%)" />
-                                      </motion.svg>
-                                    </button>
+                                        <motion.div 
+                                          className="absolute inset-0 rounded-full"
+                                          style={{
+                                            background: `radial-gradient(circle, hsl(280 80% 65% / 0.3) 0%, transparent 60%)`,
+                                            filter: 'blur(20px)',
+                                            transform: 'scale(3)',
+                                          }}
+                                          animate={{ opacity: [0.4, 0.8, 0.4] }}
+                                          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                                        />
+                                        <motion.svg 
+                                          width="56" height="56" viewBox="0 0 48 48" fill="none"
+                                          animate={{ scale: [1, 1.15, 1] }}
+                                          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                                        >
+                                          <rect x="20" y="6" width="8" height="36" rx="4" fill="hsl(267 100% 82%)" />
+                                          <rect x="6" y="20" width="36" height="8" rx="4" fill="hsl(267 100% 82%)" />
+                                        </motion.svg>
+                                      </button>
+                                    )}
 
                                     {/* Label */}
                                     <p className="text-white/40 text-xs font-medium uppercase tracking-widest">
-                                      Day {currentActivity.dayNumber} of 12
+                                      {isWeekCompleteCard
+                                        ? `Week ${completedWeek} complete ✨`
+                                        : `Day ${currentActivity.dayNumber} of 12`
+                                      }
                                     </p>
                                   </div>
                                 </div>
