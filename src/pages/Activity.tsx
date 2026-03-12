@@ -148,7 +148,9 @@ const Activity = () => {
   // Handle triggerLog from Reel page "+" button
   useEffect(() => {
     if (location.state?.triggerLog) {
-      setPendingDayNumber(photos.length + 1);
+      const real = photos.filter(p => p.dayNumber > 0 && p.dayNumber <= 12);
+      const maxDay = real.reduce((m, p) => Math.max(m, p.dayNumber), 0);
+      setPendingDayNumber(maxDay + 1);
       setShowMediaSourceSheet(true);
       navigate('/', { replace: true, state: null });
     }
@@ -557,7 +559,9 @@ const Activity = () => {
                 myPhotos={photos}
                 onPhotoTap={handlePhotoTap}
                 onLogActivity={() => {
-                  setPendingDayNumber(photos.length + 1);
+                  const real = photos.filter(p => p.dayNumber > 0 && p.dayNumber <= 12);
+                  const maxDay = real.reduce((m, p) => Math.max(m, p.dayNumber), 0);
+                  setPendingDayNumber(maxDay + 1);
                   setShowMediaSourceSheet(true);
                 }}
                 onLockedTap={() => setShowMakePublicSheet(true)}

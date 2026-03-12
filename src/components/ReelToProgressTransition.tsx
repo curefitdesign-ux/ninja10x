@@ -484,7 +484,7 @@ export default function ReelToProgressTransition({
               return [{
                 id: 'log-next',
                 storageUrl: '',
-                dayNumber: myActivities.length + 1,
+                dayNumber: (() => { const real = myActivities.filter(a => a.dayNumber > 0 && a.dayNumber <= 12); return real.reduce((m, a) => Math.max(m, a.dayNumber), 0) + 1; })(),
                 isPlaceholder: true,
               }];
             })(),

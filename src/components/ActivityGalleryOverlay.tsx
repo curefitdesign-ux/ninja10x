@@ -443,7 +443,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   backgroundPosition: '0 20px',
                 }} />
                 {/* Straight timeline line */}
-                <div className="absolute pointer-events-none" style={{ left: 28, top: 0, width: 2, height: '100%', background: 'transparent', backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.18) 0px, rgba(255,255,255,0.18) 4px, transparent 4px, transparent 10px)', borderRadius: 1 }} />
+                <div className="absolute pointer-events-none" style={{ left: 38, top: 0, width: 2, height: '100%', background: 'transparent', backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.18) 0px, rgba(255,255,255,0.18) 4px, transparent 4px, transparent 10px)', borderRadius: 1 }} />
 
                 {(() => {
                   const realActivities = [...activities].filter(a => !a.isPlaceholder);
@@ -522,10 +522,10 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           const displayName = userProfile?.displayName || 'This user';
                           const firstName = displayName.split(' ')[0];
                           return (
-                            <div className="relative" style={{ padding: '10px 16px 16px 48px', marginBottom: 10 }}>
+                            <div className="relative" style={{ padding: '10px 16px 16px 58px', marginBottom: 10 }}>
                               {/* Timeline dot - flag milestone */}
                               <div className="absolute" style={{
-                                left: 16, top: 14, width: 26, height: 26, borderRadius: '50%',
+                                left: 26, top: 14, width: 26, height: 26, borderRadius: '50%',
                                 background: 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.08))',
                                 border: '2px solid rgba(255,255,255,0.2)',
                                 boxShadow: '0 0 16px rgba(255,255,255,0.1)',
@@ -554,9 +554,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         }
                         if (realActivities.length >= 12) {
                           return (
-                            <div className="relative" style={{ padding: '10px 16px 16px 48px', marginBottom: 10 }}>
+                            <div className="relative" style={{ padding: '10px 16px 16px 58px', marginBottom: 10 }}>
                               <div className="absolute" style={{
-                                left: 16, top: 14, width: 26, height: 26, borderRadius: '50%',
+                                left: 26, top: 14, width: 26, height: 26, borderRadius: '50%',
                                 background: 'linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.15))',
                                 border: '2px solid rgba(255,255,255,0.3)',
                                 boxShadow: '0 0 18px rgba(255,255,255,0.15)',
@@ -612,9 +612,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               4: 'Week 4 conquered 🏆',
                             };
                             elements.push(
-                              <div key={`week-complete-${completedWeek}`} className="relative flex items-center" style={{ padding: '12px 16px 12px 48px', margin: '6px 0' }}>
+                              <div key={`week-complete-${completedWeek}`} className="relative flex items-center" style={{ padding: '12px 16px 12px 58px', margin: '6px 0' }}>
                                 {/* Milestone icon dot on timeline */}
-                                <div className="absolute" style={{ left: 19, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.12))', border: '1.5px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div className="absolute" style={{ left: 29, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.12))', border: '1.5px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                   {weekIcons[completedWeek] || <Flag size={9} fill="white" color="white" strokeWidth={0} />}
                                 </div>
                                 {/* Handwritten milestone with underline flourish */}
@@ -661,11 +661,11 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               key={act.id}
                               ref={(el) => { cardRefs.current[act.id] = el; }}
                               className="relative"
-                              style={{ padding: '12px 16px 12px 48px', marginBottom: idx < realActivities.length - 1 ? 8 : 0 }}
+                              style={{ padding: '12px 16px 12px 58px', marginBottom: idx < realActivities.length - 1 ? 8 : 0 }}
                             >
                               {/* Timeline dot */}
                               <div className="absolute rounded-full" style={{
-                                left: 22, top: 17, width: 14, height: 14,
+                                left: 32, top: 17, width: 14, height: 14,
                                 background: isAtTop ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.15)',
                                 border: `2px solid ${isAtTop ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.1)'}`,
                                 boxShadow: isAtTop ? '0 0 10px rgba(255,255,255,0.2)' : 'none', zIndex: 5,
@@ -799,8 +799,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       })()}
 
                       {/* Journey start */}
-                      <div className="relative" style={{ padding: '16px 16px 24px 48px' }}>
-                        <div className="absolute rounded-full" style={{ left: 24, top: 24, width: 10, height: 10, background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.1)' }} />
+                      <div className="relative" style={{ padding: '16px 16px 24px 58px' }}>
+                        <div className="absolute rounded-full" style={{ left: 34, top: 24, width: 10, height: 10, background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.1)' }} />
                         <p style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: 'rgba(255,255,255,0.2)', transform: 'rotate(-1deg)' }}>
                           the journey begins here...
                         </p>

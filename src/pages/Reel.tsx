@@ -287,7 +287,7 @@ const Reel = () => {
       });
 
     // Own user: show today's logged activity OR just the log placeholder (no past activities)
-    const allMyActivities = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
+    const allMyActivities = [...myActivities].filter(a => a.dayNumber > 0 && a.dayNumber <= 12).sort((a, b) => b.dayNumber - a.dayNumber);
     const latestActivity = allMyActivities[0];
     const loggedToday = latestActivity && new Date(latestActivity.createdAt).toDateString() === new Date().toDateString();
     
@@ -306,7 +306,7 @@ const Reel = () => {
     if (effectiveCount < 12 && !loggedToday) {
       ownActivities.push({
         id: 'log-activity',
-        dayNumber: effectiveCount + 1,
+        dayNumber: (() => { const maxDay = allMyActivities.reduce((m, a) => Math.max(m, a.dayNumber), 0); return maxDay + 1; })(),
         storageUrl: '',
         originalUrl: '',
         activity: undefined,

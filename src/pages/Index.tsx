@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
 // import { hasRecapCached, getRecapFromCache } from '@/hooks/use-recap-cache';
+import { getNextDayNumber as getNextDay, getRealActivities, canLogActivity, getCurrentWeek, hasLoggedToday } from '@/lib/journey-rules';
 import { toast } from 'sonner';
 import ImmersiveHomeLayout from '@/components/ImmersiveHomeLayout';
 import PullToRefresh from '@/components/PullToRefresh';
@@ -64,8 +65,11 @@ const Index = () => {
   // Load photos from backend (single source of truth)
   const { activities, loading: activitiesLoading, refresh: refreshActivities, userId } = useJourneyActivities();
   
+  // Filter out recap entries — only real activities (day_number 1-12)
+  const realActivities = useMemo(() => getRealActivities(activities), [activities]);
+  
   // Convert backend activities to Photo shape for compatibility
-  const photos: Photo[] = activities.map(a => ({
+  const photos: Photo[] = realActivities.map(a => ({
     id: a.id,
     storageUrl: a.storageUrl,
     originalUrl: a.originalUrl,
@@ -159,12 +163,9 @@ const Index = () => {
     return new Date().toISOString().split('T')[0];
   };
 
-  const getNextDayNumber = () => {
-    if (photos.length >= MAX_DAYS) return MAX_DAYS;
-    return photos.length + 1;
-  };
+  const getNextDayNumber = () => getNextDay(photos);
 
-  const currentWeek = Math.min(Math.floor(photos.length / 3) + 1, 4);
+  const currentWeek = getCurrentWeek(photos);
   const currentDay = (photos.length % 3) + 1;
 
   const handleCardClick = () => {
