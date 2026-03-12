@@ -593,11 +593,13 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         let lastWeek: number | null = null;
 
                         realActivities.forEach((act, idx) => {
-                          const wk = Math.ceil(act.dayNumber / 3);
+                          // Sequential position: newest-first list, so position = total - idx
+                          const seqNum = realActivities.length - idx;
+                          const wk = Math.ceil(seqNum / 3);
 
                           // Insert "Week X Complete" acknowledgement above the last activity of each completed week
-                          if (act.dayNumber % 3 === 0) {
-                            const completedWeek = act.dayNumber / 3;
+                          if (seqNum % 3 === 0) {
+                            const completedWeek = seqNum / 3;
                             // Varied icons per week milestone
                             const weekIcons: Record<number, React.ReactNode> = {
                               1: <Star size={10} fill="white" color="white" strokeWidth={0} />,
@@ -683,7 +685,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 fontWeight: isAtTop ? 700 : 400,
                                 lineHeight: 1,
                               }}>
-                                W{wk} · Activity {act.dayNumber}
+                                W{wk} · Activity {seqNum}
                               </p>
 
                               {/* Card */}
