@@ -2376,7 +2376,7 @@ const Reel = () => {
         // Get ALL activities for this user from userGroups (not filtered)
         const fullGroup = userGroups.find(g => g.userId === currentGroup.userId);
         const allUserActivities: GalleryActivity[] = (fullGroup?.activities || currentGroup.activities)
-          .filter(a => a.dayNumber < 1001 && a.id !== 'log-activity')
+          .filter(a => a.dayNumber < 1001 && a.id !== 'log-activity' && a.id !== 'week-complete')
           .sort((a, b) => b.dayNumber - a.dayNumber)
           .map(a => ({
             id: a.id,
