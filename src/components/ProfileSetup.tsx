@@ -41,12 +41,7 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
     if (editMode && existingProfile) {
       setDisplayName(existingProfile.display_name);
       const storedUrl = existingProfile.avatar_url;
-      const presetMatch = PRESET_AVATARS.find(a =>
-        storedUrl === a.id || storedUrl === `avatar-${a.id}` || storedUrl.includes(`avatar-${a.id}`)
-      );
-      if (presetMatch) {
-        setSelectedAvatar(presetMatch.id);
-      } else if (storedUrl) {
+      if (storedUrl) {
         setCustomAvatarPreview(storedUrl);
         setHeroPhotoPreview(storedUrl);
       }
