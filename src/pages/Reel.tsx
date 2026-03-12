@@ -287,7 +287,7 @@ const Reel = () => {
       });
 
     // Own user: show today's logged activity OR just the log placeholder (no past activities)
-    const allMyActivities = [...myActivities].sort((a, b) => b.dayNumber - a.dayNumber);
+    const allMyActivities = [...myActivities].filter(a => a.dayNumber > 0 && a.dayNumber <= 12).sort((a, b) => b.dayNumber - a.dayNumber);
     const latestActivity = allMyActivities[0];
     const loggedToday = latestActivity && new Date(latestActivity.createdAt).toDateString() === new Date().toDateString();
     
