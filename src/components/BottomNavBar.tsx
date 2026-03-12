@@ -103,7 +103,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
           zIndex: 9999,
         }}
-        animate={{ y: galleryOpen ? 100 : 0 }}
+        animate={{ y: galleryOpen || sheetOpen ? 100 : 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 28 }}
       >
         <div
