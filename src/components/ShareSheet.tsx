@@ -264,53 +264,63 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
   const handleShare = async (app: typeof socialApps[0]) => {
     triggerHaptic('medium');
 
-    // Web URLs — always open in new tab (safe across all environments)
-    const webUrls: Record<string, string> = {
-      'WhatsApp': `https://wa.me/?text=${encodeURIComponent(fullShareText)}`,
-      'X': `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
-      'Facebook': `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`,
-      'Telegram': `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
-      'LinkedIn': `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
-      'Instagram': `https://instagram.com`,
-      'Snapchat': `https://snapchat.com`,
-      'Messages': `sms:?body=${encodeURIComponent(fullShareText)}`,
+    // Direct app-specific URLs — skip navigator.share so each button opens its own app
+    const appUrls: Record<string, { deep: string; web: string }> = {
+      'WhatsApp': {
+        deep: `whatsapp://send?text=${encodeURIComponent(fullShareText)}`,
+        web: `https://api.whatsapp.com/send?text=${encodeURIComponent(fullShareText)}`,
+      },
+      'Instagram': {
+        deep: `instagram://story-camera`,
+        web: `https://www.instagram.com/create/story/`,
+      },
+      'X': {
+        deep: `twitter://post?message=${encodeURIComponent(shareText)}`,
+        web: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+      },
+      'Facebook': {
+        deep: `fb://publish/profile/me?text=${encodeURIComponent(shareText)}`,
+        web: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`,
+      },
+      'Telegram': {
+        deep: `tg://msg?text=${encodeURIComponent(fullShareText)}`,
+        web: `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
+      },
+      'Snapchat': {
+        deep: `snapchat://`,
+        web: `https://www.snapchat.com`,
+      },
+      'LinkedIn': {
+        deep: `linkedin://shareArticle?mini=true&summary=${encodeURIComponent(shareText)}`,
+        web: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
+      },
+      'Messages': {
+        deep: `sms:?body=${encodeURIComponent(fullShareText)}`,
+        web: `sms:?body=${encodeURIComponent(fullShareText)}`,
+      },
     };
 
-    // On real mobile devices, try the Web Share API first (triggers native share sheet)
-    if (navigator.share) {
-      try {
-        const shareData: ShareData = {
-          title: 'My Fitness Activity',
-          text: shareText,
-          url: shareUrl,
-        };
+    const urls = appUrls[app.name];
+    if (!urls) return;
 
-        // Try to attach the image file for richer sharing
-        try {
-          const response = await fetch(imageUrl);
-          const blob = await response.blob();
-          const file = new File([blob], `activity.${isVideo ? 'mp4' : 'png'}`, { type: blob.type });
-          if (navigator.canShare?.({ files: [file] })) {
-            shareData.files = [file];
-          }
-        } catch {
-          // Image attach failed — proceed with text+url only
+    // On mobile, try deep link first — if the app is installed it will open
+    // Use a hidden iframe to attempt the deep link; fall back to web URL
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      // Try deep link: set location, if nothing happens within 1.5s open web URL
+      const start = Date.now();
+      window.location.href = urls.deep;
+      
+      setTimeout(() => {
+        // If we're still on the page after 1.5s, the deep link didn't work — open web
+        if (Date.now() - start < 2000) {
+          window.open(urls.web, '_blank', 'noopener,noreferrer');
         }
-
-        await navigator.share(shareData);
-        return;
-      } catch (err: any) {
-        // User cancelled (AbortError) — don't fall through to web URL
-        if (err?.name === 'AbortError') return;
-        // Other error — fall through to web URL
-        console.log('[ShareSheet] navigator.share failed, falling back to web URL:', err);
-      }
-    }
-
-    // Fallback: open the platform's web share URL in a new tab
-    const url = webUrls[app.name];
-    if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      }, 1500);
+    } else {
+      // Desktop: always use web URL
+      window.open(urls.web, '_blank', 'noopener,noreferrer');
     }
   };
 

@@ -11,6 +11,8 @@ interface MiniSharePopupProps {
 }
 
 // Compact social apps for mini popup
+const shareText = '🏃 Check out my fitness activity! #FitnessJourney';
+
 const socialApps = [
   { 
     name: 'WhatsApp', 
@@ -20,7 +22,8 @@ const socialApps = [
       </svg>
     ),
     color: '#25D366',
-    share: (url: string) => `https://wa.me/?text=${encodeURIComponent('Check out my activity! ' + url)}`
+    deep: `whatsapp://send?text=${encodeURIComponent(shareText + '\n' + window.location.href)}`,
+    web: `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + '\n' + window.location.href)}`,
   },
   { 
     name: 'Instagram', 
@@ -30,7 +33,8 @@ const socialApps = [
       </svg>
     ),
     color: '#E4405F',
-    share: () => null
+    deep: `instagram://story-camera`,
+    web: `https://www.instagram.com/create/story/`,
   },
   { 
     name: 'X', 
@@ -40,7 +44,8 @@ const socialApps = [
       </svg>
     ),
     color: '#000000',
-    share: (url: string) => `https://twitter.com/intent/tweet?text=${encodeURIComponent('Check out my activity!')}&url=${encodeURIComponent(url)}`
+    deep: `twitter://post?message=${encodeURIComponent(shareText)}`,
+    web: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(window.location.href)}`,
   },
   { 
     name: 'Telegram', 
@@ -50,13 +55,15 @@ const socialApps = [
       </svg>
     ),
     color: '#0088cc',
-    share: (url: string) => `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('Check out my activity!')}`
+    deep: `tg://msg?text=${encodeURIComponent(shareText + '\n' + window.location.href)}`,
+    web: `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(shareText)}`,
   },
   { 
     name: 'Messages', 
     icon: <MessageCircle className="w-5 h-5" />,
     color: '#34C759',
-    share: (url: string) => `sms:?body=${encodeURIComponent('Check out my activity! ' + url)}`
+    deep: `sms:?body=${encodeURIComponent(shareText + '\n' + window.location.href)}`,
+    web: `sms:?body=${encodeURIComponent(shareText + '\n' + window.location.href)}`,
   },
 ];
 
@@ -66,28 +73,19 @@ const MiniSharePopup = ({ imageUrl, isVideo, onClose, onDone }: MiniSharePopupPr
   const handleShare = async (app: typeof socialApps[0]) => {
     triggerHaptic('medium');
     
-    // Try native share if available
-    if (navigator.share) {
-      try {
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
-        const file = new File([blob], `activity.${isVideo ? 'mp4' : 'png'}`, { type: blob.type });
-        
-        await navigator.share({
-          title: 'My Activity',
-          text: 'Check out my activity!',
-          files: [file],
-        });
-        onClose();
-        return;
-      } catch (err) {
-        console.log('Native share failed, falling back to URL');
-      }
-    }
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
-    const shareUrl = app.share(window.location.href);
-    if (shareUrl) {
-      window.open(shareUrl, '_blank', 'noopener,noreferrer');
+    if (isMobile) {
+      const start = Date.now();
+      window.location.href = app.deep;
+      
+      setTimeout(() => {
+        if (Date.now() - start < 2000) {
+          window.open(app.web, '_blank', 'noopener,noreferrer');
+        }
+      }, 1500);
+    } else {
+      window.open(app.web, '_blank', 'noopener,noreferrer');
     }
   };
 
