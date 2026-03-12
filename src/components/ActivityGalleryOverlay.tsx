@@ -87,8 +87,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [nudgeRotation, setNudgeRotation] = useState(0);
   const [nudgeNumberBehind, setNudgeNumberBehind] = useState(false);
   const [topCardId, setTopCardId] = useState<string | null>(null);
-  const [galleryCardScale, setGalleryCardScale] = useState(0.45);
-  const galleryCardMeasureRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const nudgeAudioRef = useRef<HTMLAudioElement | null>(null);
   const nudgeHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -188,21 +186,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     if (!isOpen) return;
     setCurrentIndex(initialIndex);
   }, [isOpen, initialIndex]);
-
-  // Measure gallery card width once to compute scale for pixel-perfect frame rendering
-  const FRAME_REFERENCE_WIDTH = 340;
-  useEffect(() => {
-    if (!isOpen) return;
-    const measure = () => {
-      if (galleryCardMeasureRef.current) {
-        const w = galleryCardMeasureRef.current.getBoundingClientRect().width;
-        if (w > 0) setGalleryCardScale(w / FRAME_REFERENCE_WIDTH);
-      }
-    };
-    // Measure after layout settles
-    const raf = requestAnimationFrame(() => { requestAnimationFrame(measure); });
-    return () => cancelAnimationFrame(raf);
-  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -707,7 +690,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                               {/* Card */}
                               <div
-                                ref={idx === 0 ? galleryCardMeasureRef : undefined}
                                 className="relative overflow-visible"
                                 style={{
                                   width: '48%', aspectRatio: '9/16', borderRadius: 4,
@@ -717,21 +699,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                   transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
                                 }}
                               >
-                                <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4 }}>
+                                <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4, containerType: 'inline-size' }}>
                                   {act.frame ? (
-                                    /* Render frame at full reference size, then scale down for pixel-perfect proportional rendering */
-                                    <div style={{
-                                      width: FRAME_REFERENCE_WIDTH,
-                                      height: FRAME_REFERENCE_WIDTH * 16 / 9,
-                                      transformOrigin: 'top left',
-                                      transform: `scale(${galleryCardScale})`,
-                                      containerType: 'inline-size',
-                                      position: 'absolute',
-                                      top: 0,
-                                      left: 0,
-                                    }}>
-                                      <StoryFrameRenderer imageUrl={act.originalUrl || act.storageUrl} isVideo={act.isVideo} activity={act.activity} frame={act.frame} duration={act.duration} pr={act.pr} dayNumber={act.dayNumber} />
-                                    </div>
+                                    <StoryFrameRenderer imageUrl={act.originalUrl || act.storageUrl} isVideo={act.isVideo} activity={act.activity} frame={act.frame} duration={act.duration} pr={act.pr} dayNumber={act.dayNumber} />
                                   ) : act.isVideo ? (
                                     <video src={act.originalUrl || act.storageUrl} className="absolute inset-0 w-full h-full object-cover" muted playsInline />
                                   ) : (
