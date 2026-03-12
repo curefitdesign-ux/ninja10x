@@ -184,23 +184,23 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 {/* Glass CTA button */}
                 <motion.button
                   onClick={handleNext}
-                  className="mt-2 w-full py-3.5 rounded-2xl text-sm font-bold tracking-wide active:scale-[0.97]"
+                  className="mt-2 w-full py-3.5 rounded-2xl text-sm font-bold tracking-wide"
                   style={{
                     background: 'rgba(255, 255, 255, 0.95)',
-                    color: 'transparent',
-                    backgroundClip: 'text',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundImage: 'linear-gradient(90deg, #F97316, #EC4899)',
                   }}
                   whileTap={{ scale: 0.97 }}
                 >
-                  {/* Wrapper to have both bg and gradient text */}
-                  <span className="relative">
+                  <span
+                    style={{
+                      backgroundImage: 'linear-gradient(90deg, #F97316, #EC4899)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}
+                  >
                     {step.buttonText}
                   </span>
                 </motion.button>
-                {/* Actual visible button with white bg */}
               </div>
             </motion.div>
           </AnimatePresence>
