@@ -1168,6 +1168,7 @@ const Preview = () => {
                 style={{ 
                   maxWidth: 'min(70vw, 300px)',
                   aspectRatio: '9/16',
+                  containerType: 'inline-size',
                 }}
               >
                 {currentFrame === 'shaky' && <ShakyFrame {...frameProps} />}
