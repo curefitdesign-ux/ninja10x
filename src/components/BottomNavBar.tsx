@@ -339,6 +339,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
           </div>
         </SheetContent>
       </Sheet>
+      <FeedbackSheet isOpen={showFeedbackSheet} onClose={() => setShowFeedbackSheet(false)} />
     </>
   );
 });
