@@ -1077,7 +1077,7 @@ const Reel = () => {
 
     if (channel === 'whatsapp') {
       openDeepLink(
-        `whatsapp://send?text=${encodedText}`,
+        'whatsapp://status',
         `https://wa.me/?text=${encodedText}`
       );
       return;
