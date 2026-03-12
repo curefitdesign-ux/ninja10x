@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Camera, X, Eye, EyeOff, LogOut } from 'lucide-react';
+import { Camera, X, Eye, EyeOff, LogOut } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 
@@ -11,39 +11,8 @@ import { useProfile } from '@/hooks/use-profile';
 import { z } from 'zod';
 
 
-// Curo mascot preset avatars (thumbnails)
-import curoBoxing from '@/assets/avatars/curo-boxing.png';
-import curoCool from '@/assets/avatars/curo-cool.png';
-import curoHappy from '@/assets/avatars/curo-happy.png';
-import curoFire from '@/assets/avatars/curo-fire.png';
-import curoFierce from '@/assets/avatars/curo-fierce.png';
-import curoShy from '@/assets/avatars/curo-shy.png';
-import curoZen from '@/assets/avatars/curo-zen.png';
-import curoShocked from '@/assets/avatars/curo-shocked.png';
-import curoMusic from '@/assets/avatars/curo-music.png';
 
-// HD versions for hero display
-import curoBoxingHd from '@/assets/avatars/curo-boxing-hd.png';
-import curoCoolHd from '@/assets/avatars/curo-cool-hd.png';
-import curoHappyHd from '@/assets/avatars/curo-happy-hd.png';
-import curoFireHd from '@/assets/avatars/curo-fire-hd.png';
-import curoFierceHd from '@/assets/avatars/curo-fierce-hd.png';
-import curoShyHd from '@/assets/avatars/curo-shy-hd.png';
-import curoZenHd from '@/assets/avatars/curo-zen-hd.png';
-import curoShockedHd from '@/assets/avatars/curo-shocked-hd.png';
-import curoMusicHd from '@/assets/avatars/curo-music-hd.png';
 
-const PRESET_AVATARS = [
-  { id: 'curo-boxing', src: curoBoxing, hd: curoBoxingHd },
-  { id: 'curo-cool', src: curoCool, hd: curoCoolHd },
-  { id: 'curo-happy', src: curoHappy, hd: curoHappyHd },
-  { id: 'curo-fire', src: curoFire, hd: curoFireHd },
-  { id: 'curo-fierce', src: curoFierce, hd: curoFierceHd },
-  { id: 'curo-shy', src: curoShy, hd: curoShyHd },
-  { id: 'curo-zen', src: curoZen, hd: curoZenHd },
-  { id: 'curo-shocked', src: curoShocked, hd: curoShockedHd },
-  { id: 'curo-music', src: curoMusic, hd: curoMusicHd },
-];
 
 const nameSchema = z.string().trim().min(2, 'Name must be at least 2 characters').max(50, 'Name too long');
 
@@ -56,7 +25,7 @@ const ProfileSetupPage = () => {
   const { profile, updateProfile, needsSetup, loading: profileLoading } = useProfile();
 
   const [displayName, setDisplayName] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
+  
   const [customAvatarFile, setCustomAvatarFile] = useState<File | null>(null);
   const [customAvatarPreview, setCustomAvatarPreview] = useState<string | null>(null);
   const [storiesPublic, setStoriesPublic] = useState(true);
@@ -66,13 +35,8 @@ const ProfileSetupPage = () => {
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  // Preload all HD avatar images on mount so switching is instant
-  useEffect(() => {
-    PRESET_AVATARS.forEach(({ hd }) => {
-      const img = new Image();
-      img.src = hd;
-    });
-  }, []);
+
+
 
   // Redirect if profile already exists and not in edit mode
   useEffect(() => {
@@ -89,12 +53,7 @@ const ProfileSetupPage = () => {
       setDisplayName(profile.display_name);
       setStoriesPublic(profile.stories_public ?? false);
       const storedUrl = profile.avatar_url;
-      const presetMatch = PRESET_AVATARS.find(a =>
-        storedUrl === a.id || storedUrl.includes(a.id)
-      );
-      if (presetMatch) {
-        setSelectedAvatar(presetMatch.id);
-      } else if (storedUrl) {
+      if (storedUrl && !storedUrl.startsWith('curo-')) {
         setCustomAvatarPreview(storedUrl);
       }
       setIsInitialized(true);
@@ -116,24 +75,18 @@ const ProfileSetupPage = () => {
     const reader = new FileReader();
     reader.onload = (ev) => {
       setCustomAvatarPreview(ev.target?.result as string);
-      setSelectedAvatar(null);
     };
     reader.readAsDataURL(file);
     if (e.target) e.target.value = '';
   };
 
-  const selectPresetAvatar = (avatarId: string) => {
-    setSelectedAvatar(avatarId);
-    setCustomAvatarFile(null);
-    setCustomAvatarPreview(null);
-  };
 
-  const hasAvatarSelected = selectedAvatar !== null || customAvatarFile !== null || customAvatarPreview !== null;
 
-  // What to show in the hero and blurred bg
+
+  const hasAvatarSelected = customAvatarFile !== null || customAvatarPreview !== null;
+
   const getCurrentAvatarSrc = () => {
     if (customAvatarPreview) return customAvatarPreview;
-    if (selectedAvatar) return PRESET_AVATARS.find(a => a.id === selectedAvatar)?.hd ?? null;
     return null;
   };
   const heroImage = getCurrentAvatarSrc();
@@ -157,10 +110,8 @@ const ProfileSetupPage = () => {
         if (uploadError) throw uploadError;
         const { data: urlData } = supabase.storage.from('journey-uploads').getPublicUrl(fileName);
         avatarUrl = urlData.publicUrl;
-      } else if (selectedAvatar) {
-        avatarUrl = selectedAvatar;
       } else {
-        avatarUrl = customAvatarPreview || '';
+        avatarUrl = customAvatarPreview || 'curo-happy';
       }
 
       if (editMode) {
@@ -228,7 +179,6 @@ const ProfileSetupPage = () => {
         ref={cameraInputRef}
         type="file"
         accept="image/*"
-        capture="user"
         onChange={handleHeroFileSelect}
         className="hidden"
       />
@@ -333,86 +283,23 @@ const ProfileSetupPage = () => {
           {nameError && <p className="text-red-400 text-xs mt-1.5">{nameError}</p>}
         </div>
 
-        {/* Divider */}
-        <div className="flex items-center gap-3 px-6 mb-3">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="text-white/30 text-xs tracking-wide uppercase">Choose avatar</span>
-          <div className="flex-1 h-px bg-white/10" />
-        </div>
-
-        {/* Preset Avatars — horizontal scroll, square tiles */}
-        <div className="px-4 mb-4">
-          <div className="flex gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-            {/* Camera tile — first in row */}
+        {/* Upload photo prompt when no photo selected */}
+        {!heroImage && (
+          <div className="flex items-center justify-center px-6 mt-4 mb-5">
             <motion.button
-              whileTap={{ scale: 0.92 }}
-              onClick={() => cameraInputRef.current?.click()}
-              disabled={loading}
-              className="relative flex-shrink-0 flex items-center justify-center"
+              whileTap={{ scale: 0.96 }}
+              onClick={handleHeroTap}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full"
               style={{
-                width: 60,
-                height: 60,
-                borderRadius: 12,
                 background: 'rgba(255,255,255,0.08)',
-                border: customAvatarPreview
-                  ? '2.5px solid #34d399'
-                  : '2px dashed rgba(255,255,255,0.25)',
-                boxShadow: customAvatarPreview
-                  ? '0 0 14px rgba(52,211,153,0.45)'
-                  : 'none',
+                border: '1px dashed rgba(255,255,255,0.2)',
               }}
             >
-              {customAvatarPreview ? (
-                <>
-                  <img src={customAvatarPreview} alt="Custom" className="w-full h-full object-cover" style={{ borderRadius: 10 }} />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/35" style={{ borderRadius: 10 }}>
-                    <Camera className="w-4 h-4 text-white" />
-                  </div>
-                </>
-              ) : (
-                <Camera className="w-5 h-5 text-white/50" />
-              )}
+              <Camera className="w-4 h-4 text-white/50" />
+              <span className="text-white/50 text-sm">Upload your photo</span>
             </motion.button>
-            {PRESET_AVATARS.map((avatar) => (
-              <motion.button
-                key={avatar.id}
-                whileTap={{ scale: 0.92 }}
-                onClick={() => selectPresetAvatar(avatar.id)}
-                disabled={loading}
-                className="relative flex-shrink-0"
-                style={{ width: 60, height: 60 }}
-              >
-                <div
-                  className="w-full h-full overflow-hidden"
-                  style={{
-                    borderRadius: 12,
-                    border: selectedAvatar === avatar.id
-                      ? '2.5px solid #34d399'
-                      : '2px solid rgba(255,255,255,0.1)',
-                    boxShadow: selectedAvatar === avatar.id
-                      ? '0 0 14px rgba(52,211,153,0.45)'
-                      : 'none',
-                  }}
-                >
-                  <img src={avatar.src} alt={avatar.id} className="w-full h-full object-cover" />
-                </div>
-                <AnimatePresence>
-                  {selectedAvatar === avatar.id && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0 }}
-                      className="absolute inset-0 flex items-center justify-center bg-black/35"
-                      style={{ borderRadius: 12 }}
-                    >
-                      <Check className="w-4 h-4 text-emerald-400" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-            ))}
           </div>
-        </div>
+        )}
 
         {/* Stories toggle — edit mode only */}
         {editMode && (
