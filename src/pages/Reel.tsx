@@ -324,8 +324,8 @@ const Reel = () => {
 
     // Sort own activities: log-activity always last
     ownActivities.sort((a: any, b: any) => {
-      if (a.id === 'log-activity') return 1;
-      if (b.id === 'log-activity') return -1;
+      if (a.id === 'log-activity' || a.id === 'week-complete') return 1;
+      if (b.id === 'log-activity' || b.id === 'week-complete') return -1;
       return b.dayNumber - a.dayNumber;
     });
 
