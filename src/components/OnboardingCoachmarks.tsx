@@ -133,13 +133,13 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Translucent blur background */}
+          {/* Liquid glass background — opaque enough to hide content, translucent for depth */}
           <div
             className="absolute inset-0"
             style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              backdropFilter: 'blur(80px)',
-              WebkitBackdropFilter: 'blur(80px)',
+              background: 'linear-gradient(180deg, rgba(42, 27, 78, 0.92) 0%, rgba(10, 7, 32, 0.95) 100%)',
+              backdropFilter: 'blur(80px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(80px) saturate(200%)',
             }}
           />
 
