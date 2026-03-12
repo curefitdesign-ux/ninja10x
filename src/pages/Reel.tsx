@@ -1393,7 +1393,8 @@ const Reel = () => {
   const HEADER_HEIGHT = 100; // Row: delete + avatars + close + user name
   const BOTTOM_HEIGHT = 100; // Reaction pill + view progress
 
-  const isLogActivityCard = currentActivity?.id === 'log-activity';
+  const isLogActivityCard = currentActivity?.id === 'log-activity' || currentActivity?.id === 'week-complete';
+  const isWeekCompleteCard = currentActivity?.id === 'week-complete';
 
 
   return (
