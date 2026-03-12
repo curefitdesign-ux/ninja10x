@@ -108,8 +108,7 @@ const Logout = () => {
             </motion.div>
           )}
         </div>
-
-      </div>
+      </motion.div>
     </div>
   );
 };
