@@ -174,8 +174,8 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 backdropFilter: 'blur(50px) saturate(200%)',
                 WebkitBackdropFilter: 'blur(50px) saturate(200%)',
                 background: 'rgba(0, 0, 0, 0.15)',
-                maskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 12%, black 22%)',
-                WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 12%, black 22%)',
+                maskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 6%, black 12%)',
+                WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 6%, black 12%)',
               }} />
             </motion.div>
           )}
