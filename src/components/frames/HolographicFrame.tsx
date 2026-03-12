@@ -58,7 +58,7 @@ const HolographicFrame = ({
 
   return (
     <div
-      className="w-full h-full aspect-[9/16] relative overflow-hidden"
+      className="w-full h-full relative overflow-hidden"
       style={{ borderRadius: '0px', containerType: 'inline-size' }}
     >
       {/* LAYER 0: Holographic gradient base */}

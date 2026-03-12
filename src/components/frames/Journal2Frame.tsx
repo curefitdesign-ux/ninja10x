@@ -17,7 +17,7 @@ const Journal2Frame = ({ imageUrl, activity, week, day, duration, pr, imagePosit
 
   return (
     <div
-      className="w-full h-full aspect-[9/16] overflow-hidden relative"
+      className="w-full h-full overflow-hidden relative"
       style={{ containerType: 'inline-size', background: '#fff' }}
     >
       {/* CSS-generated lined notebook background */}
