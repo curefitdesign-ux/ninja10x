@@ -1924,11 +1924,15 @@ const Reel = () => {
                                 background: isLogActivityCard
                                   ? 'linear-gradient(155deg, hsl(160 40% 35%) 0%, hsl(175 45% 30%) 25%, hsl(190 50% 28%) 50%, hsl(200 55% 24%) 75%, hsl(210 55% 18%) 100%)'
                                   : 'transparent',
-                                border: isLogActivityCard
-                                  ? '1px solid rgba(100, 200, 180, 0.15)'
-                                  : 'none',
+                                border: 'none',
                                 boxShadow: isLogActivityCard
-                                  ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 0 40px rgba(80, 180, 160, 0.1)'
+                                  ? [
+                                      'inset 0 0 0 1.5px rgba(150,240,210,0.18)',
+                                      'inset 0 1px 2px rgba(180,255,230,0.15)',
+                                      'inset 0 -1px 1px rgba(80,180,220,0.08)',
+                                      '0 0 50px rgba(80, 200, 180, 0.12)',
+                                      '0 2px 20px rgba(0,0,0,0.3)',
+                                    ].join(', ')
                                   : 'none',
                                 zIndex: 3,
                               }}
@@ -2021,7 +2025,7 @@ const Reel = () => {
                                       <p
                                         className="text-xl font-bold leading-tight"
                                         style={{
-                                          background: 'linear-gradient(135deg, hsl(267 100% 82%), hsl(278 100% 92%), hsl(var(--foreground)))',
+                                          background: 'linear-gradient(135deg, hsl(160 70% 80%), hsl(180 60% 85%), hsl(200 50% 90%))',
                                           WebkitBackgroundClip: 'text',
                                           WebkitTextFillColor: 'transparent',
                                         }}
@@ -2043,7 +2047,7 @@ const Reel = () => {
                                         <motion.div 
                                           className="absolute inset-0 rounded-full"
                                           style={{
-                                            background: `radial-gradient(circle, hsl(280 80% 65% / 0.3) 0%, transparent 60%)`,
+                                            background: `radial-gradient(circle, hsl(170 70% 55% / 0.3) 0%, transparent 60%)`,
                                             filter: 'blur(20px)',
                                             transform: 'scale(3)',
                                           }}
@@ -2055,14 +2059,14 @@ const Reel = () => {
                                           animate={{ scale: [1, 1.15, 1] }}
                                           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                                         >
-                                          <rect x="20" y="6" width="8" height="36" rx="4" fill="hsl(267 100% 82%)" />
-                                          <rect x="6" y="20" width="36" height="8" rx="4" fill="hsl(267 100% 82%)" />
+                                          <rect x="20" y="6" width="8" height="36" rx="4" fill="hsl(170 70% 75%)" />
+                                          <rect x="6" y="20" width="36" height="8" rx="4" fill="hsl(170 70% 75%)" />
                                         </motion.svg>
                                       </button>
                                     )}
 
                                     {/* Label */}
-                                    <p className="text-white/40 text-xs font-medium uppercase tracking-widest">
+                                    <p className="text-xs font-medium uppercase tracking-widest" style={{ color: 'hsl(175 40% 55% / 0.6)' }}>
                                       {isWeekCompleteCard
                                         ? `Week ${completedWeek} complete ✨`
                                         : `Day ${currentActivity.dayNumber} of 12`
