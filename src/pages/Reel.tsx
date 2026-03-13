@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { buildFullSharePayload } from '@/lib/share-utils';
 
 
 import { createPortal } from 'react-dom';
@@ -1048,18 +1049,17 @@ const Reel = () => {
   }, [weekRecapVideoFromNav, weekRecapNumber]);
 
   const buildSharePayload = useCallback(() => {
-    const mediaUrl = currentActivity?.storageUrl || currentActivity?.originalUrl;
     const userName = currentGroup?.displayName || 'Someone';
     const activityName = currentActivity?.activity || 'workout';
-    const text = isOwnStory
-      ? `Check out my ${activityName} on my fitness journey! 💪`
-      : `Check out ${userName}'s ${activityName}! 🔥`;
 
-    return {
-      title: `${isOwnStory ? 'My' : `${userName}'s`} Fitness Story`,
-      text,
-      url: mediaUrl && mediaUrl.startsWith('http') ? mediaUrl : window.location.href,
-    };
+    return buildFullSharePayload({
+      activityId: currentActivity?.id,
+      userId: currentGroup?.userId,
+      activity: activityName,
+      dayNumber: currentActivity?.dayNumber,
+      displayName: userName,
+      isOwnStory,
+    });
   }, [currentActivity, currentGroup, isOwnStory]);
 
   const handleSystemShare = useCallback(async () => {

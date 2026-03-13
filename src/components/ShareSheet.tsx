@@ -1,4 +1,5 @@
 import { X, Download, Copy, Check, Pencil, Loader2 } from 'lucide-react';
+import { buildFullSharePayload } from '@/lib/share-utils';
 import { notifyBottomSheet } from '@/lib/bottom-sheet-events';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { useState, useEffect, useRef } from 'react';
@@ -171,8 +172,14 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
         }))
     : [];
   
-  const shareText = '🏃 Check out my fitness activity! #FitnessJourney #HealthyLifestyle';
-  const shareUrl = window.location.href;
+  // Contextual share text & clean URL
+  const sharePayloadData = buildFullSharePayload({
+    activity: frameProps?.activity,
+    dayNumber,
+    isOwnStory: true,
+  });
+  const shareText = sharePayloadData.text;
+  const shareUrl = sharePayloadData.url;
   const fullShareText = `${shareText}\n\n${shareUrl}`;
 
   // Extract dominant color from image
