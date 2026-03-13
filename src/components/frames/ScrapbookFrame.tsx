@@ -57,7 +57,7 @@ const ScrapbookFrame = ({
         <div
           style={{
             width: '16%',
-            height: '3.5px',
+            height: '1cqw',
             borderRadius: '9999px',
             background: 'rgba(170, 162, 148, 0.55)',
           }}
