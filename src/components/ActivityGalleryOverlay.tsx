@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, forwardRef, useMemo } from 'react';
+import { ALL_REACTION_IMAGES } from '@/lib/reaction-images';
 import { buildFullSharePayload } from '@/lib/share-utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
@@ -1090,18 +1091,88 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   )}
                 </motion.div>
 
-                {/* Reactions below zoomed card */}
+                {/* Reactions below zoomed card — show who gave what */}
                 <motion.div
-                  className="flex items-center justify-center gap-2"
-                  style={{ marginTop: 16, zIndex: 70 }}
+                  className="flex flex-col items-center gap-3"
+                  style={{ marginTop: 16, zIndex: 70, maxWidth: '85%' }}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.25, duration: 0.3 }}
                   onClick={(e) => e.stopPropagation()}
                 >
+                  {/* Individual reactor rows */}
                   {(() => {
                     const ar = localReactions[zoomedActivity.id];
+                    const profiles = ar?.reactorProfiles || zoomedActivity.reactorProfiles || [];
                     const total = ar?.total || 0;
+
+                    if (profiles.length > 0) {
+                      // Show up to 5 reactors with avatar + reaction image
+                      const displayProfiles = profiles.slice(0, 5);
+                      const remaining = profiles.length - 5;
+                      return (
+                        <>
+                          <div className="flex items-center gap-2 flex-wrap justify-center">
+                            {displayProfiles.map((reactor, i) => {
+                              const reactionImg = reactor.reactionType ? ALL_REACTION_IMAGES[reactor.reactionType] : null;
+                              return (
+                                <motion.div
+                                  key={`${reactor.userId}-${i}`}
+                                  className="flex items-center gap-1.5 rounded-full"
+                                  style={{
+                                    background: 'rgba(255,255,255,0.1)',
+                                    backdropFilter: 'blur(20px)',
+                                    WebkitBackdropFilter: 'blur(20px)',
+                                    border: '1px solid rgba(255,255,255,0.12)',
+                                    padding: '4px 10px 4px 4px',
+                                  }}
+                                  initial={{ opacity: 0, scale: 0.8 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  transition={{ delay: 0.3 + i * 0.06 }}
+                                >
+                                  {reactor.avatarUrl ? (
+                                    <img src={reactor.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover" />
+                                  ) : (
+                                    <div className="w-6 h-6 rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }} />
+                                  )}
+                                  <span style={{ fontFamily: "'Caveat', cursive", fontSize: 14, color: 'rgba(255,255,255,0.8)' }}>
+                                    {reactor.displayName?.split(' ')[0] || 'User'}
+                                  </span>
+                                  {reactionImg && (
+                                    <img src={reactionImg} alt="" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
+                                  )}
+                                </motion.div>
+                              );
+                            })}
+                            {remaining > 0 && (
+                              <motion.span
+                                style={{ fontFamily: "'Caveat', cursive", fontSize: 14, color: 'rgba(255,255,255,0.5)' }}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.6 }}
+                              >
+                                +{remaining} more
+                              </motion.span>
+                            )}
+                          </div>
+
+                          {/* React button for visitors */}
+                          {!isOwnProfile && (
+                            <button className="flex items-center gap-1 active:scale-90 transition-transform"
+                              style={{
+                                background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                                borderRadius: 16, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)',
+                              }}
+                              onClick={() => { setCardReactId(zoomedActivity.id); setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id)); setShowSendReactionSheet(true); }}>
+                              <span style={{ fontSize: 14 }}>🔥</span>
+                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>React</span>
+                            </button>
+                          )}
+                        </>
+                      );
+                    }
+
+                    // No profiles available — fallback to count pill
                     if (total === 0 && !isOwnProfile) {
                       return (
                         <button className="flex items-center gap-1 active:scale-90 transition-transform"
@@ -1115,6 +1186,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         </button>
                       );
                     }
+
                     return (
                       <button className="flex items-center gap-1.5 active:scale-90 transition-transform"
                         style={{
