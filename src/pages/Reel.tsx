@@ -651,7 +651,7 @@ const Reel = () => {
       const targetGroup = effectiveUserGroups[newIndex];
       if (targetGroup) currentUserIdRef.current = targetGroup.userId;
       const prevGroup = effectiveUserGroups[currentUserIndex];
-      if (prevGroup) setViewedUsers(prev => new Set(prev).add(prevGroup.userId));
+      if (prevGroup) markUserViewed(prevGroup.userId);
       setCurrentUserIndex(newIndex);
       setCurrentActivityIndex(0);
     }
