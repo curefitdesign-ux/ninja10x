@@ -93,6 +93,9 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const nudgeAudioRef = useRef<HTMLAudioElement | null>(null);
   const nudgeHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const portalContainer = usePortalContainer();
+  const { user } = useAuth();
 
   // Preload nudge sound for instant playback
   useEffect(() => {
@@ -122,9 +125,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
         if (c > 0) setNudgeSentToday(true);
       });
   }, [user, targetUserId, isOwnProfile]);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const portalContainer = usePortalContainer();
-  const { user } = useAuth();
 
   // Hide bottom nav on open, show on close
   useEffect(() => {
