@@ -117,7 +117,7 @@ const ScrapbookFrame = ({
       <div style={{ padding: '4% 5% 0 5%' }}>
         <div
           style={{
-            borderTop: '1.5px dashed rgba(130, 120, 105, 0.55)',
+            borderTop: '0.4cqw dashed rgba(130, 120, 105, 0.55)',
             width: '100%',
           }}
         />
