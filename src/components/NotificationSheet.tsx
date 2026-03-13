@@ -254,6 +254,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             const newNotif: Notification = {
               id: newReaction.id,
               activityId: newReaction.activity_id,
+              reactorUserId: newReaction.user_id,
               reactorName,
               reactorAvatarUrl: profile?.avatar_url || undefined,
               reactionType: newReaction.reaction_type,
