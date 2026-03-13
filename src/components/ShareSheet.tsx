@@ -181,7 +181,6 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
   const shareText = sharePayloadData.text;
   const shareUrl = sharePayloadData.url;
   const fullShareText = `${shareText}\n\n${shareUrl}`;
-  const fullShareText = `${shareText}\n\n${shareUrl}`;
 
   // Extract dominant color from image
   useEffect(() => {
