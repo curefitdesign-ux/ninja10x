@@ -948,7 +948,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
           <AnimatePresence>
             {zoomedActivity && (
               <motion.div
-                className="fixed inset-0 flex items-center justify-center"
+                className="fixed inset-0 flex flex-col items-center justify-center"
                 style={{ zIndex: 65 }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -969,6 +969,22 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   />
                   <div className="absolute inset-0" style={{ background: 'rgba(0, 0, 0, 0.5)' }} />
                 </div>
+
+                {/* Close button */}
+                <motion.button
+                  className="absolute flex items-center justify-center"
+                  style={{
+                    top: 'max(env(safe-area-inset-top, 16px), 16px)',
+                    right: 16, width: 36, height: 36, borderRadius: 18,
+                    background: 'rgba(255,255,255,0.12)', zIndex: 70,
+                  }}
+                  onClick={() => setZoomedActivity(null)}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <X className="w-5 h-5 text-white/70" />
+                </motion.button>
 
                 {/* Zoomed card */}
                 <motion.div
@@ -1014,6 +1030,50 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       className="absolute inset-0 w-full h-full object-cover"
                     />
                   )}
+                </motion.div>
+
+                {/* Reactions below zoomed card */}
+                <motion.div
+                  className="flex items-center justify-center gap-2"
+                  style={{ marginTop: 16, zIndex: 70 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25, duration: 0.3 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {(() => {
+                    const ar = localReactions[zoomedActivity.id];
+                    const total = ar?.total || 0;
+                    return (
+                      <>
+                        {(total > 0 || isOwnProfile) && (
+                          <button
+                            className="active:scale-90 transition-transform"
+                            onClick={() => { setCardReactId(zoomedActivity.id); setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id)); setShowReactsSheet(true); }}
+                            style={{
+                              fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)',
+                              background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                              border: '1px solid rgba(255,255,255,0.15)', borderRadius: 16, padding: '6px 14px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {total} ❤️
+                          </button>
+                        )}
+                        {!isOwnProfile && (
+                          <button className="flex items-center gap-1 active:scale-90 transition-transform"
+                            style={{
+                              background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                              borderRadius: 16, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)',
+                            }}
+                            onClick={() => { setCardReactId(zoomedActivity.id); setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id)); setShowSendReactionSheet(true); }}>
+                            <span style={{ fontSize: 14 }}>🔥</span>
+                            <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>React</span>
+                          </button>
+                        )}
+                      </>
+                    );
+                  })()}
                 </motion.div>
 
                 {/* Close hint */}
