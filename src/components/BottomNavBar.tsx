@@ -23,8 +23,23 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
 
   const [showNotificationSheet, setShowNotificationSheet] = useState(false);
   const [totalNotificationCount, setTotalNotificationCount] = useState(0);
-  const seenCountRef = useRef(0);
   const [showEllipsisMenu, setShowEllipsisMenu] = useState(false);
+
+  // Persist seen count in localStorage so badge survives page refresh
+  const SEEN_KEY = 'ninja10x_seen_notification_count';
+  const seenCountRef = useRef(() => {
+    try { return parseInt(localStorage.getItem(SEEN_KEY) || '0', 10); }
+    catch { return 0; }
+  });
+  // Initialize from stored value
+  const [seenCount, setSeenCount] = useState(() => {
+    try { return parseInt(localStorage.getItem(SEEN_KEY) || '0', 10); }
+    catch { return 0; }
+  });
+  const markSeen = useCallback(() => {
+    setSeenCount(totalNotificationCount);
+    try { localStorage.setItem(SEEN_KEY, String(totalNotificationCount)); } catch {}
+  }, [totalNotificationCount]);
   const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [showFeedbackSheet, setShowFeedbackSheet] = useState(false);
