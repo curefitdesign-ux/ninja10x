@@ -36,7 +36,7 @@ function RevealLine({ text, delay = 0 }: { text: string; delay?: number }) {
   return (
     <>
       {words.map((word, i) => (
-        <RevealWord key={`${text}-${i}`} delay={delay + i * 0.4}>
+        <RevealWord key={`${text}-${i}`} delay={delay + i * 0.25}>
           {word}
         </RevealWord>
       ))}
