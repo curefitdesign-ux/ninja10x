@@ -134,6 +134,20 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
+          {/* Ambient gradient behind the blur */}
+          <motion.div
+            className="absolute inset-0 z-[0]"
+            style={{
+              background: 'radial-gradient(ellipse at 30% 20%, hsla(200, 25%, 35%, 0.6) 0%, transparent 50%), radial-gradient(ellipse at 70% 15%, hsla(260, 40%, 25%, 0.7) 0%, transparent 45%), radial-gradient(ellipse at 20% 60%, hsla(15, 30%, 35%, 0.4) 0%, transparent 50%), radial-gradient(ellipse at 80% 70%, hsla(270, 30%, 30%, 0.5) 0%, transparent 50%), radial-gradient(ellipse at 50% 90%, hsla(240, 20%, 20%, 0.6) 0%, transparent 50%), linear-gradient(160deg, hsl(215, 30%, 18%) 0%, hsl(250, 35%, 15%) 30%, hsl(270, 25%, 20%) 60%, hsl(220, 30%, 15%) 100%)',
+            }}
+            initial={{ top: 0, borderRadius: '0px' }}
+            animate={{
+              top: phase === 2 ? '11%' : 0,
+              borderRadius: phase === 2 ? '24px 24px 0px 0px' : '0px',
+            }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          />
+
           {/* Liquid glass background — slides down 7% on phase 2 to reveal top */}
           <motion.div
             className="absolute inset-0 z-[1]"
