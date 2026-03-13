@@ -2046,7 +2046,7 @@ const Reel = () => {
                                         <motion.div 
                                           className="absolute inset-0 rounded-full"
                                           style={{
-                                            background: `radial-gradient(circle, hsl(280 80% 65% / 0.3) 0%, transparent 60%)`,
+                                            background: `radial-gradient(circle, hsl(170 70% 55% / 0.3) 0%, transparent 60%)`,
                                             filter: 'blur(20px)',
                                             transform: 'scale(3)',
                                           }}
