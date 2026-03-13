@@ -47,6 +47,7 @@ const BoldFrame = ({
   const durationValue = duration ? duration.replace(/[^0-9:]/g, '') : '';
   const isNumericPr = pr ? /\d/.test(pr) : false;
   const prValue = pr ? (isNumericPr ? pr.replace(/[^0-9.]/g, '') : pr) : '';
+  const hasMetrics = !!(durationValue || prValue);
 
   return (
     <div
@@ -163,7 +164,7 @@ const BoldFrame = ({
           top: '35%',
           left: '5%',
           right: '5%',
-          bottom: '12%',
+          bottom: hasMetrics ? '12%' : '3%',
           borderRadius: '6px',
         }}
       >
@@ -196,92 +197,55 @@ const BoldFrame = ({
       </div>
 
       {/* Dashed line below photo */}
-      <div
-        className="absolute left-0 right-0"
-        style={{
-          bottom: '10%',
-          marginLeft: '5%',
-          marginRight: '5%',
-          borderTop: '2px dashed #b8b4a8',
-          zIndex: 5,
-        }}
-      />
+      {hasMetrics && (
+        <div
+          className="absolute left-0 right-0"
+          style={{
+            bottom: '10%',
+            marginLeft: '5%',
+            marginRight: '5%',
+            borderTop: '2px dashed #b8b4a8',
+            zIndex: 5,
+          }}
+        />
+      )}
 
       {/* ── BOTTOM METRICS ── */}
-      <div
-        className="absolute left-0 right-0 flex items-end justify-between"
-        style={{
-          bottom: '3%',
-          paddingLeft: '7%',
-          paddingRight: '7%',
-          zIndex: 5,
-        }}
-      >
-        {durationValue ? (
-          <div className="flex items-baseline gap-1.5">
-            <span
-              style={{
-                fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                fontWeight: 500,
-                fontSize: 'clamp(7px, 2.8cqw, 11px)',
-                color: '#3a3a3a',
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-              }}
-            >
-              DURATION :
-            </span>
-            <span
-              style={{
-                fontFamily: "'Caveat', cursive",
-                fontWeight: 700,
-                fontSize: 'clamp(18px, 7.8cqw, 30px)',
-                color: '#6B4EE6',
-                fontStyle: 'italic',
-              }}
-            >
-              {durationValue}
-            </span>
-            <span
-              style={{
-                fontFamily: "'Caveat', cursive",
-                fontWeight: 700,
-                fontSize: 'clamp(14px, 5.8cqw, 24px)',
-                color: '#6B4EE6',
-                fontStyle: 'italic',
-              }}
-            >
-              {durationUnit}
-            </span>
-          </div>
-        ) : null}
-
-        {prValue ? (
-          <div className="flex items-baseline gap-1.5">
-            <span
-              style={{
-                fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                fontWeight: 500,
-                fontSize: 'clamp(7px, 2.8cqw, 11px)',
-                color: '#3a3a3a',
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-              }}
-            >
-              {(label1Name || 'DISTANCE').toUpperCase()} :
-            </span>
-            <span
-              style={{
-                fontFamily: "'Caveat', cursive",
-                fontWeight: 700,
-                fontSize: isNumericPr ? 'clamp(18px, 7.8cqw, 30px)' : 'clamp(14px, 5.8cqw, 24px)',
-                color: '#6B4EE6',
-                fontStyle: 'italic',
-              }}
-            >
-              {prValue}
-            </span>
-            {prUnit && (
+      {hasMetrics && (
+        <div
+          className="absolute left-0 right-0 flex items-end justify-between"
+          style={{
+            bottom: '3%',
+            paddingLeft: '7%',
+            paddingRight: '7%',
+            zIndex: 5,
+          }}
+        >
+          {durationValue ? (
+            <div className="flex items-baseline gap-1.5">
+              <span
+                style={{
+                  fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  fontWeight: 500,
+                  fontSize: 'clamp(7px, 2.8cqw, 11px)',
+                  color: '#3a3a3a',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                DURATION :
+              </span>
+              <span
+                style={{
+                  fontFamily: "'Caveat', cursive",
+                  fontWeight: 700,
+                  fontSize: 'clamp(18px, 7.8cqw, 30px)',
+                  color: '#6B4EE6',
+                  fontStyle: 'italic',
+                }}
+              >
+                {durationValue}
+              </span>
               <span
                 style={{
                   fontFamily: "'Caveat', cursive",
@@ -291,12 +255,53 @@ const BoldFrame = ({
                   fontStyle: 'italic',
                 }}
               >
-                {prUnit}
+                {durationUnit}
               </span>
-            )}
-          </div>
-        ) : null}
-      </div>
+            </div>
+          ) : null}
+
+          {prValue ? (
+            <div className="flex items-baseline gap-1.5">
+              <span
+                style={{
+                  fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  fontWeight: 500,
+                  fontSize: 'clamp(7px, 2.8cqw, 11px)',
+                  color: '#3a3a3a',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {(label1Name || 'DISTANCE').toUpperCase()} :
+              </span>
+              <span
+                style={{
+                  fontFamily: "'Caveat', cursive",
+                  fontWeight: 700,
+                  fontSize: isNumericPr ? 'clamp(18px, 7.8cqw, 30px)' : 'clamp(14px, 5.8cqw, 24px)',
+                  color: '#6B4EE6',
+                  fontStyle: 'italic',
+                }}
+              >
+                {prValue}
+              </span>
+              {prUnit && (
+                <span
+                  style={{
+                    fontFamily: "'Caveat', cursive",
+                    fontWeight: 700,
+                    fontSize: 'clamp(14px, 5.8cqw, 24px)',
+                    color: '#6B4EE6',
+                    fontStyle: 'italic',
+                  }}
+                >
+                  {prUnit}
+                </span>
+              )}
+            </div>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 };
