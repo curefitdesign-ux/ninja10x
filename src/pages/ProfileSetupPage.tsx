@@ -295,7 +295,7 @@ const ProfileSetupPage = () => {
               India's Ultimate{'\n'}Habit Builder.
             </h1>
           )}
-          <p className="text-white/50 text-base mt-3 text-center">What should we call you?</p>
+          {!editMode && <p className="text-white/50 text-base mt-3 text-center">What should we call you?</p>}
         </div>
 
         {/* Name input */}
