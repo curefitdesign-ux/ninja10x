@@ -27,10 +27,6 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
 
   // Persist seen count in localStorage so badge survives page refresh
   const SEEN_KEY = 'ninja10x_seen_notification_count';
-  const seenCountRef = useRef(() => {
-    try { return parseInt(localStorage.getItem(SEEN_KEY) || '0', 10); }
-    catch { return 0; }
-  });
   // Initialize from stored value
   const [seenCount, setSeenCount] = useState(() => {
     try { return parseInt(localStorage.getItem(SEEN_KEY) || '0', 10); }
