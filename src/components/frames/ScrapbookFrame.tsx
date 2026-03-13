@@ -86,7 +86,7 @@ const ScrapbookFrame = ({
             fontFamily: "'Caveat', cursive",
             fontWeight: 700,
             fontStyle: 'italic',
-            fontSize: 'clamp(28px, 15.5cqw, 52px)',
+            fontSize: '15.5cqw',
             color: '#7C5CFC',
             lineHeight: 0.85,
             marginTop: '-6%',
