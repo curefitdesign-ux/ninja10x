@@ -1947,7 +1947,24 @@ const Reel = () => {
                               const glowMid = isEvenDay ? 'hsl(280 80% 65% / 0.35)' : 'hsl(25 95% 60% / 0.35)';
                               const completedWeek = Math.floor(totalActivities / 3);
                               return (
-                                <div className="w-full h-full flex items-center justify-center">
+                                <div className="w-full h-full flex items-center justify-center relative">
+                                  {/* Noise texture overlay */}
+                                  <div
+                                    className="absolute inset-0 pointer-events-none opacity-[0.18] mix-blend-overlay"
+                                    style={{
+                                      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
+                                      backgroundSize: '180px 180px',
+                                      borderRadius: 'inherit',
+                                    }}
+                                  />
+                                  {/* Warm ambient glow at bottom */}
+                                  <div
+                                    className="absolute pointer-events-none"
+                                    style={{
+                                      bottom: 0, left: 0, right: 0, height: '45%',
+                                      background: 'radial-gradient(ellipse at center bottom, hsl(320 60% 30% / 0.2) 0%, transparent 70%)',
+                                    }}
+                                  />
                                   <div
                                     className="w-full h-full flex flex-col items-center justify-center relative"
                                   >
