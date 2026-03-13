@@ -1752,7 +1752,7 @@ const Reel = () => {
                             maxWidth: '100%',
                             borderRadius: `${cardRadius}px`,
                             filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                            background: isLogCard ? '#0a0a12' : 'transparent',
+                            background: isLogCard ? 'linear-gradient(165deg, hsl(270 45% 12%) 0%, hsl(280 50% 8%) 35%, hsl(320 40% 10%) 65%, hsl(25 50% 10%) 100%)' : 'transparent',
                           }}
                         >
                           {isLogCard ? (
