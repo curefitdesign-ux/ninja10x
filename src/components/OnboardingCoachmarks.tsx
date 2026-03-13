@@ -288,24 +288,9 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 exit="exit"
               >
                 <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
-                  <h2
-                    className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
-                    style={{ color: textColor, fontFamily: fontStack }}
-                  >
-                    <RevealLine text="You won't walk alone." delay={1.0} />
-                  </h2>
-                  <p
-                    className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-6"
-                    style={{ color: mutedColor, fontFamily: fontStack }}
-                  >
-                    <RevealLine text="Cheer each other." delay={2.8} />
-                    <br />
-                    <RevealLine text="Move together." delay={4.4} />
-                  </p>
-
-                  {/* Small hand-drawn arrow pointing up */}
+                  {/* Small hand-drawn arrow pointing up — above text */}
                   <motion.div
-                    className="mt-5"
+                    className="mb-5"
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 5.0, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -341,6 +326,21 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                       />
                     </motion.svg>
                   </motion.div>
+
+                  <h2
+                    className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
+                    style={{ color: textColor, fontFamily: fontStack }}
+                  >
+                    <RevealLine text="You won't walk alone." delay={1.0} />
+                  </h2>
+                  <p
+                    className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-6"
+                    style={{ color: mutedColor, fontFamily: fontStack }}
+                  >
+                    <RevealLine text="Cheer each other." delay={2.8} />
+                    <br />
+                    <RevealLine text="Move together." delay={4.4} />
+                  </p>
 
                   {/* GOT IT CTA */}
                   <motion.button
