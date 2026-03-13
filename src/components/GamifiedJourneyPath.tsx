@@ -103,7 +103,7 @@ const GamifiedJourneyPath = forwardRef<HTMLDivElement, GamifiedJourneyPathProps>
           const showFinalGoal = tile.isFinal;
 
           return (
-            <div key={tile.index}>
+            <div key={tile.index} data-tile-day={tile.index + 1}>
               {/* Final goal – treasure chest */}
               {showFinalGoal && (
                 <motion.img
