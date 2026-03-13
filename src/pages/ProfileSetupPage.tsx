@@ -269,12 +269,14 @@ const ProfileSetupPage = () => {
       <div className="relative z-10 flex flex-col flex-1">
         {/* Title + Subtitle */}
         <div className="flex flex-col items-center px-6 mb-2" style={{ marginTop: '-80px' }}>
-          <h1
-            className="text-center font-black text-white uppercase leading-tight"
-            style={{ fontSize: '2rem', letterSpacing: '-0.02em' }}
-          >
-            India's Ultimate{'\n'}Habit Builder.
-          </h1>
+          {!editMode && (
+            <h1
+              className="text-center font-black text-white uppercase leading-tight"
+              style={{ fontSize: '2rem', letterSpacing: '-0.02em' }}
+            >
+              India's Ultimate{'\n'}Habit Builder.
+            </h1>
+          )}
           <p className="text-white/50 text-base mt-3 text-center">What should we call you?</p>
         </div>
 
@@ -301,39 +303,41 @@ const ProfileSetupPage = () => {
           {nameError && <p className="text-red-400 text-xs mt-1.5">{nameError}</p>}
         </div>
 
-        {/* Upload buttons — Camera + Gallery side by side */}
-        <div className="px-6 mb-5">
-          <div className="flex gap-3">
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => cameraInputRef.current?.click()}
-              disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl"
-              style={{
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                backdropFilter: 'blur(16px)',
-              }}
-            >
-              <Camera className="w-5 h-5 text-white/70" />
-              <span className="text-white/70 text-sm font-medium">Camera</span>
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => galleryInputRef.current?.click()}
-              disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl"
-              style={{
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                backdropFilter: 'blur(16px)',
-              }}
-            >
-              <ImagePlus className="w-5 h-5 text-white/70" />
-              <span className="text-white/70 text-sm font-medium">Gallery</span>
-            </motion.button>
+        {/* Upload buttons — Camera + Gallery side by side (signup only) */}
+        {!editMode && (
+          <div className="px-6 mb-5">
+            <div className="flex gap-3">
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => cameraInputRef.current?.click()}
+                disabled={loading}
+                className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl"
+                style={{
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  backdropFilter: 'blur(16px)',
+                }}
+              >
+                <Camera className="w-5 h-5 text-white/70" />
+                <span className="text-white/70 text-sm font-medium">Camera</span>
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => galleryInputRef.current?.click()}
+                disabled={loading}
+                className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl"
+                style={{
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  backdropFilter: 'blur(16px)',
+                }}
+              >
+                <ImagePlus className="w-5 h-5 text-white/70" />
+                <span className="text-white/70 text-sm font-medium">Gallery</span>
+              </motion.button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Stories toggle */}
         <div
