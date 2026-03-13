@@ -1922,13 +1922,13 @@ const Reel = () => {
                               style={{
                                 borderRadius: `${cardRadius}px`,
                                 background: isLogActivityCard
-                                  ? 'linear-gradient(165deg, hsl(200 50% 10%) 0%, hsl(180 45% 8%) 35%, hsl(160 50% 10%) 65%, hsl(140 40% 8%) 100%)'
+                                  ? 'linear-gradient(155deg, hsl(160 40% 35%) 0%, hsl(175 45% 30%) 25%, hsl(190 50% 28%) 50%, hsl(200 55% 24%) 75%, hsl(210 55% 18%) 100%)'
                                   : 'transparent',
                                 border: isLogActivityCard
-                                  ? '1px solid rgba(100, 220, 200, 0.2)'
+                                  ? '1px solid rgba(100, 200, 180, 0.15)'
                                   : 'none',
                                 boxShadow: isLogActivityCard
-                                  ? 'inset 0 1px 1px rgba(255,255,255,0.06), inset 0 -40px 80px rgba(80, 200, 180, 0.08), 0 0 30px rgba(100, 200, 180, 0.12)'
+                                  ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 0 40px rgba(80, 180, 160, 0.1)'
                                   : 'none',
                                 zIndex: 3,
                               }}
