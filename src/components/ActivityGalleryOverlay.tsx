@@ -1094,134 +1094,87 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   )}
                 </motion.div>
 
-                {/* Reactions below zoomed card — show who gave what */}
+                {/* Reactions below zoomed card — story-strip style avatars + CTA */}
                 <motion.div
                   className="flex flex-col items-center gap-3"
-                  style={{ marginTop: 16, zIndex: 70, maxWidth: '85%' }}
+                  style={{ marginTop: 16, zIndex: 70, maxWidth: '90%' }}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.25, duration: 0.3 }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {/* Individual reactor rows */}
                   {(() => {
                     const ar = localReactions[zoomedActivity.id];
                     const profiles = ar?.reactorProfiles || zoomedActivity.reactorProfiles || [];
                     const total = ar?.total || 0;
+                    const ctxIcon = getActivityReactionIcon(zoomedActivity.activity);
 
-                    if (profiles.length > 0) {
-                      // Show up to 5 reactors with avatar + reaction image
-                      const displayProfiles = profiles.slice(0, 5);
-                      const remaining = profiles.length - 5;
-                      return (
-                        <>
-                          <div className="flex items-center gap-2 flex-wrap justify-center">
-                            {displayProfiles.map((reactor, i) => {
+                    return (
+                      <>
+                        {/* Circular avatar strip with reaction badge — like discover stories */}
+                        {profiles.length > 0 && (
+                          <div className="flex items-center justify-center gap-3 flex-wrap">
+                            {profiles.slice(0, 6).map((reactor, i) => {
                               const reactionImg = reactor.reactionType ? ALL_REACTION_IMAGES[reactor.reactionType] : null;
                               return (
                                 <motion.div
                                   key={`${reactor.userId}-${i}`}
-                                  className="flex items-center gap-1.5 rounded-full"
-                                  style={{
-                                    background: 'rgba(255,255,255,0.1)',
-                                    backdropFilter: 'blur(20px)',
-                                    WebkitBackdropFilter: 'blur(20px)',
-                                    border: '1px solid rgba(255,255,255,0.12)',
-                                    padding: '4px 10px 4px 4px',
-                                  }}
-                                  initial={{ opacity: 0, scale: 0.8 }}
+                                  className="flex flex-col items-center gap-1"
+                                  initial={{ opacity: 0, scale: 0.7 }}
                                   animate={{ opacity: 1, scale: 1 }}
-                                  transition={{ delay: 0.3 + i * 0.06 }}
+                                  transition={{ delay: 0.3 + i * 0.06, type: 'spring', stiffness: 300, damping: 20 }}
                                 >
-                                  {reactor.avatarUrl ? (
-                                    <img src={reactor.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover" />
-                                  ) : (
-                                    <div className="w-6 h-6 rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }} />
-                                  )}
-                                  <span style={{ fontFamily: "'Caveat', cursive", fontSize: 14, color: 'rgba(255,255,255,0.8)' }}>
+                                  <div className="relative">
+                                    <div className="rounded-full p-[2px]" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.08))' }}>
+                                      {reactor.avatarUrl ? (
+                                        <img src={reactor.avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover" style={{ border: '2px solid rgba(0,0,0,0.3)' }} />
+                                      ) : (
+                                        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.12)', border: '2px solid rgba(0,0,0,0.3)' }}>
+                                          <span className="text-white/50 text-sm font-bold">{(reactor.displayName || 'U')[0].toUpperCase()}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                    {reactionImg && (
+                                      <div className="absolute flex items-center justify-center" style={{ bottom: -3, right: -3, width: 20, height: 20, borderRadius: '50%', background: 'rgba(30,20,50,0.85)', border: '1.5px solid rgba(255,255,255,0.15)' }}>
+                                        <img src={reactionImg} alt="" className="w-3.5 h-3.5 object-contain" />
+                                      </div>
+                                    )}
+                                  </div>
+                                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', fontWeight: 500, maxWidth: 48, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'center' }}>
                                     {reactor.displayName?.split(' ')[0] || 'User'}
                                   </span>
-                                  {reactionImg && (
-                                    <img src={reactionImg} alt="" className="w-5 h-5 object-contain" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
-                                  )}
                                 </motion.div>
                               );
                             })}
-                            {remaining > 0 && (
-                              <motion.span
-                                style={{ fontFamily: "'Caveat', cursive", fontSize: 14, color: 'rgba(255,255,255,0.5)' }}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.6 }}
-                              >
-                                +{remaining} more
-                              </motion.span>
-                            )}
                           </div>
+                        )}
 
-                          {/* React button for visitors */}
-                          {!isOwnProfile && (() => {
-                            const ctxIcon = getActivityReactionIcon(zoomedActivity.activity);
-                            return (
-                              <button className="flex items-center gap-1 active:scale-90 transition-transform"
-                                style={{
-                                  background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                                  borderRadius: 16, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)',
-                                }}
-                                onClick={() => { setCardReactId(zoomedActivity.id); setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id)); setShowSendReactionSheet(true); }}>
-                                <img src={ctxIcon.src} alt="" className="w-5 h-5 object-contain" />
-                                <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>React</span>
-                              </button>
-                            );
-                          })()}
-                        </>
-                      );
-                    }
-
-                    // No profiles available — fallback to count pill
-                    if (total === 0 && !isOwnProfile) {
-                      const ctxIcon = getActivityReactionIcon(zoomedActivity.activity);
-                      return (
-                        <button className="flex items-center gap-1 active:scale-90 transition-transform"
-                          style={{
-                            background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                            borderRadius: 16, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)',
-                          }}
-                          onClick={() => { setCardReactId(zoomedActivity.id); setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id)); setShowSendReactionSheet(true); }}>
-                          <img src={ctxIcon.src} alt="" className="w-5 h-5 object-contain" />
-                          <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>React</span>
-                        </button>
-                      );
-                    }
-
-                    return (() => {
-                      const ctxIcon = getActivityReactionIcon(zoomedActivity.activity);
-                      return (
-                        <button className="flex items-center gap-1.5 active:scale-90 transition-transform"
-                          style={{
-                            background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                            borderRadius: 16, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)',
-                          }}
-                          onClick={() => {
-                            setCardReactId(zoomedActivity.id);
-                            setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id));
-                            if (isOwnProfile) { setShowReactsSheet(true); } else { setShowSendReactionSheet(true); }
-                          }}>
-                          <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>
-                            {total} ❤️
-                          </span>
-                          {!isOwnProfile && (
-                            <>
-                              <span style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.15)', display: 'inline-block' }} />
-                              <span className="flex items-center gap-0.5">
-                                <img src={ctxIcon.src} alt="" className="w-5 h-5 object-contain" />
-                                <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>React</span>
-                              </span>
-                            </>
-                          )}
-                        </button>
-                      );
-                    })();
+                        {/* CTA pill */}
+                        {total > 0 ? (
+                          <button className="flex items-center gap-1.5 active:scale-90 transition-transform"
+                            style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderRadius: 16, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)' }}
+                            onClick={() => { setCardReactId(zoomedActivity.id); setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id)); if (isOwnProfile) { setShowReactsSheet(true); } else { setShowSendReactionSheet(true); } }}>
+                            <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>{total} ❤️</span>
+                            {!isOwnProfile && (
+                              <>
+                                <span style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.15)', display: 'inline-block' }} />
+                                <span className="flex items-center gap-0.5">
+                                  <img src={ctxIcon.src} alt="" className="w-5 h-5 object-contain" />
+                                  <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>React</span>
+                                </span>
+                              </>
+                            )}
+                          </button>
+                        ) : !isOwnProfile ? (
+                          <button className="flex items-center gap-1 active:scale-90 transition-transform"
+                            style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderRadius: 16, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)' }}
+                            onClick={() => { setCardReactId(zoomedActivity.id); setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id)); setShowSendReactionSheet(true); }}>
+                            <img src={ctxIcon.src} alt="" className="w-5 h-5 object-contain" />
+                            <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>React</span>
+                          </button>
+                        ) : null}
+                      </>
+                    );
                   })()}
                 </motion.div>
 
