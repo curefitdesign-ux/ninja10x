@@ -49,84 +49,87 @@ const BoldFrame = ({
   const prValue = pr ? (isNumericPr ? pr.replace(/[^0-9.]/g, '') : pr) : '';
   const hasMetrics = !!(durationValue || prValue);
 
+  const durationMetricName = (label2Name || 'Duration').toUpperCase();
+  const prMetricName = (label1Name || 'Distance').toUpperCase();
+
+  const mediaTransform =
+    imagePosition.x || imagePosition.y || imageScale !== 1
+      ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`
+      : `scale(${imageScale})`;
+
   return (
     <div
-      className="w-full h-full relative overflow-hidden"
+      className="w-full h-full relative overflow-hidden flex flex-col"
       style={{
         background: '#f0ede6',
-        borderRadius: '6px',
+        borderRadius: '1.4cqw',
         containerType: 'inline-size',
       }}
     >
-      {/* ── TOP HEADER — "I DID {activity} TODAY!" ── */}
-      <div
-        className="absolute left-0 right-0"
-        style={{
-          top: '4%',
-          paddingLeft: '7%',
-          paddingRight: '7%',
-          zIndex: 5,
-        }}
-      >
-        <div style={{ lineHeight: 0.95 }}>
-          <div
-            style={{
-              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-              fontWeight: 700,
-              fontSize: 'clamp(28px, 13cqw, 52px)',
-              color: '#1a1a1a',
-              textTransform: 'uppercase',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            I DID
-          </div>
-          <div
-            style={{
-              fontFamily: "'Caveat', cursive",
-              fontWeight: 700,
-              fontSize: 'clamp(32px, 14.5cqw, 56px)',
-              color: '#6B4EE6',
-              textTransform: 'capitalize',
-              lineHeight: 1,
-              marginTop: '-2px',
-            }}
-          >
-            {activity || 'Activity'}
-          </div>
-          <div
-            style={{
-              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-              fontWeight: 700,
-              fontSize: 'clamp(28px, 13cqw, 52px)',
-              color: '#1a1a1a',
-              textTransform: 'uppercase',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            TODAY!
-          </div>
+      {/* Header */}
+      <div style={{ padding: '5.2cqw 5.5cqw 0 5.5cqw' }}>
+        <div
+          style={{
+            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+            fontWeight: 700,
+            fontSize: '11.3cqw',
+            color: '#1a1a1a',
+            lineHeight: 0.92,
+            letterSpacing: '-0.06em',
+            textTransform: 'uppercase',
+          }}
+        >
+          I DID
+        </div>
+        <div
+          style={{
+            fontFamily: "'Caveat', cursive",
+            fontWeight: 700,
+            fontSize: '14.6cqw',
+            color: '#6B4EE6',
+            lineHeight: 0.82,
+            marginTop: '-1.2cqw',
+            marginLeft: '-0.5%',
+            transform: 'rotate(-1deg)',
+          }}
+        >
+          {activity || 'Activity'}
+        </div>
+        <div
+          style={{
+            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+            fontWeight: 700,
+            fontSize: '11.3cqw',
+            color: '#1a1a1a',
+            lineHeight: 0.92,
+            letterSpacing: '-0.06em',
+            textTransform: 'uppercase',
+            marginTop: '-0.8cqw',
+          }}
+        >
+          TODAY!
         </div>
       </div>
 
-      {/* ── SUBTITLE ROW — dashed line separator ── */}
+      {/* Meta Row */}
       <div
-        className="absolute left-0 right-0 flex items-center justify-between"
         style={{
-          top: '30%',
-          paddingLeft: '7%',
-          paddingRight: '7%',
-          zIndex: 5,
+          display: 'flex',
+          justifyContent: 'space-between',
+          gap: '2cqw',
+          padding: '2.8cqw 5.5cqw 1.2cqw 5.5cqw',
+          overflow: 'hidden',
         }}
       >
         <span
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 500,
-            fontSize: 'clamp(7px, 2.8cqw, 11px)',
+            fontSize: '3.15cqw',
             color: '#3a3a3a',
-            letterSpacing: '0.12em',
+            letterSpacing: '0.14em',
             textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
           }}
         >
           CULT NINJA JOURNEY
@@ -135,10 +138,11 @@ const BoldFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 500,
-            fontSize: 'clamp(7px, 2.8cqw, 11px)',
+            fontSize: '3.15cqw',
             color: '#3a3a3a',
-            letterSpacing: '0.12em',
+            letterSpacing: '0.14em',
             textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
           }}
         >
           WEEK {week} / DAY {day}
@@ -146,26 +150,26 @@ const BoldFrame = ({
       </div>
 
       {/* Dashed line above photo */}
-      <div
-        className="absolute left-0 right-0"
-        style={{
-          top: '33%',
-          marginLeft: '5%',
-          marginRight: '5%',
-          borderTop: '2px dashed #b8b4a8',
-          zIndex: 5,
-        }}
-      />
+      <div style={{ padding: '0 5cqw' }}>
+        <div
+          style={{
+            width: '100%',
+            borderTop: '0.35cqw dashed #b8b4a8',
+          }}
+        />
+      </div>
 
-      {/* ── PHOTO / VIDEO ── */}
+      {/* Photo / Video */}
       <div
-        className="absolute overflow-hidden"
         style={{
-          top: '35%',
-          left: '5%',
-          right: '5%',
-          bottom: hasMetrics ? '12%' : '3%',
-          borderRadius: '6px',
+          margin: '1.8cqw 4.8% 0 4.8%',
+          borderRadius: '1cqw',
+          overflow: 'hidden',
+          flex: 1,
+          position: 'relative',
+          background: '#000',
+          minHeight: 0,
+          marginBottom: hasMetrics ? '0' : '3.5cqw',
         }}
       >
         {isVideo ? (
@@ -177,9 +181,7 @@ const BoldFrame = ({
             muted
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
-            style={{
-              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-            }}
+            style={{ transform: mediaTransform }}
           />
         ) : (
           <img
@@ -189,117 +191,147 @@ const BoldFrame = ({
             loading="eager"
             decoding="async"
             fetchPriority="high"
-            style={{
-              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-            }}
+            style={{ transform: mediaTransform }}
           />
         )}
       </div>
 
-      {/* Dashed line below photo */}
+      {/* Bottom metrics */}
       {hasMetrics && (
-        <div
-          className="absolute left-0 right-0"
-          style={{
-            bottom: '10%',
-            marginLeft: '5%',
-            marginRight: '5%',
-            borderTop: '2px dashed #b8b4a8',
-            zIndex: 5,
-          }}
-        />
-      )}
+        <div style={{ padding: '0 5cqw 2.6cqw 5cqw', flexShrink: 0, overflow: 'hidden' }}>
+          <div
+            style={{
+              width: '100%',
+              borderTop: '0.35cqw dashed #b8b4a8',
+              marginTop: '1.6cqw',
+            }}
+          />
 
-      {/* ── BOTTOM METRICS ── */}
-      {hasMetrics && (
-        <div
-          className="absolute left-0 right-0 flex items-end justify-between"
-          style={{
-            bottom: '3%',
-            paddingLeft: '7%',
-            paddingRight: '7%',
-            zIndex: 5,
-          }}
-        >
-          {durationValue ? (
-            <div className="flex items-baseline gap-1.5">
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'baseline',
+              gap: '2.2cqw',
+              minHeight: '8.8cqw',
+              padding: '1.5cqw 0.4cqw 0 0.4cqw',
+            }}
+          >
+            <div
+              style={{
+                width: '48%',
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '0.6cqw',
+                visibility: durationValue ? 'visible' : 'hidden',
+                overflow: 'hidden',
+              }}
+            >
               <span
                 style={{
                   fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
                   fontWeight: 500,
-                  fontSize: 'clamp(7px, 2.8cqw, 11px)',
+                  fontSize: '3.2cqw',
                   color: '#3a3a3a',
-                  letterSpacing: '0.1em',
+                  letterSpacing: '0.09em',
                   textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                DURATION :
+                {durationMetricName} :
               </span>
               <span
                 style={{
-                  fontFamily: "'Caveat', cursive",
-                  fontWeight: 700,
-                  fontSize: 'clamp(18px, 7.8cqw, 30px)',
-                  color: '#6B4EE6',
-                  fontStyle: 'italic',
+                  display: 'inline-flex',
+                  alignItems: 'baseline',
+                  gap: '0.4cqw',
+                  whiteSpace: 'nowrap',
+                  minWidth: 0,
                 }}
               >
-                {durationValue}
-              </span>
-              <span
-                style={{
-                  fontFamily: "'Caveat', cursive",
-                  fontWeight: 700,
-                  fontSize: 'clamp(14px, 5.8cqw, 24px)',
-                  color: '#6B4EE6',
-                  fontStyle: 'italic',
-                }}
-              >
-                {durationUnit}
+                <span
+                  style={{
+                    fontFamily: "'Caveat', cursive",
+                    fontWeight: 700,
+                    fontSize: '6.2cqw',
+                    color: '#6B4EE6',
+                    fontStyle: 'italic',
+                    lineHeight: 1,
+                  }}
+                >
+                  {durationValue || '—'}
+                </span>
+                {durationUnit && (
+                  <span
+                    style={{
+                      fontFamily: "'Caveat', cursive",
+                      fontWeight: 700,
+                      fontSize: '5cqw',
+                      color: '#6B4EE6',
+                      fontStyle: 'italic',
+                      lineHeight: 1,
+                    }}
+                  >
+                    {durationUnit}
+                  </span>
+                )}
               </span>
             </div>
-          ) : null}
 
-          {prValue ? (
-            <div className="flex items-baseline gap-1.5">
+            <div
+              style={{
+                width: '48%',
+                display: 'flex',
+                alignItems: 'baseline',
+                justifyContent: 'flex-end',
+                gap: '0.6cqw',
+                visibility: prValue ? 'visible' : 'hidden',
+                overflow: 'hidden',
+              }}
+            >
               <span
                 style={{
                   fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
                   fontWeight: 500,
-                  fontSize: 'clamp(7px, 2.8cqw, 11px)',
+                  fontSize: '3.2cqw',
                   color: '#3a3a3a',
-                  letterSpacing: '0.1em',
+                  letterSpacing: '0.09em',
                   textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                {(label1Name || 'DISTANCE').toUpperCase()} :
+                {prMetricName} :
               </span>
               <span
                 style={{
                   fontFamily: "'Caveat', cursive",
                   fontWeight: 700,
-                  fontSize: isNumericPr ? 'clamp(18px, 7.8cqw, 30px)' : 'clamp(14px, 5.8cqw, 24px)',
+                  fontSize: isNumericPr ? '6.2cqw' : '4.8cqw',
                   color: '#6B4EE6',
                   fontStyle: 'italic',
+                  lineHeight: 1,
+                  whiteSpace: 'nowrap',
                 }}
               >
-                {prValue}
+                {prValue || '—'}
               </span>
               {prUnit && (
                 <span
                   style={{
                     fontFamily: "'Caveat', cursive",
                     fontWeight: 700,
-                    fontSize: 'clamp(14px, 5.8cqw, 24px)',
+                    fontSize: '4.8cqw',
                     color: '#6B4EE6',
                     fontStyle: 'italic',
+                    lineHeight: 1,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {prUnit}
                 </span>
               )}
             </div>
-          ) : null}
+          </div>
         </div>
       )}
     </div>

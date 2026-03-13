@@ -16,25 +16,41 @@ interface TicketFrameProps {
   label2?: string;
 }
 
-const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, imagePosition, imageScale, label1, label2 }: TicketFrameProps) => {
+const TicketFrame = ({
+  imageUrl,
+  isVideo,
+  activity,
+  week,
+  day,
+  duration,
+  pr,
+  imagePosition,
+  imageScale,
+  label1,
+  label2,
+}: TicketFrameProps) => {
   const metricLabel = label1 || 'Distance';
   const durationLabel = label2 || 'Duration';
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Ensure video plays on mount and when URL changes
   useEffect(() => {
     if (isVideo && videoRef.current) {
       videoRef.current.load();
       videoRef.current.play().catch(() => {});
     }
   }, [isVideo, imageUrl]);
-  
+
+  const mediaTransform =
+    imagePosition.x || imagePosition.y || imageScale !== 1
+      ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`
+      : `scale(${imageScale})`;
+
   return (
     <div className="w-full h-full overflow-hidden relative bg-black" style={{ containerType: 'inline-size' }}>
-      {/* Layer 1: Background Image or Video (full-bleed) */}
+      {/* Layer 1: Background Image or Video */}
       <div className="absolute inset-0 overflow-hidden z-0">
         {isVideo ? (
-          <video 
+          <video
             ref={videoRef}
             src={imageUrl}
             autoPlay
@@ -42,172 +58,163 @@ const TicketFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ima
             muted
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
-            style={{
-              transform: (imagePosition.x || imagePosition.y || imageScale !== 1) ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` : `scale(${imageScale})`,
-            }}
+            style={{ transform: mediaTransform }}
           />
         ) : (
-          <img 
+          <img
             src={imageUrl}
             alt="Activity"
             className="absolute inset-0 w-full h-full object-cover"
             loading="eager"
             decoding="async"
             fetchPriority="high"
-            style={{
-              transform: (imagePosition.x || imagePosition.y || imageScale !== 1) ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` : `scale(${imageScale})`,
-            }}
+            style={{ transform: mediaTransform }}
           />
         )}
       </div>
-      
-      {/* Layer 2: Ticket Frame Asset (with transparent window) - reduced size */}
-      <img 
+
+      {/* Layer 2: Ticket frame */}
+      <img
         src={ticketFrameAsset}
         alt=""
         className="absolute z-10 pointer-events-none"
-        style={{ 
+        style={{
           objectFit: 'fill',
           top: '4%',
           left: '6%',
           width: '88%',
-          height: '92%'
+          height: '92%',
         }}
       />
-      
-      {/* Layer 3: Title Text (dynamic) - positioned in top cream area */}
-      <div 
+
+      {/* Layer 3: Title */}
+      <div
         className="absolute z-20 left-0 right-0 flex items-center justify-center"
-        style={{ 
-          top: 'calc(4% + 20px)',
-          height: '6%'
+        style={{
+          top: '13.5cqw',
+          height: '6%',
         }}
       >
-        <h1 
-          className="text-[#2A2A2A] uppercase tracking-wide leading-none text-center"
-          style={{ 
+        <h1
+          className="text-[#2A2A2A] uppercase leading-none text-center"
+          style={{
             fontFamily: 'Impact, "Arial Black", sans-serif',
-            fontSize: 'clamp(24px, 10.5cqw, 36px)',
-            letterSpacing: '2px'
+            fontSize: '10.5cqw',
+            letterSpacing: '0.6cqw',
           }}
         >
           {activity || 'TENNIS'}
         </h1>
       </div>
-      
-      {/* Layer 4: Ribbon Asset + Text (positioned at bottom of photo area) */}
-      <div 
+
+      {/* Layer 4: Ribbon */}
+      <div
         className="absolute z-30 left-1/2 -translate-x-1/2 flex items-center justify-center"
-        style={{ 
+        style={{
           top: '65%',
           width: '50%',
-          height: '4%'
+          height: '4%',
         }}
       >
-        {/* Ribbon image */}
-        <img 
+        <img
           src={ribbonAsset}
           alt=""
           className="absolute w-full h-auto"
-          style={{ 
+          style={{
             transform: 'rotate(-4deg)',
-            filter: 'brightness(0.92)'
+            filter: 'brightness(0.92)',
           }}
         />
-        {/* Ribbon text */}
-        <span 
-          className="relative z-10 text-[#5A5A5A] font-bold tracking-wider whitespace-nowrap"
-          style={{ 
+        <span
+          className="relative z-10 text-[#5A5A5A] font-bold whitespace-nowrap"
+          style={{
             fontFamily: 'Impact, "Arial Black", sans-serif',
-            fontSize: 'clamp(10px, 3.8cqw, 13px)',
-            letterSpacing: '1.5px',
-            transform: 'rotate(-4deg)'
+            fontSize: '3.8cqw',
+            letterSpacing: '0.4cqw',
+            transform: 'rotate(-4deg)',
           }}
         >
           WEEK {week} | DAY {day}
         </span>
       </div>
-      
-      {/* Layer 5: Dashed Divider Line */}
-      <div 
-        className="absolute z-20 left-[10%] right-[10%]"
-        style={{ top: '73%' }}
-      >
-        <div 
+
+      {/* Layer 5: Dashed divider */}
+      <div className="absolute z-20 left-[10%] right-[10%]" style={{ top: '73%' }}>
+        <div
           className="w-full"
-          style={{ 
-            borderTop: '2px dashed #C8C5BC'
+          style={{
+            borderTop: '0.45cqw dashed #C8C5BC',
           }}
         />
       </div>
-      
-      {/* Layer 6-9: Stats Section - only show if user entered values */}
+
+      {/* Layer 6-9: Stats section */}
       {(duration || pr) && (
-        <div 
+        <div
           className="absolute z-20 left-0 right-0 px-[10%] flex items-center justify-center"
-          style={{ 
+          style={{
             top: '71%',
-            height: '24%'
+            height: '24%',
           }}
         >
           <div className="flex items-center justify-center w-full">
-            {/* Left stat - Metric Label + Value */}
             {pr && (
               <div className="text-center flex-1">
-                <p 
+                <p
                   className="text-[#888888] font-normal mb-1"
-                  style={{ 
+                  style={{
                     fontFamily: 'system-ui, -apple-system, sans-serif',
-                    fontSize: 'clamp(9px, 3.3cqw, 12px)',
-                    letterSpacing: '0.5px'
+                    fontSize: '3.3cqw',
+                    letterSpacing: '0.15cqw',
                   }}
                 >
                   {metricLabel}
                 </p>
-                <p 
+                <p
                   className="text-[#2A2A2A] leading-none"
-                  style={{ 
+                  style={{
                     fontFamily: 'Impact, "Arial Black", sans-serif',
-                    fontSize: 'clamp(32px, 13cqw, 48px)',
-                    fontWeight: 900
+                    fontSize: '13cqw',
+                    fontWeight: 900,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {pr}
                 </p>
               </div>
             )}
-            
-            {/* Vertical divider - only show if both values present */}
+
             {pr && duration && (
-              <div 
-                className="mx-3 rounded-full"
-                style={{ 
-                  width: '2px',
-                  height: 'clamp(40px, 15cqw, 60px)',
-                  background: '#2A2A2A'
+              <div
+                style={{
+                  width: '0.5cqw',
+                  height: '15cqw',
+                  margin: '0 1.6cqw',
+                  borderRadius: '9999px',
+                  background: '#2A2A2A',
                 }}
               />
             )}
-            
-            {/* Right stat - Duration Label + Value */}
+
             {duration && (
               <div className="text-center flex-1">
-                <p 
+                <p
                   className="text-[#888888] font-normal mb-1"
-                  style={{ 
+                  style={{
                     fontFamily: 'system-ui, -apple-system, sans-serif',
-                    fontSize: 'clamp(9px, 3.3cqw, 12px)',
-                    letterSpacing: '0.5px'
+                    fontSize: '3.3cqw',
+                    letterSpacing: '0.15cqw',
                   }}
                 >
                   {durationLabel}
                 </p>
-                <p 
+                <p
                   className="text-[#2A2A2A] leading-none uppercase"
-                  style={{ 
+                  style={{
                     fontFamily: 'Impact, "Arial Black", sans-serif',
-                    fontSize: 'clamp(32px, 13cqw, 48px)',
-                    fontWeight: 900
+                    fontSize: '13cqw',
+                    fontWeight: 900,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {duration}
