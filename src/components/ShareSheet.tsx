@@ -171,8 +171,17 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
         }))
     : [];
   
-  const shareText = '🏃 Check out my fitness activity! #FitnessJourney #HealthyLifestyle';
-  const shareUrl = window.location.href;
+  // Contextual share text & clean URL
+  const sharePayload = (() => {
+    const { buildFullSharePayload } = require('@/lib/share-utils');
+    return buildFullSharePayload({
+      activity: frameProps?.activity,
+      dayNumber,
+      isOwnStory: true,
+    });
+  })();
+  const shareText = sharePayload.text;
+  const shareUrl = sharePayload.url;
   const fullShareText = `${shareText}\n\n${shareUrl}`;
 
   // Extract dominant color from image
