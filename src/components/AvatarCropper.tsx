@@ -193,12 +193,7 @@ const AvatarCropper = ({ imageSrc, onConfirm, onCancel }: AvatarCropperProps) =>
     const srcX = srcCenterX - srcSize / 2;
     const srcY = srcCenterY - srcSize / 2;
     
-    // Draw with circular clip
-    ctx.beginPath();
-    ctx.arc(outputSize / 2, outputSize / 2, outputSize / 2, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.clip();
-    
+    // Draw square crop (no circular clip)
     ctx.drawImage(
       image,
       srcX, srcY, srcSize, srcSize,
