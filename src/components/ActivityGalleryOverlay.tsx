@@ -782,15 +782,18 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                       <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.85)' }}>
                                         {total} ❤️
                                       </span>
-                                      {!isOwnProfile && (
-                                        <>
-                                          <span style={{ width: 1, height: 14, background: 'rgba(255,255,255,0.15)', display: 'inline-block' }} />
-                                          <span className="flex items-center gap-0.5">
-                                            <span style={{ fontSize: 12 }}>🔥</span>
-                                            <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.85)' }}>React</span>
-                                          </span>
-                                        </>
-                                      )}
+                                      {!isOwnProfile && (() => {
+                                        const ctxIcon = getActivityReactionIcon(act.activity);
+                                        return (
+                                          <>
+                                            <span style={{ width: 1, height: 14, background: 'rgba(255,255,255,0.15)', display: 'inline-block' }} />
+                                            <span className="flex items-center gap-0.5">
+                                              <img src={ctxIcon.src} alt="" className="w-4 h-4 object-contain" />
+                                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.85)' }}>React</span>
+                                            </span>
+                                          </>
+                                        );
+                                      })()}
                                     </button>
                                   </div>
                                 );
