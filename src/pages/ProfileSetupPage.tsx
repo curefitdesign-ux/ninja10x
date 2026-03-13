@@ -238,7 +238,7 @@ const ProfileSetupPage = () => {
               >
                 <Camera className="w-5 h-5 text-white" />
               </div>
-              <span className="text-white/60 text-xs font-medium">Edit</span>
+              
             </div>
           )}
           {heroImage && !editMode && (
@@ -295,7 +295,7 @@ const ProfileSetupPage = () => {
               India's Ultimate{'\n'}Habit Builder.
             </h1>
           )}
-          <p className="text-white/50 text-base mt-3 text-center">What should we call you?</p>
+          {!editMode && <p className="text-white/50 text-base mt-3 text-center">What should we call you?</p>}
         </div>
 
         {/* Name input */}
