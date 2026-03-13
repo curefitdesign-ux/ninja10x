@@ -238,7 +238,7 @@ const ProfileSetupPage = () => {
               >
                 <Camera className="w-5 h-5 text-white" />
               </div>
-              <span className="text-white/60 text-xs font-medium">Edit</span>
+              
             </div>
           )}
           {heroImage && !editMode && (
