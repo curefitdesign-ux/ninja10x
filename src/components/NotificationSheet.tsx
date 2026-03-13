@@ -260,7 +260,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
               reactionType: newReaction.reaction_type,
               timestamp: new Date(),
               dayNumber: activityInfo?.day_number,
-              activityImageUrl: activityInfo?.is_video ? (activityInfo?.original_url || undefined) : activityInfo?.storage_url,
+              activityImageUrl: activityInfo?.storage_url || undefined,
               activityType: activityInfo?.activity || undefined,
             };
 
