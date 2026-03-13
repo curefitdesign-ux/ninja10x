@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, forwardRef, useMemo } from 'react';
+import { ALL_REACTION_IMAGES } from '@/lib/reaction-images';
 import { buildFullSharePayload } from '@/lib/share-utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
