@@ -215,7 +215,7 @@ const ScrapbookFrame = ({
             justifyContent: 'space-between',
             alignItems: 'baseline',
             padding: '2% 0.5% 3% 0.5%',
-            minHeight: '8cqw',
+            minHeight: 'clamp(16px, 8cqw, 28px)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', visibility: duration ? 'visible' : 'hidden' }}>
