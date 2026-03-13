@@ -281,7 +281,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
         </div>
       </motion.div>
 
-      <NotificationSheet isOpen={showNotificationSheet} onClose={() => { setShowNotificationSheet(false); seenCountRef.current = totalNotificationCount; }} onNotificationCountChange={setTotalNotificationCount} />
+      <NotificationSheet isOpen={showNotificationSheet} onClose={() => { setShowNotificationSheet(false); markSeen(); }} onNotificationCountChange={setTotalNotificationCount} />
       <MediaSourceSheet isOpen={showMediaSourceSheet} onClose={() => setShowMediaSourceSheet(false)} dayNumber={activityCount + 1} />
 
       <Sheet open={showEllipsisMenu} onOpenChange={setShowEllipsisMenu}>
