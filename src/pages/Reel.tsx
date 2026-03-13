@@ -588,7 +588,7 @@ const Reel = () => {
       setCurrentActivityIndex(prev => prev + 1);
     } else {
       // Mark current user as fully viewed and always auto-advance to next user
-      setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
+      markUserViewed(currentGroup.userId);
       if (effectiveUserGroups.length > 1) {
         const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
         const nextGroup = effectiveUserGroups[nextIdx];
