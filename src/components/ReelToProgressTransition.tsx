@@ -495,6 +495,7 @@ export default function ReelToProgressTransition({
           initialIndex={galleryInitialIndex}
           onLogActivity={onLogActivity}
           isOwnProfile={true}
+          userProfile={profile ? { displayName: profile.display_name, avatarUrl: profile.avatar_url } : undefined}
         />
       </div>
     );
