@@ -1126,13 +1126,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 >
                                   <div className="relative">
                                     <div className="rounded-full p-[2px]" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.08))' }}>
-                                      {reactor.avatarUrl ? (
-                                        <img src={reactor.avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover" style={{ border: '2px solid rgba(0,0,0,0.3)' }} />
-                                      ) : (
-                                        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.12)', border: '2px solid rgba(0,0,0,0.3)' }}>
-                                          <span className="text-white/50 text-sm font-bold">{(reactor.displayName || 'U')[0].toUpperCase()}</span>
-                                        </div>
-                                      )}
+                                      <ProfileAvatar avatarUrl={reactor.avatarUrl || ''} displayName={reactor.displayName || 'User'} size={40} className="border-2 border-black/30" />
                                     </div>
                                     {reactionImg && (
                                       <div className="absolute flex items-center justify-center" style={{ bottom: -3, right: -3, width: 20, height: 20, borderRadius: '50%', background: 'rgba(30,20,50,0.85)', border: '1.5px solid rgba(255,255,255,0.15)' }}>
