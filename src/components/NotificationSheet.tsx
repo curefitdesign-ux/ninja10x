@@ -186,6 +186,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
         nudgeNotifs = Array.from(nudgeGroups.values()).map(g => ({
           id: `nudge-${g.latestId}`,
           activityId: '',
+          reactorUserId: g.senderId,
           reactorName: profileMap.get(g.senderId)?.name || 'Someone',
           reactorAvatarUrl: profileMap.get(g.senderId)?.avatar || undefined,
           reactionType: 'nudge',
