@@ -1924,14 +1924,15 @@ const Reel = () => {
                                 background: isLogActivityCard
                                   ? 'linear-gradient(155deg, hsl(160 40% 35%) 0%, hsl(175 45% 30%) 25%, hsl(190 50% 28%) 50%, hsl(200 55% 24%) 75%, hsl(210 55% 18%) 100%)'
                                   : 'transparent',
-                                border: isLogActivityCard
-                                  ? '1.5px solid transparent'
-                                  : 'none',
-                                borderImage: isLogActivityCard
-                                  ? 'linear-gradient(160deg, rgba(180,255,230,0.35) 0%, rgba(100,220,200,0.15) 30%, rgba(80,180,220,0.25) 60%, rgba(150,255,210,0.3) 100%) 1'
-                                  : 'none',
+                                border: 'none',
                                 boxShadow: isLogActivityCard
-                                  ? 'inset 0 1px 2px rgba(180,255,230,0.12), inset 0 -1px 1px rgba(80,180,220,0.06), 0 0 50px rgba(80, 200, 180, 0.12), 0 2px 20px rgba(0,0,0,0.3)'
+                                  ? [
+                                      'inset 0 0 0 1.5px rgba(150,240,210,0.18)',
+                                      'inset 0 1px 2px rgba(180,255,230,0.15)',
+                                      'inset 0 -1px 1px rgba(80,180,220,0.08)',
+                                      '0 0 50px rgba(80, 200, 180, 0.12)',
+                                      '0 2px 20px rgba(0,0,0,0.3)',
+                                    ].join(', ')
                                   : 'none',
                                 zIndex: 3,
                               }}
