@@ -398,7 +398,26 @@ const Reel = () => {
     return allGroups.filter(g => g.activities.length > 0);
   }, [userGroups, user, myActivities, profile, sourceUserId, deepLinkActivityId]);
 
-  // Stabilize currentUserIndex when groups reorder due to viewedUsers change
+  // Initialize viewedUsers from localStorage — compare stored last-seen activity ID with current latest
+  const viewedInitializedRef = useRef(false);
+  useEffect(() => {
+    if (viewedInitializedRef.current || effectiveUserGroups.length === 0) return;
+    viewedInitializedRef.current = true;
+    try {
+      const stored: Record<string, string> = JSON.parse(localStorage.getItem(VIEWED_STORAGE_KEY) || '{}');
+      const alreadyViewed = new Set<string>();
+      for (const group of effectiveUserGroups) {
+        const latestReal = group.activities.find(a => !a.id.startsWith('log-activity') && !a.id.startsWith('week-complete') && !a.id.startsWith('week-recap'));
+        if (latestReal && stored[group.userId] === latestReal.id) {
+          alreadyViewed.add(group.userId);
+        }
+      }
+      if (alreadyViewed.size > 0) {
+        setViewedUsers(alreadyViewed);
+      }
+    } catch {}
+  }, [effectiveUserGroups]);
+
   const currentUserIdRef = useRef<string>('');
   // Flag to suppress ref-update effect during programmatic navigation
   const navigatingRef = useRef(false);
