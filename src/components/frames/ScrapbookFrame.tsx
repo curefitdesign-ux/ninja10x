@@ -160,7 +160,7 @@ const ScrapbookFrame = ({
       {/* ── Photo Area — takes remaining space ── */}
       <div
         style={{
-          margin: '5px 4.5% 0 4.5%',
+          margin: '1.5cqw 4.5% 0 4.5%',
           borderRadius: '3px',
           overflow: 'hidden',
           flex: 1,
