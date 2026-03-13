@@ -198,17 +198,17 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
                     style={{ color: textColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="Every habit starts" delay={0.4} />
+                    <RevealLine text="Every habit starts" delay={0.3} />
                     <br />
-                    <RevealLine text="with a single move." delay={2.2} />
+                    <RevealLine text="with a single move." delay={1.8} />
                   </h2>
                   <p
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-8"
                     style={{ color: mutedColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="Running. Cricket. Yoga." delay={4.0} />
+                    <RevealLine text="Snap a photo or video." delay={3.2} />
                     <br />
-                    <RevealLine text="Pick yours. Show up." delay={5.8} />
+                    <RevealLine text="That's your log. Done." delay={4.8} />
                   </p>
                 </div>
               </motion.div>
