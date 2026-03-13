@@ -45,6 +45,7 @@ const getDayLabel = (date: Date): string => {
 export interface Notification {
   id: string;
   activityId: string;
+  reactorUserId?: string;
   reactorName: string;
   reactorAvatarUrl?: string;
   reactionType: string;
