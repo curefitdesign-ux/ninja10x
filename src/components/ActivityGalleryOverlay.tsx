@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, forwardRef, useMemo } from 'react';
-import { ALL_REACTION_IMAGES } from '@/lib/reaction-images';
+import { ALL_REACTION_IMAGES, getActivityReactionIcon } from '@/lib/reaction-images';
 import { buildFullSharePayload } from '@/lib/share-utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
@@ -751,7 +751,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 const ar = localReactions[act.id];
                                 const total = ar?.total || 0;
                                 if (total === 0 && !isOwnProfile && isOwnProfile === false) {
-                                  // Show just React pill for visitors with no reactions yet
+                                  const ctxIcon = getActivityReactionIcon(act.activity);
                                   return (
                                     <div style={{ marginTop: 8, marginLeft: idx % 2 === 0 ? '0%' : '10%', paddingLeft: 2 }}>
                                       <button className="flex items-center gap-1 active:scale-90 transition-transform"
@@ -760,7 +760,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                           borderRadius: 12, padding: '4px 10px', border: '1px solid rgba(255,255,255,0.12)',
                                         }}
                                         onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}>
-                                        <span style={{ fontSize: 12 }}>🔥</span>
+                                        <img src={ctxIcon.src} alt="" className="w-4 h-4 object-contain" />
                                         <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.85)' }}>React</span>
                                       </button>
                                     </div>
@@ -782,15 +782,18 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                       <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.85)' }}>
                                         {total} ❤️
                                       </span>
-                                      {!isOwnProfile && (
-                                        <>
-                                          <span style={{ width: 1, height: 14, background: 'rgba(255,255,255,0.15)', display: 'inline-block' }} />
-                                          <span className="flex items-center gap-0.5">
-                                            <span style={{ fontSize: 12 }}>🔥</span>
-                                            <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.85)' }}>React</span>
-                                          </span>
-                                        </>
-                                      )}
+                                      {!isOwnProfile && (() => {
+                                        const ctxIcon = getActivityReactionIcon(act.activity);
+                                        return (
+                                          <>
+                                            <span style={{ width: 1, height: 14, background: 'rgba(255,255,255,0.15)', display: 'inline-block' }} />
+                                            <span className="flex items-center gap-0.5">
+                                              <img src={ctxIcon.src} alt="" className="w-4 h-4 object-contain" />
+                                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.85)' }}>React</span>
+                                            </span>
+                                          </>
+                                        );
+                                      })()}
                                     </button>
                                   </div>
                                 );
@@ -1157,23 +1160,27 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           </div>
 
                           {/* React button for visitors */}
-                          {!isOwnProfile && (
-                            <button className="flex items-center gap-1 active:scale-90 transition-transform"
-                              style={{
-                                background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                                borderRadius: 16, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)',
-                              }}
-                              onClick={() => { setCardReactId(zoomedActivity.id); setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id)); setShowSendReactionSheet(true); }}>
-                              <span style={{ fontSize: 14 }}>🔥</span>
-                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>React</span>
-                            </button>
-                          )}
+                          {!isOwnProfile && (() => {
+                            const ctxIcon = getActivityReactionIcon(zoomedActivity.activity);
+                            return (
+                              <button className="flex items-center gap-1 active:scale-90 transition-transform"
+                                style={{
+                                  background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                                  borderRadius: 16, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)',
+                                }}
+                                onClick={() => { setCardReactId(zoomedActivity.id); setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id)); setShowSendReactionSheet(true); }}>
+                                <img src={ctxIcon.src} alt="" className="w-5 h-5 object-contain" />
+                                <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>React</span>
+                              </button>
+                            );
+                          })()}
                         </>
                       );
                     }
 
                     // No profiles available — fallback to count pill
                     if (total === 0 && !isOwnProfile) {
+                      const ctxIcon = getActivityReactionIcon(zoomedActivity.activity);
                       return (
                         <button className="flex items-center gap-1 active:scale-90 transition-transform"
                           style={{
@@ -1181,37 +1188,40 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                             borderRadius: 16, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)',
                           }}
                           onClick={() => { setCardReactId(zoomedActivity.id); setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id)); setShowSendReactionSheet(true); }}>
-                          <span style={{ fontSize: 14 }}>🔥</span>
+                          <img src={ctxIcon.src} alt="" className="w-5 h-5 object-contain" />
                           <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>React</span>
                         </button>
                       );
                     }
 
-                    return (
-                      <button className="flex items-center gap-1.5 active:scale-90 transition-transform"
-                        style={{
-                          background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                          borderRadius: 16, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)',
-                        }}
-                        onClick={() => {
-                          setCardReactId(zoomedActivity.id);
-                          setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id));
-                          if (isOwnProfile) { setShowReactsSheet(true); } else { setShowSendReactionSheet(true); }
-                        }}>
-                        <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>
-                          {total} ❤️
-                        </span>
-                        {!isOwnProfile && (
-                          <>
-                            <span style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.15)', display: 'inline-block' }} />
-                            <span className="flex items-center gap-0.5">
-                              <span style={{ fontSize: 14 }}>🔥</span>
-                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>React</span>
-                            </span>
-                          </>
-                        )}
-                      </button>
-                    );
+                    return (() => {
+                      const ctxIcon = getActivityReactionIcon(zoomedActivity.activity);
+                      return (
+                        <button className="flex items-center gap-1.5 active:scale-90 transition-transform"
+                          style={{
+                            background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                            borderRadius: 16, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)',
+                          }}
+                          onClick={() => {
+                            setCardReactId(zoomedActivity.id);
+                            setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id));
+                            if (isOwnProfile) { setShowReactsSheet(true); } else { setShowSendReactionSheet(true); }
+                          }}>
+                          <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>
+                            {total} ❤️
+                          </span>
+                          {!isOwnProfile && (
+                            <>
+                              <span style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.15)', display: 'inline-block' }} />
+                              <span className="flex items-center gap-0.5">
+                                <img src={ctxIcon.src} alt="" className="w-5 h-5 object-contain" />
+                                <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>React</span>
+                              </span>
+                            </>
+                          )}
+                        </button>
+                      );
+                    })();
                   })()}
                 </motion.div>
 
