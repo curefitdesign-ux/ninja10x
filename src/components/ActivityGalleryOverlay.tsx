@@ -117,6 +117,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [showReactsSheet, setShowReactsSheet] = useState(false);
   const [showSendReactionSheet, setShowSendReactionSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
+  const [zoomedActivity, setZoomedActivity] = useState<GalleryActivity | null>(null);
   
   const [cardReactId, setCardReactId] = useState<string | null>(null);
 
@@ -690,7 +691,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                               {/* Card */}
                               <div
-                                className="relative overflow-visible"
+                                className="relative overflow-visible cursor-pointer"
+                                onClick={() => setZoomedActivity(act)}
                                 style={{
                                   width: '48%', aspectRatio: '9/16', borderRadius: 4,
                                   transform: `rotate(${activeRotation}deg) translateX(${offsetX}px)`,
@@ -939,6 +941,92 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               )}
             </div>
           </div>
+
+          {/* Zoomed activity card overlay */}
+          <AnimatePresence>
+            {zoomedActivity && (
+              <motion.div
+                className="fixed inset-0 flex items-center justify-center"
+                style={{ zIndex: 65 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                onClick={() => setZoomedActivity(null)}
+              >
+                {/* Blurred background from activity image */}
+                <div className="absolute inset-0" style={{ overflow: 'hidden' }}>
+                  <img
+                    src={zoomedActivity.originalUrl || zoomedActivity.storageUrl}
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{
+                      filter: 'blur(50px) saturate(180%) brightness(0.4)',
+                      transform: 'scale(1.3)',
+                    }}
+                  />
+                  <div className="absolute inset-0" style={{ background: 'rgba(0, 0, 0, 0.5)' }} />
+                </div>
+
+                {/* Zoomed card */}
+                <motion.div
+                  className="relative"
+                  style={{
+                    width: '72%',
+                    maxWidth: 320,
+                    aspectRatio: '9/16',
+                    borderRadius: 12,
+                    overflow: 'hidden',
+                    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.6)',
+                    containerType: 'inline-size',
+                  }}
+                  initial={{ scale: 0.7, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 26 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {zoomedActivity.frame ? (
+                    <StoryFrameRenderer
+                      imageUrl={zoomedActivity.originalUrl || zoomedActivity.storageUrl}
+                      isVideo={zoomedActivity.isVideo}
+                      activity={zoomedActivity.activity}
+                      frame={zoomedActivity.frame}
+                      duration={zoomedActivity.duration}
+                      pr={zoomedActivity.pr}
+                      dayNumber={zoomedActivity.dayNumber}
+                    />
+                  ) : zoomedActivity.isVideo ? (
+                    <video
+                      src={zoomedActivity.originalUrl || zoomedActivity.storageUrl}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      muted
+                      playsInline
+                      autoPlay
+                      loop
+                    />
+                  ) : (
+                    <img
+                      src={zoomedActivity.originalUrl || zoomedActivity.storageUrl}
+                      alt={`Activity ${zoomedActivity.dayNumber}`}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  )}
+                </motion.div>
+
+                {/* Close hint */}
+                <motion.p
+                  className="absolute text-white/30 text-xs"
+                  style={{ bottom: 'calc(env(safe-area-inset-bottom, 16px) + 24px)' }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  Tap anywhere to close
+                </motion.p>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Sheets */}
           {showReactsSheet && createPortal(
