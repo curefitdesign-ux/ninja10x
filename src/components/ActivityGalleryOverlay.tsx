@@ -87,10 +87,15 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [nudgeCount, setNudgeCount] = useState(0);
   const [nudgeRotation, setNudgeRotation] = useState(0);
   const [nudgeNumberBehind, setNudgeNumberBehind] = useState(false);
+  const [nudgeSentToday, setNudgeSentToday] = useState(false);
+  const [todayNudgeTotal, setTodayNudgeTotal] = useState(0);
   const [topCardId, setTopCardId] = useState<string | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const nudgeAudioRef = useRef<HTMLAudioElement | null>(null);
   const nudgeHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const portalContainer = usePortalContainer();
+  const { user } = useAuth();
 
   // Preload nudge sound for instant playback
   useEffect(() => {
@@ -101,9 +106,25 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     nudgeAudioRef.current = audio;
     return () => { nudgeAudioRef.current = null; };
   }, []);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const portalContainer = usePortalContainer();
-  const { user } = useAuth();
+
+  // Fetch today's nudge count for this target user
+  useEffect(() => {
+    if (!user || !targetUserId || isOwnProfile) return;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    supabase
+      .from('nudges')
+      .select('id', { count: 'exact', head: true })
+      .eq('from_user_id', user.id)
+      .eq('to_user_id', targetUserId)
+      .gte('created_at', todayStart.toISOString())
+      .then(({ count }) => {
+        const c = count || 0;
+        setTodayNudgeTotal(c);
+        setNudgeCount(c);
+        if (c > 0) setNudgeSentToday(true);
+      });
+  }, [user, targetUserId, isOwnProfile]);
 
   // Hide bottom nav on open, show on close
   useEffect(() => {
@@ -839,8 +860,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
               {/* Nudge button — shown for other users' profiles */}
               {!isOwnProfile && !current.isPlaceholder && (
                 <div className="relative">
-                  {/* Counter — Bump-style pop animation */}
-                  {nudgeCount > 0 && (
+                  {/* Counter — Bump-style pop animation (only on new taps) */}
+                  {nudgeCount > todayNudgeTotal && (
                     <motion.span
                       key={nudgeCount}
                       initial={{ scale: 0, y: 20, opacity: 0, rotate: nudgeRotation }}
@@ -877,16 +898,15 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       e.stopPropagation();
                       setNudgeBellAnim(true);
                       setNudgeNumberBehind(false);
-                      setNudgeRotation(Math.floor(Math.random() * 31) - 15); // -15 to +15 degrees
+                      setNudgeRotation(Math.floor(Math.random() * 31) - 15);
                       setNudgeCount(prev => prev + 1);
-                      // Play preloaded audio instantly
+                      setNudgeSentToday(true);
                       try {
                         if (nudgeAudioRef.current) {
                           nudgeAudioRef.current.currentTime = 0;
                           nudgeAudioRef.current.play().catch(() => {});
                         }
                       } catch {}
-                      // Hide number behind button after 0.75s
                       if (nudgeHideTimerRef.current) clearTimeout(nudgeHideTimerRef.current);
                       nudgeHideTimerRef.current = setTimeout(() => setNudgeNumberBehind(true), 750);
                       if (user && targetUserId) {
@@ -896,8 +916,14 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                     className="active:scale-[0.95] transition-transform"
                     style={{
                       height: 52, borderRadius: 26, paddingLeft: 18, paddingRight: 24,
-                      background: 'rgba(255, 255, 255, 0.08)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+                      background: nudgeSentToday
+                        ? 'rgba(255, 255, 255, 0.14)'
+                        : 'rgba(255, 255, 255, 0.08)',
+                      backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                      border: nudgeSentToday
+                        ? '1px solid rgba(255, 255, 255, 0.2)'
+                        : '1px solid rgba(255, 255, 255, 0.12)',
+                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
                     }}
                   >
                     <div className="flex items-center gap-3 h-full">
@@ -910,7 +936,24 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                         transition={{ duration: 0.6, ease: 'easeInOut' }}
                         onAnimationComplete={() => setNudgeBellAnim(false)}
                       />
-                      <span className="text-white/80 text-sm font-medium">Nudge to log activity</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-white/80 text-sm font-medium">
+                          {nudgeSentToday ? 'Nudged!' : 'Nudge'}
+                        </span>
+                        {nudgeCount > 0 && (
+                          <span
+                            className="flex items-center justify-center text-xs font-bold"
+                            style={{
+                              minWidth: 20, height: 20, borderRadius: 10,
+                              background: 'rgba(255, 255, 255, 0.2)',
+                              color: 'rgba(255, 255, 255, 0.9)',
+                              padding: '0 5px',
+                            }}
+                          >
+                            {nudgeCount}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </button>
                 </div>
