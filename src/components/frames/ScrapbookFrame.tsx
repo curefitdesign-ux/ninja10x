@@ -252,7 +252,7 @@ const ScrapbookFrame = ({
               style={{
                 fontFamily: "'Bebas Neue', sans-serif",
                 fontWeight: 400,
-                fontSize: '4.1cqw',
+                fontSize: 'clamp(8px, 4.1cqw, 14px)',
                 color: '#2e2a25',
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
