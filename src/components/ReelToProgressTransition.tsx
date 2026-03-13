@@ -63,6 +63,7 @@ export default function ReelToProgressTransition({
   const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
   const openGalleryHandledRef = useRef(false);
   const [showCertPopup, setShowCertPopup] = useState(false);
+  const [scrollHighlightDay, setScrollHighlightDay] = useState<number | undefined>(highlightDayNumber);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Combine current activity with public feed and sort by latest first
