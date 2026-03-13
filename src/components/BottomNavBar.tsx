@@ -250,7 +250,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
             }}>
               <Bell className="w-5 h-5" strokeWidth={1.5} />
               {(() => {
-                const unread = totalNotificationCount - seenCountRef.current;
+                const unread = totalNotificationCount - seenCount;
                 if (unread <= 0) return null;
                 return (
                   <div className="absolute -top-2 -right-3 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center" style={{
