@@ -258,7 +258,7 @@ const Progress = () => {
 
       {/* Main content — ReelToProgressTransition in inline mode */}
       <div
-        className="flex-1 overflow-hidden overflow-x-clip"
+        className="flex-1 overflow-y-auto overflow-x-hidden"
         style={{ paddingBottom: '0px' }}
       >
         <ReelToProgressTransition
