@@ -218,7 +218,7 @@ const ScrapbookFrame = ({
             minHeight: '8cqw',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', visibility: duration ? 'visible' : 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5cqw', visibility: duration ? 'visible' : 'hidden' }}>
             <span
               style={{
                 fontFamily: "'Bebas Neue', sans-serif",
