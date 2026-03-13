@@ -1585,7 +1585,7 @@ const Reel = () => {
                             // Mark current user as viewed when tapping another avatar
                             const prevGroup = effectiveUserGroups[currentUserIndex];
                             if (prevGroup && prevGroup.userId !== group.userId) {
-                              setViewedUsers(prev => new Set(prev).add(prevGroup.userId));
+                              markUserViewed(prevGroup.userId);
                             }
                             setCurrentUserIndex(targetIdx);
                             setCurrentActivityIndex(0);
