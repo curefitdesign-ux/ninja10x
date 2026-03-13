@@ -1752,7 +1752,7 @@ const Reel = () => {
                             maxWidth: '100%',
                             borderRadius: `${cardRadius}px`,
                             filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                            background: isLogCard ? 'linear-gradient(165deg, hsl(270 45% 12%) 0%, hsl(280 50% 8%) 35%, hsl(320 40% 10%) 65%, hsl(25 50% 10%) 100%)' : 'transparent',
+                            background: isLogCard ? 'linear-gradient(165deg, hsl(200 50% 10%) 0%, hsl(180 45% 8%) 35%, hsl(160 50% 10%) 65%, hsl(140 40% 8%) 100%)' : 'transparent',
                           }}
                         >
                           {isLogCard ? (
@@ -1922,13 +1922,13 @@ const Reel = () => {
                               style={{
                                 borderRadius: `${cardRadius}px`,
                                 background: isLogActivityCard
-                                  ? 'linear-gradient(165deg, hsl(270 45% 12%) 0%, hsl(280 50% 8%) 35%, hsl(320 40% 10%) 65%, hsl(25 50% 10%) 100%)'
+                                  ? 'linear-gradient(165deg, hsl(200 50% 10%) 0%, hsl(180 45% 8%) 35%, hsl(160 50% 10%) 65%, hsl(140 40% 8%) 100%)'
                                   : 'transparent',
                                 border: isLogActivityCard
-                                  ? '1px solid rgba(180, 140, 255, 0.2)'
+                                  ? '1px solid rgba(100, 220, 200, 0.2)'
                                   : 'none',
                                 boxShadow: isLogActivityCard
-                                  ? 'inset 0 1px 1px rgba(255,255,255,0.06), inset 0 -40px 80px rgba(140, 80, 200, 0.08), 0 0 30px rgba(140, 100, 240, 0.12)'
+                                  ? 'inset 0 1px 1px rgba(255,255,255,0.06), inset 0 -40px 80px rgba(80, 200, 180, 0.08), 0 0 30px rgba(100, 200, 180, 0.12)'
                                   : 'none',
                                 zIndex: 3,
                               }}
@@ -1962,7 +1962,7 @@ const Reel = () => {
                                     className="absolute pointer-events-none"
                                     style={{
                                       bottom: 0, left: 0, right: 0, height: '45%',
-                                      background: 'radial-gradient(ellipse at center bottom, hsl(320 60% 30% / 0.2) 0%, transparent 70%)',
+                                      background: 'radial-gradient(ellipse at center bottom, hsl(170 60% 30% / 0.2) 0%, transparent 70%)',
                                     }}
                                   />
                                   <div
