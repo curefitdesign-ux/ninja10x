@@ -2065,7 +2065,7 @@ const Reel = () => {
                                     )}
 
                                     {/* Label */}
-                                    <p className="text-white/40 text-xs font-medium uppercase tracking-widest">
+                                    <p className="text-xs font-medium uppercase tracking-widest" style={{ color: 'hsl(175 40% 55% / 0.6)' }}>
                                       {isWeekCompleteCard
                                         ? `Week ${completedWeek} complete ✨`
                                         : `Day ${currentActivity.dayNumber} of 12`
