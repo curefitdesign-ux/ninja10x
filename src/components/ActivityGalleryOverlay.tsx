@@ -751,7 +751,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 const ar = localReactions[act.id];
                                 const total = ar?.total || 0;
                                 if (total === 0 && !isOwnProfile && isOwnProfile === false) {
-                                  // Show just React pill for visitors with no reactions yet
+                                  const ctxIcon = getActivityReactionIcon(act.activity);
                                   return (
                                     <div style={{ marginTop: 8, marginLeft: idx % 2 === 0 ? '0%' : '10%', paddingLeft: 2 }}>
                                       <button className="flex items-center gap-1 active:scale-90 transition-transform"
@@ -760,7 +760,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                           borderRadius: 12, padding: '4px 10px', border: '1px solid rgba(255,255,255,0.12)',
                                         }}
                                         onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}>
-                                        <span style={{ fontSize: 12 }}>🔥</span>
+                                        <img src={ctxIcon.src} alt="" className="w-4 h-4 object-contain" />
                                         <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.85)' }}>React</span>
                                       </button>
                                     </div>
