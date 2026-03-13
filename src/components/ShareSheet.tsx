@@ -173,16 +173,14 @@ const ShareSheet = ({ imageUrl, isVideo, onClose, onEdit, onSaveWithTemplate, da
     : [];
   
   // Contextual share text & clean URL
-  const sharePayload = (() => {
-    const { buildFullSharePayload } = require('@/lib/share-utils');
-    return buildFullSharePayload({
-      activity: frameProps?.activity,
-      dayNumber,
-      isOwnStory: true,
-    });
-  })();
-  const shareText = sharePayload.text;
-  const shareUrl = sharePayload.url;
+  const sharePayloadData = buildFullSharePayload({
+    activity: frameProps?.activity,
+    dayNumber,
+    isOwnStory: true,
+  });
+  const shareText = sharePayloadData.text;
+  const shareUrl = sharePayloadData.url;
+  const fullShareText = `${shareText}\n\n${shareUrl}`;
   const fullShareText = `${shareText}\n\n${shareUrl}`;
 
   // Extract dominant color from image
