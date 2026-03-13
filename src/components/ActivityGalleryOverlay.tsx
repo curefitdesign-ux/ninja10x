@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, forwardRef, useMemo } from 'react';
+import { buildFullSharePayload } from '@/lib/share-utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
 import { X, Share2, Pencil, ChevronUp, Flag, Check, Trophy, Star, Flame, Zap } from 'lucide-react';
