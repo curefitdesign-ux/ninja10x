@@ -2058,8 +2058,8 @@ const Reel = () => {
                                           animate={{ scale: [1, 1.15, 1] }}
                                           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                                         >
-                                          <rect x="20" y="6" width="8" height="36" rx="4" fill="hsl(267 100% 82%)" />
-                                          <rect x="6" y="20" width="36" height="8" rx="4" fill="hsl(267 100% 82%)" />
+                                          <rect x="20" y="6" width="8" height="36" rx="4" fill="hsl(170 70% 75%)" />
+                                          <rect x="6" y="20" width="36" height="8" rx="4" fill="hsl(170 70% 75%)" />
                                         </motion.svg>
                                       </button>
                                     )}
