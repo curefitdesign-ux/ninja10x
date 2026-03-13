@@ -199,7 +199,7 @@ const ScrapbookFrame = ({
       </div>
 
       {/* ── Bottom Metrics ── */}
-      <div style={{ padding: '0 5%', flexShrink: 0, marginTop: '-10px', overflow: 'hidden' }}>
+      <div style={{ padding: '0 5%', flexShrink: 0, marginTop: '-2.5cqw', overflow: 'hidden' }}>
         {/* Dashed separator */}
         <div
           style={{
