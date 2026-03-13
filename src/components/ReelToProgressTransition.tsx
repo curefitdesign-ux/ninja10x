@@ -219,13 +219,26 @@ export default function ReelToProgressTransition({
                               whileTap={{ scale: 0.95 }}
                               onClick={() => {
                                 const hasPhotos = ws.activitiesInWeek.some(a => a?.storageUrl);
+                                // Scroll to the first tile of this week on the journey path
+                                const firstDayOfWeek = (ws.week - 1) * 3 + 1;
+                                setScrollHighlightDay(firstDayOfWeek);
+                                // Scroll to the tile element
+                                setTimeout(() => {
+                                  const tileEl = containerRef.current?.querySelector(`[data-tile-day="${firstDayOfWeek}"]`);
+                                  if (tileEl) {
+                                    tileEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                  }
+                                  // Clear highlight after animation
+                                  setTimeout(() => setScrollHighlightDay(highlightDayNumber), 3000);
+                                }, 100);
                                 if (hasPhotos) {
                                   // Find index in the sorted (newest-first) gallery list
                                   const uploaded = myActivities.filter(a => a.storageUrl).sort((a, b) => b.dayNumber - a.dayNumber);
                                   const firstInWeek = ws.activitiesInWeek.find(a => a?.storageUrl);
                                   const idx = firstInWeek ? uploaded.findIndex(a => a.dayNumber === firstInWeek.dayNumber) : 0;
                                   setGalleryInitialIndex(Math.max(0, idx));
-                                  setGalleryOpen(true);
+                                  // Delay gallery open slightly so scroll is visible first
+                                  setTimeout(() => setGalleryOpen(true), 600);
                                 } else if (isGlowing && onLogActivity) {
                                   onLogActivity();
                                 }
