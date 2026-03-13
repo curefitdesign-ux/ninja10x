@@ -72,7 +72,35 @@ const CircularProgressRing = ({
       const isActiveWeek = week === activeWeekIndex;
       
       // Draw translucent liquid glass background behind each group of 3 bars
-      // Simple glass layer without glow effects
+      // Reflective border layer (outer edge highlight)
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, ringRadius, toRad(weekStartAngle - 2), toRad(weekEndAngle + 2));
+      ctx.lineCap = "round";
+      ctx.lineWidth = strokeWidth + 14;
+      
+      const borderGradient = ctx.createLinearGradient(
+        centerX + Math.cos(toRad((weekStartAngle + weekEndAngle) / 2)) * (ringRadius - 30),
+        centerY + Math.sin(toRad((weekStartAngle + weekEndAngle) / 2)) * (ringRadius - 30),
+        centerX + Math.cos(toRad((weekStartAngle + weekEndAngle) / 2)) * (ringRadius + 30),
+        centerY + Math.sin(toRad((weekStartAngle + weekEndAngle) / 2)) * (ringRadius + 30)
+      );
+      
+      if (isActiveWeek) {
+        borderGradient.addColorStop(0, "rgba(150, 255, 220, 0.22)");
+        borderGradient.addColorStop(0.5, "rgba(100, 220, 200, 0.06)");
+        borderGradient.addColorStop(1, "rgba(80, 200, 255, 0.18)");
+      } else {
+        borderGradient.addColorStop(0, "rgba(255, 255, 255, 0.10)");
+        borderGradient.addColorStop(0.5, "rgba(255, 255, 255, 0.03)");
+        borderGradient.addColorStop(1, "rgba(255, 255, 255, 0.08)");
+      }
+      
+      ctx.strokeStyle = borderGradient;
+      ctx.stroke();
+      ctx.restore();
+      
+      // Inner glass fill layer
       ctx.save();
       ctx.beginPath();
       ctx.arc(centerX, centerY, ringRadius, toRad(weekStartAngle - 2), toRad(weekEndAngle + 2));
