@@ -240,7 +240,7 @@ const ScrapbookFrame = ({
                 fontSize: '6.5cqw',
                 color: '#7C5CFC',
                 lineHeight: 1,
-                marginLeft: '2px',
+                marginLeft: '0.5cqw',
               }}
             >
               {duration || '—'}
