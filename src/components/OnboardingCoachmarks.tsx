@@ -36,7 +36,7 @@ function RevealLine({ text, delay = 0 }: { text: string; delay?: number }) {
   return (
     <>
       {words.map((word, i) => (
-        <RevealWord key={`${text}-${i}`} delay={delay + i * 0.4}>
+        <RevealWord key={`${text}-${i}`} delay={delay + i * 0.25}>
           {word}
         </RevealWord>
       ))}
@@ -72,7 +72,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
   useEffect(() => {
     if (!visible) return;
     if (phase === 0) {
-      timerRef.current = setTimeout(() => setPhase(1), 9500);
+      timerRef.current = setTimeout(() => setPhase(1), 8000);
     }
     if (phase === 2) {
       timerRef.current = setTimeout(() => finish(), 12000);
@@ -142,7 +142,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             }}
             initial={{ top: 0, borderRadius: '0px' }}
             animate={{
-              top: phase === 2 ? '11%' : 0,
+              top: phase === 2 ? '18%' : 0,
               borderRadius: phase === 2 ? '24px 24px 0px 0px' : '0px',
             }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -158,7 +158,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
             }}
             initial={{ top: 0, borderRadius: '0px' }}
             animate={{
-              top: phase === 2 ? '11%' : 0,
+              top: phase === 2 ? '18%' : 0,
               borderRadius: phase === 2 ? '24px 24px 0px 0px' : '0px',
             }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -198,17 +198,17 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
                     style={{ color: textColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="Every habit starts" delay={0.4} />
+                    <RevealLine text="Every habit starts" delay={0.3} />
                     <br />
-                    <RevealLine text="with a single move." delay={2.2} />
+                    <RevealLine text="with a single move." delay={1.8} />
                   </h2>
                   <p
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3] mt-8"
                     style={{ color: mutedColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="Running. Cricket. Yoga." delay={4.0} />
+                    <RevealLine text="Snap a photo or video." delay={3.2} />
                     <br />
-                    <RevealLine text="Pick yours. Show up." delay={5.8} />
+                    <RevealLine text="That's your log. Done." delay={4.8} />
                   </p>
                 </div>
               </motion.div>
@@ -219,14 +219,14 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
               <motion.div
                 key="phase1"
                 className="absolute inset-0 z-10 flex flex-col items-center"
-                variants={fadeVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, transition: { duration: 0.6, ease: 'easeOut' } }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               >
                 {/* Centered content */}
                 <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
-                  {/* Ring — no separate animation, inherits parent fade */}
+                  {/* Ring */}
                   <div className="mb-4">
                     <CircularProgressRing
                       currentDay={ringDay}
@@ -239,16 +239,16 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                     className="text-[32px] font-semibold tracking-[-0.03em] leading-[1.3]"
                     style={{ color: textColor, fontFamily: fontStack }}
                   >
-                    <RevealLine text="Log 3 times a week." delay={0.3} />
+                    <RevealLine text="3 activities a week." delay={0.3} />
                     <br />
-                    <RevealLine text="Do it for 4 weeks." delay={2.4} />
+                    <RevealLine text="4 weeks. That's it." delay={1.8} />
                   </h2>
 
                   <motion.div
                     className="mt-5"
-                    initial={{ opacity: 0, transform: 'scale(1.04)' }}
-                    animate={{ opacity: 1, transform: 'scale(1)' }}
-                    transition={{ duration: 1.6, delay: 4.6, ease: [0.16, 1, 0.3, 1] }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 1.2, delay: 3.4, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <span
                       className="text-[32px] font-semibold tracking-[-0.03em]"
@@ -260,11 +260,11 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                         fontFamily: fontStack,
                       }}
                     >
-                      Become a Ninja. 🥷
+                      Become a Cult Ninja. 🥷
                     </span>
                   </motion.div>
 
-                  {/* NEXT CTA — directly below content */}
+                  {/* NEXT CTA */}
                   <motion.button
                     className="mt-10 w-[260px] rounded-2xl uppercase"
                     style={{
@@ -281,7 +281,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                     }}
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 5.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ delay: 4.0, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                     onClick={(e) => { e.stopPropagation(); setPhase(2); }}
                     whileTap={{ scale: 0.97 }}
                   >
@@ -301,10 +301,10 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
                 animate="animate"
                 exit="exit"
               >
-                <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
+                <div className="flex-1 flex flex-col items-center px-8 text-center" style={{ justifyContent: 'flex-start', paddingTop: '22%' }}>
                   {/* Small hand-drawn arrow pointing up — above text */}
                   <motion.div
-                    className="mb-5"
+                    className="mb-2"
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 5.0, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
