@@ -103,6 +103,25 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
     nudgeAudioRef.current = audio;
     return () => { nudgeAudioRef.current = null; };
   }, []);
+
+  // Fetch today's nudge count for this target user
+  useEffect(() => {
+    if (!user || !targetUserId || isOwnProfile) return;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    supabase
+      .from('nudges')
+      .select('id', { count: 'exact', head: true })
+      .eq('from_user_id', user.id)
+      .eq('to_user_id', targetUserId)
+      .gte('created_at', todayStart.toISOString())
+      .then(({ count }) => {
+        const c = count || 0;
+        setTodayNudgeTotal(c);
+        setNudgeCount(c);
+        if (c > 0) setNudgeSentToday(true);
+      });
+  }, [user, targetUserId, isOwnProfile]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const portalContainer = usePortalContainer();
   const { user } = useAuth();
