@@ -128,7 +128,7 @@ const AnimatedRoutes = () => {
     <Suspense fallback={<RouteFallback />}>
       <PageTransition key={location.pathname}>
         <Routes location={location}>
-          <Route path="/auth" element={<Navigate to="/reel" replace />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/profile-setup" element={<ProfileSetupRouteWrapper><ProfileSetupPage /></ProfileSetupRouteWrapper>} />
           <Route path="/avatar-crop" element={<ProtectedRoute><AvatarCrop /></ProtectedRoute>} />
