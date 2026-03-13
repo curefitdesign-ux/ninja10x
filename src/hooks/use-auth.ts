@@ -1,21 +1,17 @@
-/**
- * Backward-compatible useAuth hook.
- * Wraps the new SSO AuthContext so all existing components keep working.
- */
-import { useSSOAuth } from '@/context/AuthContext';
+import { useAuthContext } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useAuth = () => {
-  const { user, isAuthenticated, isLoading, error } = useSSOAuth();
+  const { user, session, isAuthenticated, isLoading } = useAuthContext();
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    window.location.href = '/logout';
+    window.location.href = '/auth';
   };
 
   return {
     user,
-    session: isAuthenticated ? {} as any : null, // backwards compat for truthy checks
+    session,
     loading: isLoading,
     signOut,
   };

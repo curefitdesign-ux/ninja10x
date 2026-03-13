@@ -16,6 +16,7 @@ import { MorphTransitionProvider } from "@/hooks/use-morph-transition";
 import MorphTransitionOverlay from "@/components/MorphTransitionOverlay";
 
 // Lazy-load all other routes
+const Auth = lazy(() => import("./pages/Auth"));
 const Index = lazy(() => import("./pages/Index"));
 const Preview = lazy(() => import("./pages/Preview"));
 const Activity = lazy(() => import("./pages/Activity"));
