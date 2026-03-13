@@ -37,7 +37,6 @@ const TokenFrame = ({
   label1,
   label2,
   label1Name,
-  label2Name,
 }: TokenFrameProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -54,6 +53,11 @@ const TokenFrame = ({
   const isNumericPr = pr ? /\d/.test(pr) : false;
   const prValue = pr ? (isNumericPr ? pr.replace(/[^0-9.]/g, '') : pr) : '';
 
+  const mediaTransform =
+    imagePosition.x || imagePosition.y || imageScale !== 1
+      ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`
+      : `scale(${imageScale})`;
+
   return (
     <div
       className="w-full h-full relative"
@@ -66,15 +70,15 @@ const TokenFrame = ({
         backgroundPosition: 'center',
       }}
     >
-      {/* ── USER PHOTO / VIDEO — clipped inside the stamp window ── */}
+      {/* Photo / Video */}
       <div
         className="absolute overflow-hidden"
         style={{
-          top: 'calc(17% + 10px)',
+          top: '33cqw',
           left: '7%',
           right: '7%',
-          bottom: '14%',
-          borderRadius: '2px',
+          bottom: '24.5cqw',
+          borderRadius: '0.6cqw',
         }}
       >
         {isVideo ? (
@@ -86,9 +90,7 @@ const TokenFrame = ({
             muted
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
-            style={{
-              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-            }}
+            style={{ transform: mediaTransform }}
           />
         ) : (
           <img
@@ -98,23 +100,21 @@ const TokenFrame = ({
             loading="eager"
             decoding="async"
             fetchPriority="high"
-            style={{
-              transform: `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`,
-            }}
+            style={{ transform: mediaTransform }}
           />
         )}
       </div>
 
-      {/* ── TOP HEADER (Activity name + subtitle) ── */}
+      {/* Header */}
       <div
         className="absolute left-0 right-0 flex flex-col items-center"
-        style={{ top: 'calc(3.5% + 10px)', zIndex: 5, paddingLeft: '8%', paddingRight: '8%' }}
+        style={{ top: '9.4cqw', zIndex: 5, paddingLeft: '8%', paddingRight: '8%' }}
       >
         <div
           style={{
             fontFamily: "'DM Serif Display', Georgia, serif",
             fontWeight: 400,
-            fontSize: 'clamp(25px, 13cqw, 49px)',
+            fontSize: '13cqw',
             color: '#0a4a72',
             textTransform: 'capitalize',
             letterSpacing: '-0.01em',
@@ -128,25 +128,26 @@ const TokenFrame = ({
           style={{
             fontFamily: "'Rowdies', 'Arial', sans-serif",
             fontWeight: 300,
-            fontSize: 'clamp(8px, 3.2cqw, 12px)',
+            fontSize: '3.2cqw',
             color: '#696760',
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            marginTop: '5px',
+            marginTop: '1.3cqw',
             textAlign: 'center',
+            whiteSpace: 'nowrap',
           }}
         >
           · CULT NINJA JOURNEY | WEEK {week} | DAY {day} ·
         </div>
       </div>
 
-      {/* ── STAMP BADGE ── */}
+      {/* Badge */}
       <img
         src={tokenBadge}
         alt=""
         className="absolute pointer-events-none"
         style={{
-          bottom: '16%',
+          bottom: '26cqw',
           left: '3%',
           width: '34%',
           zIndex: 5,
@@ -155,28 +156,55 @@ const TokenFrame = ({
         }}
       />
 
-      {/* ── BOTTOM METRICS ── */}
+      {/* Metrics */}
       <div
         className="absolute left-0 right-0 flex items-end justify-between"
         style={{
-          bottom: '5cqw',
-          height: '14%',
+          bottom: '4.8cqw',
+          height: '22.5cqw',
           paddingLeft: '8%',
           paddingRight: '8%',
-          paddingBottom: '3%',
+          paddingBottom: '1.2cqw',
           zIndex: 5,
         }}
       >
         {durationValue ? (
           <div style={{ textAlign: 'left', lineHeight: 1.1 }}>
-            <div style={{ fontFamily: "'Rowdies', 'Arial', sans-serif", fontWeight: 300, fontSize: 'clamp(8px, 3.4cqw, 12px)', color: '#696760', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '2px' }}>
+            <div
+              style={{
+                fontFamily: "'Rowdies', 'Arial', sans-serif",
+                fontWeight: 300,
+                fontSize: '3.2cqw',
+                color: '#696760',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                marginBottom: '0.5cqw',
+              }}
+            >
               DURATION
             </div>
-            <span style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: 'clamp(14px, 6.5cqw, 24px)', color: '#0a4a72' }}>
+            <span
+              style={{
+                fontFamily: "'DM Serif Display', Georgia, serif",
+                fontWeight: 400,
+                fontSize: '6.5cqw',
+                color: '#0a4a72',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {durationValue}
             </span>
             {durationUnit && (
-              <span style={{ fontFamily: "'Rowdies', 'Arial Black', sans-serif", fontWeight: 700, fontSize: 'clamp(10px, 4.5cqw, 18px)', color: '#0a4a72', marginLeft: '4px' }}>
+              <span
+                style={{
+                  fontFamily: "'Rowdies', 'Arial Black', sans-serif",
+                  fontWeight: 700,
+                  fontSize: '4.5cqw',
+                  color: '#0a4a72',
+                  marginLeft: '1cqw',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {durationUnit}
               </span>
             )}
@@ -185,14 +213,41 @@ const TokenFrame = ({
 
         {prValue ? (
           <div style={{ textAlign: 'right', lineHeight: 1.1 }}>
-            <div style={{ fontFamily: "'Rowdies', 'Arial', sans-serif", fontWeight: 300, fontSize: 'clamp(8px, 3.4cqw, 12px)', color: '#696760', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '2px' }}>
+            <div
+              style={{
+                fontFamily: "'Rowdies', 'Arial', sans-serif",
+                fontWeight: 300,
+                fontSize: '3.2cqw',
+                color: '#696760',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                marginBottom: '0.5cqw',
+              }}
+            >
               {(label1Name || 'DISTANCE').toUpperCase()}
             </div>
-            <span style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontWeight: 400, fontSize: isNumericPr ? 'clamp(14px, 6.5cqw, 24px)' : 'clamp(10px, 4.5cqw, 18px)', color: '#0a4a72' }}>
+            <span
+              style={{
+                fontFamily: "'DM Serif Display', Georgia, serif",
+                fontWeight: 400,
+                fontSize: isNumericPr ? '6.5cqw' : '4.5cqw',
+                color: '#0a4a72',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {prValue}
             </span>
             {prUnit && (
-              <span style={{ fontFamily: "'Rowdies', 'Arial Black', sans-serif", fontWeight: 700, fontSize: 'clamp(10px, 4.5cqw, 18px)', color: '#0a4a72', marginLeft: '4px' }}>
+              <span
+                style={{
+                  fontFamily: "'Rowdies', 'Arial Black', sans-serif",
+                  fontWeight: 700,
+                  fontSize: '4.5cqw',
+                  color: '#0a4a72',
+                  marginLeft: '1cqw',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {prUnit}
               </span>
             )}
