@@ -311,6 +311,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             const newNotif: Notification = {
               id: `nudge-${nudge.id}`,
               activityId: '',
+              reactorUserId: nudge.from_user_id,
               reactorName: senderName,
               reactorAvatarUrl: profile?.avatar_url || undefined,
               reactionType: 'nudge',
