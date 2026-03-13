@@ -275,19 +275,11 @@ const AvatarCropper = ({ imageSrc, onConfirm, onCancel }: AvatarCropperProps) =>
         </div>
       </div>
       
-      {/* Circular crop overlay */}
+      {/* Square crop overlay */}
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-        {/* Dark overlay with circular cutout */}
+        {/* Square border with rounded corners */}
         <div 
-          className="absolute inset-0"
-          style={{
-            background: `radial-gradient(circle ${cropSize / 2}px at 50% 50%, transparent 100%, rgba(0, 0, 0, 0.7) 100%)`,
-          }}
-        />
-        
-        {/* Circle border */}
-        <div 
-          className="rounded-full border-4 border-white/80"
+          className="rounded-2xl border-4 border-white/80"
           style={{ 
             width: cropSize, 
             height: cropSize,
