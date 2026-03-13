@@ -982,7 +982,7 @@ const Preview = () => {
             </motion.h2>
           </div>
 
-          {/* Activity Grid — NO scroll, NO per-icon stagger (stagger + overflow causes hidden icons) */}
+          {/* Activity Grid — with recent activities section */}
           <motion.div
             className="px-4"
             initial={{ opacity: 0 }}
@@ -992,6 +992,51 @@ const Preview = () => {
               paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 20px)',
             }}
           >
+            {/* Recent Activities — show user's previously used activities */}
+            {(() => {
+              const standardNames = activityOptions.map(a => a.name);
+              const recentNames = activities
+                .map(a => a.activity)
+                .filter((name): name is string => !!name)
+                .filter((name, i, arr) => arr.indexOf(name) === i)
+                .reverse()
+                .slice(0, 5);
+              
+              if (recentNames.length === 0) return null;
+              
+              return (
+                <div className="mb-4">
+                  <p className="text-white/50 text-[10px] uppercase tracking-wider mb-2 px-1">Recent</p>
+                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+                    {recentNames.map((name) => {
+                      const matchedOption = activityOptions.find(a => a.name === name);
+                      const IconComp = matchedOption?.icon || MoreHorizontal;
+                      return (
+                        <button
+                          key={name}
+                          onClick={() => {
+                            if (matchedOption) {
+                              handleActivitySelection(name);
+                            } else {
+                              handleCustomActivityConfirm(name);
+                            }
+                          }}
+                          className="flex items-center gap-2 px-3 py-2 rounded-xl active:scale-95 transition-transform flex-shrink-0"
+                          style={{
+                            background: 'rgba(255,255,255,0.10)',
+                            border: '1px solid rgba(255,255,255,0.15)',
+                          }}
+                        >
+                          <IconComp size={16} strokeWidth={1.5} color="#fff" stroke="#fff" style={{ color: '#fff', fill: 'none' }} />
+                          <span className="text-white/80 text-xs whitespace-nowrap">{name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
             <div className="grid grid-cols-4 gap-x-2 gap-y-4">
               {activityOptions.map((activityOption) => {
                 const IconComp = activityOption.icon;
