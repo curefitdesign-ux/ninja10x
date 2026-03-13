@@ -1718,7 +1718,10 @@ const Reel = () => {
                     || activities[0]
                     || null;
 
-                const media = (activity?.originalUrl || activity?.storageUrl || group.avatarUrl || '').trim();
+                // For peek cards: if activity is a placeholder (log-activity/week-complete), use its state directly
+                // instead of falling back to avatarUrl
+                const isPlaceholderCard = activity?.id === 'log-activity' || activity?.id === 'week-complete';
+                const media = isPlaceholderCard ? '' : (activity?.originalUrl || activity?.storageUrl || '').trim();
                 const isOwnCard = !!user && group.userId === user.id;
                 const isLockedCard = !isOwnCard && !viewerCanSeeCommunity;
                 const hasFrame = activity?.frame && activity.frame !== 'none';
