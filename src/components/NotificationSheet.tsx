@@ -30,9 +30,22 @@ const formatRelativeTime = (date: Date): string => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
+// Day segregation helper
+const getDayLabel = (date: Date): string => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today.getTime() - 86400000);
+  const notifDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  
+  if (notifDay.getTime() === today.getTime()) return 'Today';
+  if (notifDay.getTime() === yesterday.getTime()) return 'Yesterday';
+  return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+};
+
 export interface Notification {
   id: string;
   activityId: string;
+  reactorUserId?: string;
   reactorName: string;
   reactorAvatarUrl?: string;
   reactionType: string;
@@ -121,6 +134,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
               return {
                 id: r.id,
                 activityId: r.activity_id,
+                reactorUserId: r.user_id,
                 reactorName: reactorProfile?.name || 'Someone',
                 reactorAvatarUrl: reactorProfile?.avatar || undefined,
                 reactionType: r.reaction_type,
@@ -172,6 +186,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
         nudgeNotifs = Array.from(nudgeGroups.values()).map(g => ({
           id: `nudge-${g.latestId}`,
           activityId: '',
+          reactorUserId: g.senderId,
           reactorName: profileMap.get(g.senderId)?.name || 'Someone',
           reactorAvatarUrl: profileMap.get(g.senderId)?.avatar || undefined,
           reactionType: 'nudge',
@@ -239,6 +254,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             const newNotif: Notification = {
               id: newReaction.id,
               activityId: newReaction.activity_id,
+              reactorUserId: newReaction.user_id,
               reactorName,
               reactorAvatarUrl: profile?.avatar_url || undefined,
               reactionType: newReaction.reaction_type,
@@ -295,6 +311,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             const newNotif: Notification = {
               id: `nudge-${nudge.id}`,
               activityId: '',
+              reactorUserId: nudge.from_user_id,
               reactorName: senderName,
               reactorAvatarUrl: profile?.avatar_url || undefined,
               reactionType: 'nudge',
@@ -327,6 +344,19 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
     setNotifications([]);
     onClose();
   }, [onClose]);
+
+  // Navigate to the user's profile in the Reel/Discover page
+  const handleProfileTap = useCallback((notif: Notification) => {
+    if (!notif.reactorUserId) return;
+    onClose();
+    navigate('/reel', {
+      replace: true,
+      state: {
+        focusUserId: notif.reactorUserId,
+        _ts: Date.now(),
+      },
+    });
+  }, [navigate, onClose]);
 
   // Navigate to the progress page gallery overlay for the specific activity
   const handleNotificationTap = useCallback((notif: Notification) => {
@@ -378,22 +408,9 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
               paddingBottom: 'calc(env(safe-area-inset-bottom) + 80px)',
             }}
           >
-            {/* Header — back arrow removed, bottom nav handles navigation */}
-            <div className="flex items-center justify-between px-4 pb-4 flex-shrink-0">
-              <div style={{ width: 40, height: 40 }} />
-              
-              <h2 className="text-white text-lg font-semibold">Reactions</h2>
-              
-              {notifications.length > 0 ? (
-                <button
-                  onClick={dismissAll}
-                  className="text-white/50 text-xs hover:text-white transition-colors px-2"
-                >
-                  Clear all
-                </button>
-              ) : (
-                <div className="w-10" /> // Spacer for centering
-              )}
+            {/* Header */}
+            <div className="flex items-center justify-center px-4 pb-3 flex-shrink-0">
+              <h2 className="text-white text-lg font-semibold">Alerts</h2>
             </div>
 
             {/* Scrollable notification list */}
@@ -409,123 +426,141 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
                   <p className="text-white/30 text-sm mt-1">Share your activities to get reactions!</p>
                 </div>
               ) : (
-                <div className="space-y-5">
-                  {notifications.map((notif, index) => {
-                    const iconSrc = notif.isNudge ? undefined : REACTION_IMAGES[notif.reactionType];
-                    return (
-                      <motion.div
-                        key={notif.id}
-                        initial={{ opacity: 0, y: -15, scale: 0.97 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, height: 0 }}
-                        transition={{ delay: index * 0.04, type: 'spring', stiffness: 300, damping: 22 }}
-                        className="relative flex items-center gap-3 p-3 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform"
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.06)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                        }}
-                        onClick={() => !notif.isNudge && handleNotificationTap(notif)}
-                      >
-                        {/* Reactor avatar — clean, no badge */}
-                        <div className="relative flex-shrink-0">
-                          <div className="w-11 h-11 rounded-full overflow-hidden">
-                            <ProfileAvatar
-                              src={notif.reactorAvatarUrl}
-                              name={notif.reactorName}
-                              size={44}
-                            />
-                          </div>
-                        </div>
+                <div>
+                  {(() => {
+                    // Group notifications by day
+                    const groups: { label: string; items: typeof notifications }[] = [];
+                    let currentLabel = '';
+                    notifications.forEach(notif => {
+                      const label = getDayLabel(notif.timestamp);
+                      if (label !== currentLabel) {
+                        currentLabel = label;
+                        groups.push({ label, items: [notif] });
+                      } else {
+                        groups[groups.length - 1].items.push(notif);
+                      }
+                    });
 
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white text-sm leading-snug">
-                            <span className="font-semibold">{notif.reactorName}</span>
-                            <span className="text-white/60">
-                              {notif.isNudge 
-                                ? <>{(notif.nudgeCount || 0) > 1 ? ` nudged you ${notif.nudgeCount}x` : ' nudged you'} — time to crush it! 🔥</>
-                                : ` ${REACTION_VERBS[notif.reactionType] || 'reacted to'} your ${notif.activityType || 'activity'}`}
-                            </span>
-                          </p>
-                          <p className="text-white/35 text-xs mt-0.5">
-                            {notif.dayNumber ? `Day ${notif.dayNumber} · ` : ''}{formatRelativeTime(notif.timestamp)}
-                          </p>
-                          {notif.isNudge && (
-                            <motion.button
-                              whileTap={{ scale: 0.95 }}
-                              onClick={(e) => { e.stopPropagation(); handleLogActivity(); }}
-                              className="mt-2 px-3 py-1.5 rounded-full text-[11px] font-semibold inline-flex items-center gap-1.5"
-                              style={{
-                                background: 'rgba(255, 255, 255, 0.07)',
-                                backdropFilter: 'blur(20px) saturate(180%)',
-                                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                                border: '1px solid rgba(255, 255, 255, 0.18)',
-                                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 8px rgba(0,0,0,0.2)',
-                                color: 'rgba(255, 255, 255, 0.9)',
-                              }}
-                            >
-                              <span>Log Activity</span>
-                              <span>💪</span>
-                            </motion.button>
-                          )}
-                        </div>
+                    let globalIndex = 0;
+                    return groups.map((group) => (
+                      <div key={group.label} className="mb-4">
+                        {/* Day section header */}
+                        <p className="text-white/40 text-[11px] font-semibold uppercase tracking-wider px-1 mb-2">
+                          {group.label}
+                        </p>
+                        <div className="space-y-2">
+                          {group.items.map((notif) => {
+                            const idx = globalIndex++;
+                            const iconSrc = notif.isNudge ? undefined : REACTION_IMAGES[notif.reactionType];
+                            return (
+                              <motion.div
+                                key={notif.id}
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.03, type: 'spring', stiffness: 320, damping: 24 }}
+                                className="relative flex items-center gap-2.5 py-2.5 px-2 rounded-xl cursor-pointer active:scale-[0.98] transition-transform"
+                                style={{
+                                  background: 'rgba(255, 255, 255, 0.04)',
+                                }}
+                                onClick={() => !notif.isNudge && handleNotificationTap(notif)}
+                              >
+                                {/* Reactor avatar — tappable to go to profile */}
+                                <div
+                                  className="relative flex-shrink-0"
+                                  onClick={(e) => { e.stopPropagation(); handleProfileTap(notif); }}
+                                >
+                                  <div className="w-10 h-10 rounded-full overflow-hidden">
+                                    <ProfileAvatar
+                                      src={notif.reactorAvatarUrl}
+                                      name={notif.reactorName}
+                                      size={40}
+                                    />
+                                  </div>
+                                </div>
 
-                        {/* Right side: nudge icon or reaction badge + thumbnail */}
-                        {notif.isNudge ? (
-                          <div className="relative flex-shrink-0 self-start mt-0.5">
-                            <div 
-                              className="w-11 h-11 rounded-[5px] overflow-hidden flex items-center justify-center"
-                              style={{
-                                background: 'rgba(255, 255, 255, 0.10)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                              }}
-                            >
-                              <img src={deskBellImg} alt="Nudge" className="w-8 h-8 object-contain" />
-                            </div>
-                            {(notif.nudgeCount || 0) > 1 && (
-                              <div 
-                                className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
-                                style={{
-                                  background: 'rgba(30, 18, 69, 0.9)',
-                                  border: '1.5px solid rgba(255,255,255,0.15)',
-                                }}
-                              >
-                                <span className="text-white text-[10px] font-bold leading-none">{notif.nudgeCount}</span>
-                              </div>
-                            )}
-                          </div>
-                        ) : notif.activityImageUrl ? (
-                          <div className="relative flex-shrink-0">
-                            <div 
-                              className="w-11 h-11 rounded-[5px] overflow-hidden"
-                              style={{ border: '1px solid rgba(255,255,255,0.1)' }}
-                            >
-                              <img 
-                                src={notif.activityImageUrl} 
-                                alt="Activity" 
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            {iconSrc && (
-                              <div 
-                                className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
-                                style={{
-                                  background: 'rgba(30, 18, 69, 0.9)',
-                                  border: '1.5px solid rgba(255,255,255,0.15)',
-                                }}
-                              >
-                                <img src={iconSrc} alt={notif.reactionType} className="w-4 h-4 object-contain" />
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-white/30 text-xs flex-shrink-0">
-                            {formatRelativeTime(notif.timestamp)}
-                          </span>
-                        )}
-                      </motion.div>
-                    );
-                  })}
+                                {/* Content */}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-white text-[13px] leading-tight">
+                                    <span className="font-semibold">{notif.reactorName}</span>
+                                    <span className="text-white/55">
+                                      {notif.isNudge 
+                                        ? <>{(notif.nudgeCount || 0) > 1 ? ` nudged you ${notif.nudgeCount}x` : ' nudged you'} 🔔</>
+                                        : ` ${REACTION_VERBS[notif.reactionType] || 'reacted to'} your ${notif.activityType || 'activity'}`}
+                                    </span>
+                                    <span className="text-white/30 text-[11px] ml-1">{formatRelativeTime(notif.timestamp)}</span>
+                                  </p>
+                                  {notif.isNudge && (
+                                    <motion.button
+                                      whileTap={{ scale: 0.95 }}
+                                      onClick={(e) => { e.stopPropagation(); handleLogActivity(); }}
+                                      className="mt-1.5 px-3 py-1 rounded-full text-[10px] font-semibold inline-flex items-center gap-1"
+                                      style={{
+                                        background: 'rgba(255, 255, 255, 0.07)',
+                                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                                        color: 'rgba(255, 255, 255, 0.85)',
+                                      }}
+                                    >
+                                      <span>Log Activity</span>
+                                      <span>💪</span>
+                                    </motion.button>
+                                  )}
+                                </div>
+
+                                {/* Right side: nudge icon or reaction badge + thumbnail */}
+                                {notif.isNudge ? (
+                                  <div className="relative flex-shrink-0">
+                                    <div 
+                                      className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center"
+                                      style={{
+                                        background: 'rgba(255, 255, 255, 0.08)',
+                                      }}
+                                    >
+                                      <img src={deskBellImg} alt="Nudge" className="w-7 h-7 object-contain" />
+                                    </div>
+                                    {(notif.nudgeCount || 0) > 1 && (
+                                      <div 
+                                        className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
+                                        style={{
+                                          background: 'rgba(30, 18, 69, 0.9)',
+                                          border: '1.5px solid rgba(255,255,255,0.15)',
+                                        }}
+                                      >
+                                        <span className="text-white text-[9px] font-bold leading-none">{notif.nudgeCount}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : notif.activityImageUrl ? (
+                                  <div className="relative flex-shrink-0">
+                                    <div 
+                                      className="w-10 h-10 rounded-lg overflow-hidden"
+                                      style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+                                    >
+                                      <img 
+                                        src={notif.activityImageUrl} 
+                                        alt="Activity" 
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                    {iconSrc && (
+                                      <div 
+                                        className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
+                                        style={{
+                                          background: 'rgba(30, 18, 69, 0.9)',
+                                          border: '1.5px solid rgba(255,255,255,0.15)',
+                                        }}
+                                      >
+                                        <img src={iconSrc} alt={notif.reactionType} className="w-3.5 h-3.5 object-contain" />
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : null}
+                              </motion.div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ));
+                  })()}
                 </div>
               )}
             </div>

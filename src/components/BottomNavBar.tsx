@@ -1,5 +1,5 @@
 // Floating glass tab bar — Home | Discover | My Progress | Alerts | ⋮ Menu
-import { useState, useEffect, memo, useCallback, useRef } from "react";
+import { useState, useEffect, memo, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Map, Bell, MoreVertical, Plus, UserPen, LogOut, Sparkles, MessageSquareText } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -23,8 +23,19 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
 
   const [showNotificationSheet, setShowNotificationSheet] = useState(false);
   const [totalNotificationCount, setTotalNotificationCount] = useState(0);
-  const seenCountRef = useRef(0);
   const [showEllipsisMenu, setShowEllipsisMenu] = useState(false);
+
+  // Persist seen count in localStorage so badge survives page refresh
+  const SEEN_KEY = 'ninja10x_seen_notification_count';
+  // Initialize from stored value
+  const [seenCount, setSeenCount] = useState(() => {
+    try { return parseInt(localStorage.getItem(SEEN_KEY) || '0', 10); }
+    catch { return 0; }
+  });
+  const markSeen = useCallback(() => {
+    setSeenCount(totalNotificationCount);
+    try { localStorage.setItem(SEEN_KEY, String(totalNotificationCount)); } catch {}
+  }, [totalNotificationCount]);
   const [showMediaSourceSheet, setShowMediaSourceSheet] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [showFeedbackSheet, setShowFeedbackSheet] = useState(false);
@@ -72,8 +83,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
   const handleTabClick = (tabId: string) => {
     if (tabId === "bell") {
       setShowNotificationSheet(prev => !prev);
-      // Mark all current notifications as seen
-      seenCountRef.current = totalNotificationCount;
+      markSeen();
       return;
     }
     if (tabId === "menu") {
@@ -236,7 +246,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
             }}>
               <Bell className="w-5 h-5" strokeWidth={1.5} />
               {(() => {
-                const unread = totalNotificationCount - seenCountRef.current;
+                const unread = totalNotificationCount - seenCount;
                 if (unread <= 0) return null;
                 return (
                   <div className="absolute -top-2 -right-3 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center" style={{
@@ -267,7 +277,7 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
         </div>
       </motion.div>
 
-      <NotificationSheet isOpen={showNotificationSheet} onClose={() => { setShowNotificationSheet(false); seenCountRef.current = totalNotificationCount; }} onNotificationCountChange={setTotalNotificationCount} />
+      <NotificationSheet isOpen={showNotificationSheet} onClose={() => { setShowNotificationSheet(false); markSeen(); }} onNotificationCountChange={setTotalNotificationCount} />
       <MediaSourceSheet isOpen={showMediaSourceSheet} onClose={() => setShowMediaSourceSheet(false)} dayNumber={activityCount + 1} />
 
       <Sheet open={showEllipsisMenu} onOpenChange={setShowEllipsisMenu}>
