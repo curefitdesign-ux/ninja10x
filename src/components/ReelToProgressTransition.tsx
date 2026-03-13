@@ -54,6 +54,7 @@ export default function ReelToProgressTransition({
   openGalleryAtDay,
 }: ReelToProgressTransitionProps) {
   const navigate = useNavigate();
+  const { profile } = useProfile();
   const [showTiles, setShowTiles] = useState(false);
   const [showStories, setShowStories] = useState(false);
   const [expandingCardId, setExpandingCardId] = useState<string | null>(null);
