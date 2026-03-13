@@ -83,6 +83,15 @@ export const ACTIVITY_REACTIONS: Record<string, { reactions: ReactionType[]; lab
   'Other': { reactions: ['sneakers', 'medal'], label: 'Workout' },
 };
 
+// Get the primary contextual reaction image for a given activity type
+export function getActivityReactionIcon(activityType?: string | null): { type: ReactionType; src: string } {
+  if (activityType && ACTIVITY_REACTIONS[activityType]) {
+    const primaryType = ACTIVITY_REACTIONS[activityType].reactions[0];
+    return { type: primaryType, src: ALL_REACTION_IMAGES[primaryType] };
+  }
+  return { type: 'fire', src: ALL_REACTION_IMAGES.fire };
+}
+
 export const REACTION_LABELS: Record<string, string> = {
   heart: '❤️ loved',
   fire: '🔥 fired up',
