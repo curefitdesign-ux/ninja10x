@@ -153,8 +153,21 @@ const Reel = () => {
   // State for user story groups
   const [userGroups, setUserGroups] = useState<UserStoryGroup[]>([]);
   
-  // Track which users' stories have been fully viewed (all activities cycled through)
-  const [viewedUsers, setViewedUsers] = useState<Set<string>>(new Set());
+  // Track which users' stories have been fully viewed (persisted via localStorage)
+  const VIEWED_STORAGE_KEY = 'ninja10x_last_seen_activities';
+  const [viewedUsers, setViewedUsers] = useState<Set<string>>(() => {
+    // Will be populated after effectiveUserGroups is available
+    return new Set();
+  });
+  
+  // Persist last-seen activity ID per user when marking as viewed
+  const persistViewedUser = useCallback((userId: string, latestActivityId: string) => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(VIEWED_STORAGE_KEY) || '{}');
+      stored[userId] = latestActivityId;
+      localStorage.setItem(VIEWED_STORAGE_KEY, JSON.stringify(stored));
+    } catch {}
+  }, []);
   const [loading, setLoading] = useState(true);
   
   // Current user index (horizontal swipe between users)
