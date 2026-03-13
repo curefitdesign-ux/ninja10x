@@ -72,7 +72,7 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
   useEffect(() => {
     if (!visible) return;
     if (phase === 0) {
-      timerRef.current = setTimeout(() => setPhase(1), 9500);
+      timerRef.current = setTimeout(() => setPhase(1), 8000);
     }
     if (phase === 2) {
       timerRef.current = setTimeout(() => finish(), 12000);
