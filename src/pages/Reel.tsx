@@ -1962,7 +1962,7 @@ const Reel = () => {
                                     className="absolute pointer-events-none"
                                     style={{
                                       bottom: 0, left: 0, right: 0, height: '45%',
-                                      background: 'radial-gradient(ellipse at center bottom, hsl(320 60% 30% / 0.2) 0%, transparent 70%)',
+                                      background: 'radial-gradient(ellipse at center bottom, hsl(170 60% 30% / 0.2) 0%, transparent 70%)',
                                     }}
                                   />
                                   <div
