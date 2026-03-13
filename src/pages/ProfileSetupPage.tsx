@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Camera, X, Eye, EyeOff, LogOut } from 'lucide-react';
+import { Camera, X, Eye, EyeOff, ImagePlus } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 
@@ -9,41 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 import { useProfile } from '@/hooks/use-profile';
 import { z } from 'zod';
-
-
-// Curo mascot preset avatars (thumbnails)
-import curoBoxing from '@/assets/avatars/curo-boxing.png';
-import curoCool from '@/assets/avatars/curo-cool.png';
-import curoHappy from '@/assets/avatars/curo-happy.png';
-import curoFire from '@/assets/avatars/curo-fire.png';
-import curoFierce from '@/assets/avatars/curo-fierce.png';
-import curoShy from '@/assets/avatars/curo-shy.png';
-import curoZen from '@/assets/avatars/curo-zen.png';
-import curoShocked from '@/assets/avatars/curo-shocked.png';
-import curoMusic from '@/assets/avatars/curo-music.png';
-
-// HD versions for hero display
-import curoBoxingHd from '@/assets/avatars/curo-boxing-hd.png';
-import curoCoolHd from '@/assets/avatars/curo-cool-hd.png';
-import curoHappyHd from '@/assets/avatars/curo-happy-hd.png';
-import curoFireHd from '@/assets/avatars/curo-fire-hd.png';
-import curoFierceHd from '@/assets/avatars/curo-fierce-hd.png';
-import curoShyHd from '@/assets/avatars/curo-shy-hd.png';
-import curoZenHd from '@/assets/avatars/curo-zen-hd.png';
-import curoShockedHd from '@/assets/avatars/curo-shocked-hd.png';
-import curoMusicHd from '@/assets/avatars/curo-music-hd.png';
-
-const PRESET_AVATARS = [
-  { id: 'curo-boxing', src: curoBoxing, hd: curoBoxingHd },
-  { id: 'curo-cool', src: curoCool, hd: curoCoolHd },
-  { id: 'curo-happy', src: curoHappy, hd: curoHappyHd },
-  { id: 'curo-fire', src: curoFire, hd: curoFireHd },
-  { id: 'curo-fierce', src: curoFierce, hd: curoFierceHd },
-  { id: 'curo-shy', src: curoShy, hd: curoShyHd },
-  { id: 'curo-zen', src: curoZen, hd: curoZenHd },
-  { id: 'curo-shocked', src: curoShocked, hd: curoShockedHd },
-  { id: 'curo-music', src: curoMusic, hd: curoMusicHd },
-];
+import AvatarCropper from '@/components/AvatarCropper';
 
 const nameSchema = z.string().trim().min(2, 'Name must be at least 2 characters').max(50, 'Name too long');
 
@@ -56,23 +22,16 @@ const ProfileSetupPage = () => {
   const { profile, updateProfile, needsSetup, loading: profileLoading } = useProfile();
 
   const [displayName, setDisplayName] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [customAvatarFile, setCustomAvatarFile] = useState<File | null>(null);
   const [customAvatarPreview, setCustomAvatarPreview] = useState<string | null>(null);
   const [storiesPublic, setStoriesPublic] = useState(true);
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   
   const cameraInputRef = useRef<HTMLInputElement>(null);
-
-  // Preload all HD avatar images on mount so switching is instant
-  useEffect(() => {
-    PRESET_AVATARS.forEach(({ hd }) => {
-      const img = new Image();
-      img.src = hd;
-    });
-  }, []);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   // Redirect if profile already exists and not in edit mode
   useEffect(() => {
@@ -89,12 +48,7 @@ const ProfileSetupPage = () => {
       setDisplayName(profile.display_name);
       setStoriesPublic(profile.stories_public ?? false);
       const storedUrl = profile.avatar_url;
-      const presetMatch = PRESET_AVATARS.find(a =>
-        storedUrl === a.id || storedUrl.includes(a.id)
-      );
-      if (presetMatch) {
-        setSelectedAvatar(presetMatch.id);
-      } else if (storedUrl) {
+      if (storedUrl) {
         setCustomAvatarPreview(storedUrl);
       }
       setIsInitialized(true);
@@ -103,45 +57,42 @@ const ProfileSetupPage = () => {
     }
   }, [editMode, profile, isInitialized]);
 
-  // Tap hero → open native camera directly
-  const handleHeroTap = () => cameraInputRef.current?.click();
+  // Tap hero → open gallery (more natural for profile photo)
+  const handleHeroTap = () => galleryInputRef.current?.click();
 
-  const handleHeroFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return; }
     if (file.size > 20 * 1024 * 1024) { toast.error('Image must be less than 20MB'); return; }
-    // Use image directly — no crop tool
-    setCustomAvatarFile(file);
     const reader = new FileReader();
     reader.onload = (ev) => {
-      setCustomAvatarPreview(ev.target?.result as string);
-      setSelectedAvatar(null);
+      setCropImageSrc(ev.target?.result as string);
     };
     reader.readAsDataURL(file);
     if (e.target) e.target.value = '';
   };
 
-  const selectPresetAvatar = (avatarId: string) => {
-    setSelectedAvatar(avatarId);
-    setCustomAvatarFile(null);
-    setCustomAvatarPreview(null);
+  const handleCropConfirm = (croppedDataUrl: string) => {
+    fetch(croppedDataUrl)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
+        setCustomAvatarFile(file);
+        setCustomAvatarPreview(croppedDataUrl);
+        setCropImageSrc(null);
+      });
   };
 
-  const hasAvatarSelected = selectedAvatar !== null || customAvatarFile !== null || customAvatarPreview !== null;
+  const handleCropCancel = () => setCropImageSrc(null);
 
-  // What to show in the hero and blurred bg
-  const getCurrentAvatarSrc = () => {
-    if (customAvatarPreview) return customAvatarPreview;
-    if (selectedAvatar) return PRESET_AVATARS.find(a => a.id === selectedAvatar)?.hd ?? null;
-    return null;
-  };
-  const heroImage = getCurrentAvatarSrc();
+  const hasPhoto = customAvatarFile !== null || customAvatarPreview !== null;
+  const heroImage = customAvatarPreview;
 
   const handleSubmit = async () => {
     const nameResult = nameSchema.safeParse(displayName);
     if (!nameResult.success) { setNameError(nameResult.error.errors[0].message); return; }
-    if (!hasAvatarSelected) { toast.error('Please select an avatar'); return; }
+    if (!hasPhoto) { toast.error('Please add your photo'); return; }
     if (!user) { toast.error('No user logged in'); return; }
 
     setLoading(true);
@@ -157,8 +108,6 @@ const ProfileSetupPage = () => {
         if (uploadError) throw uploadError;
         const { data: urlData } = supabase.storage.from('journey-uploads').getPublicUrl(fileName);
         avatarUrl = urlData.publicUrl;
-      } else if (selectedAvatar) {
-        avatarUrl = selectedAvatar;
       } else {
         avatarUrl = customAvatarPreview || '';
       }
@@ -202,7 +151,7 @@ const ProfileSetupPage = () => {
       className="fixed inset-0 flex flex-col overflow-y-auto"
       style={{ background: '#0a0a12', height: '100dvh', WebkitOverflowScrolling: 'touch' }}
     >
-      {/* ── Ambient blurred background (always visible) ── */}
+      {/* ── Ambient blurred background ── */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <AnimatePresence>
           {heroImage && (
@@ -219,21 +168,27 @@ const ProfileSetupPage = () => {
             />
           )}
         </AnimatePresence>
-        {/* Dark veil so content is always readable */}
         <div className="absolute inset-0" style={{ background: 'rgba(10,10,18,0.45)' }} />
       </div>
 
-      {/* Hidden camera file input */}
+      {/* Hidden file inputs */}
       <input
         ref={cameraInputRef}
         type="file"
         accept="image/*"
         capture="user"
-        onChange={handleHeroFileSelect}
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+      <input
+        ref={galleryInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
         className="hidden"
       />
 
-      {/* ── HERO — 3:4 format, tap to open camera ── */}
+      {/* ── HERO — tap to upload photo ── */}
       <div className="relative z-10 w-full flex-shrink-0" style={{ aspectRatio: '3 / 4', minHeight: '75vw' }}>
         <div className="block w-full h-full cursor-pointer relative overflow-hidden" onClick={handleHeroTap}>
           {heroImage ? (
@@ -252,24 +207,37 @@ const ProfileSetupPage = () => {
               style={{ background: 'linear-gradient(180deg, rgba(42,27,78,0.6) 0%, rgba(10,7,32,0.3) 100%)' }}
             >
               <motion.div
-                className="w-20 h-20 rounded-3xl flex items-center justify-center"
+                className="w-24 h-24 rounded-full flex items-center justify-center"
                 style={{
                   background: 'rgba(255,255,255,0.06)',
-                  border: '1.5px dashed rgba(255,255,255,0.25)',
+                  border: '2px dashed rgba(255,255,255,0.25)',
                   backdropFilter: 'blur(10px)',
                 }}
-                animate={{ scale: [1, 1.04, 1] }}
+                animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <Camera className="w-9 h-9 text-white/40" />
+                <Camera className="w-10 h-10 text-white/40" />
               </motion.div>
-              <p className="text-white/35 text-sm tracking-wide">Tap to add your photo</p>
+              <p className="text-white/40 text-sm tracking-wide font-medium">Tap to add your photo</p>
             </div>
           )}
 
+          {/* Edit overlay when photo exists */}
+          {heroImage && (
+            <div
+              className="absolute bottom-4 right-4 w-10 h-10 rounded-full flex items-center justify-center"
+              style={{
+                background: 'rgba(0,0,0,0.55)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255,255,255,0.2)',
+              }}
+            >
+              <Camera className="w-4.5 h-4.5 text-white" />
+            </div>
+          )}
         </div>
 
-        {/* ✕ Close / Back button — always visible (top-right) */}
+        {/* ✕ Close / Back button */}
         <motion.button
           onClick={async () => {
             if (editMode) {
@@ -297,7 +265,7 @@ const ProfileSetupPage = () => {
         </motion.button>
       </div>
 
-      {/* ── BOTTOM PANEL — flows naturally below hero ── */}
+      {/* ── BOTTOM PANEL ── */}
       <div className="relative z-10 flex flex-col flex-1">
         {/* Title + Subtitle */}
         <div className="flex flex-col items-center px-6 mb-2" style={{ marginTop: '-80px' }}>
@@ -311,7 +279,7 @@ const ProfileSetupPage = () => {
         </div>
 
         {/* Name input */}
-        <div className="flex flex-col items-center px-6 mt-2 mb-4">
+        <div className="flex flex-col items-center px-6 mt-2 mb-5">
           <div
             className="w-full rounded-2xl overflow-hidden"
             style={{
@@ -333,123 +301,74 @@ const ProfileSetupPage = () => {
           {nameError && <p className="text-red-400 text-xs mt-1.5">{nameError}</p>}
         </div>
 
-        {/* Divider */}
-        <div className="flex items-center gap-3 px-6 mb-3">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="text-white/30 text-xs tracking-wide uppercase">Choose avatar</span>
-          <div className="flex-1 h-px bg-white/10" />
-        </div>
-
-        {/* Preset Avatars — horizontal scroll, square tiles */}
-        <div className="px-4 mb-4">
-          <div className="flex gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-            {/* Camera tile — first in row */}
+        {/* Upload buttons — Camera + Gallery side by side */}
+        <div className="px-6 mb-5">
+          <div className="flex gap-3">
             <motion.button
-              whileTap={{ scale: 0.92 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => cameraInputRef.current?.click()}
               disabled={loading}
-              className="relative flex-shrink-0 flex items-center justify-center"
+              className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl"
               style={{
-                width: 60,
-                height: 60,
-                borderRadius: 12,
                 background: 'rgba(255,255,255,0.08)',
-                border: customAvatarPreview
-                  ? '2.5px solid #34d399'
-                  : '2px dashed rgba(255,255,255,0.25)',
-                boxShadow: customAvatarPreview
-                  ? '0 0 14px rgba(52,211,153,0.45)'
-                  : 'none',
+                border: '1px solid rgba(255,255,255,0.12)',
+                backdropFilter: 'blur(16px)',
               }}
             >
-              {customAvatarPreview ? (
-                <>
-                  <img src={customAvatarPreview} alt="Custom" className="w-full h-full object-cover" style={{ borderRadius: 10 }} />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/35" style={{ borderRadius: 10 }}>
-                    <Camera className="w-4 h-4 text-white" />
-                  </div>
-                </>
-              ) : (
-                <Camera className="w-5 h-5 text-white/50" />
-              )}
+              <Camera className="w-5 h-5 text-white/70" />
+              <span className="text-white/70 text-sm font-medium">Camera</span>
             </motion.button>
-            {PRESET_AVATARS.map((avatar) => (
-              <motion.button
-                key={avatar.id}
-                whileTap={{ scale: 0.92 }}
-                onClick={() => selectPresetAvatar(avatar.id)}
-                disabled={loading}
-                className="relative flex-shrink-0"
-                style={{ width: 60, height: 60 }}
-              >
-                <div
-                  className="w-full h-full overflow-hidden"
-                  style={{
-                    borderRadius: 12,
-                    border: selectedAvatar === avatar.id
-                      ? '2.5px solid #34d399'
-                      : '2px solid rgba(255,255,255,0.1)',
-                    boxShadow: selectedAvatar === avatar.id
-                      ? '0 0 14px rgba(52,211,153,0.45)'
-                      : 'none',
-                  }}
-                >
-                  <img src={avatar.src} alt={avatar.id} className="w-full h-full object-cover" />
-                </div>
-                <AnimatePresence>
-                  {selectedAvatar === avatar.id && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0 }}
-                      className="absolute inset-0 flex items-center justify-center bg-black/35"
-                      style={{ borderRadius: 12 }}
-                    >
-                      <Check className="w-4 h-4 text-emerald-400" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-            ))}
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => galleryInputRef.current?.click()}
+              disabled={loading}
+              className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl"
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                backdropFilter: 'blur(16px)',
+              }}
+            >
+              <ImagePlus className="w-5 h-5 text-white/70" />
+              <span className="text-white/70 text-sm font-medium">Gallery</span>
+            </motion.button>
           </div>
         </div>
 
-        {/* Stories toggle — edit mode only */}
-        {editMode && (
-          <div
-            className="mx-6 rounded-2xl p-4 mb-4"
-            style={{
-              background: 'rgba(255,255,255,0.06)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255,255,255,0.1)',
-            }}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {storiesPublic ? <Eye className="w-5 h-5 text-emerald-400" /> : <EyeOff className="w-5 h-5 text-white/50" />}
-                <div>
-                  <p className="text-white font-medium text-sm">Stories Visibility</p>
-                  <p className="text-white/50 text-xs mt-0.5">{storiesPublic ? 'Visible to community' : 'Only you can see'}</p>
-                </div>
+        {/* Stories toggle */}
+        <div
+          className="mx-6 rounded-2xl p-4 mb-4"
+          style={{
+            background: 'rgba(255,255,255,0.06)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.1)',
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {storiesPublic ? <Eye className="w-5 h-5 text-emerald-400" /> : <EyeOff className="w-5 h-5 text-white/50" />}
+              <div>
+                <p className="text-white font-medium text-sm">Stories Visibility</p>
+                <p className="text-white/50 text-xs mt-0.5">{storiesPublic ? 'Visible to community' : 'Only you can see'}</p>
               </div>
-              <Switch checked={storiesPublic} onCheckedChange={setStoriesPublic} disabled={loading} />
             </div>
+            <Switch checked={storiesPublic} onCheckedChange={setStoriesPublic} disabled={loading} />
           </div>
-        )}
+        </div>
 
         {/* Submit CTA */}
         <div className="px-6 pb-safe">
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={handleSubmit}
-            disabled={loading || !displayName.trim() || !hasAvatarSelected}
+            disabled={loading || !displayName.trim() || !hasPhoto}
             className="w-full py-4 rounded-2xl font-semibold text-white transition-all duration-200 disabled:opacity-40 relative overflow-hidden"
             style={{
-              background: hasAvatarSelected && displayName.trim()
+              background: hasPhoto && displayName.trim()
                 ? 'linear-gradient(135deg, #F97316 0%, #EC4899 100%)'
                 : 'rgba(255,255,255,0.08)',
               border: '1px solid rgba(255,255,255,0.12)',
-              boxShadow: hasAvatarSelected && displayName.trim()
+              boxShadow: hasPhoto && displayName.trim()
                 ? '0 8px 28px rgba(249,115,22,0.3), inset 0 1px 0 rgba(255,255,255,0.2)'
                 : 'inset 0 1px 1px rgba(255,255,255,0.1)',
               marginBottom: 'max(env(safe-area-inset-bottom), 24px)',
@@ -468,6 +387,23 @@ const ProfileSetupPage = () => {
         </div>
       </div>
 
+      {/* Inline Avatar Cropper overlay */}
+      <AnimatePresence>
+        {cropImageSrc && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50"
+          >
+            <AvatarCropper
+              imageSrc={cropImageSrc}
+              onConfirm={handleCropConfirm}
+              onCancel={handleCropCancel}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
