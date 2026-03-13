@@ -134,6 +134,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
               return {
                 id: r.id,
                 activityId: r.activity_id,
+                reactorUserId: r.user_id,
                 reactorName: reactorProfile?.name || 'Someone',
                 reactorAvatarUrl: reactorProfile?.avatar || undefined,
                 reactionType: r.reaction_type,
