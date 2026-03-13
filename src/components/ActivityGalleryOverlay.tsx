@@ -1160,17 +1160,20 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                           </div>
 
                           {/* React button for visitors */}
-                          {!isOwnProfile && (
-                            <button className="flex items-center gap-1 active:scale-90 transition-transform"
-                              style={{
-                                background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                                borderRadius: 16, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)',
-                              }}
-                              onClick={() => { setCardReactId(zoomedActivity.id); setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id)); setShowSendReactionSheet(true); }}>
-                              <span style={{ fontSize: 14 }}>🔥</span>
-                              <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>React</span>
-                            </button>
-                          )}
+                          {!isOwnProfile && (() => {
+                            const ctxIcon = getActivityReactionIcon(zoomedActivity.activity);
+                            return (
+                              <button className="flex items-center gap-1 active:scale-90 transition-transform"
+                                style={{
+                                  background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                                  borderRadius: 16, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)',
+                                }}
+                                onClick={() => { setCardReactId(zoomedActivity.id); setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id)); setShowSendReactionSheet(true); }}>
+                                <img src={ctxIcon.src} alt="" className="w-5 h-5 object-contain" />
+                                <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>React</span>
+                              </button>
+                            );
+                          })()}
                         </>
                       );
                     }
