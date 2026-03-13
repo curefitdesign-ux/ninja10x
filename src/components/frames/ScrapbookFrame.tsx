@@ -161,7 +161,7 @@ const ScrapbookFrame = ({
       <div
         style={{
           margin: '1.5cqw 4.5% 0 4.5%',
-          borderRadius: '3px',
+          borderRadius: '1cqw',
           overflow: 'hidden',
           flex: 1,
           position: 'relative',
