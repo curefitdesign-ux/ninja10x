@@ -345,6 +345,19 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
     onClose();
   }, [onClose]);
 
+  // Navigate to the user's profile in the Reel/Discover page
+  const handleProfileTap = useCallback((notif: Notification) => {
+    if (!notif.reactorUserId) return;
+    onClose();
+    navigate('/reel', {
+      replace: true,
+      state: {
+        focusUserId: notif.reactorUserId,
+        _ts: Date.now(),
+      },
+    });
+  }, [navigate, onClose]);
+
   // Navigate to the progress page gallery overlay for the specific activity
   const handleNotificationTap = useCallback((notif: Notification) => {
     onClose();
