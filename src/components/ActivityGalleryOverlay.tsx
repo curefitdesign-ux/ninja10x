@@ -117,6 +117,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
   const [showReactsSheet, setShowReactsSheet] = useState(false);
   const [showSendReactionSheet, setShowSendReactionSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
+  const [zoomedActivity, setZoomedActivity] = useState<GalleryActivity | null>(null);
   
   const [cardReactId, setCardReactId] = useState<string | null>(null);
 
