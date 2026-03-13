@@ -225,11 +225,11 @@ const ProfileSetupPage = () => {
           {/* Edit overlay when photo exists */}
           {heroImage && editMode && (
             <div
-              className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
+              className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center"
               style={{ bottom: '70px' }}
             >
               <div
-                className="w-11 h-11 rounded-full flex items-center justify-center"
+                className="w-14 h-14 rounded-full flex flex-col items-center justify-center gap-0.5"
                 style={{
                   background: 'rgba(0,0,0,0.55)',
                   backdropFilter: 'blur(16px)',
@@ -237,8 +237,8 @@ const ProfileSetupPage = () => {
                 }}
               >
                 <Camera className="w-5 h-5 text-white" />
+                <span className="text-white/70 text-[9px] font-medium leading-none">Edit</span>
               </div>
-              <span className="text-white/60 text-xs font-medium">Edit</span>
             </div>
           )}
           {heroImage && !editMode && (
@@ -295,7 +295,7 @@ const ProfileSetupPage = () => {
               India's Ultimate{'\n'}Habit Builder.
             </h1>
           )}
-          <p className="text-white/50 text-base mt-3 text-center">What should we call you?</p>
+          {!editMode && <p className="text-white/50 text-base mt-3 text-center">What should we call you?</p>}
         </div>
 
         {/* Name input */}
