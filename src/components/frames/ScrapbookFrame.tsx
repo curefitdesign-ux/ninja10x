@@ -40,6 +40,8 @@ const ScrapbookFrame = ({
     }
   }, [isVideo, imageUrl]);
 
+  const hasMetrics = duration || pr;
+
   return (
     <div
       className="w-full h-full overflow-hidden relative flex flex-col"
@@ -53,11 +55,11 @@ const ScrapbookFrame = ({
       }}
     >
       {/* ── Top Handle Bar ── */}
-      <div className="flex justify-center" style={{ paddingTop: '3%' }}>
+      <div className="flex justify-center" style={{ paddingTop: '2.5cqw' }}>
         <div
           style={{
             width: '16%',
-            height: '1cqw',
+            height: '0.8cqw',
             borderRadius: '9999px',
             background: 'rgba(170, 162, 148, 0.55)',
           }}
@@ -65,13 +67,12 @@ const ScrapbookFrame = ({
       </div>
 
       {/* ── "I DID {Activity} TODAY!" Header ── */}
-      <div style={{ padding: '3.5% 5.5% 0 5.5%' }}>
-        {/* "I DID" - Helvetica Neue Bold */}
+      <div style={{ padding: '2.5cqw 5cqw 0 5cqw' }}>
         <div
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 700,
-            fontSize: '11.5cqw',
+            fontSize: '10.5cqw',
             color: '#1a1a1a',
             lineHeight: 0.95,
             letterSpacing: '-0.06em',
@@ -80,47 +81,35 @@ const ScrapbookFrame = ({
         >
           I DID
         </div>
-        {/* Activity name - Caveat (Figma Hand alternative) */}
         <div
           style={{
             fontFamily: "'Caveat', cursive",
             fontWeight: 700,
             fontStyle: 'italic',
-            fontSize: '15.5cqw',
+            fontSize: '14cqw',
             color: '#7C5CFC',
             lineHeight: 0.85,
-            marginTop: '-6%',
+            marginTop: '-1cqw',
             marginLeft: '-0.5%',
             transform: 'rotate(-1.5deg)',
           }}
         >
           {activity}
         </div>
-        {/* "TODAY!" - Helvetica Neue Bold */}
         <div
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 700,
-            fontSize: '11.5cqw',
+            fontSize: '10.5cqw',
             color: '#1a1a1a',
             lineHeight: 0.95,
             letterSpacing: '-0.06em',
             textTransform: 'uppercase' as const,
-            marginTop: '-1%',
+            marginTop: '-0.5cqw',
           }}
         >
           TODAY!
         </div>
-      </div>
-
-      {/* ── Dashed Separator ── */}
-      <div style={{ padding: '4% 5% 0 5%' }}>
-        <div
-          style={{
-            borderTop: '0.4cqw dashed rgba(130, 120, 105, 0.55)',
-            width: '100%',
-          }}
-        />
       </div>
 
       {/* ── Meta Row: CULT NINJA JOURNEY / WEEK / DAY ── */}
@@ -128,14 +117,14 @@ const ScrapbookFrame = ({
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          padding: '3.2% 5.5% 1.5% 5.5%',
+          padding: '2.5cqw 5cqw 1cqw 5cqw',
         }}
       >
         <span
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 500,
-            fontSize: '3.5cqw',
+            fontSize: '3cqw',
             color: '#2e2a25',
             letterSpacing: '0.16em',
             textTransform: 'uppercase',
@@ -147,7 +136,7 @@ const ScrapbookFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 500,
-            fontSize: '3.5cqw',
+            fontSize: '3cqw',
             color: '#2e2a25',
             letterSpacing: '0.16em',
             textTransform: 'uppercase',
@@ -155,6 +144,16 @@ const ScrapbookFrame = ({
         >
           WEEK {week} / DAY {day}
         </span>
+      </div>
+
+      {/* ── Dashed Separator (above photo) ── */}
+      <div style={{ padding: '0 5cqw' }}>
+        <div
+          style={{
+            borderTop: '0.35cqw dashed rgba(130, 120, 105, 0.55)',
+            width: '100%',
+          }}
+        />
       </div>
 
       {/* ── Photo Area — takes remaining space ── */}
@@ -167,7 +166,7 @@ const ScrapbookFrame = ({
           position: 'relative',
           background: '#000',
           minHeight: 0,
-          marginBottom: '4cqw',
+          marginBottom: hasMetrics ? '0' : '3cqw',
         }}
       >
         {isVideo ? (
@@ -180,7 +179,9 @@ const ScrapbookFrame = ({
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
             style={{
-              transform: (imagePosition.x || imagePosition.y || imageScale !== 1) ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` : `scale(${imageScale})`,
+              transform: (imagePosition.x || imagePosition.y || imageScale !== 1)
+                ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`
+                : `scale(${imageScale})`,
             }}
           />
         ) : (
@@ -192,91 +193,99 @@ const ScrapbookFrame = ({
             decoding="async"
             fetchPriority="high"
             style={{
-              transform: (imagePosition.x || imagePosition.y || imageScale !== 1) ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})` : `scale(${imageScale})`,
+              transform: (imagePosition.x || imagePosition.y || imageScale !== 1)
+                ? `translate(${imagePosition.x}%, ${imagePosition.y}%) scale(${imageScale})`
+                : `scale(${imageScale})`,
             }}
           />
         )}
       </div>
 
       {/* ── Bottom Metrics ── */}
-      <div style={{ padding: '0 5%', flexShrink: 0, marginTop: '-2.5cqw', overflow: 'hidden' }}>
-        {/* Dashed separator */}
-        <div
-          style={{
-            borderTop: '0.4cqw dashed rgba(130, 120, 105, 0.55)',
-            width: '100%',
-            marginTop: '2.5%',
-          }}
-        />
+      {hasMetrics && (
+        <div style={{ padding: '0 5cqw', flexShrink: 0, overflow: 'hidden' }}>
+          {/* Dashed separator */}
+          <div
+            style={{
+              borderTop: '0.35cqw dashed rgba(130, 120, 105, 0.55)',
+              width: '100%',
+              marginTop: '1.5cqw',
+            }}
+          />
 
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'baseline',
-            padding: '2% 0.5% 3% 0.5%',
-            minHeight: '8cqw',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5cqw', visibility: duration ? 'visible' : 'hidden' }}>
-            <span
-              style={{
-                fontFamily: "'Bebas Neue', sans-serif",
-                fontWeight: 400,
-                fontSize: '4.1cqw',
-                color: '#2e2a25',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {durationLabel} :
-            </span>
-            <span
-              style={{
-                fontFamily: "'Caveat', cursive",
-                fontWeight: 700,
-                fontStyle: 'italic',
-                fontSize: '6.5cqw',
-                color: '#7C5CFC',
-                lineHeight: 1,
-                marginLeft: '0.5cqw',
-              }}
-            >
-              {duration || '—'}
-            </span>
-          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'baseline',
+              padding: '1.5cqw 0.5cqw 2.5cqw 0.5cqw',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5cqw', visibility: duration ? 'visible' : 'hidden' }}>
+              <span
+                style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontWeight: 400,
+                  fontSize: '3.6cqw',
+                  color: '#2e2a25',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {durationLabel} :
+              </span>
+              <span
+                style={{
+                  fontFamily: "'Caveat', cursive",
+                  fontWeight: 700,
+                  fontStyle: 'italic',
+                  fontSize: '5.8cqw',
+                  color: '#7C5CFC',
+                  lineHeight: 1,
+                  marginLeft: '0.5cqw',
+                }}
+              >
+                {duration || '—'}
+              </span>
+            </div>
 
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5cqw', visibility: pr ? 'visible' : 'hidden' }}>
-            <span
-              style={{
-                fontFamily: "'Bebas Neue', sans-serif",
-                fontWeight: 400,
-                fontSize: '4.1cqw',
-                color: '#2e2a25',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {metricLabel} :
-            </span>
-            <span
-              style={{
-                fontFamily: "'Caveat', cursive",
-                fontWeight: 700,
-                fontStyle: 'italic',
-                fontSize: '6.5cqw',
-                color: '#7C5CFC',
-                lineHeight: 1,
-                marginLeft: '0.5cqw',
-              }}
-            >
-              {pr || '—'}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5cqw', visibility: pr ? 'visible' : 'hidden' }}>
+              <span
+                style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontWeight: 400,
+                  fontSize: '3.6cqw',
+                  color: '#2e2a25',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {metricLabel} :
+              </span>
+              <span
+                style={{
+                  fontFamily: "'Caveat', cursive",
+                  fontWeight: 700,
+                  fontStyle: 'italic',
+                  fontSize: '5.8cqw',
+                  color: '#7C5CFC',
+                  lineHeight: 1,
+                  marginLeft: '0.5cqw',
+                }}
+              >
+                {pr || '—'}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Hidden placeholder to keep consistent height when no metrics */}
+      {!hasMetrics && (
+        <div style={{ height: '0', flexShrink: 0 }} />
+      )}
     </div>
   );
 };
