@@ -57,7 +57,7 @@ const ScrapbookFrame = ({
         <div
           style={{
             width: '16%',
-            height: '3.5px',
+            height: '1cqw',
             borderRadius: '9999px',
             background: 'rgba(170, 162, 148, 0.55)',
           }}
@@ -71,7 +71,7 @@ const ScrapbookFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 700,
-            fontSize: 'clamp(20px, 11.5cqw, 38px)',
+            fontSize: '11.5cqw',
             color: '#1a1a1a',
             lineHeight: 0.95,
             letterSpacing: '-0.06em',
@@ -86,7 +86,7 @@ const ScrapbookFrame = ({
             fontFamily: "'Caveat', cursive",
             fontWeight: 700,
             fontStyle: 'italic',
-            fontSize: 'clamp(28px, 15.5cqw, 52px)',
+            fontSize: '15.5cqw',
             color: '#7C5CFC',
             lineHeight: 0.85,
             marginTop: '-6%',
@@ -101,7 +101,7 @@ const ScrapbookFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 700,
-            fontSize: 'clamp(20px, 11.5cqw, 38px)',
+            fontSize: '11.5cqw',
             color: '#1a1a1a',
             lineHeight: 0.95,
             letterSpacing: '-0.06em',
@@ -117,7 +117,7 @@ const ScrapbookFrame = ({
       <div style={{ padding: '4% 5% 0 5%' }}>
         <div
           style={{
-            borderTop: '1.5px dashed rgba(130, 120, 105, 0.55)',
+            borderTop: '0.4cqw dashed rgba(130, 120, 105, 0.55)',
             width: '100%',
           }}
         />
@@ -135,7 +135,7 @@ const ScrapbookFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 500,
-            fontSize: 'clamp(7px, 3.5cqw, 12px)',
+            fontSize: '3.5cqw',
             color: '#2e2a25',
             letterSpacing: '0.16em',
             textTransform: 'uppercase',
@@ -147,7 +147,7 @@ const ScrapbookFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 500,
-            fontSize: 'clamp(7px, 3.5cqw, 12px)',
+            fontSize: '3.5cqw',
             color: '#2e2a25',
             letterSpacing: '0.16em',
             textTransform: 'uppercase',
@@ -160,14 +160,14 @@ const ScrapbookFrame = ({
       {/* ── Photo Area — takes remaining space ── */}
       <div
         style={{
-          margin: '5px 4.5% 0 4.5%',
-          borderRadius: '3px',
+          margin: '1.5cqw 4.5% 0 4.5%',
+          borderRadius: '1cqw',
           overflow: 'hidden',
           flex: 1,
           position: 'relative',
           background: '#000',
           minHeight: 0,
-          marginBottom: '15px',
+          marginBottom: '4cqw',
         }}
       >
         {isVideo ? (
@@ -199,11 +199,11 @@ const ScrapbookFrame = ({
       </div>
 
       {/* ── Bottom Metrics ── */}
-      <div style={{ padding: '0 5%', flexShrink: 0, marginTop: '-10px', overflow: 'hidden' }}>
+      <div style={{ padding: '0 5%', flexShrink: 0, marginTop: '-2.5cqw', overflow: 'hidden' }}>
         {/* Dashed separator */}
         <div
           style={{
-            borderTop: '1.5px dashed rgba(130, 120, 105, 0.55)',
+            borderTop: '0.4cqw dashed rgba(130, 120, 105, 0.55)',
             width: '100%',
             marginTop: '2.5%',
           }}
@@ -215,15 +215,15 @@ const ScrapbookFrame = ({
             justifyContent: 'space-between',
             alignItems: 'baseline',
             padding: '2% 0.5% 3% 0.5%',
-            minHeight: 'clamp(16px, 8cqw, 28px)',
+            minHeight: '8cqw',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', visibility: duration ? 'visible' : 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5cqw', visibility: duration ? 'visible' : 'hidden' }}>
             <span
               style={{
                 fontFamily: "'Bebas Neue', sans-serif",
                 fontWeight: 400,
-                fontSize: 'clamp(8px, 4.1cqw, 14px)',
+                fontSize: '4.1cqw',
                 color: '#2e2a25',
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
@@ -237,22 +237,22 @@ const ScrapbookFrame = ({
                 fontFamily: "'Caveat', cursive",
                 fontWeight: 700,
                 fontStyle: 'italic',
-                fontSize: 'clamp(12px, 6.5cqw, 22px)',
+                fontSize: '6.5cqw',
                 color: '#7C5CFC',
                 lineHeight: 1,
-                marginLeft: '2px',
+                marginLeft: '0.5cqw',
               }}
             >
               {duration || '—'}
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', visibility: pr ? 'visible' : 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5cqw', visibility: pr ? 'visible' : 'hidden' }}>
             <span
               style={{
                 fontFamily: "'Bebas Neue', sans-serif",
                 fontWeight: 400,
-                fontSize: 'clamp(8px, 4.1cqw, 14px)',
+                fontSize: '4.1cqw',
                 color: '#2e2a25',
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
@@ -266,10 +266,10 @@ const ScrapbookFrame = ({
                 fontFamily: "'Caveat', cursive",
                 fontWeight: 700,
                 fontStyle: 'italic',
-                fontSize: 'clamp(12px, 6.5cqw, 22px)',
+                fontSize: '6.5cqw',
                 color: '#7C5CFC',
                 lineHeight: 1,
-                marginLeft: '2px',
+                marginLeft: '0.5cqw',
               }}
             >
               {pr || '—'}
