@@ -168,6 +168,23 @@ const Reel = () => {
       localStorage.setItem(VIEWED_STORAGE_KEY, JSON.stringify(stored));
     } catch {}
   }, []);
+  
+  // Helper: mark a user as viewed and persist their latest activity ID
+  const markUserViewed = useCallback((userId: string) => {
+    setViewedUsers(prev => new Set(prev).add(userId));
+    // Find latest real activity for this user from effectiveUserGroups
+    // We use a ref to avoid dependency issues
+    const group = effectiveUserGroupsRef.current.find(g => g.userId === userId);
+    if (group) {
+      const latestReal = group.activities.find(a => !a.id.startsWith('log-activity') && !a.id.startsWith('week-complete') && !a.id.startsWith('week-recap'));
+      if (latestReal) {
+        persistViewedUser(userId, latestReal.id);
+      }
+    }
+  }, [persistViewedUser]);
+  
+  const effectiveUserGroupsRef = useRef<UserStoryGroup[]>([]);
+  
   const [loading, setLoading] = useState(true);
   
   // Current user index (horizontal swipe between users)
