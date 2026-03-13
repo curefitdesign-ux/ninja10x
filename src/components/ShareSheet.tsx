@@ -1,4 +1,5 @@
 import { X, Download, Copy, Check, Pencil, Loader2 } from 'lucide-react';
+import { buildFullSharePayload } from '@/lib/share-utils';
 import { notifyBottomSheet } from '@/lib/bottom-sheet-events';
 import { triggerHaptic } from '@/hooks/use-haptic-feedback';
 import { useState, useEffect, useRef } from 'react';
