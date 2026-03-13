@@ -691,7 +691,8 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
                               {/* Card */}
                               <div
-                                className="relative overflow-visible"
+                                className="relative overflow-visible cursor-pointer"
+                                onClick={() => setZoomedActivity(act)}
                                 style={{
                                   width: '48%', aspectRatio: '9/16', borderRadius: 4,
                                   transform: `rotate(${activeRotation}deg) translateX(${offsetX}px)`,
