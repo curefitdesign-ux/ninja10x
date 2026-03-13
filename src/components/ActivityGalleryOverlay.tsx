@@ -668,7 +668,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               key={act.id}
                               ref={(el) => { cardRefs.current[act.id] = el; }}
                               className="relative"
-                              style={{ padding: '12px 16px 12px 58px', marginBottom: idx < realActivities.length - 1 ? 8 : 0 }}
+                              style={{ padding: '12px 16px 6px 58px', marginBottom: idx < realActivities.length - 1 ? 16 : 0 }}
                             >
                               {/* Timeline dot */}
                               <div className="absolute rounded-full" style={{
@@ -683,7 +683,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                               <p style={{
                                 fontFamily: "'Caveat', cursive", fontSize: 23,
                                 color: isAtTop ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.45)',
-                                marginBottom: 21,
+                                marginBottom: 14,
                                 transform: `rotate(${rotation * 0.3}deg)`,
                                 marginLeft: offsetX,
                                 transition: 'color 0.3s ease',
@@ -701,8 +701,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                   width: '48%', aspectRatio: '9/16', borderRadius: 4,
                                   transform: `rotate(${activeRotation}deg) translateX(${offsetX}px)`,
                                   marginLeft: idx % 2 === 0 ? '0%' : '10%',
-                                  marginTop: 10,
-                                  transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
                                 }}
                               >
                                 <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 4, containerType: 'inline-size' }}>
@@ -715,41 +713,6 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                   )}
                                 </div>
 
-                                {/* Reactions */}
-                                {(() => {
-                                  const ar = localReactions[act.id];
-                                  const total = ar?.total || 0;
-                                  return (
-                                    <div className="absolute flex items-center gap-1.5" style={{ bottom: -12, left: -6, zIndex: 30, transform: `rotate(${-activeRotation * 0.6}deg)` }}>
-                                      {(total > 0 || isOwnProfile) && (
-                                        <button
-                                          className="active:scale-90 transition-transform"
-                                          onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowReactsSheet(true); }}
-                                          style={{
-                                            fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.85)',
-                                            background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                                            border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
-                                            cursor: 'pointer',
-                                          }}
-                                        >
-                                          {total} ❤️
-                                        </button>
-                                      )}
-                                      {!isOwnProfile && (
-                                        <button className="flex items-center gap-0.5 active:scale-90 transition-transform"
-                                          style={{
-                                            background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                                            borderRadius: 12, padding: '4px 10px', border: '1px solid rgba(255,255,255,0.12)',
-                                          }}
-                                          onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}>
-                                          <span style={{ fontSize: 12 }}>🔥</span>
-                                          <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.85)' }}>React</span>
-                                        </button>
-                                      )}
-                                    </div>
-                                  );
-                                })()}
-
                                 {/* Edit button — top right */}
                                 {canEdit && (
                                   <button className="absolute flex items-center gap-1 active:scale-90 transition-transform"
@@ -761,8 +724,43 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                 )}
                               </div>
 
+                              {/* Reactions — below card, not overlapping */}
+                              {(() => {
+                                const ar = localReactions[act.id];
+                                const total = ar?.total || 0;
+                                return (
+                                  <div className="flex items-center gap-1.5" style={{ marginTop: 8, marginLeft: idx % 2 === 0 ? '0%' : '10%', paddingLeft: 2 }}>
+                                    {(total > 0 || isOwnProfile) && (
+                                      <button
+                                        className="active:scale-90 transition-transform"
+                                        onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowReactsSheet(true); }}
+                                        style={{
+                                          fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.85)',
+                                          background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                                          border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '4px 10px',
+                                          cursor: 'pointer',
+                                        }}
+                                      >
+                                        {total} ❤️
+                                      </button>
+                                    )}
+                                    {!isOwnProfile && (
+                                      <button className="flex items-center gap-0.5 active:scale-90 transition-transform"
+                                        style={{
+                                          background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                                          borderRadius: 12, padding: '4px 10px', border: '1px solid rgba(255,255,255,0.12)',
+                                        }}
+                                        onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}>
+                                        <span style={{ fontSize: 12 }}>🔥</span>
+                                        <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.85)' }}>React</span>
+                                      </button>
+                                    )}
+                                  </div>
+                                );
+                              })()}
+
                               {/* Hand-drawn journal doodles */}
-                              <div className="pointer-events-none relative" style={{ minHeight: 36, marginTop: 10 }}>
+                              <div className="pointer-events-none relative" style={{ minHeight: 32, marginTop: 8 }}>
                                 <p style={{
                                   fontFamily: "'Caveat', cursive", fontSize: 17, fontWeight: 700,
                                   color: 'rgba(255,255,255,0.28)',
@@ -950,7 +948,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
           <AnimatePresence>
             {zoomedActivity && (
               <motion.div
-                className="fixed inset-0 flex items-center justify-center"
+                className="fixed inset-0 flex flex-col items-center justify-center"
                 style={{ zIndex: 65 }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -971,6 +969,22 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                   />
                   <div className="absolute inset-0" style={{ background: 'rgba(0, 0, 0, 0.5)' }} />
                 </div>
+
+                {/* Close button */}
+                <motion.button
+                  className="absolute flex items-center justify-center"
+                  style={{
+                    top: 'max(env(safe-area-inset-top, 16px), 16px)',
+                    right: 16, width: 36, height: 36, borderRadius: 18,
+                    background: 'rgba(255,255,255,0.12)', zIndex: 70,
+                  }}
+                  onClick={() => setZoomedActivity(null)}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <X className="w-5 h-5 text-white/70" />
+                </motion.button>
 
                 {/* Zoomed card */}
                 <motion.div
@@ -1016,6 +1030,50 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                       className="absolute inset-0 w-full h-full object-cover"
                     />
                   )}
+                </motion.div>
+
+                {/* Reactions below zoomed card */}
+                <motion.div
+                  className="flex items-center justify-center gap-2"
+                  style={{ marginTop: 16, zIndex: 70 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25, duration: 0.3 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {(() => {
+                    const ar = localReactions[zoomedActivity.id];
+                    const total = ar?.total || 0;
+                    return (
+                      <>
+                        {(total > 0 || isOwnProfile) && (
+                          <button
+                            className="active:scale-90 transition-transform"
+                            onClick={() => { setCardReactId(zoomedActivity.id); setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id)); setShowReactsSheet(true); }}
+                            style={{
+                              fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)',
+                              background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                              border: '1px solid rgba(255,255,255,0.15)', borderRadius: 16, padding: '6px 14px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {total} ❤️
+                          </button>
+                        )}
+                        {!isOwnProfile && (
+                          <button className="flex items-center gap-1 active:scale-90 transition-transform"
+                            style={{
+                              background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                              borderRadius: 16, padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)',
+                            }}
+                            onClick={() => { setCardReactId(zoomedActivity.id); setCurrentIndex(activities.findIndex(a => a.id === zoomedActivity.id)); setShowSendReactionSheet(true); }}>
+                            <span style={{ fontSize: 14 }}>🔥</span>
+                            <span style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: 'rgba(255,255,255,0.9)' }}>React</span>
+                          </button>
+                        )}
+                      </>
+                    );
+                  })()}
                 </motion.div>
 
                 {/* Close hint */}
