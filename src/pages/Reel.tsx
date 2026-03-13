@@ -1921,12 +1921,14 @@ const Reel = () => {
                               className="relative overflow-hidden w-full h-full"
                               style={{
                                 borderRadius: `${cardRadius}px`,
-                                background: isLogActivityCard ? '#0a0a12' : 'transparent',
+                                background: isLogActivityCard
+                                  ? 'linear-gradient(165deg, hsl(270 45% 12%) 0%, hsl(280 50% 8%) 35%, hsl(320 40% 10%) 65%, hsl(25 50% 10%) 100%)'
+                                  : 'transparent',
                                 border: isLogActivityCard
-                                  ? '1px solid rgba(160, 120, 255, 0.25)'
+                                  ? '1px solid rgba(180, 140, 255, 0.2)'
                                   : 'none',
                                 boxShadow: isLogActivityCard
-                                  ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 0 20px rgba(140, 100, 240, 0.15), 0 0 40px rgba(140, 100, 240, 0.08)'
+                                  ? 'inset 0 1px 1px rgba(255,255,255,0.06), inset 0 -40px 80px rgba(140, 80, 200, 0.08), 0 0 30px rgba(140, 100, 240, 0.12)'
                                   : 'none',
                                 zIndex: 3,
                               }}
