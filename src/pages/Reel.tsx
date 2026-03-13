@@ -415,7 +415,11 @@ const Reel = () => {
     return allGroups.filter(g => g.activities.length > 0);
   }, [userGroups, user, myActivities, profile, sourceUserId, deepLinkActivityId]);
 
-  // Initialize viewedUsers from localStorage — compare stored last-seen activity ID with current latest
+  // Keep effectiveUserGroupsRef in sync
+  useEffect(() => {
+    effectiveUserGroupsRef.current = effectiveUserGroups;
+  }, [effectiveUserGroups]);
+
   const viewedInitializedRef = useRef(false);
   useEffect(() => {
     if (viewedInitializedRef.current || effectiveUserGroups.length === 0) return;
