@@ -253,9 +253,12 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
 
   const buildSharePayload = () => {
     const activityName = current?.activity || 'workout';
-    const shareText = `Check out my ${activityName} on my fitness journey! 💪`;
-    const url = mediaUrl && mediaUrl.startsWith('http') ? mediaUrl : window.location.href;
-    return { title: 'My Fitness Story', text: shareText, url };
+    return buildFullSharePayload({
+      activityId: current?.id,
+      activity: activityName,
+      dayNumber: current?.dayNumber,
+      isOwnStory: true,
+    });
   };
 
   const shareToChannel = (channel: 'whatsapp' | 'instagram' | 'messages') => {
