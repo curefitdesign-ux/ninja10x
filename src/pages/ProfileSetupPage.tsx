@@ -269,12 +269,14 @@ const ProfileSetupPage = () => {
       <div className="relative z-10 flex flex-col flex-1">
         {/* Title + Subtitle */}
         <div className="flex flex-col items-center px-6 mb-2" style={{ marginTop: '-80px' }}>
-          <h1
-            className="text-center font-black text-white uppercase leading-tight"
-            style={{ fontSize: '2rem', letterSpacing: '-0.02em' }}
-          >
-            India's Ultimate{'\n'}Habit Builder.
-          </h1>
+          {!editMode && (
+            <h1
+              className="text-center font-black text-white uppercase leading-tight"
+              style={{ fontSize: '2rem', letterSpacing: '-0.02em' }}
+            >
+              India's Ultimate{'\n'}Habit Builder.
+            </h1>
+          )}
           <p className="text-white/50 text-base mt-3 text-center">What should we call you?</p>
         </div>
 
