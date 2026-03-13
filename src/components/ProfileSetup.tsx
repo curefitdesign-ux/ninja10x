@@ -82,7 +82,8 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
 
       if (customAvatarFile) {
         const fileExt = customAvatarFile.name.split('.').pop();
-        const fileName = `${user.id}/avatar.${fileExt}`;
+        const timestamp = Date.now();
+        const fileName = `${user.id}/avatar-${timestamp}.${fileExt}`;
         const { error: uploadError } = await supabase.storage
           .from('journey-uploads')
           .upload(fileName, customAvatarFile, { upsert: true });
