@@ -1726,7 +1726,7 @@ const Reel = () => {
                 const isLockedCard = !isOwnCard && !viewerCanSeeCommunity;
                 const hasFrame = activity?.frame && activity.frame !== 'none';
 
-                const isLogCard = activity?.id === 'log-activity';
+                const isLogCard = activity?.id === 'log-activity' || activity?.id === 'week-complete';
                 const cardRadius = isLogCard ? 13 : 16;
 
                 const cardStyle: React.CSSProperties = {
