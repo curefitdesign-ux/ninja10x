@@ -8,6 +8,7 @@ import ActivityGalleryOverlay from '@/components/ActivityGalleryOverlay';
 import { isVideoUrl } from '@/lib/media';
 import { ReactionType, ActivityReaction } from '@/services/journey-service';
 import GamifiedJourneyPath from '@/components/GamifiedJourneyPath';
+import { useProfile } from '@/hooks/use-profile';
 import plusIconImg from '@/assets/icons/plus-icon.png';
 import cultNinjaText from '@/assets/progress/cult-ninja-text.svg';
 import finalGoalImg from '@/assets/progress/final-goal.png';

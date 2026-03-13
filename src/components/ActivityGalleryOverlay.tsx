@@ -739,7 +739,7 @@ const ActivityGalleryOverlay = forwardRef<HTMLDivElement, ActivityGalleryOverlay
                                           }}
                                           onClick={(e) => { e.stopPropagation(); setCardReactId(act.id); setCurrentIndex(activities.findIndex(a => a.id === act.id)); setShowSendReactionSheet(true); }}>
                                           <span style={{ fontSize: 12 }}>🔥</span>
-                                          <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(0,0,0,0.7)' }}>React</span>
+                                          <span style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: 'rgba(255,255,255,0.85)' }}>React</span>
                                         </button>
                                       )}
                                     </div>
