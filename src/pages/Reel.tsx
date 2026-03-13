@@ -1048,7 +1048,6 @@ const Reel = () => {
   }, [weekRecapVideoFromNav, weekRecapNumber]);
 
   const buildSharePayload = useCallback(() => {
-    const { buildFullSharePayload } = await_import_share;
     const userName = currentGroup?.displayName || 'Someone';
     const activityName = currentActivity?.activity || 'workout';
 
