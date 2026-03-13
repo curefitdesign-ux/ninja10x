@@ -405,7 +405,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             className="relative flex flex-col h-full"
             style={{
               paddingTop: 'calc(env(safe-area-inset-top) + 16px)',
-              paddingBottom: 'calc(env(safe-area-inset-bottom) + 80px)',
+              paddingBottom: '16px',
             }}
           >
             {/* Header */}
