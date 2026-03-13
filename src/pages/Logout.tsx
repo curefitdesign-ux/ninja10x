@@ -101,10 +101,23 @@ const Logout = () => {
 
               <div>
                 <h2 className="text-xl font-bold text-white mb-1">You're logged out</h2>
-                <p className="text-white/50 text-sm">
+              <p className="text-white/50 text-sm mb-4">
                   Thanks for using Cult. See you next session!
                 </p>
               </div>
+
+              <motion.button
+                onClick={() => navigate('/auth')}
+                className="w-full h-12 rounded-xl font-semibold text-teal-950"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,253,250,0.9) 100%)',
+                  boxShadow: '0 4px 20px rgba(20, 184, 166, 0.25)',
+                }}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Sign In
+              </motion.button>
             </motion.div>
           )}
         </div>

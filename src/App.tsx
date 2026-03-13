@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 
-import { AuthProvider, useSSOAuth } from "@/context/AuthContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -16,6 +16,7 @@ import { MorphTransitionProvider } from "@/hooks/use-morph-transition";
 import MorphTransitionOverlay from "@/components/MorphTransitionOverlay";
 
 // Lazy-load all other routes
+const Auth = lazy(() => import("./pages/Auth"));
 const Index = lazy(() => import("./pages/Index"));
 const Preview = lazy(() => import("./pages/Preview"));
 const Activity = lazy(() => import("./pages/Activity"));
@@ -69,7 +70,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   // Only redirect if we're certain there's no session (auth is done loading)
   if (!session && !user) {
-    return <Navigate to="/logout" replace />;
+    return <Navigate to="/auth" replace />;
   }
 
   // Wait for profile check if we have a user
@@ -104,7 +105,7 @@ const ProfileSetupRouteWrapper = ({ children }: { children: React.ReactNode }) =
   }
   
   if (!user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/auth" replace />;
   }
 
   // If profile exists and not in edit mode, redirect to home
@@ -128,7 +129,7 @@ const AnimatedRoutes = () => {
     <Suspense fallback={<RouteFallback />}>
       <PageTransition key={location.pathname}>
         <Routes location={location}>
-          <Route path="/auth" element={<Navigate to="/reel" replace />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/profile-setup" element={<ProfileSetupRouteWrapper><ProfileSetupPage /></ProfileSetupRouteWrapper>} />
           <Route path="/avatar-crop" element={<ProtectedRoute><AvatarCrop /></ProtectedRoute>} />

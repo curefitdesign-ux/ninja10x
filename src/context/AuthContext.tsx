@@ -1,118 +1,52 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
-import { validateSSOToken } from "@/services/authService";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthContextShape {
   user: User | null;
-  cultUserId: string | null;
+  session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextShape | undefined>(undefined);
 
-export const useSSOAuth = (): AuthContextShape => {
+export const useAuthContext = (): AuthContextShape => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useSSOAuth must be used within <AuthProvider>");
+  if (!ctx) throw new Error("useAuthContext must be used within <AuthProvider>");
   return ctx;
 };
 
-// Capture SSO token and initial path synchronously at module level
-// before any React Router redirect can strip it
-const _initialSearch = window.location.search;
-const _initialParams = new URLSearchParams(_initialSearch);
-const _capturedSSOToken = _initialParams.get("sso_token") || _initialParams.get("ssoToken");
-const _ignoreAuth = _initialParams.get("ignoreAuth") === "true";
-
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [cultUserId, setCultUserId] = useState<string | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const didRun = useRef(false);
 
   useEffect(() => {
-    if (didRun.current) return;
-    didRun.current = true;
-
-    const ssoToken = _capturedSSOToken;
-
-    const run = async () => {
-      try {
-        // Check for existing session first
-        const { data: { session: existingSession } } = await supabase.auth.getSession();
-
-        // If we have an existing session and NO sso token to re-validate, use it
-        if (existingSession?.user && !ssoToken && !_ignoreAuth) {
-          setUser(existingSession.user);
-          setIsLoading(false);
-          return;
-        }
-
-        // If no sso token and not in ignoreAuth mode, stop loading
-        if (!ssoToken && !_ignoreAuth) {
-          setIsLoading(false);
-          return;
-        }
-
-        // Sign out any existing session before establishing a new one
-        // This prevents multiple auth sessions accumulating in localStorage
-        if (existingSession) {
-          console.log("[SSO Auth] Existing session found — signing out before re-auth...");
-          await supabase.auth.signOut();
-        }
-
-        console.log(
-          _ignoreAuth
-            ? "[SSO Auth] ignoreAuth mode — using 'at' header..."
-            : "[SSO Auth] Validating SSO token..."
-        );
-        const result = await validateSSOToken(ssoToken, _ignoreAuth);
-
-        // Set Supabase session from edge function tokens
-        const { data: sessionData, error: sessionError } =
-          await supabase.auth.setSession({
-            access_token: result.supabaseTokens.access_token,
-            refresh_token: result.supabaseTokens.refresh_token,
-          });
-
-        if (sessionError) throw new Error("Failed to establish session");
-
-        setCultUserId(result.cultUserId);
-        setUser(sessionData.user);
-        setError(null);
-      } catch (err: any) {
-        console.error("[SSO Auth] Validation failed:", err);
-        setError(err?.message || "Authentication failed");
-        setUser(null);
-        setCultUserId(null);
-      } finally {
-        // Strip sso token and ignoreAuth from URL
-        const params = new URLSearchParams(window.location.search);
-        params.delete("sso_token");
-        params.delete("ssoToken");
-        params.delete("ignoreAuth");
-        const remaining = params.toString();
-        const newUrl =
-          window.location.pathname +
-          (remaining ? `?${remaining}` : "") +
-          window.location.hash;
-        window.history.replaceState({}, "", newUrl);
+    // Set up auth listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, newSession) => {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
         setIsLoading(false);
       }
-    };
+    );
 
-    run();
+    // Then check existing session
+    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
+      setSession(existingSession);
+      setUser(existingSession?.user ?? null);
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const value: AuthContextShape = {
     user,
-    cultUserId,
-    isAuthenticated: !!user,
+    session,
+    isAuthenticated: !!session,
     isLoading,
-    error,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
