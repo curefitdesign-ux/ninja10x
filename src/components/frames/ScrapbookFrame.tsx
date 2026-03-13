@@ -71,11 +71,11 @@ const ScrapbookFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 700,
-            fontSize: '11.5cqw',
+            fontSize: 'clamp(20px, 11.5cqw, 38px)',
             color: '#1a1a1a',
             lineHeight: 0.95,
             letterSpacing: '-0.06em',
-            textTransform: 'uppercase',
+            textTransform: 'uppercase' as const,
           }}
         >
           I DID
@@ -86,7 +86,7 @@ const ScrapbookFrame = ({
             fontFamily: "'Caveat', cursive",
             fontWeight: 700,
             fontStyle: 'italic',
-            fontSize: '15.5cqw',
+            fontSize: 'clamp(28px, 15.5cqw, 52px)',
             color: '#7C5CFC',
             lineHeight: 0.85,
             marginTop: '-6%',
@@ -101,11 +101,11 @@ const ScrapbookFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 700,
-            fontSize: '11.5cqw',
+            fontSize: 'clamp(20px, 11.5cqw, 38px)',
             color: '#1a1a1a',
             lineHeight: 0.95,
             letterSpacing: '-0.06em',
-            textTransform: 'uppercase',
+            textTransform: 'uppercase' as const,
             marginTop: '-1%',
           }}
         >
@@ -135,7 +135,7 @@ const ScrapbookFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 500,
-            fontSize: '3.5cqw',
+            fontSize: 'clamp(7px, 3.5cqw, 12px)',
             color: '#2e2a25',
             letterSpacing: '0.16em',
             textTransform: 'uppercase',
@@ -147,7 +147,7 @@ const ScrapbookFrame = ({
           style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             fontWeight: 500,
-            fontSize: '3.5cqw',
+            fontSize: 'clamp(7px, 3.5cqw, 12px)',
             color: '#2e2a25',
             letterSpacing: '0.16em',
             textTransform: 'uppercase',
@@ -199,7 +199,7 @@ const ScrapbookFrame = ({
       </div>
 
       {/* ── Bottom Metrics ── */}
-      <div style={{ padding: '0 5%', flexShrink: 0, marginTop: '-10px' }}>
+      <div style={{ padding: '0 5%', flexShrink: 0, marginTop: '-10px', overflow: 'hidden' }}>
         {/* Dashed separator */}
         <div
           style={{
@@ -215,7 +215,7 @@ const ScrapbookFrame = ({
             justifyContent: 'space-between',
             alignItems: 'baseline',
             padding: '2% 0.5% 3% 0.5%',
-            minHeight: '8cqw',
+            minHeight: 'clamp(16px, 8cqw, 28px)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', visibility: duration ? 'visible' : 'hidden' }}>
@@ -223,7 +223,7 @@ const ScrapbookFrame = ({
               style={{
                 fontFamily: "'Bebas Neue', sans-serif",
                 fontWeight: 400,
-                fontSize: '4.1cqw',
+                fontSize: 'clamp(8px, 4.1cqw, 14px)',
                 color: '#2e2a25',
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
@@ -237,7 +237,7 @@ const ScrapbookFrame = ({
                 fontFamily: "'Caveat', cursive",
                 fontWeight: 700,
                 fontStyle: 'italic',
-                fontSize: '6.5cqw',
+                fontSize: 'clamp(12px, 6.5cqw, 22px)',
                 color: '#7C5CFC',
                 lineHeight: 1,
                 marginLeft: '2px',
@@ -252,7 +252,7 @@ const ScrapbookFrame = ({
               style={{
                 fontFamily: "'Bebas Neue', sans-serif",
                 fontWeight: 400,
-                fontSize: '4.1cqw',
+                fontSize: 'clamp(8px, 4.1cqw, 14px)',
                 color: '#2e2a25',
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
@@ -266,7 +266,7 @@ const ScrapbookFrame = ({
                 fontFamily: "'Caveat', cursive",
                 fontWeight: 700,
                 fontStyle: 'italic',
-                fontSize: '6.5cqw',
+                fontSize: 'clamp(12px, 6.5cqw, 22px)',
                 color: '#7C5CFC',
                 lineHeight: 1,
                 marginLeft: '2px',
