@@ -153,8 +153,38 @@ const Reel = () => {
   // State for user story groups
   const [userGroups, setUserGroups] = useState<UserStoryGroup[]>([]);
   
-  // Track which users' stories have been fully viewed (all activities cycled through)
-  const [viewedUsers, setViewedUsers] = useState<Set<string>>(new Set());
+  // Track which users' stories have been fully viewed (persisted via localStorage)
+  const VIEWED_STORAGE_KEY = 'ninja10x_last_seen_activities';
+  const [viewedUsers, setViewedUsers] = useState<Set<string>>(() => {
+    // Will be populated after effectiveUserGroups is available
+    return new Set();
+  });
+  
+  // Persist last-seen activity ID per user when marking as viewed
+  const persistViewedUser = useCallback((userId: string, latestActivityId: string) => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(VIEWED_STORAGE_KEY) || '{}');
+      stored[userId] = latestActivityId;
+      localStorage.setItem(VIEWED_STORAGE_KEY, JSON.stringify(stored));
+    } catch {}
+  }, []);
+  
+  // Helper: mark a user as viewed and persist their latest activity ID
+  const markUserViewed = useCallback((userId: string) => {
+    setViewedUsers(prev => new Set(prev).add(userId));
+    // Find latest real activity for this user from effectiveUserGroups
+    // We use a ref to avoid dependency issues
+    const group = effectiveUserGroupsRef.current.find(g => g.userId === userId);
+    if (group) {
+      const latestReal = group.activities.find(a => !a.id.startsWith('log-activity') && !a.id.startsWith('week-complete') && !a.id.startsWith('week-recap'));
+      if (latestReal) {
+        persistViewedUser(userId, latestReal.id);
+      }
+    }
+  }, [persistViewedUser]);
+  
+  const effectiveUserGroupsRef = useRef<UserStoryGroup[]>([]);
+  
   const [loading, setLoading] = useState(true);
   
   // Current user index (horizontal swipe between users)
@@ -385,7 +415,30 @@ const Reel = () => {
     return allGroups.filter(g => g.activities.length > 0);
   }, [userGroups, user, myActivities, profile, sourceUserId, deepLinkActivityId]);
 
-  // Stabilize currentUserIndex when groups reorder due to viewedUsers change
+  // Keep effectiveUserGroupsRef in sync
+  useEffect(() => {
+    effectiveUserGroupsRef.current = effectiveUserGroups;
+  }, [effectiveUserGroups]);
+
+  const viewedInitializedRef = useRef(false);
+  useEffect(() => {
+    if (viewedInitializedRef.current || effectiveUserGroups.length === 0) return;
+    viewedInitializedRef.current = true;
+    try {
+      const stored: Record<string, string> = JSON.parse(localStorage.getItem(VIEWED_STORAGE_KEY) || '{}');
+      const alreadyViewed = new Set<string>();
+      for (const group of effectiveUserGroups) {
+        const latestReal = group.activities.find(a => !a.id.startsWith('log-activity') && !a.id.startsWith('week-complete') && !a.id.startsWith('week-recap'));
+        if (latestReal && stored[group.userId] === latestReal.id) {
+          alreadyViewed.add(group.userId);
+        }
+      }
+      if (alreadyViewed.size > 0) {
+        setViewedUsers(alreadyViewed);
+      }
+    } catch {}
+  }, [effectiveUserGroups]);
+
   const currentUserIdRef = useRef<string>('');
   // Flag to suppress ref-update effect during programmatic navigation
   const navigatingRef = useRef(false);
@@ -535,7 +588,7 @@ const Reel = () => {
       setCurrentActivityIndex(prev => prev + 1);
     } else {
       // Mark current user as fully viewed and always auto-advance to next user
-      setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
+      markUserViewed(currentGroup.userId);
       if (effectiveUserGroups.length > 1) {
         const nextIdx = (currentUserIndex + 1) % effectiveUserGroups.length;
         const nextGroup = effectiveUserGroups[nextIdx];
@@ -559,7 +612,7 @@ const Reel = () => {
       currentUserIdRef.current = nextGroup.userId;
     }
     if (currentGroup) {
-      setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
+      markUserViewed(currentGroup.userId);
     }
     setCurrentActivityIndex(0);
     setCurrentUserIndex(nextIdx);
@@ -574,7 +627,7 @@ const Reel = () => {
       currentUserIdRef.current = prevGroup.userId;
     }
     if (currentGroup) {
-      setViewedUsers(prev => new Set(prev).add(currentGroup.userId));
+      markUserViewed(currentGroup.userId);
     }
     setCurrentActivityIndex(0);
     setCurrentUserIndex(prevIdx);
@@ -598,7 +651,7 @@ const Reel = () => {
       const targetGroup = effectiveUserGroups[newIndex];
       if (targetGroup) currentUserIdRef.current = targetGroup.userId;
       const prevGroup = effectiveUserGroups[currentUserIndex];
-      if (prevGroup) setViewedUsers(prev => new Set(prev).add(prevGroup.userId));
+      if (prevGroup) markUserViewed(prevGroup.userId);
       setCurrentUserIndex(newIndex);
       setCurrentActivityIndex(0);
     }
@@ -1532,7 +1585,7 @@ const Reel = () => {
                             // Mark current user as viewed when tapping another avatar
                             const prevGroup = effectiveUserGroups[currentUserIndex];
                             if (prevGroup && prevGroup.userId !== group.userId) {
-                              setViewedUsers(prev => new Set(prev).add(prevGroup.userId));
+                              markUserViewed(prevGroup.userId);
                             }
                             setCurrentUserIndex(targetIdx);
                             setCurrentActivityIndex(0);

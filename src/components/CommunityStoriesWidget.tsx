@@ -114,28 +114,39 @@ const CommunityStoriesWidget = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 + idx * 0.05, duration: 0.3 }}
             >
-              {/* Avatar with gradient ring */}
+              {/* Avatar with gradient/grey ring based on viewed state */}
               <div className="relative">
-                <svg
-                  className="absolute inset-0"
-                  style={{ width: 48, height: 48, transform: 'rotate(-90deg)' }}
-                  viewBox="0 0 100 100"
-                >
-                  <circle
-                    cx="50" cy="50" r="44"
-                    fill="none" strokeWidth="6"
-                    stroke={`url(#communityRing-${idx})`}
-                    strokeLinecap="round"
-                  />
-                  <defs>
-                    <linearGradient id={`communityRing-${idx}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#FEDA75" />
-                      <stop offset="35%" stopColor="#FA7E1E" />
-                      <stop offset="60%" stopColor="#D62976" />
-                      <stop offset="100%" stopColor="#4F5BD5" />
-                    </linearGradient>
-                  </defs>
-                </svg>
+                {(() => {
+                  const VIEWED_STORAGE_KEY = 'ninja10x_last_seen_activities';
+                  let isViewed = false;
+                  try {
+                    const stored = JSON.parse(localStorage.getItem(VIEWED_STORAGE_KEY) || '{}');
+                    isViewed = stored[activity.userId] === activity.id;
+                  } catch {}
+                  return (
+                    <svg
+                      className="absolute inset-0"
+                      style={{ width: 48, height: 48, transform: 'rotate(-90deg)' }}
+                      viewBox="0 0 100 100"
+                    >
+                      <circle
+                        cx="50" cy="50" r="44"
+                        fill="none" strokeWidth="6"
+                        stroke={isViewed ? 'rgba(255,255,255,0.3)' : `url(#communityRing-${idx})`}
+                        strokeLinecap="round"
+                        style={{ filter: isViewed ? 'none' : 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))' }}
+                      />
+                      <defs>
+                        <linearGradient id={`communityRing-${idx}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#FEDA75" />
+                          <stop offset="35%" stopColor="#FA7E1E" />
+                          <stop offset="60%" stopColor="#D62976" />
+                          <stop offset="100%" stopColor="#4F5BD5" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  );
+                })()}
                 <div style={{ width: 48, height: 48, padding: 5 }}>
                   <div className="w-full h-full rounded-full overflow-hidden">
                     <ProfileAvatar
