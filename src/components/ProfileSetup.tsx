@@ -202,6 +202,21 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
       {/* Bottom panel */}
       <div className="absolute inset-x-0 bottom-0 flex flex-col z-10" style={{ top: '56%' }}>
         <div className="flex flex-col items-center px-6 mt-4">
+          {/* In edit mode: camera icon centered above name */}
+          {editMode && (
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => galleryInputRef.current?.click()}
+              className="w-11 h-11 rounded-full flex items-center justify-center mb-3"
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.18)',
+                backdropFilter: 'blur(12px)',
+              }}
+            >
+              <Camera className="w-5 h-5 text-white/70" />
+            </motion.button>
+          )}
           <input
             type="text"
             value={displayName}
@@ -215,31 +230,36 @@ const ProfileSetup = ({ onComplete, editMode = false, existingProfile }: Profile
           {nameError && <p className="text-red-400 text-xs mt-1">{nameError}</p>}
         </div>
 
-        {/* Upload buttons */}
-        <div className="px-6 mt-5 mb-5">
-          <div className="flex gap-3">
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => cameraInputRef.current?.click()}
-              disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl"
-              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(16px)' }}
-            >
-              <Camera className="w-5 h-5 text-white/70" />
-              <span className="text-white/70 text-sm font-medium">Camera</span>
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => galleryInputRef.current?.click()}
-              disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl"
-              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(16px)' }}
-            >
-              <ImagePlus className="w-5 h-5 text-white/70" />
-              <span className="text-white/70 text-sm font-medium">Gallery</span>
-            </motion.button>
+        {/* Upload buttons - only in signup mode */}
+        {!editMode && (
+          <div className="px-6 mt-5 mb-5">
+            <div className="flex gap-3">
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => cameraInputRef.current?.click()}
+                disabled={loading}
+                className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl"
+                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(16px)' }}
+              >
+                <Camera className="w-5 h-5 text-white/70" />
+                <span className="text-white/70 text-sm font-medium">Camera</span>
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => galleryInputRef.current?.click()}
+                disabled={loading}
+                className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl"
+                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(16px)' }}
+              >
+                <ImagePlus className="w-5 h-5 text-white/70" />
+                <span className="text-white/70 text-sm font-medium">Gallery</span>
+              </motion.button>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Spacer in edit mode */}
+        {editMode && <div className="mt-5 mb-5" />}
 
         {/* Submit CTA */}
         <div className="px-6 pb-10">
