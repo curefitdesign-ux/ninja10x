@@ -1898,7 +1898,7 @@ const Reel = () => {
                             {/* "View my Journey" hint for log-activity / week-complete cards */}
                             {isCenter && isLogActivityCard && isOwnStory && myActivities.length > 0 && (
                               <motion.div
-                                onClick={(e) => { e.stopPropagation(); navigate('/progress'); }}
+                                onClick={(e) => { e.stopPropagation(); setShowHistoryGallery(true); }}
                                 className="absolute cursor-pointer flex items-center justify-center gap-1 w-full"
                                 initial={{ opacity: 0, y: 6 }}
                                 animate={{ opacity: [0, 1, 0.4, 1], y: 0 }}
