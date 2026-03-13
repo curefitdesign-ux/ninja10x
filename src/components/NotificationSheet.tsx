@@ -345,14 +345,14 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
     onClose();
   }, [onClose]);
 
-  // Navigate to the user's profile in the Reel/Discover page
+  // Navigate to the user's stories in the Discover/Reel page
   const handleProfileTap = useCallback((notif: Notification) => {
     if (!notif.reactorUserId) return;
     onClose();
     navigate('/reel', {
       replace: true,
       state: {
-        focusUserId: notif.reactorUserId,
+        sourceUserId: notif.reactorUserId,
         _ts: Date.now(),
       },
     });
