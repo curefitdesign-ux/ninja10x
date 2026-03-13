@@ -47,6 +47,7 @@ const BoldFrame = ({
   const durationValue = duration ? duration.replace(/[^0-9:]/g, '') : '';
   const isNumericPr = pr ? /\d/.test(pr) : false;
   const prValue = pr ? (isNumericPr ? pr.replace(/[^0-9.]/g, '') : pr) : '';
+  const hasMetrics = !!(durationValue || prValue);
 
   return (
     <div
