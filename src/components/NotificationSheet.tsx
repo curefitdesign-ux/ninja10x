@@ -382,8 +382,8 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25 }}
-          className="fixed inset-0 flex flex-col"
-          style={{ height: '100dvh', zIndex: 9998 }}
+          className="fixed inset-x-0 top-0 flex flex-col"
+          style={{ height: 'calc(100dvh - 72px)', zIndex: 9998 }}
         >
           {/* Full-screen blur background */}
           <div 
@@ -405,7 +405,7 @@ export default function NotificationSheet({ isOpen, onClose, onNotificationCount
             className="relative flex flex-col h-full"
             style={{
               paddingTop: 'calc(env(safe-area-inset-top) + 16px)',
-              paddingBottom: 'calc(env(safe-area-inset-bottom) + 80px)',
+              paddingBottom: '16px',
             }}
           >
             {/* Header */}
