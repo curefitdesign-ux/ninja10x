@@ -1752,7 +1752,7 @@ const Reel = () => {
                             maxWidth: '100%',
                             borderRadius: `${cardRadius}px`,
                             filter: isLockedCard ? 'blur(16px) brightness(0.5)' : 'brightness(0.75)',
-                            background: isLogCard ? '#0a0a12' : 'transparent',
+                            background: isLogCard ? 'linear-gradient(165deg, hsl(270 45% 12%) 0%, hsl(280 50% 8%) 35%, hsl(320 40% 10%) 65%, hsl(25 50% 10%) 100%)' : 'transparent',
                           }}
                         >
                           {isLogCard ? (
@@ -1921,12 +1921,14 @@ const Reel = () => {
                               className="relative overflow-hidden w-full h-full"
                               style={{
                                 borderRadius: `${cardRadius}px`,
-                                background: isLogActivityCard ? '#0a0a12' : 'transparent',
+                                background: isLogActivityCard
+                                  ? 'linear-gradient(165deg, hsl(270 45% 12%) 0%, hsl(280 50% 8%) 35%, hsl(320 40% 10%) 65%, hsl(25 50% 10%) 100%)'
+                                  : 'transparent',
                                 border: isLogActivityCard
-                                  ? '1px solid rgba(160, 120, 255, 0.25)'
+                                  ? '1px solid rgba(180, 140, 255, 0.2)'
                                   : 'none',
                                 boxShadow: isLogActivityCard
-                                  ? 'inset 0 1px 1px rgba(255,255,255,0.08), 0 0 20px rgba(140, 100, 240, 0.15), 0 0 40px rgba(140, 100, 240, 0.08)'
+                                  ? 'inset 0 1px 1px rgba(255,255,255,0.06), inset 0 -40px 80px rgba(140, 80, 200, 0.08), 0 0 30px rgba(140, 100, 240, 0.12)'
                                   : 'none',
                                 zIndex: 3,
                               }}
@@ -1945,7 +1947,24 @@ const Reel = () => {
                               const glowMid = isEvenDay ? 'hsl(280 80% 65% / 0.35)' : 'hsl(25 95% 60% / 0.35)';
                               const completedWeek = Math.floor(totalActivities / 3);
                               return (
-                                <div className="w-full h-full flex items-center justify-center">
+                                <div className="w-full h-full flex items-center justify-center relative">
+                                  {/* Noise texture overlay */}
+                                  <div
+                                    className="absolute inset-0 pointer-events-none opacity-[0.18] mix-blend-overlay"
+                                    style={{
+                                      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
+                                      backgroundSize: '180px 180px',
+                                      borderRadius: 'inherit',
+                                    }}
+                                  />
+                                  {/* Warm ambient glow at bottom */}
+                                  <div
+                                    className="absolute pointer-events-none"
+                                    style={{
+                                      bottom: 0, left: 0, right: 0, height: '45%',
+                                      background: 'radial-gradient(ellipse at center bottom, hsl(320 60% 30% / 0.2) 0%, transparent 70%)',
+                                    }}
+                                  />
                                   <div
                                     className="w-full h-full flex flex-col items-center justify-center relative"
                                   >
