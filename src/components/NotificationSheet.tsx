@@ -30,6 +30,18 @@ const formatRelativeTime = (date: Date): string => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
+// Day segregation helper
+const getDayLabel = (date: Date): string => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today.getTime() - 86400000);
+  const notifDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  
+  if (notifDay.getTime() === today.getTime()) return 'Today';
+  if (notifDay.getTime() === yesterday.getTime()) return 'Yesterday';
+  return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+};
+
 export interface Notification {
   id: string;
   activityId: string;
