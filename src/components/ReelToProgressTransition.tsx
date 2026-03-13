@@ -8,6 +8,7 @@ import ActivityGalleryOverlay from '@/components/ActivityGalleryOverlay';
 import { isVideoUrl } from '@/lib/media';
 import { ReactionType, ActivityReaction } from '@/services/journey-service';
 import GamifiedJourneyPath from '@/components/GamifiedJourneyPath';
+import { useProfile } from '@/hooks/use-profile';
 import plusIconImg from '@/assets/icons/plus-icon.png';
 import cultNinjaText from '@/assets/progress/cult-ninja-text.svg';
 import finalGoalImg from '@/assets/progress/final-goal.png';
@@ -53,6 +54,7 @@ export default function ReelToProgressTransition({
   openGalleryAtDay,
 }: ReelToProgressTransitionProps) {
   const navigate = useNavigate();
+  const { profile } = useProfile();
   const [showTiles, setShowTiles] = useState(false);
   const [showStories, setShowStories] = useState(false);
   const [expandingCardId, setExpandingCardId] = useState<string | null>(null);
@@ -493,6 +495,7 @@ export default function ReelToProgressTransition({
           initialIndex={galleryInitialIndex}
           onLogActivity={onLogActivity}
           isOwnProfile={true}
+          userProfile={profile ? { displayName: profile.display_name, avatarUrl: profile.avatar_url } : undefined}
         />
       </div>
     );
