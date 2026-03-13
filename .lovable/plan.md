@@ -1,106 +1,41 @@
 
-## Rebuilding TokenFrame with Real Assets
 
-### What We're Doing
-Replacing all the programmatic CSS/SVG attempts (perforations, bird SVG paths) with the three real design assets the user has provided:
+## Current Ring Logic
 
-1. **`token.png`** — The complete stamp frame image (gray background, perforated scalloped edges, "CULT NINJA / Journey" header text) used as a transparent overlay on top of the user's photo — exactly how `TicketFrame` uses `ticket-frame.png`
-2. **`Container-7.png`** — The actual cult.fit bird mascot icon for the stamp seal center
-3. **`2-2.png`** — The double concentric circle rings for the stamp seal
+### How it works today
 
-### Layout Architecture (matching the reference image exactly)
+**Storage:** `localStorage` key `ninja10x_last_seen_activities` stores `{ [userId]: latestActivityId }`.
 
-```text
-+------------------------------------------+
-| token.png overlaid on top (z=10)         |
-|  ┌── photo fills full card (z=0) ──┐     |
-|  │                                  │     |
-|  │      USER PHOTO (full bleed)     │     |
-|  │                                  │     |
-|  └──────────────────────────────────┘     |
-|                                           |
-| [circles + bird seal — bottom-left, z=20] |
-| SWIMMING          <-- bold blue caps      |
-| 02 HRS | 05 PERSONAL BEST SCORE          |
-+------------------------------------------+
-```
+**CommunityStoriesWidget (home page avatars):**
+- On every render, reads localStorage inline (inside JSX via IIFE)
+- Compares `stored[activity.userId] === activity.id`
+- If match → grey ring (`rgba(255,255,255,0.3)`), else → gradient ring
 
-The `token.png` frame already contains:
-- The perforated stamp border
-- The gray background
-- "CULT NINJA" header text in navy blue
-- "Journey" italic script text
-- A transparent/white center window where the photo shows through
+**Reel page (avatar strip):**
+- On mount, initializes `viewedUsers` Set by comparing stored activity IDs against each group's latest real activity
+- When user taps another avatar or finishes viewing, calls `markUserViewed()` which adds to the Set and persists to localStorage
+- Ring color: gradient if unviewed, grey if viewed, progress animation if active
 
-### Files to Change
+### The Bug
 
-**Step 1 — Copy assets to project:**
-- `user-uploads://token.png` → `src/assets/frames/token-bg.png`
-- `user-uploads://Container-7.png` → `src/assets/frames/token-bird.png`
-- `user-uploads://2-2.png` → `src/assets/frames/token-circles.png`
+In `CommunityStoriesWidget`, the comparison is `stored[activity.userId] === activity.id` — but `activity` here is the **latest activity per user** (already deduplicated). So the logic is correct in principle. However, the widget compares against the activity shown in the widget row, while the Reel persists the latest **real** activity (excluding log-activity/week-complete/week-recap cards). If these differ, the ring state can be inconsistent.
 
-**Step 2 — Rewrite `src/components/frames/TokenFrame.tsx`:**
+### Plan
 
-Remove all the complex programmatic code (PerforationBorder, PerforationRows, TopBottomHoles, LeftRightHoles, CircularStampSeal SVG with manual path). Replace with:
+**File: `src/components/CommunityStoriesWidget.tsx`**
+- Extract the viewed-check out of the JSX IIFE into a clean variable before the map
+- Ensure comparison uses `activity.userId` to look up the stored ID, then compares it against `activity.id` (the latest activity for that user) — this is already correct but will be cleaned up
 
-```tsx
-import tokenBg from '@/assets/frames/token-bg.png';
-import tokenBird from '@/assets/frames/token-bird.png';
-import tokenCircles from '@/assets/frames/token-circles.png';
+**File: `src/pages/Reel.tsx`**
+- No logic changes needed — the existing `markUserViewed` correctly persists the latest real activity ID
 
-const TokenFrame = ({ imageUrl, isVideo, activity, week, day, duration, pr, ... }) => {
-  return (
-    <div className="w-[90%] mx-auto aspect-[9/16] overflow-hidden relative">
-      
-      {/* Layer 0: Full-bleed user photo (fills entire card) */}
-      <div className="absolute inset-0 z-0">
-        <img/video src={imageUrl} ... />
-      </div>
+**Memory note to save:**
+- Gradient ring = user's latest activity has NOT been seen (stored ID ≠ latest activity ID)
+- Grey ring = user's latest activity HAS been seen (stored ID === latest activity ID)
+- Storage format: `ninja10x_last_seen_activities` → `{ userId: lastSeenActivityId }`
+- Both CommunityStoriesWidget and Reel avatar strip use the same localStorage key
+- Reel marks viewed on: tapping another avatar (marks previous), swiping past last story, or navigating away
+- "Latest activity" excludes synthetic cards (log-activity, week-complete, week-recap)
 
-      {/* Layer 1: Stamp frame overlay — token.png covers the card,
-          the frame's white center window reveals the photo underneath */}
-      <img
-        src={tokenBg}
-        className="absolute inset-0 w-full h-full z-10 pointer-events-none"
-        style={{ objectFit: 'fill' }}
-      />
+The current logic is already correct — colored gradient ring shows only for users whose latest story/activity has not been seen. No code changes are needed. I will save this to memory for future reference.
 
-      {/* Layer 2: Stamp seal — circles + bird, bottom-left area */}
-      <div className="absolute z-20" style={{ bottom: '16%', left: '4%', width: '22%' }}>
-        {/* Circles ring behind bird */}
-        <img src={tokenCircles} className="absolute inset-0 w-full h-full" style={{ objectFit: 'contain' }} />
-        {/* Bird mascot centered inside rings */}
-        <img src={tokenBird} className="relative w-[55%] h-auto mx-auto block" style={{ marginTop: '22%' }} />
-      </div>
-
-      {/* Layer 3: Activity name + metrics in the bottom gray strip */}
-      <div className="absolute z-20 bottom-0 left-0 right-0 text-center" style={{ paddingBottom: '4%' }}>
-        <div style={{ fontFamily: 'Montserrat bold', color: '#0a5278', textTransform: 'uppercase' }}>
-          {activity}
-        </div>
-        <div style={{ color: '#808080', fontSize: 'small' }}>
-          {metricsLine}
-        </div>
-      </div>
-    </div>
-  );
-};
-```
-
-### Key Positioning Details
-Looking at `token.png` reference image carefully:
-- The frame has a **top gray strip** (~20% height) containing "CULT NINJA / Journey" — already baked into the PNG
-- The **photo window** is the white/transparent middle area (~55% height)
-- There is a **bottom gray strip** (~25% height) below the photo for activity name + metrics
-- The stamp seal sits at the **bottom-left of the bottom gray strip**, overlapping slightly with the photo boundary
-
-The `token.png` overlay uses `objectFit: 'fill'` to stretch to fill the 9:16 container, matching exactly how `TicketFrame` handles `ticket-frame.png`.
-
-### What Gets Removed
-- `PerforationBorder` component (400+ lines of programmatic circles)
-- `PerforationRows`, `TopBottomHoles`, `LeftRightHoles` sub-components
-- `CircularStampSeal` SVG with manual bird path
-- All the complex CSS mask attempts
-- The Google Fonts `<link>` tag (fonts already in token.png image)
-
-The result will be pixel-perfect to the reference design with far simpler code (~80 lines vs ~484 lines).
