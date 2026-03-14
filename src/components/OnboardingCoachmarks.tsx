@@ -4,9 +4,10 @@ import CircularProgressRing from '@/components/CircularProgressRing';
 
 interface OnboardingCoachmarksProps {
   onComplete: () => void;
+  userId?: string;
 }
 
-const STORAGE_KEY = 'ninja10x_onboarding_seen';
+const getStorageKey = (userId?: string) => userId ? `ninja10x_onboarding_seen_${userId}` : 'ninja10x_onboarding_seen';
 
 const RevealWord = memo(function RevealWord({
   children,
