@@ -47,7 +47,7 @@ function RevealLine({ text, delay = 0 }: { text: string; delay?: number }) {
 
 type Phase = 0 | 1 | 2;
 
-export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmarksProps) {
+export default function OnboardingCoachmarks({ onComplete, userId }: OnboardingCoachmarksProps) {
   const [phase, setPhase] = useState<Phase>(0);
   const [visible, setVisible] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
