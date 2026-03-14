@@ -55,14 +55,15 @@ export default function OnboardingCoachmarks({ onComplete, userId }: OnboardingC
   const ringTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
-    const seen = localStorage.getItem(STORAGE_KEY);
+    const key = getStorageKey(userId);
+    const seen = localStorage.getItem(key);
     if (!seen) {
       const t = setTimeout(() => setVisible(true), 700);
       return () => clearTimeout(t);
     } else {
       onComplete();
     }
-  }, [onComplete]);
+  }, [onComplete, userId]);
 
   const finish = useCallback(() => {
     localStorage.setItem(STORAGE_KEY, 'true');
