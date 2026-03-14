@@ -307,7 +307,9 @@ const BottomNavBar = memo(({ hidden = false }: { hidden?: boolean }) => {
             <button
               onClick={() => {
                 setShowEllipsisMenu(false);
-                localStorage.removeItem('ninja10x_onboarding_seen');
+                if (user?.id) {
+                  localStorage.removeItem(`ninja10x_onboarding_seen_${user.id}`);
+                }
                 window.location.reload();
               }}
               className="flex items-center gap-4 px-6 py-4 text-left transition-colors active:scale-[0.97]"

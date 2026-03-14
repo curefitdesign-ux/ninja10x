@@ -2600,7 +2600,7 @@ const Reel = () => {
       </AlertDialog>
 
       {/* Onboarding coachmarks — first-time user tutorial */}
-      <OnboardingCoachmarks onComplete={() => {}} />
+      <OnboardingCoachmarks onComplete={() => {}} userId={user?.id} />
     </DynamicBlurBackground>
   );
 };

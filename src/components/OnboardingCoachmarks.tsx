@@ -4,9 +4,10 @@ import CircularProgressRing from '@/components/CircularProgressRing';
 
 interface OnboardingCoachmarksProps {
   onComplete: () => void;
+  userId?: string;
 }
 
-const STORAGE_KEY = 'ninja10x_onboarding_seen';
+const getStorageKey = (userId?: string) => userId ? `ninja10x_onboarding_seen_${userId}` : 'ninja10x_onboarding_seen';
 
 const RevealWord = memo(function RevealWord({
   children,
@@ -46,7 +47,7 @@ function RevealLine({ text, delay = 0 }: { text: string; delay?: number }) {
 
 type Phase = 0 | 1 | 2;
 
-export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmarksProps) {
+export default function OnboardingCoachmarks({ onComplete, userId }: OnboardingCoachmarksProps) {
   const [phase, setPhase] = useState<Phase>(0);
   const [visible, setVisible] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -54,20 +55,21 @@ export default function OnboardingCoachmarks({ onComplete }: OnboardingCoachmark
   const ringTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
-    const seen = localStorage.getItem(STORAGE_KEY);
+    const key = getStorageKey(userId);
+    const seen = localStorage.getItem(key);
     if (!seen) {
       const t = setTimeout(() => setVisible(true), 700);
       return () => clearTimeout(t);
     } else {
       onComplete();
     }
-  }, [onComplete]);
+  }, [onComplete, userId]);
 
   const finish = useCallback(() => {
-    localStorage.setItem(STORAGE_KEY, 'true');
+    localStorage.setItem(getStorageKey(userId), 'true');
     setVisible(false);
     setTimeout(onComplete, 400);
-  }, [onComplete]);
+  }, [onComplete, userId]);
 
   useEffect(() => {
     if (!visible) return;
