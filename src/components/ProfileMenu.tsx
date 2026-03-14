@@ -129,7 +129,9 @@ const ProfileMenu = ({ onEditProfile }: ProfileMenuProps) => {
                   <motion.button
                     onClick={() => {
                       setIsOpen(false);
-                      localStorage.removeItem('ninja10x_onboarding_seen');
+                      if (user?.id) {
+                        localStorage.removeItem(`ninja10x_onboarding_seen_${user.id}`);
+                      }
                       window.location.reload();
                     }}
                     className="w-full flex items-center gap-3 px-4 py-3 text-left text-white/80 hover:text-white hover:bg-white/5 transition-colors"
