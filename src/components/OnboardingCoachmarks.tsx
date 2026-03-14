@@ -66,10 +66,10 @@ export default function OnboardingCoachmarks({ onComplete, userId }: OnboardingC
   }, [onComplete, userId]);
 
   const finish = useCallback(() => {
-    localStorage.setItem(STORAGE_KEY, 'true');
+    localStorage.setItem(getStorageKey(userId), 'true');
     setVisible(false);
     setTimeout(onComplete, 400);
-  }, [onComplete]);
+  }, [onComplete, userId]);
 
   useEffect(() => {
     if (!visible) return;
